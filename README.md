@@ -4,6 +4,8 @@ This is a custom user interface for WoW: Classic, with a fresh new design and br
 
 The motivation of this user interface is immersion, and a more simplified gaming experience then what the "norm" has turned into. This game has SO much information that if not handled carefully becomes cumbersome, therefore blocking the most important asset of the game, the world. The best interface is no interface at all, but in a game such as this that is not possible. But if we have to block away parts of the game world to see information about the game mechanics, then at least let’s make it dynamic, beautiful and in sync with the game's aesthetics. Let's make it Warcraft!  
 
+**When updating from 1.x to 2.x, make sure you first remove the old version before installing the new, or there could be file conflicts and multiple versions active at once!**
+
 ## **Pledge to my work:**  
 * Patreon: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)  
 * PayPal: [www.paypal.me/goldpawsstuff](https://www.paypal.me/goldpawsstuff)  
