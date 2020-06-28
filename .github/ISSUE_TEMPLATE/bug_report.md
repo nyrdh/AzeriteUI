@@ -10,10 +10,15 @@ assignees: goldpaw
 ## The problem  
 <!--Briefly describe the issue you are experiencing below. Tell us what you were trying to do and what happened instead. Remember, this is _not_ a place to ask questions. For questions, go to [our Discord](https://discord.gg/MUSfWXd) server, just remember to read the rules and keep in mind nobody there are paid, we're all just gaming enthusiasts and volunteers.-->
 
-
 ### Make sure you can check all these boxes  
-- [ ] I have the latest addon version available from CurseForge/Twitch.
+<!--The game only finds new files on game startup, not on character relogs or interface reloads. So make sure you exit the game when updating addons to avoid this.-->
+- [ ] I have the latest addon version available from CurseForge/Overwolf/Twitch.
 - [ ] I restarted the entire game after updating the addon, not just relogged or reloaded. 
+
+## What game version(s) does it happen in?  
+<!--The game uses different addon APIs in different versions, so this matters a lot.-->
+- [ ] Classic
+- [ ] Battle for Azeroth
 
 ### Does this happen with NO other addons enabled?  
 <!--This is helpful because it tells us whether it's an addon bug or addon conflict.-->
@@ -32,8 +37,8 @@ assignees: goldpaw
 - [ ] Warlock 
 - [ ] Warrior 
 
-### Any logs, error output, etc?  
-<!--Paste any shorter error logs below. If it’s long, please paste to https://ghostbin.com/ and insert the link here instead.-->
+### Any logs, screenshots, error output, etc?  
+<!--Post any screenshots and paste any shorter error logs below. If it’s long, please paste to https://ghostbin.com/ and insert the link here instead.-->
 
 ### Steps to reproduce  
 <!--If possible, tell us how to reproduce this issue. If you don't know exactly how to, please tell us what you were doing when it happened, in as much detail as possible. Include class, specialization, what quest/instance/battleground you were doing etc.-->
