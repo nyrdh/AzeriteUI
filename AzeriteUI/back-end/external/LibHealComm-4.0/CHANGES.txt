@@ -1,0 +1,22 @@
+lightweight tag cbf7e0c2a2d6455e1828219ecd39b7f762387091 v1.8.1
+Author:	Azilroka <darktemplar9900@yahoo.com>
+Date:	Sun May 10 16:23:29 2020 -0500
+
+commit cbf7e0c2a2d6455e1828219ecd39b7f762387091
+Author: Azilroka <darktemplar9900@yahoo.com>
+Date:   Sun May 10 16:23:29 2020 -0500
+
+    Minor 91
+
+commit 68698f507aac7ebbc2949a69ad43864666fe123c
+Author: dev7355608 <dev7355608@gmail.com>
+Date:   Wed May 6 19:30:15 2020 +0200
+
+    Prevent sending of incorrect heal interrupted message
+
+commit 68698f507aac7ebbc2949a69ad43864666fe123c
+Author: dev7355608 <dev7355608@gmail.com>
+Date:   Wed May 6 19:30:15 2020 +0200
+
+    Prevent sending of incorrect heal interrupted message
+
