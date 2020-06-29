@@ -776,6 +776,21 @@ Module.AddOptionsToMenuWindow = function(self)
 	self.addedToMenuWindow = true
 end
 
+local SetOptionProxyUpdater = function(option)
+	local proxyUpdater
+	if (option.proxyModule) then 
+		local proxyModule = Core:GetModule(option.proxyModule)
+		if (proxyModule and proxyModule.GetSecureUpdater) then 
+			proxyUpdater = proxyModule:GetSecureUpdater()
+		end 
+	elseif (option.useCore) then 
+		proxyUpdater = Core:GetSecureUpdater()
+	end 
+	if (proxyUpdater) then
+		option:SetFrameRef("proxyUpdater", proxyUpdater)
+	end
+end
+
 Module.PostUpdateOptions = function(self, event, ...)
 	if (event) then 
 		self:UnregisterEvent(event, "PostUpdateOptions")
@@ -785,12 +800,8 @@ Module.PostUpdateOptions = function(self, event, ...)
 			if (option.updateType == "SET_VALUE") then
 				local db = GetConfig(option.optionDB, option.optionProfile)
 				local value = db[option.optionName]
-
-				if option.proxyModule then 
-					option:SetFrameRef("proxyUpdater", Core:GetModule(option.proxyModule):GetSecureUpdater())
-				elseif option.useCore then 
-					option:SetFrameRef("proxyUpdater", Core:GetSecureUpdater())
-				end 
+				
+				SetOptionProxyUpdater(option)
 
 				option:SetAttribute("optionValue", value)
 				option:Update()
@@ -799,28 +810,14 @@ Module.PostUpdateOptions = function(self, event, ...)
 				local db = GetConfig(option.optionDB, option.optionProfile)
 				local value = db[option.optionName]
 
-				if option.proxyModule then 
-					option:SetFrameRef("proxyUpdater", Core:GetModule(option.proxyModule):GetSecureUpdater())
-				elseif option.useCore then 
-					option:SetFrameRef("proxyUpdater", Core:GetSecureUpdater())
-				end 
+				SetOptionProxyUpdater(option)
 
 				option:SetAttribute("optionValue", value)
 				option:Update()
+
 			elseif (option.updateType == "TOGGLE_MODE") then
-				local proxyUpdater
-				if option.proxyModule then 
-					local Module = Core:GetModule(option.proxyModule)
-					if Module and Module.GetSecureUpdater then 
-						proxyUpdater = Core:GetModule(option.proxyModule):GetSecureUpdater()
-					else 
-					end 
-				elseif option.useCore then 
-					proxyUpdater = Core:GetSecureUpdater()
-				end 
-				if proxyUpdater then 
-					option:SetFrameRef("proxyUpdater", proxyUpdater)
-				end
+				SetOptionProxyUpdater(option)
+
 			end 
 			if (option.isSlave) then 
 				local attributeName = "DB_"..option.slaveDB.."_"..option.slaveKey
@@ -1158,6 +1155,7 @@ Module.CreateMenuTable = function(self)
 	end 
 
 	-- Unitframes
+	local hasUnits
 	local UnitFrameMenu = {
 		title = L["UnitFrames"], type = nil, hasWindow = true, 
 		buttons = {
@@ -1167,6 +1165,7 @@ Module.CreateMenuTable = function(self)
 
 	local UnitFrameParty = Core:GetModule("UnitFrameParty", true)
 	if UnitFrameParty and not (UnitFrameParty:IsIncompatible() or UnitFrameParty:DependencyFailed()) then 
+		hasUnits = true
 		table_insert(UnitFrameMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Party Frames"]),
 			disabledTitle = L_DISABLED:format(L["Party Frames"]),
@@ -1178,6 +1177,7 @@ Module.CreateMenuTable = function(self)
 
 	local UnitFrameRaid = Core:GetModule("UnitFrameRaid", true)
 	if UnitFrameRaid and not (UnitFrameRaid:IsIncompatible() or UnitFrameRaid:DependencyFailed()) then 
+		hasUnits = true
 		table_insert(UnitFrameMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Raid Frames"]),
 			disabledTitle = L_DISABLED:format(L["Raid Frames"]),
@@ -1187,19 +1187,24 @@ Module.CreateMenuTable = function(self)
 		})
 	end
 
-	if (PlayerClass == "DRUID") or (PlayerClass == "HUNTER") 
-				 or (PlayerClass == "PALADIN") or (PlayerClass == "SHAMAN")
-				 or (PlayerClass == "MAGE") or (PlayerClass == "PRIEST") or (PlayerClass == "WARLOCK") then
-		table_insert(UnitFrameMenu.buttons, {
-			enabledTitle = L_ENABLED:format(L["Use Mana Orb"]),
-			disabledTitle = L_DISABLED:format(L["Use Mana Orb"]),
-			type = "TOGGLE_VALUE", 
-			configDB = "UnitFramePlayer", configKey = "enablePlayerManaOrb", 
-			proxyModule = "UnitFramePlayer"
-		})
+	local UnitFramePlayer = Core:GetModule("UnitFramePlayer", true)
+	if UnitFramePlayer and not (UnitFramePlayer:IsIncompatible() or UnitFramePlayer:DependencyFailed())then
+		if (PlayerClass == "DRUID") or (PlayerClass == "HUNTER") 
+		or (PlayerClass == "PALADIN") or (PlayerClass == "SHAMAN")
+		or (PlayerClass == "MAGE") or (PlayerClass == "PRIEST") or (PlayerClass == "WARLOCK") then
+			hasUnits = true
+			table_insert(UnitFrameMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["Use Mana Orb"]),
+				disabledTitle = L_DISABLED:format(L["Use Mana Orb"]),
+				type = "TOGGLE_VALUE", 
+				configDB = "UnitFramePlayer", configKey = "enablePlayerManaOrb", 
+				proxyModule = "UnitFramePlayer"
+			})
+		end
 	end
-
-	table_insert(MenuTable, UnitFrameMenu)
+	if (hasUnits) then
+		table_insert(MenuTable, UnitFrameMenu)
+	end
 
 	-- HUD
 	local UnitFramePlayerHUD = Core:GetModule("UnitFramePlayerHUD", true)

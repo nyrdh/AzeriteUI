@@ -262,19 +262,23 @@ if (IsRetail) then
 end
 
 local ConfigWindow_OnShow = function(self) 
-	local tooltip = Module:GetOptionsMenuTooltip()
 	local button = Module:GetToggleButton()
-	if (tooltip:IsShown() and (tooltip:GetOwner() == button)) then 
-		tooltip:Hide()
+	if (button) then
+		local tooltip = Module:GetOptionsMenuTooltip()
+		if (tooltip:IsShown() and (tooltip:GetOwner() == button)) then 
+			tooltip:Hide()
+		end 
 	end 
 end
 
 local ConfigWindow_OnHide = function(self) 
-	local tooltip = Module:GetOptionsMenuTooltip()
 	local button = Module:GetToggleButton()
-	if (button:IsMouseOver(0,0,0,0) and ((not tooltip:IsShown()) or (tooltip:GetOwner() ~= button))) then 
-		button:GetScript("OnEnter")(button)
-	end 
+	if (button) then
+		local tooltip = Module:GetOptionsMenuTooltip()
+		if (button:IsMouseOver(0,0,0,0) and ((not tooltip:IsShown()) or (tooltip:GetOwner() ~= button))) then 
+			button:GetScript("OnEnter")(button)
+		end 
+	end
 end
 
 -- Same tooltip as used by the options menu module. 
@@ -342,7 +346,8 @@ Module.GetConfigWindow = function(self)
 end
 
 Module.GetToggleButton = function(self)
-	return Core:GetModule("OptionsMenu"):GetToggleButton()
+	local optionsModule = Core:GetModule("OptionsMenu")
+	return optionsModule and optionsModule:GetToggleButton()
 end
 
 Module.GetConfigButtons = function(self)
@@ -364,32 +369,34 @@ Module.AddOptionsToMenuButton = function(self)
 		self.addedToMenuButton = true
 
 		local ToggleButton = self:GetToggleButton()
-		ToggleButton:SetFrameRef("MicroMenu", self:GetConfigWindow())
-		ToggleButton:SetAttribute("middleclick", [[
-			local window = self:GetFrameRef("MicroMenu");
-			if window:IsShown() then
-				window:Hide();
-			else
-				local window2 = self:GetFrameRef("OptionsMenu"); 
-				if (window2 and window2:IsShown()) then 
-					window2:Hide(); 
-				end 
-				window:Show();
-				window:RegisterAutoHide(.75);
-				window:AddToAutoHide(self);
-				local autohideCounter = 1
-				local autohideFrame = window:GetFrameRef("autohide"..autohideCounter);
-				while autohideFrame do 
-					window:AddToAutoHide(autohideFrame);
-					autohideCounter = autohideCounter + 1;
-					autohideFrame = window:GetFrameRef("autohide"..autohideCounter);
-				end 
-			end
-		]])
-		for reference,frame in pairs(self:GetAutoHideReferences()) do 
-			self:GetConfigWindow():SetFrameRef(reference,frame)
-		end 
-		ToggleButton.middleButtonTooltip = "|TInterface\\TutorialFrame\\UI-TUTORIAL-FRAME:20:15:0:0:512:512:1:76:118:218|t " .. L["Game Panels"]
+		if (ToggleButton) then
+			ToggleButton:SetFrameRef("MicroMenu", self:GetConfigWindow())
+			ToggleButton:SetAttribute("middleclick", [[
+				local window = self:GetFrameRef("MicroMenu");
+				if window:IsShown() then
+					window:Hide();
+				else
+					local window2 = self:GetFrameRef("OptionsMenu"); 
+					if (window2 and window2:IsShown()) then 
+						window2:Hide(); 
+					end 
+					window:Show();
+					window:RegisterAutoHide(.75);
+					window:AddToAutoHide(self);
+					local autohideCounter = 1
+					local autohideFrame = window:GetFrameRef("autohide"..autohideCounter);
+					while autohideFrame do 
+						window:AddToAutoHide(autohideFrame);
+						autohideCounter = autohideCounter + 1;
+						autohideFrame = window:GetFrameRef("autohide"..autohideCounter);
+					end 
+				end
+			]])
+			for reference,frame in pairs(self:GetAutoHideReferences()) do 
+				self:GetConfigWindow():SetFrameRef(reference,frame)
+			end 
+			ToggleButton.middleButtonTooltip = "|TInterface\\TutorialFrame\\UI-TUTORIAL-FRAME:20:15:0:0:512:512:1:76:118:218|t " .. L["Game Panels"]
+		end
 	end 
 end 
 
