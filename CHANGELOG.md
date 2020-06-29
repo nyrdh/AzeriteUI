@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.363-Alpha] 2020-06-29
+### Fixed
+- Chat filters should no longer bug out for non-English game clients. Tested with at least deDe.
+
 ## [2.0.362-Alpha] 2020-06-28
 This update contains WoW Retail compatibility. A major part of this update is in that added compatibility, and a lot of features that previously only were a part of the Classic version will now also be a part of the Retail version. The project version has because of this been bumped to indicate the amount of added, changed and updated features, as well as the number of builds we've passed since the last public update. This changelog is meant to be read by humans, by the users, and thus will not include most of the numerous back-end changes.
 
