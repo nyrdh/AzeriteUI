@@ -56,16 +56,6 @@ local ChatFrame_AddMessage = {}
 
 local PlayerFaction, PlayerFactionLabel = UnitFactionGroup("player")
 
--- Money Icon Strings
-local L_GOLD = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,0,32)
-local L_SILVER = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 32,64,0,32)
-local L_COPPER = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,32,64)
-
--- Search Patterns
-local P_GOLD = string_gsub(GOLD_AMOUNT, "(%%d)", "(%%d+)") -- "%d Gold"
-local P_SILVER = string_gsub(SILVER_AMOUNT, "(%%d)", "(%%d+)") -- "%d Silver"
-local P_COPPER = string_gsub(COPPER_AMOUNT, "(%%d)", "(%%d+)") -- "%d Copper"
-
 -- Chat output templates
 local sign, value, label = "|cffeaeaea", "|cfff0f0f0", "|cffffb200"
 local red = "|cffcc0000"
@@ -105,6 +95,16 @@ local getFilter = function(msg)
 	msg = string_gsub(msg, "%%(%d+)%$s", "%%%%%1$(%%s+)")
 	return msg
 end
+
+-- Money Icon Strings
+local L_GOLD = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,0,32)
+local L_SILVER = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 32,64,0,32)
+local L_COPPER = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,32,64)
+
+-- Search Patterns
+local P_GOLD = getFilter(GOLD_AMOUNT) -- "%d Gold"
+local P_SILVER = getFilter(SILVER_AMOUNT) -- "%d Silver"
+local P_COPPER = getFilter(COPPER_AMOUNT) -- "%d Copper"
 
 -- Patterns to identify loot
 local LootPatterns = {}
@@ -386,9 +386,11 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 		local copper_amount = tonumber(string_match(message, P_COPPER)) or 0
 
 		local moneyString = CreateMoneyString(gold_amount, silver_amount, copper_amount)
-
-		return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
-
+		if (moneyString) then
+			return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
+		else
+			return true
+		end
 
 	elseif (event == "CHAT_MSG_COMBAT_FACTION_CHANGE") then
 
@@ -576,20 +578,20 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 		end
 
 		-- Quest money?
-		local money_pattern = string_gsub(ERR_QUEST_REWARD_MONEY_S, "%%s", "(.+)") -- "Received %s."
+		local money_pattern = getFilter(ERR_QUEST_REWARD_MONEY_S) -- "Received %s."
 		local money_string = string_match(message, money_pattern)
 		if (money_string) then
-			local gold_amount_pattern = string_gsub(GOLD_AMOUNT, "(%%d)", "(%%d+)") -- "%d Gold"
-			local silver_amount_pattern = string_gsub(SILVER_AMOUNT, "(%%d)", "(%%d+)") -- "%d Silver"
-			local copper_amount_pattern = string_gsub(COPPER_AMOUNT, "(%%d)", "(%%d+)") -- "%d Copper"
 	
-			local gold_amount = tonumber(string_match(money_string, gold_amount_pattern)) or 0
-			local silver_amount = tonumber(string_match(money_string, silver_amount_pattern)) or 0
-			local copper_amount = tonumber(string_match(money_string, copper_amount_pattern)) or 0
+			local gold_amount = tonumber(string_match(money_string, P_GOLD)) or 0
+			local silver_amount = tonumber(string_match(money_string, P_SILVER)) or 0
+			local copper_amount = tonumber(string_match(money_string, P_COPPER)) or 0
 	
 			local moneyString = CreateMoneyString(gold_amount, silver_amount, copper_amount)
-	
-			return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
+			if (moneyString) then
+				return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
+			else
+				return true
+			end
 		end
 
 		-- AFK
