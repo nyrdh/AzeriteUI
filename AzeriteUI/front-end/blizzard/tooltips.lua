@@ -355,6 +355,9 @@ local OnTooltipShow = function(tooltip)
 	if (GameTooltipHeader:GetFontObject() ~= headerFontObject) then 
 		GameTooltipHeader:SetFontObject(headerFontObject)
 	end
+
+	-- Some texts inherit from this, like the "!Quest Available" texts
+	-- in the follower selection frame in Nazjatar. Outline doesn't work there!
 	local lineFontObject = GetFont(13,true)
 	if (GameTooltipText:GetFontObject() ~= lineFontObject) then 
 		GameTooltipText:SetFontObject(lineFontObject)
