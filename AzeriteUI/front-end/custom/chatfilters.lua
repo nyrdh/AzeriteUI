@@ -96,6 +96,16 @@ local RESTED_ADDED_TEMPLATE = gain.."+ "..TUTORIAL_TITLE26.."|r"
 local RESTED_CLEARED_TEMPLATE = busy.."- "..TUTORIAL_TITLE26.."|r"
 local SKILL_TEMPLATE = gain.."+|r %s "..sign.."(%d)|r"
 
+-- Get the current game client locale.
+-- We're treating enGB on old clients as enUS, as it's the same in-game anyway.
+local getFilter = function(msg)
+	msg = string_gsub(msg, "%%d", "(%%d+)")
+	msg = string_gsub(msg, "%%s", "(.+)")
+	msg = string_gsub(msg, "%%(%d+)%$d", "%%%%%1$(%%d+)")
+	msg = string_gsub(msg, "%%(%d+)%$s", "%%%%%1$(%%s+)")
+	return msg
+end
+
 -- Patterns to identify loot
 local LootPatterns = {}
 for i,global in ipairs({
@@ -113,9 +123,7 @@ for i,global in ipairs({
 }) do
 	local msg = _G[global]
 	if (msg) then
-		msg = string_gsub(msg, "%%d", "(%%d+)")
-		msg = string_gsub(msg, "%%s", "(.+)")
-		table_insert(LootPatterns, msg)
+		table_insert(LootPatterns, getFilter(msg))
 	end
 end
 
@@ -129,9 +137,7 @@ for i,global in ipairs({
 }) do
 	local msg = _G[global]
 	if (msg) then
-		msg = string_gsub(msg, "%%d", "(%%d+)")
-		msg = string_gsub(msg, "%%s", "(.+)")
-		table_insert(FactionPatterns, msg)
+		table_insert(FactionPatterns, getFilter(msg))
 	end
 end
 
@@ -188,10 +194,7 @@ for i,global in ipairs({
 		msg = string_gsub(msg, "%)", "%%)");
 		msg = string_gsub(msg, "%[", "%%[");
 		msg = string_gsub(msg, "%]", "%%]");
-		msg = string_gsub(msg, "%%d", "(%%d+)")
-		msg = string_gsub(msg, "%%s", "(.-)")
-		--msg = string_gsub(msg, "%%[d/s]", "(.-)")
-		table_insert(FilteredGlobals, msg)
+		table_insert(FilteredGlobals, getFilter(msg))
 	end
 end
 
@@ -444,41 +447,35 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 	elseif (event == "CHAT_MSG_COMBAT_XP_GAIN") then
 
 		-- Monster with rested bonus
-		local xp_bonus_pattern = COMBATLOG_XPGAIN_EXHAUSTION1 -- "%s dies, you gain %d experience. (%s exp %s bonus)"
-		xp_bonus_pattern = string_gsub(xp_bonus_pattern, "(%%d)", "(%%d+)")
-		xp_bonus_pattern = string_gsub(xp_bonus_pattern, "%%s", "(.+)")
+		local xp_bonus_pattern = getFilter(COMBATLOG_XPGAIN_EXHAUSTION1) -- "%s dies, you gain %d experience. (%s exp %s bonus)"
 		local name, total, xp, bonus = string_match(message, xp_bonus_pattern)
 		if (total) then
 			return false, string_format(XP_TEMPLATE_MULTIPLE, total, XP, name), author, ...
 		end
 
 		-- Quest with rested bonus
-		local xp_quest_rested_pattern = COMBATLOG_XPGAIN_QUEST -- "You gain %d experience. (%s exp %s bonus)"
-		xp_quest_rested_pattern = string_gsub(xp_quest_rested_pattern, "(%%d)", "(%%d+)")
-		xp_quest_rested_pattern = string_gsub(xp_quest_rested_pattern, "%%s", "(.+)")
+		local xp_quest_rested_pattern = getFilter(COMBATLOG_XPGAIN_QUEST) -- "You gain %d experience. (%s exp %s bonus)"
 		name, total, xp, bonus = string_match(message, xp_bonus_pattern)
 		if (total) then
 			return false, string_format(XP_TEMPLATE_MULTIPLE, total, XP, name), author, ...
 		end
 
 		-- Named monster
-		local xp_normal_pattern = COMBATLOG_XPGAIN_FIRSTPERSON -- "%s dies, you gain %d experience."
-		xp_normal_pattern = string_gsub(xp_normal_pattern, "(%%d)", "(%%d+)")
-		xp_normal_pattern = string_gsub(xp_normal_pattern, "%%s", "(.+)")
+		local xp_normal_pattern = getFilter(COMBATLOG_XPGAIN_FIRSTPERSON) -- "%s dies, you gain %d experience."
 		name, total = string_match(message, xp_normal_pattern)
 		if (total) then
 			return false, string_format(XP_TEMPLATE_MULTIPLE, total, XP, name), author, ...
 		end
 	
 		-- Quest
-		local xp_quest_pattern = string_gsub(COMBATLOG_XPGAIN_FIRSTPERSON_UNNAMED, "(%%d)", "(%%d+)") -- "You gain %d experience."
+		local xp_quest_pattern = getFilter(COMBATLOG_XPGAIN_FIRSTPERSON_UNNAMED) -- "You gain %d experience."
 		total = string_match(message, xp_quest_pattern)
 		if (total) then
 			return false, string_format(XP_TEMPLATE, total, XP), author, ...
 		end
 
 		-- Unknown
-		local xp_quest_pattern = string_gsub(ERR_QUEST_REWARD_EXP_I, "(%%d)", "(%%d+)") -- "Experience gained: %d."
+		local xp_quest_pattern = getFilter(ERR_QUEST_REWARD_EXP_I) -- "Experience gained: %d."
 		total = string_match(message, xp_quest_pattern)
 		if (total) then
 			return false, string_format(XP_TEMPLATE, total, XP), author, ...
@@ -486,10 +483,7 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 
 	elseif (event == "CHAT_MSG_SKILL") then
 	
-		local skillup_pattern = SKILL_RANK_UP -- "Your skill in %s has increased to %d."
-			  skillup_pattern = string_gsub(skillup_pattern, "(%%d)", "(%%d+)")
-			  skillup_pattern = string_gsub(skillup_pattern, "%%s", "(.+)")
-		
+		local skillup_pattern = getFilter(SKILL_RANK_UP) -- "Your skill in %s has increased to %d."
 		local skill, gain = string_match(message, skillup_pattern)
 		if (skill and gain) then
 			gain = tonumber(gain)
@@ -523,7 +517,7 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 	elseif (event == "CHAT_MSG_ACHIEVEMENT") then
 
 		-- Achievement announce
-		local achievement_pattern = string_gsub(ACHIEVEMENT_BROADCAST, "%%s", "(.+)") -- "%s has earned the achievement %s!"
+		local achievement_pattern = getFilter(ACHIEVEMENT_BROADCAST) -- "%s has earned the achievement %s!"
 		local player_name, achievement = string_match(message, achievement_pattern)
 		if (player_name) and (achievement) then
 
@@ -546,21 +540,21 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 		-- Followers
 		if (IsRetail) then
 			-- Exhausted
-			local follower_exhausted_pattern = string_gsub(GARRISON_FOLLOWER_DISBANDED, "%%s", "(.+)") -- "%s has been exhausted."
+			local follower_exhausted_pattern = getFilter(GARRISON_FOLLOWER_DISBANDED) -- "%s has been exhausted."
 			local follower_name = string_match(message, follower_exhausted_pattern)
 			if (follower_name) then
 				return false, string_format(LOOT_MINUS_TEMPLATE, follower_name), author, ...
 			end
 
 			-- Removed
-			local follower_removed_pattern = string_gsub(GARRISON_FOLLOWER_REMOVED, "%%s", "(.+)") -- "%s is no longer your follower."
+			local follower_removed_pattern = getFilter(GARRISON_FOLLOWER_REMOVED) -- "%s is no longer your follower."
 			follower_name = string_match(message, follower_removed_pattern)
 			if (follower_name) then
 				return false, string_format(LOOT_MINUS_TEMPLATE, follower_name), author, ...
 			end
 
 			-- Added
-			local follower_added_pattern = string_gsub(GARRISON_FOLLOWER_ADDED, "%%s", "(.+)") -- "%s recruited."
+			local follower_added_pattern = getFilter(GARRISON_FOLLOWER_ADDED) -- "%s recruited."
 			follower_name = string_match(message, follower_added_pattern)
 			if (follower_name) then
 				follower_name = string_gsub(follower_name, "[%[/%]]", "") -- kill brackets
@@ -575,9 +569,7 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 
 
 		-- Discovery XP?
-		local xp_discovery_pattern = ERR_ZONE_EXPLORED_XP -- "Discovered %s: %d experience gained"
-		xp_discovery_pattern = string_gsub(xp_discovery_pattern, "(%%d)", "(%%d+)")
-		xp_discovery_pattern = string_gsub(xp_discovery_pattern, "%%s", "(.+)")
+		local xp_discovery_pattern = getFilter(ERR_ZONE_EXPLORED_XP) -- "Discovered %s: %d experience gained"
 		local name, total = string_match(message, xp_discovery_pattern)
 		if (total) then
 			return false, string_format(XP_TEMPLATE_MULTIPLE, total, XP, name), author, ...
@@ -607,7 +599,7 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 		if (message == CLEARED_AFK) then -- "You are no longer AFK."
 			return false, AFK_CLEARED_TEMPLATE, author, ...
 		end
-		local afk_pattern = string_gsub(MARKED_AFK_MESSAGE, "%%s", "(.+)") -- "You are now AFK: %s"
+		local afk_pattern = getFilter(MARKED_AFK_MESSAGE) -- "You are now AFK: %s"
 		local afk_message = string_match(message, afk_pattern)
 		if (afk_message) then
 			if (afk_message == DEFAULT_AFK_MESSAGE) then -- "Away from Keyboard"
@@ -620,7 +612,7 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 		if (message == CLEARED_DND) then -- "You are no longer marked DND."
 			return false, DND_CLEARED_TEMPLATE, author, ...
 		end
-		local dnd_pattern = string_gsub(MARKED_DND, "%%s", "(.+)") -- "You are now DND: %s."
+		local dnd_pattern = getFilter(MARKED_DND) -- "You are now DND: %s."
 		local dnd_message = string_match(message, dnd_pattern)
 		if (dnd_message) then
 			if (dnd_message == DEFAULT_DND_MESSAGE) then -- "Do not Disturb"
@@ -639,7 +631,7 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 
 		-- Artifact Power?
 		if (IsRetail) then
-			local artifact_pattern = string_gsub(ARTIFACT_XP_GAIN, "(%%s)", "(.+)") -- "%s gains %s Artifact Power."
+			local artifact_pattern = getFilter(ARTIFACT_XP_GAIN) -- "%s gains %s Artifact Power."
 			local artifact, artifactPower = string_match(message, artifact_pattern)
 			if (artifact) then
 				local first, last = string_find(message, "|c(.+)|r")
