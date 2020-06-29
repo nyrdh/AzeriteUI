@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.367-Alpha] 2020-06-29
+### Fixed
+- Chat filters should no longer bug out when you receive the awesome amount of 0 gold, 0 silver and 0 copper.
+
 ## [2.0.363-Alpha] 2020-06-29
 ### Fixed
 - Chat filters should no longer bug out for non-English game clients. Tested with at least deDe.
