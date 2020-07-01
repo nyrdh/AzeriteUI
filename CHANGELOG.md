@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.368-Alpha] 2020-07-01
+### Changed
+#### Retail
+- The Personal Resource Display now has a power bar. 
+- The Personal Resource Display's castbar now shows the currently set spell queue window. Remember you can always change this with `/run SetCVar("spellQueueWindow", 55)`, where you replace the number `55` with your desired queue window in milliseconds. For a fluent gameplay for melee I recommend adding 5 to your world latency, and rounding up to the nearest 5 after that. Meaning if your latency is 28ms, you should put the spell queue window to 35ms. If you're a caster that thrive on spell batching to the point of madness, putting it to something outlandishly high like 400ms would probably work well. 
+- The Personal Resource Display now grows towards the right, like the player unitframe. This is to match the said player unitframe, and also to make sure this special nameplate stands out from all the others. 
+- The floating on-screen castbar is now disabled when the Personal Resource Display is enabled, since they occupy the same area on the screen.
+
+### Removed
+#### Retail
+- The Blizzard interface options menu entry to show target of target has been removed, as it does not apply to our unitframes.
+- The Blizzard interface options menu entry to show combo points and personal resources on the target plate has been removed, as we're already using a very centered system for secondary resources like combo points, runes, holy power and so on.
+
 ## [2.0.367-Alpha] 2020-06-29
 ### Fixed
 - Chat filters should no longer bug out when you receive the awesome amount of 0 gold, 0 silver and 0 copper.
