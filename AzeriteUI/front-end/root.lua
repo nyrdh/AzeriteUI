@@ -451,7 +451,7 @@ Core.ApplyExperimentalFeatures = function(self)
 					isTracking = nil
 
 					-- Stop tracking
-					self:UnregisterMessage("GP_UNIT_AURA", onTrackingEvent)
+					self:UnregisterMessage("GP_UNIT_AURA", onTrackingEvent, true)
 
 					-- Debug output the stop reason
 					if (inInstance) then
@@ -511,10 +511,10 @@ Core.ApplyExperimentalFeatures = function(self)
 
 				-- Kill it all off in instances
 				if (inInstance) then
-					self:UnregisterEvent("GROUP_ROSTER_UPDATE", onTrackingEvent)
-					self:UnregisterEvent("PLAYER_REGEN_DISABLED", onTrackingEvent)
-					self:UnregisterEvent("PLAYER_REGEN_ENABLED", onTrackingEvent)
-					self:UnregisterMessage("GP_UNIT_AURA", onTrackingEvent)
+					self:UnregisterEvent("GROUP_ROSTER_UPDATE", onTrackingEvent, true)
+					self:UnregisterEvent("PLAYER_REGEN_DISABLED", onTrackingEvent, true)
+					self:UnregisterEvent("PLAYER_REGEN_ENABLED", onTrackingEvent, true)
+					self:UnregisterMessage("GP_UNIT_AURA", onTrackingEvent, true)
 				else
 					-- Always want these on out in the world
 					self:RegisterEvent("GROUP_ROSTER_UPDATE", onTrackingEvent)

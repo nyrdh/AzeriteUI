@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 34)
+local LibFader = Wheel:Set("LibFader", 35)
 if (not LibFader) then	
 	return
 end
@@ -482,6 +482,7 @@ LibFader.OnEvent = function(self, event, ...)
 		if (isInitialLogin) or (isReloadingUi) then
 			self.frame:SetScript("OnUpdate", InitiateDelay)
 		else
+			self:ValidateTimerData()
 			self.frame:SetScript("OnUpdate", OnUpdate)
 		end
 
@@ -553,14 +554,7 @@ LibFader.OnEvent = function(self, event, ...)
 	end 
 end
 
-LibFader.InitiateDelay = function(self, elapsed)
-	self.elapsed = self.elapsed + elapsed
-
-	-- Enforce a delay at the start
-	if (self.elapsed < 15) then 
-		return 
-	end
-
+LibFader.ClearTimerData = function(self)
 	self.elapsed = 0
 	self.totalElapsed = 0
 	self.totalElapsedIn = 0
@@ -569,10 +563,38 @@ LibFader.InitiateDelay = function(self, elapsed)
 	self.totalDurationOut = .75
 	self.currentPosition = 1
 	self.achievedState = "peril"
+end
 
+LibFader.ValidateTimerData = function(self)
+	self.elapsed = 0
+	self.totalElapsed = 0
+	self.totalElapsedIn = 0
+	self.totalElapsedOut = 0
+	self.totalDurationIn = .15
+	self.totalDurationOut = .75
+	self.currentPosition = self.currentPosition or 1
+	self.achievedState = self.achievedState or "peril"
+end
+
+LibFader.InitiateDelay = function(self, elapsed)
+	self.elapsed = self.elapsed + elapsed
+
+	-- Enforce a delay at the start
+	if (self.elapsed < 15) then 
+		return 
+	end
+
+	-- Clearout everything
+	self:ClearTimerData()
+
+	-- Debug output
 	LibModule:AddDebugMessageFormatted(string_format("FaderState achieved: '%s'", self.achievedState))
+
+	-- Notify the environment
 	self:SendMessage("GP_FADER_STATE_ACHIEVED", self.achievedState)
 
+	-- Validate values and return to standard updates
+	self:ValidateTimerData()
 	self.frame:SetScript("OnUpdate", OnUpdate)
 end 
 
