@@ -247,7 +247,7 @@ local OnUpdate = function(element, elapsed)
 				element.Value:SetText(formatTime(element.max - duration))
 			end
 		end
-		if (element.SpellQueue) then 
+		if (element.SpellQueue) and (not element.disableSpellQueue) then 
 			updateSpellQueueValue(element)
 		end 
 		element.duration = duration
@@ -278,7 +278,7 @@ local OnUpdate = function(element, elapsed)
 				element.Value:SetText(formatTime(duration))
 			end
 		end
-		if (element.SpellQueue) then 
+		if (element.SpellQueue) and (not element.disableSpellQueue) then 
 			updateSpellQueueValue(element)
 		end 
 		element.duration = duration
@@ -366,7 +366,7 @@ Update = function(self, event, unit, ...)
 					element.Shield:Hide()
 				end
 			end
-			if (element.SpellQueue) then 
+			if (element.SpellQueue) and (not element.disableSpellQueue) then 
 				updateSpellQueueOrientation(element)
 				updateSpellQueueValue(element)
 			end 
@@ -501,7 +501,7 @@ Update = function(self, event, unit, ...)
 					element.Shield:Hide()
 				end
 			end
-			if (element.SpellQueue) then 
+			if (element.SpellQueue) and (not element.disableSpellQueue) then 
 				updateSpellQueueOrientation(element)
 				updateSpellQueueValue(element)
 			end 
@@ -529,7 +529,7 @@ Update = function(self, event, unit, ...)
 		element.duration = duration
 		element.max = endTime - startTime
 
-		if (element.SpellQueue) then 
+		if (element.SpellQueue) and (not element.disableSpellQueue) then 
 			updateSpellQueueValue(element)
 		end 
 	
@@ -583,6 +583,14 @@ local Enable = function(self)
 		element.ForceUpdate = ForceUpdate
 		element:Hide()
 
+		-- Make a little proxy to update only this.
+		if (element.SpellQueue) then
+			element.SpellQueue.ForceUpdate = function()
+				updateSpellQueueOrientation(element)
+				updateSpellQueueValue(element)
+			end
+		end
+
 		if (self.unit == "target") or (self.unit == "targettarget") then
 			self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
 		end
@@ -635,5 +643,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 41)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 42)
 end 

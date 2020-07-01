@@ -637,6 +637,42 @@ local NamePlates_RaidTarget_PostUpdate = function(element, unit)
 	end 
 end
 
+
+-- Retail Personal Resource Display
+local NamePlates_PreUpdate = function(plate, event, unit)
+	if (plate.isYou) and (not plate.enabledAsPlayer) then
+		local layout = plate.layout
+
+		plate.Health:SetOrientation(layout.HealthBarOrientationPlayer)
+		plate.Cast:SetOrientation(layout.CastOrientationPlayer)
+		plate.Cast:Place(unpack(layout.CastPlacePlayer))
+		if (plate.Cast.SpellQueue) then
+			if (plate.Cast.SpellQueue.ForceUpdate) then
+				plate.Cast.SpellQueue:ForceUpdate() -- in case a cast was running
+			end
+			plate.Cast.SpellQueue:Show()
+			plate.Cast.disableSpellQueue = nil
+		end
+		plate:EnableElement("Power")
+
+		plate.enabledAsPlayer = true
+
+	elseif (not plate.isYou) and (plate.enabledAsPlayer) then
+		local layout = plate.layout
+
+		plate.Health:SetOrientation(layout.HealthBarOrientation)
+		plate.Cast:SetOrientation(layout.CastOrientation)
+		plate.Cast:Place(unpack(layout.CastPlace))
+		if (plate.Cast.SpellQueue) then
+			plate.Cast.SpellQueue:Hide()
+			plate.Cast.disableSpellQueue = true
+		end
+		plate:DisableElement("Power")
+
+		plate.enabledAsPlayer = nil
+	end
+end
+
 local NamePlates_Auras_PostCreateButton = function(element, button)
 	local layout = element._owner.layout
 
@@ -2226,6 +2262,10 @@ Layouts[ADDON] = {
 		{ ID = 5, Name = "InterfaceOptionsActionBarsPanel" },
 		--{ ID = 10, Name = "CompactUnitFrameProfiles" }
 	},
+	DisableUIMenuOptions = {
+		{ Shrink = true, Name = "InterfaceOptionsCombatPanelTargetOfTarget" },
+		{ Shrink = "Vertical", Name = "InterfaceOptionsNamesPanelUnitNameplatesPersonalResourceOnEnemy" }
+	},
 	FadeInDelay = 1.5,
 	FadeInSpeed = .75,
 	FadeInUI = true, 
@@ -2939,6 +2979,26 @@ Layouts.NamePlates = {
 	CastBackdropPlace = { "CENTER", 0, 0 },
 	CastBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
 	CastBackdropTexture = GetMedia("nameplate_backdrop"),
+	CastBarSpellQueuePlace = { "CENTER", 0, 0 }, 
+	CastBarSpellQueueSize = { 84, 14 },
+	CastBarSpellQueueTexture = GetMedia("nameplate_bar"), 
+	CastBarSpellQueueCastTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
+	CastBarSpellQueueColor = { 1, 1, 1, .5 },
+	CastBarSpellQueueOrientation = "LEFT",
+	CastBarSpellQueueSparkMap = {
+		top = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
+		},
+		bottom = {
+			{ keyPercent =   0/128, offset = -16/32 }, 
+			{ keyPercent =  10/128, offset =   0/32 }, 
+			{ keyPercent = 119/128, offset =   0/32 }, 
+			{ keyPercent = 128/128, offset = -16/32 }
+		}
+	},
 	CastColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
 	CastNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
 	CastNameDrawLayer = { "OVERLAY", 1 }, 
@@ -2947,7 +3007,9 @@ Layouts.NamePlates = {
 	CastNameJustifyV = "MIDDLE",
 	CastNamePlace = { "TOP", 0, -18 },
 	CastOrientation = "LEFT", 
+	CastOrientationPlayer = "RIGHT", 
 	CastPlace = { "TOP", 0, -20 },
+	CastPlacePlayer = { "TOP", 0, -(2 + 18 + 18) },
 	CastPostUpdate = NamePlate_CastBar_PostUpdate,
 	CastShieldColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
 	CastShieldDrawLayer = { "BACKGROUND", -5 },
@@ -2980,6 +3042,7 @@ Layouts.NamePlates = {
 	HealthBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
 	HealthBackdropTexture = GetMedia("nameplate_backdrop"),
 	HealthBarOrientation = "LEFT", 
+	HealthBarOrientationPlayer = "RIGHT", 
 	HealthColorCivilian = true, 
 	HealthColorClass = true, 
 	HealthColorDisconnected = true,
@@ -3008,10 +3071,40 @@ Layouts.NamePlates = {
 	},
 	HealthTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
 	HealthTexture = GetMedia("nameplate_bar"),
+	PreUpdate = IsRetail and NamePlates_PreUpdate,
 	PostCreateAuraButton = NamePlates_Auras_PostCreateButton,
 	PostUpdateAura = NamePlates_Auras_PostUpdate,
 	PostUpdateAuraButton = NamePlates_Auras_PostUpdateButton,
 	PostUpdateRaidTarget = NamePlates_RaidTarget_PostUpdate,
+
+	PowerBackdropColor = { 1, 1, 1, 1 },
+	PowerBackdropDrawLayer = { "BACKGROUND", -2 },
+	PowerBackdropPlace = { "CENTER", 0, 0 },
+	PowerBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
+	PowerBackdropTexture = GetMedia("nameplate_backdrop"),
+	PowerBarOrientation = "RIGHT", 
+	PowerFrequent = true,
+	PowerPlace = { "TOP", 0, -20 },
+	PowerSize = { 84, 14 }, 
+	PowerSparkMap = {
+		top = {
+			{ keyPercent =   0/256, offset = -16/32 }, 
+			{ keyPercent =   4/256, offset = -16/32 }, 
+			{ keyPercent =  19/256, offset =   0/32 }, 
+			{ keyPercent = 236/256, offset =   0/32 }, 
+			{ keyPercent = 256/256, offset = -16/32 }
+		},
+		bottom = {
+			{ keyPercent =   0/256, offset = -16/32 }, 
+			{ keyPercent =   4/256, offset = -16/32 }, 
+			{ keyPercent =  19/256, offset =   0/32 }, 
+			{ keyPercent = 236/256, offset =   0/32 }, 
+			{ keyPercent = 256/256, offset = -16/32 }
+		}
+	},
+	PowerTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
+	PowerTexture = GetMedia("nameplate_bar"),
+
 	RaidTargetDrawLayer = { "ARTWORK", 0 },
 	RaidTargetPlace = { "TOP", 0, 20+ 44 }, -- no auras
 	RaidTargetPlace_AuraRow = { "TOP", 0, 20+ 80 }, -- auras, 1 row

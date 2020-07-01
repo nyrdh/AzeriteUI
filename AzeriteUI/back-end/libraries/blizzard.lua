@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 45)
+local LibBlizzard = Wheel:Set("LibBlizzard", 46)
 if (not LibBlizzard) then 
 	return
 end
@@ -895,7 +895,13 @@ LibBlizzard.DisableUIMenuOption = function(self, option_shrink, option_name)
 	end
 	if option_shrink then
 		option:SetHeight(0.00001)
-		option:SetScale(0.00001) -- needed for the options to shrink properly. Watch out for side effects(?)
+		-- Needed for the options to shrink properly.
+		-- Will mess up alignment for indented options, 
+		-- so only use this when the following options is
+		-- horizontally aligned with the removed one.
+		if (option_shrink == true) then
+			option:SetScale(0.00001) 
+		end
 	end
 	option.cvar = ""
 	option.uvar = ""

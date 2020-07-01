@@ -885,8 +885,8 @@ Core.OnEnable = function(self)
 
 	-- Disable most of the BlizzardUI, to give room for our own!
 	------------------------------------------------------------------------------------
-	for widget, state in pairs(self.layout.DisableUIWidgets) do 
-		if state then 
+	for widget,state in pairs(self.layout.DisableUIWidgets) do 
+		if (state) then 
 			self:DisableUIWidget(widget)
 		end 
 	end 
@@ -899,6 +899,12 @@ Core.OnEnable = function(self)
 			updateBarToggles = true 
 		end 
 		self:DisableUIMenuPage(page.ID, page.Name)
+	end 
+
+	-- Disable single interface options we don't need
+	------------------------------------------------------------------------------------
+	for id,option in pairs(self.layout.DisableUIMenuOptions) do 
+		self:DisableUIMenuOption(option.Shrink, option.Name)
 	end 
 
 	-- Working around Blizzard bugs and issues I've discovered

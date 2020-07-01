@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("NamePlates", "LibEvent", "LibNamePlate", "LibDB", "LibFrame")
+local Module = Core:NewModule("NamePlates", "LibEvent", "LibNamePlate", "LibDB", "LibFrame", "LibClientBuild")
 Module:SetIncompatible("Kui_Nameplates")
 Module:SetIncompatible("NeatPlates")
 Module:SetIncompatible("Plater")
@@ -29,6 +29,10 @@ local SetNamePlateSelfClickThrough = C_NamePlate.SetNamePlateSelfClickThrough
 local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
+
+-- Constants for client version
+local IsClassic = Module:IsClassic()
+local IsRetail = Module:IsRetail()
 
 -- Local cache of the nameplates, for easy access to some methods
 local Plates = {} 
@@ -158,6 +162,20 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	castShield:SetVertexColor(unpack(layout.CastShieldColor))
 	cast.Shield = castShield
 
+	if (IsRetail) then
+		local spellQueue = cast:CreateStatusBar()
+		spellQueue:Hide()
+		spellQueue:SetFrameLevel(cast:GetFrameLevel() + 1)
+		spellQueue:Place(unpack(layout.CastBarSpellQueuePlace))
+		spellQueue:SetSize(unpack(layout.CastBarSpellQueueSize))
+		spellQueue:SetOrientation(layout.CastBarSpellQueueOrientation) 
+		spellQueue:SetStatusBarTexture(layout.CastBarSpellQueueTexture) 
+		spellQueue:SetTexCoord(unpack(layout.CastBarSpellQueueCastTexCoord))
+		spellQueue:SetStatusBarColor(unpack(layout.CastBarSpellQueueColor)) 
+		spellQueue:DisableSmoothing(true)
+		cast.SpellQueue = spellQueue
+	end
+
 	local raidTarget = baseFrame:CreateTexture()
 	raidTarget:SetPoint(unpack(layout.RaidTargetPlace))
 	raidTarget:SetSize(unpack(layout.RaidTargetSize))
@@ -187,6 +205,37 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	if (not db.enableAuras) then 
 		plate:DisableElement("Auras")
 	end 
+
+	-- Add in Personal Resource Display for Retail
+	if (IsRetail) then
+
+		-- Power bar
+		local power = plate:CreateStatusBar()
+		power:Hide()
+		power:SetSize(unpack(layout.PowerSize))
+		power:SetPoint(unpack(layout.PowerPlace))
+		power:SetStatusBarTexture(layout.PowerTexture)
+		power:SetOrientation(layout.PowerBarOrientation)
+		power:SetSmoothingFrequency(.1)
+		power:SetSparkMap(layout.PowerSparkMap)
+		power:SetTexCoord(unpack(layout.PowerTexCoord))
+		power.frequent = layout.PowerFrequent
+		plate.Power = power
+
+		local powerBg = power:CreateTexture()
+		powerBg:SetPoint(unpack(layout.PowerBackdropPlace))
+		powerBg:SetSize(unpack(layout.PowerBackdropSize))
+		powerBg:SetDrawLayer(unpack(layout.PowerBackdropDrawLayer))
+		powerBg:SetTexture(layout.PowerBackdropTexture)
+		powerBg:SetVertexColor(unpack(layout.PowerBackdropColor))
+		plate.Power.Bg = powerBg
+
+		-- Disable this as default, we only want it on the player.
+		plate:DisableElement("Power")
+	end
+
+	-- Add preupdates. Usually only meaningful in Retail.
+	plate.PreUpdate = layout.PreUpdate
 
 	-- The library does this too, but isn't exposing it to us.
 	Plates[plate] = baseFrame

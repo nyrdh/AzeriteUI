@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 47)
+local LibNamePlate = Wheel:Set("LibNamePlate", 48)
 if (not LibNamePlate) then	
 	return
 end
@@ -470,7 +470,7 @@ NamePlate.UpdateScale = function(self)
 	self:SetScale(LibNamePlate.SCALE * self.baseFrame:GetScale())
 end
 
-NamePlate.OnShow = function(self)
+NamePlate.OnShow = function(self, event, unit)
 	local unit = self.unit
 	if not UnitExists(unit) then
 		return
@@ -492,6 +492,11 @@ NamePlate.OnShow = function(self)
 	self.unitLevel = UnitLevel(unit)
 	self.unitClassificiation = UnitClassification(unit)
 
+	-- Enabling of situational elements should be done here.
+	-- Flags are available to the front-end at this point.
+	if (self.PreUpdate) then 
+		self:PreUpdate("OnShow", unit)
+	end 
 	self:Show() -- make the fully transparent frame visible
 
 	-- this will trigger the fadein 
@@ -508,11 +513,11 @@ NamePlate.OnShow = function(self)
 	self:UpdateAllElements()
 
 	if (self.PostUpdate) then 
-		self:PostUpdate()
+		self:PostUpdate("OnShow", unit)
 	end 
 end
 
-NamePlate.OnHide = function(self)
+NamePlate.OnHide = function(self, event, unit)
 	visiblePlates[self] = false -- this will trigger the fadeout and hiding
 
 	self.isYou = nil
@@ -968,8 +973,7 @@ LibNamePlate.OnEvent = function(self, event, ...)
 		local plate = baseFrame and allPlates[baseFrame] 
 		if plate then
 			plate.unit = unit
-			plate:OnShow(unit)
-
+			plate:OnShow(event, unit)
 		end
 
 	elseif (event == "NAME_PLATE_UNIT_REMOVED") then
@@ -978,7 +982,7 @@ LibNamePlate.OnEvent = function(self, event, ...)
 		local plate = baseFrame and allPlates[baseFrame] 
 		if plate then
 			plate.unit = nil
-			plate:OnHide()
+			plate:OnHide(event, unit)
 		end
 
 	elseif (event == "PLAYER_TARGET_CHANGED") then
