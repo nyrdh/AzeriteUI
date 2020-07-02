@@ -15,21 +15,32 @@ assignees: goldpaw
 - [ ] I have the latest addon version available from CurseForge/Overwolf/Twitch.
 - [ ] I restarted the entire game after updating the addon, not just relogged or reloaded. 
 
-## What game version(s) does it happen in?  
+### What addon release version(s) does it happen in?  
+- If you have manually chosen a release type in the Twitch client, please tell me which one:
+	- [ ] Alpha
+	- [ ] Beta
+	- [ ] Release (CurseForge/Twitch default)
+
+### What game version(s) does it happen in?  
 <!--The game uses different addon APIs in different versions, so this matters a lot.-->
-- [ ] Classic
-- [ ] Battle for Azeroth
+- [ ] Classic 
+- [ ] Classic (Public Test Realm) 
+- [ ] Battle for Azeroth 
+- [ ] Battle for Azeroth (Public Test Realm) 
 
 ### Does this happen with NO other addons enabled?  
 <!--This is helpful because it tells us whether it's an addon bug or addon conflict.-->
-- [ ] Yes
-- [ ] No
+- [ ] Yes 
+- [ ] No 
 
 ### What classes does it happen on?  
-<!--This is helpful because the issue could be related to databases or class powers that differ in code from class to class. So even though it might not appear to be a class related issue, the bug itself could be just that.-->
+<!--This is helpful because the issue could be related to databases or class powers that differ in code from class to class. So even though it might not appear to be a class related issue, the bug itself could be just that. You don't have to check all classes, though, just list the ones you experienced the bug on!-->
+- [ ] Death Knight 
+- [ ] Demon Hunter 
 - [ ] Druid 
 - [ ] Hunter 
 - [ ] Mage 
+- [ ] Monk 
 - [ ] Paladin 
 - [ ] Priest 
 - [ ] Rogue 
