@@ -563,6 +563,7 @@ end
 Module.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
 	self.frame = self:CreateFrame("Frame", nil, "UICenter")
+	self.frame:SetFrameStrata("LOW")
 
 	if (IsClassic) then
 		self:StyleClassicLog()

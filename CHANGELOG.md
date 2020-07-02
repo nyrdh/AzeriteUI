@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.372-Alpha] 2020-07-02
+### Changed
+- Lowered the objectives tracker strata, to prevent it from covering the Immersion buttons.
+
+### Fixed
+- Attempting a different set of visibility conditionals to avoid the pet action bar popping up as a copy of the main bar in certain Retail world quests like Beachhead.
+- Fixed the Retail issue where logging in after having logged out while inside an instance would lead to weird errors.
+
 ## [2.0.371-Alpha] 2020-07-02
 ### Fixed
 #### Retail

@@ -1,4 +1,4 @@
-local LibMessage = Wheel:Set("LibMessage", 13)
+local LibMessage = Wheel:Set("LibMessage", 14)
 if (not LibMessage) then	
 	return
 end
@@ -289,16 +289,21 @@ LibMessage.RegisterMessage = function(self, message, func, ...)
 	events[message][self][#events[message][self] + 1] = func
 end
 
-LibMessage.UnregisterMessage = function(self, message, func)
+LibMessage.UnregisterMessage = function(self, message, func, ...)
 	check(message, 1, "string")
 	check(func, 2, "string", "function", "nil")
 
 	local messages = events[message] and events[message][self]
 	if (not messages) then
-		if (not events[message]) then
-			return error(("The message '%s' isn't currently registered to any object."):format(message))
+		local silent = ...
+		if (silent == true) then
+			return
 		else
-			return error(("The message '%s' isn't currently registered to the object '%s'."):format(message, tostring(self)))
+			if (not events[message]) then
+				return error(("The message '%s' isn't currently registered to any object."):format(message))
+			else
+				return error(("The message '%s' isn't currently registered to the object '%s'."):format(message, tostring(self)))
+			end
 		end
 	end
 

@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 93)
+local LibSecureButton = Wheel:Set("LibSecureButton", 94)
 if (not LibSecureButton) then
 	return
 end
@@ -1979,7 +1979,15 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 			return "message", "update"
 		]])
 
-		local visibilityDriver = "[@pet,exists]show;hide"
+		local visibilityDriver
+		if (IsClassic) then
+			visibilityDriver = "[@pet,exists]show;hide"
+			
+		elseif (IsRetail) then
+			-- Experimental change to avoid duplicate bars on some world quests.
+			visibilityDriver = "[@pet,exists,nopossessbar,nooverridebar,noshapeshift,novehicleui]show;hide"
+			--visibilityDriver = "[@pet,exists]show;hide"
+		end
 
 		-- enable the visibility driver
 		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
