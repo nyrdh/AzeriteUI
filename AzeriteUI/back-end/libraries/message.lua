@@ -1,4 +1,4 @@
-local LibMessage = Wheel:Set("LibMessage", 12)
+local LibMessage = Wheel:Set("LibMessage", 13)
 if (not LibMessage) then	
 	return
 end
@@ -184,17 +184,15 @@ LibMessage.New = function(self, target, registerName, registerNameAlternate, unr
 				return
 			end
 
-			if (messages) and (messages > 0) then
-				for i = #messages, 1, -1 do
-					table_remove(messages, i)
-				end
+			for i = #messages, 1, -1 do
+				table_remove(messages, i)
+			end
 
-				-- Fire the Unregister callback if something was actually unregistered
-				-- This is intentionally the same callback as used in the single unregister method, 
-				-- as that too is only called when no more occurrences of the message are registered.
-				if (target.OnUnregister and (not next(events[message]))) then
-					target:OnUnregister(message, ...)
-				end
+			-- Fire the Unregister callback if something was actually unregistered
+			-- This is intentionally the same callback as used in the single unregister method, 
+			-- as that too is only called when no more occurrences of the message are registered.
+			if (target.OnUnregister and (not next(events[message]))) then
+				target:OnUnregister(message, ...)
 			end
 		end
 	end
@@ -338,11 +336,8 @@ LibMessage.UnregisterAllMessages = function(self)
 		if (not messages) or (#messages == 0) then
 			return
 		end
-
-		if (messages) and (messages > 0) then
-			for i = #messages, 1, -1 do
-				table_remove(messages, i)
-			end
+		for i = #messages, 1, -1 do
+			table_remove(messages, i)
 		end
 	end
 end

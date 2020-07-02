@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.370-Alpha] 2020-07-02
+### Fixed
+- Tried to fix some inconsistencies in when the "Failed" message appears on the castbars.
+- Fixed an issue related to multiple unregistrations of custom messages, that amongst other things affected the chat module and caused problems when using Prat. 
+
 ## [2.0.369-Alpha] 2020-07-01
 ### Fixed
 - The fader system should no longer randomly throw errors upon logging in while inside an instance.

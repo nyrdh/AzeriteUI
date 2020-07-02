@@ -119,16 +119,16 @@ end
 local clear = function(element)
 	element.name = nil
 	element.text = nil
-	if element.Name then 
+	if (element.Name) then 
 		element.Name:SetText("")
 	end
-	if element.Value then 
+	if (element.Value) then 
 		element.Value:SetText("")
 	end
-	if element.Failed then 
+	if (element.Failed) then 
 		element.Failed:SetText("")
 	end
-	if element.SpellQueue then 
+	if (element.SpellQueue) then 
 		element.SpellQueue:SetValue(0, true)
 	end
 	element:SetValue(0, true)
@@ -293,27 +293,20 @@ local OnUpdate = function(element, elapsed)
 			return 
 		end 
 		element.failedMessageTimer = nil
-		local msg = element.Failed or element.Value or element.Name
-		if (msg) then 
-			msg:SetText("")
+		if (element.Failed) then 
+			element.Failed:SetText("")
 		end
 	else
 		clear(element)
 		element:Hide()
 		element.casting = nil
 		element.channeling = nil
-		if element.PostUpdate then
+		if (element.PostUpdate) then
 			return element:PostUpdate(unit)
 		end
 		return
 	end
 end 
-
-if (IsClassic) then
-end
-
-if (IsRetail) then
-end
 
 Update = function(self, event, unit, ...)
 	-- This just messes with our system here.
@@ -331,7 +324,7 @@ Update = function(self, event, unit, ...)
 	end 
 
 	local element = self.Cast
-	if element.PreUpdate then
+	if (element.PreUpdate) then
 		element:PreUpdate(unit)
 	end
 
@@ -356,6 +349,7 @@ Update = function(self, event, unit, ...)
 			element:SetValue(element.duration, true) 
 			element:UpdateColor(unit)
 
+			if (element.Failed) then element.Failed:SetText("") end
 			if (element.Name) then element.Name:SetText(utf8sub(text, 32, true)) end
 			if (element.Icon) then element.Icon:SetTexture(texture) end
 			if (element.Value) then element.Value:SetText("") end
@@ -417,7 +411,9 @@ Update = function(self, event, unit, ...)
 		element.notInterruptible = nil
 		element.total = nil
 		element.tradeskill = nil
+		element.failedMessageTimer = nil
 
+		-- Clear leftovers from earlier casts
 		local msg = element.Failed or element.Value or element.Name
 		if (msg) then 
 			msg:SetText("") 
@@ -491,6 +487,7 @@ Update = function(self, event, unit, ...)
 			element:SetValue(duration, true)
 			element:UpdateColor(unit)
 
+			if (element.Failed) then element.Failed:SetText("") end
 			if (element.Name) then element.Name:SetText(utf8sub(name, 32, true)) end
 			if (element.Icon) then element.Icon:SetTexture(texture) end
 			if (element.Value) then element.Value:SetText("") end
@@ -561,6 +558,11 @@ Update = function(self, event, unit, ...)
 			element.total = nil
 			element.max = 0
 			element.delay = 0
+			element.failedMessageTimer = nil
+			local msg = element.Failed or element.Value or element.Name
+			if (msg) then 
+				msg:SetText("") 
+			end 
 		end 
 	end
 	if (element.PostUpdate) then 
@@ -643,5 +645,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 42)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 43)
 end 
