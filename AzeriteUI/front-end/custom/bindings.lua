@@ -24,7 +24,7 @@ local IsAltKeyDown = IsAltKeyDown
 local IsControlKeyDown = IsControlKeyDown
 local IsShiftKeyDown = IsShiftKeyDown
 local LoadBindings = LoadBindings
-local AttemptToSaveBindings = AttemptToSaveBindings
+local AttemptToSaveBindings = AttemptToSaveBindings or SaveBindings 
 local SetBinding = SetBinding
 
 -- Private API

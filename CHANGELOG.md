@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.371-Alpha] 2020-07-02
+### Fixed
+#### Retail
+- Fixed an issue that would cause our keybind interface to bug out when you attempted to save the new bindings.
+
 ## [2.0.370-Alpha] 2020-07-02
 ### Fixed
 - Tried to fix some inconsistencies in when the "Failed" message appears on the castbars.
