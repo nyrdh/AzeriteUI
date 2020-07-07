@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.373-Alpha] 2020-07-07
+### Changed
+- Restricting certain checks and updates done by unitframes and nameplates in an effort to increase the performance in large groups a bit.
+
+### Fixed
+- Working around some issues related to checking for threat in retail.
+
 ## [2.0.372-Alpha] 2020-07-02
 ### Changed
 - Lowered the objectives tracker strata, to prevent it from covering the Immersion buttons.

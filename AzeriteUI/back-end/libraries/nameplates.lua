@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 48)
+local LibNamePlate = Wheel:Set("LibNamePlate", 49)
 if (not LibNamePlate) then	
 	return
 end
@@ -987,8 +987,12 @@ LibNamePlate.OnEvent = function(self, event, ...)
 
 	elseif (event == "PLAYER_TARGET_CHANGED") then
 		HAS_TARGET = UnitExists("target")
-		for baseFrame, plate in pairs(allPlates) do
-			if plate:IsShown() then
+		for plate, baseFrame in pairs(visiblePlates) do
+			-- Will be 'false' when fading out, 'nil' when hidden.
+			-- Either way, this only applies to visible, active plates. 
+			if (baseFrame) then
+		--for baseFrame, plate in pairs(allPlates) do
+			--if plate:IsShown() then
 				plate.isTarget = HAS_TARGET and plate.unit and UnitIsUnit(plate.unit, "target") 
 				plate:UpdateAlpha()
 				plate:UpdateFrameLevel()
@@ -1012,16 +1016,24 @@ LibNamePlate.OnEvent = function(self, event, ...)
 
 	elseif (event == "PLAYER_REGEN_DISABLED") then 
 		IN_COMBAT = true
-		for baseFrame, plate in pairs(allPlates) do
-			if plate and plate:IsShown() then
+		for plate, baseFrame in pairs(visiblePlates) do
+			-- Will be 'false' when fading out, 'nil' when hidden.
+			-- Either way, this only applies to visible, active plates. 
+			if (baseFrame) then
+		--for baseFrame, plate in pairs(allPlates) do
+			--if plate and plate:IsShown() then
 				plate:UpdateAlpha()
 			end
 		end
 
 	elseif (event == "PLAYER_REGEN_ENABLED") then 
 		IN_COMBAT = false 
-		for baseFrame, plate in pairs(allPlates) do
-			if (plate and plate:IsShown()) then
+		for plate, baseFrame in pairs(visiblePlates) do
+			-- Will be 'false' when fading out, 'nil' when hidden.
+			-- Either way, this only applies to visible, active plates. 
+			if (baseFrame) then
+		--for baseFrame, plate in pairs(allPlates) do
+			--if (plate and plate:IsShown()) then
 				plate:UpdateAlpha()
 			end
 		end

@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 75)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 76)
 if (not LibUnitFrame) then	
 	return
 end
@@ -430,31 +430,33 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 
 	frame:SetScript("OnHide", UnitFrame.OnHide)
 
+	local OverrideAllElements = UnitFrame.OverrideAllElementsOnChangedGUID -- UnitFrame.OverrideAllElements
+
 	if (unit == "target") then
-		frame:RegisterEvent("PLAYER_TARGET_CHANGED", UnitFrame.OverrideAllElements, true)
+		frame:RegisterEvent("PLAYER_TARGET_CHANGED", OverrideAllElements, true)
 
 	elseif (unit == "focus") then
-		frame:RegisterEvent("PLAYER_FOCUS_CHANGED", UnitFrame.OverrideAllElements, true)
+		frame:RegisterEvent("PLAYER_FOCUS_CHANGED", OverrideAllElements, true)
 
 	elseif (unit == "mouseover") then
-		frame:RegisterEvent("UPDATE_MOUSEOVER_UNIT", UnitFrame.OverrideAllElements, true)
+		frame:RegisterEvent("UPDATE_MOUSEOVER_UNIT", OverrideAllElements, true)
 
 	elseif (unit:match("^arena(%d+)")) then
 		frame.unitGroup = "arena"
 		frame:SetFrameStrata("MEDIUM")
 		frame:SetFrameLevel(1000)
-		frame:RegisterEvent("ARENA_OPPONENT_UPDATE", UnitFrame.OverrideAllElements, true)
+		frame:RegisterEvent("ARENA_OPPONENT_UPDATE", OverrideAllElements, true)
 
 	elseif (string_match(unit, "^boss(%d+)")) then
 		frame.unitGroup = "boss"
 		frame:SetFrameStrata("MEDIUM")
 		frame:SetFrameLevel(1000)
-		frame:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT", UnitFrame.OverrideAllElements, true)
-		frame:RegisterEvent("UNIT_TARGETABLE_CHANGED", UnitFrame.OverrideAllElements, true)
+		frame:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT", OverrideAllElements, true)
+		frame:RegisterEvent("UNIT_TARGETABLE_CHANGED", OverrideAllElements, true)
 
 	elseif (string_match(unit, "^party(%d+)")) then 
 		frame.unitGroup = "party"
-		frame:RegisterEvent("GROUP_ROSTER_UPDATE", UnitFrame.OverrideAllElements, true)
+		frame:RegisterEvent("GROUP_ROSTER_UPDATE", OverrideAllElements, true)
 		if (IsRetail) then
 			frame:RegisterEvent("UNIT_PET", UpdatePet)
 		end
@@ -468,7 +470,7 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 
 	elseif (unit == "targettarget") then
 		-- Need an extra override event here so the ToT frame won't appear to lag behind on target changes.
-		frame:RegisterEvent("PLAYER_TARGET_CHANGED", UnitFrame.OverrideAllElements, true)
+		frame:RegisterEvent("PLAYER_TARGET_CHANGED", OverrideAllElements, true)
 		frame:EnableFrameFrequent(.5, "unit")
 
 	elseif (string_match(unit, "%w+target")) then

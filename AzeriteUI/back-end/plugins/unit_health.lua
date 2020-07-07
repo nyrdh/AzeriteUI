@@ -246,23 +246,24 @@ local UpdateColors = function(health, unit, min, max)
 		color = class and self.colors.class[class]
 	else
 
-		-- BUG: Non-existent '*target' or '*pet' units cause UnitThreatSituation() errors (thank you oUF!)
-		local threat
-		if (IsRetail) then
-			if ((not health.hideThreatSolo) or (IsInGroup() or IsInInstance())) then
-				local feedbackUnit = health.threatFeedbackUnit
-				if (feedbackUnit and (feedbackUnit ~= unit) and UnitExists(feedbackUnit)) then
-					threat = UnitThreatSituation(feedbackUnit, unit)
-				else
-					threat = UnitThreatSituation(unit)
+		if (health.colorThreat) then
+			-- BUG: Non-existent '*target' or '*pet' units cause UnitThreatSituation() errors (thank you oUF!)
+			local threat
+			if (IsRetail) then
+				if ((not health.hideThreatSolo) or (IsInGroup() or IsInInstance())) then
+					local feedbackUnit = health.threatFeedbackUnit
+					if (feedbackUnit and (feedbackUnit ~= unit) and UnitExists(feedbackUnit)) then
+						threat = UnitThreatSituation(feedbackUnit, unit)
+					else
+						threat = UnitThreatSituation(unit)
+					end
 				end
 			end
-		end
-		if (health.colorThreat and threat) then 
-			color = self.colors.threat[threat]
-		end
-		
-		if (health.colorReaction and UnitReaction(unit, "player")) then
+			if (threat) then 
+				color = self.colors.threat[threat]
+			end
+
+		elseif (health.colorReaction and UnitReaction(unit, "player")) then
 			color = self.colors.reaction[UnitReaction(unit, "player")]
 		elseif (health.colorHealth) then 
 			color = self.colors.health
@@ -337,7 +338,9 @@ local UpdateTexCoords = function(health)
 		-- This might be at a tiny, tiny performance cost, 
 		-- but this whole function is only ever called when 
 		-- the Health bar's texcoords are manually changed. 
-		health:ForceUpdate()
+		if (UnitExists(health.unit)) then
+			health:ForceUpdate()
+		end
 	end
 end
 
@@ -695,5 +698,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 44)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 45)
 end 
