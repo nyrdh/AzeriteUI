@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.374-Alpha] 2020-07-14
+### Fixed
+- Bufftimers in certain retail quests and world quests (like "Show-Off" where you mount Cooper and score style points) should no longer bug out!
+
 ## [2.0.373-Alpha] 2020-07-07
 ### Changed
 - Restricting certain checks and updates done by unitframes and nameplates in an effort to increase the performance in large groups a bit.
