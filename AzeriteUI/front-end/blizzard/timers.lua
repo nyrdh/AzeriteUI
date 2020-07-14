@@ -128,7 +128,8 @@ Module.StyleTimer = function(self, frame, ignoreTextureFix)
 	end 
 end
 
-Module.StyleBuffTimer = function(self, timer)
+Module.StyleBuffTimer = function(self, timer, auraID)
+	local layout = self.layout
 
 	-- Iterate the timer pool for available timers
 	for i = 1, #self.buffTimers do
@@ -193,7 +194,7 @@ Module.GetBuffTimer = function(self, auraID)
 		return timer, false 
 	end
 
-	return self:StyleBuffTimer(timer)
+	return self:StyleBuffTimer(timer, auraID)
 end
 
 -----------------------------------------------------------------
