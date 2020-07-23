@@ -1346,67 +1346,58 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 
 	-- Mana Orb
 	-----------------------------------------------------------
-	-- Only create this for actual mana classes
-	local hasMana = (PlayerClass == "DRUID") or (PlayerClass == "HUNTER") 
-				 or (PlayerClass == "PALADIN") or (PlayerClass == "SHAMAN")
-				 or (PlayerClass == "MAGE") or (PlayerClass == "PRIEST") or (PlayerClass == "WARLOCK") 
+	local extraPower = backdrop:CreateOrb()
+	extraPower:SetStatusBarTexture(unpack(layout.ManaOrbTextures)) 
+	extraPower:Place(unpack(layout.ManaPlace))  
+	extraPower:SetSize(unpack(layout.ManaSize)) 
+	extraPower.frequent = true
+	extraPower.exclusiveResource = layout.ManaExclusiveResource or "MANA" 
+	self.ExtraPower = extraPower
+	self.ExtraPower.OverrideColor = layout.ManaOverridePowerColor
 
-	if hasMana then 
+	local extraPowerBg = extraPower:CreateBackdropTexture()
+	extraPowerBg:SetPoint(unpack(layout.ManaBackgroundPlace))
+	extraPowerBg:SetSize(unpack(layout.ManaBackgroundSize))
+	extraPowerBg:SetTexture(layout.ManaBackgroundTexture)
+	extraPowerBg:SetDrawLayer(unpack(layout.ManaBackgroundDrawLayer))
+	extraPowerBg:SetVertexColor(unpack(layout.ManaBackgroundColor)) 
+	self.ExtraPower.bg = extraPowerBg
 
-		local extraPower = backdrop:CreateOrb()
-		extraPower:SetStatusBarTexture(unpack(layout.ManaOrbTextures)) 
-		extraPower:Place(unpack(layout.ManaPlace))  
-		extraPower:SetSize(unpack(layout.ManaSize)) 
-		extraPower.frequent = true
-		extraPower.exclusiveResource = layout.ManaExclusiveResource or "MANA" 
-		self.ExtraPower = extraPower
-		self.ExtraPower.OverrideColor = layout.ManaOverridePowerColor
+	local extraPowerShade = extraPower:CreateTexture()
+	extraPowerShade:SetPoint(unpack(layout.ManaShadePlace))
+	extraPowerShade:SetSize(unpack(layout.ManaShadeSize)) 
+	extraPowerShade:SetTexture(layout.ManaShadeTexture)
+	extraPowerShade:SetDrawLayer(unpack(layout.ManaShadeDrawLayer))
+	extraPowerShade:SetVertexColor(unpack(layout.ManaShadeColor)) 
+	self.ExtraPower.Shade = extraPowerShade
+
+	local extraPowerFg = extraPower:CreateTexture()
+	extraPowerFg:SetPoint(unpack(layout.ManaForegroundPlace))
+	extraPowerFg:SetSize(unpack(layout.ManaForegroundSize))
+	extraPowerFg:SetDrawLayer(unpack(layout.ManaForegroundDrawLayer))
+	self.ExtraPower.Fg = extraPowerFg
+
+	-- Mana Value
+	local extraPowerVal = self.ExtraPower:CreateFontString()
+	extraPowerVal:SetPoint(unpack(layout.ManaValuePlace))
+	extraPowerVal:SetDrawLayer(unpack(layout.ManaValueDrawLayer))
+	extraPowerVal:SetJustifyH(layout.ManaValueJustifyH)
+	extraPowerVal:SetJustifyV(layout.ManaValueJustifyV)
+	extraPowerVal:SetFontObject(layout.ManaValueFont)
+	extraPowerVal:SetTextColor(unpack(layout.ManaValueColor))
+	self.ExtraPower.Value = extraPowerVal
 	
-		local extraPowerBg = extraPower:CreateBackdropTexture()
-		extraPowerBg:SetPoint(unpack(layout.ManaBackgroundPlace))
-		extraPowerBg:SetSize(unpack(layout.ManaBackgroundSize))
-		extraPowerBg:SetTexture(layout.ManaBackgroundTexture)
-		extraPowerBg:SetDrawLayer(unpack(layout.ManaBackgroundDrawLayer))
-		extraPowerBg:SetVertexColor(unpack(layout.ManaBackgroundColor)) 
-		self.ExtraPower.bg = extraPowerBg
-
-		local extraPowerShade = extraPower:CreateTexture()
-		extraPowerShade:SetPoint(unpack(layout.ManaShadePlace))
-		extraPowerShade:SetSize(unpack(layout.ManaShadeSize)) 
-		extraPowerShade:SetTexture(layout.ManaShadeTexture)
-		extraPowerShade:SetDrawLayer(unpack(layout.ManaShadeDrawLayer))
-		extraPowerShade:SetVertexColor(unpack(layout.ManaShadeColor)) 
-		self.ExtraPower.Shade = extraPowerShade
-
-		local extraPowerFg = extraPower:CreateTexture()
-		extraPowerFg:SetPoint(unpack(layout.ManaForegroundPlace))
-		extraPowerFg:SetSize(unpack(layout.ManaForegroundSize))
-		extraPowerFg:SetDrawLayer(unpack(layout.ManaForegroundDrawLayer))
-		self.ExtraPower.Fg = extraPowerFg
-
-		-- Mana Value
-		local extraPowerVal = self.ExtraPower:CreateFontString()
-		extraPowerVal:SetPoint(unpack(layout.ManaValuePlace))
-		extraPowerVal:SetDrawLayer(unpack(layout.ManaValueDrawLayer))
-		extraPowerVal:SetJustifyH(layout.ManaValueJustifyH)
-		extraPowerVal:SetJustifyV(layout.ManaValueJustifyV)
-		extraPowerVal:SetFontObject(layout.ManaValueFont)
-		extraPowerVal:SetTextColor(unpack(layout.ManaValueColor))
-		self.ExtraPower.Value = extraPowerVal
-		
-		local day = tonumber(date("%d"))
-		local month = tonumber(date("%m"))
-		if ((month >= 12) and (day >=15 )) or ((month <= 1) and (day <= 2)) then 
-			local winterVeilMana = extraPower:CreateTexture()
-			winterVeilMana:SetSize(unpack(layout.WinterVeilManaSize))
-			winterVeilMana:SetPoint(unpack(layout.WinterVeilManaPlace))
-			winterVeilMana:SetDrawLayer(unpack(layout.WinterVeilManaDrawLayer))
-			winterVeilMana:SetTexture(layout.WinterVeilManaTexture)
-			winterVeilMana:SetVertexColor(unpack(layout.WinterVeilManaColor))
-			self.ExtraPower.WinterVeil = winterVeilMana
-		end 
-
-	end
+	local day = tonumber(date("%d"))
+	local month = tonumber(date("%m"))
+	if ((month >= 12) and (day >=15 )) or ((month <= 1) and (day <= 2)) then 
+		local winterVeilMana = extraPower:CreateTexture()
+		winterVeilMana:SetSize(unpack(layout.WinterVeilManaSize))
+		winterVeilMana:SetPoint(unpack(layout.WinterVeilManaPlace))
+		winterVeilMana:SetDrawLayer(unpack(layout.WinterVeilManaDrawLayer))
+		winterVeilMana:SetTexture(layout.WinterVeilManaTexture)
+		winterVeilMana:SetVertexColor(unpack(layout.WinterVeilManaColor))
+		self.ExtraPower.WinterVeil = winterVeilMana
+	end 
 
 	-- Threat
 	-----------------------------------------------------------	
@@ -1482,30 +1473,26 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	threatPowerBg._owner = self.Power
 	threat.powerBg = threatPowerBg
 		
-	if (hasMana) then
-		
-		local threatManaFrame = backdrop:CreateFrame("Frame")
-		threatManaFrame:SetFrameLevel(backdrop:GetFrameLevel())
-		threatManaFrame:SetAllPoints(self.ExtraPower)
-		threatManaFrame:SetShown(self.ExtraPower:IsShown())
+	local threatManaFrame = backdrop:CreateFrame("Frame")
+	threatManaFrame:SetFrameLevel(backdrop:GetFrameLevel())
+	threatManaFrame:SetAllPoints(self.ExtraPower)
+	threatManaFrame:SetShown(self.ExtraPower:IsShown())
 
-		-- Hook the mana threat frame visibility to the mana orb
-		--self.ExtraPower:HookScript("OnShow", function() threatManaFrame:Show() end)
-		--self.ExtraPower:HookScript("OnHide", function() threatManaFrame:Hide() end)
-		hooksecurefunc(self.ExtraPower, "Show", function() threatManaFrame:Show() end)
-		hooksecurefunc(self.ExtraPower, "Hide", function() threatManaFrame:Hide() end)
-		hooksecurefunc(self.ExtraPower, "SetShown", function(_,isShown) threatManaFrame:SetShown(isShown) end)
+	-- Hook the mana threat frame visibility to the mana orb
+	--self.ExtraPower:HookScript("OnShow", function() threatManaFrame:Show() end)
+	--self.ExtraPower:HookScript("OnHide", function() threatManaFrame:Hide() end)
+	hooksecurefunc(self.ExtraPower, "Show", function() threatManaFrame:Show() end)
+	hooksecurefunc(self.ExtraPower, "Hide", function() threatManaFrame:Hide() end)
+	hooksecurefunc(self.ExtraPower, "SetShown", function(_,isShown) threatManaFrame:SetShown(isShown) end)
 
-		local threatMana = threatManaFrame:CreateTexture()
-		threatMana:SetDrawLayer(unpack(layout.ThreatManaDrawLayer))
-		threatMana:SetPoint(unpack(layout.ThreatManaPlace))
-		threatMana:SetSize(unpack(layout.ThreatManaSize))
-		threatMana:SetAlpha(layout.ThreatManaAlpha)
-		threatMana:SetTexture(layout.ThreatManaTexture)
-		threatMana._owner = self.ExtraPower
-		threat.mana = threatMana
-
-	end
+	local threatMana = threatManaFrame:CreateTexture()
+	threatMana:SetDrawLayer(unpack(layout.ThreatManaDrawLayer))
+	threatMana:SetPoint(unpack(layout.ThreatManaPlace))
+	threatMana:SetSize(unpack(layout.ThreatManaSize))
+	threatMana:SetAlpha(layout.ThreatManaAlpha)
+	threatMana:SetTexture(layout.ThreatManaTexture)
+	threatMana._owner = self.ExtraPower
+	threat.mana = threatMana
 
 	self.Threat = threat
 

@@ -357,7 +357,7 @@ Core.ApplyExperimentalFeatures = function(self)
 	end
 
 	-- Attempt to hide the UI in the rune mini-game
-	if (IsRetail) then
+	if (IsRetail) and (false) then
 
 		local updateTrackingEvent, onTrackingEvent, checkForActiveGame, findActiveBuffID, restoreUI
 		local isTracking, inGroup, inCombat, inInstance, stopReason
