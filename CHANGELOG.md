@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.375-Alpha] 2020-07-23
+### Fixed
+- Monks should finally get their mana orb back in retail. 
+- Neutral Pandaren no longer has to wait until they've chosen a faction to be able to use the micromenu without causing a bug. 
+
 ## [2.0.374-Alpha] 2020-07-14
 ### Fixed
 - Bufftimers in certain retail quests and world quests (like "Show-Off" where you mount Cooper and score style points) should no longer bug out!
