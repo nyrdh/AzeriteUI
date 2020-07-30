@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 94)
+local LibSecureButton = Wheel:Set("LibSecureButton", 97)
 if (not LibSecureButton) then
 	return
 end
@@ -323,24 +323,15 @@ local OnUpdate = function(self, elapsed)
 
 	-- Cooldown count
 	if (self.cooldownTimer <= 0) then 
+
 		local Cooldown = self.Cooldown 
+		local ChargeCooldown = self.ChargeCooldown
 		local CooldownCount = self.CooldownCount
-		if Cooldown.active then 
 
-			local start, duration
-			if (Cooldown.currentCooldownType == COOLDOWN_TYPE_NORMAL) then 
-				local action = self.buttonAction
-				start, duration = GetActionCooldown(action)
-
-			elseif (Cooldown.currentCooldownType == COOLDOWN_TYPE_LOSS_OF_CONTROL) then
-				local action = self.buttonAction
-				start, duration = GetActionLossOfControlCooldown(action)
-
-			end 
-
+		if (ChargeCooldown.active) then
 			if CooldownCount then 
-				if ((start > 0) and (duration > 1.5)) then
-					CooldownCount:SetFormattedText(formatCooldownTime(duration - GetTime() + start))
+				if ((ChargeCooldown.chargeStart > 0) and (ChargeCooldown.chargeDuration > 1.5)) then
+					CooldownCount:SetFormattedText(formatCooldownTime(ChargeCooldown.chargeDuration - GetTime() + ChargeCooldown.chargeStart))
 					if (not CooldownCount:IsShown()) then 
 						CooldownCount:Show()
 					end
@@ -351,6 +342,30 @@ local OnUpdate = function(self, elapsed)
 					end
 				end  
 			end 
+
+		elseif (Cooldown.active) then 
+			--local start, duration
+			--if (Cooldown.currentCooldownType == COOLDOWN_TYPE_NORMAL) then 
+			--	local action = self.buttonAction
+			--	start, duration = GetActionCooldown(action)
+			--elseif (Cooldown.currentCooldownType == COOLDOWN_TYPE_LOSS_OF_CONTROL) then
+			--	local action = self.buttonAction
+			--	start, duration = GetActionLossOfControlCooldown(action)
+			--end 
+			if CooldownCount then 
+				if ((start > 0) and (duration > 1.5)) then
+					CooldownCount:SetFormattedText(formatCooldownTime(Cooldown.duration - GetTime() + Cooldown.start))
+					if (not CooldownCount:IsShown()) then 
+						CooldownCount:Show()
+					end
+				else 
+					if (CooldownCount:IsShown()) then 
+						CooldownCount:SetText("")
+						CooldownCount:Hide()
+					end
+				end  
+			end 
+
 		else
 			if (CooldownCount and CooldownCount:IsShown()) then 
 				CooldownCount:SetText("")
@@ -648,6 +663,14 @@ local SetCooldown = function(cooldown, start, duration, enable, forceShowDrawEdg
 		cooldown.active = true
 	else
 		cooldown.active = nil
+		cooldown.start = nil
+		cooldown.duration = nil
+		cooldown.modRate = nil
+		cooldown.charges = nil
+		cooldown.maxCharges = nil
+		cooldown.chargeStart = nil
+		cooldown.chargeDuration = nil
+		cooldown.chargeModRate = nil
 		cooldown:Clear()
 	end
 end
@@ -907,7 +930,7 @@ end
 
 ActionButton.UpdateCooldown = function(self)
 	local Cooldown = self.Cooldown
-	if Cooldown then
+	if (Cooldown) then
 		local locStart, locDuration = GetActionLossOfControlCooldown(self.buttonAction)
 		local start, duration, enable, modRate = GetActionCooldown(self.buttonAction)
 		local charges, maxCharges, chargeStart, chargeDuration, chargeModRate = GetActionCharges(self.buttonAction)
@@ -915,12 +938,15 @@ ActionButton.UpdateCooldown = function(self)
 
 		if ((locStart + locDuration) > (start + duration)) then
 
-			if Cooldown.currentCooldownType ~= COOLDOWN_TYPE_LOSS_OF_CONTROL then
+			if (Cooldown.currentCooldownType ~= COOLDOWN_TYPE_LOSS_OF_CONTROL) then
 				Cooldown:SetEdgeTexture(EDGE_LOC_TEXTURE)
 				Cooldown:SetSwipeColor(0.17, 0, 0)
 				Cooldown:SetHideCountdownNumbers(true)
 				Cooldown.currentCooldownType = COOLDOWN_TYPE_LOSS_OF_CONTROL
 			end
+			Cooldown.start = locStart
+			Cooldown.duration = locDuration
+			Cooldown.modRate = modRate
 			SetCooldown(Cooldown, locStart, locDuration, true, true, modRate)
 
 		else
@@ -937,32 +963,41 @@ ActionButton.UpdateCooldown = function(self)
 			end
 
 			local ChargeCooldown = self.ChargeCooldown
-			if ChargeCooldown then 
+			if (ChargeCooldown) then 
 				if (charges and maxCharges and (charges > 0) and (charges < maxCharges)) and not((not chargeStart) or (chargeStart == 0)) then
-
 					-- Set the spellcharge cooldown
 					--cooldown:SetDrawBling(cooldown:GetEffectiveAlpha() > 0.5)
 					SetCooldown(ChargeCooldown, chargeStart, chargeDuration, true, true, chargeModRate)
+					ChargeCooldown.charges = charges
+					ChargeCooldown.maxCharges = maxCharges
+					ChargeCooldown.chargeStart = chargeStart
+					ChargeCooldown.chargeDuration = chargeDuration
+					ChargeCooldown.chargeModRate = chargeModRate
 					hasChargeCooldown = true 
 				else
-					ChargeCooldown.active = nil
 					ChargeCooldown:Hide()
 				end
 			end 
 
 			if (hasChargeCooldown) then 
-				SetCooldown(ChargeCooldown, 0, 0, false)
+				Cooldown.start = nil
+				Cooldown.duration = nil
+				Cooldown.modRate = nil
+				SetCooldown(Cooldown, 0, 0, false)
 			else 
+				Cooldown.start = start
+				Cooldown.duration = duration
+				Cooldown.modRate = modRate
 				SetCooldown(Cooldown, start, duration, enable, false, modRate)
 			end 
 		end
 
-		if hasChargeCooldown then 
-			if self.PostUpdateChargeCooldown then 
+		if (hasChargeCooldown) then 
+			if (self.PostUpdateChargeCooldown) then 
 				return self:PostUpdateChargeCooldown(self.ChargeCooldown)
 			end 
 		else 
-			if self.PostUpdateCooldown then 
+			if (self.PostUpdateCooldown) then 
 				return self:PostUpdateCooldown(self.Cooldown)
 			end 
 		end 
@@ -975,41 +1010,55 @@ ActionButton.UpdateCount = function(self)
 		local count
 		local action = self.buttonAction
 		local actionType, actionID = GetActionInfo(action)
-		if (actionType == "spell") or (actionType == "macro") then
-			if (actionType == "macro") then
-				actionID = GetMacroSpell(actionID)
-				if (not actionID) then
-					-- Only show this count on actions that
-					-- have more than a single charge,
-					-- or we'll have shapeshifts, trinkets
-					-- and all sorts of stuff showing "1".
-					local numActions = GetActionCount(action)
-					if (numActions > 1) then
-						count = numActions
+		if (IsClassic) then
+			if (actionType == "spell") or (actionType == "macro") then
+				if (actionType == "macro") then
+					actionID = GetMacroSpell(actionID)
+					if (not actionID) then
+						-- Only show this count on actions that
+						-- have more than a single charge,
+						-- or we'll have shapeshifts, trinkets
+						-- and all sorts of stuff showing "1".
+						local numActions = GetActionCount(action)
+						if (numActions > 1) then
+							count = numActions
+						end
+					end
+				end
+				if (IsClassic) then
+					local reagentID = LibSecureButton:GetReagentBySpellID(actionID)
+					if reagentID then
+						count = GetItemCount(reagentID)
+					end
+				end
+			else
+				if (IsItemAction(action) and (IsConsumableAction(action) or IsStackableAction(action))) then
+					count = GetActionCount(action)
+				else
+					local charges, maxCharges, chargeStart, chargeDuration, chargeModRate = GetActionCharges(action)
+					if (charges and maxCharges and (maxCharges > 1) and (charges > 0)) then
+						count = charges
 					end
 				end
 			end
-			if (IsClassic) then
-				local reagentID = LibSecureButton:GetReagentBySpellID(actionID)
-				if reagentID then
-					count = GetItemCount(reagentID)
-				end
-			end
 		else
-			if (IsItemAction(action) and (IsConsumableAction(action) or IsStackableAction(action))) then
-				count = GetActionCount(action)
-			else
-				local charges, maxCharges, chargeStart, chargeDuration, chargeModRate = GetActionCharges(action)
-				if (charges and maxCharges and (maxCharges > 1) and (charges > 0)) then
-					count = charges
+			if (HasAction(action)) then 
+				if (IsConsumableAction(action) or IsStackableAction(action)) then
+					count = GetActionCount(action)
+				else
+					local charges, maxCharges, chargeStart, chargeDuration, chargeModRate = GetActionCharges(action)
+					if (charges and maxCharges and (maxCharges > 1) and (charges > 0)) then
+						count = charges
+					end
 				end
-			end
+		
+			end 
 		end
-		if count and (count > (self.maxDisplayCount or 9999)) then
+		if (count) and (count > (self.maxDisplayCount or 9999)) then
 			count = "*"
 		end
 		Count:SetText(count or "")
-		if self.PostUpdateCount then 
+		if (self.PostUpdateCount) then 
 			return self:PostUpdateCount(count)
 		end 
 	end 

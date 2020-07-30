@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.376-Alpha] 2020-07-30
+### Fixed
+- Retail spell charge cooldowns are now in place!
+
 ## [2.0.375-Alpha] 2020-07-23
 ### Fixed
 - Monks should finally get their mana orb back in retail. 
