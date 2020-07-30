@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 97)
+local LibSecureButton = Wheel:Set("LibSecureButton", 98)
 if (not LibSecureButton) then
 	return
 end
@@ -324,14 +324,14 @@ local OnUpdate = function(self, elapsed)
 	-- Cooldown count
 	if (self.cooldownTimer <= 0) then 
 
-		local Cooldown = self.Cooldown 
-		local ChargeCooldown = self.ChargeCooldown
 		local CooldownCount = self.CooldownCount
+		if (CooldownCount) then
+			local Charge = self.ChargeCooldown
+			local Cooldown = self.Cooldown 
 
-		if (ChargeCooldown.active) then
-			if CooldownCount then 
-				if ((ChargeCooldown.chargeStart > 0) and (ChargeCooldown.chargeDuration > 1.5)) then
-					CooldownCount:SetFormattedText(formatCooldownTime(ChargeCooldown.chargeDuration - GetTime() + ChargeCooldown.chargeStart))
+			if (Charge.active) then
+				if (Charge.chargeStart and Charge.chargeDuration) and ((Charge.chargeStart > 0) and (Charge.chargeDuration > 1.5)) then
+					CooldownCount:SetFormattedText(formatCooldownTime(Charge.chargeDuration - GetTime() + Charge.chargeStart))
 					if (not CooldownCount:IsShown()) then 
 						CooldownCount:Show()
 					end
@@ -341,19 +341,9 @@ local OnUpdate = function(self, elapsed)
 						CooldownCount:Hide()
 					end
 				end  
-			end 
 
-		elseif (Cooldown.active) then 
-			--local start, duration
-			--if (Cooldown.currentCooldownType == COOLDOWN_TYPE_NORMAL) then 
-			--	local action = self.buttonAction
-			--	start, duration = GetActionCooldown(action)
-			--elseif (Cooldown.currentCooldownType == COOLDOWN_TYPE_LOSS_OF_CONTROL) then
-			--	local action = self.buttonAction
-			--	start, duration = GetActionLossOfControlCooldown(action)
-			--end 
-			if CooldownCount then 
-				if ((start > 0) and (duration > 1.5)) then
+			elseif (Cooldown.active) then 
+				if (Cooldown.start and Cooldown.duration) and ((Cooldown.start > 0) and (Cooldown.duration > 1.5)) then
 					CooldownCount:SetFormattedText(formatCooldownTime(Cooldown.duration - GetTime() + Cooldown.start))
 					if (not CooldownCount:IsShown()) then 
 						CooldownCount:Show()
@@ -364,14 +354,14 @@ local OnUpdate = function(self, elapsed)
 						CooldownCount:Hide()
 					end
 				end  
-			end 
 
-		else
-			if (CooldownCount and CooldownCount:IsShown()) then 
-				CooldownCount:SetText("")
-				CooldownCount:Hide()
-			end
-		end 
+			else
+				if (CooldownCount and CooldownCount:IsShown()) then 
+					CooldownCount:SetText("")
+					CooldownCount:Hide()
+				end
+			end 
+		end
 
 		self.cooldownTimer = .1
 	end 

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.377-Alpha] 2020-07-30
+### Fixed
+- Fixed the wrong upvalue in today's previous update. You should no longer get a bug everytime something goes on full cooldown.
+
 ## [2.0.376-Alpha] 2020-07-30
 ### Fixed
 - Retail spell charge cooldowns are now in place!
