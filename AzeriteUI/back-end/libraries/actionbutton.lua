@@ -431,6 +431,7 @@ local OnUpdatePet = function(self, elapsed)
 	end
 end
 
+-- Actual Event Handler
 local UpdateActionButton = function(self, event, ...)
 	local arg1, arg2 = ...
 

@@ -1,4 +1,4 @@
-local LibCast = Wheel:Set("LibCast", 8)
+local LibCast = Wheel:Set("LibCast", 9)
 if (not LibCast) then
 	return
 end
@@ -490,6 +490,9 @@ LibCast.OnEvent = function(self, event, unit, ...)
 		self:SendMessage("GP_SPELL_CAST_START", unit)
 
 	elseif (event == "UNIT_SPELLCAST_FAILED") then
+		self:SendMessage("GP_SPELL_CAST_FAILED_QUIET", unit)
+
+	elseif (event == "UNIT_SPELLCAST_FAILED") then
 		self:SendMessage("GP_SPELL_CAST_FAILED", unit)
 
 	elseif (event == "UNIT_SPELLCAST_STOP") then
@@ -503,6 +506,12 @@ LibCast.OnEvent = function(self, event, unit, ...)
 
 	elseif (event == "UNIT_SPELLCAST_INTERRUPTED") then
 		self:SendMessage("GP_SPELL_CAST_INTERRUPTED", unit)
+
+	elseif (event == "UNIT_SPELLCAST_INTERRUPTIBLE") then
+		self:SendMessage("GP_SPELL_CAST_INTERRUPTIBLE", unit)
+
+	elseif (event == "UNIT_SPELLCAST_NOT_INTERRUPTIBLE") then
+		self:SendMessage("GP_SPELL_CAST_NOT_INTERRUPTIBLE", unit)
 
 	elseif (event == "UNIT_SPELLCAST_DELAYED") then
 		self:SendMessage("GP_SPELL_CAST_DELAYED", unit)
@@ -543,12 +552,16 @@ if (IsRetail) then
 		-- These are for all units in retail
 		self:RegisterEvent("UNIT_SPELLCAST_START", "OnEvent")
 		self:RegisterEvent("UNIT_SPELLCAST_FAILED", "OnEvent")
+		self:RegisterEvent("UNIT_SPELLCAST_FAILED_QUIET", "OnEvent")
 		self:RegisterEvent("UNIT_SPELLCAST_STOP", "OnEvent")
 		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED", "OnEvent")
+		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE", "OnEvent")
+		self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", "OnEvent")
 		self:RegisterEvent("UNIT_SPELLCAST_DELAYED", "OnEvent")
 		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START", "OnEvent")
 		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", "OnEvent")
 		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", "OnEvent")
+
 	end
 end
 

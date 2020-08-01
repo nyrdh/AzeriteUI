@@ -34,6 +34,8 @@ local DAY, HOUR, MINUTE = 86400, 3600, 60
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 
+local playerGUID = UnitGUID("player")
+
 -- Define it here so it can call itself later on
 local Update
 
@@ -160,7 +162,13 @@ local updateSpellQueueOrientation = function(element)
 end
 
 local updateSpellQueueValue = function(element)
-	local ms = tonumber(GetCVar("SpellQueueWindow")) or 400 -- that large value is WoW's default
+	element.spellQueueWindow = tonumber(GetCVar("SpellQueueWindow")) or 400 -- that large value is WoW's default
+	return element.spellQueueWindow
+end
+
+local updateSpellQueueDisplay = function(element)
+
+	local ms = updateSpellQueueValue(element)
 	local max = element.total or element.max
 
 	-- Don't allow values above max, it'd look wrong
@@ -248,7 +256,7 @@ local OnUpdate = function(element, elapsed)
 			end
 		end
 		if (element.SpellQueue) and (not element.disableSpellQueue) then 
-			updateSpellQueueValue(element)
+			updateSpellQueueDisplay(element)
 		end 
 		element.duration = duration
 		element:SetValue(duration)
@@ -279,7 +287,7 @@ local OnUpdate = function(element, elapsed)
 			end
 		end
 		if (element.SpellQueue) and (not element.disableSpellQueue) then 
-			updateSpellQueueValue(element)
+			updateSpellQueueDisplay(element)
 		end 
 		element.duration = duration
 		element:SetValue(duration)
@@ -328,7 +336,7 @@ Update = function(self, event, unit, ...)
 		element:PreUpdate(unit)
 	end
 
-	if (event == "UNIT_SPELLCAST_START") or (event == "GP_SPELL_CAST_START") then
+	if (event == "GP_SPELL_CAST_START") then
 		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible = LibCast:UnitCastingInfo(unit)
 		if (name) then
 			local now = GetTime()
@@ -362,7 +370,7 @@ Update = function(self, event, unit, ...)
 			end
 			if (element.SpellQueue) and (not element.disableSpellQueue) then 
 				updateSpellQueueOrientation(element)
-				updateSpellQueueValue(element)
+				updateSpellQueueDisplay(element)
 			end 
 			element:Show()
 			element:SetScript("OnUpdate", OnUpdate)
@@ -372,7 +380,12 @@ Update = function(self, event, unit, ...)
 			element:SetScript("OnUpdate", nil)
 		end
 		
-	elseif (event == "UNIT_SPELLCAST_FAILED") or (event == "GP_SPELL_CAST_FAILED") then
+	elseif (event == "GP_SPELL_CAST_FAILED") then
+
+		local timeLeft
+		if (element.timeToHold) then
+			timeLeft = GetTime() - (element.starttime or 0) -- should be there
+		end
 		
 		clear(element)
 		element.tradeskill = nil
@@ -386,11 +399,21 @@ Update = function(self, event, unit, ...)
 		end 
 
 		if (element.timeToHold) then
-			element.failedMessageTimer = element.timeToHold
-			local msg = element.Failed or element.Value or element.Name
-			if (msg) then 
-				msg:SetText(utf8sub(L_FAILED, 32, true)) 
-			end 
+			local spellQueueWindow = updateSpellQueueValue(element) / 1e3 -- get value in seconds
+			if (timeLeft >= spellQueueWindow) then
+				element.failedMessageTimer = element.timeToHold
+				local msg = element.Failed or element.Value or element.Name
+				if (msg) then 
+					msg:SetText(utf8sub(L_FAILED, 32, true)) 
+				end 
+			else
+				element.failedMessageTimer = nil
+				local msg = element.Failed or element.Value or element.Name
+				if (msg) then 
+					msg:SetText("") 
+				end 
+			end
+
 		else
 			element:Hide()
 			element:SetScript("OnUpdate", nil)
@@ -400,8 +423,7 @@ Update = function(self, event, unit, ...)
 			end 
 		end
 		
-	elseif (event == "UNIT_SPELLCAST_STOP") or (event == "UNIT_SPELLCAST_CHANNEL_STOP") 
-		or (event == "GP_SPELL_CAST_SUCCESS") or (event == "GP_SPELL_CAST_STOP") or (event == "GP_SPELL_CAST_CHANNEL_STOP") then
+	elseif (event == "GP_SPELL_CAST_SUCCESS") or (event == "GP_SPELL_CAST_STOP") or (event == "GP_SPELL_CAST_CHANNEL_STOP") then
 
 		clear(element)
 		element:Hide()
@@ -422,7 +444,12 @@ Update = function(self, event, unit, ...)
 			element.Shield:Hide() 
 		end 
 		
-	elseif (event == "UNIT_SPELLCAST_INTERRUPTED") or (event == "GP_SPELL_CAST_INTERRUPTED") then
+	elseif (event == "GP_SPELL_CAST_INTERRUPTED") then
+
+		local timeLeft
+		if (element.timeToHold) then
+			timeLeft = GetTime() - (element.starttime or 0) -- should be there
+		end
 
 		clear(element)
 		element.casting = nil
@@ -436,11 +463,22 @@ Update = function(self, event, unit, ...)
 		end 
 
 		if (element.timeToHold) then
-			element.failedMessageTimer = element.timeToHold
-			local msg = element.Failed or element.Value or element.Name
-			if (msg) then 
-				msg:SetText(utf8sub(L_INTERRUPTED, 32, true)) 
-			end 
+
+			local spellQueueWindow = updateSpellQueueValue(element) / 1e3 -- get value in seconds
+			if (timeLeft >= spellQueueWindow) then
+				element.failedMessageTimer = element.timeToHold
+				local msg = element.Failed or element.Value or element.Name
+				if (msg) then 
+					msg:SetText(utf8sub(L_INTERRUPTED, 32, true)) 
+				end 
+			else
+				element.failedMessageTimer = nil
+				local msg = element.Failed or element.Value or element.Name
+				if (msg) then 
+					msg:SetText("") 
+				end 
+			end
+
 		else
 			element:Hide()
 			element:SetScript("OnUpdate", nil)
@@ -453,7 +491,27 @@ Update = function(self, event, unit, ...)
 			end 
 		end 
 
-	elseif (event == "UNIT_SPELLCAST_DELAYED") or (event == "GP_SPELL_CAST_DELAYED") then
+	elseif (event == "GP_SPELL_CAST_INTERRUPTIBLE") then 
+		element.notInterruptible = nil
+		if (element.Shield) then 
+			if (unitGUID ~= playerGUID) then
+				element.Shield:Show()
+			else
+				element.Shield:Hide()
+			end
+		end
+
+	elseif (event == "GP_SPELL_CAST_NOT_INTERRUPTIBLE") then 
+		element.notInterruptible = true
+		if (element.Shield) then 
+			if (unitGUID ~= playerGUID) then
+				element.Shield:Show()
+			else
+				element.Shield:Hide()
+			end
+		end
+
+	elseif (event == "GP_SPELL_CAST_DELAYED") then
 		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible = LibCast:UnitCastingInfo(unit)
 		if (not startTime) or (not element.duration) then 
 			return 
@@ -468,7 +526,7 @@ Update = function(self, event, unit, ...)
 		element.duration = duration
 		element:SetValue(duration)
 		
-	elseif (event == "UNIT_SPELLCAST_CHANNEL_START") or (event == "GP_SPELL_CAST_CHANNEL_START") then	
+	elseif (event == "GP_SPELL_CAST_CHANNEL_START") then	
 		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible = LibCast:UnitChannelInfo(unit)
 		if (name) then
 			local max = endTime - startTime
@@ -500,7 +558,7 @@ Update = function(self, event, unit, ...)
 			end
 			if (element.SpellQueue) and (not element.disableSpellQueue) then 
 				updateSpellQueueOrientation(element)
-				updateSpellQueueValue(element)
+				updateSpellQueueDisplay(element)
 			end 
 			element:Show()
 			element:SetScript("OnUpdate", OnUpdate)
@@ -515,7 +573,7 @@ Update = function(self, event, unit, ...)
 			end 
 		end
 		
-	elseif (event == "UNIT_SPELLCAST_CHANNEL_UPDATE") or (event == "GP_SPELL_CAST_CHANNEL_UPDATE") then
+	elseif (event == "GP_SPELL_CAST_CHANNEL_UPDATE") then
 		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible = LibCast:UnitChannelInfo(unit)
 		if (not name) or (not element.duration) then 
 			return 
@@ -527,26 +585,20 @@ Update = function(self, event, unit, ...)
 		element.max = endTime - startTime
 
 		if (element.SpellQueue) and (not element.disableSpellQueue) then 
-			updateSpellQueueValue(element)
+			updateSpellQueueDisplay(element)
 		end 
 	
 		element:SetMinMaxValues(0, element.max)
 		element:SetValue(duration)
 	
 	elseif (event == "Forced") or (event == "PLAYER_TARGET_CHANGED") then
+
 		if (LibCast:UnitCastingInfo(unit)) then
-			if (unit == "player") then 
-				return Update(self, "UNIT_SPELLCAST_START", unit)
-			else 
-				return Update(self, "GP_SPELL_CAST_START", unitGUID)
-			end 
+			return Update(self, "GP_SPELL_CAST_START", unitGUID)
 		elseif (LibCast:UnitChannelInfo(unit)) then
-			if (unit == "player") then 
-				return Update(self, "UNIT_SPELLCAST_CHANNEL_START", unit)
-			else 
-				return Update(self, "GP_SPELL_CAST_CHANNEL_START", unitGUID)
-			end 
+			return Update(self, "GP_SPELL_CAST_CHANNEL_START", unitGUID)
 		end
+
 		if (event == "PLAYER_TARGET_CHANGED") or not(element.casting or element.channeling or element.tradeskill or element.failedMessageTimer) then 
 			clear(element)
 			element:Hide()
@@ -589,7 +641,7 @@ local Enable = function(self)
 		if (element.SpellQueue) then
 			element.SpellQueue.ForceUpdate = function()
 				updateSpellQueueOrientation(element)
-				updateSpellQueueValue(element)
+				updateSpellQueueDisplay(element)
 			end
 		end
 
@@ -602,6 +654,8 @@ local Enable = function(self)
 		self:RegisterMessage("GP_SPELL_CAST_FAILED", Proxy)
 		self:RegisterMessage("GP_SPELL_CAST_SUCCESS", Proxy)
 		self:RegisterMessage("GP_SPELL_CAST_INTERRUPTED", Proxy)
+		self:RegisterMessage("GP_SPELL_CAST_INTERRUPTIBLE", Proxy)
+		self:RegisterMessage("GP_SPELL_CAST_NOT_INTERRUPTIBLE", Proxy)
 		self:RegisterMessage("GP_SPELL_CAST_DELAYED", Proxy)
 		self:RegisterMessage("GP_SPELL_CAST_CHANNEL_START", Proxy)
 		self:RegisterMessage("GP_SPELL_CAST_CHANNEL_UPDATE", Proxy)
@@ -616,22 +670,14 @@ end
 local Disable = function(self)
 	local element = self.Cast
 	if element then
-
-		self:UnregisterEvent("UNIT_SPELLCAST_START", Proxy)
-		self:UnregisterEvent("UNIT_SPELLCAST_FAILED", Proxy)
-		self:UnregisterEvent("UNIT_SPELLCAST_STOP", Proxy)
-		self:UnregisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", Proxy)
-		self:UnregisterEvent("UNIT_SPELLCAST_DELAYED", Proxy)
-		self:UnregisterEvent("UNIT_SPELLCAST_CHANNEL_START", Proxy)
-		self:UnregisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", Proxy)
-		self:UnregisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", Proxy)
-		self:UnregisterEvent("PLAYER_TARGET_CHANGED", Proxy)
-
+		self:UnregisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
 		self:UnregisterMessage("GP_SPELL_CAST_START", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_STOP", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_FAILED", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_SUCCESS", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_INTERRUPTED", Proxy)
+		self:UnregisterMessage("GP_SPELL_CAST_INTERRUPTIBLE", Proxy)
+		self:UnregisterMessage("GP_SPELL_CAST_NOT_INTERRUPTIBLE", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_DELAYED", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_CHANNEL_START", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_CHANNEL_UPDATE", Proxy)
@@ -645,5 +691,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 43)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 44)
 end 

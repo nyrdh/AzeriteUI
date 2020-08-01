@@ -463,6 +463,8 @@ local StyleSmallFrame = function(self, unit, id, layout, ...)
 	health:Place(unpack(layout.HealthPlace))
 	health:SetSmoothingMode(layout.HealthSmoothingMode or "bezier-fast-in-slow-out") 
 	health:SetSmoothingFrequency(layout.HealthSmoothingFrequency or .5) 
+	health.threatFeedbackUnit = "player"
+	health.colorThreat = layout.HealthColorThreat -- color non-friendly by threat
 	health.colorTapped = layout.HealthColorTapped  -- color tap denied units 
 	health.colorDisconnected = layout.HealthColorDisconnected -- color disconnected units
 	health.colorClass = layout.HealthColorClass -- color players by class 
@@ -616,6 +618,8 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	health:SetSparkMap(layout.HealthBarSparkMap) 
 	health:SetStatusBarTexture(layout.HealthBarTexture)
 	health:SetSmartSmoothing(true)
+	health.threatFeedbackUnit = "player"
+	health.colorThreat = layout.HealthColorThreat -- color non-friendly by threat
 	health.colorTapped = layout.HealthColorTapped  -- color tap denied units 
 	health.colorDisconnected = layout.HealthColorDisconnected -- color disconnected units
 	health.colorClass = layout.HealthColorClass -- color players by class 
@@ -952,6 +956,8 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	health:SetFrameLevel(health:GetFrameLevel() + 2)
 	health:Place(unpack(layout.HealthPlace))
 	health:SetSmartSmoothing(true)
+	health.threatFeedbackUnit = "player"
+	health.colorThreat = layout.HealthColorThreat -- color non-friendly by threat
 	health.colorTapped = layout.HealthColorTapped  -- color tap denied units 
 	health.colorDisconnected = layout.HealthColorDisconnected -- color disconnected units
 	health.colorClass = layout.HealthColorClass -- color players by class 
@@ -1258,6 +1264,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	health:SetFrameLevel(health:GetFrameLevel() + 2)
 	health:Place(unpack(layout.HealthPlace))
 	health:SetSmartSmoothing(true)
+	health.colorThreat = layout.HealthColorThreat -- color non-friendly by threat
 	health.colorTapped = layout.HealthColorTapped  -- color tap denied units 
 	health.colorDisconnected = layout.HealthColorDisconnected -- color disconnected units
 	health.colorClass = layout.HealthColorClass -- color players by class 
@@ -1825,6 +1832,8 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	health:SetFrameLevel(health:GetFrameLevel() + 2)
 	health:Place(unpack(layout.HealthPlace))
 	health:SetSmartSmoothing(true)
+	health.threatFeedbackUnit = "player"
+	health.colorThreat = layout.HealthColorThreat -- color non-friendly by threat
 	health.colorTapped = layout.HealthColorTapped  -- color tap denied units 
 	health.colorDisconnected = layout.HealthColorDisconnected -- color disconnected units
 	health.colorClass = layout.HealthColorClass -- color players by class 

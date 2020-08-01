@@ -245,32 +245,33 @@ local UpdateColors = function(health, unit, min, max)
 		local _, class = UnitClass("player")
 		color = class and self.colors.class[class]
 	else
-
 		if (health.colorThreat) then
 			-- BUG: Non-existent '*target' or '*pet' units cause UnitThreatSituation() errors (thank you oUF!)
 			local threat
 			if (IsRetail) then
 				if ((not health.hideThreatSolo) or (IsInGroup() or IsInInstance())) then
 					local feedbackUnit = health.threatFeedbackUnit
-					if (feedbackUnit and (feedbackUnit ~= unit) and UnitExists(feedbackUnit)) then
+					if (not UnitIsFriend("player", unit)) and (feedbackUnit and (feedbackUnit ~= unit) and UnitExists(feedbackUnit)) then
 						threat = UnitThreatSituation(feedbackUnit, unit)
 					else
 						threat = UnitThreatSituation(unit)
 					end
 				end
 			end
-			if (threat) then 
+			if (threat) and (self.colors.threat[threat]) then 
 				color = self.colors.threat[threat]
 			end
-
-		elseif (health.colorReaction and UnitReaction(unit, "player")) then
-			color = self.colors.reaction[UnitReaction(unit, "player")]
-		elseif (health.colorHealth) then 
-			color = self.colors.health
+		end
+		if (not color) then
+			if (health.colorReaction and UnitReaction(unit, "player")) then
+				color = self.colors.reaction[UnitReaction(unit, "player")]
+			elseif (health.colorHealth) then 
+				color = self.colors.health
+			end
 		end
 	end
 
-	if color then 
+	if (color) then 
 		if (health.colorSmooth) then 
 			r, g, b = gradient(min, max, 1,0,0, color[1], color[2], color[3], color[1], color[2], color[3])
 		else 
@@ -280,7 +281,7 @@ local UpdateColors = function(health, unit, min, max)
 		health.Preview:SetStatusBarColor(r, g, b)
 	end 
 	
-	if health.PostUpdateColor then 
+	if (health.PostUpdateColor) then 
 		health:PostUpdateColor(unit, min, max, r, g, b)
 	end 
 end
@@ -574,7 +575,7 @@ local Enable = function(self)
 	local unit = self.unit
 	local health = self.Health
 
-	if health then
+	if (health) then
 		health._owner = self
 		health.unit = unit
 		health.guid = nil
@@ -591,7 +592,7 @@ local Enable = function(self)
 		health.PostUpdateTexCoord = UpdateTexCoords
 
 		-- Health events
-		if health.frequent then
+		if (health.frequent) then
 			self:RegisterEvent("UNIT_HEALTH_FREQUENT", Proxy)
 		else
 			self:RegisterEvent("UNIT_HEALTH", Proxy)
@@ -602,15 +603,27 @@ local Enable = function(self)
 		self:RegisterEvent("UNIT_CONNECTION", Proxy)
 		self:RegisterEvent("UNIT_FACTION", Proxy) 
 
-		if (IsRetail) then
+		if (IsClassic) then
+
+			-- TODO:
+			-- Add in threat coloring, but wait until 
+			-- we can make a unified back-end for all frames.
+			-- (ETA: starting the work first full work week of August 2020)
+
+		elseif (IsRetail) then
+
 			-- Predict events
 			self:RegisterEvent("UNIT_HEAL_PREDICTION", Proxy)
 
 			-- Absorb events
 			self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", Proxy)
 			self:RegisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED", Proxy)
+
+			-- Threat coloring events
+			self:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE", Proxy)
+			self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", Proxy)
+
 		end
-	
 
 		if (not health.Preview) then 
 			local preview = health:CreateStatusBar()
@@ -654,7 +667,7 @@ end
 
 local Disable = function(self)
 	local health = self.Health
-	if health then 
+	if (health) then 
 		self:UnregisterEvent("UNIT_HEALTH_FREQUENT", Proxy)
 		self:UnregisterEvent("UNIT_HEALTH", Proxy)
 		self:UnregisterEvent("UNIT_MAXHEALTH", Proxy)
@@ -698,5 +711,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 45)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 46)
 end 

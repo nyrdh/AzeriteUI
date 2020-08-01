@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.378-Alpha] 2020-08-01
+### Added
+- Protected casts should now have a shielded nameplate castbar.
+
+### Changed
+- Actionbuttons above the 7 default ones now fill towards the right in an up and down zig zag manner, instead of by rows as previously. This will probably mess up the bars for a lot of people. I'm fine with that, as it's a better choice to keep the bars this way, letting them grow as a solid unit from left to right.
+- Actionbuttons will now show empty slots only for single empty slots which has a filled button to both its sides, while other empty slots will be hidden.
+- You should see less "Failed" messages for spells that are interrupted within the spell queue window and actually completed despite the interruption.
+- Healthbars are now colored according to threat where applicable. This update only applies to Retail, Classic will be done next week as it requires a little more work to avoid any additional performance cost during large group combat.
+
 ## [2.0.377-Alpha] 2020-07-30
 ### Fixed
 - Fixed the wrong upvalue in today's previous update. You should no longer get a bug everytime something goes on full cooldown.

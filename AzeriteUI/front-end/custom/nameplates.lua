@@ -107,6 +107,8 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	health:SetSparkMap(layout.HealthSparkMap)
 	health:SetTexCoord(unpack(layout.HealthTexCoord))
 	health.absorbThreshold = layout.AbsorbThreshold
+	health.threatFeedbackUnit = "player"
+	health.colorThreat = layout.HealthColorThreat -- color non-friendly by threat
 	health.colorTapped = layout.HealthColorTapped
 	health.colorDisconnected = layout.HealthColorDisconnected
 	health.colorClass = layout.HealthColorClass

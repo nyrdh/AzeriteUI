@@ -4,8 +4,10 @@ if (not Core) then
 	return 
 end
 
--- Note that there's still a lot of hardcoded things in this file, 
--- and it will eventually be changed to be fully Layout driven. 
+-- Note that there's still a lot of hardcoded things in this file,
+-- and they will most likely NOT be moved into the layout, 
+-- as bar layouts in our UIs are very non-typical,
+-- and more often than not iconic, integral elements of the design.
 local L = Wheel("LibLocale"):GetLocale(ADDON)
 local Module = Core:NewModule("ActionBarMain", "LibEvent", "LibMessage", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibSecureButton", "LibWidgetContainer", "LibPlayerData", "LibClientBuild")
 
@@ -79,42 +81,65 @@ local secureSnippets = {
 		local UICenter = self:GetFrameRef("UICenter"); 
 		local extraButtonsCount = tonumber(self:GetAttribute("extraButtonsCount")) or 0;
 		local buttonSize, buttonSpacing, iconSize = 64, 8, 44;
-		local row2mod = -2/5; -- horizontal offset for upper row
+		local row2mod = 1-2/5; -- horizontal offset for upper row
 
 		for id,button in ipairs(Buttons) do 
 			local buttonID = button:GetID(); 
 			local barID = Pagers[id]:GetID(); 
 
-			-- Primary Bar
-			if (barID == 1) then 
-				button:ClearAllPoints(); 
+			-- Brave New World.
+			local layoutID = button:GetAttribute("layoutID");
+			if (layoutID <= 7) then
+				button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((layoutID-1) * (buttonSize + buttonSpacing)), 42)
+			else
+				local slot = floor((layoutID - 8)/2)
 
-				if (buttonID > 10) then
-					button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((buttonID-2-1 + row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
+				-- Bottom row
+				if (layoutID%2 == 0) then
+
+					button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((slot+7) * (buttonSize + buttonSpacing)), 42 )
+
+				-- Top row
 				else
-					button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((buttonID-1) * (buttonSize + buttonSpacing)), 42)
-				end 
 
-			-- Secondary Bar
-			elseif (barID == self:GetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE")) then 
-				button:ClearAllPoints(); 
+					button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((slot+7 + row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
+				end
 
-				-- 3x2 complimentary buttons
-				if (extraButtonsCount <= 11) then 
-					if (buttonID < 4) then 
-						button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID+10)-1) * (buttonSize + buttonSpacing)), 42 )
+			end
+
+
+			if (false) then
+				-- Primary Bar
+				if (barID == 1) then 
+					button:ClearAllPoints(); 
+
+					if (buttonID > 10) then
+						button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((buttonID-2-1 + row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
 					else
-						button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID-3+10)-1 +row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
-					end
+						button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((buttonID-1) * (buttonSize + buttonSpacing)), 42)
+					end 
 
-				-- 6x2 complimentary buttons
-				else 
-					if (buttonID < 7) then 
-						button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID+10)-1) * (buttonSize + buttonSpacing)), 42 )
-					else
-						button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID-6+10)-1 +row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
-					end
-				end 
+				-- Secondary Bar
+				elseif (barID == self:GetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE")) then 
+					button:ClearAllPoints(); 
+
+					-- 3x2 complimentary buttons
+					if (extraButtonsCount <= 11) then 
+						if (buttonID < 4) then 
+							button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID+10)-1) * (buttonSize + buttonSpacing)), 42 )
+						else
+							button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID-3+10)-1 +row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
+						end
+
+					-- 6x2 complimentary buttons
+					else 
+						if (buttonID < 7) then 
+							button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID+10)-1) * (buttonSize + buttonSpacing)), 42 )
+						else
+							button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID-6+10)-1 +row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
+						end
+					end 
+				end
 			end
 		end 
 
@@ -905,22 +930,29 @@ Module.SpawnActionBars = function(self)
 		HoverButtons[Buttons[buttonID]] = true
 	end 
 
+	-- Layout helper
+	for buttonID,button in pairs(Buttons) do
+		button:SetAttribute("layoutID",buttonID)
+	end
+	
 	-- First Side Bar (Bottom Right)
-	for id = 1,NUM_ACTIONBAR_BUTTONS do 
-		buttonID = buttonID + 1
-		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, BOTTOMRIGHT_ACTIONBAR_PAGE, id)
-	end
+	if (false) then
+		for id = 1,NUM_ACTIONBAR_BUTTONS do 
+			buttonID = buttonID + 1
+			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, BOTTOMRIGHT_ACTIONBAR_PAGE, id)
+		end
 
-	-- Second Side bar (Right)
-	for id = 1,NUM_ACTIONBAR_BUTTONS do 
-		buttonID = buttonID + 1
-		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, RIGHT_ACTIONBAR_PAGE, id)
-	end
+		-- Second Side bar (Right)
+		for id = 1,NUM_ACTIONBAR_BUTTONS do 
+			buttonID = buttonID + 1
+			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, RIGHT_ACTIONBAR_PAGE, id)
+		end
 
-	-- Third Side Bar (Left)
-	for id = 1,NUM_ACTIONBAR_BUTTONS do 
-		buttonID = buttonID + 1
-		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, LEFT_ACTIONBAR_PAGE, id)
+		-- Third Side Bar (Left)
+		for id = 1,NUM_ACTIONBAR_BUTTONS do 
+			buttonID = buttonID + 1
+			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, LEFT_ACTIONBAR_PAGE, id)
+		end
 	end
 
 	-- Apply common settings to the action buttons.
@@ -1363,6 +1395,7 @@ Module.UpdateButtonGrids = function(self)
 	local button, buttonHasContent, forceGrid
 
 	if (IsRetail) then
+		-- Completely hide grids in vehicles and event driven bars
 		if (HasOverrideActionBar() or HasTempShapeshiftActionBar() or HasVehicleActionBar()) then
 			for buttonID = numButtons,1,-1 do
 				button = Buttons[buttonID]
@@ -1373,24 +1406,71 @@ Module.UpdateButtonGrids = function(self)
 			return
 		end
 	end
-	
-	for buttonID = numButtons,1,-1 do
-		button = Buttons[buttonID]
-		buttonHasContent = button:HasContent()
 
-		if (forceGrid) then
-			button.showGrid = true
-			button.overrideAlphaWhenEmpty = .95
+	local gapStartTop, gapStartBottom
+	local gapCountTop, gapCountBottom = 0, 0
+	local buttonID = 1
+	while (buttonID <= numButtons) do
+
+		local onMain = (buttonID <= 7)
+		local onBottom = (buttonID <= 24) and ((onMain) or (buttonID%2 == 0))
+		local onTop = (buttonID <= 24) and ((not onMain) and (buttonID%2 > 0))
+
+		button = Buttons[buttonID]
+		button.showGrid = nil
+		button.overrideAlphaWhenEmpty = nil
+
+		if (button:HasContent()) then
+			
+			if (onBottom) then
+				if (gapStartBottom) and (gapStartBottom > 1) then
+					if (gapCountBottom == 1) then
+						for id = gapStartBottom,gapStartBottom+gapCountBottom-1,2 do
+							button = Buttons[id]
+							button.showGrid = true
+							button.overrideAlphaWhenEmpty = .95
+						end
+					end
+				end
+				gapStartBottom = nil
+				gapCountBottom = 0
+
+			elseif (onTop) then
+				if (gapStartTop) and (gapStartTop > 9) then
+					if (gapCountTop == 1) then
+						for id = gapStartTop,gapStartTop+gapCountTop-1,2 do
+							button = Buttons[id]
+							button.showGrid = true
+							button.overrideAlphaWhenEmpty = .95
+						end
+					end
+				end
+				gapStartTop = nil
+				gapCountTop = 0
+			end
+
 		else
-			-- Check if the button has content,
-			-- and if so start forcing the grids.
-			if (buttonHasContent) then
-				forceGrid = true
+
+			-- We are on bottom row
+			if (onBottom) then
+				if (not gapStartBottom) then
+					gapStartBottom = buttonID
+				end
+				gapCountBottom = gapCountBottom + 1
+
+			-- We are on top Row
 			else
-				button.showGrid = nil
-				button.overrideAlphaWhenEmpty = nil
+				if (not gapStartTop) then
+					gapStartTop = buttonID
+				end
+				gapCountTop = gapCountTop + 1
 			end
 		end
+		buttonID = buttonID + 1
+	end
+
+	for buttonID = numButtons,1,-1 do
+		button = Buttons[buttonID]
 		button:UpdateGrid()
 	end
 end
