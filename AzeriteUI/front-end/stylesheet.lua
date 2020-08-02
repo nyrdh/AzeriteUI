@@ -2798,7 +2798,8 @@ Layouts.Minimap = {
 			}, { __index = function(t,k) return GetMedia("Blip-Nandini-New-113_2") end }) or
 		(IsRetail) and 
 			setmetatable({
-				["8.3.0"] = GetMedia("Blip-Nandini-New-830")
+				["8.3.0"] = GetMedia("Blip-Nandini-New-830"),
+				["8.3.7"] = GetMedia("Blip-Nandini-New-830") -- no changes.
 			}, { __index = function(t,k) return [[Interface\Minimap\ObjectIconsAtlas.blp]] end }),
 	BlobAlpha = { 0, 96, 0, 0 }, -- blobInside, blobOutside, ringOutside, ringInside
 	Clock_OverrideValue = Minimap_Clock_OverrideValue,

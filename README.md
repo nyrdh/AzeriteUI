@@ -41,10 +41,8 @@ These are some addons I feel go very well together with our user interface. They
 
 ### **Retail:**
 * Immersion: [www.curseforge.com/wow/addons/immersion](https://www.curseforge.com/wow/addons/immersion)  
-* Minimap Button Bag: [www.curseforge.com/wow/addons/mbb](https://www.curseforge.com/wow/addons/mbb)  
 * Narcissus: [www.curseforge.com/wow/addons/narcissus](https://www.curseforge.com/wow/addons/narcissus)  
-* World Quest Tab: [www.curseforge.com/wow/addons/worldquesttab](https://www.curseforge.com/wow/addons/worldquesttab)  
-* World Quest Tab Utilities: [www.curseforge.com/wow/addons/world-quest-tab-utilities](https://www.curseforge.com/wow/addons/world-quest-tab-utilities)  
+* Minimap Button Bag: [www.curseforge.com/wow/addons/mbb](https://www.curseforge.com/wow/addons/mbb)  
 
 ## **Frequently Asked Questions:**  
 ### **It's so big, how can I scale it down?**  

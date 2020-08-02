@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.379-RC] 2020-08-02
+### Changed
+- (Classic) TOC bump to WoW Classic Client Patch 1.13.5.
+- (Classic) Updated Minimap blips to patch 1.13.15.
+- (Retail) Updated Minimap blips to patch 8.3.7.
+
 ## [2.0.378-Alpha] 2020-08-01
 ### Added
 - Protected casts should now have a shielded nameplate castbar.
