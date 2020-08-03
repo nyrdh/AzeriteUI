@@ -120,6 +120,10 @@ if (gameLocale == "zhCN") then
 	end
 end 
 
+--local tooltipBorder = GetMedia("tooltip_border_blizzcompatible")
+local tooltipBorder = GetMedia("tooltip_border_hex")
+local tooltipInset = 10.5
+
 ------------------------------------------------
 -- Module Callbacks
 ------------------------------------------------
@@ -134,14 +138,14 @@ local Core_Window_CreateBorder = function(self)
 	border:SetPoint("BOTTOMRIGHT", 6, -8)
 	border:SetBackdrop({
 		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = GetMedia("tooltip_border_blizzcompatible"),
+		edgeFile = tooltipBorder,
 		edgeSize = 32, 
 		tile = false, 
 		insets = { 
-			top = 9, 
-			bottom = 9, 
-			left = 9, 
-			right = 9 
+			top = tooltipInset, 
+			bottom = tooltipInset, 
+			left = tooltipInset, 
+			right = tooltipInset 
 		}
 	})
 	border:SetBackdropBorderColor(1, 1, 1, 1)
@@ -325,10 +329,10 @@ local BlizzardPopup_OnShow = function(popup)
 	local sizeMod = 3/4
 	backdrop:SetBackdrop({
 		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = GetMedia("tooltip_border_blizzcompatible"),
+		edgeFile = tooltipBorder,
 		edgeSize = 32*sizeMod, 
 		tile = false, 
-		insets = { top = 2.5, bottom = 2.5, left = 2.5, right = 2.5 }
+		insets = { top = tooltipInset*sizeMod, bottom = tooltipInset*sizeMod, left = tooltipInset*sizeMod, right = tooltipInset*sizeMod }
 	})
 	backdrop:SetBackdropColor(.05, .05, .05, .85)
 	backdrop:SetBackdropBorderColor(1,1,1,1)
@@ -348,19 +352,20 @@ local BlizzardPopup_OnShow = function(popup)
 			local border = popupBackdrops[button]
 			if (not border) then 
 				local sizeMod = 2/3
+				local offset = 8
 				border = CreateFrame("Frame", nil, button)
 				border:SetFrameLevel(button:GetFrameLevel() - 1)
-				border:SetPoint("TOPLEFT", -23*sizeMod, 23*sizeMod -2)
-				border:SetPoint("BOTTOMRIGHT", 23*sizeMod, -23*sizeMod -2)
+				border:SetPoint("TOPLEFT", -(3 + offset)*sizeMod, (3 + offset)*sizeMod -2) -- 23
+				border:SetPoint("BOTTOMRIGHT", (3 + offset)*sizeMod, -(3 + offset)*sizeMod -2) -- 23
 				border:SetBackdrop({
 					bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-					edgeFile = GetMedia("tooltip_border"),
+					edgeFile = tooltipBorder, -- GetMedia("tooltip_border"),
 					edgeSize = 32*sizeMod,
 					insets = {
-						left = 22*sizeMod,
-						right = 22*sizeMod,
-						top = 22*sizeMod +2,
-						bottom = 22*sizeMod -2
+						left = (2 + offset)*sizeMod,
+						right = (2 + offset)*sizeMod,
+						top = (2 + offset)*sizeMod,
+						bottom = (2 + offset)*sizeMod
 					}
 				})
 				border:SetBackdropColor(.05, .05, .05, .75)
@@ -2171,7 +2176,11 @@ Defaults.ActionBarMain = {
 }
 
 Defaults.ChatFilters = {
-	enableAllChatFilters = true -- enable chat filters to pretty things up!
+	enableAllChatFilters = true, -- enable chat filters to pretty things up!
+	enableChatStyling = true,
+	enableMonsterFilter = true,
+	enableBossFilter = true,
+	enableSpamFilter = true
 }
 
 Defaults.ExplorerMode = {
@@ -2244,7 +2253,7 @@ Layouts[ADDON] = {
 		--ObjectiveTracker = true, -- Retail
 		PlayerPowerBarAlt = true, -- Retail
 		--QuestWatchFrame = true, -- Classic
-		TotemFrame = true, -- Retail
+		--TotemFrame = true, -- Retail
 		Tutorials = true,
 		UnitFramePlayer = true,
 		UnitFramePet = true,
@@ -2501,8 +2510,8 @@ Layouts.BlizzardPopupStyling = {
 Layouts.BlizzardTooltips = {
 	TooltipBackdrop = {
 		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
-		edgeFile = GetMedia("tooltip_border_blizzcompatible"), edgeSize = 32, 
-		insets = { top = 2.5, bottom = 2.5, left = 2.5, right = 2.5 }
+		edgeFile = tooltipBorder, edgeSize = 32, 
+		insets = { top = tooltipInset, bottom = tooltipInset, left = tooltipInset, right = tooltipInset }
 	},
 	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
 	TooltipBackdropColor = { .05, .05, .05, .85 },
@@ -3166,9 +3175,9 @@ Layouts.Tooltips = {
 	PostCreateTooltip = Tooltip_PostCreate,
 	TooltipBackdrop = {
 		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], 
-		edgeFile = GetMedia("tooltip_border_blizzcompatible"), 
+		edgeFile = tooltipBorder, 
 		edgeSize = 32, 
-		insets = { top = 2.5, bottom = 2.5, left = 2.5, right = 2.5 },
+		insets = { top = tooltipInset, bottom = tooltipInset, left = tooltipInset, right = tooltipInset },
 		tile = false
 	},
 	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
@@ -3584,7 +3593,7 @@ Layouts.UnitFramePlayerHUD = {
 	PlayerAltPowerBarNameJustifyV = "MIDDLE",
 	PlayerAltPowerBarNamePlace = { "TOP", 0, -(12 + 14) },
 	PlayerAltPowerBarOrientation = "RIGHT",
-	PlayerAltPowerBarPlace = { "CENTER", "UICenter", "CENTER", 0, -(133 + 56)  }, 
+	PlayerAltPowerBarPlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 340 }, -- "CENTER", "UICenter", "CENTER", 0, -(133 + 56)
 	PlayerAltPowerBarSize = Constant.SmallBar,
 	PlayerAltPowerBarSparkMap = {
 		top = {

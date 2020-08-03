@@ -130,7 +130,7 @@ end
 do 
 	local fontPrefix = GetAddOnMetadata(ADDON, "X-FontPrefix") 
 	local chatPrefix = GetAddOnMetadata(ADDON, "X-ChatPrefix") 
-	for i = 10,100 do 
+	for i = 9,100 do 
 		local fontNormal = _G[fontPrefix .. i]
 		if fontNormal then 
 			fontsDB.normal[i] = fontNormal

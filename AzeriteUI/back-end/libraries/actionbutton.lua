@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 98)
+local LibSecureButton = Wheel:Set("LibSecureButton", 99)
 if (not LibSecureButton) then
 	return
 end
@@ -1034,7 +1034,7 @@ ActionButton.UpdateCount = function(self)
 			end
 		else
 			if (HasAction(action)) then 
-				if (IsConsumableAction(action) or IsStackableAction(action)) then
+				if (IsConsumableAction(action) or IsStackableAction(action) or (not IsItemAction(action) and GetActionCount(action) > 0)) then
 					count = GetActionCount(action)
 				else
 					local charges, maxCharges, chargeStart, chargeDuration, chargeModRate = GetActionCharges(action)

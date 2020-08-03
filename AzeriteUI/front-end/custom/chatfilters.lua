@@ -304,24 +304,104 @@ local SendMonsterMessage = function(chatType, message, monster, ...)
 end
 
 Module.UpdateChatFilters = function(self)
-	if (self.db.enableAllChatFilters) then
+	-- Styling
+	if (self.db.enableChatStyling) then
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_COMBAT_FACTION_CHANGE", ChatFilterProxy) -- reputation
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_COMBAT_XP_GAIN", ChatFilterProxy) -- xp
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_CURRENCY", ChatFilterProxy) -- money loot
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_LOOT", ChatFilterProxy) -- item loot
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONEY", ChatFilterProxy) -- money loot
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_SKILL", ChatFilterProxy) -- skill ups
+		if (IsRetail) then
+			ChatFrame_AddMessageEventFilter("CHAT_MSG_ACHIEVEMENT", ChatFilterProxy)
+		end
+	else
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_COMBAT_FACTION_CHANGE", ChatFilterProxy) -- reputation
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_COMBAT_XP_GAIN", ChatFilterProxy) -- xp
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_CURRENCY", ChatFilterProxy) -- money loot
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_LOOT", ChatFilterProxy) -- item loot
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONEY", ChatFilterProxy) -- money loot
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SKILL", ChatFilterProxy) -- skill ups
+		if (IsRetail) then
+			ChatFrame_RemoveMessageEventFilter("CHAT_MSG_ACHIEVEMENT", ChatFilterProxy)
+		end
+	end
+
+	-- Monster Filter
+	if (self.db.enableMonsterFilter) then
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_SAY", ChatFilterProxy)
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_YELL", ChatFilterProxy)
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_EMOTE", ChatFilterProxy)
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_WHISPER", ChatFilterProxy)
+	else
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_SAY", ChatFilterProxy)
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_YELL", ChatFilterProxy)
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_EMOTE", ChatFilterProxy)
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_WHISPER", ChatFilterProxy)
+	end
+
+	-- Boss Filter
+	if (self.db.enableBossFilter) then
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_BOSS_EMOTE", ChatFilterProxy)
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_BOSS_WHISPER", ChatFilterProxy)
+	else
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_RAID_BOSS_EMOTE", ChatFilterProxy)
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_RAID_BOSS_WHISPER", ChatFilterProxy)
+	end
+
+	-- Spam Filter
+	if (self.db.enableSpamFilter) then
+		-- This kills off blizzard's interfering bg spam filter,
+		-- and prevents it from adding their additional leave/join messages.
+		BattlegroundChatFilters:StopBGChatFilter()
+		BattlegroundChatFilters:UnregisterAllEvents()
+		BattlegroundChatFilters:SetScript("OnUpdate", nil)
+		BattlegroundChatFilters:SetScript("OnEvent", nil)
+	else
+		-- (Re)start blizzard's interfering bg spam filter,
+		-- which in my opinion creates as much spam as it removes.
+		BattlegroundChatFilters:OnLoad()
+		BattlegroundChatFilters:SetScript("OnEvent", BattlegroundChatFilters.OnEvent)
+		if (not BattlegroundChatFilters:GetScript("OnUpdate")) then
+			local _, instanceType = IsInInstance()
+			if (instanceType == "pvp") then
+				BattlegroundChatFilters:StartBGChatFilter()
+			end
+		end
+	end
+
+	-- Used by both styling and spam filters.
+	if (self.db.enableSpamFilter) or (self.db.enableChatStyling) then
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", ChatFilterProxy)
-	
+	else
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", ChatFilterProxy)
+	end
+
+	--[[--
+	if (self.db.enableAllChatFilters) then
+		-- Styling
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_COMBAT_FACTION_CHANGE", ChatFilterProxy) -- reputation
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_COMBAT_XP_GAIN", ChatFilterProxy) -- xp
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_CURRENCY", ChatFilterProxy) -- money loot
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_LOOT", ChatFilterProxy) -- item loot
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONEY", ChatFilterProxy) -- money loot
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_SKILL", ChatFilterProxy) -- skill ups
 		if (IsRetail) then
 			ChatFrame_AddMessageEventFilter("CHAT_MSG_ACHIEVEMENT", ChatFilterProxy)
 		end
+
+		-- Monster Filter
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_SAY", ChatFilterProxy)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_YELL", ChatFilterProxy)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_EMOTE", ChatFilterProxy)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_WHISPER", ChatFilterProxy)
+
+		-- Boss Filter
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_BOSS_EMOTE", ChatFilterProxy)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_BOSS_WHISPER", ChatFilterProxy)
+
+		-- Spam Filter and Styling.
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", ChatFilterProxy)
 
 		-- This kills off blizzard's interfering bg spam filter,
 		-- and prevents it from adding their additional leave/join messages.
@@ -359,6 +439,7 @@ Module.UpdateChatFilters = function(self)
 			end
 		end
 	end
+	--]]--
 end
 
 -- Apply custom methods to the chat frames
@@ -538,146 +619,150 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 		-- Make a system that pairs patterns with solutions,
 		-- describing if it allows multiple, should block, replace, etc.
 
+		if (self.db.enableChatStyling) then
 
-		-- Followers
-		if (IsRetail) then
-			-- Exhausted
-			local follower_exhausted_pattern = getFilter(GARRISON_FOLLOWER_DISBANDED) -- "%s has been exhausted."
-			local follower_name = string_match(message, follower_exhausted_pattern)
-			if (follower_name) then
-				return false, string_format(LOOT_MINUS_TEMPLATE, follower_name), author, ...
+			-- Followers
+			if (IsRetail) then
+				-- Exhausted
+				local follower_exhausted_pattern = getFilter(GARRISON_FOLLOWER_DISBANDED) -- "%s has been exhausted."
+				local follower_name = string_match(message, follower_exhausted_pattern)
+				if (follower_name) then
+					return false, string_format(LOOT_MINUS_TEMPLATE, follower_name), author, ...
+				end
+
+				-- Removed
+				local follower_removed_pattern = getFilter(GARRISON_FOLLOWER_REMOVED) -- "%s is no longer your follower."
+				follower_name = string_match(message, follower_removed_pattern)
+				if (follower_name) then
+					return false, string_format(LOOT_MINUS_TEMPLATE, follower_name), author, ...
+				end
+
+				-- Added
+				local follower_added_pattern = getFilter(GARRISON_FOLLOWER_ADDED) -- "%s recruited."
+				follower_name = string_match(message, follower_added_pattern)
+				if (follower_name) then
+					follower_name = string_gsub(follower_name, "[%[/%]]", "") -- kill brackets
+					return false, string_format(LOOT_TEMPLATE, follower_name), author, ...
+				end
+
+				-- GARRISON_FOLLOWER_LEVEL_UP = "LEVEL UP!"
+				-- GARRISON_FOLLOWER_XP_ADDED_ZONE_SUPPORT = "%s has earned %d xp."
+				-- GARRISON_FOLLOWER_XP_ADDED_ZONE_SUPPORT_LEVEL_UP = "%s is now level %d!"
+				-- GARRISON_FOLLOWER_XP_ADDED_ZONE_SUPPORT_QUALITY_UP = "%s has gained a quality level!"
 			end
 
-			-- Removed
-			local follower_removed_pattern = getFilter(GARRISON_FOLLOWER_REMOVED) -- "%s is no longer your follower."
-			follower_name = string_match(message, follower_removed_pattern)
-			if (follower_name) then
-				return false, string_format(LOOT_MINUS_TEMPLATE, follower_name), author, ...
+
+			-- Discovery XP?
+			local xp_discovery_pattern = getFilter(ERR_ZONE_EXPLORED_XP) -- "Discovered %s: %d experience gained"
+			local name, total = string_match(message, xp_discovery_pattern)
+			if (total) then
+				return false, string_format(XP_TEMPLATE_MULTIPLE, total, XP, name), author, ...
 			end
 
-			-- Added
-			local follower_added_pattern = getFilter(GARRISON_FOLLOWER_ADDED) -- "%s recruited."
-			follower_name = string_match(message, follower_added_pattern)
-			if (follower_name) then
-				follower_name = string_gsub(follower_name, "[%[/%]]", "") -- kill brackets
-				return false, string_format(LOOT_TEMPLATE, follower_name), author, ...
+			-- Quest money?
+			local money_pattern = getFilter(ERR_QUEST_REWARD_MONEY_S) -- "Received %s."
+			local money_string = string_match(message, money_pattern)
+			if (money_string) then
+		
+				local gold_amount = tonumber(string_match(money_string, P_GOLD)) or 0
+				local silver_amount = tonumber(string_match(money_string, P_SILVER)) or 0
+				local copper_amount = tonumber(string_match(money_string, P_COPPER)) or 0
+		
+				local moneyString = CreateMoneyString(gold_amount, silver_amount, copper_amount)
+				if (moneyString) then
+					return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
+				else
+					return true
+				end
 			end
 
-			-- GARRISON_FOLLOWER_LEVEL_UP = "LEVEL UP!"
-			-- GARRISON_FOLLOWER_XP_ADDED_ZONE_SUPPORT = "%s has earned %d xp."
-			-- GARRISON_FOLLOWER_XP_ADDED_ZONE_SUPPORT_LEVEL_UP = "%s is now level %d!"
-			-- GARRISON_FOLLOWER_XP_ADDED_ZONE_SUPPORT_QUALITY_UP = "%s has gained a quality level!"
-		end
-
-
-		-- Discovery XP?
-		local xp_discovery_pattern = getFilter(ERR_ZONE_EXPLORED_XP) -- "Discovered %s: %d experience gained"
-		local name, total = string_match(message, xp_discovery_pattern)
-		if (total) then
-			return false, string_format(XP_TEMPLATE_MULTIPLE, total, XP, name), author, ...
-		end
-
-		-- Quest money?
-		local money_pattern = getFilter(ERR_QUEST_REWARD_MONEY_S) -- "Received %s."
-		local money_string = string_match(message, money_pattern)
-		if (money_string) then
-	
-			local gold_amount = tonumber(string_match(money_string, P_GOLD)) or 0
-			local silver_amount = tonumber(string_match(money_string, P_SILVER)) or 0
-			local copper_amount = tonumber(string_match(money_string, P_COPPER)) or 0
-	
-			local moneyString = CreateMoneyString(gold_amount, silver_amount, copper_amount)
-			if (moneyString) then
-				return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
-			else
-				return true
-			end
-		end
-
-		-- AFK
-		if (message == MARKED_AFK) then -- "You are now AFK."
-			return false, AFK_ADDED_TEMPLATE, author, ...
-		end
-		if (message == CLEARED_AFK) then -- "You are no longer AFK."
-			return false, AFK_CLEARED_TEMPLATE, author, ...
-		end
-		local afk_pattern = getFilter(MARKED_AFK_MESSAGE) -- "You are now AFK: %s"
-		local afk_message = string_match(message, afk_pattern)
-		if (afk_message) then
-			if (afk_message == DEFAULT_AFK_MESSAGE) then -- "Away from Keyboard"
+			-- AFK
+			if (message == MARKED_AFK) then -- "You are now AFK."
 				return false, AFK_ADDED_TEMPLATE, author, ...
 			end
-			return false, string_format(AFK_ADDED_TEMPLATE_MESSAGE, afk_message), author, ...
-		end
-
-		-- DND
-		if (message == CLEARED_DND) then -- "You are no longer marked DND."
-			return false, DND_CLEARED_TEMPLATE, author, ...
-		end
-		local dnd_pattern = getFilter(MARKED_DND) -- "You are now DND: %s."
-		local dnd_message = string_match(message, dnd_pattern)
-		if (dnd_message) then
-			if (dnd_message == DEFAULT_DND_MESSAGE) then -- "Do not Disturb"
-				return false, DND_ADDED_TEMPLATE, author, ...
+			if (message == CLEARED_AFK) then -- "You are no longer AFK."
+				return false, AFK_CLEARED_TEMPLATE, author, ...
 			end
-			return false, string_format(DND_ADDED_TEMPLATE_MESSAGE, dnd_message), author, ...
-		end
+			local afk_pattern = getFilter(MARKED_AFK_MESSAGE) -- "You are now AFK: %s"
+			local afk_message = string_match(message, afk_pattern)
+			if (afk_message) then
+				if (afk_message == DEFAULT_AFK_MESSAGE) then -- "Away from Keyboard"
+					return false, AFK_ADDED_TEMPLATE, author, ...
+				end
+				return false, string_format(AFK_ADDED_TEMPLATE_MESSAGE, afk_message), author, ...
+			end
 
-		-- Rested
-		if (message == ERR_EXHAUSTION_WELLRESTED) then -- "You feel well rested."
-			return false, RESTED_ADDED_TEMPLATE, author, ...
-		end
-		if (message == ERR_EXHAUSTION_NORMAL) then -- "You feel normal."
-			return false, RESTED_CLEARED_TEMPLATE, author, ...
-		end
+			-- DND
+			if (message == CLEARED_DND) then -- "You are no longer marked DND."
+				return false, DND_CLEARED_TEMPLATE, author, ...
+			end
+			local dnd_pattern = getFilter(MARKED_DND) -- "You are now DND: %s."
+			local dnd_message = string_match(message, dnd_pattern)
+			if (dnd_message) then
+				if (dnd_message == DEFAULT_DND_MESSAGE) then -- "Do not Disturb"
+					return false, DND_ADDED_TEMPLATE, author, ...
+				end
+				return false, string_format(DND_ADDED_TEMPLATE_MESSAGE, dnd_message), author, ...
+			end
 
-		-- Artifact Power?
-		if (IsRetail) then
-			local artifact_pattern = getFilter(ARTIFACT_XP_GAIN) -- "%s gains %s Artifact Power."
-			local artifact, artifactPower = string_match(message, artifact_pattern)
-			if (artifact) then
-				local first, last = string_find(message, "|c(.+)|r")
-				if (first and last) then
-					local artifact = string_sub(message, first, last)
-					artifact = string_gsub(artifact, "[%[/%]]", "") -- kill brackets
-					local countString = string_sub(message, last + 1)
-					local artifactPower = tonumber(string_match(countString, "(%d+)"))
-					if (artifactPower) and (artifactPower > 1) then
-						return false, string_format(REP_TEMPLATE_MULTIPLE, artifactPower, ARTIFACT_POWER, artifact), author, ...
+			-- Rested
+			if (message == ERR_EXHAUSTION_WELLRESTED) then -- "You feel well rested."
+				return false, RESTED_ADDED_TEMPLATE, author, ...
+			end
+			if (message == ERR_EXHAUSTION_NORMAL) then -- "You feel normal."
+				return false, RESTED_CLEARED_TEMPLATE, author, ...
+			end
+
+			-- Artifact Power?
+			if (IsRetail) then
+				local artifact_pattern = getFilter(ARTIFACT_XP_GAIN) -- "%s gains %s Artifact Power."
+				local artifact, artifactPower = string_match(message, artifact_pattern)
+				if (artifact) then
+					local first, last = string_find(message, "|c(.+)|r")
+					if (first and last) then
+						local artifact = string_sub(message, first, last)
+						artifact = string_gsub(artifact, "[%[/%]]", "") -- kill brackets
+						local countString = string_sub(message, last + 1)
+						local artifactPower = tonumber(string_match(countString, "(%d+)"))
+						if (artifactPower) and (artifactPower > 1) then
+							return false, string_format(REP_TEMPLATE_MULTIPLE, artifactPower, ARTIFACT_POWER, artifact), author, ...
+						end
 					end
 				end
 			end
-		end
 
-		-- Loot?
-		for i,pattern in ipairs(LootPatterns) do
-			local item, count = string_match(message,pattern)
-			if (item) then
-				-- The patterns above tend to fail on the number,
-				-- so we do this ugly non-localized hack instead.
+			-- Loot?
+			for i,pattern in ipairs(LootPatterns) do
+				local item, count = string_match(message,pattern)
+				if (item) then
+					-- The patterns above tend to fail on the number,
+					-- so we do this ugly non-localized hack instead.
 
-				-- |cffffffff|Hitem:itemID:::::|h[display name]|h|r
-				local first, last = string_find(message, "|c(.+)|r")
-				if (first and last) then
-					local item = string_sub(message, first, last)
-					item = string_gsub(item, "[%[/%]]", "") -- kill brackets
-					local countString = string_sub(message, last + 1)
-					local count = tonumber(string_match(countString, "(%d+)"))
-					if (count) and (count > 1) then
-						return false, string_format(LOOT_TEMPLATE_MULTIPLE, item, count), author, ...
+					-- |cffffffff|Hitem:itemID:::::|h[display name]|h|r
+					local first, last = string_find(message, "|c(.+)|r")
+					if (first and last) then
+						local item = string_sub(message, first, last)
+						item = string_gsub(item, "[%[/%]]", "") -- kill brackets
+						local countString = string_sub(message, last + 1)
+						local count = tonumber(string_match(countString, "(%d+)"))
+						if (count) and (count > 1) then
+							return false, string_format(LOOT_TEMPLATE_MULTIPLE, item, count), author, ...
+						else
+							return false, string_format(LOOT_TEMPLATE, item), author, ...
+						end
 					else
-						return false, string_format(LOOT_TEMPLATE, item), author, ...
+						return false, string_gsub(message, "|", "||"), author, ...
 					end
-				else
-					return false, string_gsub(message, "|", "||"), author, ...
 				end
 			end
 		end
 
 		-- Hide selected stuff from various other events
-		for i,pattern in ipairs(FilteredGlobals) do
-			if (string_match(message,pattern)) then
-				return true
+		if (self.db.enableSpamFilter) then
+			for i,pattern in ipairs(FilteredGlobals) do
+				if (string_match(message,pattern)) then
+					return true
+				end
 			end
 		end
 	end
@@ -710,8 +795,20 @@ Module.OnInit = function(self)
 		if name then 
 			name = string.lower(name); 
 		end 
-		if (name == "change-enableallchatfilters") then
-			self:SetAttribute("enableAllChatFilters", value); 
+		if (name == "change-enablechatstyling") then
+			self:SetAttribute("enableChatStyling", value); 
+			self:CallMethod("UpdateChatFilters"); 
+
+		elseif (name == "change-enablemonsterfilter") then
+			self:SetAttribute("enableMonsterFilter", value); 
+			self:CallMethod("UpdateChatFilters"); 
+
+		elseif (name == "change-enablebossfilter") then
+			self:SetAttribute("enableBossFilter", value); 
+			self:CallMethod("UpdateChatFilters"); 
+
+		elseif (name == "change-enablespamfilter") then
+			self:SetAttribute("enableSpamFilter", value); 
 			self:CallMethod("UpdateChatFilters"); 
 		end 
 	]=])

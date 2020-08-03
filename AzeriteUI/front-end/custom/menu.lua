@@ -1095,11 +1095,37 @@ Module.CreateMenuTable = function(self)
 		title = L["Chat Windows"], type = nil, hasWindow = true, 
 		buttons = {
 			{
-				enabledTitle = L_ENABLED:format(L["Chat Filters"]),
-				disabledTitle = L_DISABLED:format(L["Chat Filters"]),
-				type = "TOGGLE_VALUE", 
-				configDB = "ChatFilters", configKey = "enableAllChatFilters", 
-				proxyModule = "ChatFilters"
+				title = L["Chat Filters"], type = nil, hasWindow = true, 
+				buttons = {
+					{
+						enabledTitle = L_ENABLED:format(L["Chat Styling"]),
+						disabledTitle = L_DISABLED:format(L["Chat Styling"]),
+						type = "TOGGLE_VALUE", 
+						configDB = "ChatFilters", configKey = "enableChatStyling", 
+						proxyModule = "ChatFilters"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["Hide Monster Messages"]),
+						disabledTitle = L_DISABLED:format(L["Hide Monster Messages"]),
+						type = "TOGGLE_VALUE", 
+						configDB = "ChatFilters", configKey = "enableMonsterFilter", 
+						proxyModule = "ChatFilters"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["Hide Boss Messages"]),
+						disabledTitle = L_DISABLED:format(L["Hide Boss Messages"]),
+						type = "TOGGLE_VALUE", 
+						configDB = "ChatFilters", configKey = "enableBossFilter", 
+						proxyModule = "ChatFilters"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["Hide Spam"]),
+						disabledTitle = L_DISABLED:format(L["Hide Spam"]),
+						type = "TOGGLE_VALUE", 
+						configDB = "ChatFilters", configKey = "enableSpamFilter", 
+						proxyModule = "ChatFilters"
+					}
+				}
 			}
 		}
 	}

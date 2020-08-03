@@ -36,12 +36,16 @@ local UnitRace = UnitRace
 -- Private API
 local Colors = Private.Colors
 local GetConfig = Private.GetConfig
+local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
 
 -- Constants for client version
 local IsClassic = Module:IsClassic()
 local IsRetail = Module:IsRetail()
+
+-- Player Class
+local _,playerClass = UnitClass("player")
 
 -- Blizzard textures for generic styling
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
@@ -1012,6 +1016,134 @@ end
 Module.SpawnStanceBar = function(self)
 end
 
+-- Time constants
+local DAY, HOUR, MINUTE = 86400, 3600, 60
+
+-- Aimed to be compact and displayed on buttons
+local formatCooldownTime = function(time)
+	if time > DAY then -- more than a day
+		time = time + DAY/2
+		return "%d%s", time/DAY - time/DAY%1, "d"
+	elseif time > HOUR then -- more than an hour
+		time = time + HOUR/2
+		return "%d%s", time/HOUR - time/HOUR%1, "h"
+	elseif time > MINUTE then -- more than a minute
+		time = time + MINUTE/2
+		return "%d%s", time/MINUTE - time/MINUTE%1, "m"
+	elseif time > 10 then -- more than 10 seconds
+		return "%d", time - time%1
+	elseif time >= 1 then -- more than 5 seconds
+		return "|cffff8800%d|r", time - time%1
+	elseif time > 0 then
+		return "|cffff0000%d|r", time*10 - time*10%1
+	else
+		return ""
+	end	
+end
+
+Module.SpawnTotemBar = function(self)
+	local db = self.db
+
+	--[[--
+		
+		Restrictions:
+		- Can't remove button methods like SetPoint to prevent blizzard repositioning
+		- Can't reposition in combat
+
+	--]]-- 
+
+	-- player castbar "BOTTOM", "UICenter", "BOTTOM", 0, 290
+	-- player altpower "BOTTOM", "UICenter", "BOTTOM", 0, 340 ("CENTER", "UICenter", "CENTER", 0, -189)
+	local totemFrame = self:CreateFrame("Frame", nil, "UICenter")
+	totemFrame:SetSize(2,2)
+	totemFrame:Place("BOTTOM", "UICenter", "BOTTOM", 0, 390)
+	
+	-- TotemFrame, 128x53
+	local totemScale = 1.5
+	local totems = TotemFrame
+	totems:SetParent(totemFrame)
+	totems:SetScale(totemScale)
+	--totems:SetParent(self:GetFrame("UICenter"))
+
+	local hidden = CreateFrame("Frame")
+	hidden:Hide()
+
+	local SetMask = hidden:CreateTexture().SetMask
+
+	for i = 1, MAX_TOTEMS do
+		local buttonName = "TotemFrameTotem"..i
+		local button = _G[buttonName]
+		local buttonBackground = _G[buttonName.."Background"]
+		local buttonIcon = _G[buttonName.."IconTexture"] -- doesn't support SetMask
+		local buttonDuration = _G[buttonName.."Duration"]
+		local buttonCooldown = _G[buttonName.."IconCooldown"] -- doesn't support SetMask
+
+		buttonBackground:SetParent(hidden)
+		buttonDuration:SetParent(hidden)
+		buttonCooldown:SetReverse(false)
+		
+		local borderFrame, borderTexture
+		for i = 1, button:GetNumChildren() do
+			local child = select(i, button:GetChildren())
+			if (child:GetObjectType() == "Frame") and (not child:GetName()) then
+				for j = 1, child:GetNumRegions() do
+					local region = select(j, child:GetRegions())
+					if (region:GetObjectType() == "Texture") and (region:GetTexture() == [=[Interface\CharacterFrame\TotemBorder]=]) then
+						region:ClearAllPoints()
+						region:SetPoint("CENTER", 0, 0)
+						region:SetTexture(GetMedia("actionbutton-border"))
+						region:SetSize(256*.25,256*.25)
+						borderFrame = child
+						borderTexture = region
+					end
+				end
+			end
+		end
+
+		local duration = borderFrame:CreateFontString()
+		duration:SetDrawLayer("OVERLAY")
+		duration:SetPoint("CENTER", button, "BOTTOMRIGHT", -8, 10)
+		duration:SetFontObject(GetFont(9,true))
+		duration:SetAlpha(.75)
+		button.duration = duration
+
+	end
+
+	local totemButtonOnUpdate = function(button, elapsed)
+		button.duration:SetFormattedText(formatCooldownTime(GetTotemTimeLeft(button.slot)))
+	end
+
+	local totemButtonUpdate = function(button, startTime, duration, icon)
+		if (duration > 0) then
+			button:SetScript("OnUpdate", totemButtonOnUpdate)
+		else
+			button:SetScript("OnUpdate", nil)
+		end
+	end
+	hooksecurefunc("TotemButton_Update", totemButtonUpdate)
+
+	local totemEvent, totemFrameUpdate
+	totemEvent = function(self, event, ...)
+		if (event == "PLAYER_REGEN_ENABLED") then
+			self:UnregisterEvent("PLAYER_REGEN_ENABLED", totemEvent)
+		end
+		totemFrameUpdate()
+	end
+	totemFrameUpdate = function()
+		if (InCombatLockdown()) then
+			return self:RegisterEvent("PLAYER_REGEN_ENABLED", totemEvent)
+		end
+		local point, anchor = totems:GetPoint()
+		if (anchor ~= totemFrame) then
+			totems:ClearAllPoints()
+			totems:SetPoint("CENTER", totemFrame, "CENTER", 0, 0)
+		end
+	end
+	totemFrameUpdate(totems)
+	hooksecurefunc(TotemFrame, "SetPoint", totemFrameUpdate)
+
+end
+
 Module.SpawnExitButton = function(self)
 	local layout = self.layout
 
@@ -1583,6 +1715,11 @@ Module.OnInit = function(self)
 	self:SpawnPetBar()
 	self:SpawnStanceBar()
 	self:SpawnExitButton()
+
+	-- Verified to only exist in retail.
+	if (IsRetail) then
+		self:SpawnTotemBar()
+	end
 
 	-- Arrange buttons
 	-- *We're using the non-secure proxy method here,

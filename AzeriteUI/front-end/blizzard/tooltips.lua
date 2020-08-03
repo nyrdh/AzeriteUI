@@ -699,8 +699,8 @@ local OnTooltipSetUnit = function(tooltip)
 	if (bar) then
 		bar.color = { r, g, b }
 		bar:ClearAllPoints()
-		bar:SetPoint("TOPLEFT", tooltip, "BOTTOMLEFT", 3, -1)
-		bar:SetPoint("TOPRIGHT", tooltip, "BOTTOMRIGHT", -3, -1)
+		bar:SetPoint("TOPLEFT", tooltip, "BOTTOMLEFT", 9, -3)
+		bar:SetPoint("TOPRIGHT", tooltip, "BOTTOMRIGHT", -9, -3)
 		bar:SetStatusBarColor(r, g, b)
 	end
 

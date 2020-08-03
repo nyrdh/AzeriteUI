@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.380-RC] 2020-08-03
+### Added
+- Trying out a new tooltip texture. Work in progress!
+- The retail totem frame should be available now!
+
+### Changed
+- Split the chat filter setting into multiple options for styling and filtering.
+- Adjusted how action button stack/charge count is detected. Should see a few missing things now.
+
 ## [2.0.379-RC] 2020-08-02
 ### Changed
 - (Classic) TOC bump to WoW Classic Client Patch 1.13.5.

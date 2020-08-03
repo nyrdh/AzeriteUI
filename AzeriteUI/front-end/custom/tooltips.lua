@@ -56,7 +56,7 @@ Module.StyleTooltips = function(self)
 	self:SetDefaultTooltipStatusBarOffset(3)
 
 	-- Points the bar is shrunk inwards the left and right sides 
-	self:SetDefaultTooltipStatusBarInset(4, 4)
+	self:SetDefaultTooltipStatusBarInset(6, 6) -- 4,4
 
 	-- The height of the healthbar.
 	-- The bar grows from top to bottom.
