@@ -16,6 +16,7 @@ license-output: LICENSE.txt
 ignore:
     - AzeriteUI/back-end/external
     - AzeriteUI/back-end/external.xml
+    - .pkgmeta-classic
     - CHANGELOG.md
     - CODE_OF_CONDUCT.md
     - LICENSE.md
