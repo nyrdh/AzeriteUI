@@ -4,9 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.0.381-RC] 2020-08-07
-- Attempting to use curse packager keyword substitutions to run the same git source for both the Classic and Retail versions of this addon, gathering them under the same curseforge project in a hassle free manner.
-
+## [2.0.382-RC] 2020-08-07
 ### Added
 - Nameplates now show unit names when targeted or mouseovered, or if it's owner is attackable and you're currently engaged in combat.
 - Nameplates belonging to attackable units now show health values when targeted or mouseovered.
