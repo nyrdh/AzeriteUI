@@ -1,6 +1,6 @@
 [ ![Become a Patreon](http://larsnorbergofficial.com/img/social-media-buttons-patreon-small.jpg) ](https://www.patreon.com/goldpawsstuff) 
 
-This is a custom user interface for WoW: Classic, with a fresh new design and brand new custom codebase at its core. Designed by Daniel "Blakmane" Troko & coded by yours truly, Lars "Goldpaw" Norberg. 
+This is a custom user interface for World of Warcraft, with a fresh new design and brand new custom codebase at its core. Designed by Daniel "Blakmane" Troko & coded by yours truly, Lars "Goldpaw" Norberg. 
 
 The motivation of this user interface is immersion, and a more simplified gaming experience then what the "norm" has turned into. This game has SO much information that if not handled carefully becomes cumbersome, therefore blocking the most important asset of the game, the world. The best interface is no interface at all, but in a game such as this that is not possible. But if we have to block away parts of the game world to see information about the game mechanics, then at least let’s make it dynamic, beautiful and in sync with the game's aesthetics. Let's make it Warcraft!  
 
@@ -35,9 +35,7 @@ These are some addons I feel go very well together with our user interface. They
 
 ### **Classic:**
 * Enhanced World Map for WoW Classic: [www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic](https://www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic)  
-* H.H.T.D for WoW Classic: [www.curseforge.com/wow/addons/h-h-t-d](https://www.curseforge.com/wow/addons/h-h-t-d/files/all?filter-game-version=1738749986%3a67408)  
 * Immersion for WoW Classic: [www.curseforge.com/wow/addons/immersion](https://www.curseforge.com/wow/addons/immersion/files/all?filter-game-version=1738749986%3a67408)  
-* Questie: [www.curseforge.com/wow/addons/questie](https://www.curseforge.com/wow/addons/questie)  
 
 ### **Retail:**
 * Immersion: [www.curseforge.com/wow/addons/immersion](https://www.curseforge.com/wow/addons/immersion)  
