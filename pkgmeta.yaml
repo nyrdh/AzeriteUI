@@ -14,7 +14,6 @@ manual-changelog:
 license-output: LICENSE.txt
 
 ignore:
-    - .pkgmeta
     - CHANGELOG.md
     - CODE_OF_CONDUCT.md
     - LICENSE.md

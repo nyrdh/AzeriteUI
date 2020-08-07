@@ -1,9 +1,4 @@
-#@retail@
-## Interface: 80300
-#@end-retail@
-#@non-retail@
-# ## Interface: 11305
-#@end-non-retail@
+## Interface: 11305
 ## Name: AzeriteUI
 ## Title: |c00000002|r|cff7284abA|r|cff6a7a9ez|r|cff617092e|r|cff596785r|r|cff505d78i|r|cff48536bt|r|cff3f495fe|r|cffffffffUI|r
 ## Author: Daniel Troko, Lars Norberg
@@ -15,7 +10,6 @@
 ## X-FontPrefix: AzeriteFont
 ## X-ChatPrefix: AzeriteChatFont
 ## X-Category: Interface Enhancements
-## X-Curse-Project-ID: 298648
 ## X-Discord: https://discord.gg/MUSfWXd
 ## X-Website: https://www.patreon.com/goldpawsstuff
 ## X-License: Custom
@@ -24,17 +18,9 @@
 FontStyles.xml
 Templates.xml
 
-#@do-not-package@
 # External libraries, not made by us.
 # Loaded first, so our own can assume they exist.
 back-end\external.xml
-#@end-do-not-package@
-
-#@non-retail@
-# # External libraries, not made by us.
-# # Loaded first, so our own can assume they exist.
-# back-end\external.xml
-#@end-non-retail@
 
 # Addon libraries & plugins, the main engine of it all.
 back-end\wheel.lua
