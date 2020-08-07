@@ -651,7 +651,7 @@ local NamePlates_PreUpdate = function(plate, event, unit)
 			if (spellQueue.ForceUpdate) then
 				spellQueue:ForceUpdate() -- in case a cast was running
 			end
-			spellQueue.SpellQueue:Show()
+			spellQueue:Show()
 			spellQueue.disableSpellQueue = nil
 		end
 

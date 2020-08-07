@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.384-RC] 2020-08-07
+### Fixed
+- Fixed a wrong upvalue that would cause the Personal Resource Display (your own nameplate) to break.
+
 ## [2.0.383-RC] 2020-08-07
 ### Added
 - Added Demon Hunter Soul Fragments tracking to our class resource system.

@@ -1,4 +1,4 @@
-local LibFrame = Wheel:Set("LibFrame", 59)
+local LibFrame = Wheel:Set("LibFrame", 60)
 if (not LibFrame) then	
 	return
 end
@@ -59,6 +59,13 @@ local KEYWORD_DEFAULT = "UICenter"
 -- Create the new frame parent 
 if (not LibFrame.frameParent) then
 	LibFrame.frameParent = LibFrame.frameParent or CreateFrame("Frame", nil, UIParent, "SecureHandlerAttributeTemplate")
+end 
+
+-- Create the cache frame
+if (not LibFrame.frameMemoryCache) then
+	LibFrame.frameMemoryCache = LibFrame.frameMemoryCache or CreateFrame("Frame", nil, UIParent)
+	LibFrame.frameMemoryCache:SetSize(2,2)
+	LibFrame.frameMemoryCache:SetPoint("BOTTOM", UIParent, "TOP", 0, 2)
 end 
 
 -- Create the UICenter frame
@@ -146,6 +153,7 @@ local keyWords = LibFrame.keyWords
 
 -- Our special frames
 local DisplayFrame = LibFrame.frame
+local MemoryCacheFrame = LibFrame.frameMemoryCache
 local VisibilityFrame = LibFrame.frameParent
 
 -- Frame meant for events, timers, etc
@@ -368,6 +376,18 @@ LibFrame.GetFrame = function(self, anchor)
 	return anchor and parseAnchor(anchor) or self.frame or DisplayFrame
 end
 
+-- Texture Memory Cache
+-----------------------------------------------------------------
+-- The idea here is that texture kept visible, even off-screen.
+LibFrame.CreateTextureCache = function(self, texturePath)
+	if (not MemoryCacheFrame[texturePath]) then
+		MemoryCacheFrame[texturePath] = MemoryCacheFrame:CreateTexture(nil, "ARTWORK")
+		MemoryCacheFrame[texturePath]:SetSize(2,2)
+		MemoryCacheFrame[texturePath]:SetAlpha(0)
+		MemoryCacheFrame[texturePath]:SetPoint("BOTTOM")
+	end
+end
+
 LibFrame.SetAspectRatio = function(self, ratio, altRatio, useSmallestRatio)
 	check(ratio, 1, "number", "nil")
 	check(altRatio, 2, "number", "nil")
@@ -441,6 +461,7 @@ LibFrame:Enable()
 -- Module embedding
 local embedMethods = {
 	CreateFrame = true,
+	CreateTextureCache = true,
 	GetFrame = true,
 	RegisterKeyword = true,
 	SetAspectRatio = true
