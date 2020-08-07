@@ -202,8 +202,12 @@ end
 local CreateAuraButton = function(element)
 
 	local button = element:CreateFrame("Button")
-	button:EnableMouse(not element.disableMouse)
-	button:RegisterForClicks("RightButtonUp")
+	if (element.disableMouse) then
+		button:EnableMouse(true)
+		button:RegisterForClicks("RightButtonUp")
+	else
+		button:EnableMouse(false)
+	end
 	button:SetSize(element.auraSize, element.auraSize)
 	button._owner = element
 

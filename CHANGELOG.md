@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.383-RC] 2020-08-07
+### Added
+- Added Demon Hunter Soul Fragments tracking to our class resource system.
+
+### Fixed
+- Fixed a bug where the experience percent value on the minimap badge sometimes would show the percentage sign, cluttering up everything.
+- Fixed a bug that made nameplates unclickable. 
+
 ## [2.0.382-RC] 2020-08-07
 ### Added
 - Nameplates now show unit names when targeted or mouseovered, or if it's owner is attackable and you're currently engaged in combat.

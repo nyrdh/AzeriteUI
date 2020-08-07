@@ -1366,7 +1366,7 @@ Module.UpdateBars = function(self, event, ...)
 
 				-- Assign the correct post updates
 				if (first == "XP") then 
-					Spinner[1].OverrideValue = XP_OverrideValue
+					Spinner[1].OverrideValue = layout.XP_OverrideValue
 	
 				elseif (first == "Reputation") then 
 					Spinner[1].OverrideValue = layout.Rep_OverrideValue

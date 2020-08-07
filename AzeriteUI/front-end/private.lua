@@ -263,6 +263,7 @@ colorDB.power.CHI = createColor(126/255, 255/255, 163/255) -- Monk
 colorDB.power.COMBO_POINTS = createColor(255/255, 0/255, 30/255) -- Rogues, Druids
 colorDB.power.HOLY_POWER = createColor(245/255, 254/255, 145/255) -- Retribution Paladins 
 colorDB.power.RUNES = createColor(100/255, 155/255, 225/255) -- Death Knight 
+colorDB.power.SOUL_FRAGMENTS = createColor(148/255, 130/255, 201/255) -- Demon Hunter
 colorDB.power.SOUL_SHARDS = createColor(148/255, 130/255, 201/255) -- Warlock 
 
 -- Alternate Power
@@ -927,11 +928,21 @@ if (IsClassic) then
 -- WoW Retail (Battle for Azeroth)
 elseif (IsRetail) then
 
-		-- Death Knight
+	-- Demon Hunter
+	------------------------------------------------------------------------
+	do
+		AddUserFlags(203981, ByPlayer) 						-- Soul Fragments (Buff)
+
+		-- Demon Hunter (Vengeance)
+		-- https://www.wowhead.com/vengeance-demon-hunter-abilities/live-only:on
+		------------------------------------------------------------------------
+	end
+
+	-- Death Knight
 	------------------------------------------------------------------------
 	do
 		-- Death Knight (Blood)
-		-- https://www.wowhead.com/mage-abilities/live-only:on
+		-- https://www.wowhead.com/blood-death-knight-abilities/live-only:on
 		------------------------------------------------------------------------
 		AddUserFlags(188290, ByPlayer) 						-- Death and Decay (Buff)
 	end

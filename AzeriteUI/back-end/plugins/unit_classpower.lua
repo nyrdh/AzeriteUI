@@ -71,6 +71,9 @@ local STAGGER_RED_INDEX = STAGGER_RED_INDEX or 3
 -- Sourced from FrameXML/TargetFrame.lua
 local MAX_COMBO_POINTS = MAX_COMBO_POINTS or 5
 
+-- AuraIDs
+local SOUL_FRAGMENTS_ID = 203981
+
 -- Class specific info
 local _, PLAYERCLASS = UnitClass("player")
 
@@ -163,9 +166,10 @@ local Generic = setmetatable({
 
 		-- Has the module chosen to only show this with an active target,
 		-- or has the module chosen to hide all when empty?
-		if (element.hideWhenNoTarget and (not UnitExists("target"))) 
-		or (element.hideWhenUnattackable and (not UnitCanAttack("player", "target"))) 
-		or (element.hideWhenEmpty and (min == 0)) then 
+		if (element.hideWhenEmpty and (min == 0))
+		or ((powerType ~= "SOUL_FRAGMENTS") 
+		and ((element.hideWhenNoTarget and (not UnitExists("target"))) or (element.hideWhenUnattackable and (not UnitCanAttack("player", "target")))))
+		then 
 			for i = 1, maxDisplayed do
 				local point = element[i]
 				if point then
@@ -558,6 +562,66 @@ if (IsRetail) then
 		end
 	}, Generic_MT)
 
+	ClassPower.SoulFragments = setmetatable({ 
+		EnablePower = function(self)
+			local element = self.ClassPower
+			element.powerType = "SOUL_FRAGMENTS"
+			element.maxDisplayed = 5
+			element.isEnabled = true
+
+			self:RegisterEvent("UNIT_AURA", Proxy)
+
+			Generic.EnablePower(self)
+		end,
+		DisablePower = function(self)
+			self:UnregisterEvent("UNIT_AURA", Proxy)
+
+			Generic.DisablePower(self)
+		end,
+		UpdatePower = function(self, event, unit, ...)
+			local element = self.ClassPower
+			if (not element.isEnabled) then 
+				element:Hide()
+				return 
+			end 
+
+			local powerType = element.powerType
+			local min = 0
+			local max = 5
+
+			-- Scan buffs
+			local id = 1
+			while (true) do
+				local name, _, count, _, _, _, _, _, _, spellID = UnitAura("player", id, "HELPFUL")
+				if (not name) then 
+					break 
+				end
+				if (spellID == SOUL_FRAGMENTS_ID) then
+					min = count
+				end
+				id = id + 1
+			end
+
+			local maxDisplayed = element.maxDisplayed or element.max or max
+			for i = 1, maxDisplayed do 
+				local point = element[i]
+				if (not point:IsShown()) then 
+					point:Show()
+				end 
+				point:SetValue(min >= i and 1 or 0)
+			end 
+
+			for i = maxDisplayed + 1, #element do 
+				element[i]:SetValue(0)
+				if element[i]:IsShown() then 
+					element[i]:Hide()
+				end 
+			end 
+
+			return min, max, powerType
+		end,
+	}, Generic_MT)
+
 	ClassPower.SoulShards = setmetatable({ 
 		EnablePower = function(self)
 			local element = self.ClassPower
@@ -910,6 +974,8 @@ if (IsRetail) then
 			newType = "ComboPoints"
 		elseif ((PLAYERCLASS == "WARLOCK") and (level >= SHARDBAR_SHOW_LEVEL)) and (not element.ignoreSoulShards) then 
 			newType = "SoulShards"
+		elseif (PLAYERCLASS == "DEMONHUNTER") and (not element.ignoreSoulFragments) then 
+			newType = "SoulFragments"
 		elseif (not element.ignoreComboPoints) then 
 			newType = "ComboPoints"
 		else 
@@ -1022,5 +1088,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 38)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 39)
 end 

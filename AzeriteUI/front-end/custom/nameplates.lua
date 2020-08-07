@@ -271,6 +271,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	auras.relPoint = layout.AuraRelPoint
 	auras.offsetX = layout.AuraOffsetX
 	auras.offsetY = layout.AuraOffsetY
+	auras.disableMouse = true
 	auras:ClearAllPoints()
 	auras:SetPoint(auras.point, auras.anchor, auras.relPoint, auras.offsetX, auras.offsetY)
 	for property,value in pairs(layout.AuraProperties) do 

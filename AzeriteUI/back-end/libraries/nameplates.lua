@@ -854,10 +854,16 @@ LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
 	plate:UpdateScale()
 
 	-- Make sure the visible part of the Blizzard frame remains hidden
+	-- *Note: Do not EVER put a script on any of these with SetScript, 
+	--  as it will break important secure functionality of the frame, like clicks!
 	local unitframe = baseFrame.UnitFrame
-	if unitframe then
+	if (unitframe) then
 		unitframe:Hide()
 		unitframe:HookScript("OnShow", function(unitframe) unitframe:Hide() end) 
+		if (unitframe.selectionHighlight) then
+			hooksecurefunc(unitframe.selectionHighlight, "Show", function() plate:OnEnter()  end)
+			hooksecurefunc(unitframe.selectionHighlight, "Hide", function() plate:OnLeave()  end)
+		end
 	end
 
 	-- Make sure our nameplate fades out when the blizzard one is hidden.
@@ -866,13 +872,6 @@ LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
 	-- Follow the blizzard scale changes.
 	baseFrame:HookScript("OnSizeChanged", function() plate:UpdateScale() end)
 
-	-- Can't hook if they don't have the script to begin with
-	baseFrame[baseFrame:GetScript("OnEnter") and "HookScript" or "SetScript"](baseFrame, "OnEnter", function() 
-		plate:OnEnter() 
-	end)
-	baseFrame[baseFrame:GetScript("OnLeave") and "HookScript" or "SetScript"](baseFrame, "OnLeave", function() 
-		plate:OnLeave() 
-	end)
 
 	-- Since constantly updating frame levels can cause quite the performance drop, 
 	-- we're just giving each frame a set frame level when they spawn. 

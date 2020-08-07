@@ -1125,7 +1125,7 @@ local PlayerHUD_ClassPowerPostUpdate = function(element, unit, min, max, newMax,
 		style = "Chi"
 
 	--5 points: 3 circles, 3 crystals, last crystal larger
-	elseif (powerType == "ARCANE_CHARGES") or (powerType == "HOLY_POWER") or (powerType == "SOUL_SHARDS") then 
+	elseif (powerType == "ARCANE_CHARGES") or (powerType == "HOLY_POWER") or (powerType == "SOUL_SHARDS") or (powerType == "SOUL_FRAGMENTS") then 
 		style = "SoulShards"
 
 	-- 3 points: 
