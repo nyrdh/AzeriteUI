@@ -14,8 +14,6 @@ manual-changelog:
 license-output: LICENSE.txt
 
 ignore:
-    - AzeriteUI/back-end/external
-    - AzeriteUI/back-end/external.xml
     - CHANGELOG.md
     - CODE_OF_CONDUCT.md
     - LICENSE.md

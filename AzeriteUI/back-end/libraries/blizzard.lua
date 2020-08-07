@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 46)
+local LibBlizzard = Wheel:Set("LibBlizzard", 48)
 if (not LibBlizzard) then 
 	return
 end
@@ -111,33 +111,39 @@ local kill = function(object, keepEvents, silent)
 	return true
 end
 
-local killUnitFrame = function(baseName, keepParent)
+local killUnitFrame = function(baseName, keepParent, keepEvents, keepVisible)
 	local frame = getFrame(baseName)
-	if frame then
+	if (frame) then
 		if (not keepParent) then
-			kill(frame, false, true)
+			if (keepEvents) then
+				kill(frame, true, true)
+			else
+				kill(frame, false, true)
+			end
 		end
-		frame:Hide()
+		if (not keepVisible) then
+			frame:Hide()
+		end
 		frame:ClearAllPoints()
 		frame:SetPoint("BOTTOMLEFT", UIParent, "TOPLEFT", -400, 500)
 
 		local health = frame.healthbar
-		if health then
+		if (health) then
 			health:UnregisterAllEvents()
 		end
 
 		local power = frame.manabar
-		if power then
+		if (power) then
 			power:UnregisterAllEvents()
 		end
 
 		local spell = frame.spellbar
-		if spell then
+		if (spell) then
 			spell:UnregisterAllEvents()
 		end
 
 		local altpowerbar = frame.powerBarAlt
-		if altpowerbar then
+		if (altpowerbar) then
 			altpowerbar:UnregisterAllEvents()
 		end
 	end
@@ -668,7 +674,14 @@ UIWidgets["UnitFramePlayer"] = function(self)
 end
 
 UIWidgets["UnitFramePet"] = function(self)
-	killUnitFrame("PetFrame")
+	if (IsClassic) then
+		killUnitFrame("PetFrame")
+	else
+		-- The retail totem bar relies on this
+		-- appearing as blizzard intended.
+		-- We need both events and visiblity intact.
+		killUnitFrame("PetFrame", false, true, true)
+	end
 end
 
 UIWidgets["UnitFrameTarget"] = function(self)

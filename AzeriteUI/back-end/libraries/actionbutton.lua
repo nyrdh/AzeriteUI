@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 99)
+local LibSecureButton = Wheel:Set("LibSecureButton", 100)
 if (not LibSecureButton) then
 	return
 end
@@ -582,9 +582,7 @@ local UpdatePetButton = function(self, event, ...)
 		self:Update()
 	elseif (((event == "UNIT_FLAGS") or (event == "UNIT_AURA")) and (arg1 == "pet")) then
 		self:Update()
-	elseif (event == "PLAYER_CONTROL_LOST") or (event == "PLAYER_CONTROL_GAINED") then
-		self:Update()
-	elseif (event == "PLAYER_FARSIGHT_FOCUS_CHANGED") then
+	elseif (event == "PLAYER_CONTROL_LOST") or (event == "PLAYER_CONTROL_GAINED") or (event == "PLAYER_FARSIGHT_FOCUS_CHANGED") or (event == "PET_BAR_UPDATE_USABLE") or (event == "PLAYER_TARGET_CHANGED") or (event == "PLAYER_MOUNT_DISPLAY_CHANGED") then
 		self:Update()
 	elseif (event == "PET_BAR_UPDATE_COOLDOWN") then
 		self:UpdateCooldown()
@@ -1569,33 +1567,39 @@ PetButton.GetTooltip = ActionButton.GetTooltip
 -- PetButton Script Handlers
 ----------------------------------------------------
 PetButton.OnEnable = function(self)
+	self:RegisterEvent("PET_BAR_UPDATE", UpdatePetButton)
+	self:RegisterEvent("PET_BAR_UPDATE_COOLDOWN", UpdatePetButton)
+	self:RegisterEvent("PET_BAR_UPDATE_USABLE", UpdatePetButton)
+	self:RegisterEvent("PET_BAR_HIDEGRID", UpdatePetButton)
+	self:RegisterEvent("PET_BAR_SHOWGRID", UpdatePetButton)
 	self:RegisterEvent("PLAYER_CONTROL_LOST", UpdatePetButton)
 	self:RegisterEvent("PLAYER_CONTROL_GAINED", UpdatePetButton)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", UpdatePetButton)
 	self:RegisterEvent("PLAYER_FARSIGHT_FOCUS_CHANGED", UpdatePetButton)
-	self:RegisterEvent("UNIT_PET", UpdatePetButton)
-	self:RegisterEvent("UNIT_FLAGS", UpdatePetButton)
+	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED", UpdatePetButton)
+	self:RegisterEvent("PLAYER_TARGET_CHANGED", UpdatePetButton)
 	self:RegisterEvent("UNIT_AURA", UpdatePetButton)
+	self:RegisterEvent("UNIT_FLAGS", UpdatePetButton)
+	self:RegisterEvent("UNIT_PET", UpdatePetButton)
 	self:RegisterEvent("UPDATE_BINDINGS", UpdatePetButton)
-	self:RegisterEvent("PET_BAR_UPDATE", UpdatePetButton)
-	self:RegisterEvent("PET_BAR_UPDATE_COOLDOWN", UpdatePetButton)
-	self:RegisterEvent("PET_BAR_SHOWGRID", UpdatePetButton)
-	self:RegisterEvent("PET_BAR_HIDEGRID", UpdatePetButton)
 end
 
 PetButton.OnDisable = function(self)
+	self:UnregisterEvent("PET_BAR_UPDATE", UpdatePetButton)
+	self:UnregisterEvent("PET_BAR_UPDATE_COOLDOWN", UpdatePetButton)
+	self:UnregisterEvent("PET_BAR_UPDATE_USABLE", UpdatePetButton)
+	self:UnregisterEvent("PET_BAR_HIDEGRID", UpdatePetButton)
+	self:UnregisterEvent("PET_BAR_SHOWGRID", UpdatePetButton)
 	self:UnregisterEvent("PLAYER_CONTROL_LOST", UpdatePetButton)
 	self:UnregisterEvent("PLAYER_CONTROL_GAINED", UpdatePetButton)
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD", UpdatePetButton)
 	self:UnregisterEvent("PLAYER_FARSIGHT_FOCUS_CHANGED", UpdatePetButton)
-	self:UnregisterEvent("UNIT_PET", UpdatePetButton)
-	self:UnregisterEvent("UNIT_FLAGS", UpdatePetButton)
+	self:UnregisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED", UpdatePetButton)
+	self:UnregisterEvent("PLAYER_TARGET_CHANGED", UpdatePetButton)
 	self:UnregisterEvent("UNIT_AURA", UpdatePetButton)
+	self:UnregisterEvent("UNIT_FLAGS", UpdatePetButton)
+	self:UnregisterEvent("UNIT_PET", UpdatePetButton)
 	self:UnregisterEvent("UPDATE_BINDINGS", UpdatePetButton)
-	self:UnregisterEvent("PET_BAR_UPDATE", UpdatePetButton)
-	self:UnregisterEvent("PET_BAR_UPDATE_COOLDOWN", UpdatePetButton)
-	self:UnregisterEvent("PET_BAR_SHOWGRID", UpdatePetButton)
-	self:UnregisterEvent("PET_BAR_HIDEGRID", UpdatePetButton)
 end
 
 PetButton.OnEnter = function(self) 

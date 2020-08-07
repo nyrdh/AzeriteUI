@@ -35,7 +35,7 @@ if (IsClassic) then
 	--ThreatLib:RegisterCallback("Activate", CheckStatus)
 	--ThreatLib:RegisterCallback("Deactivate", CheckStatus)
 	--ThreatLib:RegisterCallback("ThreatUpdated", CheckStatus)
-	--ThreatLib:RequestActiveOnSolo(true)
+	ThreatLib:RequestActiveOnSolo(true)
 
 	-- I do NOT like exposing this, but I don't want multiple update handlers either,
 	-- neither from multiple frames using this element or multiple versions of the plugin.
@@ -264,5 +264,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Threat", Enable, Disable, Proxy, 15)
+	Lib:RegisterElement("Threat", Enable, Disable, Proxy, 17)
 end 

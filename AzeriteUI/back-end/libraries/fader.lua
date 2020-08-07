@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 35)
+local LibFader = Wheel:Set("LibFader", 36)
 if (not LibFader) then	
 	return
 end
@@ -396,7 +396,8 @@ LibFader.CheckPower = function(self)
 end 
 
 LibFader.CheckVehicle = function(self)
-	if (UnitInVehicle("player") or HasVehicleActionBar()) then 
+	--if (UnitInVehicle("player") or HasVehicleActionBar()) then 
+	if (HasVehicleActionBar()) then 
 		Data.inVehicle = true
 		return 
 	end 

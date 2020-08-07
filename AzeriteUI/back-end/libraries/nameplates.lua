@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 49)
+local LibNamePlate = Wheel:Set("LibNamePlate", 52)
 if (not LibNamePlate) then	
 	return
 end
@@ -52,6 +52,7 @@ local InCombatLockdown = InCombatLockdown
 local IsAddOnLoaded = IsAddOnLoaded
 local IsLoggedIn = IsLoggedIn
 local SetCVar = SetCVar
+local UnitCanAttack = UnitCanAttack
 local UnitClass = UnitClass
 local UnitClassification = UnitClassification
 local UnitExists = UnitExists
@@ -480,6 +481,8 @@ NamePlate.OnShow = function(self, event, unit)
 	self.currentAlpha = 0 -- update stored alpha value
 	self.achievedAlpha = 0 -- set this as the achieved alpha
 
+	self.isVisible = true
+	self.inCombat = IN_COMBAT
 	self.isYou = UnitIsUnit(unit, "player")
 	self.isTarget = UnitIsUnit(unit, "target") -- gotta update this on target changes... 
 	self.isPlayer = UnitIsPlayer(unit)
@@ -491,6 +494,7 @@ NamePlate.OnShow = function(self, event, unit)
 	self.isElite = (self.unitClassificiation == "elite") or (self.unitClassificiation == "rareelite")
 	self.unitLevel = UnitLevel(unit)
 	self.unitClassificiation = UnitClassification(unit)
+	self.unitCanAttack = UnitCanAttack("player", unit)
 
 	-- Enabling of situational elements should be done here.
 	-- Flags are available to the front-end at this point.
@@ -520,6 +524,7 @@ end
 NamePlate.OnHide = function(self, event, unit)
 	visiblePlates[self] = false -- this will trigger the fadeout and hiding
 
+	self.isVisible = nil
 	self.isYou = nil
 	self.isTarget = nil
 	self.isPlayer = nil
@@ -529,12 +534,27 @@ NamePlate.OnHide = function(self, event, unit)
 	self.isBoss = nil
 	self.isRare = nil
 	self.isElite = nil
+	self.inCombat = nil
 	self.unitLevel = nil
 	self.unitClassificiation = nil
 
 	for element in pairs(elements) do
 		self:DisableElement(element, true)
 	end
+end
+
+NamePlate.OnEnter = function(self)
+	self.isMouseOver = true
+	if (self.PostUpdate) then 
+		self:PostUpdate("OnEnter", self.unit)
+	end 
+end
+
+NamePlate.OnLeave = function(self)
+	self.isMouseOver = false
+	if (self.PostUpdate) then 
+		self:PostUpdate("OnLeave", self.unit)
+	end 
 end
 
 NamePlate.OnEvent = function(frame, event, ...)
@@ -846,6 +866,14 @@ LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
 	-- Follow the blizzard scale changes.
 	baseFrame:HookScript("OnSizeChanged", function() plate:UpdateScale() end)
 
+	-- Can't hook if they don't have the script to begin with
+	baseFrame[baseFrame:GetScript("OnEnter") and "HookScript" or "SetScript"](baseFrame, "OnEnter", function() 
+		plate:OnEnter() 
+	end)
+	baseFrame[baseFrame:GetScript("OnLeave") and "HookScript" or "SetScript"](baseFrame, "OnLeave", function() 
+		plate:OnLeave() 
+	end)
+
 	-- Since constantly updating frame levels can cause quite the performance drop, 
 	-- we're just giving each frame a set frame level when they spawn. 
 	-- We can still get frames overlapping, but in most cases we avoid it now.
@@ -991,11 +1019,12 @@ LibNamePlate.OnEvent = function(self, event, ...)
 			-- Will be 'false' when fading out, 'nil' when hidden.
 			-- Either way, this only applies to visible, active plates. 
 			if (baseFrame) then
-		--for baseFrame, plate in pairs(allPlates) do
-			--if plate:IsShown() then
 				plate.isTarget = HAS_TARGET and plate.unit and UnitIsUnit(plate.unit, "target") 
 				plate:UpdateAlpha()
 				plate:UpdateFrameLevel()
+				if (plate.PostUpdate) then
+					plate:PostUpdate(event, plate.unit)
+				end
 			end
 		end	
 		
@@ -1020,9 +1049,11 @@ LibNamePlate.OnEvent = function(self, event, ...)
 			-- Will be 'false' when fading out, 'nil' when hidden.
 			-- Either way, this only applies to visible, active plates. 
 			if (baseFrame) then
-		--for baseFrame, plate in pairs(allPlates) do
-			--if plate and plate:IsShown() then
+				plate.inCombat = IN_COMBAT
 				plate:UpdateAlpha()
+				if (plate.PostUpdate) then
+					plate:PostUpdate(event, plate.unit)
+				end
 			end
 		end
 
@@ -1032,9 +1063,11 @@ LibNamePlate.OnEvent = function(self, event, ...)
 			-- Will be 'false' when fading out, 'nil' when hidden.
 			-- Either way, this only applies to visible, active plates. 
 			if (baseFrame) then
-		--for baseFrame, plate in pairs(allPlates) do
-			--if (plate and plate:IsShown()) then
+				plate.inCombat = IN_COMBAT
 				plate:UpdateAlpha()
+				if (plate.PostUpdate) then
+					plate:PostUpdate(event, plate.unit)
+				end
 			end
 		end
 		if hasQueuedSettingsUpdate then 

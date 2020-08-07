@@ -123,6 +123,7 @@ end
 --local tooltipBorder = GetMedia("tooltip_border_blizzcompatible")
 local tooltipBorder = GetMedia("tooltip_border_hex")
 local tooltipInset = 10.5
+local buttonSpacing = 8 -- 10
 
 ------------------------------------------------
 -- Module Callbacks
@@ -134,8 +135,8 @@ local Core_Window_CreateBorder = function(self)
 	local mod = 1 -- .75
 	local border = self:CreateFrame("Frame")
 	border:SetFrameLevel(self:GetFrameLevel()-1)
-	border:SetPoint("TOPLEFT", -6, 8)
-	border:SetPoint("BOTTOMRIGHT", 6, -8)
+	border:SetPoint("TOPLEFT", -6, 8) -- -6, 8
+	border:SetPoint("BOTTOMRIGHT", 6, -8) -- 6, -8
 	border:SetBackdrop({
 		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
 		edgeFile = tooltipBorder,
@@ -329,7 +330,7 @@ local BlizzardPopup_OnShow = function(popup)
 	local sizeMod = 3/4
 	backdrop:SetBackdrop({
 		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = tooltipBorder,
+		edgeFile = tooltipBorder, GetMedia("tooltip_border_hex_large"), -- tooltipBorder,
 		edgeSize = 32*sizeMod, 
 		tile = false, 
 		insets = { top = tooltipInset*sizeMod, bottom = tooltipInset*sizeMod, left = tooltipInset*sizeMod, right = tooltipInset*sizeMod }
@@ -632,48 +633,46 @@ local Minimap_ZoneName_PlaceFunc = function(Handler)
 	return "BOTTOMRIGHT", Handler.Clock, "BOTTOMLEFT", -8, 0 
 end
 
-local NamePlates_RaidTarget_PostUpdate = function(element, unit)
-	local self = element._owner
-	if self:IsElementEnabled("Auras") then 
-		self.Auras:ForceUpdate()
-	else 
-		element:ClearAllPoints()
-		element:SetPoint(unpack(self.layout.RaidTargetPlace))
-	end 
-end
-
-
 -- Retail Personal Resource Display
 local NamePlates_PreUpdate = function(plate, event, unit)
+	if (plate.isYou) then
+		plate.Health.Value:Hide()
+	end
 	if (plate.isYou) and (not plate.enabledAsPlayer) then
 		local layout = plate.layout
+		local cast = plate.Cast
+		local spellQueue = cast.SpellQueue
 
 		plate.Health:SetOrientation(layout.HealthBarOrientationPlayer)
-		plate.Cast:SetOrientation(layout.CastOrientationPlayer)
-		plate.Cast:Place(unpack(layout.CastPlacePlayer))
-		if (plate.Cast.SpellQueue) then
-			if (plate.Cast.SpellQueue.ForceUpdate) then
-				plate.Cast.SpellQueue:ForceUpdate() -- in case a cast was running
-			end
-			plate.Cast.SpellQueue:Show()
-			plate.Cast.disableSpellQueue = nil
-		end
-		plate:EnableElement("Power")
+		cast:SetOrientation(layout.CastOrientationPlayer)
+		cast:Place(unpack(layout.CastPlacePlayer))
 
+		if (spellQueue) then
+			if (spellQueue.ForceUpdate) then
+				spellQueue:ForceUpdate() -- in case a cast was running
+			end
+			spellQueue.SpellQueue:Show()
+			spellQueue.disableSpellQueue = nil
+		end
+
+		plate:EnableElement("Power")
 		plate.enabledAsPlayer = true
 
 	elseif (not plate.isYou) and (plate.enabledAsPlayer) then
 		local layout = plate.layout
+		local cast = plate.Cast
+		local spellQueue = cast.SpellQueue
 
 		plate.Health:SetOrientation(layout.HealthBarOrientation)
-		plate.Cast:SetOrientation(layout.CastOrientation)
-		plate.Cast:Place(unpack(layout.CastPlace))
-		if (plate.Cast.SpellQueue) then
-			plate.Cast.SpellQueue:Hide()
-			plate.Cast.disableSpellQueue = true
-		end
-		plate:DisableElement("Power")
+		cast:SetOrientation(layout.CastOrientation)
+		cast:Place(unpack(layout.CastPlace))
 
+		if (spellQueue) then
+			spellQueue:Hide()
+			cast.disableSpellQueue = true
+		end
+
+		plate:DisableElement("Power")
 		plate.enabledAsPlayer = nil
 	end
 end
@@ -756,37 +755,7 @@ local NamePlates_Auras_PostUpdateButton = function(element, button)
 	end 
 end
 
-local NamePlates_Auras_PostUpdate = function(element, unit, visible)
-	local self = element._owner
-	if (not self) then 
-		return 
-	end 
-
-	element:ClearAllPoints()
-	if element.point then 
-		element:SetPoint(element.point, element.anchor, element.relPoint, element.offsetX, element.offsetY)
-	else 
-		element:SetPoint(unpack(self.layout.AuraFramePlace))
-	end 
-
-	local raidTarget = self.RaidTarget
-	if raidTarget then 
-		raidTarget:ClearAllPoints()
-		if visible then
-			if visible > 3 then 
-				raidTarget:SetPoint(unpack(self.layout.RaidTargetPlace_AuraRows))
-			elseif visible > 0 then
-				raidTarget:SetPoint(unpack(self.layout.RaidTargetPlace_AuraRow))
-			else 
-				raidTarget:SetPoint(unpack(self.layout.RaidTargetPlace))
-			end  
-		else
-			raidTarget:SetPoint(unpack(self.layout.RaidTargetPlace))
-		end
-	end 
-end
-
-local NamePlate_CastBar_PostUpdate = function(cast, unit)
+local NamePlates_CastBar_PostUpdate = function(cast, unit)
 	if cast.notInterruptible then
 
 		-- Set it to the protected look 
@@ -835,11 +804,70 @@ local NamePlate_CastBar_PostUpdate = function(cast, unit)
 		-- Standard bar coloring
 		cast:SetStatusBarColor(Colors.cast[1], Colors.cast[2], Colors.cast[3]) 
 	end 
+	local self = cast._owner
+	if (not self) then 
+		return 
+	end 
+	unit = unit or self.unit
+	if (unit) then
+		self:PostUpdate(unit)
+	end
+end
+
+local NamePlates_PostUpdate_ElementProxy = function(element, unit)
+	local self = element._owner
+	if (not self) then 
+		return 
+	end 
+	unit = unit or self.unit
+	if (unit) then
+		self:PostUpdate(unit)
+	end
+end
+
+local NamePlates_PostUpdate = function(self, event, unit, ...)
+	local layout = self.layout
+	local auras = self.Auras
+	local cast = self.Cast
+	local health = self.Health
+	local healthVal = self.Health.Value
+	local name = self.Name
+	local raidicon = self.RaidTarget
+
+	local showName = not(name.hidePlayer and self.isYou) 
+		and ((name.showMouseover and self.isMouseOver) or (name.showTarget and self.isTarget))
+		or ((self.unitCanAttack) and (name.showCombat and self.inCombat))
+
+	local showHealthValue = (self.unitCanAttack) 
+		and not(healthVal.hidePlayer and self.isYou) 
+		and not(healthVal.hideCasting and (cast.casting or cast.channeling)) 
+		and ((healthVal.showMouseover and self.isMouseOver) or (healthVal.showTarget and self.isTarget) or (healthVal.showCombat and self.inCombat)) 
+
+	local num = auras.visibleAuras or 0
+	local auraOffset = showName and layout.NameOffsetWhenShown or 0
+	local raidiconOffset = auraOffset + ((num > 3) and (layout.AuraSize*2 + layout.AuraPadding) or (num > 0) and (layout.AuraSize) or 0)
+
+	if (showHealthValue) then
+		healthVal:Show()
+		health:ForceUpdate()
+	else
+		healthVal:Hide()
+	end
+
+	if (showName) then
+		name:Show()
+		name:ForceUpdate()
+	else
+		name:Hide()
+	end
+
+	auras:SetPoint(auras.point, auras.anchor, auras.relPoint, auras.offsetX, auras.offsetY + auraOffset)
+	raidicon:SetPoint(raidicon.point, raidicon.anchor, raidicon.relPoint, raidicon.offsetX, raidicon.offsetY + raidiconOffset)
 end
 
 -- Tooltip Bar post updates
 -- Show health values for tooltip health bars, and hide others.
--- Will expand on this later to tailer all tooltips to our needs.  
+-- Will expand on this later to tailor all tooltips to our needs.  
 local Tooltip_StatusBar_PostUpdate = function(tooltip, bar, value, min, max, isRealValue)
 	if (bar.barType == "health") then 
 		if (isRealValue) then 
@@ -2216,7 +2244,8 @@ Defaults.UnitFrameParty = {
 }
 
 Defaults.UnitFrameRaid = {
-	enableRaidFrames = true
+	enableRaidFrames = true,
+	enableRaidFrameTestMode = false
 }
 
 ------------------------------------------------
@@ -2284,7 +2313,7 @@ Layouts[ADDON] = {
 	MenuButton_PostUpdate = Core_MenuButton_Layers_PostUpdate,
 	MenuButtonSize = { MenuButtonW, MenuButtonH },
 	MenuButtonSizeMod = .75, 
-	MenuButtonSpacing = 10, 
+	MenuButtonSpacing = buttonSpacing, 
 	MenuPlace = { "BOTTOMRIGHT", -41, 32 },
 	MenuSize = { 320 -10, 70 }, 
 	MenuToggleButtonSize = { 48, 48 }, 
@@ -2403,7 +2432,7 @@ Layouts.BlizzardGameMenu = {
 	MenuButton_PostUpdate = Blizzard_GameMenu_Button_PostUpdate,
 	MenuButtonSize = { MenuButtonW, MenuButtonH },
 	MenuButtonSizeMod = .75, 
-	MenuButtonSpacing = 10
+	MenuButtonSpacing = buttonSpacing
 }
 
 -- Blizzard MicroMenu
@@ -2428,7 +2457,7 @@ Layouts.BlizzardMicroMenu = {
 	MenuButtonNormalColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
 	MenuButtonSize = { MenuButtonW, MenuButtonH },
 	MenuButtonSizeMod = .75, 
-	MenuButtonSpacing = 10, 
+	MenuButtonSpacing = buttonSpacing, 
 	MenuButtonTitleColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
 	MenuWindow_CreateBorder = Core_Window_CreateBorder
 }
@@ -2733,7 +2762,7 @@ Layouts.Bindings = {
 	MenuButton_PostUpdate = BindMode_MenuButton_PostUpdate, 
 	MenuButtonSize = { MenuButtonW, MenuButtonH },
 	MenuButtonSizeMod = .75, 
-	MenuButtonSpacing = 10, 
+	MenuButtonSpacing = buttonSpacing, 
 	MenuWindow_CreateBorder = BindMode_MenuWindow_CreateBorder,
 	Place = { "TOP", "UICenter", "TOP", 0, -100 }, 
 	Size = { 520, 180 }
@@ -2941,6 +2970,8 @@ Layouts.Minimap = {
 
 -- NamePlates
 Layouts.NamePlates = {
+	PostCreateAuraButton = NamePlates_Auras_PostCreateButton,
+	PostUpdateAuraButton = NamePlates_Auras_PostUpdateButton,
 	AuraAnchor = "Health", 
 	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
 	AuraBorderBackdropBorderColor = { Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3 },
@@ -2956,7 +2987,8 @@ Layouts.NamePlates = {
 	AuraIconSize = { 30 - 6, 30 - 6 },
 	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
 	AuraOffsetX = (84 - (30*3 + 4*2))/2, 
-	AuraOffsetY = 10 + 4,
+	AuraOffsetY = 10 + 4 - 10,
+	AuraSize = 30, AuraPadding = 4,
 	AuraPoint = "BOTTOMLEFT", 
 	AuraProperties = {
 		growthX = "LEFT", 
@@ -3020,7 +3052,6 @@ Layouts.NamePlates = {
 	CastOrientationPlayer = "RIGHT", 
 	CastPlace = { "TOP", 0, -20 },
 	CastPlacePlayer = { "TOP", 0, -(2 + 18 + 18) },
-	CastPostUpdate = NamePlate_CastBar_PostUpdate,
 	CastShieldColor = { Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3] },
 	CastShieldDrawLayer = { "BACKGROUND", -5 },
 	CastShieldPlace = { "CENTER", 0, -1 }, 
@@ -3082,11 +3113,47 @@ Layouts.NamePlates = {
 	},
 	HealthTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
 	HealthTexture = GetMedia("nameplate_bar"),
+
+	HealthValuePlace = { "TOP", 0, -18 },
+	HealthValueDrawLayer = { "OVERLAY", 1 },
+	HealthValueFontObject = GetFont(12,true),
+	HealthValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	HealthValueJustifyH = "CENTER",
+	HealthValueJustifyV = "MIDDLE",
+	HealthValueHidePlayer = true,
+	HealthValueHideWhileCasting = true,
+	HealthValueShowInCombat = false,
+	HealthValueShowOnMouseover = true,
+	HealthValueShowOnTarget = true,
+	HealthValueShowAtMax = true,
+
+	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	NameDrawLayer = { "ARTWORK", 1 },
+	NameFont = GetFont(12,true),
+	NameJustifyH = "CENTER",
+	NameJustifyV = "MIDDLE",
+	NamePlace = { "TOP", 0, 16 },
+	NameOffsetWhenShown = 12 + 4,
+	NameShowLevel = nil,
+	NameShowLevelLast = nil,
+	NameHidePlayer = true,
+	NameShowInCombat = true,
+	NameShowOnMouseover = true,
+	NameShowOnTarget = true,
+
+	ClassificationPlace = { "RIGHT", 32-10, -1 },
+	ClassificationSize = { 40, 40 },
+	ClassificationColor = { 1, 1, 1, 1 },
+	ClassificationHideOnFriendly = true,
+	ClassificationIndicatorBossTexture = GetMedia("icon_badges_boss"),
+	ClassificationIndicatorEliteTexture = GetMedia("icon_classification_elite"),
+	ClassificationIndicatorRareTexture = GetMedia("icon_classification_rare"),
+
 	PreUpdate = IsRetail and NamePlates_PreUpdate,
-	PostCreateAuraButton = NamePlates_Auras_PostCreateButton,
-	PostUpdateAura = NamePlates_Auras_PostUpdate,
-	PostUpdateAuraButton = NamePlates_Auras_PostUpdateButton,
-	PostUpdateRaidTarget = NamePlates_RaidTarget_PostUpdate,
+	PostUpdate = NamePlates_PostUpdate,
+	PostUpdateAura = NamePlates_PostUpdate_ElementProxy,
+	PostUpdateCast = NamePlates_CastBar_PostUpdate,
+	PostUpdateRaidTarget = NamePlates_PostUpdate_ElementProxy,
 
 	PowerBackdropColor = { 1, 1, 1, 1 },
 	PowerBackdropDrawLayer = { "BACKGROUND", -2 },
@@ -3117,9 +3184,13 @@ Layouts.NamePlates = {
 	PowerTexture = GetMedia("nameplate_bar"),
 
 	RaidTargetDrawLayer = { "ARTWORK", 0 },
-	RaidTargetPlace = { "TOP", 0, 20+ 44 }, -- no auras
-	RaidTargetPlace_AuraRow = { "TOP", 0, 20+ 80 }, -- auras, 1 row
-	RaidTargetPlace_AuraRows = { "TOP", 0, 20+ 112 }, -- auras, 2 rows
+	RaidTargetPoint = "BOTTOM",
+	RaidTargetRelPoint = "TOP",
+	RaidTargetOffsetX = 0,
+	RaidTargetOffsetY = 6,
+	--RaidTargetPlace = { "TOP", 0, 20+ 44 -6 }, -- no auras
+	--RaidTargetPlace_AuraRow = { "TOP", 0, 20+ 80 -6 }, -- auras, 1 row
+	--RaidTargetPlace_AuraRows = { "TOP", 0, 20+ 112 -6 }, -- auras, 2 rows
 	RaidTargetSize = { 64, 64 },
 	RaidTargetTexture = GetMedia("raid_target_icons"),
 	SetConsoleVars = {
@@ -3138,6 +3209,7 @@ Layouts.NamePlates = {
 		nameplateLargeBottomInset = .02, -- default .15
 		nameplateOtherBottomInset = .02, -- default .1
 		nameplateClassResourceTopInset = 0,
+		clampTargetNameplateToScreen = 1, -- new CVar July 14th 2020. Wohoo! Thanks torhaala for telling me! :)
 	
 		-- Nameplate scale
 		nameplateMinScale = false, -- .8
@@ -3165,7 +3237,14 @@ Layouts.NamePlates = {
 		-- The max distance to show the target nameplate when the target is behind the camera.
 		nameplateTargetBehindMaxDistance = 15 -- default 15
 	},
-	Size = { 80, 32 }
+	Size = { 80, 32 },
+	ThreatColor = { 1, 1, 1, 1 },
+	ThreatDrawLayer = { "BACKGROUND", -3 },
+	ThreatHideSolo = false, 
+	ThreatPlace = { "CENTER", 0, 0 },
+	ThreatSize = { 84*256/(256-28), 14*64/(64-28) },
+	ThreatTexture = GetMedia("nameplate_glow"),
+
 }
 
 -- Custom Tooltips
@@ -3469,10 +3548,10 @@ Layouts.UnitFramePlayer = {
 	ThreatFadeOut = 3,
 	ThreatHealthAlpha = .5,
 	ThreatHealthDrawLayer = { "BACKGROUND", -2 },
-	ThreatHealthPlace = { "CENTER", 1, -1 },
+	ThreatHealthPlace = { "CENTER", 1, 0 },
 	ThreatHealthSize = { 716, 188 },
 	ThreadHide = PlayerFrame_Threat_Hide,
-	ThreatHideSolo = false, -- true, -- only set to false when testing
+	ThreatHideSolo = true, -- only set to false when testing
 	ThreatIsShown = PlayerFrame_Threat_IsShown,
 	ThreatManaAlpha = .5,
 	ThreatManaPlace = { "CENTER", 0, 0 },
@@ -3486,7 +3565,7 @@ Layouts.UnitFramePlayer = {
 	ThreatPowerBgSize = { 198,98 },
 	ThreatPowerBgTexture = GetMedia("pw_crystal_case_glow"),
 	ThreatPowerDrawLayer = { "BACKGROUND", -2 },
-	ThreatPowerPlace = { "CENTER", 0, 0 }, 
+	ThreatPowerPlace = { "CENTER", 0, 1 }, 
 	ThreatPowerSize = { 120/157*256, 140/183*256 },
 	ThreatPowerTexture = GetMedia("power_crystal_glow"),
 	ThreatShow = PlayerFrame_Threat_Show,
@@ -3836,7 +3915,7 @@ Layouts.UnitFrameTarget = {
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
 	HardenedHealthTexture = GetMedia("hp_lowmid_bar"),
-	HardenedHealthThreatPlace = { "CENTER", 0, 0 },
+	HardenedHealthThreatPlace = { "CENTER", 0, 1 },
 	HardenedHealthThreatSize = { 716, 188 },
 	HardenedHealthThreatTexture = GetMedia("hp_mid_case_glow"),
 	HardenedHealthValueVisible = true,
@@ -3945,7 +4024,7 @@ Layouts.UnitFrameTarget = {
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
 	NoviceHealthTexture = GetMedia("hp_lowmid_bar"),
-	NoviceHealthThreatPlace = { "CENTER", 0, 0 },
+	NoviceHealthThreatPlace = { "CENTER", 0, 1 },
 	NoviceHealthThreatSize = { 716, 188 },
 	NoviceHealthThreatTexture = GetMedia("hp_low_case_glow"),
 	NoviceHealthValueVisible = true,
@@ -4033,7 +4112,7 @@ Layouts.UnitFrameTarget = {
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
 	SeasonedHealthTexture = GetMedia("hp_cap_bar"),
-	SeasonedHealthThreatPlace = { "CENTER", 0, 0 },
+	SeasonedHealthThreatPlace = { "CENTER", 0, 1 },
 	SeasonedHealthThreatSize = { 716, 188 },
 	SeasonedHealthThreatTexture = GetMedia("hp_cap_case_glow"),
 	SeasonedHealthValueVisible = true, 
@@ -4058,10 +4137,10 @@ Layouts.UnitFrameTarget = {
 	ThreatHealthAlpha = .5,
 	ThreatHealthDrawLayer = { "BACKGROUND", -2 },
 	ThreatHealthTexCoord = { 1,0,0,1 },
-	ThreatHideSolo = false, -- true, -- only set to false when testing
+	ThreatHideSolo = true, -- only set to false when testing
 	ThreatPortraitAlpha = .5,
 	ThreatPortraitDrawLayer = { "BACKGROUND", -2 },
-	ThreatPortraitPlace = { "CENTER", -1, 2 },
+	ThreatPortraitPlace = { "CENTER", -1, 2 + 1 },
 	ThreatPortraitSize = { 187, 187 },
 	ThreatPortraitTexture = GetMedia("portrait_frame_glow")
 }

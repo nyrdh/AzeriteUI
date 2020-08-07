@@ -13,17 +13,17 @@ Module:SetIncompatible("TidyPlates")
 Module:SetIncompatible("TidyPlates_ThreatPlates")
 Module:SetIncompatible("TidyPlatesContinued")
 
--- Lua API
-local _G = _G
-
 -- WoW API
 local GetQuestGreenRange = GetQuestGreenRange
 local InCombatLockdown = InCombatLockdown
 local IsInInstance = IsInInstance 
 local SetCVar = SetCVar
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
+local SetNamePlateEnemySize = C_NamePlate.SetNamePlateEnemySize
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
+local SetNamePlateFriendlySize = C_NamePlate.SetNamePlateFriendlySize
 local SetNamePlateSelfClickThrough = C_NamePlate.SetNamePlateSelfClickThrough
+local SetNamePlateSelfSize = C_NamePlate.SetNamePlateSelfSize
 
 -- Private API
 local Colors = Private.Colors
@@ -79,9 +79,9 @@ Module.PostUpdateNamePlateOptions = function(self, isInInstace)
 	-- but since we're using our out of combat wrapper, we should be safe.
 	-- Default size 110, 45
 	-- Note: No freaking effect at all in classic. >:(
-	C_NamePlate.SetNamePlateFriendlySize(unpack(layout.Size))
-	C_NamePlate.SetNamePlateEnemySize(unpack(layout.Size))
-	C_NamePlate.SetNamePlateSelfSize(unpack(layout.Size))
+	SetNamePlateFriendlySize(unpack(layout.Size))
+	SetNamePlateEnemySize(unpack(layout.Size))
+	SetNamePlateSelfSize(unpack(layout.Size))
 
 	--NamePlateDriverFrame.UpdateNamePlateOptions = function() end
 end
@@ -127,7 +127,39 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	healthBg:SetVertexColor(unpack(layout.HealthBackdropColor))
 	plate.Health.Bg = healthBg
 
-	local cast = (plate.Health or plate):CreateStatusBar()
+	local healthValue = health:CreateFontString()
+	healthValue:Hide()
+	healthValue:SetPoint(unpack(layout.HealthValuePlace))
+	healthValue:SetDrawLayer(unpack(layout.HealthValueDrawLayer))
+	healthValue:SetFontObject(layout.HealthValueFontObject)
+	healthValue:SetTextColor(unpack(layout.HealthValueColor))
+	healthValue:SetJustifyH(layout.HealthValueJustifyH)
+	healthValue:SetJustifyV(layout.HealthValueJustifyV)
+	healthValue.hidePlayer = layout.HealthValueHidePlayer
+	healthValue.hideCasting = layout.HealthValueHideWhileCasting
+	healthValue.showCombat = layout.HealthValueShowInCombat
+	healthValue.showMouseover = layout.HealthValueShowOnMouseover
+	healthValue.showTarget = layout.HealthValueShowOnTarget
+	healthValue.showMaxValue = layout.HealthValueShowAtMax
+	plate.Health.Value = healthValue
+
+	local name = health:CreateFontString()
+	name:Hide()
+	name:SetPoint(unpack(layout.NamePlace))
+	name:SetDrawLayer(unpack(layout.NameDrawLayer))
+	name:SetJustifyH(layout.NameJustifyH)
+	name:SetJustifyV(layout.NameJustifyV)
+	name:SetFontObject(layout.NameFont)
+	name:SetTextColor(unpack(layout.NameColor))
+	name.showLevel = layout.NameShowLevel
+	name.showLevelLast = layout.NameShowLevelLast
+	name.hidePlayer = layout.NameHidePlayer
+	name.showCombat = layout.NameShowInCombat
+	name.showMouseover = layout.NameShowOnMouseover
+	name.showTarget = layout.NameShowOnTarget
+	plate.Name = name
+	
+	local cast = plate.Health:CreateStatusBar()
 	cast:SetSize(unpack(layout.CastSize))
 	cast:SetPoint(unpack(layout.CastPlace))
 	cast:SetStatusBarTexture(layout.CastTexture)
@@ -137,7 +169,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	cast:SetSmoothingFrequency(.1)
 	cast.timeToHold = layout.CastTimeToHoldFailed
 	plate.Cast = cast
-	plate.Cast.PostUpdate = layout.CastPostUpdate
+	plate.Cast.PostUpdate = layout.PostUpdateCast
 
 	local castBg = cast:CreateTexture()
 	castBg:SetPoint(unpack(layout.CastBackdropPlace))
@@ -164,6 +196,16 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	castShield:SetVertexColor(unpack(layout.CastShieldColor))
 	cast.Shield = castShield
 
+	local threat = plate.Health:CreateTexture()
+	threat:SetPoint(unpack(layout.ThreatPlace))
+	threat:SetSize(unpack(layout.ThreatSize))
+	threat:SetTexture(layout.ThreatTexture)
+	threat:SetDrawLayer(unpack(layout.ThreatDrawLayer))
+	threat:SetVertexColor(unpack(layout.ThreatColor))
+	threat.hideSolo = layout.ThreatHideSolo
+	threat.feedbackUnit = "player"
+	plate.Threat = threat
+
 	if (IsRetail) then
 		local spellQueue = cast:CreateStatusBar()
 		spellQueue:Hide()
@@ -178,8 +220,42 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 		cast.SpellQueue = spellQueue
 	end
 
+	-- Unit Classification (boss, elite, rare)
+	local classification = health:CreateFrame("Frame")
+	classification:SetPoint(unpack(layout.ClassificationPlace))
+	classification:SetSize(unpack(layout.ClassificationSize))
+	classification.hideOnFriendly = layout.ClassificationHideOnFriendly
+	--classification:SetIgnoreParentAlpha(true)
+	plate.Classification = classification
+
+	local boss = classification:CreateTexture()
+	boss:SetPoint("CENTER", 0, 0)
+	boss:SetSize(unpack(layout.ClassificationSize))
+	boss:SetTexture(layout.ClassificationIndicatorBossTexture)
+	boss:SetVertexColor(unpack(layout.ClassificationColor))
+	plate.Classification.Boss = boss
+
+	local elite = classification:CreateTexture()
+	elite:SetPoint("CENTER", 0, 0)
+	elite:SetSize(unpack(layout.ClassificationSize))
+	elite:SetTexture(layout.ClassificationIndicatorEliteTexture)
+	elite:SetVertexColor(unpack(layout.ClassificationColor))
+	plate.Classification.Elite = elite
+
+	local rare = classification:CreateTexture()
+	rare:SetPoint("CENTER", 0, 0)
+	rare:SetSize(unpack(layout.ClassificationSize))
+	rare:SetTexture(layout.ClassificationIndicatorRareTexture)
+	rare:SetVertexColor(unpack(layout.ClassificationColor))
+	plate.Classification.Rare = rare
+
 	local raidTarget = baseFrame:CreateTexture()
-	raidTarget:SetPoint(unpack(layout.RaidTargetPlace))
+	raidTarget.point = layout.RaidTargetPoint
+	raidTarget.anchor = plate[layout.RaidTargetAnchor] or plate
+	raidTarget.relPoint = layout.RaidTargetRelPoint
+	raidTarget.offsetX = layout.RaidTargetOffsetX
+	raidTarget.offsetY = layout.RaidTargetOffsetY
+	raidTarget:SetPoint(raidTarget.point, raidTarget.anchor, raidTarget.relPoint, raidTarget.offsetX, raidTarget.offsetY)
 	raidTarget:SetSize(unpack(layout.RaidTargetSize))
 	raidTarget:SetDrawLayer(unpack(layout.RaidTargetDrawLayer))
 	raidTarget:SetTexture(layout.RaidTargetTexture)
@@ -189,7 +265,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	hooksecurefunc(plate, "SetScale", function(plate,scale) raidTarget:SetScale(scale) end)
 
 	local auras = plate:CreateFrame("Frame")
-	auras:SetSize(unpack(layout.AuraFrameSize)) -- auras will be aligned in the available space, this size gives us 8x1 auras
+	auras:SetSize(unpack(layout.AuraFrameSize))
 	auras.point = layout.AuraPoint
 	auras.anchor = plate[layout.AuraAnchor] or plate
 	auras.relPoint = layout.AuraRelPoint
@@ -239,6 +315,9 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	-- Add preupdates. Usually only meaningful in Retail.
 	plate.PreUpdate = layout.PreUpdate
 
+	-- Add post updates. 
+	plate.PostUpdate = layout.PostUpdate
+
 	-- The library does this too, but isn't exposing it to us.
 	Plates[plate] = baseFrame
 end
@@ -246,7 +325,7 @@ end
 Module.PostUpdateSettings = function(self)
 	local db = self.db
 	for plate, baseFrame in pairs(Plates) do 
-		if db.enableAuras then 
+		if (db.enableAuras) then 
 			plate:EnableElement("Auras")
 			plate.Auras:ForceUpdate()
 			plate.RaidTarget:ForceUpdate()
@@ -254,6 +333,7 @@ Module.PostUpdateSettings = function(self)
 			plate:DisableElement("Auras")
 			plate.RaidTarget:ForceUpdate()
 		end 
+		plate:PostUpdate("ForceUpdate", plate.unit)
 	end
 end
 

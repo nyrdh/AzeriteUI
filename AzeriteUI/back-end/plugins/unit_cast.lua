@@ -348,6 +348,7 @@ Update = function(self, event, unit, ...)
 			element.max = max
 			element.delay = 0
 			element.casting = true
+			element.channeling = nil
 			element.notInterruptible = notInterruptible
 			element.tradeskill = isTradeSkill
 			element.total = nil
@@ -535,6 +536,7 @@ Update = function(self, event, unit, ...)
 			element.duration = duration
 			element.max = max
 			element.delay = 0
+			element.casting = nil
 			element.channeling = true
 			element.notInterruptible = notInterruptible
 			element.name = name
@@ -635,7 +637,13 @@ local Enable = function(self)
 	if element then
 		element._owner = self
 		element.ForceUpdate = ForceUpdate
+		clear(element)
 		element:Hide()
+		element.casting = nil
+		element.channeling = nil
+		element.tradeskill = nil
+		element.max = 0
+		element.delay = 0
 
 		-- Make a little proxy to update only this.
 		if (element.SpellQueue) then
@@ -686,10 +694,15 @@ local Disable = function(self)
 		element:SetScript("OnUpdate", nil)
 		element:Hide()
 		clear(element)
+		element.casting = nil
+		element.channeling = nil
+		element.tradeskill = nil
+		element.max = 0
+		element.delay = 0
 	end
 end 
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 44)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 45)
 end 

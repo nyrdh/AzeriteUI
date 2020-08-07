@@ -69,14 +69,14 @@ if (IsClassic) then
 	--ThreatLib:RegisterCallback("Activate", CheckStatus)
 	--ThreatLib:RegisterCallback("Deactivate", CheckStatus)
 	--ThreatLib:RegisterCallback("ThreatUpdated", CheckStatus)
-	--ThreatLib:RequestActiveOnSolo(true)
+	ThreatLib:RequestActiveOnSolo(true)
 
 	-- I do NOT like exposing this, but I don't want multiple update handlers either,
 	-- neither from multiple frames using this element or multiple versions of the plugin.
 	local LibDB = Wheel("LibDB")
 	assert(LibDB, "UnitHealth requires LibDB to be loaded.")
 
-	UnitThreatDB = LibDB:GetDatabase("UnitThreatDB", true) or LibDB:NewDatabase("UnitThreatDB")
+	UnitThreatDB = LibDB:GetDatabase("UnitHealthThreatDB", true) or LibDB:NewDatabase("UnitHealthThreatDB")
 	UnitThreatDB.frames = UnitThreatDB.frames or {}
 
 	-- Shortcut it
@@ -174,7 +174,11 @@ local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 				if (min == 0 or max == 0) and (not healthValue.showAtZero) then
 					healthValue:SetText("")
 				else
-					healthValue:SetFormattedText("%s", large(min))
+					if (healthValue.showMaxValue) then
+						healthValue:SetFormattedText("%s / %s", large(min), large(max))
+					else
+						healthValue:SetFormattedText("%s", large(min))
+					end
 				end
 			end
 			if (healthValue.PostUpdate) then 
@@ -218,7 +222,6 @@ local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 			absorbValue:SetText("")
 		end 
 	end
-
 end 
 
 local UpdateColors = function(health, unit, min, max)
@@ -558,7 +561,7 @@ local Update = function(self, event, unit)
 		absorb:Show()
 	end 
 
-	if health.PostUpdate then
+	if (health.PostUpdate) then
 		return health:PostUpdate(unit, curHealth, maxHealth, minPerc, maxPerc)
 	end	
 end
@@ -566,6 +569,29 @@ end
 local Proxy = function(self, ...)
 	return (self.Health.Override or Update)(self, ...)
 end 
+
+local timer, HZ = 0, .2
+local OnUpdate_Threat = function(this, elapsed)
+	timer = timer + elapsed
+	if (timer >= HZ) then
+		for frame in pairs(Frames) do 
+			if (frame:IsShown()) then
+				Proxy(frame, "OnUpdate", frame.unit)
+			end
+		end
+		timer = 0
+	end
+end
+
+local OnEvent_Threat = function(this, event, ...)
+	if (event == "PLAYER_REGEN_DISABLED") then
+		this:SetScript("OnUpdate", OnUpdate_Threat)
+		this:Show()
+	elseif (event == "PLAYER_REGEN_ENABLED") then
+		this:SetScript("OnUpdate", nil)
+		this:Hide()
+	end
+end
 
 local ForceUpdate = function(health)
 	return Proxy(health._owner, "Forced", health._owner.unit)
@@ -605,10 +631,31 @@ local Enable = function(self)
 
 		if (IsClassic) then
 
-			-- TODO:
-			-- Add in threat coloring, but wait until 
-			-- we can make a unified back-end for all frames.
-			-- (ETA: starting the work first full work week of August 2020)
+			self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
+			self:RegisterEvent("PLAYER_REGEN_DISABLED", Proxy, true)
+			self:RegisterEvent("PLAYER_REGEN_ENABLED", Proxy, true)
+
+			Frames[self] = true
+
+			-- We create the update frame on the fly
+			if (not UnitThreatDB.ThreatFrame) then
+				UnitThreatDB.ThreatFrame = CreateFrame("Frame")
+				UnitThreatDB.ThreatFrame:Hide()
+			end
+
+			-- Reset the update frame
+			UnitThreatDB.ThreatFrame:UnregisterAllEvents()
+			UnitThreatDB.ThreatFrame:SetScript("OnEvent", OnEvent_Threat)
+			UnitThreatDB.ThreatFrame:SetScript("OnUpdate", nil)
+
+			UnitThreatDB.ThreatFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+			UnitThreatDB.ThreatFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+
+			-- In case this element for some reason is first enabled in combat.
+			if (InCombatLockdown()) and (not UnitThreatDB.ThreatFrame:IsShown()) then
+				OnEvent_Threat(UnitThreatDB.ThreatFrame, "PLAYER_REGEN_DISABLED")
+			end
+			
 
 		elseif (IsRetail) then
 
@@ -706,10 +753,29 @@ local Disable = function(self)
 		if (health.ValueAbsorb) then 
 			health.ValueAbsorb:SetText("")
 		end
+
+		if (IsClassic) then
+			self:UnregisterEvent("PLAYER_TARGET_CHANGED", Proxy)
+			self:UnregisterEvent("PLAYER_REGEN_DISABLED", Proxy)
+			self:UnregisterEvent("PLAYER_REGEN_ENABLED", Proxy)
+
+			-- Erase the entry
+			Frames[self] = nil
+
+			-- Spooky fun way to return if the table has entries! 
+			for frame in pairs(Frames) do 
+				return 
+			end 
+	
+			-- Hide the threat frame if the previous returned zero table entries
+			if (UnitThreatDB.ThreatFrame) then 
+				UnitThreatDB.ThreatFrame:Hide()
+			end 
+		end
 	end
 end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 46)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 50)
 end 

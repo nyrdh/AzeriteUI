@@ -3,15 +3,16 @@ local _G = _G
 local pairs = pairs
 
 -- WoW API
-local GetPVPTimer = _G.GetPVPTimer
-local UnitAffectingCombat = _G.UnitAffectingCombat
-local UnitClassification = _G.UnitClassification
-local UnitFactionGroup = _G.UnitFactionGroup
-local UnitIsPlayer = _G.UnitIsPlayer
-local UnitIsPVP = _G.UnitIsPVP
-local UnitIsPVPFreeForAll = _G.UnitIsPVPFreeForAll
-local UnitIsPVPSanctuary = _G.UnitIsPVPSanctuary
-local UnitLevel = _G.UnitLevel
+local GetPVPTimer = GetPVPTimer
+local UnitAffectingCombat = UnitAffectingCombat
+local UnitClassification = UnitClassification
+local UnitFactionGroup = UnitFactionGroup
+local UnitIsFriend = UnitIsFriend
+local UnitIsPlayer = UnitIsPlayer
+local UnitIsPVP = UnitIsPVP
+local UnitIsPVPFreeForAll = UnitIsPVPFreeForAll
+local UnitIsPVPSanctuary = UnitIsPVPSanctuary
+local UnitLevel = UnitLevel
 
 -- Objects that we'll be looking for in the element
 local objects = {
@@ -42,7 +43,7 @@ local Update = function(self, event, unit)
 		element:PreUpdate(unit)
 	end
 
-	if (element.hideInCombat and UnitAffectingCombat("player")) then 
+	if (element.hideInCombat and UnitAffectingCombat("player")) or (element.hideOnFriendly and UnitIsFriend("player", unit)) then 
 		return element:Hide()
 	end
 
@@ -155,5 +156,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Classification", Enable, Disable, Proxy, 6)
+	Lib:RegisterElement("Classification", Enable, Disable, Proxy, 7)
 end 

@@ -171,12 +171,13 @@ local SECURE = {
 		end 
 		if (name == "change-enablepartyframes") then 
 			self:SetAttribute("enablePartyFrames", value); 
-			local visibilityFrame = self:GetFrameRef("Owner");
-			UnregisterAttributeDriver(visibilityFrame, "state-vis"); 
-			if value then 
-				RegisterAttributeDriver(visibilityFrame, "state-vis", "%s"); 
+			local Owner = self:GetFrameRef("Owner");
+			UnregisterAttributeDriver(Owner, "state-vis"); 
+			if (value) then 
+				local visDriver = self:GetAttribute("visDriver"); -- get the correct visibility driver
+				RegisterAttributeDriver(Owner, "state-vis", visDriver); 
 			else 
-				RegisterAttributeDriver(visibilityFrame, "state-vis", "hide"); 
+				RegisterAttributeDriver(Owner, "state-vis", "hide"); 
 			end 
 		elseif (name == "change-enablehealermode") then 
 
@@ -251,23 +252,25 @@ local SECURE = {
 			name = string.lower(name); 
 		end 
 		if (name == "change-enableraidframes") then 
-			self:SetAttribute("enableRaidFrames", value); 
-			local visibilityFrame = self:GetFrameRef("Owner");
-			UnregisterAttributeDriver(visibilityFrame, "state-vis"); 
-			if value then 
-				RegisterAttributeDriver(visibilityFrame, "state-vis", "%s"); 
-			else 
-				RegisterAttributeDriver(visibilityFrame, "state-vis", "hide"); 
-			end 
-		elseif (name == "change-enablehealermode") then 
+			self:SetAttribute("enableRaidFrames", value); -- store the setting
 
+			-- retrieve the raid header frame
 			local Owner = self:GetFrameRef("Owner"); 
+			Owner:SetAttribute("enableRaidFrames", value); -- store the setting on the header too
 
-			-- set flag for healer mode 
-			Owner:SetAttribute("inHealerMode", value); 
+			UnregisterAttributeDriver(Owner, "state-vis"); -- kill off the old visibility driver
+			if (value) then 
+				local visDriver = self:GetAttribute("visDriver"); -- get the correct visibility driver
+				RegisterAttributeDriver(Owner, "state-vis", visDriver); -- apply it!
+			else 
+				RegisterAttributeDriver(Owner, "state-vis", "hide"); 
+			end 
 
-			-- Update the layout 
-			Owner:RunAttribute("sortFrames"); 
+		elseif (name == "change-enablehealermode") then 
+			self:SetAttribute("enableHealerMode", value); -- store the setting(?)
+			local Owner = self:GetFrameRef("Owner"); -- retrieve the raid header frame
+			Owner:SetAttribute("inHealerMode", value); -- set flag for healer mode
+			Owner:RunAttribute("sortFrames"); -- Update the layout 
 		end 
 	]=], 
 
@@ -2165,7 +2168,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	name:SetFontObject(layout.NameFont)
 	name:SetTextColor(unpack(layout.NameColor))
 	name.showLevel = true
-	name.showLevelLast = true
+	name.showLevelLast = false
 	self.Name = name
 
 	-- Health Value
@@ -2536,11 +2539,11 @@ end
 -- Party
 -----------------------------------------------------------
 UnitFrameParty.OnInit = function(self)
-	local dev --= true
-
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
-	
+
+	local dev = false -- self.db.enableTestMode
+
 	self.frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame:SetSize(unpack(self.layout.Size))
 	self.frame:Place(unpack(self.layout.Place))
@@ -2564,17 +2567,12 @@ UnitFrameParty.OnInit = function(self)
 
 	-- Hide it in raids of 6 or more players 
 	-- Use an attribute driver to do it so the normal unitframe visibility handler can remain unchanged
-	local visDriver = dev and "[@player,exists]show;hide" or "[@raid6,exists]hide;[group]show;hide"
-	if (self.db.enablePartyFrames) then 
-		RegisterAttributeDriver(self.frame, "state-vis", visDriver)
-	else 
-		RegisterAttributeDriver(self.frame, "state-vis", "hide")
-	end 
+	self.frame:SetAttribute("visDriver", dev and "[@player,exists]show;hide" or "[@raid6,exists]hide;[group]show;hide")
+	RegisterAttributeDriver(self.frame, "state-vis", self.db.enablePartyFrames and self.frame:GetAttribute("visDriver") or "hide")
 
 	local style = function(frame, unit, id, _, ...)
 		return UnitStyles.StylePartyFrames(frame, unit, id, self.layout, ...)
 	end
-
 	for i = 1,4 do 
 		local frame = self:SpawnUnitFrame(dev and "player" or "party"..i, self.frame, style)
 
@@ -2596,10 +2594,10 @@ end
 -- Raid
 -----------------------------------------------------------
 UnitFrameRaid.OnInit = function(self)
-	local dev --= true
-
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
+
+	local dev = false -- self.db.enableTestMode
 
 	self.frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame:SetSize(1,1)
@@ -2610,6 +2608,8 @@ UnitFrameRaid.OnInit = function(self)
 	self.frame:SetFrameRef("HealerModeAnchor", self.frame.healerAnchor)
 	self.frame:Execute(SECURE.FrameTable_Create)
 	self.frame:SetAttribute("inHealerMode", GetConfig(ADDON).enableHealerMode)
+	self.frame:SetAttribute("enableRaidFrames", self.db.enableRaidFrames)
+	self.frame:SetAttribute("updateTestMode", SECURE.Raid_UpdateTestMode)
 	self.frame:SetAttribute("sortFrames", SECURE.Raid_SortFrames:format(
 		self.layout.GroupSizeNormal, 
 		self.layout.GrowthXNormal,
@@ -2635,7 +2635,6 @@ UnitFrameRaid.OnInit = function(self)
 		self.layout.GroupAnchorEpic,
 		self.layout.GroupAnchorEpicHealerMode
 	))
-	self.frame:SetAttribute("_onattributechanged", SECURE.Raid_OnAttribute)
 
 	if (not self.db.allowBlizzard) then
 		self:DisableUIWidget("UnitFrameRaid")
@@ -2643,8 +2642,8 @@ UnitFrameRaid.OnInit = function(self)
 
 	-- Only show it in raids, not parties.
 	-- Use an attribute driver to do it so the normal unitframe visibility handler can remain unchanged
-	local visDriver = dev and "[@player,exists]show;hide" or "[group:raid]show;hide"
-	RegisterAttributeDriver(self.frame, "state-vis", self.db.enableRaidFrames and visDriver or "hide")
+	self.frame:SetAttribute("visDriver", dev and "[@player,exists]show;hide" or "[group:raid]show;hide")
+	RegisterAttributeDriver(self.frame, "state-vis", self.db.enableRaidFrames and self.frame:GetAttribute("visDriver") or "hide")
 
 	local style = function(frame, unit, id, _, ...)
 		return UnitStyles.StyleRaidFrames(frame, unit, id, self.layout, ...)
@@ -2659,8 +2658,11 @@ UnitFrameRaid.OnInit = function(self)
 	-- Register the layout driver
 	RegisterAttributeDriver(self.frame, "state-layout", dev and "[@target,exists]epic;normal" or "[@raid26,exists]epic;normal")
 
+	-- Gotta wait with this until we're done setting initial attributes
+	self.frame:SetAttribute("_onattributechanged", SECURE.Raid_OnAttribute)
+
 	-- Create a secure proxy updater for the menu system
-	CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.Raid_SecureCallback:format(visDriver))
+	CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.Raid_SecureCallback)
 end 
 
 -----------------------------------------------------------

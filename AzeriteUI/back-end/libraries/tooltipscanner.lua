@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 55)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 57)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -333,6 +333,15 @@ local ClearScanner = function()
 	Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 end
 
+-- Just to avoid empty tables being sent back, causing bugs.
+local validateResults = function(data)
+	local hasContent
+	for i in pairs(data) do
+		return data -- any content at all will lead us here
+	end
+	return nil -- nothing existed, do not return the data table
+end
+
 -- Library API
 ---------------------------------------------------------
 -- *Methods will return nil if no data was found, 
@@ -504,7 +513,7 @@ LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
 				tbl.attackDPSOffHand = string_format("%.1f", offhandDps)
 			end
 
-			return tbl
+			return validateResults(tbl)
 		end 
 
 		-- Spell school / Spell Type (could be "Racial")
@@ -770,7 +779,7 @@ LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
 			end 
 		end 
 
-		return tbl
+		return validateResults(tbl)
 	end 
 
 end
@@ -1083,7 +1092,7 @@ LibTooltipScanner.GetTooltipDataForActionItem = function(self, actionSlot, tbl)
 			end 
 		end 
 
-		return tbl
+		return validateResults(tbl)
 	end 
 end 
 
@@ -1300,7 +1309,7 @@ LibTooltipScanner.GetTooltipDataForPetAction = function(self, actionSlot, tbl)
 			end 
 		end 
 
-		return tbl
+		return validateResults(tbl)
 	end
 end
 
@@ -1527,7 +1536,7 @@ LibTooltipScanner.GetTooltipDataForSpellID = function(self, spellID, tbl)
 
 		end 
 
-		return tbl
+		return validateResults(tbl)
 	end 
 
 end
@@ -1859,7 +1868,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			tbl.objectives = objectives
 		end
 
-		return tbl
+		return validateResults(tbl)
 	end 
 end
 
@@ -1901,7 +1910,7 @@ LibTooltipScanner.GetTooltipDataForItemLink = function(self, itemLink, tbl)
 		tbl.itemSellPrice = itemSellPrice
 		tbl.itemStackCount = itemStackCount
 
-		return tbl
+		return validateResults(tbl)
 	end 
 end
 
@@ -1918,7 +1927,7 @@ LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID,
 			tbl[i] = nil
 		end 
 
-		return tbl
+		return validateResults(tbl)
 	end 
 
 end
@@ -1939,7 +1948,7 @@ LibTooltipScanner.GetTooltipDataForGuildBankSlot = function(self, tabID, slotID,
 		end 
 
 
-		return tbl
+		return validateResults(tbl)
 	end 
 end
 
@@ -1957,7 +1966,7 @@ LibTooltipScanner.GetTooltipDataForInventorySlot = function(self, unit, inventor
 			tbl[i] = nil
 		end 
 
-		return tbl
+		return validateResults(tbl)
 	end
 end
 
@@ -1976,7 +1985,7 @@ LibTooltipScanner.GetTooltipDataForInboxItem = function(self, inboxID, attachInd
 		end 
 
 
-	return tbl
+	return validateResults(tbl)
 end
 
 -- Returns data about unit auras 
@@ -2070,7 +2079,7 @@ LibTooltipScanner.GetTooltipDataForUnitAura = function(self, unit, auraID, filte
 			end 
 		end 
 
-		return tbl
+		return validateResults(tbl)
 	end 
 end 
 
@@ -2166,7 +2175,7 @@ LibTooltipScanner.GetTooltipDataForUnitBuff = function(self, unit, buffID, filte
 			end 
 		end 
 
-		return tbl
+		return validateResults(tbl)
 	end 
 end
 
@@ -2261,7 +2270,7 @@ LibTooltipScanner.GetTooltipDataForUnitDebuff = function(self, unit, debuffID, f
 			end 
 		end 
 
-		return tbl
+		return validateResults(tbl)
 	end
 end
 
@@ -2306,7 +2315,7 @@ LibTooltipScanner.GetTooltipDataForTrackingSpell = function(self, tbl)
 			end 
 		end 
 
-		return tbl
+		return validateResults(tbl)
 	end
 end
 

@@ -24,6 +24,7 @@ local tostring = tostring
 local FindActiveAzeriteItem = C_AzeriteItem and C_AzeriteItem.FindActiveAzeriteItem
 local GetAzeriteItemXPInfo = C_AzeriteItem and C_AzeriteItem.GetAzeriteItemXPInfo
 local GetPowerLevel = C_AzeriteItem and C_AzeriteItem.GetPowerLevel
+local GetTotemTimeLeft = GetTotemTimeLeft
 local HasOverrideActionBar = HasOverrideActionBar
 local HasTempShapeshiftActionBar = HasTempShapeshiftActionBar
 local HasVehicleActionBar = HasVehicleActionBar
@@ -67,6 +68,9 @@ local HoverButtons = {} -- all action buttons that can fade out
 -- *Not related to the explorer mode.
 local ActionBarHoverFrame, PetBarHoverFrame
 local FadeOutHZ, FadeOutDuration = 1/20, 1/5
+
+-- Time constants
+local DAY, HOUR, MINUTE = 86400, 3600, 60
 
 -- Is ConsolePort enabled in the addon listing?
 local IsConsolePortEnabled = Module:IsAddOnEnabled("ConsolePort")
@@ -433,6 +437,28 @@ local getBindingKeyText = function(key)
 
 		return key
 	end
+end
+
+-- Aimed to be compact and displayed on buttons
+local formatCooldownTime = function(time)
+	if (time > DAY) then -- more than a day
+		time = time + DAY/2
+		return "%d%s", time/DAY - time/DAY%1, "d"
+	elseif (time > HOUR) then -- more than an hour
+		time = time + HOUR/2
+		return "%d%s", time/HOUR - time/HOUR%1, "h"
+	elseif (time > MINUTE) then -- more than a minute
+		time = time + MINUTE/2
+		return "%d%s", time/MINUTE - time/MINUTE%1, "m"
+	elseif (time > 10) then -- more than 10 seconds
+		return "%d", time - time%1
+	elseif (time >= 1) then -- more than 5 seconds
+		return "|cffff8800%d|r", time - time%1
+	elseif (time > 0) then
+		return "|cffff0000%d|r", time*10 - time*10%1
+	else
+		return ""
+	end	
 end
 
 -- ActionButton Template (Custom Methods)
@@ -1016,59 +1042,32 @@ end
 Module.SpawnStanceBar = function(self)
 end
 
--- Time constants
-local DAY, HOUR, MINUTE = 86400, 3600, 60
-
--- Aimed to be compact and displayed on buttons
-local formatCooldownTime = function(time)
-	if time > DAY then -- more than a day
-		time = time + DAY/2
-		return "%d%s", time/DAY - time/DAY%1, "d"
-	elseif time > HOUR then -- more than an hour
-		time = time + HOUR/2
-		return "%d%s", time/HOUR - time/HOUR%1, "h"
-	elseif time > MINUTE then -- more than a minute
-		time = time + MINUTE/2
-		return "%d%s", time/MINUTE - time/MINUTE%1, "m"
-	elseif time > 10 then -- more than 10 seconds
-		return "%d", time - time%1
-	elseif time >= 1 then -- more than 5 seconds
-		return "|cffff8800%d|r", time - time%1
-	elseif time > 0 then
-		return "|cffff0000%d|r", time*10 - time*10%1
-	else
-		return ""
-	end	
-end
-
+-- Hardcoded stuff here. Work in progress.
 Module.SpawnTotemBar = function(self)
 	local db = self.db
 
-	--[[--
-		
-		Restrictions:
-		- Can't remove button methods like SetPoint to prevent blizzard repositioning
-		- Can't reposition in combat
+	-- Restrictions:
+	-- 	Can't reposition or reparent in combat
+	-- 	Can't remove button methods like SetPoint to prevent blizzard repositioning
+	-- 	Can't really mess with PetFrame hide/show either, it needs to remain whatever Blizzard intended.
 
-	--]]-- 
-
-	-- player castbar "BOTTOM", "UICenter", "BOTTOM", 0, 290
-	-- player altpower "BOTTOM", "UICenter", "BOTTOM", 0, 340 ("CENTER", "UICenter", "CENTER", 0, -189)
-	local totemFrame = self:CreateFrame("Frame", nil, "UICenter")
-	totemFrame:SetSize(2,2)
-	totemFrame:Place("BOTTOM", "UICenter", "BOTTOM", 0, 390)
+	-- Just for my own reference:
+	-- 	player castbar "BOTTOM", "UICenter", "BOTTOM", 0, 290
+	-- 	player altpower "BOTTOM", "UICenter", "BOTTOM", 0, 340 ("CENTER", "UICenter", "CENTER", 0, -189)
+	local totemHolderFrame = self:CreateFrame("Frame", nil, "UICenter")
+	totemHolderFrame:SetSize(2,2)
+	totemHolderFrame:Place("BOTTOM", "UICenter", "BOTTOM", 0, 390)
 	
-	-- TotemFrame, 128x53
-	local totemScale = 1.5
-	local totems = TotemFrame
-	totems:SetParent(totemFrame)
+	-- Scaling it up get a more fitting size,
+	-- without messing with actual relative
+	-- positioning of the buttons.
+	local totemScale = 1.5 
+	local totems = TotemFrame -- original size is 128x53
+	totems:SetParent(totemHolderFrame)
 	totems:SetScale(totemScale)
-	--totems:SetParent(self:GetFrame("UICenter"))
 
 	local hidden = CreateFrame("Frame")
 	hidden:Hide()
-
-	local SetMask = hidden:CreateTexture().SetMask
 
 	for i = 1, MAX_TOTEMS do
 		local buttonName = "TotemFrameTotem"..i
@@ -1106,7 +1105,6 @@ Module.SpawnTotemBar = function(self)
 		duration:SetFontObject(GetFont(9,true))
 		duration:SetAlpha(.75)
 		button.duration = duration
-
 	end
 
 	local totemButtonOnUpdate = function(button, elapsed)
@@ -1134,14 +1132,17 @@ Module.SpawnTotemBar = function(self)
 			return self:RegisterEvent("PLAYER_REGEN_ENABLED", totemEvent)
 		end
 		local point, anchor = totems:GetPoint()
-		if (anchor ~= totemFrame) then
+		if (anchor ~= totemHolderFrame) then
 			totems:ClearAllPoints()
-			totems:SetPoint("CENTER", totemFrame, "CENTER", 0, 0)
+			totems:SetPoint("CENTER", totemHolderFrame, "CENTER", 0, 0)
+		end
+		local parent = totems:GetParent()
+		if (parent ~= totemHolderFrame) then
+			totems:SetParent(totemHolderFrame)
 		end
 	end
-	totemFrameUpdate(totems)
 	hooksecurefunc(TotemFrame, "SetPoint", totemFrameUpdate)
-
+	totemFrameUpdate(totems)
 end
 
 Module.SpawnExitButton = function(self)

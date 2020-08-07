@@ -886,6 +886,22 @@ Module.CreateMenuTable = function(self)
 			proxyModule = nil, useCore = true
 		})
 	end
+
+	--table_insert(DebugMenu.buttons, {
+	--	enabledTitle = L_ENABLED:format(L["Raid Test Mode"]),
+	--	disabledTitle = L_DISABLED:format(L["Raid Test Mode"]),
+	--	type = "TOGGLE_VALUE", 
+	--	configDB = "UnitFrameRaid", configKey = "enableTestMode", 
+	--	proxyModule = "UnitFrameRaid"
+	--})
+	--table_insert(DebugMenu.buttons, {
+	--	enabledTitle = L_ENABLED:format(L["Party Test Mode"]),
+	--	disabledTitle = L_DISABLED:format(L["Party Test Mode"]),
+	--	type = "TOGGLE_VALUE", 
+	--	configDB = "UnitFrameParty", configKey = "enableTestMode", 
+	--	proxyModule = "UnitFrameParty"
+	--})
+
 	table_insert(DebugMenu.buttons, {
 		enabledTitle = L_ENABLED:format(L["Reload UI"]),
 		disabledTitle = L_DISABLED:format(L["Reload UI"]),
