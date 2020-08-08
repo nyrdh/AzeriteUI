@@ -594,13 +594,13 @@ end
 
 local Minimap_XP_OverrideValue = function(element, min, max, restedLeft, restedTimeLeft)
 	local value = element.Value or element:IsObjectType("FontString") and element 
-	if value.showDeficit then 
+	if (value.showDeficit) then 
 		value:SetFormattedText(short(max - min))
 	else 
 		value:SetFormattedText(short(min))
 	end
 	local percent = value.Percent
-	if percent then 
+	if (percent) then 
 		if (max > 0) then 
 			local percValue = math_floor(min/max*100)
 			if (percValue > 0) then 
@@ -613,9 +613,9 @@ local Minimap_XP_OverrideValue = function(element, min, max, restedLeft, restedT
 			percent:SetText(NEW)
 		end 
 	end 
-	if element.colorValue then 
+	if (element.colorValue) then 
 		local color
-		if restedLeft then 
+		if (restedLeft) then 
 			local colors = element._owner.colors
 			color = colors.restedValue or colors.rested or colors.xpValue or colors.xp
 		else 
@@ -623,7 +623,7 @@ local Minimap_XP_OverrideValue = function(element, min, max, restedLeft, restedT
 			color = colors.xpValue or colors.xp
 		end 
 		value:SetTextColor(color[1], color[2], color[3])
-		if percent then 
+		if (percent) then 
 			percent:SetTextColor(color[1], color[2], color[3])
 		end 
 	end 
@@ -762,14 +762,14 @@ local NamePlates_CastBar_PostUpdate = function(cast, unit)
 		if (cast.currentStyle ~= "protected") then 
 			cast:SetSize(68, 9)
 			cast:ClearAllPoints()
-			cast:SetPoint("TOP", 0, -26)
+			cast:SetPoint("TOPLEFT", cast:GetParent():GetWidth()/2 - cast:GetWidth()/2, -26)
 			cast:SetStatusBarTexture(GetMedia("cast_bar"))
 			cast:SetTexCoord(0, 1, 0, 1)
 			cast.Bg:SetSize(68, 9)
 			cast.Bg:SetTexture(GetMedia("cast_bar"))
 			cast.Bg:SetVertexColor(.15, .15, .15, 1)
 			cast.Name:ClearAllPoints()
-			cast.Name:SetPoint("TOP",0,-20)
+			cast.Name:SetPoint("TOPLEFT", cast.Name:GetParent():GetWidth()/2 - cast.Name:GetWidth()/2, -20)
 			cast.currentStyle = "protected"
 		end 
 
@@ -790,14 +790,14 @@ local NamePlates_CastBar_PostUpdate = function(cast, unit)
 		if (cast.currentStyle == "protected") then 
 			cast:SetSize(84, 14)
 			cast:ClearAllPoints()
-			cast:SetPoint("TOP", 0, -20)
+			cast:SetPoint("TOPLEFT", cast:GetParent():GetWidth()/2 - cast:GetWidth()/2, -20)
 			cast:SetStatusBarTexture(GetMedia("nameplate_bar"))
 			cast:SetTexCoord(14/256, 242/256, 14/64, 50/64)
 			cast.Bg:SetSize(84*256/228, 14*64/36)
 			cast.Bg:SetTexture(GetMedia("nameplate_backdrop"))
 			cast.Bg:SetVertexColor(1, 1, 1, 1)
 			cast.Name:ClearAllPoints()
-			cast.Name:SetPoint("TOP",0,-18)
+			cast.Name:SetPoint("TOPLEFT", cast.Name:GetParent():GetWidth()/2 - cast.Name:GetWidth()/2, -18)
 			cast.currentStyle = nil 
 		end 
 
@@ -805,17 +805,6 @@ local NamePlates_CastBar_PostUpdate = function(cast, unit)
 		cast:SetStatusBarColor(Colors.cast[1], Colors.cast[2], Colors.cast[3]) 
 	end 
 	local self = cast._owner
-	if (not self) then 
-		return 
-	end 
-	unit = unit or self.unit
-	if (unit) then
-		self:PostUpdate(unit)
-	end
-end
-
-local NamePlates_PostUpdate_ElementProxy = function(element, unit)
-	local self = element._owner
 	if (not self) then 
 		return 
 	end 
@@ -861,8 +850,22 @@ local NamePlates_PostUpdate = function(self, event, unit, ...)
 		name:Hide()
 	end
 
+	auras:ClearAllPoints()
 	auras:SetPoint(auras.point, auras.anchor, auras.relPoint, auras.offsetX, auras.offsetY + auraOffset)
+
+	raidicon:ClearAllPoints()
 	raidicon:SetPoint(raidicon.point, raidicon.anchor, raidicon.relPoint, raidicon.offsetX, raidicon.offsetY + raidiconOffset)
+end
+
+local NamePlates_PostUpdate_ElementProxy = function(element, unit)
+	local self = element._owner
+	if (not self) then 
+		return 
+	end 
+	unit = unit or self.unit
+	if (unit) then
+		self:PostUpdate(unit)
+	end
 end
 
 -- Tooltip Bar post updates
@@ -2290,7 +2293,7 @@ Layouts[ADDON] = {
 		UnitFrameToT = true,
 		UnitFrameFocus = true, -- Retail
 		UnitFrameParty = true,
-		--UnitFrameRaid = true, -- Disabled from the unitframe module!
+		UnitFrameRaid = true,
 		UnitFrameBoss = true, -- Retail
 		UnitFrameArena = true, -- Classic TBC, Retail
 		--Warnings = true,
@@ -2298,7 +2301,7 @@ Layouts[ADDON] = {
 	},
 	DisableUIMenuPages = {
 		{ ID = 5, Name = "InterfaceOptionsActionBarsPanel" },
-		--{ ID = 10, Name = "CompactUnitFrameProfiles" }
+		{ ID = 10, Name = "CompactUnitFrameProfiles" }
 	},
 	DisableUIMenuOptions = {
 		{ Shrink = true, Name = "InterfaceOptionsCombatPanelTargetOfTarget" },

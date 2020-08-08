@@ -2636,9 +2636,9 @@ UnitFrameRaid.OnInit = function(self)
 		self.layout.GroupAnchorEpicHealerMode
 	))
 
-	if (not self.db.allowBlizzard) then
-		self:DisableUIWidget("UnitFrameRaid")
-	end
+	--if (not self.db.allowBlizzard) then
+	--	self:DisableUIWidget("UnitFrameRaid")
+	--end
 
 	-- Only show it in raids, not parties.
 	-- Use an attribute driver to do it so the normal unitframe visibility handler can remain unchanged

@@ -202,7 +202,7 @@ end
 local CreateAuraButton = function(element)
 
 	local button = element:CreateFrame("Button")
-	if (element.disableMouse) then
+	if (not element.disableMouse) then
 		button:EnableMouse(true)
 		button:RegisterForClicks("RightButtonUp")
 	else
