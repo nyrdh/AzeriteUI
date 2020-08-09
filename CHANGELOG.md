@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.386-RC] 2020-08-09
+### Fixed
+- Raid frames appear instantly once again, and not just when changing between 26 or more and 25 or less group members. The bugs get ever more interesting.
+
 ## [2.0.385-RC] 2020-08-08
 ### Added
 - Trying to see if our pretty Nazjatar rune/line minigame interface works without imploding the game client this time.
@@ -11,6 +15,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - No more Blizzard raid frames. We tried having it compatible for a while, it didn't work out. Use our frames, or another 3rd party raid frame addon like Grid.
 - Re-adjusting most nameplate element anchors to use nameplate corners instead of the nameplate center as their reference points, as the center regions for some reason are super buggy in the game and somehow tends to make the elements drift. Parts of the nameplate are rendered by the game engine, and not the UI. And when the game devs venture into UI territory, it usually turns out comparibly to a dog standing on two legs thinking itself human. This change may or may not solve the problem.
+
+### Fixed
+- Fixed a mixup that would cause aura buttons set for mouse input to not get any, and those set to ignore mouse to get mouse input. It should once more be possible to cancel auras out of combat now. 
 
 ## [2.0.384-RC] 2020-08-07
 ### Fixed

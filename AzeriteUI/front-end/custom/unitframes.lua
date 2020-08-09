@@ -2539,10 +2539,10 @@ end
 -- Party
 -----------------------------------------------------------
 UnitFrameParty.OnInit = function(self)
+	local dev --= true
+
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
-
-	local dev = false -- self.db.enableTestMode
 
 	self.frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame:SetSize(unpack(self.layout.Size))
@@ -2594,11 +2594,11 @@ end
 -- Raid
 -----------------------------------------------------------
 UnitFrameRaid.OnInit = function(self)
+	local dev --= true 
+
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
-
-	local dev = false -- self.db.enableTestMode
-
+	
 	self.frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame:SetSize(1,1)
 	self.frame:Place(unpack(self.layout.Place)) 
@@ -2609,7 +2609,6 @@ UnitFrameRaid.OnInit = function(self)
 	self.frame:Execute(SECURE.FrameTable_Create)
 	self.frame:SetAttribute("inHealerMode", GetConfig(ADDON).enableHealerMode)
 	self.frame:SetAttribute("enableRaidFrames", self.db.enableRaidFrames)
-	self.frame:SetAttribute("updateTestMode", SECURE.Raid_UpdateTestMode)
 	self.frame:SetAttribute("sortFrames", SECURE.Raid_SortFrames:format(
 		self.layout.GroupSizeNormal, 
 		self.layout.GrowthXNormal,
@@ -2635,10 +2634,7 @@ UnitFrameRaid.OnInit = function(self)
 		self.layout.GroupAnchorEpic,
 		self.layout.GroupAnchorEpicHealerMode
 	))
-
-	--if (not self.db.allowBlizzard) then
-	--	self:DisableUIWidget("UnitFrameRaid")
-	--end
+	self.frame:SetAttribute("_onattributechanged", SECURE.Raid_OnAttribute)
 
 	-- Only show it in raids, not parties.
 	-- Use an attribute driver to do it so the normal unitframe visibility handler can remain unchanged
@@ -2658,8 +2654,8 @@ UnitFrameRaid.OnInit = function(self)
 	-- Register the layout driver
 	RegisterAttributeDriver(self.frame, "state-layout", dev and "[@target,exists]epic;normal" or "[@raid26,exists]epic;normal")
 
-	-- Gotta wait with this until we're done setting initial attributes
-	self.frame:SetAttribute("_onattributechanged", SECURE.Raid_OnAttribute)
+	-- Do an initial sorting, for visibility.
+	self.frame:Execute(self.frame:GetAttribute("sortFrames"))
 
 	-- Create a secure proxy updater for the menu system
 	CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.Raid_SecureCallback)
