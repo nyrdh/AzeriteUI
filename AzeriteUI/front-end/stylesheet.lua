@@ -769,7 +769,7 @@ local NamePlates_CastBar_PostUpdate = function(cast, unit)
 			cast.Bg:SetTexture(GetMedia("cast_bar"))
 			cast.Bg:SetVertexColor(.15, .15, .15, 1)
 			cast.Name:ClearAllPoints()
-			cast.Name:SetPoint("TOPLEFT", cast.Name:GetParent():GetWidth()/2 - cast.Name:GetWidth()/2, -20)
+			cast.Name:SetPoint("TOPLEFT", cast:GetWidth()/2 - cast.Name:GetStringWidth()/2, -20)
 			cast.currentStyle = "protected"
 		end 
 
@@ -797,7 +797,7 @@ local NamePlates_CastBar_PostUpdate = function(cast, unit)
 			cast.Bg:SetTexture(GetMedia("nameplate_backdrop"))
 			cast.Bg:SetVertexColor(1, 1, 1, 1)
 			cast.Name:ClearAllPoints()
-			cast.Name:SetPoint("TOPLEFT", cast.Name:GetParent():GetWidth()/2 - cast.Name:GetWidth()/2, -18)
+			cast.Name:SetPoint("TOPLEFT", cast:GetWidth()/2 - cast.Name:GetStringWidth()/2, -18)
 			cast.currentStyle = nil 
 		end 
 
@@ -836,16 +836,23 @@ local NamePlates_PostUpdate = function(self, event, unit, ...)
 	local auraOffset = showName and layout.NameOffsetWhenShown or 0
 	local raidiconOffset = auraOffset + ((num > 3) and (layout.AuraSize*2 + layout.AuraPadding) or (num > 0) and (layout.AuraSize) or 0)
 
+	-- ForceUpdate() may not exist
+	-- if this is called before initial Enable()
 	if (showHealthValue) then
 		healthVal:Show()
-		health:ForceUpdate()
+		if (health.ForceUpdate) then
+			health:ForceUpdate()
+		end
 	else
 		healthVal:Hide()
 	end
-
 	if (showName) then
 		name:Show()
-		name:ForceUpdate()
+		if (name.ForceUpdate) then
+			name:ForceUpdate()
+		else
+			self:EnableElement("Name") 
+		end
 	else
 		name:Hide()
 	end

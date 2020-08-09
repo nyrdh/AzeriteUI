@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.387-RC] 2020-08-09
+### Changed
+- Styled a few more Minimap blip icons for better consistency.
+
+### Fixed
+- Fixed an issue that sometimes would produce a bug if a new nameplate was created in the middle of combat.
+- Fixed an unalignment issue with nameplate castbar spellnames.
+
 ## [2.0.386-RC] 2020-08-09
 ### Fixed
 - Raid frames appear instantly once again, and not just when changing between 26 or more and 25 or less group members. The bugs get ever more interesting.
