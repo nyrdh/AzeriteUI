@@ -1546,6 +1546,10 @@ Module.OnEvent = function(self, event, ...)
 		self:UpdateMinimapSize()
 		self:UpdateMinimapMask()
 		self:UpdateTracking()
+		-- Can this force an update in minimap pin addons?
+		-- Problem: GatherMate2, HandyNotes and Questie sometimes break for us.
+		SetCVar("rotateMinimap", GetCVar("rotateMinimap"))
+
 	elseif (event == "ADDON_LOADED") then 
 		local addon = ...
 		if (addon == "MBB") then 

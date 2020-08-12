@@ -1,4 +1,4 @@
-local Version = 48
+local Version = 51
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -421,12 +421,22 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 		end
 	end
 
+	-- We need to do this, or moving the Minimap will
+	-- cause a SetPoint family anchor bullshit bug.
+	-----------------------------------------------------------
+	if (not ObjectiveTrackerFrame:IsUserPlaced()) then
+		ObjectiveTrackerFrame:SetClampedToScreen(false)
+		ObjectiveTrackerFrame:SetMovable(true)
+		ObjectiveTrackerFrame:SetUserPlaced(true)
+	end
+
 	-- Create Custom Scaffolding
 	-----------------------------------------------------------
 	-- Create missing custom frames
 
 	-- Direct parent to the minimap, needed to avoid size callbacks from Blizzard.
 	Library.MapParent = Library.MapParent or LibMinimap:CreateFrame("Frame")
+	Library.MapParent:SetIgnoreParentAlpha(true)
 	Library.MapParent:SetFrameStrata("LOW")
 	Library.MapParent:SetFrameLevel(0)
 

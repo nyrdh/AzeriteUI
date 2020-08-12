@@ -16,6 +16,7 @@ local string_match = string.match
 
 -- WoW API
 local hooksecurefunc = hooksecurefunc
+local InCombatLockdown = InCombatLockdown
 local RegisterAttributeDriver = RegisterAttributeDriver
 local FauxScrollFrame_GetOffset = FauxScrollFrame_GetOffset
 local GetNumQuestLogEntries = GetNumQuestLogEntries
@@ -431,7 +432,7 @@ Module.StyleRetailTracker = function(self)
 	end
 end
 
-Module.PositionRetailTracker = function(self)
+Module.InitRetailTracker = function(self)
 	if (not IsRetail) then
 		return
 	end
@@ -445,9 +446,9 @@ Module.PositionRetailTracker = function(self)
 	ObjectiveFrameHolder:SetHeight(22)
 	ObjectiveFrameHolder:Place(unpack(layout.Place))
 	
-	ObjectiveTrackerFrame:SetParent(self.frame) -- taint or ok?
-	ObjectiveTrackerFrame:ClearAllPoints()
-	ObjectiveTrackerFrame:SetPoint("TOP", ObjectiveFrameHolder, "TOP")
+	ObjectiveTrackerFrame:SetClampedToScreen(false)
+	ObjectiveTrackerFrame:SetAlpha(.9)
+	ObjectiveTrackerFrame:SetParent(self.frame)
 
 	-- Create a dummy frame to cover the tracker  
 	-- to block mouse input when it's faded out. 
@@ -479,18 +480,28 @@ Module.PositionRetailTracker = function(self)
 		ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight)
 	end	
 
-	ObjectiveTrackerFrame:SetClampedToScreen(false)
-	ObjectiveTrackerFrame:SetAlpha(.9)
+	self.ObjectiveFrameHolder = ObjectiveFrameHolder
 
-	local ObjectiveTrackerFrame_SetPosition = function(_,_, parent)
-		if parent ~= ObjectiveFrameHolder then
-			ObjectiveTrackerFrame:ClearAllPoints()
-			ObjectiveTrackerFrame:SetPoint("TOP", ObjectiveFrameHolder, "TOP")
-		end
-	end
-	hooksecurefunc(ObjectiveTrackerFrame,"SetPoint", ObjectiveTrackerFrame_SetPosition)
+	hooksecurefunc(ObjectiveTrackerFrame,"SetPoint", function(_, ...) self:PositionRetailTracker() end)
+	hooksecurefunc(ObjectiveTrackerFrame,"SetAllPoints", function(_, ...) self:PositionRetailTracker() end)
 
+	self:PositionRetailTracker()
 	self:StyleRetailTracker()
+end
+
+Module.PositionRetailTracker = function(self, event, ...)
+	if (InCombatLockdown()) then
+		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
+	end
+	local _,anchor = ObjectiveTrackerFrame:GetPoint()
+	if (anchor ~= self.ObjectiveFrameHolder) then
+		if (not ObjectiveTrackerFrame:IsUserPlaced()) then
+			ObjectiveTrackerFrame:SetMovable(true)
+			ObjectiveTrackerFrame:SetUserPlaced(true)
+		end
+		ObjectiveTrackerFrame:ClearAllPoints()
+		ObjectiveTrackerFrame:SetPoint("TOP", self.ObjectiveFrameHolder, "TOP")
+	end
 end
 
 -----------------------------------------------------------------
@@ -555,8 +566,15 @@ Module.OnEvent = function(self, event, ...)
 		local addon = ...
 		if (addon == "Blizzard_ObjectiveTracker") then 
 			self:UnregisterEvent("ADDON_LOADED", "OnEvent")
-			self:PositionRetailTracker()
-		end 
+			self:InitRetailTracker()
+		end
+
+	elseif (event == "VARIABLES_LOADED") then
+		self:PositionRetailTracker()
+
+	elseif (event == "PLAYER_REGEN_ENABLED") then
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
+		self:PositionRetailTracker()
 	end 
 end
 
@@ -569,10 +587,11 @@ Module.OnInit = function(self)
 		self:StyleClassicLog()
 		self:StyleClassicTracker()
 	end
-
 	if (IsRetail) then
-		self:PositionRetailTracker()
+		self:InitRetailTracker()
 	end
+
+	self:RegisterEvent("VARIABLES_LOADED", "OnEvent")
 end 
 
 Module.OnEnable = function(self)

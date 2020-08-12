@@ -7,10 +7,10 @@ If you can contribute with missing localizations, that would be helpful. If you 
 The biggest contribution is to pledge to our Patreon, and help us secure the future of this project. Or a little beer tip on PayPal, we do love those. Apart from that we would love for you to join us on Discord and any other of our communites linked below! 
 
 ## **Pledge to our work:**  
-* Patreon: [www.patreon.com/AzeriteUI](https://www.patreon.com/goldpawsstuff)  
-* PayPal: [www.paypal.me/AzeriteUI](https://www.paypal.me/goldpawsstuff)  
-* Liberapay: [liberapay.com/AzeriteTeam/donate](https://liberapay.com/goldpawsstuff/donate)
+* Patreon: [www.patreon.com/GoldpawsStuff](https://www.patreon.com/goldpawsstuff)  
+* PayPal: [www.paypal.me/GoldpawsStuff](https://www.paypal.me/goldpawsstuff)  
+* Liberapay: [liberapay.com/GoldpawsStuff/donate](https://liberapay.com/goldpawsstuff/donate)
 
 ## **Follow us:**  
 * Discord: [discord.gg/MUSfWXd](https://discord.gg/MUSfWXd)  
-* Twitter: [@AzeriteUI](https://twitter.com/goldpawsstuff)  
+* Twitter: [@GoldpawsStuff](https://twitter.com/goldpawsstuff)  

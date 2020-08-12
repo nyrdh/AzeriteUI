@@ -2839,7 +2839,6 @@ Layouts.Minimap = {
 	BattleGroundEyePlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
 	BattleGroundEyeSize = { 64, 64 }, 
 	BattleGroundEyeTexture = GetMedia("group-finder-eye-green"),
-	BlipScale = 1.15, 
 	BlipTextures = 
 		(IsClassic) and 
 			setmetatable({

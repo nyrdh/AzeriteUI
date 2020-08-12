@@ -1,6 +1,10 @@
 local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, "UnitName requires LibClientBuild to be loaded.")
 
+-- Lua API
+local string_len = string.len
+local string_split = string.split
+
 -- WoW API
 local GetQuestGreenRange = GetQuestGreenRange
 local GetScalingQuestGreenRange = GetScalingQuestGreenRange
@@ -123,23 +127,43 @@ local Update = function(self, event, unit)
 
 	-- Retrieve data
 	local name = UnitName(unit)
+	local nameLength = string_len(name)
 
-	-- Truncate name
-	if (element.maxChars) then 
-		name = utf8sub(name, element.maxChars, element.useDots)
-	end 
+	local levelText, levelTextLength, showLevel
 
 	if (element.showLevel) then
 		local level = UnitEffectiveLevel(unit)
-		if (level and (level > 0)) then 
+		if (level and level > 0) then 
 			local r, g, b, colorCode = GetDifficultyColorByLevel(self, level)
 			levelText = colorCode .. level .. "|r"
-			if (element.showLevelLast) then 
-				name = name .. "|cff888888:|r" .. levelText
-			else 
-				name = levelText .. "|cff888888:|r" .. name
-			end
+			levelTextLength = level >= 100 and 5 or level >= 10 and 4 or 3
+			showLevel = true
 		end 
+	end
+
+	local fullLength = (showLevel) and (nameLength + levelTextLength) or (nameLength)
+	if (element.maxChars) and (fullLength > element.maxChars) then 
+		local maxChars = (showLevel) and (element.maxChars - levelTextLength) or (element.maxChars)
+		if (element.useSmartName) then
+			local nameTable = { string_split(" ", name) }
+			if (#nameTable > 1) then
+				if string_len(nameTable[#nameTable]) < maxChars then
+					name = nameTable[#nameTable]
+				else
+					name = utf8sub(name, maxChars, element.useDots)
+				end
+			end
+		else
+			name = utf8sub(name, maxChars, element.useDots)
+		end
+	end 
+
+	if (showLevel) then
+		if (element.showLevelLast) then 
+			name = name .. " |cff888888:|r" .. levelText
+		else 
+			name = levelText .. "|cff888888:|r " .. name
+		end
 	end
 
 	element:SetText(name)
@@ -193,5 +217,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Name", Enable, Disable, Proxy, 12)
+	Lib:RegisterElement("Name", Enable, Disable, Proxy, 13)
 end 

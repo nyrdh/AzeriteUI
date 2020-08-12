@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.388-RC] 2020-08-12
+### Changed
+- Updated the UI switcher chat commands for compatibility with new upcoming UIs. More on this later!
+
+### Fixed
+- Modified Minimap back-end to not require our objectives tracker module anymore. Also detached Minimap alpha from the rest of the UI. We don't want to fade this frame in and out, the actual map section and its blips and pins is incompatible with this. It is now possible for tinkerers to disable the objectives tracker and minimap modules form the ToC file separately.
+- We previously scaled up the Minimap blip icons about 15%, as it simply looked better. This has proven to be incompatible with addons adding their own pins to the Minimap, like GatherMate, HandyNotes or Questie, so we are removing it and going back to tiny icons. 
+- We are now re-applying the game's saved setting for Minimap rotation after logging in, in an attempt to forcefully update the rotation setting in addons adding their own pins to the Minimap, as this sometimes simply did not happen after reloads, and icons would act as if no rotation was enabled, even though it was. Experimental solution, still keeping an eye on this.
+
 ## [2.0.387-RC] 2020-08-09
 ### Changed
 - Styled a few more Minimap blip icons for better consistency.
@@ -14,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [2.0.386-RC] 2020-08-09
 ### Fixed
-- Raid frames appear instantly once again, and not just when changing between 26 or more and 25 or less group members. The bugs get ever more interesting.
+- Our raid frames appear instantly once again, and not just when changing between 26 or more and 25 or less group members. The bugs get ever more interesting.
 
 ## [2.0.385-RC] 2020-08-08
 ### Added

@@ -189,23 +189,25 @@ local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 	local healthPercent = health.ValuePercent
 	if (healthPercent) then 
 		local min, max = minPerc or min, maxPerc or max
-		if (healthPercent.Override) then 
-			healthPercent:Override(unit, min, max)
-		else
-			if (health.disconnected or health.dead) then 
-				healthPercent:SetText("")
-			else 
-				healthPercent:SetFormattedText("%.0f", min/max*100 - (min/max*100)%1)
-			end 
-			if (healthPercent.PostUpdate) then 
-				healthPercent:PostUpdate(unit, min, max)
+		if (min and max) then
+			if (healthPercent.Override) then 
+				healthPercent:Override(unit, min, max)
+			else
+				if (health.disconnected or health.dead) then 
+					healthPercent:SetText("")
+				else 
+					healthPercent:SetFormattedText("%.0f", min/max*100 - (min/max*100)%1)
+				end 
+				if (healthPercent.PostUpdate) then 
+					healthPercent:PostUpdate(unit, min, max)
+				end 
 			end 
 		end 
 	end
 	local absorbValue = health.ValueAbsorb
 	if (absorbValue) then 
 		local curAbsorb = health.curAbsorb
-		if (curAbsorb > 0) then 
+		if (curAbsorb) and (curAbsorb > 0) then 
 			if (absorbValue.Override) then 
 				absorbValue:Override(unit, curAbsorb)
 			else
@@ -777,5 +779,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 50)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 51)
 end 

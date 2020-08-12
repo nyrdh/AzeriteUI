@@ -1,4 +1,4 @@
-local LibSwitcher = Wheel:Set("LibSwitcher", 2)
+local LibSwitcher = Wheel:Set("LibSwitcher", 4)
 if (not LibSwitcher) then
 	return
 end
@@ -42,63 +42,41 @@ local CurrentProjects = { Addons = {}, Cmds = {} }
 -- List of known user interfaces. 
 local KnownProjects = {
 	["AzeriteUI"] = {
+		azeriteui2 = true,
 		azeriteui = true,
+		azerite2 = true,
 		azerite = true,
+		azui2 = true,
 		azui = true,
+		az2 = true,
 		az = true
 	},
 	["DiabolicUI"] = { 
 		diabolicui2 = true, 
 		diabolicui = true, 
+		diabolic2 = true, 
 		diabolic = true, 
+		diabloui2 = true, 
 		diabloui = true, 
 		dui2 = true, 
 		dui = true 
 	},
-	["GoldieSix"] = { 
-		goldpawui6 = true,
+	["GoldpawUI7"] = { 
+		goldpawui7 = true,
 		goldpawui = true,
-		goldpaw6 = true,
+		goldpaw7 = true,
 		goldpaw = true,
-		goldui6 = true,
+		goldui7 = true,
 		goldui = true,
-		gui6 = true,
+		gui7 = true,
 		gui = true 
 	},
-	["GoldpawUI"] = { 
-		goldpawui5 = true,
-		goldpaw5 = true,
-		goldui5 = true,
-		gui5 = true
-	},
-	["LaeviaUI"] = { 
-		laeviaui = true, 
-		laevia = true, 
-		lui = true 
-	},
-	["LaeviaUI"] = { 
-		laeviaui = true, 
-		laevia = true, 
-		lui = true 
-	},
-	["KkthnxUI"] = { 
-		kkthnxui = true, 
-		kkthnx = true, 
-		kui = true 
-	},
-	["SpartanUI"] = { 
-		laeviaui = true, 
-		laevia = true, 
-		lui = true 
-	},
-	["Tukui"] = { 
-		tukui = true, 
-		tukz = true
-	},
-	["ElvUI"] = { 
-		elvui = true, 
-		elv = true
-	}
+	["GoldieSix"] = {},
+	["GoldpawUI"] = {},
+	["SpartanUI"] = {},
+	["KkthnxUI"] = {},
+	["TukUI"] = {},
+	["ElvUI"] = {}
 }
 
 -- Shortcuts for quality of life.
