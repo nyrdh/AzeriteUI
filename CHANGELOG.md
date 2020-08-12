@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.389-RC] 2020-08-12
+### Fixed
+- Fixed a back-end issue introduced in the previous update that could cause a bug when name info was unavailable on a unit frame.
+
 ## [2.0.388-RC] 2020-08-12
 ### Changed
 - Updated the UI switcher chat commands for compatibility with new upcoming UIs. More on this later!

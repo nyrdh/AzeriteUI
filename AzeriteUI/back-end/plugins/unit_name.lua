@@ -127,8 +127,12 @@ local Update = function(self, event, unit)
 
 	-- Retrieve data
 	local name = UnitName(unit)
-	local nameLength = string_len(name)
+	if (not name) then 
+		element:SetText("")
+		return
+	end
 
+	local nameLength = string_len(name)
 	local levelText, levelTextLength, showLevel
 
 	if (element.showLevel) then
