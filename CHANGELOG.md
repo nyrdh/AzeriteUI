@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.391-Alpha] 2020-08-13
+### Fixed
+- Fixed nameplate castbar spell name alignment, as this would only be fully correct directly after changing between a protected and regular cast. Now it updates on every cast.
+
 ## [2.0.390-RC] 2020-08-13
 ### Fixed
 - Fixed a back-end issue that would break the UI for some users, as it wrongly assumed the Blizzard_ObjectiveTracker always would be loaded prior to itself. Which it isn't. Though it strangely enough always is for me. 

@@ -768,8 +768,6 @@ local NamePlates_CastBar_PostUpdate = function(cast, unit)
 			cast.Bg:SetSize(68, 9)
 			cast.Bg:SetTexture(GetMedia("cast_bar"))
 			cast.Bg:SetVertexColor(.15, .15, .15, 1)
-			cast.Name:ClearAllPoints()
-			cast.Name:SetPoint("TOPLEFT", cast:GetWidth()/2 - cast.Name:GetStringWidth()/2, -20)
 			cast.currentStyle = "protected"
 		end 
 
@@ -796,14 +794,22 @@ local NamePlates_CastBar_PostUpdate = function(cast, unit)
 			cast.Bg:SetSize(84*256/228, 14*64/36)
 			cast.Bg:SetTexture(GetMedia("nameplate_backdrop"))
 			cast.Bg:SetVertexColor(1, 1, 1, 1)
-			cast.Name:ClearAllPoints()
-			cast.Name:SetPoint("TOPLEFT", cast:GetWidth()/2 - cast.Name:GetStringWidth()/2, -18)
 			cast.currentStyle = nil 
 		end 
 
 		-- Standard bar coloring
 		cast:SetStatusBarColor(Colors.cast[1], Colors.cast[2], Colors.cast[3]) 
 	end 
+
+	-- Reposition cast name based on cast type.
+	-- This must happen on every cast, as it depends on the cast name width, which changes.
+	cast.Name:ClearAllPoints()
+	if (cast.currentStyle == "protected") then
+		cast.Name:SetPoint("TOPLEFT", cast:GetWidth()/2 - cast.Name:GetStringWidth()/2, -20)
+	else
+		cast.Name:SetPoint("TOPLEFT", cast:GetWidth()/2 - cast.Name:GetStringWidth()/2, -18)
+	end
+
 	local self = cast._owner
 	if (not self) then 
 		return 
