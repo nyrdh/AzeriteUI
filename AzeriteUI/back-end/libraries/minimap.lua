@@ -1,4 +1,4 @@
-local Version = 51
+local Version = 52
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -393,6 +393,28 @@ ElementHandler.EnableAllElements = function(proxy)
 	end
 end
 
+-- We need to do this, or moving the Minimap will
+-- cause a SetPoint family anchor bullshit bug.
+-----------------------------------------------------------
+LibMinimap.HandleObjectivesTracker = function(self, event, addon)
+	if (event == "ADDON_LOADED") then 
+		if (addon == "Blizzard_ObjectiveTracker") then
+			LibMinimap:UnregisterEvent("ADDON_LOADED", "HandleObjectivesTracker")
+		else
+			return
+		end
+	end
+	if (ObjectiveTrackerFrame) then
+		if (not ObjectiveTrackerFrame:IsUserPlaced()) then
+			ObjectiveTrackerFrame:SetClampedToScreen(false)
+			ObjectiveTrackerFrame:SetMovable(true)
+			ObjectiveTrackerFrame:SetUserPlaced(true)
+		end
+	else
+		LibMinimap:RegisterEvent("ADDON_LOADED", "HandleObjectivesTracker")
+	end
+end
+
 -- Public API
 ---------------------------------------------------------
 -- Create or fetch our minimap. Only one can exist, this is a WoW limitation.
@@ -424,11 +446,7 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 	-- We need to do this, or moving the Minimap will
 	-- cause a SetPoint family anchor bullshit bug.
 	-----------------------------------------------------------
-	if (not ObjectiveTrackerFrame:IsUserPlaced()) then
-		ObjectiveTrackerFrame:SetClampedToScreen(false)
-		ObjectiveTrackerFrame:SetMovable(true)
-		ObjectiveTrackerFrame:SetUserPlaced(true)
-	end
+	LibMinimap:HandleObjectivesTracker()
 
 	-- Create Custom Scaffolding
 	-----------------------------------------------------------

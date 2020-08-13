@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.390-RC] 2020-08-13
+### Fixed
+- Fixed a back-end issue that would break the UI for some users, as it wrongly assumed the Blizzard_ObjectiveTracker always would be loaded prior to itself. Which it isn't. Though it strangely enough always is for me. 
+
 ## [2.0.389-RC] 2020-08-12
 ### Fixed
 - Fixed a back-end issue introduced in the previous update that could cause a bug when name info was unavailable on a unit frame.

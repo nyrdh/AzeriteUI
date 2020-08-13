@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 76)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 77)
 if (not LibUnitFrame) then	
 	return
 end
@@ -346,7 +346,7 @@ LibUnitFrame.GetScript = function(self, scriptHandler)
 	return scriptHandlers[scriptHandler]
 end
 
-LibUnitFrame.GetUnitFrameVisibilityDriver = function(self, unit)
+LibUnitFrame.GetUnitFrameVisibilityDriver = function(self, unit, hideInVehicles)
 	local visDriver
 	if (unit == "player") then
 		if (IsClassic) then
@@ -354,19 +354,39 @@ LibUnitFrame.GetUnitFrameVisibilityDriver = function(self, unit)
 		elseif (IsRetail) then
 			-- Might seem stupid, but I want the player frame to disappear along with the actionbars 
 			-- when we've blown the flight master's whistle and are getting picked up.
-			visDriver = "[@player,exists][vehicleui][possessbar][overridebar][mounted]show;hide"
+			if (hideInVehicles) then
+				visDriver = "[vehicleui]hide;[@player,exists][possessbar][overridebar][mounted]show;hide"
+			else
+				visDriver = "[@player,exists][vehicleui][possessbar][overridebar][mounted]show;hide"
+			end
 		end
 	elseif (unit == "pet") then
 		if (IsRetail) then
-			visDriver = "[@pet,exists][nooverridebar,vehicleui]show;hide"
+			if (hideInVehicles) then
+				visDriver = "[vehicleui]hide;[@pet,exists]show;hide"
+			else
+				visDriver = "[@pet,exists][nooverridebar,vehicleui]show;hide"
+			end
 		end
 	else
 		local partyID = string_match(unit, "^party(%d+)")
 		if (partyID) then
-			visDriver = string_format("[nogroup:raid,@%s,exists]show;hide", unit)
+			if (hideInVehicles) then
+				visDriver = string_format("[vehicleui]hide;[nogroup:raid,@%s,exists]show;hide", unit)
+			else
+				visDriver = string_format("[nogroup:raid,@%s,exists]show;hide", unit)
+			end
 		end
 	end
-	return visDriver or string_format("[@%s,exists]show;hide", unit)
+	if (visDriver) then
+		return visDriver
+	else
+		if (hideInVehicles) then
+			return string_format("[vehicleui]hide;[@%s,exists]show;hide", unit)
+		else
+			return string_format("[@%s,exists]show;hide", unit)
+		end
+	end
 end 
 
 LibUnitFrame.GetUnitFrameUnitDriver = function(self, unit)
@@ -480,7 +500,7 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 	frame:SetAttribute("unit", unit)
 
 	local unitDriver = LibUnitFrame:GetUnitFrameUnitDriver(unit)
-	if (unitDriver) then 
+	if (unitDriver) and (not frame.hideInVehicles) then 
 		local unitSwitcher = CreateFrame("Frame", nil, nil, "SecureHandlerAttributeTemplate")
 		unitSwitcher:SetFrameRef("UnitFrame", frame)
 		unitSwitcher:SetAttribute("unit", unit)
@@ -495,7 +515,7 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 		frame:SetAttribute("unit", unit)
 	end 
 
-	local visDriver = LibUnitFrame:GetUnitFrameVisibilityDriver(unit)
+	local visDriver = LibUnitFrame:GetUnitFrameVisibilityDriver(unit, frame.hideInVehicles)
 	if (frame.visibilityOverrideDriver) then 
 		visDriver = frame.visibilityOverrideDriver
 	elseif (frame.visibilityPreDriver) then
