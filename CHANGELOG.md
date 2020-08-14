@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.392-Alpha] 2020-08-14
+### Changed
+- The minimap blip icon for the city mission boards leading to the various BfA storyline chapters now have a similar exclamation mark to the others. 
+- The new rare/elite/boss icon on the nameplates now ignores the nameplate alpha. They look weird when faded, and we want to know the classification at all times. This is really needed when deciding what plate to click for the rare mob that's about to die in half a second. 
+- The buff and debuff unitframe plugins - which this UI actually doesn't use - now obeys the same filter rules as the aura element does. This is just a bonus inherited from the GoldpawUI7 development. 
+
 ## [2.0.391-Alpha] 2020-08-13
 ### Fixed
 - Fixed nameplate castbar spell name alignment, as this would only be fully correct directly after changing between a protected and regular cast. Now it updates on every cast.

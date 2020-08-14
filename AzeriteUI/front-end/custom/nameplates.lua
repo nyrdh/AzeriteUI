@@ -225,7 +225,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	classification:SetPoint(unpack(layout.ClassificationPlace))
 	classification:SetSize(unpack(layout.ClassificationSize))
 	classification.hideOnFriendly = layout.ClassificationHideOnFriendly
-	--classification:SetIgnoreParentAlpha(true)
+	classification:SetIgnoreParentAlpha(true)
 	plate.Classification = classification
 
 	local boss = classification:CreateTexture()

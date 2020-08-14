@@ -3156,7 +3156,7 @@ Layouts.NamePlates = {
 	NameShowOnMouseover = true,
 	NameShowOnTarget = true,
 
-	ClassificationPlace = { "RIGHT", 32-10, -1 },
+	ClassificationPlace = { "RIGHT", 18, -1 },
 	ClassificationSize = { 40, 40 },
 	ClassificationColor = { 1, 1, 1, 1 },
 	ClassificationHideOnFriendly = true,

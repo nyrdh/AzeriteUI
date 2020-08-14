@@ -686,17 +686,28 @@ local Update = function(self, event, unit, ...)
 		-- Store some basic values on the element
 		local forced = forced or guid ~= Buffs.guid
 		Buffs.guid = guid
-		
-		local buffFilter = Buffs.buffFilterString or Buffs.auraFilterString or Buffs.filter
-		local buffFilterFunc = Buffs.buffFilterFunc or Buffs.auraFilterFunc
 
-		-- Forcefully register aura watches for the relevant filters
+		-- Filter strings
+		local buffFilter = Buffs.filter or Buffs.filterBuffs 
+		
+		-- Filter functions
+		local buffFilterFunc = Buffs.func or Buffs.funcBuffs 
+
+		-- Forcefully register cache the auras for the relevant filters
 		-- This is to ensure force updates actually have the right filters and fully updated caches
 		if forced then 
 			LibAura:CacheUnitBuffsByFilter(unit, buffFilter)
 		end 
-		
-		local visible = IterateBuffs(Buffs, unit, buffFilter, buffFilterFunc)
+
+		local visible, visibleBuffs, visibleDebuffs = 0, 0, 0
+		visible, visibleBuffs = IterateBuffs(Buffs, unit, buffFilter, buffFilterFunc, visible)
+
+		-- Add in meta-info for filters
+		Buffs.visibleAuras = visible
+		Buffs.visibleBuffs = visibleBuffs
+		Buffs.visibleDebuffs = visibleDebuffs
+		Buffs.hasBuffs = visibleBuffs > 0
+		Buffs.hasDebuffs = visibleDebuffs > 0
 
 		EvaluateVisibilities(Buffs, visible)
 
@@ -714,16 +725,27 @@ local Update = function(self, event, unit, ...)
 		local forced = forced or guid ~= Debuffs.guid
 		Debuffs.guid = guid
 		
-		local debuffFilter = Debuffs.debuffFilterString or Debuffs.auraFilterString or Debuffs.filter
-		local debuffFilterFunc = Debuffs.debuffFilterFunc or Debuffs.auraFilterFunc
+		-- Filter strings
+		local debuffFilter = Debuffs.filter or Debuffs.filterDebuffs
+		
+		-- Filter functions
+		local debuffFilterFunc = Debuffs.func or Debuffs.funcDebuffs
 
-		-- Forcefully register aura watches for the relevant filters
+		-- Forcefully register cache the auras for the relevant filters
 		-- This is to ensure force updates actually have the right filters and fully updated caches
 		if forced then 
 			LibAura:CacheUnitDebuffsByFilter(unit, debuffFilter)
 		end 
 
-		local visible = IterateDebuffs(Debuffs, unit, debuffFilter, debuffFilterFunc)
+		local visible, visibleBuffs, visibleDebuffs = 0, 0, 0
+		visible, visibleDebuffs = IterateDebuffs(Debuffs, unit, debuffFilter, debuffFilterFunc, visible)
+
+		-- Add in meta-info for filters
+		Debuffs.visibleAuras = visible
+		Debuffs.visibleBuffs = visibleBuffs
+		Debuffs.visibleDebuffs = visibleDebuffs
+		Debuffs.hasBuffs = visibleBuffs > 0
+		Debuffs.hasDebuffs = visibleDebuffs > 0
 
 		EvaluateVisibilities(Debuffs, visible)
 
@@ -848,5 +870,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 54)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 55)
 end 
