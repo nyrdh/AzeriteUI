@@ -330,7 +330,7 @@ local BlizzardPopup_OnShow = function(popup)
 	local sizeMod = 3/4
 	backdrop:SetBackdrop({
 		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = tooltipBorder, GetMedia("tooltip_border_hex_large"), -- tooltipBorder,
+		edgeFile = tooltipBorder, -- GetMedia("tooltip_border_hex_large"), -- tooltipBorder,
 		edgeSize = 32*sizeMod, 
 		tile = false, 
 		insets = { top = tooltipInset*sizeMod, bottom = tooltipInset*sizeMod, left = tooltipInset*sizeMod, right = tooltipInset*sizeMod }

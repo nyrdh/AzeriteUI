@@ -493,6 +493,9 @@ Module.PositionRetailTracker = function(self, event, ...)
 	if (InCombatLockdown()) then
 		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	end
+	if (not ObjectiveTrackerFrame) then
+		return
+	end
 	local _,anchor = ObjectiveTrackerFrame:GetPoint()
 	if (anchor ~= self.ObjectiveFrameHolder) then
 		if (not ObjectiveTrackerFrame:IsUserPlaced()) then

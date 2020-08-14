@@ -1236,7 +1236,8 @@ elseif (IsRetail) then
 		AddUserFlags(188029, ByPlayer) 						-- Unbending Potion (Legion Consumables)
 		AddUserFlags(127372, OnPlayer) 						-- Unstable Serum (Klaxxi Enhancement: Raining Blood)
 		AddUserFlags(240640, OnPlayer) 						-- The Shadow of the Sentinax (Mark of the Sentinax)
-
+		AddUserFlags(254873, OnPlayer) 						-- Irontide Recruit (Tiragarde Sound Storyline)
+		
 		-- Heroism
 		------------------------------------------------------------------------
 		AddUserFlags( 90355, OnPlayer + PrioHigh) 			-- Ancient Hysteria
