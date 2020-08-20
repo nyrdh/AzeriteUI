@@ -203,12 +203,12 @@ local ModuleProtoType = {
 		if (isIncompatible) then 
 			if (self:IsTopLevel()) then 
 				local ourAddon = self:GetAddon()
-				if (ourAddon) and (conflictLists[ourAddon] ~= conflictingAddon) then
-					conflictLists[conflictingAddon] = ourAddon
-					local ourName = GetAddOnMetadata(ourAddon, "Title") or ourAddon
-					local conflictingAddonName = GetAddOnMetadata(conflictingAddon, "Title") or conflictingAddon
+				local ourName = ourAddon and GetAddOnMetadata(ourAddon, "Title") or ourAddon
+				local conflictingAddonName = conflictingAddon and GetAddOnMetadata(conflictingAddon, "Title") or conflictingAddon
+				if (ourName) and (conflictingAddonName) then
 					print(("|cffcc0000Cannot have both |r|cff888888'|r%s|cff888888'|r|cffcc0000 and |r|cff888888'|r%s|cff888888'|r|cffcc0000 enabled!"):format(ourName, conflictingAddonName))
 				end 
+				return
 			end 
 		elseif (self:DependencyFailed()) then
 			return
@@ -391,6 +391,16 @@ local ModuleProtoType = {
 			end
 			currentArg = currentArg + 1
 			addonDependencies[self][addonName] = condition and condition or true
+		end
+	end,
+
+	GetAddOnDisplayName = function(self, addonName)
+		local target = string_lower(addonName)
+		for i = 1,GetNumAddOns() do
+			local name, title, notes, enabled, loadable, reason, security = self:GetAddOnInfo(i)
+			if string_lower(name) == addonName then
+				return title or name
+			end
 		end
 	end,
 

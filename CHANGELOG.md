@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.394-RC] 2020-08-20
+### Changed
+- The UIs master frame is now forcefully turned visible upon entering combat, and a previous system that hid it when zoning between instances has been disabled, as this was proving to be buggy.
+- The slightly delayed UI fade-in after logging in or reloading has been disabled. This might too have misfired at some point. Taking the safe route today.
+
 ## [2.0.393-RC] 2020-08-14
 ### Changed
 - The minimap blip icon for the city mission boards leading to the various BfA storyline chapters now have a similar exclamation mark to the others. 

@@ -14,6 +14,9 @@ Core:RegisterSavedVariablesGlobal(ADDON.."_DB")
 -- Make sure that duplicate UIs aren't loaded
 Core:SetIncompatible(Core:GetInterfaceList())
 
+-- Dev switch. Might need this permantently.
+local DISABLE_STARTUP_FADE = true
+
 -- Lua API
 local _G = _G
 local ipairs = ipairs
@@ -296,7 +299,7 @@ end
 Core.ApplyExperimentalFeatures = function(self)
 
 	-- Memory Cache of textures
-	do
+	if (false) then
 		for i,path in ipairs({
 			"actionbutton-ants-small-glow-grid.tga",
 			"icon_target_green.tga",
@@ -511,7 +514,7 @@ Core.ApplyExperimentalFeatures = function(self)
 	if (IsRetail) then
 
 		local updateTrackingEvent, onTrackingEvent, checkForActiveGame, findActiveBuffID, restoreUI
-		local isTracking, inGroup, inCombat, inInstance, stopReason
+		local isTracking, inGroup, inCombat, inInstance, stopReason, gameRunning
 		local currentGUID
 		local playerGUID = UnitGUID("player")
 		local filter = "HELPFUL PLAYER CANCELABLE"
@@ -546,6 +549,9 @@ Core.ApplyExperimentalFeatures = function(self)
 		exitButton.msg:SetPoint("CENTER", 0, 0)
 		exitButton.msg:SetTextColor(1, 0, 0)
 
+		-- Forcefully hide this in combat.
+		RegisterAttributeDriver(exitButton, "state-visibility", "[combat]hide")
+
 		-- Search for an active minigame buffID
 		findActiveBuffID = function()
 			local buffID
@@ -569,7 +575,9 @@ Core.ApplyExperimentalFeatures = function(self)
 		-- Show the user interface, hide the exitbutton
 		restoreUI = function()
 			local visFrame = self:GetFrame("UICenter"):GetParent()
-			if (not visFrame:IsShown()) and (not InCombatLockdown()) then 
+			-- This happens automatically in combat by the back-end now,
+			-- we still need to show it when the game ends normally, though.
+			if (not InCombatLockdown()) then 
 				visFrame:Show()
 				exitButton:Hide()
 			end
@@ -581,6 +589,7 @@ Core.ApplyExperimentalFeatures = function(self)
 			local buffID, buffName = findActiveBuffID(self)
 			if (buffID) then 
 				if (visFrame:IsShown()) and (not InCombatLockdown()) then 
+					gameRunning = true
 					self:AddDebugMessageFormatted(string_format("MiniGame Enabled: '%s'", buffName))
 					visFrame:Hide()
 					exitButton:Show()
@@ -588,7 +597,12 @@ Core.ApplyExperimentalFeatures = function(self)
 				end
 			else
 				if (not visFrame:IsShown()) and (not InCombatLockdown()) then
-					self:AddDebugMessageFormatted("MiniGame Ended.")
+					-- Only fire this debug message if a game was actually running.
+					-- Had a lot of false positives at reloads and world entries without it.
+					if (gameRunning) then
+						gameRunning = nil
+						self:AddDebugMessageFormatted("MiniGame Ended.")
+					end
 					restoreUI()
 				end
 			end
@@ -984,8 +998,10 @@ Core.OnInit = function(self)
 	self.layout = GetLayout(ADDON)
 
 	-- Hide the entire UI from the start
-	if self.layout.FadeInUI then 
-		self:GetFrame("UICenter"):SetAlpha(0)
+	if (not DISABLE_STARTUP_FADE) then
+		if self.layout.FadeInUI then 
+			self:GetFrame("UICenter"):SetAlpha(0)
+		end
 	end
 
 	-- In case some other jokers have disabled these, we add them back to avoid a World of Bugs.
@@ -1075,12 +1091,14 @@ Core.OnEnable = function(self)
 
 	-- Apply startup smoothness and sweetness
 	------------------------------------------------------------------------------------
-	if self.layout.FadeInUI or self.layout.ShowWelcomeMessage then 
-		self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
-		if self.layout.FadeInUI then 
-			self:RegisterEvent("PLAYER_LEAVING_WORLD", "OnEvent")
-		end
-	end 
+	if (not DISABLE_STARTUP_FADE) then
+		if (self.layout.FadeInUI) or (self.layout.ShowWelcomeMessage) then 
+			self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
+			if (self.layout.FadeInUI) then 
+				self:RegisterEvent("PLAYER_LEAVING_WORLD", "OnEvent")
+			end
+		end 
+	end
 
 	-- Make sure frame references to secure frames are in place for the menu
 	------------------------------------------------------------------------------------
@@ -1093,7 +1111,7 @@ end
 
 Core.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then 
-		if self.layout.FadeInUI then 
+		if (not DISABLE_STARTUP_FADE) and (self.layout.FadeInUI) then 
 			self.frame = self.frame or CreateFrame("Frame")
 			self.frame.alpha = 0
 			self.frame.elapsed = 0
@@ -1136,7 +1154,7 @@ Core.OnEvent = function(self, event, ...)
 		self:UpdateAspectRatio()
 
 	elseif (event == "PLAYER_LEAVING_WORLD") then
-		if self.layout.FadeInUI then 
+		if (not DISABLE_STARTUP_FADE) and (self.layout.FadeInUI) then 
 			if self.frame then 
 				self.frame:SetScript("OnUpdate", nil)
 				self.alpha = 0

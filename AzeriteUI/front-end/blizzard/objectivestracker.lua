@@ -449,7 +449,8 @@ Module.InitRetailTracker = function(self)
 	ObjectiveTrackerFrame:SetClampedToScreen(false)
 	ObjectiveTrackerFrame:SetAlpha(.9)
 	ObjectiveTrackerFrame:SetParent(self.frame)
-
+	ObjectiveTrackerFrame:SetIgnoreParentAlpha(false)
+	
 	-- Create a dummy frame to cover the tracker  
 	-- to block mouse input when it's faded out. 
 	local ObjectiveFrameCover = self:CreateFrame("Frame", nil, "UICenter")
@@ -502,6 +503,7 @@ Module.PositionRetailTracker = function(self, event, ...)
 			ObjectiveTrackerFrame:SetMovable(true)
 			ObjectiveTrackerFrame:SetUserPlaced(true)
 		end
+		ObjectiveTrackerFrame:SetIgnoreParentAlpha(false)
 		ObjectiveTrackerFrame:ClearAllPoints()
 		ObjectiveTrackerFrame:SetPoint("TOP", self.ObjectiveFrameHolder, "TOP")
 	end

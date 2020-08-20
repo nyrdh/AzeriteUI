@@ -2318,7 +2318,7 @@ Layouts[ADDON] = {
 	},
 	DisableUIMenuOptions = {
 		{ Shrink = true, Name = "InterfaceOptionsCombatPanelTargetOfTarget" },
-		{ Shrink = "Vertical", Name = "InterfaceOptionsNamesPanelUnitNameplatesPersonalResourceOnEnemy" }
+		IsRetail and { Shrink = "Vertical", Name = "InterfaceOptionsNamesPanelUnitNameplatesPersonalResourceOnEnemy" } or nil
 	},
 	FadeInDelay = 1.5,
 	FadeInSpeed = .75,

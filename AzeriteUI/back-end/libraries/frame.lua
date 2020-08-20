@@ -1,4 +1,4 @@
-local LibFrame = Wheel:Set("LibFrame", 60)
+local LibFrame = Wheel:Set("LibFrame", 63)
 if (not LibFrame) then	
 	return
 end
@@ -79,9 +79,9 @@ end
 
 -- Hide the master visibility frame if we haven't yet reached login. 
 -- This might improve addon loading time. 
-if (not IsLoggedIn()) and (not InCombatLockdown()) then 
-	LibFrame.frameParent:Hide()
-end
+--if (not IsLoggedIn()) and (not InCombatLockdown()) then 
+--	LibFrame.frameParent:Hide()
+--end
 
 -- Return a value rounded to the nearest integer.
 local math_round = function(value)
@@ -131,11 +131,13 @@ end
 SetDisplaySize()
 
 if (IsClassic) then
-	RegisterAttributeDriver(LibFrame.frame, "state-visibility", "show")
+	-- Forcefully re-show this in combat if somebody has hidden it.
+	RegisterAttributeDriver(LibFrame.frame, "state-visibility", "[combat]show;show")
 
 elseif (IsRetail) then
 	-- Keep it and all its children hidden during pet battles.
-	RegisterAttributeDriver(LibFrame.frame, "state-visibility", "[petbattle] hide; show")
+	-- Forcefully re-show this in combat if somebody has hidden it.
+	RegisterAttributeDriver(LibFrame.frame, "state-visibility", "[petbattle]hide;[combat]show;show")
 end
 
 -- Keyword registry to translate words to frame handles used for anchoring or parenting
@@ -439,8 +441,8 @@ LibFrame.Enable = function(self)
 
 	-- Hide the visibility frame when reloading
 	-- The idea is to just stop all running OnUpdate handlers
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnReload")
-	self:RegisterEvent("PLAYER_LEAVING_WORLD", "OnReload")
+	--self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnReload")
+	--self:RegisterEvent("PLAYER_LEAVING_WORLD", "OnReload")
 
 	-- New system only needs to capture changes and events
 	-- affecting display size or the cinematic frame visibility.

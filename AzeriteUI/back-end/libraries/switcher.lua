@@ -1,4 +1,4 @@
-local LibSwitcher = Wheel:Set("LibSwitcher", 4)
+local LibSwitcher = Wheel:Set("LibSwitcher", 5)
 if (not LibSwitcher) then
 	return
 end
@@ -58,9 +58,15 @@ local KnownProjects = {
 		diabolic = true, 
 		diabloui2 = true, 
 		diabloui = true, 
+		diablo = true,
+		dio2 = true,
+		dio = true,
 		dui2 = true, 
-		dui = true 
+		dui = true
 	},
+	["ElvUI"] = {},
+	["GoldieSix"] = {},
+	["GoldpawUI"] = {},
 	["GoldpawUI7"] = { 
 		goldpawui7 = true,
 		goldpawui = true,
@@ -71,12 +77,9 @@ local KnownProjects = {
 		gui7 = true,
 		gui = true 
 	},
-	["GoldieSix"] = {},
-	["GoldpawUI"] = {},
-	["SpartanUI"] = {},
 	["KkthnxUI"] = {},
-	["TukUI"] = {},
-	["ElvUI"] = {}
+	["SpartanUI"] = {},
+	["TukUI"] = {}
 }
 
 -- Shortcuts for quality of life.
