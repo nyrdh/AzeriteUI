@@ -1,4 +1,4 @@
-local LibMessage = Wheel:Set("LibMessage", 14)
+local LibMessage = Wheel:Set("LibMessage", 15)
 if (not LibMessage) then	
 	return
 end
@@ -160,6 +160,11 @@ LibMessage.New = function(self, target, registerName, registerNameAlternate, unr
 				-- Fire the Unregister callback if no more occurrences of this message is registered
 				return (target.OnUnregister and (not next(events[message]))) and target:OnUnregister(message, ...)
 			end
+		end
+
+		-- Obey the silent flag!
+		if (silent == true) then
+			return
 		end
 
 		-- If we reach this point it means nothing to unregister was found
