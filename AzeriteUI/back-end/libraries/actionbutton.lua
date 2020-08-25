@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 100)
+local LibSecureButton = Wheel:Set("LibSecureButton", 101)
 if (not LibSecureButton) then
 	return
 end
@@ -65,6 +65,7 @@ local type = type
 -- WoW API
 local ClearOverrideBindings = ClearOverrideBindings
 local CursorHasItem = CursorHasItem
+local CursorHasMacro = CursorHasMacro
 local CursorHasSpell = CursorHasSpell
 local FlyoutHasSpell = FlyoutHasSpell
 local GetActionCharges = GetActionCharges
@@ -473,7 +474,8 @@ local UpdateActionButton = function(self, event, ...)
 		--self:UpdateCheckedState()
 
 	elseif (event == "CURSOR_UPDATE") 
-		or (event == "ACTIONBAR_SHOWGRID") or (event == "ACTIONBAR_HIDEGRID") then 
+		or (event == "ACTIONBAR_SHOWGRID") or (event == "ACTIONBAR_HIDEGRID") 
+		or (IsRetail and (event == "PET_BAR_SHOWGRID") or (event == "PET_BAR_HIDEGRID")) then 
 			self:UpdateGrid()
 
 	elseif (event == "LOSS_OF_CONTROL_ADDED") then
@@ -1121,11 +1123,11 @@ ActionButton.UpdateGrid = function(self)
 	if (self:IsShown()) then 
 		if (self:HasContent()) then
 			self:SetAlpha(1)
-		elseif (CursorHasSpell() or CursorHasItem()) then
+		elseif (CursorHasSpell() or CursorHasItem() or CursorHasMacro()) then
 			self:SetAlpha(1)
 		else 
 			local cursor = GetCursorInfo()
-			if (cursor == "spell") or (cursor == "macro") or (cursor == "mount") or (cursor == "item") or (cursor == "battlepet") then 
+			if (cursor == "spell") or (cursor == "macro") or (cursor == "mount") or (cursor == "item") or (cursor == "battlepet") or (IsRetail and cursor == "petaction") then 
 				self:SetAlpha(1)
 			else
 				if (self.showGrid) then 
@@ -1352,9 +1354,6 @@ ActionButton.OnEnable = function(self)
 	self:RegisterEvent("CURSOR_UPDATE", UpdateActionButton)
 	self:RegisterEvent("LOSS_OF_CONTROL_ADDED", UpdateActionButton)
 	self:RegisterEvent("LOSS_OF_CONTROL_UPDATE", UpdateActionButton)
-	self:RegisterEvent("PET_BAR_HIDEGRID", UpdateActionButton)
-	self:RegisterEvent("PET_BAR_SHOWGRID", UpdateActionButton)
-	self:RegisterEvent("PET_BAR_UPDATE", UpdateActionButton)
 	self:RegisterEvent("PLAYER_ENTER_COMBAT", UpdateActionButton)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", UpdateActionButton)
 	self:RegisterEvent("PLAYER_LEAVE_COMBAT", UpdateActionButton)
@@ -1377,6 +1376,9 @@ ActionButton.OnEnable = function(self)
 	if (IsRetail) then
 		self:RegisterEvent("ARCHAEOLOGY_CLOSED", UpdateActionButton)
 		self:RegisterEvent("COMPANION_UPDATE", UpdateActionButton)
+		self:RegisterEvent("PET_BAR_HIDEGRID", UpdateActionButton)
+		self:RegisterEvent("PET_BAR_SHOWGRID", UpdateActionButton)
+		self:RegisterEvent("PET_BAR_UPDATE", UpdateActionButton)
 		self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", UpdateActionButton)
 		self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", UpdateActionButton)
 		self:RegisterEvent("UNIT_ENTERED_VEHICLE", UpdateActionButton)
@@ -1396,9 +1398,11 @@ ActionButton.OnDisable = function(self)
 	self:UnregisterEvent("CURSOR_UPDATE", UpdateActionButton)
 	self:UnregisterEvent("LOSS_OF_CONTROL_ADDED", UpdateActionButton)
 	self:UnregisterEvent("LOSS_OF_CONTROL_UPDATE", UpdateActionButton)
-	--self:UnregisterEvent("PET_BAR_HIDEGRID", UpdateActionButton)
-	--self:UnregisterEvent("PET_BAR_SHOWGRID", UpdateActionButton)
-	--self:UnregisterEvent("PET_BAR_UPDATE", UpdateActionButton)
+	if (IsRetail) then
+		self:UnregisterEvent("PET_BAR_HIDEGRID", UpdateActionButton)
+		self:UnregisterEvent("PET_BAR_SHOWGRID", UpdateActionButton)
+		self:UnregisterEvent("PET_BAR_UPDATE", UpdateActionButton)
+	end
 	self:UnregisterEvent("PLAYER_ENTER_COMBAT", UpdateActionButton)
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD", UpdateActionButton)
 	self:UnregisterEvent("PLAYER_LEAVE_COMBAT", UpdateActionButton)

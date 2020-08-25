@@ -1279,10 +1279,23 @@ Module.GetFadeFrame = function(self)
 			end 
 		end) 
 
+		local actionBarGrid, petBarGrid, buttonLock
 		ActionBarHoverFrame:SetScript("OnEvent", function(self, event, ...) 
 			if (event == "ACTIONBAR_SHOWGRID") then 
+				actionBarGrid = true
+			elseif (event == "ACTIONBAR_HIDEGRID") then 
+				actionBarGrid = nil
+			elseif (event == "PET_BAR_SHOWGRID") then 
+				petBarGrid = true
+			elseif (event == "PET_BAR_HIDEGRID") then 
+				petBarGrid = nil
+			elseif (event == "buttonLock") then
+				actionBarGrid = nil
+				petBarGrid = nil
+			end
+			if (actionBarGrid or petBarGrid) then
 				self.forced = true
-			elseif (event == "ACTIONBAR_HIDEGRID") or (event == "buttonLock") then
+			else
 				self.forced = nil
 			end 
 		end)
@@ -1295,6 +1308,12 @@ Module.GetFadeFrame = function(self)
 
 		ActionBarHoverFrame:RegisterEvent("ACTIONBAR_HIDEGRID")
 		ActionBarHoverFrame:RegisterEvent("ACTIONBAR_SHOWGRID")
+
+		if (IsRetail) then
+			ActionBarHoverFrame:RegisterEvent("PET_BAR_HIDEGRID")
+			ActionBarHoverFrame:RegisterEvent("PET_BAR_SHOWGRID")
+		end
+
 		ActionBarHoverFrame.isMouseOver = true -- Set this to initiate the first fade-out
 	end
 	return ActionBarHoverFrame
