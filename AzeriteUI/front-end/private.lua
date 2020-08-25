@@ -47,6 +47,7 @@ local UnitPlayerControlled = UnitPlayerControlled
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
+local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Addon API
 local GetPlayerRole = LibPlayerData.GetPlayerRole
@@ -374,10 +375,12 @@ colorDB.quality[8] = createColor( 79/255, 196/255, 225/255) -- Blizard
 
 -- world quest quality coloring
 -- using item rarities for these colors
-colorDB.worldquestquality = {}
-colorDB.worldquestquality[LE_WORLD_QUEST_QUALITY_COMMON] = colorDB.quality[ITEM_QUALITY_COMMON]
-colorDB.worldquestquality[LE_WORLD_QUEST_QUALITY_RARE] = colorDB.quality[ITEM_QUALITY_RARE]
-colorDB.worldquestquality[LE_WORLD_QUEST_QUALITY_EPIC] = colorDB.quality[ITEM_QUALITY_EPIC]
+if (not IsRetailShadowlands) then
+	colorDB.worldquestquality = {}
+	colorDB.worldquestquality[LE_WORLD_QUEST_QUALITY_COMMON] = colorDB.quality[ITEM_QUALITY_COMMON]
+	colorDB.worldquestquality[LE_WORLD_QUEST_QUALITY_RARE] = colorDB.quality[ITEM_QUALITY_RARE]
+	colorDB.worldquestquality[LE_WORLD_QUEST_QUALITY_EPIC] = colorDB.quality[ITEM_QUALITY_EPIC]
+end
 
 -- Aura Filter Bitflags
 -----------------------------------------------------------------

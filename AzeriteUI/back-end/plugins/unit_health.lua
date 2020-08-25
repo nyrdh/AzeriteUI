@@ -41,6 +41,7 @@ local S_PLAYER_OFFLINE = PLAYER_OFFLINE
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
+local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Constants
 local _,CLASS = UnitClass("player")
@@ -619,8 +620,10 @@ local Enable = function(self)
 		health.PostUpdateStatusBarTexture = UpdateStatusBarTextures
 		health.PostUpdateTexCoord = UpdateTexCoords
 
+		-- IsRetailShadowlands
+
 		-- Health events
-		if (health.frequent) then
+		if (health.frequent) and (not IsRetailShadowlands) then
 			self:RegisterEvent("UNIT_HEALTH_FREQUENT", Proxy)
 		else
 			self:RegisterEvent("UNIT_HEALTH", Proxy)
@@ -779,5 +782,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 51)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 52)
 end 

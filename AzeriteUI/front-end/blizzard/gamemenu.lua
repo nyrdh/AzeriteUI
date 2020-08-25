@@ -169,7 +169,10 @@ end
 Module.StyleWindow = function(self, frame)
 
 	self.frame:EnableMouse(false) -- only need the mouse on the actual buttons
-	self.frame:SetBackdrop(nil) 
+
+	if (self.frame.SetBackdrop) then
+		self.frame:SetBackdrop(nil) 
+	end
 	
 	self.frame:SetFrameStrata("DIALOG")
 	self.frame:SetFrameLevel(120)

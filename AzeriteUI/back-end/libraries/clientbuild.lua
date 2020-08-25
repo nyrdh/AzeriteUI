@@ -1,4 +1,4 @@
-local LibClientBuild = Wheel:Set("LibClientBuild", 38)
+local LibClientBuild = Wheel:Set("LibClientBuild", 39)
 if (not LibClientBuild) then
 	return
 end
@@ -26,8 +26,8 @@ local IsRetail, IsRetailBFA, IsRetailShadowlands
 -- *Using blizzard constants if they exist,
 -- using string parsing as a fallback.
 if (WOW_PROJECT_ID ~= nil) then
-	IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC -- 1
-	IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE -- 2
+	IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+	IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 else
 	IsClassic = tonumber(MAJOR) == 1
 	IsRetail = tonumber(MAJOR) >= 8

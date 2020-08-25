@@ -93,6 +93,7 @@ local DisableTexture = function(texture, _, loop)
 		return
 	end
 	texture:SetTexture(nil, true)
+	texture:SetAlpha(0)
 end
 
 local ResetPoint = function(object, _, anchor) 
@@ -579,45 +580,60 @@ Module.HandleZoneAbilityButton = function(self)
 	CreatePointHook(frame)
 
 	-- Take over the mouseover scripts, use our own tooltip
-	local button = frame.SpellButton
+	local button = frame.SpellButton or frame.SpellButtonContainer -- 9.0.1
 	button:ClearAllPoints()
 	button:SetSize(unpack(layout.ZoneAbilityButtonSize))
 	button:SetPoint(unpack(layout.ZoneAbilityButtonPlace))
 	button:SetScript("OnEnter", ZoneAbilityButton_OnEnter)
 	button:SetScript("OnLeave", ZoneAbilityButton_OnLeave)
 
-	button.Icon:ClearAllPoints()
-	button.Icon:SetPoint(unpack(layout.ZoneAbilityButtonIconPlace))
-	button.Icon:SetSize(unpack(layout.ZoneAbilityButtonIconSize))
-	button.Icon:SetMask(layout.ZoneAbilityButtonIconMaskTexture)
+	local scaffold = button
+	if (not button.Icon) then
+		for i = 1, button:GetNumChildren() do
+			local child = select(i, button:GetChildren())
+			if (child.Icon) then
+				scaffold = child
+				break
+			end
+		end
+	end
 
-	button.Count:ClearAllPoints()
-	button.Count:SetPoint(unpack(layout.ZoneAbilityButtonCountPlace))
-	button.Count:SetFontObject(layout.ZoneAbilityButtonFont)
-	button.Count:SetJustifyH(layout.ZoneAbilityButtonCountJustifyH)
-	button.Count:SetJustifyV(layout.ZoneAbilityButtonCountJustifyV)
+	scaffold.Icon:ClearAllPoints()
+	scaffold.Icon:SetPoint(unpack(layout.ZoneAbilityButtonIconPlace))
+	scaffold.Icon:SetSize(unpack(layout.ZoneAbilityButtonIconSize))
+	scaffold.Icon:SetMask(layout.ZoneAbilityButtonIconMaskTexture)
 
-	button.Cooldown:SetSize(unpack(layout.ZoneAbilityButtonCooldownSize))
-	button.Cooldown:ClearAllPoints()
-	button.Cooldown:SetPoint(unpack(layout.ZoneAbilityButtonCooldownPlace))
-	button.Cooldown:SetSwipeTexture(layout.ZoneAbilityButtonCooldownSwipeTexture)
-	button.Cooldown:SetSwipeColor(unpack(layout.ZoneAbilityButtonCooldownSwipeColor))
-	button.Cooldown:SetDrawSwipe(layout.ZoneAbilityButtonShowCooldownSwipe)
-	button.Cooldown:SetBlingTexture(layout.ZoneAbilityButtonCooldownBlingTexture, unpack(layout.ZoneAbilityButtonCooldownBlingColor)) 
-	button.Cooldown:SetDrawBling(layout.ZoneAbilityButtonShowCooldownBling)
+	scaffold.Count:ClearAllPoints()
+	scaffold.Count:SetPoint(unpack(layout.ZoneAbilityButtonCountPlace))
+	scaffold.Count:SetFontObject(layout.ZoneAbilityButtonFont)
+	scaffold.Count:SetJustifyH(layout.ZoneAbilityButtonCountJustifyH)
+	scaffold.Count:SetJustifyV(layout.ZoneAbilityButtonCountJustifyV)
+
+	scaffold.Cooldown:SetSize(unpack(layout.ZoneAbilityButtonCooldownSize))
+	scaffold.Cooldown:ClearAllPoints()
+	scaffold.Cooldown:SetPoint(unpack(layout.ZoneAbilityButtonCooldownPlace))
+	scaffold.Cooldown:SetSwipeTexture(layout.ZoneAbilityButtonCooldownSwipeTexture)
+	scaffold.Cooldown:SetSwipeColor(unpack(layout.ZoneAbilityButtonCooldownSwipeColor))
+	scaffold.Cooldown:SetDrawSwipe(layout.ZoneAbilityButtonShowCooldownSwipe)
+	scaffold.Cooldown:SetBlingTexture(layout.ZoneAbilityButtonCooldownBlingTexture, unpack(layout.ZoneAbilityButtonCooldownBlingColor)) 
+	scaffold.Cooldown:SetDrawBling(layout.ZoneAbilityButtonShowCooldownBling)
 
 	-- Attempting to fix the issue with too opaque swipe textures
-	button.Cooldown:HookScript("OnShow", function() 
-		button.Cooldown:SetSwipeColor(unpack(layout.ZoneAbilityButtonCooldownSwipeColor))
+	scaffold.Cooldown:HookScript("OnShow", function() 
+		scaffold.Cooldown:SetSwipeColor(unpack(layout.ZoneAbilityButtonCooldownSwipeColor))
 	end)
 	
 	-- Kill off the surrounding style texture
-	button.Style:SetTexture(nil)
-	hooksecurefunc(button.Style, "SetTexture", DisableTexture)
+	local Style = button.Style or scaffold.Style or frame.Style
+	if (Style) then
+		Style:SetTexture(nil)
+		Style:SetAlpha(0)
+		hooksecurefunc(Style, "SetTexture", DisableTexture)
+	end
 
-	button:GetNormalTexture():SetTexture(nil)
-	button:GetHighlightTexture():SetTexture(nil)
-	--button:GetCheckedTexture():SetTexture(nil)
+	scaffold:GetNormalTexture():SetTexture(nil)
+	scaffold:GetHighlightTexture():SetTexture(nil)
+	--scaffold:GetCheckedTexture():SetTexture(nil)
 
 	button.BorderFrame = CreateFrame("Frame", nil, button)
 	button.BorderFrame:SetFrameLevel(button:GetFrameLevel() + 5)

@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 77)
+local LibTooltip = Wheel:Set("LibTooltip", 78)
 if (not LibTooltip) then
 	return
 end
@@ -2537,7 +2537,9 @@ LibTooltip.KillBlizzardTooltipBackdrop = function(self, tooltip)
 	if (Backdrops[tooltip]) then 
 		return 
 	end 
-	tooltip:SetBackdrop(nil) -- a reset is needed first, or we'll get weird bugs
+	if (tooltip.SetBackdrop) then
+		tooltip:SetBackdrop(nil) -- a reset is needed first, or we'll get weird bugs
+	end
 	tooltip.SetBackdrop = function() end -- kill off the original backdrop function
 	tooltip.GetBackdrop = function() return fakeBackdrop end
 	tooltip.GetBackdropColor = function() return unpack(fakeBackdropColor) end
@@ -2557,7 +2559,7 @@ end
 
 LibTooltip.SetBlizzardTooltipBackdrop = function(self, tooltip, backdrop)
 	if (not Backdrops[tooltip]) then
-		local backdrop = CreateFrame("Frame", nil, tooltip)
+		local backdrop = CreateFrame("Frame", nil, tooltip, "BackdropTemplate")
 		backdrop:SetFrameStrata(tooltip:GetFrameStrata())
 		backdrop:SetFrameLevel(tooltip:GetFrameLevel())
 		backdrop:SetPoint("LEFT", 0, 0)

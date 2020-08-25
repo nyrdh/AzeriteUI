@@ -840,7 +840,7 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	groupAura.Overlay = groupAuraOverlay
 
 	-- Cooldown frame
-	local groupAuraCooldown = groupAura:CreateFrame("Cooldown", nil, groupAura, "CooldownFrameTemplate")
+	local groupAuraCooldown = groupAura:CreateFrame("Cooldown", nil, "CooldownFrameTemplate")
 	groupAuraCooldown:Hide()
 	groupAuraCooldown:SetAllPoints(groupAura)
 	groupAuraCooldown:SetFrameLevel(groupAura:GetFrameLevel() + 1)
@@ -1142,7 +1142,7 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	groupAura.Overlay = groupAuraOverlay
 
 	-- Cooldown frame
-	local groupAuraCooldown = groupAura:CreateFrame("Cooldown", nil, groupAura, "CooldownFrameTemplate")
+	local groupAuraCooldown = groupAura:CreateFrame("Cooldown", nil, "CooldownFrameTemplate")
 	groupAuraCooldown:Hide()
 	groupAuraCooldown:SetAllPoints(groupAura)
 	groupAuraCooldown:SetFrameLevel(groupAura:GetFrameLevel() + 1)

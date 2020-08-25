@@ -219,7 +219,7 @@ local CreateAuraButton = function(element)
 
 	-- Frame to contain art overlays, texts, etc
 	-- Modules can put their borders and other overlays here
-	local overlay = button:CreateFrame("Frame", nil, button)
+	local overlay = button:CreateFrame("Frame")
 	overlay:SetAllPoints(button)
 	overlay:SetFrameLevel(button:GetFrameLevel() + 2)
 	button.Overlay = overlay
@@ -870,5 +870,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 55)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 56)
 end 

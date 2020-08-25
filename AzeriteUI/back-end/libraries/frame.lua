@@ -1,4 +1,4 @@
-local LibFrame = Wheel:Set("LibFrame", 63)
+local LibFrame = Wheel:Set("LibFrame", 65)
 if (not LibFrame) then	
 	return
 end
@@ -196,6 +196,17 @@ local parseAnchorStrict = function(anchor)
 	return anchor and (keyWords[anchor] and keyWords[anchor]() or _G[anchor] and _G[anchor] or anchor) 
 end
 
+local parseTemplate = function(template)
+	if (template) then
+		if (BackdropTemplateMixin) then
+			template = "BackdropTemplate,"..template
+		end
+	else
+		template = (BackdropTemplateMixin) and "BackdropTemplate" or nil
+	end
+	return template
+end
+
 -- WoW 8.2 restricted frame check
 local isRestricted = function(frame)
 	if (frame and (not pcall(frame.GetPoint, frame))) then
@@ -303,7 +314,7 @@ local frameWidgetPrototype = {
 local framePrototype
 framePrototype = {
 	CreateFrame = function(self, frameType, frameName, template) 
-		local frame = embed(CreateFrame(frameType or "Frame", frameName, self, template), framePrototype)
+		local frame = embed(CreateFrame(frameType or "Frame", frameName, self, parseTemplate(template)), framePrototype)
 		frames[frame] = true
 		return frame
 	end,
@@ -356,6 +367,9 @@ LibFrame.CreateFrame = function(self, frameType, frameName, parent, template)
 	-- the 'parent' argument in the same manner the inherited frame method does.
 	-- Because we don't really want two different syntaxes. 
 	local parsedAnchor = parseAnchorStrict(parent)
+	if (template) then 
+		template = parseTemplate(template)
+	end
 	if (not parsedAnchor) then 
 		parsedAnchor = self.IsObjectType and parseAnchor(self) or parseAnchor(parent)
 		if (type(parent) == "string") and (not template) then 

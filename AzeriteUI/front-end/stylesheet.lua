@@ -309,9 +309,11 @@ local BlizzardMicroMenu_Button_PostUpdate = Core_MenuButton_Layers_PostUpdate
 -- Blizzard Popup PostCreate styling
 local popupBackdrops = {}
 local BlizzardPopup_OnShow = function(popup)
-	popup:SetBackdrop(nil)
-	popup:SetBackdropColor(0,0,0,0)
-	popup:SetBackdropBorderColor(0,0,0,0)
+	if (popup.SetBackdrop) then
+		popup:SetBackdrop(nil)
+		popup:SetBackdropColor(0,0,0,0)
+		popup:SetBackdropBorderColor(0,0,0,0)
+	end
 
 	if (popup.Border) then 
 		popup.Border:SetAlpha(0)
@@ -320,7 +322,7 @@ local BlizzardPopup_OnShow = function(popup)
 	-- add a bigger backdrop frame with room for our larger buttons
 	local backdrop = popupBackdrops[popup]
 	if (not backdrop) then
-		backdrop = CreateFrame("Frame", nil, popup)
+		backdrop = CreateFrame("Frame", nil, popup, "BackdropTemplate")
 		backdrop:SetFrameLevel(popup:GetFrameLevel())
 		backdrop:SetPoint("TOPLEFT", -4, 4)
 		backdrop:SetPoint("BOTTOMRIGHT", 4, -4)
@@ -346,15 +348,18 @@ local BlizzardPopup_OnShow = function(popup)
 			button:GetHighlightTexture():SetVertexColor(0, 0, 0, 0)
 			button:GetPushedTexture():SetVertexColor(0, 0, 0, 0)
 			button:GetDisabledTexture():SetVertexColor(0, 0, 0, 0)
-			button:SetBackdrop(nil)
-			button:SetBackdropColor(0,0,0,0)
-			button:SetBackdropBorderColor(0,0,0.0)
+
+			if (button.SetBackdrop) then
+				button:SetBackdrop(nil)
+				button:SetBackdropColor(0,0,0,0)
+				button:SetBackdropBorderColor(0,0,0.0)
+			end
 
 			local border = popupBackdrops[button]
 			if (not border) then 
 				local sizeMod = 2/3
 				local offset = 8
-				border = CreateFrame("Frame", nil, button)
+				border = CreateFrame("Frame", nil, button, "BackdropTemplate")
 				border:SetFrameLevel(button:GetFrameLevel() - 1)
 				border:SetPoint("TOPLEFT", -(3 + offset)*sizeMod, (3 + offset)*sizeMod -2) -- 23
 				border:SetPoint("BOTTOMRIGHT", (3 + offset)*sizeMod, -(3 + offset)*sizeMod -2) -- 23
@@ -405,22 +410,24 @@ local BlizzardPopup_OnShow = function(popup)
 	if editbox_mid then editbox_mid:SetTexture(nil) end
 	if editbox_right then editbox_right:SetTexture(nil) end
 
-	editbox:SetBackdrop(nil)
-	editbox:SetBackdrop({
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeSize = 1,
-		tile = false,
-		tileSize = 0,
-		insets = {
-			left = -6,
-			right = -6,
-			top = 0,
-			bottom = 0
-		}
-	})
-	editbox:SetBackdropColor(0, 0, 0, 0)
-	editbox:SetBackdropBorderColor(.15, .1, .05, 1)
+	if (editbox.SetBackdrop) then
+		editbox:SetBackdrop(nil)
+		editbox:SetBackdrop({
+			bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
+			edgeFile = [[Interface\ChatFrame\ChatFrameBackground]],
+			edgeSize = 1,
+			tile = false,
+			tileSize = 0,
+			insets = {
+				left = -6,
+				right = -6,
+				top = 0,
+				bottom = 0
+			}
+		})
+		editbox:SetBackdropColor(0, 0, 0, 0)
+		editbox:SetBackdropBorderColor(.15, .1, .05, 1)
+	end
 	editbox:SetTextInsets(6,6,0,0)
 	
 end
@@ -709,7 +716,7 @@ local NamePlates_Auras_PostCreateButton = function(element, button)
 	button.Overlay:SetPoint("CENTER", 0, 0)
 	button.Overlay:SetSize(button.Icon:GetSize())
 
-	button.Border = button.Border or button.Overlay:CreateFrame("Frame", nil, button.Overlay)
+	button.Border = button.Border or button.Overlay:CreateFrame("Frame")
 	button.Border:SetFrameLevel(button.Overlay:GetFrameLevel() - 5)
 	button.Border:ClearAllPoints()
 	button.Border:SetPoint(unpack(layout.AuraBorderFramePlace))
@@ -1796,7 +1803,7 @@ local UnitFrame_Aura_PostCreateButton = function(element, button)
 	button.Overlay:SetPoint("CENTER", 0, 0)
 	button.Overlay:SetSize(button.Icon:GetSize())
 
-	button.Border = button.Border or button.Overlay:CreateFrame("Frame", nil, button.Overlay)
+	button.Border = button.Border or button.Overlay:CreateFrame("Frame")
 	button.Border:SetFrameLevel(button.Overlay:GetFrameLevel() - 5)
 	button.Border:ClearAllPoints()
 	button.Border:SetPoint(unpack(layout.AuraBorderFramePlace))

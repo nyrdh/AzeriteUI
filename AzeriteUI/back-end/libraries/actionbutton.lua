@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 101)
+local LibSecureButton = Wheel:Set("LibSecureButton", 102)
 if (not LibSecureButton) then
 	return
 end
@@ -1724,7 +1724,7 @@ LibSecureButton.CreateButtonLayers = function(self, button)
 end
 
 LibSecureButton.CreateButtonOverlay = function(self, button)
-	local overlay = button:CreateFrame("Frame", nil, button)
+	local overlay = button:CreateFrame("Frame")
 	overlay:SetAllPoints()
 	overlay:SetFrameLevel(button:GetFrameLevel() + 15)
 	button.Overlay = overlay
@@ -1785,7 +1785,7 @@ LibSecureButton.CreateButtonAutoCast = function(self, button)
 end
 
 LibSecureButton.CreateButtonCooldowns = function(self, button)
-	local cooldown = button:CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
+	local cooldown = button:CreateFrame("Cooldown", nil, "CooldownFrameTemplate")
 	cooldown:Hide()
 	cooldown:SetAllPoints()
 	cooldown:SetFrameLevel(button:GetFrameLevel() + 1)
@@ -1810,7 +1810,7 @@ LibSecureButton.CreateButtonCooldowns = function(self, button)
 	cooldownCount:SetTextColor(250/255, 250/255, 250/255, .85)
 	button.CooldownCount = cooldownCount
 
-	local chargeCooldown = button:CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
+	local chargeCooldown = button:CreateFrame("Cooldown", nil, "CooldownFrameTemplate")
 	chargeCooldown:Hide()
 	chargeCooldown:SetAllPoints()
 	chargeCooldown:SetFrameLevel(button:GetFrameLevel() + 2)

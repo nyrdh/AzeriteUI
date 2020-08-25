@@ -105,6 +105,7 @@ local playerGUID = UnitGUID("player")
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
+local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Sourced from BlizzardInterfaceResources/Resources/EnumerationTables.lua
 local SPELL_POWER_COMBO_POINTS = Enum.PowerType.ComboPoints
