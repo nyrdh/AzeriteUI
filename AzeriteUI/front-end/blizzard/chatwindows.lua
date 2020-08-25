@@ -6,6 +6,7 @@ end
 
 local Module = Core:NewModule("BlizzardChatFrames", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibHook", "LibSecureHook", "LibChatWindow", "LibFader", "LibClientBuild")
 Module:SetIncompatible("Prat-3.0")
+Module:SetIncompatible("Glass")
 
 -- Lua API
 local _G = _G
