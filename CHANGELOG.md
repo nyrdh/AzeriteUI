@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.395-RC] 2020-08-26
+### Changed
+- First round of changes to make this WoW 9.0.1 compatible. 
+- Action button backdrops become visible and buttons faded in when holding a pet ability on the cursor in retail now.
+
 ## [2.0.394-RC] 2020-08-20
 ### Changed
 - The UIs master frame is now forcefully turned visible upon entering combat, and a previous system that hid it when zoning between instances has been disabled, as this was proving to be buggy.

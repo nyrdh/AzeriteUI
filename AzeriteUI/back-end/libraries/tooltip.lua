@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 78)
+local LibTooltip = Wheel:Set("LibTooltip", 79)
 if (not LibTooltip) then
 	return
 end
@@ -2559,7 +2559,7 @@ end
 
 LibTooltip.SetBlizzardTooltipBackdrop = function(self, tooltip, backdrop)
 	if (not Backdrops[tooltip]) then
-		local backdrop = CreateFrame("Frame", nil, tooltip, "BackdropTemplate")
+		local backdrop = CreateFrame("Frame", nil, tooltip, BackdropTemplateMixin and "BackdropTemplate")
 		backdrop:SetFrameStrata(tooltip:GetFrameStrata())
 		backdrop:SetFrameLevel(tooltip:GetFrameLevel())
 		backdrop:SetPoint("LEFT", 0, 0)

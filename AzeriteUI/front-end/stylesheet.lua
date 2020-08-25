@@ -322,7 +322,7 @@ local BlizzardPopup_OnShow = function(popup)
 	-- add a bigger backdrop frame with room for our larger buttons
 	local backdrop = popupBackdrops[popup]
 	if (not backdrop) then
-		backdrop = CreateFrame("Frame", nil, popup, "BackdropTemplate")
+		backdrop = CreateFrame("Frame", nil, popup, BackdropTemplateMixin and "BackdropTemplate")
 		backdrop:SetFrameLevel(popup:GetFrameLevel())
 		backdrop:SetPoint("TOPLEFT", -4, 4)
 		backdrop:SetPoint("BOTTOMRIGHT", 4, -4)
@@ -359,7 +359,7 @@ local BlizzardPopup_OnShow = function(popup)
 			if (not border) then 
 				local sizeMod = 2/3
 				local offset = 8
-				border = CreateFrame("Frame", nil, button, "BackdropTemplate")
+				border = CreateFrame("Frame", nil, button, BackdropTemplateMixin and "BackdropTemplate")
 				border:SetFrameLevel(button:GetFrameLevel() - 1)
 				border:SetPoint("TOPLEFT", -(3 + offset)*sizeMod, (3 + offset)*sizeMod -2) -- 23
 				border:SetPoint("BOTTOMRIGHT", (3 + offset)*sizeMod, -(3 + offset)*sizeMod -2) -- 23
