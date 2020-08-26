@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 52)
+local LibNamePlate = Wheel:Set("LibNamePlate", 53)
 if (not LibNamePlate) then	
 	return
 end
@@ -73,6 +73,7 @@ local WorldFrame = WorldFrame
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
+local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Plate Registries
 LibNamePlate.allPlates = LibNamePlate.allPlates or {}
@@ -223,16 +224,19 @@ local Colors = {
 	tapped = prepare(161/255, 141/255, 120/255),
 
 	class = {
-		DRUID 			= prepare( 255/255, 125/255,  10/255 ),
-		HUNTER 			= prepare( 191/255, 232/255, 115/255 ), -- slightly more green and yellow, to stand more out from friendly players/npcs
-		MAGE 			= prepare( 105/255, 204/255, 240/255 ),
-		PALADIN 		= prepare( 255/255, 130/255, 226/255 ), -- less pink, more purple
-		PRIEST 			= prepare( 220/255, 235/255, 250/255 ), -- tilted slightly towards blue, and somewhat toned down. chilly.
-		ROGUE 			= prepare( 255/255, 225/255,  95/255 ), -- slightly more orange than Blizz, to avoid the green effect when shaded with black
-		SHAMAN 			= prepare(  32/255, 122/255, 222/255 ), -- brighter, to move it a bit away from the mana color
-		WARLOCK 		= prepare( 148/255, 130/255, 201/255 ),
-		WARRIOR 		= prepare( 199/255, 156/255, 110/255 ),
-		UNKNOWN 		= prepare( 195/255, 202/255, 217/255 )
+		DEATHKNIGHT 		= prepare( 176/255,  31/255,  79/255 ),
+		DEMONHUNTER 		= prepare( 163/255,  48/255, 201/255 ),
+		DRUID 				= prepare( 255/255, 125/255,  10/255 ),
+		HUNTER 				= prepare( 191/255, 232/255, 115/255 ), 
+		MAGE 				= prepare( 105/255, 204/255, 240/255 ),
+		MONK 				= prepare(   0/255, 255/255, 150/255 ),
+		PALADIN 			= prepare( 225/255, 160/255, 226/255 ),
+		PRIEST 				= prepare( 176/255, 200/255, 225/255 ),
+		ROGUE 				= prepare( 255/255, 225/255,  95/255 ), 
+		SHAMAN 				= prepare(  32/255, 122/255, 222/255 ), 
+		WARLOCK 			= prepare( 148/255, 130/255, 201/255 ), 
+		WARRIOR 			= prepare( 229/255, 156/255, 110/255 ), 
+		UNKNOWN 			= prepare( 195/255, 202/255, 217/255 ),
 	},
 	debuff = {
 		none 			= prepare( 204/255,   0/255,   0/255 ),
@@ -261,13 +265,6 @@ local Colors = {
 		civilian 		= prepare(  64/255, 131/255,  38/255 )  -- used for friendly player nameplates
 	}
 }
-
--- Add in retail class colors
-if (IsRetail) then
-	Colors.class.DEATHKNIGHT = prepare( 176/255,  31/255,  79/255 ) -- slightly more blue, less red, to stand out from angry mobs better
-	Colors.class.DEMONHUNTER = prepare( 163/255,  48/255, 201/255 )
-	Colors.class.MONK = prepare(   0/255, 255/255, 150/255 )
-end
 
 -- Utility Functions
 ----------------------------------------------------------
@@ -501,6 +498,7 @@ NamePlate.OnShow = function(self, event, unit)
 	if (self.PreUpdate) then 
 		self:PreUpdate("OnShow", unit)
 	end 
+	self:KillBlizzard()
 	self:Show() -- make the fully transparent frame visible
 
 	-- this will trigger the fadein 
@@ -856,13 +854,26 @@ LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
 	-- Make sure the visible part of the Blizzard frame remains hidden
 	-- *Note: Do not EVER put a script on any of these with SetScript, 
 	--  as it will break important secure functionality of the frame, like clicks!
-	local unitframe = baseFrame.UnitFrame
-	if (unitframe) then
-		unitframe:Hide()
-		unitframe:HookScript("OnShow", function(unitframe) unitframe:Hide() end) 
-		if (unitframe.selectionHighlight) then
-			hooksecurefunc(unitframe.selectionHighlight, "Show", function() plate:OnEnter()  end)
-			hooksecurefunc(unitframe.selectionHighlight, "Hide", function() plate:OnLeave()  end)
+	plate.KillBlizzard = function(self)
+		local unitFrame = self.baseFrame.UnitFrame
+		if (unitFrame) then
+			unitFrame:Hide()
+			if (not self.hasHideScripts) then
+				unitFrame:HookScript("OnShow", function() unitFrame:Hide() end) 
+				if (not IsRetailShadowlands) then
+					if (unitFrame.selectionHighlight) then
+						-- Hooking the baseframe kills the ability to click to target, so DON'T!
+						--baseFrame:HookScript("OnEnter", function() plate:OnEnter()  end)
+						--baseFrame:HookScript("OnLeave", function() plate:OnLeave()  end)
+
+						-- Not firing in 9.0.1
+						-- Edit: Appears to only happen on selection now, not on mouseover.
+						hooksecurefunc(unitFrame.selectionHighlight, "Show", function() plate:OnEnter() end)
+						hooksecurefunc(unitFrame.selectionHighlight, "Hide", function() plate:OnLeave() end)
+					end
+				end
+				self.hasHideScripts = true
+			end
 		end
 	end
 
@@ -871,7 +882,6 @@ LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
 
 	-- Follow the blizzard scale changes.
 	baseFrame:HookScript("OnSizeChanged", function() plate:UpdateScale() end)
-
 
 	-- Since constantly updating frame levels can cause quite the performance drop, 
 	-- we're just giving each frame a set frame level when they spawn. 

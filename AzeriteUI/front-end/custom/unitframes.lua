@@ -176,6 +176,7 @@ local SECURE = {
 			if (value) then 
 				local visDriver = self:GetAttribute("visDriver"); -- get the correct visibility driver
 				RegisterAttributeDriver(Owner, "state-vis", visDriver); 
+				Owner:RunAttribute("sortFrames"); -- Update the layout 
 			else 
 				RegisterAttributeDriver(Owner, "state-vis", "hide"); 
 			end 
@@ -262,6 +263,7 @@ local SECURE = {
 			if (value) then 
 				local visDriver = self:GetAttribute("visDriver"); -- get the correct visibility driver
 				RegisterAttributeDriver(Owner, "state-vis", visDriver); -- apply it!
+				Owner:RunAttribute("sortFrames"); -- Update the layout 
 			else 
 				RegisterAttributeDriver(Owner, "state-vis", "hide"); 
 			end 

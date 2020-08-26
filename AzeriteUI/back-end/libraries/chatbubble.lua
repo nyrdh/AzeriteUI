@@ -1,10 +1,16 @@
-local LibChatBubble = Wheel:Set("LibChatBubble", 16)
+local LibChatBubble = Wheel:Set("LibChatBubble", 18)
 if (not LibChatBubble) then	
 	return
 end
 
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "LibChatBubble requires LibClientBuild to be loaded.")
+
 local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibChatBubble requires LibEvent to be loaded.")
+
+local LibHook = Wheel("LibHook")
+assert(LibHook, "LibChatBubble requires LibHook to be loaded.")
 
 local LibHook = Wheel("LibHook")
 assert(LibHook, "LibChatBubble requires LibHook to be loaded.")
@@ -14,8 +20,6 @@ LibEvent:Embed(LibChatBubble)
 LibHook:Embed(LibChatBubble)
 
 -- Lua API
-local _G = _G
-
 local ipairs = ipairs
 local math_abs = math.abs
 local math_floor = math.floor
@@ -24,12 +28,17 @@ local select = select
 local tostring = tostring
 
 -- WoW API
-local C_ChatBubbles_GetAllChatBubbles = _G.C_ChatBubbles.GetAllChatBubbles
-local CreateFrame = _G.CreateFrame
-local InCombatLockdown = _G.InCombatLockdown
-local IsInInstance = _G.IsInInstance
-local SetCVar = _G.SetCVar
-local UnitAffectingCombat = _G.UnitAffectingCombat
+local C_ChatBubbles_GetAllChatBubbles = C_ChatBubbles.GetAllChatBubbles
+local CreateFrame = CreateFrame
+local InCombatLockdown = InCombatLockdown
+local IsInInstance = IsInInstance
+local SetCVar = SetCVar
+local UnitAffectingCombat = UnitAffectingCombat
+
+-- Constants for client version
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
+local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Textures
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
@@ -226,7 +235,7 @@ end
 LibChatBubble.InitBubble = function(self, bubble)
 	LibChatBubble.numBubbles = LibChatBubble.numBubbles + 1
 
-	local customBubble = CreateFrame("Frame", nil, bubbleBox)
+	local customBubble = CreateFrame("Frame", nil, bubbleBox, BackdropTemplateMixin and "BackdropTemplate")
 	customBubble:Hide()
 	customBubble:SetFrameStrata("BACKGROUND")
 	customBubble:SetFrameLevel(LibChatBubble.numBubbles%128 + 1) -- try to avoid overlapping bubbles blending into each other
@@ -243,12 +252,29 @@ LibChatBubble.InitBubble = function(self, bubble)
 	customBubble.text:SetShadowOffset(0, 0)
 	customBubble.text:SetShadowColor(0, 0, 0, 0)
 	
-	for i = 1, bubble:GetNumRegions() do
-		local region = select(i, bubble:GetRegions())
-		if (region:GetObjectType() == "Texture") then
-			customBubble.blizzardRegions[region] = region:GetTexture()
-		elseif (region:GetObjectType() == "FontString") then
-			customBubble.blizzardText = region
+	-- Chat bubble has been moved to a nameless subframe in 9.0.1
+	if (IsRetailShadowlands) then
+		for i = 1, bubble:GetNumChildren() do
+			local child = select(i, select(i, bubble:GetChildren()))
+			if (child:GetObjectType() == "Frame") and (child.String) and (child.Center) then
+				for i = 1, child:GetNumRegions() do
+					local region = select(i, child:GetRegions())
+					if (region:GetObjectType() == "Texture") then
+						customBubble.blizzardRegions[region] = region:GetTexture()
+					elseif (region:GetObjectType() == "FontString") then
+						customBubble.blizzardText = region
+					end
+				end
+			end
+		end
+	else
+		for i = 1, bubble:GetNumRegions() do
+			local region = select(i, bubble:GetRegions())
+			if (region:GetObjectType() == "Texture") then
+				customBubble.blizzardRegions[region] = region:GetTexture()
+			elseif (region:GetObjectType() == "FontString") then
+				customBubble.blizzardText = region
+			end
 		end
 	end
 
