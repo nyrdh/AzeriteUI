@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 53)
+local LibNamePlate = Wheel:Set("LibNamePlate", 54)
 if (not LibNamePlate) then	
 	return
 end
@@ -854,24 +854,13 @@ LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
 	-- Make sure the visible part of the Blizzard frame remains hidden
 	-- *Note: Do not EVER put a script on any of these with SetScript, 
 	--  as it will break important secure functionality of the frame, like clicks!
+	-- *Note2: Don't hook OnEnter/OnLeave on the baseFrame either, same reason as above.
 	plate.KillBlizzard = function(self)
 		local unitFrame = self.baseFrame.UnitFrame
 		if (unitFrame) then
 			unitFrame:Hide()
 			if (not self.hasHideScripts) then
 				unitFrame:HookScript("OnShow", function() unitFrame:Hide() end) 
-				if (not IsRetailShadowlands) then
-					if (unitFrame.selectionHighlight) then
-						-- Hooking the baseframe kills the ability to click to target, so DON'T!
-						--baseFrame:HookScript("OnEnter", function() plate:OnEnter()  end)
-						--baseFrame:HookScript("OnLeave", function() plate:OnLeave()  end)
-
-						-- Not firing in 9.0.1
-						-- Edit: Appears to only happen on selection now, not on mouseover.
-						hooksecurefunc(unitFrame.selectionHighlight, "Show", function() plate:OnEnter() end)
-						hooksecurefunc(unitFrame.selectionHighlight, "Hide", function() plate:OnLeave() end)
-					end
-				end
 				self.hasHideScripts = true
 			end
 		end
@@ -1126,22 +1115,51 @@ LibNamePlate.OnUpdate = function(self, elapsed)
 	-- We need the full value since the last set of updates
 	local elapsed = self.elapsed
 
-	for frame, frequentElements in pairs(frequentUpdates) do
-		for element, frequency in pairs(frequentElements) do
-			if frequency.hz then
-				frequency.elapsed = frequency.elapsed + elapsed
-				if (frequency.elapsed >= frequency.hz) then
-					elements[element].Update(frame, "FrequentUpdate", frame.unit, elapsed) 
-					frequency.elapsed = 0
+	for plate, frequentElements in pairs(frequentUpdates) do
+		if (visiblePlates[plate]) then
+			for element, frequency in pairs(frequentElements) do
+				if (frequency.hz) then
+					frequency.elapsed = frequency.elapsed + elapsed
+					if (frequency.elapsed >= frequency.hz) then
+						elements[element].Update(plate, "FrequentUpdate", plate.unit, elapsed) 
+						frequency.elapsed = 0
+					end
+				else
+					elements[element].Update(plate, "FrequentUpdate", plate.unit)
 				end
-			else
-				elements[element].Update(frame, "FrequentUpdate", frame.unit)
 			end
 		end
 	end
 
+	-- Does a mouseover unit exist?
+	local hasMouseOver = UnitExists("mouseover")
+
+	-- Is a frame currently highlighted?
+	local previousHighlight = self.currentHighlight
+	
+	-- Flag to track discovery in the current iteration
+	local currentHighlight
+
+	-- Iterate!
 	for plate, baseFrame in pairs(visiblePlates) do
-		if baseFrame and baseFrame:IsShown() then
+
+		if (plate.unit) then
+			if (previousHighlight) then
+				if (previousHighlight == plate) and ((not hasMouseOver) or (not UnitIsUnit("mouseover", plate.unit))) then
+					plate:OnLeave()
+					previousHighlight = nil
+				end
+			end
+			if (not currentHighlight) then
+				if (hasMouseOver) and (previousHighlight ~= plate) and (UnitIsUnit("mouseover", plate.unit)) then
+					self.currentHighlight = plate
+					plate:OnEnter()
+					currentHighlight = plate
+				end
+			end
+		end
+
+		if (baseFrame and baseFrame:IsShown()) then
 			plate:UpdateAlpha()
 		else
 			plate.targetAlpha = 0

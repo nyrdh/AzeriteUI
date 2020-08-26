@@ -4,10 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.0.395-RC] 2020-08-26
-### Changed
+## [2.0.397-RC] 2020-08-27
 - First round of changes to make this WoW 9.0.1 compatible. 
+
+### Changed
 - Action button backdrops become visible and buttons faded in when holding a pet ability on the cursor in retail now.
+
+### Fixed
+- Added a raid frame sorting call after toggling the frames on from the menu. This should hopefully solve the bug of raid frames not appearing.
 
 ## [2.0.394-RC] 2020-08-20
 ### Changed
