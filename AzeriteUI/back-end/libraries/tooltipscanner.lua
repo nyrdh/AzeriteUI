@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 57)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 58)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -1743,11 +1743,11 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 
 					-- Retrieve the quest title
 					local titleLine = _G[ScannerName .. "TextLeft" .. currentTitleLineID]
-					local titleText = titleLine:GetText()
+					local titleText = titleLine and titleLine:GetText() -- may not always exist. "Svarnos" in Tol Barad reportedly bugs out.
 
 					-- Set a new local objective ID
 					objectiveID = #objectives + 1
-					objectives[objectiveID] = { questTitle = titleText, questObjectives = {} }
+					objectives[objectiveID] = { questTitle = titleText or "", questObjectives = {} }
 				end
 
 				-- Store the data we've found about this objective
