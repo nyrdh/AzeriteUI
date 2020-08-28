@@ -378,15 +378,19 @@ local BlizzardPopup_OnShow = function(popup)
 				border:SetBackdropBorderColor(Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
 
 				button:HookScript("OnEnter", function() 
-					button:SetBackdropColor(0,0,0,0)
-					button:SetBackdropBorderColor(0,0,0.0)
+					if (button.SetBackdrop) then
+						button:SetBackdropColor(0,0,0,0)
+						button:SetBackdropBorderColor(0,0,0.0)
+					end
 					popupBackdrops[button]:SetBackdropColor(.1, .1, .1, .75)
 					popupBackdrops[button]:SetBackdropBorderColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3])
 				end)
 	
 				button:HookScript("OnLeave", function() 
-					button:SetBackdropColor(0,0,0,0)
-					button:SetBackdropBorderColor(0,0,0.0)
+					if (button.SetBackdrop) then
+						button:SetBackdropColor(0,0,0,0)
+						button:SetBackdropBorderColor(0,0,0.0)
+					end
 					popupBackdrops[button]:SetBackdropColor(.05, .05, .05, .75)
 					popupBackdrops[button]:SetBackdropBorderColor(Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
 				end)
@@ -3226,7 +3230,7 @@ Layouts.NamePlates = {
 		-- which the target nameplate will be kept away from. 
 		-- Used to avoid the target plate being overlapped 
 		-- by the target frame or actionbars and keep it in view.
-		nameplateLargeTopInset = false, -- default .1
+		nameplateLargeTopInset = .1, -- default .1
 		nameplateOtherTopInset = .1, -- default .08
 		nameplateLargeBottomInset = .02, -- default .15
 		nameplateOtherBottomInset = .02, -- default .1
@@ -3234,7 +3238,7 @@ Layouts.NamePlates = {
 		clampTargetNameplateToScreen = 1, -- new CVar July 14th 2020. Wohoo! Thanks torhaala for telling me! :)
 	
 		-- Nameplate scale
-		nameplateMinScale = false, -- .8
+		nameplateMinScale = .75, -- .8
 		nameplateMaxScale = 1, 
 		nameplateLargerScale = 1, -- Scale modifier for large plates, used for important monsters
 		nameplateGlobalScale = 1,
@@ -3242,16 +3246,16 @@ Layouts.NamePlates = {
 		NamePlateVerticalScale = 1,
 	
 		-- The minimum distance from the camera plates will reach their minimum scale and alpha
-		nameplateMinScaleDistance = false, 
+		nameplateMinScaleDistance = 20, 
 		
 		-- The maximum distance from the camera where plates will still have max scale and alpha
-		nameplateMaxScaleDistance = 20, -- 10
+		nameplateMaxScaleDistance = 10, -- 10
 	
 		-- Show nameplates above heads or at the base (0 or 2,
 		nameplateOtherAtBase = 0,
 	
 		-- Scale and Alpha of the selected nameplate (current target,
-		nameplateSelectedScale = 1, -- default 1.2
+		nameplateSelectedScale = 1.2, -- default 1.2
 	
 		-- The max distance to show nameplates.
 		nameplateMaxDistance = false, -- 20 is classic upper limit, 60 is BfA default

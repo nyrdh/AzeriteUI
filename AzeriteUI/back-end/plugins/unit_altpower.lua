@@ -14,12 +14,35 @@ local tonumber = tonumber
 local tostring = tostring
 
 -- WoW API
+local GetAlternatePowerInfoByID = GetAlternatePowerInfoByID
+local GetUnitPowerBarInfoByID = GetUnitPowerBarInfoByID
+local GetUnitPowerBarStringsByID = GetUnitPowerBarStringsByID
 local UnitAlternatePowerInfo = UnitAlternatePowerInfo
 local UnitPower = UnitPower
+local UnitPowerBarID = UnitPowerBarID
 local UnitPowerMax = UnitPowerMax
 
 -- Sourced from BlizzardInterfaceResources/Resources/EnumerationTables.lua
 local ALTERNATE_POWER_INDEX = Enum and Enum.PowerType.Alternate or ALTERNATE_POWER_INDEX or 10
+
+if (not GetAlternatePowerInfoByID) then
+	GetAlternatePowerInfoByID = function(barID)
+		local GetUnitPowerBarInfoByID = GetUnitPowerBarInfoByID
+		local GetUnitPowerBarStringsByID = GetUnitPowerBarStringsByID
+		local barInfo = GetUnitPowerBarInfoByID(barID)
+		if (barInfo) then
+			local name, tooltip, cost = GetUnitPowerBarStringsByID(barID)
+			return barInfo.barType,barInfo.minPower, barInfo.startInset, barInfo.endInset, barInfo.smooth, barInfo.hideFromOthers, barInfo.showOnRaid, barInfo.opaqueSpark, barInfo.opaqueFlash, barInfo.anchorTop, name, tooltip, cost, barInfo.ID, barInfo.forcePercentage, barInfo.sparkUnderFrame
+		end
+	end
+end
+
+if (not UnitAlternatePowerInfo) then
+	UnitAlternatePowerInfo = function(unit)
+		local barID = UnitPowerBarID(unit)
+		return GetAlternatePowerInfoByID(barID)
+	end
+end
 
 -- Number abbreviations
 ---------------------------------------------------------------------	
@@ -205,5 +228,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do
-	Lib:RegisterElement("AltPower", Enable, Disable, Proxy, 13)
+	Lib:RegisterElement("AltPower", Enable, Disable, Proxy, 14)
 end 
