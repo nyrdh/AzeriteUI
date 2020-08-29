@@ -9,7 +9,6 @@
 
 <!-- core libs, require callbacks libs or none -->
 <Script file='libraries\auradata.lua'/>
-<Script file='libraries\blizzard.lua'/>
 <Script file='libraries\db.lua'/>
 <Script file='libraries\hook.lua'/>
 <Script file='libraries\locale.lua'/>
@@ -57,5 +56,8 @@
 <Script file='libraries\actionbutton.lua'/>
 <Script file='libraries\bagbutton.lua'/>
 <Script file='libraries\nameplates.lua'/>
+
+<!-- Disabling and styling of Blizzard widgets and menu options -->
+<Script file='libraries\blizzard.lua'/>
 
 </Ui>

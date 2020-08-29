@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 48)
+local LibBlizzard = Wheel:Set("LibBlizzard", 50)
 if (not LibBlizzard) then 
 	return
 end
@@ -7,10 +7,17 @@ local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibBlizzard requires LibEvent to be loaded.")
 
 local LibClientBuild = Wheel("LibClientBuild")
-assert(LibClientBuild, "LibCast requires LibClientBuild to be loaded.")
+assert(LibClientBuild, "LibBlizzard requires LibClientBuild to be loaded.")
 
--- Embed event functionality into this
+local LibHook = Wheel("LibHook")
+assert(LibHook, "LibBlizzard requires LibHook to be loaded.")
+
+local LibSecureHook = Wheel("LibSecureHook")
+assert(LibSecureHook, "LibBlizzard requires LibSecureHook to be loaded.")
+
 LibEvent:Embed(LibBlizzard)
+LibHook:Embed(LibBlizzard)
+LibSecureHook:Embed(LibBlizzard)
 
 -- Lua API
 local _G = _G
@@ -23,24 +30,29 @@ local string_format = string.format
 local string_join = string.join
 local string_match = string.match
 local type = type
+local unpack = unpack
 
 -- WoW API
-local CreateFrame = _G.CreateFrame
-local FCF_GetCurrentChatFrame = _G.FCF_GetCurrentChatFrame
-local IsAddOnLoaded = _G.IsAddOnLoaded
-local RegisterStateDriver = _G.RegisterStateDriver
-local SetCVar = _G.SetCVar
-local TargetofTarget_Update = _G.TargetofTarget_Update
+local CreateFrame = CreateFrame
+local FCF_GetCurrentChatFrame = FCF_GetCurrentChatFrame
+local InCombatLockdown = InCombatLockdown
+local IsAddOnLoaded = IsAddOnLoaded
+local RegisterStateDriver = RegisterStateDriver
+local SetCVar = SetCVar
+local SetUIPanelAttribute = SetUIPanelAttribute
+local TargetofTarget_Update = TargetofTarget_Update
 
 -- WoW Objects
-local UIParent = _G.UIParent
+local UIParent = UIParent
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
+local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 LibBlizzard.embeds = LibBlizzard.embeds or {}
 LibBlizzard.queue = LibBlizzard.queue or {}
+LibBlizzard.stylingQueue = LibBlizzard.stylingQueue or {}
 
 -- Frame to securely hide items
 if (not LibBlizzard.frame) then
@@ -58,7 +70,10 @@ end
 local UIHider = LibBlizzard.frame
 local UIWidgets = {}
 local UIWidgetDependency = {}
+local UIWidgetStyling = {}
 
+-- Utility Functions
+-----------------------------------------------------------------
 -- Syntax check 
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
@@ -149,223 +164,225 @@ local killUnitFrame = function(baseName, keepParent, keepEvents, keepVisible)
 	end
 end
 
+-- Widget Functions
+-----------------------------------------------------------------
+
+
+-- Widget Disabling Pool
+-----------------------------------------------------------------
 -- ActionBars (Classic)
-if (IsClassic) then
-	UIWidgets["ActionBars"] = function(self)
+UIWidgets["ActionBars"] = IsClassic and function(self)
 
-		for _,object in pairs({
-			"MainMenuBarVehicleLeaveButton",
-			"MainMenuExpBar",
-			"PetActionBarFrame",
-			"ReputationWatchBar",
-			"StanceBarFrame",
-			"TutorialFrameAlertButton1",
-			"TutorialFrameAlertButton2",
-			"TutorialFrameAlertButton3",
-			"TutorialFrameAlertButton4",
-			"TutorialFrameAlertButton5",
-			"TutorialFrameAlertButton6",
-			"TutorialFrameAlertButton7",
-			"TutorialFrameAlertButton8",
-			"TutorialFrameAlertButton9",
-			"TutorialFrameAlertButton10",
-		}) do 
-			if (_G[object]) then 
-				_G[object]:UnregisterAllEvents()
-			else 
-				print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
-			end
-		end 
-		for _,object in pairs({
-			"FramerateLabel",
-			"FramerateText",
-			"MainMenuBarArtFrame",
-			"MainMenuBarOverlayFrame",
-			"MainMenuExpBar",
-			"MainMenuBarVehicleLeaveButton",
-			"MultiBarBottomLeft",
-			"MultiBarBottomRight",
-			"MultiBarLeft",
-			"MultiBarRight",
-			"PetActionBarFrame",
-			"ReputationWatchBar",
-			"StanceBarFrame",
-			"StreamingIcon"
-		}) do 
-			if (_G[object]) then 
-				_G[object]:SetParent(UIHider)
-			else 
-				print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
-			end
-		end 
-		for _,object in pairs({
-			"MainMenuBarArtFrame",
-			"PetActionBarFrame",
-			"StanceBarFrame"
-		}) do 
-			if (_G[object]) then 
-				_G[object]:Hide()
-			else 
-				print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
-			end
-		end 
-		for _,object in pairs({
-			"ActionButton", 
-			"MultiBarBottomLeftButton", 
-			"MultiBarBottomRightButton", 
-			"MultiBarRightButton",
-			"MultiBarLeftButton"
-		}) do 
-			for i = 1,NUM_ACTIONBAR_BUTTONS do
-				local button = _G[object..i]
-				button:Hide()
-				button:UnregisterAllEvents()
-				button:SetAttribute("statehidden", true)
-			end
-		end 
-
-		MainMenuBar:EnableMouse(false)
-		MainMenuBar:SetAlpha(0)
-		MainMenuBar:UnregisterEvent("DISPLAY_SIZE_CHANGED")
-		MainMenuBar:UnregisterEvent("UI_SCALE_CHANGED")
-		MainMenuBar.slideOut:GetAnimations():SetOffset(0,0)
-
-		-- Gets rid of the loot anims
-		MainMenuBarBackpackButton:UnregisterEvent("ITEM_PUSH") 
-		for slot = 0,3 do
-			_G["CharacterBag"..slot.."Slot"]:UnregisterEvent("ITEM_PUSH") 
+	for _,object in pairs({
+		"MainMenuBarVehicleLeaveButton",
+		"MainMenuExpBar",
+		"PetActionBarFrame",
+		"ReputationWatchBar",
+		"StanceBarFrame",
+		"TutorialFrameAlertButton1",
+		"TutorialFrameAlertButton2",
+		"TutorialFrameAlertButton3",
+		"TutorialFrameAlertButton4",
+		"TutorialFrameAlertButton5",
+		"TutorialFrameAlertButton6",
+		"TutorialFrameAlertButton7",
+		"TutorialFrameAlertButton8",
+		"TutorialFrameAlertButton9",
+		"TutorialFrameAlertButton10",
+	}) do 
+		if (_G[object]) then 
+			_G[object]:UnregisterAllEvents()
+		else 
+			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
 		end
+	end 
+	for _,object in pairs({
+		"FramerateLabel",
+		"FramerateText",
+		"MainMenuBarArtFrame",
+		"MainMenuBarOverlayFrame",
+		"MainMenuExpBar",
+		"MainMenuBarVehicleLeaveButton",
+		"MultiBarBottomLeft",
+		"MultiBarBottomRight",
+		"MultiBarLeft",
+		"MultiBarRight",
+		"PetActionBarFrame",
+		"ReputationWatchBar",
+		"StanceBarFrame",
+		"StreamingIcon"
+	}) do 
+		if (_G[object]) then 
+			_G[object]:SetParent(UIHider)
+		else 
+			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+		end
+	end 
+	for _,object in pairs({
+		"MainMenuBarArtFrame",
+		"PetActionBarFrame",
+		"StanceBarFrame"
+	}) do 
+		if (_G[object]) then 
+			_G[object]:Hide()
+		else 
+			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+		end
+	end 
+	for _,object in pairs({
+		"ActionButton", 
+		"MultiBarBottomLeftButton", 
+		"MultiBarBottomRightButton", 
+		"MultiBarRightButton",
+		"MultiBarLeftButton"
+	}) do 
+		for i = 1,NUM_ACTIONBAR_BUTTONS do
+			local button = _G[object..i]
+			button:Hide()
+			button:UnregisterAllEvents()
+			button:SetAttribute("statehidden", true)
+		end
+	end 
 
-		UIPARENT_MANAGED_FRAME_POSITIONS["MainMenuBar"] = nil
-		UIPARENT_MANAGED_FRAME_POSITIONS["StanceBarFrame"] = nil
-		UIPARENT_MANAGED_FRAME_POSITIONS["PETACTIONBAR_YPOS"] = nil
-		UIPARENT_MANAGED_FRAME_POSITIONS["MultiCastActionBarFrame"] = nil
-		UIPARENT_MANAGED_FRAME_POSITIONS["MULTICASTACTIONBAR_YPOS"] = nil
+	MainMenuBar:EnableMouse(false)
+	MainMenuBar:SetAlpha(0)
+	MainMenuBar:UnregisterEvent("DISPLAY_SIZE_CHANGED")
+	MainMenuBar:UnregisterEvent("UI_SCALE_CHANGED")
+	MainMenuBar.slideOut:GetAnimations():SetOffset(0,0)
 
-		--UIWidgets["ActionBarsMainBar"](self)
-		--UIWidgets["ActionBarsBagBarAnims"](self)
+	-- Gets rid of the loot anims
+	MainMenuBarBackpackButton:UnregisterEvent("ITEM_PUSH") 
+	for slot = 0,3 do
+		_G["CharacterBag"..slot.."Slot"]:UnregisterEvent("ITEM_PUSH") 
 	end
+
+	UIPARENT_MANAGED_FRAME_POSITIONS["MainMenuBar"] = nil
+	UIPARENT_MANAGED_FRAME_POSITIONS["StanceBarFrame"] = nil
+	UIPARENT_MANAGED_FRAME_POSITIONS["PETACTIONBAR_YPOS"] = nil
+	UIPARENT_MANAGED_FRAME_POSITIONS["MultiCastActionBarFrame"] = nil
+	UIPARENT_MANAGED_FRAME_POSITIONS["MULTICASTACTIONBAR_YPOS"] = nil
+
+	--UIWidgets["ActionBarsMainBar"](self)
+	--UIWidgets["ActionBarsBagBarAnims"](self)
 end
 
 -- ActionBars (Retail)
-if (IsRetail) then
-	UIWidgets["ActionBars"] = function(self)
-		for _,object in pairs({
-			"CollectionsMicroButtonAlert",
-			"EJMicroButtonAlert",
-			"LFDMicroButtonAlert",
-			"MainMenuBarVehicleLeaveButton",
-			"OverrideActionBar",
-			"PetActionBarFrame",
-			"StanceBarFrame",
-			"TalentMicroButtonAlert",
-			"TutorialFrameAlertButton"
-		}) do 
-			if (_G[object]) then 
-				_G[object]:UnregisterAllEvents()
-			else 
-				print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
-			end
-		end 
-		for _,object in pairs({
-			"CollectionsMicroButtonAlert",
-			"EJMicroButtonAlert",
-			"FramerateLabel",
-			"FramerateText",
-			"LFDMicroButtonAlert",
-			"MainMenuBarArtFrame",
-			"MainMenuBarVehicleLeaveButton",
-			"MicroButtonAndBagsBar",
-			"MultiBarBottomLeft",
-			"MultiBarBottomRight",
-			"MultiBarLeft",
-			"MultiBarRight",
-			"OverrideActionBar",
-			"PetActionBarFrame",
-			"PossessBarFrame",
-			"StanceBarFrame",
-			"StreamingIcon",
-			"TalentMicroButtonAlert"
-		}) do 
-			if (_G[object]) then 
-				_G[object]:SetParent(UIHider)
-			else 
-				print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
-			end
-		end 
-		for _,object in pairs({
-			"CollectionsMicroButtonAlert",
-			"EJMicroButtonAlert",
-			"LFDMicroButtonAlert",
-			"MainMenuBarArtFrame",
-			"MicroButtonAndBagsBar",
-			"OverrideActionBar",
-			"PetActionBarFrame",
-			"PossessBarFrame",
-			"StanceBarFrame",
-			"StatusTrackingBarManager",
-			"TutorialFrameAlertButton"
-		}) do 
-			if (_G[object]) then 
-				_G[object]:Hide()
-			else 
-				print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
-			end
-		end 
-		for _,object in pairs({
-			"ActionButton", 
-			"MultiBarBottomLeftButton", 
-			"MultiBarBottomRightButton", 
-			"MultiBarRightButton",
-			"MultiBarLeftButton"
-		}) do 
-			for i = 1,NUM_ACTIONBAR_BUTTONS do
-				local button = _G[object..i]
-				button:Hide()
-				button:UnregisterAllEvents()
-				button:SetAttribute("statehidden", true)
-			end
-		end 
-		for i = 1,6 do
-			local button = _G["OverrideActionBarButton"..i]
+or IsRetail and function(self)
+	for _,object in pairs({
+		"CollectionsMicroButtonAlert",
+		"EJMicroButtonAlert",
+		"LFDMicroButtonAlert",
+		"MainMenuBarVehicleLeaveButton",
+		"OverrideActionBar",
+		"PetActionBarFrame",
+		"StanceBarFrame",
+		"TalentMicroButtonAlert",
+		"TutorialFrameAlertButton"
+	}) do 
+		if (_G[object]) then 
+			_G[object]:UnregisterAllEvents()
+		else 
+			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+		end
+	end 
+	for _,object in pairs({
+		"CollectionsMicroButtonAlert",
+		"EJMicroButtonAlert",
+		"FramerateLabel",
+		"FramerateText",
+		"LFDMicroButtonAlert",
+		"MainMenuBarArtFrame",
+		"MainMenuBarVehicleLeaveButton",
+		"MicroButtonAndBagsBar",
+		"MultiBarBottomLeft",
+		"MultiBarBottomRight",
+		"MultiBarLeft",
+		"MultiBarRight",
+		"OverrideActionBar",
+		"PetActionBarFrame",
+		"PossessBarFrame",
+		"StanceBarFrame",
+		"StreamingIcon",
+		"TalentMicroButtonAlert"
+	}) do 
+		if (_G[object]) then 
+			_G[object]:SetParent(UIHider)
+		else 
+			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+		end
+	end 
+	for _,object in pairs({
+		"CollectionsMicroButtonAlert",
+		"EJMicroButtonAlert",
+		"LFDMicroButtonAlert",
+		"MainMenuBarArtFrame",
+		"MicroButtonAndBagsBar",
+		"OverrideActionBar",
+		"PetActionBarFrame",
+		"PossessBarFrame",
+		"StanceBarFrame",
+		"StatusTrackingBarManager",
+		"TutorialFrameAlertButton"
+	}) do 
+		if (_G[object]) then 
+			_G[object]:Hide()
+		else 
+			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+		end
+	end 
+	for _,object in pairs({
+		"ActionButton", 
+		"MultiBarBottomLeftButton", 
+		"MultiBarBottomRightButton", 
+		"MultiBarRightButton",
+		"MultiBarLeftButton"
+	}) do 
+		for i = 1,NUM_ACTIONBAR_BUTTONS do
+			local button = _G[object..i]
+			button:Hide()
 			button:UnregisterAllEvents()
 			button:SetAttribute("statehidden", true)
-	
-			-- Just in case it's still there, covering stuff. 
-			-- This has happened in some rare cases. Hiding won't work. 
-			button:EnableMouse(false) 
 		end
-		if PlayerTalentFrame then
-			PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
-		elseif TalentFrame_LoadUI then
-			hooksecurefunc("TalentFrame_LoadUI", function() PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED") end)
-		end
-	
-		MainMenuBar:EnableMouse(false)
-		MainMenuBar:SetAlpha(0)
-		MainMenuBar:UnregisterEvent("DISPLAY_SIZE_CHANGED")
-		MainMenuBar:UnregisterEvent("UI_SCALE_CHANGED")
-		MainMenuBar.slideOut:GetAnimations():SetOffset(0,0)
-	
-		-- If I'm not hiding this, it will become visible (though transparent)
-		-- and cover our own custom vehicle/possess action bar. 
-		OverrideActionBar:EnableMouse(false)
-		OverrideActionBar:SetAlpha(0)
-		OverrideActionBar.slideOut:GetAnimations():SetOffset(0,0)
-	
-		-- Gets rid of the loot anims
-		MainMenuBarBackpackButton:UnregisterEvent("ITEM_PUSH") 
-		for slot = 0,3 do
-			_G["CharacterBag"..slot.."Slot"]:UnregisterEvent("ITEM_PUSH") 
-		end
-	
-		UIPARENT_MANAGED_FRAME_POSITIONS["MainMenuBar"] = nil
-		UIPARENT_MANAGED_FRAME_POSITIONS["StanceBarFrame"] = nil
-		UIPARENT_MANAGED_FRAME_POSITIONS["PossessBarFrame"] = nil
-		UIPARENT_MANAGED_FRAME_POSITIONS["PETACTIONBAR_YPOS"] = nil
-		UIPARENT_MANAGED_FRAME_POSITIONS["MultiCastActionBarFrame"] = nil
-		UIPARENT_MANAGED_FRAME_POSITIONS["MULTICASTACTIONBAR_YPOS"] = nil
+	end 
+	for i = 1,6 do
+		local button = _G["OverrideActionBarButton"..i]
+		button:UnregisterAllEvents()
+		button:SetAttribute("statehidden", true)
+
+		-- Just in case it's still there, covering stuff. 
+		-- This has happened in some rare cases. Hiding won't work. 
+		button:EnableMouse(false) 
 	end
+	if PlayerTalentFrame then
+		PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+	elseif TalentFrame_LoadUI then
+		hooksecurefunc("TalentFrame_LoadUI", function() PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED") end)
+	end
+
+	MainMenuBar:EnableMouse(false)
+	MainMenuBar:SetAlpha(0)
+	MainMenuBar:UnregisterEvent("DISPLAY_SIZE_CHANGED")
+	MainMenuBar:UnregisterEvent("UI_SCALE_CHANGED")
+	MainMenuBar.slideOut:GetAnimations():SetOffset(0,0)
+
+	-- If I'm not hiding this, it will become visible (though transparent)
+	-- and cover our own custom vehicle/possess action bar. 
+	OverrideActionBar:EnableMouse(false)
+	OverrideActionBar:SetAlpha(0)
+	OverrideActionBar.slideOut:GetAnimations():SetOffset(0,0)
+
+	-- Gets rid of the loot anims
+	MainMenuBarBackpackButton:UnregisterEvent("ITEM_PUSH") 
+	for slot = 0,3 do
+		_G["CharacterBag"..slot.."Slot"]:UnregisterEvent("ITEM_PUSH") 
+	end
+
+	UIPARENT_MANAGED_FRAME_POSITIONS["MainMenuBar"] = nil
+	UIPARENT_MANAGED_FRAME_POSITIONS["StanceBarFrame"] = nil
+	UIPARENT_MANAGED_FRAME_POSITIONS["PossessBarFrame"] = nil
+	UIPARENT_MANAGED_FRAME_POSITIONS["PETACTIONBAR_YPOS"] = nil
+	UIPARENT_MANAGED_FRAME_POSITIONS["MultiCastActionBarFrame"] = nil
+	UIPARENT_MANAGED_FRAME_POSITIONS["MULTICASTACTIONBAR_YPOS"] = nil
 end
 
 UIWidgets["Alerts"] = function(self)
@@ -749,8 +766,219 @@ UIWidgets["UnitFrameArena"] = function(self)
 	end
 end
 
+UIWidgets["ZoneText"] = function(self)
+	local ZoneTextFrame = _G.ZoneTextFrame
+	local SubZoneTextFrame = _G.SubZoneTextFrame
+	local AutoFollowStatus = _G.AutoFollowStatus
+
+	ZoneTextFrame:SetParent(UIHider)
+	ZoneTextFrame:UnregisterAllEvents()
+	ZoneTextFrame:SetScript("OnUpdate", nil)
+	-- ZoneTextFrame:Hide()
+	
+	SubZoneTextFrame:SetParent(UIHider)
+	SubZoneTextFrame:UnregisterAllEvents()
+	SubZoneTextFrame:SetScript("OnUpdate", nil)
+	-- SubZoneTextFrame:Hide()
+	
+	AutoFollowStatus:SetParent(UIHider)
+	AutoFollowStatus:UnregisterAllEvents()
+	AutoFollowStatus:SetScript("OnUpdate", nil)
+	-- AutoFollowStatus:Hide()
+end 
+
+-- Widget Styling Pool
+-----------------------------------------------------------------
+UIWidgetStyling["GameMenu"] = function(self, ...)
+
+end
+
+UIWidgetStyling["PopUps"] = function(self, ...)
+
+	-- Retrieve styling data
+	local frameBackdrop, 
+	      frameBackdropOffsets,
+	      frameBackdropColor, 
+	      frameBackdropBorderColor, 
+	      buttonBackdrop, 
+	      buttonBackdropOffsets,
+	      buttonBackdropColor, 
+	      buttonBackdropBorderColor, 
+	      buttonBackdropHoverColor, 
+		  buttonBackdropHoverBorderColor, 
+		  editBoxBackdrop,
+		  editBoxBackdropColor,
+		  editBoxBackdropBorderColor,
+		  editBoxInsets,
+	      anchorOffsetV = ...
+
+	-- Custom backdrop frames
+	local Backdrops = {}
+	local GetBackdrop = function(popup)
+		local backdrop = Backdrops[popup]
+		if (not backdrop) then
+			backdrop = CreateFrame("Frame", nil, popup, BackdropTemplateMixin and "BackdropTemplate")
+			backdrop:SetFrameLevel(popup:GetFrameLevel())
+			Backdrops[popup] = backdrop
+		end	
+		return backdrop
+	end
+
+	local SetAnchors
+	SetAnchors = function(self, event)
+		-- Not strictly certain if moving them in combat would taint them, 
+		-- but knowing the blizzard UI, I'm not willing to take that chance.
+		if (InCombatLockdown()) then 
+			self:RegisterEvent("PLAYER_REGEN_ENABLED", SetAnchors)
+			return
+
+		elseif (event == "PLAYER_REGEN_ENABLED") then
+			self:UnregisterEvent("PLAYER_REGEN_ENABLED", SetAnchors)
+		end 
+
+		local previous
+		for i = 1, STATICPOPUP_NUMDIALOGS do
+			local popup = _G["StaticPopup"..i]
+			local point, anchor, rpoint, x, y = popup:GetPoint()
+			if (anchor == previous) then
+				-- We only change the offsets values, not the anchor points, 
+				-- since experience tells me that this is a safer way to avoid potential taint!
+				popup:ClearAllPoints()
+				popup:SetPoint(point, anchor, rpoint, 0, -(anchorOffsetV or 6))
+			end
+			previous = popup
+		end
+	end
+	SetAnchors()
+	
+	-- Clear out the old
+	local Clear = function(popup)
+
+		local name = popup:GetName()
+		if (not name) then
+			return
+		end
+
+		-- Remove 8.x backdrops
+		if (popup.SetBackdrop) then
+			popup:SetBackdrop(nil)
+			popup:SetBackdropColor(0,0,0,0)
+			popup:SetBackdropBorderColor(0,0,0,0)
+		end
+
+		-- Remove 9.x backdrops
+		if (popup.Border) then 
+			popup.Border:SetAlpha(0)
+		end
+
+		-- Remove button artwork
+		for _,buttonName in pairs({ "Button1", "Button2", "Button3", "Button4", "ExtraButton" }) do
+			local button = _G[name..buttonName]
+			if (button) then
+				button:GetNormalTexture():SetVertexColor(0, 0, 0, 0)
+				button:GetHighlightTexture():SetVertexColor(0, 0, 0, 0)
+				button:GetPushedTexture():SetVertexColor(0, 0, 0, 0)
+				button:GetDisabledTexture():SetVertexColor(0, 0, 0, 0)
+				if (button.SetBackdrop) then
+					button:SetBackdrop(nil)
+					button:SetBackdropColor(0,0,0,0)
+					button:SetBackdropBorderColor(0,0,0.0)
+				end
+			end
+		end
+
+		-- Remove editbox artwork
+		local editbox = _G[name .. "EditBox"]
+		if (editbox) then
+			for _,texName in pairs({ "EditBoxLeft", "EditBoxMid", "EditBoxRight" }) do
+				local tex = _G[name..texName]
+				if (tex) then
+					tex:SetTexture(nil)
+					tex:SetAlpha(0)
+				end
+			end
+			if (editbox.SetBackdrop) then
+				editbox:SetBackdrop(nil)
+				editbox:SetBackdropColor(0, 0, 0, 0)
+				editbox:SetBackdropBorderColor(0, 0, 0, 0)
+			end
+			editbox:SetTextInsets(6, 6, 0, 0)
+		end
+
+		-- Remaining frames:
+		-- "$parentMoneyFrame" - "SmallMoneyFrameTemplate"
+		-- "$parentMoneyInputFrame" - "MoneyInputFrameTemplate"
+		-- "$parentItemFrame"
+
+	end
+
+	local OnShow = function(popup)
+
+		local name = popup:GetName()
+		if (not name) then
+			return
+		end
+
+		-- Clear the blizzard content
+		Clear(popup)
+
+		-- User styled backdrops
+		local backdrop = GetBackdrop(popup)
+		backdrop:SetBackdrop(frameBackdrop)
+		backdrop:SetBackdropColor(unpack(frameBackdropColor))
+		backdrop:SetBackdropBorderColor(unpack(frameBackdropBorderColor))
+		backdrop:SetPoint("TOPLEFT", -frameBackdropOffsets[1], frameBackdropOffsets[3])
+		backdrop:SetPoint("BOTTOMRIGHT", frameBackdropOffsets[2], -frameBackdropOffsets[4])
+
+		-- User styled buttons
+		for _,buttonName in pairs({ "Button1", "Button2", "Button3", "Button4", "ExtraButton" }) do
+			local button = _G[name..buttonName]
+			if (button) then
+				local border = GetBackdrop(button)
+				border:SetFrameLevel(button:GetFrameLevel() - 1)
+				border:SetPoint("TOPLEFT", -buttonBackdropOffsets[1], buttonBackdropOffsets[3])
+				border:SetPoint("BOTTOMRIGHT", buttonBackdropOffsets[2], -buttonBackdropOffsets[4])
+				border:SetBackdrop(buttonBackdrop)
+				border:SetBackdropColor(unpack(buttonBackdropColor))
+				border:SetBackdropBorderColor(unpack(buttonBackdropBorderColor))
+				button:HookScript("OnEnter", function() 
+					border:SetBackdropColor(unpack(buttonBackdropHoverColor))
+					border:SetBackdropBorderColor(unpack(buttonBackdropHoverBorderColor))
+				end)
+				button:HookScript("OnLeave", function() 
+					border:SetBackdropColor(unpack(buttonBackdropColor))
+					border:SetBackdropBorderColor(unpack(buttonBackdropBorderColor))
+				end)
+			end
+		end
+
+		-- User styled editbox
+		local editbox = _G[name.."EditBox"]
+		if (editbox) then
+			if (editbox.SetBackdrop) then
+				editbox:SetBackdrop(editBoxBackdrop)
+				editbox:SetBackdropColor(unpack(editBoxBackdropColor))
+				editbox:SetBackdropBorderColor(unpack(editBoxBackdropBorderColor))
+			end
+			editbox:SetTextInsets(unpack(editBoxInsets))
+		end
+	end
+	
+	local Hooked = {}
+	for i = 1, STATICPOPUP_NUMDIALOGS do 
+		local popup = _G["StaticPopup"..i]
+		if (popup) and (not Hooked[popup]) then
+			self:SetHook(popup, "OnShow", function() OnShow(popup) end, "GP_POPUP"..i.."_ONSHOW")
+			Hooked[popup] = true
+		end
+	end
+
+	-- The popups are re-anchored by blizzard, so we need to re-adjust them when they do.
+	self:SetSecureHook("StaticPopup_SetUpPosition", SetAnchors, "GP_POPUP_SET_ANCHORS")
+end
+
 UIWidgetDependency["WorldMap"] = "Blizzard_WorldMap"
-UIWidgets["WorldMap"] = function(self)
+UIWidgetStyling["WorldMap"] = IsClassic and function(self, ...)
 	local Canvas = WorldMapFrame
 	Canvas.BlackoutFrame:Hide()
 	Canvas:SetIgnoreParentScale(false)
@@ -832,42 +1060,133 @@ UIWidgets["WorldMap"] = function(self)
 	frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	frame:RegisterEvent("PLAYER_STARTED_MOVING")
 	frame:RegisterEvent("PLAYER_STOPPED_MOVING")
-end
-
-UIWidgets["ZoneText"] = function(self)
-	local ZoneTextFrame = _G.ZoneTextFrame
-	local SubZoneTextFrame = _G.SubZoneTextFrame
-	local AutoFollowStatus = _G.AutoFollowStatus
-
-	ZoneTextFrame:SetParent(UIHider)
-	ZoneTextFrame:UnregisterAllEvents()
-	ZoneTextFrame:SetScript("OnUpdate", nil)
-	-- ZoneTextFrame:Hide()
-	
-	SubZoneTextFrame:SetParent(UIHider)
-	SubZoneTextFrame:UnregisterAllEvents()
-	SubZoneTextFrame:SetScript("OnUpdate", nil)
-	-- SubZoneTextFrame:Hide()
-	
-	AutoFollowStatus:SetParent(UIHider)
-	AutoFollowStatus:UnregisterAllEvents()
-	AutoFollowStatus:SetScript("OnUpdate", nil)
-	-- AutoFollowStatus:Hide()
 end 
 
+or IsRetail and function(self, ...)
+
+	local WorldMapFrame = WorldMapFrame
+
+	local SetLargeWorldMap, SetSmallWorldMap
+	local SynchronizeDisplayState
+	local UpdateMaximizedSize, UpdateMaximizedSize
+	local WorldMapOnShow
+
+	local smallerMapScale, mapSized = .8
+
+	SetLargeWorldMap = function(self)
+		WorldMapFrame:SetParent(UIParent)
+		WorldMapFrame:SetScale(1)
+		WorldMapFrame.ScrollContainer.Child:SetScale(smallerMapScale)
+	
+		if (WorldMapFrame:GetAttribute("UIPanelLayout-area") ~= "center") then
+			SetUIPanelAttribute(WorldMapFrame, "area", "center");
+		end
+	
+		if (WorldMapFrame:GetAttribute("UIPanelLayout-allowOtherPanels") ~= true) then
+			SetUIPanelAttribute(WorldMapFrame, "allowOtherPanels", true)
+		end
+	
+		WorldMapFrame:OnFrameSizeChanged()
+		if (WorldMapFrame:GetMapID()) then
+			WorldMapFrame.NavBar:Refresh()
+		end
+	end
+	
+	UpdateMaximizedSize = function(self)
+		local width, height = WorldMapFrame:GetSize()
+		local magicNumber = (1 - smallerMapScale) * 100
+		WorldMapFrame:SetSize((width * smallerMapScale) - (magicNumber + 2), (height * smallerMapScale) - 2)
+	end
+	
+	SynchronizeDisplayState = function(self)
+		if (WorldMapFrame:IsMaximized()) then
+			WorldMapFrame:ClearAllPoints()
+			WorldMapFrame:SetPoint("CENTER", UIParent)
+		end
+	end
+	
+	SetSmallWorldMap = function(self)
+		if (not WorldMapFrame:IsMaximized()) then
+			WorldMapFrame:ClearAllPoints()
+			WorldMapFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 16, -94)
+		end
+	end
+	
+	WorldMapOnShow = function(self, event, ...)
+		if (mapSized) then
+			return
+		end
+	
+		-- Don't do this in combat, there are secure elements here.
+		if (InCombatLockdown()) then
+			self:RegisterEvent("PLAYER_REGEN_ENABLED", WorldMapOnShow)
+			return
+	
+		-- Only ever need this event once.
+		elseif (event == "PLAYER_REGEN_ENABLED") then
+			self:UnregisterEvent(event, WorldMapOnShow)
+		end
+	
+		if (WorldMapFrame:IsMaximized()) then
+			WorldMapFrame:UpdateMaximizedSize()
+			SetLargeWorldMap()
+		else
+			SetSmallWorldMap()
+		end
+	
+		-- Never again!
+		mapSized = true
+	end
+	
+	WorldMapFrame.BlackoutFrame.Blackout:SetTexture(nil)
+	WorldMapFrame.BlackoutFrame:EnableMouse(false)
+
+	self:SetSecureHook(WorldMapFrame, "Maximize", SetLargeWorldMap, "GP_SET_LARGE_WORLDMAP")
+	self:SetSecureHook(WorldMapFrame, "Minimize", SetSmallWorldMap, "GP_SET_SMALL_WORLDMAP")
+	self:SetSecureHook(WorldMapFrame, "SynchronizeDisplayState", SynchronizeDisplayState, "GP_SYNC_DISPLAYSTATE_WORLDMAP")
+	self:SetSecureHook(WorldMapFrame, "UpdateMaximizedSize", UpdateMaximizedSize, "GP_UPDATE_MAXIMIZED_WORLDMAP")
+
+	WorldMapFrame:HookScript("OnShow", function() WorldMapOnShow() end)
+end
+
+-- Library Event Handling
+-----------------------------------------------------------------
 LibBlizzard.OnEvent = function(self, event, ...)
 	local arg1 = ...
 	if (event == "ADDON_LOADED") then
-		local queueCount = 0
-		for widgetName,addonName in pairs(self.queue) do 
-			if (addonName == arg1) then 
+		local found, hasQueued
+
+		-- Iterate widgets queued for disabling after their loading 
+		for widgetName,widgetData in pairs(self.queue) do 
+			if (widgetData.addonName == arg1) then 
+				UIWidgets[widgetName](self, unpack(widgetData.args))
 				self.queue[widgetName] = nil
-				UIWidgets[widgetName](self)
+				found = true
 			else 
-				queueCount = queueCount + 1
+				hasQueued = true
 			end 
+			-- Definitely not the fastest way, but sufficient for our purpose
+			if (found) and (hasQueued) then
+				break
+			end
 		end 
-		if (queueCount == 0) then 
+
+		-- Iterate widgets queued for styling after their loading
+		for widgetName, widgetData in pairs(self.stylingQueue) do 
+			if (widgetData.addonName == arg1) then 
+				UIWidgetStyling[widgetName](self, unpack(widgetData.args))
+				self.stylingQueue[widgetName] = nil
+				found = true
+			else 
+				hasQueued = true
+			end 
+			if (found) and (hasQueued) then
+				break
+			end
+		end 
+
+		-- Nothing queued, kill off this event
+		if (not hasQueued) then 
 			if self:IsEventRegistered("ADDON_LOADED", "OnEvent") then 
 				self:UnregisterEvent("ADDON_LOADED", "OnEvent")
 			end 
@@ -875,6 +1194,8 @@ LibBlizzard.OnEvent = function(self, event, ...)
 	end 
 end 
 
+-- Library Public API
+-----------------------------------------------------------------
 LibBlizzard.DisableUIWidget = function(self, name, ...)
 	-- Just silently fail for widgets that don't exist.
 	-- Makes it much simpler during development, 
@@ -884,9 +1205,9 @@ LibBlizzard.DisableUIWidget = function(self, name, ...)
 		return 
 	end 
 	local dependency = UIWidgetDependency[name]
-	if dependency then 
+	if (dependency) then 
 		if (not IsAddOnLoaded(dependency)) then 
-			LibBlizzard.queue[name] = dependency
+			LibBlizzard.queue[name] = { addonName = dependency, args = { ... } }
 			if (not LibBlizzard:IsEventRegistered("ADDON_LOADED", "OnEvent")) then 
 				LibBlizzard:RegisterEvent("ADDON_LOADED", "OnEvent")
 			end 
@@ -959,8 +1280,30 @@ LibBlizzard.DisableUIMenuPage = function(self, panel_id, panel_name)
 	end 
 end
 
+LibBlizzard.StyleUIWidget = function(self, name, ...)
+	-- Just silently fail for widgets that don't exist.
+	-- Makes it much simpler during development, 
+	-- and much easier in the future to upgrade.
+	if (not UIWidgetStyling[name]) then 
+		print(("LibBlizzard: The UI widget '%s' does not exist."):format(name))
+		return 
+	end 
+	local dependency = UIWidgetDependency[name]
+	if (dependency) then 
+		if (not IsAddOnLoaded(dependency)) then 
+			LibBlizzard.stylingQueue[name] = { addonName = dependency, args = { ... } }
+			if (not LibBlizzard:IsEventRegistered("ADDON_LOADED", "OnEvent")) then 
+				LibBlizzard:RegisterEvent("ADDON_LOADED", "OnEvent")
+			end 
+			return 
+		end 
+	end 
+	UIWidgetStyling[name](LibBlizzard, ...)
+end
+
 -- Module embedding
 local embedMethods = {
+	StyleUIWidget = true,
 	DisableUIMenuOption = true,
 	DisableUIMenuPage = true,
 	DisableUIWidget = true

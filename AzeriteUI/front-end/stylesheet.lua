@@ -306,156 +306,6 @@ local Blizzard_GameMenu_Button_PostUpdate = Core_MenuButton_Layers_PostUpdate
 local BlizzardMicroMenu_Button_PostCreate = Core_MenuButton_PostCreate
 local BlizzardMicroMenu_Button_PostUpdate = Core_MenuButton_Layers_PostUpdate
 
--- Blizzard Popup PostCreate styling
-local popupBackdrops = {}
-local BlizzardPopup_OnShow = function(popup)
-	if (popup.SetBackdrop) then
-		popup:SetBackdrop(nil)
-		popup:SetBackdropColor(0,0,0,0)
-		popup:SetBackdropBorderColor(0,0,0,0)
-	end
-
-	if (popup.Border) then 
-		popup.Border:SetAlpha(0)
-	end
-
-	-- add a bigger backdrop frame with room for our larger buttons
-	local backdrop = popupBackdrops[popup]
-	if (not backdrop) then
-		backdrop = CreateFrame("Frame", nil, popup, BackdropTemplateMixin and "BackdropTemplate")
-		backdrop:SetFrameLevel(popup:GetFrameLevel())
-		backdrop:SetPoint("TOPLEFT", -4, 4)
-		backdrop:SetPoint("BOTTOMRIGHT", 4, -4)
-		popupBackdrops[popup] = backdrop
-	end	
-
-	local sizeMod = 3/4
-	backdrop:SetBackdrop({
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = tooltipBorder, -- GetMedia("tooltip_border_hex_large"), -- tooltipBorder,
-		edgeSize = 32*sizeMod, 
-		tile = false, 
-		insets = { top = tooltipInset*sizeMod, bottom = tooltipInset*sizeMod, left = tooltipInset*sizeMod, right = tooltipInset*sizeMod }
-	})
-	backdrop:SetBackdropColor(.05, .05, .05, .85)
-	backdrop:SetBackdropBorderColor(1,1,1,1)
-
-	-- remove button artwork
-	for i = 1,4 do
-		local button = popup["button"..i]
-		if button then
-			button:GetNormalTexture():SetVertexColor(0, 0, 0, 0)
-			button:GetHighlightTexture():SetVertexColor(0, 0, 0, 0)
-			button:GetPushedTexture():SetVertexColor(0, 0, 0, 0)
-			button:GetDisabledTexture():SetVertexColor(0, 0, 0, 0)
-
-			if (button.SetBackdrop) then
-				button:SetBackdrop(nil)
-				button:SetBackdropColor(0,0,0,0)
-				button:SetBackdropBorderColor(0,0,0.0)
-			end
-
-			local border = popupBackdrops[button]
-			if (not border) then 
-				local sizeMod = 2/3
-				local offset = 8
-				border = CreateFrame("Frame", nil, button, BackdropTemplateMixin and "BackdropTemplate")
-				border:SetFrameLevel(button:GetFrameLevel() - 1)
-				border:SetPoint("TOPLEFT", -(3 + offset)*sizeMod, (3 + offset)*sizeMod -2) -- 23
-				border:SetPoint("BOTTOMRIGHT", (3 + offset)*sizeMod, -(3 + offset)*sizeMod -2) -- 23
-				border:SetBackdrop({
-					bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-					edgeFile = tooltipBorder, -- GetMedia("tooltip_border"),
-					edgeSize = 32*sizeMod,
-					insets = {
-						left = (2 + offset)*sizeMod,
-						right = (2 + offset)*sizeMod,
-						top = (2 + offset)*sizeMod,
-						bottom = (2 + offset)*sizeMod
-					}
-				})
-				border:SetBackdropColor(.05, .05, .05, .75)
-				border:SetBackdropBorderColor(Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
-
-				button:HookScript("OnEnter", function() 
-					if (button.SetBackdrop) then
-						button:SetBackdropColor(0,0,0,0)
-						button:SetBackdropBorderColor(0,0,0.0)
-					end
-					popupBackdrops[button]:SetBackdropColor(.1, .1, .1, .75)
-					popupBackdrops[button]:SetBackdropBorderColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3])
-				end)
-	
-				button:HookScript("OnLeave", function() 
-					if (button.SetBackdrop) then
-						button:SetBackdropColor(0,0,0,0)
-						button:SetBackdropBorderColor(0,0,0.0)
-					end
-					popupBackdrops[button]:SetBackdropColor(.05, .05, .05, .75)
-					popupBackdrops[button]:SetBackdropBorderColor(Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
-				end)
-
-				popupBackdrops[button] = border
-			end
-		
-		end
-	end
-
-	-- remove editbox artwork
-	local name = popup:GetName()
-
-	local editbox = _G[name .. "EditBox"]
-	local editbox_left = _G[name .. "EditBoxLeft"]
-	local editbox_mid = _G[name .. "EditBoxMid"]
-	local editbox_right = _G[name .. "EditBoxRight"]
-
-	-- these got added in... uh... cata?
-	if editbox_left then editbox_left:SetTexture(nil) end
-	if editbox_mid then editbox_mid:SetTexture(nil) end
-	if editbox_right then editbox_right:SetTexture(nil) end
-
-	if (editbox.SetBackdrop) then
-		editbox:SetBackdrop(nil)
-		editbox:SetBackdrop({
-			bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-			edgeFile = [[Interface\ChatFrame\ChatFrameBackground]],
-			edgeSize = 1,
-			tile = false,
-			tileSize = 0,
-			insets = {
-				left = -6,
-				right = -6,
-				top = 0,
-				bottom = 0
-			}
-		})
-		editbox:SetBackdropColor(0, 0, 0, 0)
-		editbox:SetBackdropBorderColor(.15, .1, .05, 1)
-	end
-	editbox:SetTextInsets(6,6,0,0)
-	
-end
-
-local BlizzardPopup_PostCreate = function(self, popup)
-	popup:HookScript("OnShow", BlizzardPopup_OnShow)
-end
-
--- Blizzard Popup anchor points post updates
-local BlizzardPopup_Anchors_PostUpdate = function(self)
-	local previous
-	for i = 1, _G.STATICPOPUP_NUMDIALOGS do
-		local popup = _G["StaticPopup"..i]
-		local point, anchor, rpoint, x, y = popup:GetPoint()
-		if (anchor == previous) then
-			-- We only change the offsets values, not the anchor points, 
-			-- since experience tells me that this is a safer way to avoid potential taint!
-			popup:ClearAllPoints()
-			popup:SetPoint(point, anchor, rpoint, 0, -32)
-		end
-		previous = popup
-	end
-end
-
 -- Group Tools Menu Button Creation 
 local GroupTools_Button_PostCreate = function(self) end 
 
@@ -2558,8 +2408,39 @@ end
 
 -- Blizzard Popup Styling
 Layouts.BlizzardPopupStyling = {
-	PostCreatePopup = BlizzardPopup_PostCreate,
-	PostUpdateAnchors = BlizzardPopup_Anchors_PostUpdate
+	EditBoxBackdrop = {
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
+		edgeFile = [[Interface\ChatFrame\ChatFrameBackground]],
+		edgeSize = 1,
+		tile = false,
+		insets = { left = -6, right = -6, top = 0, bottom = 0 }
+	},
+	EditBoxBackdropColor = { 0, 0, 0, 0 },
+	EditBoxBackdropBorderColor = { .15, .1, .05, 1 },
+	EditBoxInsets = { 6, 6, 0, 0 },
+	PopupBackdrop = {
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
+		edgeFile = tooltipBorder, 
+		edgeSize = 32*3/4, 
+		tile = false, 
+		insets = { top = tooltipInset*3/4, bottom = tooltipInset*3/4, left = tooltipInset*3/4, right = tooltipInset*3/4 }
+	},
+	PopupBackdropOffsets = { 4, 4, 4, 4 },
+	PopupBackdropColor = { .05, .05, .05, .85 },
+	PopupBackdropBorderColor = { 1, 1, 1, 1 },
+	PopupButtonBackdrop = {
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
+		edgeFile = tooltipBorder,
+		edgeSize = 32*2/3,
+		tile = false, 
+		insets = { left = (2 + 8)*2/3, right = (2 + 8)*2/3, top = (2 + 8)*2/3, bottom = (2 + 8)*2/3 }
+	},
+	PopupButtonBackdropOffsets = { (3 + 8)*2/3, (3 + 8)*2/3, (3 + 8)*2/3 -2, (3 + 8)*2/3 -2 },
+	PopupButtonBackdropColor = { .05, .05, .05, .75 },
+	PopupButtonBackdropBorderColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
+	PopupButtonBackdropHoverColor = { .1, .1, .1, .75 },
+	PopupButtonBackdropHoverBorderColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3] },
+	PopupVerticalOffset = 32
 }
 
 -- Blizzard Tooltips
@@ -3238,7 +3119,7 @@ Layouts.NamePlates = {
 		clampTargetNameplateToScreen = 1, -- new CVar July 14th 2020. Wohoo! Thanks torhaala for telling me! :)
 	
 		-- Nameplate scale
-		nameplateMinScale = .75, -- .8
+		nameplateMinScale = .85, -- .8
 		nameplateMaxScale = 1, 
 		nameplateLargerScale = 1, -- Scale modifier for large plates, used for important monsters
 		nameplateGlobalScale = 1,
@@ -3246,16 +3127,16 @@ Layouts.NamePlates = {
 		NamePlateVerticalScale = 1,
 	
 		-- The minimum distance from the camera plates will reach their minimum scale and alpha
-		nameplateMinScaleDistance = 20, 
+		nameplateMinScaleDistance = 20, -- 10
 		
 		-- The maximum distance from the camera where plates will still have max scale and alpha
-		nameplateMaxScaleDistance = 10, -- 10
+		nameplateMaxScaleDistance = 20, -- 10
 	
 		-- Show nameplates above heads or at the base (0 or 2,
 		nameplateOtherAtBase = 0,
 	
 		-- Scale and Alpha of the selected nameplate (current target,
-		nameplateSelectedScale = 1.2, -- default 1.2
+		nameplateSelectedScale = 1.1, -- default 1.2
 	
 		-- The max distance to show nameplates.
 		nameplateMaxDistance = false, -- 20 is classic upper limit, 60 is BfA default

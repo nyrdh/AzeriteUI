@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.399-RC] 2020-08-29
+### Changed
+- Did some more adjustments to the nameplate distance- and target scaling, as our previous changes were a bit too extreme.
+- Chat bubbles should now be visible in instances when not engaged in combat, making it easier to understand what is going on before boss encounters or during the large amount of dialog in some scenarios.
+
 ## [2.0.398-RC] 2020-08-28
 - First round of changes to make this WoW 9.0.1 compatible. Note that due to loading issues and client instability, I have been unable to test most max level features at this point, and have only been able to play a fresh character leveling in the new starting zone. The fixes reflect this. Also note that the majority of changes, bug fixes and updates related to this will NOT be listed here while 9.0.1 is still on the PTR and not live. 
 

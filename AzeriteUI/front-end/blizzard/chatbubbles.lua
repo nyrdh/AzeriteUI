@@ -1,24 +1,34 @@
 local ADDON = ...
-
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
 
-local Module = Core:NewModule("ChatBubbles", "LibEvent", "LibChatBubble")
+local Module = Core:NewModule("ChatBubbles", "LibChatBubble")
 Module:SetIncompatible("Prat-3.0")
 
-local PostCreateBubble = function(bubble)
-end
-
-local PostUpdateBubble = function(bubble)
-end
-
-Module.OnInit = function(self)
-end 
-
 Module.OnEnable = function(self)
+	-- Enable styling
 	self:EnableBubbleStyling()
-	self:SetBubblePostCreateFunc(PostCreateBubble)
-	self:SetBubblePostCreateFunc(PostUpdateBubble)
+
+	-- Kill off any existing post updates,
+	-- we don't need them.
+	self:SetBubblePostCreateFunc()
+	self:SetBubblePostCreateFunc()
+
+	-- Keep them visible in the world
+	self:SetBubbleVisibleInWorld(true)
+
+	-- Keep them visible in combat in the world.
+	-- They are styled and unintrusive.
+	self:SetBubbleCombatHideInWorld(false)
+
+	-- Keep them visible in instances,
+	-- we need them for monster and boss dialog
+	-- before boss encounters or in scenarios.
+	self:SetBubbleVisibleInInstances(true)
+
+	-- Hide them during combat in instances,
+	-- they are unstyled and horribad as hell.
+	self:SetBubbleCombatHideInInstances(true)
 end 
