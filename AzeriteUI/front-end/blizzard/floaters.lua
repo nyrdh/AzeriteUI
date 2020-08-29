@@ -587,6 +587,7 @@ Module.HandleZoneAbilityButton = function(self)
 	button:SetScript("OnEnter", ZoneAbilityButton_OnEnter)
 	button:SetScript("OnLeave", ZoneAbilityButton_OnLeave)
 
+	local handleCooldownHooking, handleStyleHooking
 	local handle = function()
 		local scaffold = button
 		if (not button.Icon) then
@@ -598,9 +599,7 @@ Module.HandleZoneAbilityButton = function(self)
 				end
 			end
 		end
-
 		if (not scaffold.Icon) then
-			print(button:GetName(), "is fucked")
 			return
 		end
 	
@@ -625,39 +624,43 @@ Module.HandleZoneAbilityButton = function(self)
 		scaffold.Cooldown:SetDrawBling(layout.ZoneAbilityButtonShowCooldownBling)
 	
 		-- Attempting to fix the issue with too opaque swipe textures
-		scaffold.Cooldown:HookScript("OnShow", function() 
-			scaffold.Cooldown:SetSwipeColor(unpack(layout.ZoneAbilityButtonCooldownSwipeColor))
-		end)
+		if (not handleCooldownHooking) then
+			handleCooldownHooking = true
+			scaffold.Cooldown:HookScript("OnShow", function() 
+				scaffold.Cooldown:SetSwipeColor(unpack(layout.ZoneAbilityButtonCooldownSwipeColor))
+			end)
+		end
 		
 		-- Kill off the surrounding style texture
 		local Style = button.Style or scaffold.Style or frame.Style
 		if (Style) then
 			Style:SetTexture(nil)
 			Style:SetAlpha(0)
-			hooksecurefunc(Style, "SetTexture", DisableTexture)
+			if (not handleStyleHooking) then
+				handleStyleHooking = true
+				hooksecurefunc(Style, "SetTexture", DisableTexture)
+			end
 		end
 	
 		scaffold:GetNormalTexture():SetTexture(nil)
 		scaffold:GetHighlightTexture():SetTexture(nil)
 		--scaffold:GetCheckedTexture():SetTexture(nil)
 	
-		button.BorderFrame = CreateFrame("Frame", nil, button)
+		button.BorderFrame = button.BorderFrame or CreateFrame("Frame", nil, button)
 		button.BorderFrame:SetFrameLevel(button:GetFrameLevel() + 5)
 		button.BorderFrame:SetAllPoints(button)
-	
-	
-		button.BorderTexture = button.BorderFrame:CreateTexture()
+		
+		button.BorderTexture = button.BorderTexture or button.BorderFrame:CreateTexture()
 		button.BorderTexture:SetPoint(unpack(layout.ZoneAbilityButtonBorderPlace))
 		button.BorderTexture:SetDrawLayer(unpack(layout.ZoneAbilityButtonBorderDrawLayer))
 		button.BorderTexture:SetSize(unpack(layout.ZoneAbilityButtonBorderSize))
 		button.BorderTexture:SetTexture(layout.ZoneAbilityButtonBorderTexture)
 		button.BorderTexture:SetVertexColor(unpack(layout.ZoneAbilityButtonBorderColor))
 	end
-
 	handle()
+
 	button:HookScript("OnShow", handle)
 	button:HookScript("OnHide", handle)
-
 end
 
 -- Startup & Init

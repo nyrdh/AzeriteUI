@@ -290,4 +290,7 @@ end
 Module.OnEnable = function(self)
 	self:StyleWindow()
 	self:StyleButtons()
+
+	-- Hack to trigger everything else(?)
+	GameMenuFrame_OnShow(GameMenuFrame)
 end
