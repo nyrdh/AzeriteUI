@@ -1068,6 +1068,33 @@ elseif (IsRetail) then
 		AddUserFlags(194407, Boost) 				-- Spitting Cobra
 		AddUserFlags(268552, Boost) 				-- Viper's Venom (Proc)
 
+		-- Hunter (Beast Mastery)
+		-- https://www.wowhead.com/beast-mastery-hunter-abilities/live-only:on
+		------------------------------------------------------------------------
+		AddUserFlags(193530, ByPlayer) 				-- Aspect of the Wild
+		AddUserFlags(217200, Damage) 				-- Barbed Shot
+		AddUserFlags( 19574, Boost) 				-- Bestial Wrath
+		AddUserFlags(  5116, Harmful) 				-- Concussive Shot
+		AddUserFlags( 19577, ByPlayer) 				-- Intimidation
+		AddUserFlags( 34477, ByPlayer) 				-- Misdirection
+		AddUserFlags(118922, ByPlayer) 				-- Posthaste (Disengage Proc)
+		AddUserFlags(185791, Boost) 				-- Wild Call
+
+		-- Hunter (Marksmanship)
+		-- https://www.wowhead.com/marksmanship-hunter-abilities/live-only:on
+		------------------------------------------------------------------------
+		AddUserFlags(186387, Harmful) 				-- Bursting Shot
+		AddUserFlags(257044, Damage) 				-- Rapid Fire
+		AddUserFlags(288613, Boost) 				-- Trueshot
+
+		-- Hunter (Survival)
+		-- https://www.wowhead.com/survival-hunter-abilities/live-only:on
+		------------------------------------------------------------------------
+		AddUserFlags(186289, ByPlayer) 				-- Aspect of the Eagle
+		AddUserFlags(266779, Boost) 				-- Coordinated Assault
+		AddUserFlags(186260, Harmful) 				-- Harpoon
+		AddUserFlags(259491, Damage) 				-- Serpent Sting (Survival)
+		AddUserFlags(195645, Harmful) 				-- Wing Clip
 	end
 
 	-- Warrior

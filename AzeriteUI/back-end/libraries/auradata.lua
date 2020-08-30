@@ -994,10 +994,13 @@ local PopulateRetailClassDatabase = function()
 		------------------------------------------------------------------------
 		AddFlags(131894, IsHunter) 				-- A Murder of Crows
 		AddFlags(199483, IsHunter) 				-- Camouflage
+		AddFlags(  5116, IsHunter + IsSnare) 	-- Concussive Shot
 		AddFlags(260402, IsHunter) 				-- Double Tap
 		AddFlags(212431, IsHunter) 				-- Explosive Shot
 		AddFlags(257284, IsHunter) 				-- Hunter's Mark
 		AddFlags(194594, IsHunter) 				-- Lock and Load (Proc)
+		AddFlags( 34477, IsHunter) 				-- Misdirection
+		AddFlags(118922, IsHunter) 				-- Posthaste (Disengage Proc)
 		AddFlags(271788, IsHunter) 				-- Serpent Sting
 		AddFlags(194407, IsHunter) 				-- Spitting Cobra
 		AddFlags(268552, IsHunter) 				-- Viper's Venom (Proc)
@@ -1005,64 +1008,27 @@ local PopulateRetailClassDatabase = function()
 		-- Hunter (Beast Mastery)
 		-- https://www.wowhead.com/beast-mastery-hunter-abilities/live-only:on
 		------------------------------------------------------------------------
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags(193530, IsHunter) 				-- Aspect of the Wild
+		AddFlags(217200, IsHunter) 				-- Barbed Shot
+		AddFlags( 19574, IsHunter) 				-- Bestial Wrath
+		AddFlags( 19577, IsHunter + IsTaunt) 	-- Intimidation
+		AddFlags(185791, IsHunter) 				-- Wild Call (Proc)
 
 		-- Hunter (Marksmanship)
 		-- https://www.wowhead.com/marksmanship-hunter-abilities/live-only:on
 		------------------------------------------------------------------------
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags(186387, IsHunter + IsSnare) 	-- Bursting Shot
+		AddFlags(257044, IsHunter) 				-- Rapid Fire
+		AddFlags(288613, IsHunter) 				-- Trueshot
 
 		-- Hunter (Survival)
 		-- https://www.wowhead.com/survival-hunter-abilities/live-only:on
 		------------------------------------------------------------------------
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
-		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags(266779, IsHunter) 				-- Coordinated Assault
+		AddFlags(259491, IsHunter) 				-- Serpent Sting (Survival)
+		AddFlags(186260, IsHunter + IsStun) 	-- Harpoon
+		AddFlags(195645, IsHunter + IsSnare) 	-- Wing Clip
+		AddFlags(186289, IsHunter) 				-- Aspect of the Eagle
 	end
 
 	-- Warrior

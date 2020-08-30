@@ -42,7 +42,8 @@ locale\ruRU.lua
 locale\zhCN.lua
 locale\zhTW.lua
 
-# Addon specific data tables and methods. 
+# Addon specific data tables and methods.
+# Many things here will be moved to the back-end later. 
 front-end\private.lua
 
 # Addon specific layout and design. 
@@ -80,5 +81,5 @@ front-end\custom\unitframes.lua
 # Configuration
 front-end\custom\menu.lua
 
-# All module incompatibilities in one place
+# All module incompatibilities in one place.
 front-end\incompatibilities.lua
