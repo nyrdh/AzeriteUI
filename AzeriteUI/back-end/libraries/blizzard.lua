@@ -484,8 +484,66 @@ UIWidgetsDisable["LevelUpDisplay"] = function(self)
 	if (not LevelUpDisplay) then
 		return
 	end
+	LevelUpDisplay:SetScript("OnEvent", nil)
 	LevelUpDisplay:UnregisterAllEvents()
 	LevelUpDisplay:StopBanner()
+	LevelUpDisplay:SetParent(UIHider)
+end
+UIWidgetsEnable["LevelUpDisplay"] = function(self)
+	if (not LevelUpDisplay) then
+		return
+	end
+	LevelUpDisplay:SetParent(UIParent)
+	LevelUpDisplay:SetScript("OnEvent", LevelUpDisplay_OnEvent)
+	LevelUpDisplay_OnLoad(LevelUpDisplay)
+end
+
+UIWidgetDependency["Banners"] = "Blizzard_ObjectiveTracker"
+UIWidgetsDisable["Banners"] = function(self)
+	local frame = ObjectiveTrackerBonusBannerFrame
+	if (frame) then
+		frame.PlayBanner = nil
+		frame.StopBanner = nil
+		frame:SetParent(UIHider)
+	end
+	local frame = BossBanner
+	if (frame) then
+		frame.PlayBanner = nil
+		frame.StopBanner = nil
+		frame:SetScript("OnEvent", nil)
+		frame:UnregisterAllEvents()
+		frame:SetParent(UIHider)
+	end
+end
+UIWidgetsEnable["Banners"] = function(self)
+	local frame = ObjectiveTrackerBonusBannerFrame
+	if (frame) then
+		frame:SetParent(UIParent)
+		ObjectiveTrackerBonusBannerFrame_OnLoad(frame)
+	end
+	local frame = BossBanner
+	if (frame) then
+		frame:SetScript("OnEvent", BossBanner_OnEvent)
+		frame:SetScript("OnUpdate", BossBanner_OnUpdate)
+		BossBanner_OnLoad(frame)
+	end
+end
+
+UIWidgetsDisable["BossBanners"] = function(self)
+	local frame = BossBanner
+	BossBanner_Stop(frame)	
+	frame.PlayBanner = nil
+	frame.StopBanner = nil
+	frame:UnregisterAllEvents()
+	frame:SetScript("OnEvent", nil)
+	frame:SetScript("OnUpdate", nil)
+	frame:SetParent(UIHider)
+end
+UIWidgetsEnable["BossBanners"] = function(self)
+	local frame = BossBanner
+	frame:SetScript("OnEvent", BossBanner_OnEvent)
+	frame:SetScript("OnUpdate", BossBanner_OnUpdate)
+	BossBanner_OnLoad(frame)
 end
 
 UIWidgetsDisable["Minimap"] = function(self)
@@ -653,6 +711,26 @@ UIWidgetsDisable["QuestWatchFrame"] = function(self)
 	end
 	QuestWatchFrame:SetParent(UIHider)
 	local frame = TalkingHeadFrame
+end
+
+UIWidgetsDisable["RaidBossEmotes"] = function(self)
+	RaidBossEmoteFrame:SetParent(UIHider)
+	RaidBossEmoteFrame:Hide()
+end
+UIWidgetsEnable["RaidBossEmotes"] = function(self)
+	RaidBossEmoteFrame:SetParent(UIParent)
+	RaidBossEmoteFrame:Show()
+end
+
+UIWidgetsDisable["RaidWarnings"] = function(self)
+	RaidWarningFrame:SetParent(UIHider)
+	RaidWarningFrame:Hide()
+	RaidBossEmoteFrame:SetPoint("TOP", UIErrorsFrame, "BOTTOM", 0, 0)
+end
+UIWidgetsEnable["RaidWarnings"] = function(self)
+	RaidWarningFrame:SetParent(UIParent)
+	RaidWarningFrame:Show()
+	RaidBossEmoteFrame:SetPoint("TOP", RaidWarningFrame, "BOTTOM", 0, 0)
 end
 
 UIWidgetDependency["TalkingHead"] = "Blizzard_TalkingHeadUI"

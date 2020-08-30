@@ -4,12 +4,15 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("BlizzardFloaterHUD", "LibEvent", "LibFrame", "LibTooltip", "LibDB", "LibBlizzard", "LibClientBuild")
+local Module = Core:NewModule("BlizzardFloaterHUD", "LOW", "LibEvent", "LibFrame", "LibTooltip", "LibDB", "LibBlizzard", "LibClientBuild")
 
 -- Lua API
 local _G = _G
 local ipairs = ipairs
 local table_remove = table.remove
+
+-- WoW API
+local InCombatLockdown = InCombatLockdown
 
 -- Private API
 local GetConfig = Private.GetConfig
@@ -295,6 +298,64 @@ Module.UpdateTalkingHead = function(self, event, ...)
 	end
 end
 
+Module.UpdateAnnouncements = function(self, event, ...)
+	if (self.db.enableAnnouncements) then
+		self:EnableUIWidget("Banners")
+		self:EnableUIWidget("BossBanners")
+		self:EnableUIWidget("LevelUpDisplay")
+	else
+		self:DisableUIWidget("Banners")
+		self:DisableUIWidget("BossBanners")
+		self:DisableUIWidget("LevelUpDisplay")
+	end
+end
+
+Module.UpdateWarnings = function(self, event, ...)
+	if (self.db.enableRaidBossEmotes) then
+		self:EnableUIWidget("RaidBossEmotes")
+	else
+		self:DisableUIWidget("RaidBossEmotes")
+	end
+	if (self.db.enableRaidWarnings) then
+		self:EnableUIWidget("RaidWarnings")
+	else
+		self:DisableUIWidget("RaidWarnings")
+	end
+end
+
+Module.UpdateObjectivesTracker = function(self, event, ...)
+	if (InCombatLockdown()) then
+		self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateObjectivesTracker")
+		return
+	end
+	if (event == "PLAYER_REGEN_ENABLED") then
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "UpdateObjectivesTracker")
+	--elseif (event == "ADDON_LOADED") then
+	--	local addon = ...
+	--	if (addon == "Blizzard_ObjectiveTracker") then 
+	--		self:UnregisterEvent("ADDON_LOADED", "UpdateObjectivesTracker")
+	--	else
+	--		return
+	--	end
+	end
+	--if (not IsAddOnLoaded("Blizzard_ObjectiveTracker")) then
+	--end
+	local BlizzardObjectivesTracker = Core:GetModule("BlizzardObjectivesTracker", true)
+	if (BlizzardObjectivesTracker) and not (BlizzardObjectivesTracker:IsIncompatible() or BlizzardObjectivesTracker:DependencyFailed())then
+		local frame = BlizzardObjectivesTracker.frame
+		if (frame) then
+			if (self.db.enableObjectivesTracker) then
+				frame:Show()
+			else
+				frame:Hide()
+				if (frame.cover) then
+					frame.cover:Hide()
+				end
+			end
+		end
+	end
+end
+
 -- Setup
 ----------------------------------------------------
 Module.HandleAlertFrames = function(self)
@@ -546,6 +607,7 @@ Module.HandleWarningFrames = function(self)
 
 	-- Just a little in-game test for dev purposes!
 	-- /run RaidNotice_AddMessage(RaidWarningFrame, "Testing how texts will be displayed with my changes! Testing how texts will be displayed with my changes!", ChatTypeInfo["RAID_WARNING"])
+	-- /run RaidNotice_AddMessage(RaidBossEmoteFrame, "Testing how texts will be displayed with my changes! Testing how texts will be displayed with my changes!", ChatTypeInfo["RAID_WARNING"])
 end
 
 Module.HandleZoneAbilityButton = function(self)
@@ -672,9 +734,18 @@ Module.OnInit = function(self)
 
 	-- Create a secure proxy frame for the menu system
 	local callbackFrame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
-	callbackFrame.UpdateTalkingHead = function(proxy, ...) self:UpdateTalkingHead() end 
-	callbackFrame.UpdateAlertFrames = function(proxy, ...) self:UpdateAlertFrames() end 
-	
+
+	-- Add proxy methods
+	for _,method in pairs({
+			"UpdateAlertFrames",
+			"UpdateAnnouncements",
+			"UpdateObjectivesTracker",
+			"UpdateTalkingHead",
+			"UpdateWarnings"
+		}) do
+		callbackFrame[method] = function() self[method](self) end 
+	end
+
 	-- Register module db with the secure proxy
 	for key,value in pairs(self.db) do 
 		callbackFrame:SetAttribute(key,value)
@@ -687,9 +758,26 @@ Module.OnInit = function(self)
 			if (name == "change-enabletalkinghead") then 
 				self:SetAttribute("enableTalkingHead", value); 
 				self:CallMethod("UpdateTalkingHead"); 
+
 			elseif (name == "change-enablealerts") then 
 				self:SetAttribute("enableAlerts", value); 
 				self:CallMethod("UpdateAlertFrames"); 
+
+			elseif (name == "change-enableannouncements") then 
+				self:SetAttribute("enableAnnouncements", value); 
+				self:CallMethod("UpdateAnnouncements"); 
+
+			elseif (name == "change-enableraidwarnings") then 
+				self:SetAttribute("enableRaidWarnings", value); 
+				self:CallMethod("UpdateWarnings"); 
+
+			elseif (name == "change-enableraidbossemotes") then 
+				self:SetAttribute("enableRaidBossEmotes", value); 
+				self:CallMethod("UpdateWarnings"); 
+
+			elseif (name == "change-enableobjectivestracker") then 
+				self:SetAttribute("enableObjectivesTracker", value); 
+				self:CallMethod("UpdateObjectivesTracker"); 
 			end 
 		end 
 	]=])
@@ -698,24 +786,23 @@ Module.OnInit = function(self)
 	self.GetSecureUpdater = function(self) 
 		return callbackFrame 
 	end
-	
 end 
 
 Module.OnEnable = function(self)
-
 	self:HandleErrorFrame()
 	self:HandleWarningFrames()
-
 	if (IsClassic) then
 		self:HandleQuestTimerFrame()
 	end
-
 	if (IsRetail) then
 		self:HandleBelowMinimapWidgets()
 		self:HandleExtraActionButton()
 		self:HandleVehicleSeatIndicator()
 		self:HandleZoneAbilityButton()
 		self:UpdateAlertFrames()
+		self:UpdateAnnouncements()
 		self:UpdateTalkingHead()
+		self:UpdateWarnings()
+		self:UpdateObjectivesTracker()
 	end
 end

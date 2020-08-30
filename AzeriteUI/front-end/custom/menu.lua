@@ -1283,6 +1283,47 @@ Module.CreateMenuTable = function(self)
 				configDB = "BlizzardFloaterHUD", configKey = "enableTalkingHead", 
 				proxyModule = "BlizzardFloaterHUD"
 			})
+		end
+
+		-- Objectives Tracker
+		local BlizzardObjectivesTracker = Core:GetModule("BlizzardObjectivesTracker", true)
+		if BlizzardObjectivesTracker and not (BlizzardObjectivesTracker:IsIncompatible() or BlizzardObjectivesTracker:DependencyFailed()) then
+			table_insert(HUDMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["Objectives Tracker"]),
+				disabledTitle = L_DISABLED:format(L["Objectives Tracker"]),
+				type = "TOGGLE_VALUE", 
+				configDB = "BlizzardFloaterHUD", configKey = "enableObjectivesTracker", 
+				proxyModule = "BlizzardFloaterHUD"
+			})
+		end
+			
+		-- RaidWarning
+		table_insert(HUDMenu.buttons, {
+			enabledTitle = L_ENABLED:format(L["Raid Warnings"]),
+			disabledTitle = L_DISABLED:format(L["Raid Warnings"]),
+			type = "TOGGLE_VALUE", 
+			configDB = "BlizzardFloaterHUD", configKey = "enableRaidWarnings", 
+			proxyModule = "BlizzardFloaterHUD"
+		})
+
+		-- RaidWarning
+		table_insert(HUDMenu.buttons, {
+			enabledTitle = L_ENABLED:format(L["Monster Emotes"]),
+			disabledTitle = L_DISABLED:format(L["Monster Emotes"]),
+			type = "TOGGLE_VALUE", 
+			configDB = "BlizzardFloaterHUD", configKey = "enableRaidBossEmotes", 
+			proxyModule = "BlizzardFloaterHUD"
+		})
+
+		if (IsRetail) then
+			-- LevelUpDisplay
+			table_insert(HUDMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["Kills, Levels, Loot"]),
+				disabledTitle = L_DISABLED:format(L["Kills, Levels, Loot"]),
+				type = "TOGGLE_VALUE", 
+				configDB = "BlizzardFloaterHUD", configKey = "enableAnnouncements", 
+				proxyModule = "BlizzardFloaterHUD"
+			})
 
 			-- Alerts
 			table_insert(HUDMenu.buttons, {

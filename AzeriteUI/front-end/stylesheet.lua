@@ -2039,8 +2039,11 @@ if (IsClassic) then
 elseif (IsRetail) then
 	Defaults.BlizzardFloaterHUD = {
 		enableAlerts = false, -- spams like crazy. can we filter it? I did in legion. MUST LOOK UP!
-		enableRaidWarnings = true, -- not yet implemented!
-		enableTalkingHead = true
+		enableAnnouncements = false, -- level up, loot
+		enableObjectivesTracker = true, -- the blizzard monstrosity
+		enableRaidBossEmotes = true, -- partly needed for instance encounters
+		enableRaidWarnings = true,  -- groups would want this
+		enableTalkingHead = true -- immersive and nice
 	}
 end
 
@@ -2153,7 +2156,6 @@ Layouts[ADDON] = {
 		CastBars = true,
 		Chat = true,
 		Durability = true,
-		LevelUpDisplay = true, -- Retail
 		Minimap = true,
 		OrderHall = true,
 		--ObjectiveTracker = true, -- Retail

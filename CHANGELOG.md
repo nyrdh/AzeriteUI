@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.400-RC] 2020-08-31
+### Added
+- You can now also disable on-screen raid warnings, boss and monster emotes, boss kill announcements, level up announcements and loot announcements from the HUD menu!
+
+
 ## [2.0.399-RC] 2020-08-30
 - Continuing the work on 9.0.1 compatibility, though chances are there will still be endgame bugs on the PTR and in the beta. Please do NOT report them. They are per say not "real" bugs, I just haven't reached that point yet. I am not in the beta, and the PTR takes 5-10 minutes to log into, then I get randomly disconnected after 2-3 minutes. Working there is hard. And takes time. 
 - First round of changes to move a lot more of the generic code into the back-end. The goal is to make the UI far more stylesheet-driven, making it easier for others to edit, and easier for me to transfer to other UIs. No ETA on this mad scientist change, nor any guarantees I'll actually take it all the way.
