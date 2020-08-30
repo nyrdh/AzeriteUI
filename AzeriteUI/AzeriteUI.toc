@@ -79,3 +79,6 @@ front-end\custom\unitframes.lua
 
 # Configuration
 front-end\custom\menu.lua
+
+# All module incompatibilities in one place
+front-end\incompatibilities.lua

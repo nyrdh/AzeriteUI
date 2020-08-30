@@ -352,7 +352,7 @@ if (IsRetail) then
 			element.powerID = SPELL_POWER_CHI
 			element.powerType = "CHI"
 			element.isEnabled = true
-			element.maxDisplayed = element.maxComboPoints or 5
+			element.maxDisplayed = UnitPowerMax("player", element.powerID) or element.maxComboPoints or 5
 
 			self:RegisterEvent("UNIT_POWER_FREQUENT", Proxy)
 			self:RegisterEvent("UNIT_MAXPOWER", Proxy)
@@ -364,6 +364,15 @@ if (IsRetail) then
 			self:UnregisterEvent("UNIT_MAXPOWER", Proxy)
 
 			Generic.DisablePower(self)
+		end,
+		UpdatePower = function(self)
+			local element = self.ClassPower
+			if (UnitPowerMax("player", element.powerID) == 6) then
+				element.maxDisplayed =  6
+			else
+				element.maxDisplayed =  element.maxComboPoints or 5
+			end
+			return Generic.UpdatePower(self)
 		end
 	}, Generic_MT)
 
@@ -964,9 +973,9 @@ if (IsRetail) then
 			newType = "ComboPoints"
 		elseif (PLAYERCLASS == "MAGE") and (spec == SPEC_MAGE_ARCANE) and (not element.ignoreArcaneCharges) then 
 			newType = "ArcaneCharges"
-		elseif (PLAYERCLASS == "MONK") and (spec == SPEC_MONK_WINDWALKER) and (not element.ignoreChi)then 
+		elseif (PLAYERCLASS == "MONK") and (spec == SPEC_MONK_WINDWALKER) and (not element.ignoreChi) then 
 			newType = "Chi"
-		elseif (PLAYERCLASS == "MONK") and (spec == SPEC_MONK_BREWMASTER) and (not element.ignoreStagger)then 
+		elseif (PLAYERCLASS == "MONK") and (spec == SPEC_MONK_BREWMASTER) and (not element.ignoreStagger) then 
 			newType = "Stagger"
 		elseif ((PLAYERCLASS == "PALADIN") and (spec == SPEC_PALADIN_RETRIBUTION) and (level >= PALADINPOWERBAR_SHOW_LEVEL)) and (not element.ignoreHolyPower)then
 			newType = "HolyPower"
@@ -1041,6 +1050,9 @@ local Enable = function(self)
 			if (PLAYERCLASS == "MONK") or (PLAYERCLASS == "MAGE") or (PLAYERCLASS == "PALADIN") then 
 				self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", Proxy, true) 
 			end 
+			if (PLAYERCLASS == "MONK") then
+				self:RegisterEvent("PLAYER_TALENT_UPDATE", Proxy, true) 
+			end
 
 			-- All must check for vehicles
 			-- *Also of importance that none 
@@ -1052,7 +1064,6 @@ local Enable = function(self)
 			self:RegisterEvent("UPDATE_OVERRIDE_ACTIONBAR", Proxy, true)
 			self:RegisterEvent("UPDATE_POSSESS_BAR", Proxy, true)
 		end
-
 
 		return true
 	end
@@ -1088,5 +1099,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 39)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 40)
 end 

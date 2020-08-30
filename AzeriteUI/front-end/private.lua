@@ -431,7 +431,7 @@ local L_FOOD = GetSpellInfo(433)
 local SLACKMODE = (playerClass == "DEATHKNIGHT")
 			   or (playerClass == "DEMONHUNTER")
 			   --or (playerClass == "DRUID")
-			   or (playerClass == "HUNTER")
+			   or (IsClassic and (playerClass == "HUNTER"))
 			   --or (playerClass == "MAGE")
 			   or (playerClass == "MONK")
 			   or (playerClass == "PALADIN")
@@ -1039,6 +1039,35 @@ elseif (IsRetail) then
 		--AddUserFlags( 93402, Damage) 						-- Sunfire
 		AddUserFlags(   740, Healing) 						-- Tranquility
 		AddUserFlags( 48438, Healing) 						-- Wild Growth
+	end
+
+	-- Hunter
+	-----------------------------------------------------------------
+	do
+		-- Hunter (Abilities)
+		-- https://www.wowhead.com/hunter-abilities/live-only:on
+		------------------------------------------------------------------------
+		AddUserFlags( 61648, ByPlayer) 				-- Aspect of the Chameleon
+		AddUserFlags(186257, ByPlayer) 				-- Aspect of the Cheetah
+		AddUserFlags(186265, ByPlayer) 				-- Aspect of the Turtle
+		AddUserFlags(  6197, ByPlayer) 				-- Eagle Eye
+		AddUserFlags(  5384, ByPlayer) 				-- Feign Death
+		AddUserFlags(209997, ByPlayer) 				-- Play Dead
+		AddUserFlags(  1515, ByPlayer) 				-- Tame Beast
+
+		-- Hunter (Talents)
+		-- https://www.wowhead.com/hunter-talents/live-only:on
+		------------------------------------------------------------------------
+		AddUserFlags(131894, ByPlayer) 				-- A Murder of Crows
+		AddUserFlags(199483, ByPlayer) 				-- Camouflage
+		AddUserFlags(260402, Boost) 				-- Double Tap
+		AddUserFlags(212431, Damage) 				-- Explosive Shot
+		AddUserFlags(257284, ByPlayer) 				-- Hunter's Mark
+		AddUserFlags(194594, Boost) 				-- Lock and Load (Proc)
+		AddUserFlags(271788, Damage) 				-- Serpent Sting
+		AddUserFlags(194407, Boost) 				-- Spitting Cobra
+		AddUserFlags(268552, Boost) 				-- Viper's Venom (Proc)
+
 	end
 
 	-- Warrior

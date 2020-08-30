@@ -4,10 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("ChatBubbles", "LibChatBubble")
-Module:SetIncompatible("Prat-3.0")
-
-Module.OnEnable = function(self)
+Core:NewModule("ChatBubbles", "LibChatBubble").OnEnable = function(self)
 	-- Enable styling
 	self:EnableBubbleStyling()
 

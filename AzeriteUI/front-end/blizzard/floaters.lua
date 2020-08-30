@@ -20,8 +20,6 @@ local GetLayout = Private.GetLayout
 local IsClassic = Module:IsClassic()
 local IsRetail = Module:IsRetail()
 
-local MAPPY = Module:IsAddOnEnabled("Mappy")
-
 -- Local caches
 local HolderCache, FrameCache = {}, {}
 
@@ -258,15 +256,9 @@ end
 -- Updates
 ----------------------------------------------------
 Module.UpdateAlertFrames = function(self)
-	local db = self.db
-	local frame = AlertFrame
-	if (db.enableAlerts) then 
-		if (frame:GetParent() ~= UIParent) then 
-			frame:SetParent(UIParent)
-			frame:SetScript("OnEvent", frame.OnEvent)
-			frame:OnLoad()
-		end
-		return self:HandleAlertFrames()
+	if (self.db.enableAlerts) then 
+		self:EnableUIWidget("Alerts")
+		self:HandleAlertFrames()
 	else
 		self:DisableUIWidget("Alerts")
 	end
@@ -280,18 +272,10 @@ Module.UpdateTalkingHead = function(self, event, ...)
 		end
 		self:UnregisterEvent("ADDON_LOADED", "UpdateTalkingHead")
 	end 
-	local db = self.db
 	local frame = TalkingHeadFrame
-	if (db.enableTalkingHead) then 
+	if (self.db.enableTalkingHead) then 
 		if (frame) then 
-			-- The frame is loaded, so we re-register any needed events,
-			-- just in case this is a manual user called re-enabling.
-			-- Or in case another addon has disabled it.
-			frame:RegisterEvent("TALKINGHEAD_REQUESTED")
-			frame:RegisterEvent("TALKINGHEAD_CLOSE")
-			frame:RegisterEvent("SOUNDKIT_FINISHED")
-			frame:RegisterEvent("LOADING_SCREEN_ENABLED")
-
+			self:EnableUIWidget("TalkingHead")
 			self:HandleTalkingHeadFrame()
 		else
 			-- If the head hasn't been loaded yet, we queue the event.
@@ -299,16 +283,11 @@ Module.UpdateTalkingHead = function(self, event, ...)
 		end
 	else
 		if (frame) then 
-			frame:UnregisterEvent("TALKINGHEAD_REQUESTED")
-			frame:UnregisterEvent("TALKINGHEAD_CLOSE")
-			frame:UnregisterEvent("SOUNDKIT_FINISHED")
-			frame:UnregisterEvent("LOADING_SCREEN_ENABLED")
-			frame:Hide()
+			self:DisableUIWidget("TalkingHead")
 		else
 			-- If no frame is found, the addon hasn't been loaded yet,
 			-- and it should have been enough to just prevent blizzard from showing it.
 			UIParent:UnregisterEvent("TALKINGHEAD_REQUESTED")
-
 			-- Since other addons might load it contrary to our settings, though,
 			-- we register our addon listener to take control of it when it's loaded.
 			return self:RegisterEvent("ADDON_LOADED", "UpdateTalkingHead")
@@ -519,7 +498,7 @@ end
 Module.HandleVehicleSeatIndicator = function(self)
 	local layout = self.layout
 
-	if (MAPPY) then 
+	if (self:IsAddOnEnabled("Mappy")) then 
 		VehicleSeatIndicator.Mappy_DidHook = true -- set the flag indicating its already been set up for Mappy
 		VehicleSeatIndicator.Mappy_SetPoint = function() end -- kill the IsVisible reference Mappy makes
 		VehicleSeatIndicator.Mappy_HookedSetPoint = function() end -- kill this too

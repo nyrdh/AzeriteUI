@@ -975,6 +975,96 @@ local PopulateRetailClassDatabase = function()
 		
 	end
 
+	-- Hunter
+	-----------------------------------------------------------------
+	do
+		-- Hunter (Abilities)
+		-- https://www.wowhead.com/hunter-abilities/live-only:on
+		------------------------------------------------------------------------
+		AddFlags( 61648, IsHunter) 				-- Aspect of the Chameleon
+		AddFlags(186257, IsHunter) 				-- Aspect of the Cheetah
+		AddFlags(186265, IsHunter) 				-- Aspect of the Turtle
+		AddFlags(209997, IsHunter) 				-- Play Dead
+		AddFlags(  6197, IsHunter) 				-- Eagle Eye
+		AddFlags(  5384, IsHunter) 				-- Feign Death
+		AddFlags(  1515, IsHunter) 				-- Tame Beast
+
+		-- Hunter (Talents)
+		-- https://www.wowhead.com/hunter-talents/live-only:on
+		------------------------------------------------------------------------
+		AddFlags(131894, IsHunter) 				-- A Murder of Crows
+		AddFlags(199483, IsHunter) 				-- Camouflage
+		AddFlags(260402, IsHunter) 				-- Double Tap
+		AddFlags(212431, IsHunter) 				-- Explosive Shot
+		AddFlags(257284, IsHunter) 				-- Hunter's Mark
+		AddFlags(194594, IsHunter) 				-- Lock and Load (Proc)
+		AddFlags(271788, IsHunter) 				-- Serpent Sting
+		AddFlags(194407, IsHunter) 				-- Spitting Cobra
+		AddFlags(268552, IsHunter) 				-- Viper's Venom (Proc)
+
+		-- Hunter (Beast Mastery)
+		-- https://www.wowhead.com/beast-mastery-hunter-abilities/live-only:on
+		------------------------------------------------------------------------
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+
+		-- Hunter (Marksmanship)
+		-- https://www.wowhead.com/marksmanship-hunter-abilities/live-only:on
+		------------------------------------------------------------------------
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+
+		-- Hunter (Survival)
+		-- https://www.wowhead.com/survival-hunter-abilities/live-only:on
+		------------------------------------------------------------------------
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+		AddFlags( 00000, IsHunter) 				-- 
+	end
+
 	-- Warrior
 	-----------------------------------------------------------------
 	do

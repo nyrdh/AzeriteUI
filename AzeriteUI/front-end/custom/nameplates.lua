@@ -5,13 +5,6 @@ if (not Core) then
 end
 
 local Module = Core:NewModule("NamePlates", "LibEvent", "LibNamePlate", "LibDB", "LibFrame", "LibClientBuild")
-Module:SetIncompatible("Kui_Nameplates")
-Module:SetIncompatible("NeatPlates")
-Module:SetIncompatible("Plater")
-Module:SetIncompatible("SimplePlates")
-Module:SetIncompatible("TidyPlates")
-Module:SetIncompatible("TidyPlates_ThreatPlates")
-Module:SetIncompatible("TidyPlatesContinued")
 
 -- WoW API
 local GetQuestGreenRange = GetQuestGreenRange

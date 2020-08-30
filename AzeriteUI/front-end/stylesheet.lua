@@ -43,6 +43,7 @@ local UnitIsEnemy = UnitIsEnemy
 local UnitIsPlayer = UnitIsPlayer
 local UnitIsUnit = UnitIsUnit
 local UnitLevel = UnitLevel
+local UnitPowerMax = UnitPowerMax
 
 -- Private Addon API
 local GetAuraFilterFunc = Private.GetAuraFilterFunc
@@ -987,7 +988,6 @@ local PlayerHUD_ClassPowerPostCreatePoint = function(element, id, point)
 
 	point:SetOrientation("UP") -- set the bars to grow from bottom to top.
 	point:SetSparkTexture(GetMedia("blank")) -- this will be too tricky to rotate and map
-	
 end
 
 local PlayerHUD_ClassPowerPostUpdate = function(element, unit, min, max, newMax, powerType)
@@ -999,7 +999,7 @@ local PlayerHUD_ClassPowerPostUpdate = function(element, unit, min, max, newMax,
 
 	-- 5 points: 5 circles, center one larger
 	elseif (powerType == "CHI") then
-		style = "Chi"
+		style = (UnitPowerMax("player", Enum.PowerType.Chi) == 6) and "Runes" or "Chi"
 
 	--5 points: 3 circles, 3 crystals, last crystal larger
 	elseif (powerType == "ARCANE_CHARGES") or (powerType == "HOLY_POWER") or (powerType == "SOUL_SHARDS") or (powerType == "SOUL_FRAGMENTS") then 
@@ -2281,7 +2281,7 @@ Layouts.BlizzardFloaterHUD = {
 	ZoneAbilityButtonCooldownBlingTexture = GetMedia("blank"),
 	ZoneAbilityButtonCooldownPlace = { "CENTER", 0, 0 },
 	ZoneAbilityButtonCooldownSize = { 44, 44 },
-	ZoneAbilityButtonCooldownSwipeColor = { 0, 0, 0, .5 },
+	ZoneAbilityButtonCooldownSwipeColor = { 0, 0, 0, .75 },
 	ZoneAbilityButtonCooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
 	ZoneAbilityButtonCount = GetFont(18, true),
 	ZoneAbilityButtonCountPlace = { "BOTTOMRIGHT", -3, 3 },

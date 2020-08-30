@@ -6,7 +6,6 @@ end
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
 local Module = Core:NewModule("BlizzardObjectivesTracker", "LibEvent", "LibFrame", "LibClientBuild")
-Module:SetIncompatible("!KalielsTracker")
 
 -- Lua API
 local _G = _G

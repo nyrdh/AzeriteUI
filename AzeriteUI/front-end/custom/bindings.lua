@@ -6,7 +6,6 @@ end
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
 local Module = Core:NewModule("Bindings", "PLUGIN", "LibEvent", "LibMessage", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibFader", "LibSlash")
-Module:SetIncompatible("ConsolePort")
 
 -- Lua API
 local _G = _G

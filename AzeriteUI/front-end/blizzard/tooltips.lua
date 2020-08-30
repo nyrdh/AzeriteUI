@@ -5,9 +5,6 @@ if (not Core) then
 end
 
 local Module = Core:NewModule("BlizzardTooltips", "LibEvent", "LibDB", "LibFrame", "LibTooltip", "LibTooltipScanner", "LibPlayerData", "LibClientBuild")
-Module:SetIncompatible("TipTac")
-Module:SetIncompatible("TinyTip")
-Module:SetIncompatible("TinyTooltip")
 
 -- Lua API
 local _G = _G

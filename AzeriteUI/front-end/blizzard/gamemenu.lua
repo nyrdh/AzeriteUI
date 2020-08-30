@@ -6,7 +6,6 @@ end
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
 local Module = Core:NewModule("BlizzardGameMenu", "LibEvent", "LibDB", "LibTooltip", "LibFrame")
-Module:SetIncompatible("ConsolePort")
 
 -- Lua API
 local _G = _G

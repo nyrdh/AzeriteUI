@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 50)
+local LibBlizzard = Wheel:Set("LibBlizzard", 52)
 if (not LibBlizzard) then 
 	return
 end
@@ -52,6 +52,7 @@ local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 LibBlizzard.embeds = LibBlizzard.embeds or {}
 LibBlizzard.queue = LibBlizzard.queue or {}
+LibBlizzard.enableQueue = LibBlizzard.enableQueue or {}
 LibBlizzard.stylingQueue = LibBlizzard.stylingQueue or {}
 
 -- Frame to securely hide items
@@ -68,9 +69,10 @@ if (not LibBlizzard.frame) then
 end
 
 local UIHider = LibBlizzard.frame
-local UIWidgets = {}
-local UIWidgetDependency = {}
-local UIWidgetStyling = {}
+local UIWidgetsDisable = {} -- Disable methods
+local UIWidgetsEnable = {} -- Enable methods
+local UIWidgetStyling = {} -- Styling methods
+local UIWidgetDependency = {} -- Dependencies, applies to all
 
 -- Utility Functions
 -----------------------------------------------------------------
@@ -164,14 +166,10 @@ local killUnitFrame = function(baseName, keepParent, keepEvents, keepVisible)
 	end
 end
 
--- Widget Functions
------------------------------------------------------------------
-
-
--- Widget Disabling Pool
+-- Widget Pool
 -----------------------------------------------------------------
 -- ActionBars (Classic)
-UIWidgets["ActionBars"] = IsClassic and function(self)
+UIWidgetsDisable["ActionBars"] = IsClassic and function(self)
 
 	for _,object in pairs({
 		"MainMenuBarVehicleLeaveButton",
@@ -262,8 +260,8 @@ UIWidgets["ActionBars"] = IsClassic and function(self)
 	UIPARENT_MANAGED_FRAME_POSITIONS["MultiCastActionBarFrame"] = nil
 	UIPARENT_MANAGED_FRAME_POSITIONS["MULTICASTACTIONBAR_YPOS"] = nil
 
-	--UIWidgets["ActionBarsMainBar"](self)
-	--UIWidgets["ActionBarsBagBarAnims"](self)
+	--UIWidgetsDisable["ActionBarsMainBar"](self)
+	--UIWidgetsDisable["ActionBarsBagBarAnims"](self)
 end
 
 -- ActionBars (Retail)
@@ -385,7 +383,7 @@ or IsRetail and function(self)
 	UIPARENT_MANAGED_FRAME_POSITIONS["MULTICASTACTIONBAR_YPOS"] = nil
 end
 
-UIWidgets["Alerts"] = function(self)
+UIWidgetsDisable["Alerts"] = function(self)
 	if (not AlertFrame) then
 		return
 	end
@@ -394,7 +392,18 @@ UIWidgets["Alerts"] = function(self)
 	AlertFrame:SetParent(UIHider)
 end 
 
-UIWidgets["Auras"] = function(self)
+UIWidgetsEnable["Alerts"] = function(self)
+	if (not AlertFrame) then
+		return
+	end
+	if (AlertFrame:GetParent() ~= UIParent) then 
+		AlertFrame:SetParent(UIParent)
+		AlertFrame:SetScript("OnEvent", AlertFrame.OnEvent)
+		AlertFrame:OnLoad()
+	end
+end 
+
+UIWidgetsDisable["Auras"] = function(self)
 	BuffFrame:SetScript("OnLoad", nil)
 	BuffFrame:SetScript("OnUpdate", nil)
 	BuffFrame:SetScript("OnEvent", nil)
@@ -406,7 +415,7 @@ UIWidgets["Auras"] = function(self)
 	end 
 end 
 
-UIWidgets["BuffTimer"] = function(self)
+UIWidgetsDisable["BuffTimer"] = function(self)
 	if (not PlayerBuffTimerManager) then
 		return
 	end
@@ -415,7 +424,7 @@ UIWidgets["BuffTimer"] = function(self)
 	PlayerBuffTimerManager:UnregisterAllEvents()
 end
 
-UIWidgets["CastBars"] = function(self)
+UIWidgetsDisable["CastBars"] = function(self)
 	-- player's castbar
 	CastingBarFrame:SetScript("OnEvent", nil)
 	CastingBarFrame:SetScript("OnUpdate", nil)
@@ -430,7 +439,7 @@ UIWidgets["CastBars"] = function(self)
 end 
 
 UIWidgetDependency["CaptureBar"] = "Blizzard_UIWidgets"
-UIWidgets["CaptureBar"] = function(self)
+UIWidgetsDisable["CaptureBar"] = function(self)
 	if (not UIWidgetBelowMinimapContainerFrame) then
 		return
 	end
@@ -439,7 +448,7 @@ UIWidgets["CaptureBar"] = function(self)
 	UIWidgetBelowMinimapContainerFrame:UnregisterAllEvents()
 end
 
-UIWidgets["Chat"] = function(self)
+UIWidgetsDisable["Chat"] = function(self)
 	if (not QuickJoinToastButton) then
 		return
 	end
@@ -458,7 +467,7 @@ UIWidgets["Chat"] = function(self)
 	LibBlizzard:RegisterEvent("PLAYER_ENTERING_WORLD", killQuickToast)
 end 
 
-UIWidgets["Durability"] = function(self)
+UIWidgetsDisable["Durability"] = function(self)
 	DurabilityFrame:UnregisterAllEvents()
 	DurabilityFrame:SetScript("OnShow", nil)
 	DurabilityFrame:SetScript("OnHide", nil)
@@ -471,7 +480,7 @@ UIWidgets["Durability"] = function(self)
 	DurabilityFrame.IsShown = function() return false end
 end
 
-UIWidgets["LevelUpDisplay"] = function(self)
+UIWidgetsDisable["LevelUpDisplay"] = function(self)
 	if (not LevelUpDisplay) then
 		return
 	end
@@ -479,7 +488,7 @@ UIWidgets["LevelUpDisplay"] = function(self)
 	LevelUpDisplay:StopBanner()
 end
 
-UIWidgets["Minimap"] = function(self)
+UIWidgetsDisable["Minimap"] = function(self)
 
 	for _,object in pairs({
 		"GameTimeFrame",
@@ -549,14 +558,14 @@ UIWidgets["Minimap"] = function(self)
 end
 
 UIWidgetDependency["MinimapClock"] = "Blizzard_TimeManager"
-UIWidgets["MinimapClock"] = function(self)
+UIWidgetsDisable["MinimapClock"] = function(self)
 	if TimeManagerClockButton then 
 		TimeManagerClockButton:SetParent(UIHider)
 		TimeManagerClockButton:UnregisterAllEvents()
 	end 
 end
 
-UIWidgets["MirrorTimer"] = function(self)
+UIWidgetsDisable["MirrorTimer"] = function(self)
 	for i = 1,MIRRORTIMER_NUMTIMERS do
 		local timer = _G["MirrorTimer"..i]
 		timer:SetScript("OnEvent", nil)
@@ -567,7 +576,7 @@ UIWidgets["MirrorTimer"] = function(self)
 end 
 
 UIWidgetDependency["ObjectiveTracker"] = "Blizzard_ObjectiveTracker"
-UIWidgets["ObjectiveTracker"] = function(self)
+UIWidgetsDisable["ObjectiveTracker"] = function(self)
 
 	if (ObjectiveTrackerFrame) then
 		ObjectiveTrackerFrame:UnregisterAllEvents()
@@ -599,7 +608,7 @@ UIWidgets["ObjectiveTracker"] = function(self)
 end
 
 UIWidgetDependency["OrderHall"] = "Blizzard_OrderHallUI"
-UIWidgets["OrderHall"] = function(self)
+UIWidgetsDisable["OrderHall"] = function(self)
 	if (not OrderHallCommandBar) then
 		return
 	end
@@ -611,7 +620,7 @@ UIWidgets["OrderHall"] = function(self)
 	OrderHallCommandBar:UnregisterAllEvents()
 end
 
-UIWidgets["PlayerPowerBarAlt"] = function(self)
+UIWidgetsDisable["PlayerPowerBarAlt"] = function(self)
 	if (not PlayerPowerBarAlt) then
 		return
 	end
@@ -620,7 +629,7 @@ UIWidgets["PlayerPowerBarAlt"] = function(self)
 	PlayerPowerBarAlt:SetParent(UIHider)
 end
 
-UIWidgets["QuestTimerFrame"] = function(self)
+UIWidgetsDisable["QuestTimerFrame"] = function(self)
 	if (not QuestTimerFrame) then
 		return
 	end
@@ -638,14 +647,42 @@ UIWidgets["QuestTimerFrame"] = function(self)
 	end
 end
 
-UIWidgets["QuestWatchFrame"] = function(self)
+UIWidgetsDisable["QuestWatchFrame"] = function(self)
 	if (not QuestWatchFrame) then
 		return
 	end
 	QuestWatchFrame:SetParent(UIHider)
+	local frame = TalkingHeadFrame
 end
 
-UIWidgets["TimerTracker"] = function(self)
+UIWidgetDependency["TalkingHead"] = "Blizzard_TalkingHeadUI"
+UIWidgetsDisable["TalkingHead"] = function(self)
+	local frame = TalkingHeadFrame
+	if (not frame) then
+		return
+	end
+	frame:UnregisterEvent("TALKINGHEAD_REQUESTED")
+	frame:UnregisterEvent("TALKINGHEAD_CLOSE")
+	frame:UnregisterEvent("SOUNDKIT_FINISHED")
+	frame:UnregisterEvent("LOADING_SCREEN_ENABLED")
+	frame:Hide()
+end
+
+UIWidgetsEnable["TalkingHead"] = function(self)
+	local frame = TalkingHeadFrame
+	if (not frame) then
+		return
+	end
+	-- The frame is loaded, so we re-register any needed events,
+	-- just in case this is a manual user called re-enabling.
+	-- Or in case another addon has disabled it.
+	frame:RegisterEvent("TALKINGHEAD_REQUESTED")
+	frame:RegisterEvent("TALKINGHEAD_CLOSE")
+	frame:RegisterEvent("SOUNDKIT_FINISHED")
+	frame:RegisterEvent("LOADING_SCREEN_ENABLED")
+end
+
+UIWidgetsDisable["TimerTracker"] = function(self)
 	if (not TimerTracker) then
 		return
 	end
@@ -662,7 +699,7 @@ UIWidgets["TimerTracker"] = function(self)
 	end
 end
 
-UIWidgets["TotemFrame"] = function(self)
+UIWidgetsDisable["TotemFrame"] = function(self)
 	if (not TotemFrame) then
 		return
 	end
@@ -672,13 +709,13 @@ UIWidgets["TotemFrame"] = function(self)
 	TotemFrame:SetScript("OnHide", nil)
 end
 
-UIWidgets["Tutorials"] = function(self)
+UIWidgetsDisable["Tutorials"] = function(self)
 	TutorialFrame:UnregisterAllEvents()
 	TutorialFrame:Hide()
 	TutorialFrame.Show = TutorialFrame.Hide
 end
 
-UIWidgets["UnitFramePlayer"] = function(self)
+UIWidgetsDisable["UnitFramePlayer"] = function(self)
 	killUnitFrame("PlayerFrame")
 
 	-- A lot of blizz modules relies on PlayerFrame.unit
@@ -690,7 +727,7 @@ UIWidgets["UnitFramePlayer"] = function(self)
 	_G.PlayerFrame:SetDontSavePosition(true)
 end
 
-UIWidgets["UnitFramePet"] = function(self)
+UIWidgetsDisable["UnitFramePet"] = function(self)
 	if (IsClassic) then
 		killUnitFrame("PetFrame")
 	else
@@ -701,22 +738,22 @@ UIWidgets["UnitFramePet"] = function(self)
 	end
 end
 
-UIWidgets["UnitFrameTarget"] = function(self)
+UIWidgetsDisable["UnitFrameTarget"] = function(self)
 	killUnitFrame("TargetFrame")
 	killUnitFrame("ComboFrame")
 end
 
-UIWidgets["UnitFrameToT"] = function(self)
+UIWidgetsDisable["UnitFrameToT"] = function(self)
 	killUnitFrame("TargetFrameToT")
 	TargetofTarget_Update(TargetFrameToT)
 end
 
-UIWidgets["UnitFrameFocus"] = function(self)
+UIWidgetsDisable["UnitFrameFocus"] = function(self)
 	killUnitFrame("FocusFrame")
 	killUnitFrame("TargetofFocusFrame")
 end 
 
-UIWidgets["UnitFrameParty"] = function(self)
+UIWidgetsDisable["UnitFrameParty"] = function(self)
 	for i = 1,5 do
 		killUnitFrame(("PartyMemberFrame%.0f"):format(i))
 	end
@@ -734,7 +771,7 @@ UIWidgets["UnitFrameParty"] = function(self)
 	--end)
 end
 
-UIWidgets["UnitFrameRaid"] = function(self)
+UIWidgetsDisable["UnitFrameRaid"] = function(self)
 	-- dropdowns cause taint through the blizz compact unit frames, so we disable them
 	-- http://www.wowinterface.com/forums/showpost.php?p=261589&postcount=5
 	if (CompactUnitFrameProfiles) then
@@ -748,13 +785,13 @@ UIWidgets["UnitFrameRaid"] = function(self)
 	UIParent:UnregisterEvent("GROUP_ROSTER_UPDATE")
 end
 
-UIWidgets["UnitFrameBoss"] = function(self)
+UIWidgetsDisable["UnitFrameBoss"] = function(self)
 	for i = 1,MAX_BOSS_FRAMES do
 		killUnitFrame(("Boss%.0fTargetFrame"):format(i))
 	end
 end
 
-UIWidgets["UnitFrameArena"] = function(self)
+UIWidgetsDisable["UnitFrameArena"] = function(self)
 	for i = 1,5 do
 		killUnitFrame(("ArenaEnemyFrame%.0f"):format(i))
 	end
@@ -766,7 +803,7 @@ UIWidgets["UnitFrameArena"] = function(self)
 	end
 end
 
-UIWidgets["ZoneText"] = function(self)
+UIWidgetsDisable["ZoneText"] = function(self)
 	local ZoneTextFrame = _G.ZoneTextFrame
 	local SubZoneTextFrame = _G.SubZoneTextFrame
 	local AutoFollowStatus = _G.AutoFollowStatus
@@ -1146,7 +1183,7 @@ or IsRetail and function(self, ...)
 	self:SetSecureHook(WorldMapFrame, "SynchronizeDisplayState", SynchronizeDisplayState, "GP_SYNC_DISPLAYSTATE_WORLDMAP")
 	self:SetSecureHook(WorldMapFrame, "UpdateMaximizedSize", UpdateMaximizedSize, "GP_UPDATE_MAXIMIZED_WORLDMAP")
 
-	WorldMapFrame:HookScript("OnShow", function() WorldMapOnShow() end)
+	WorldMapFrame:HookScript("OnShow", function() WorldMapOnShow(self) end)
 end
 
 -- Library Event Handling
@@ -1159,7 +1196,7 @@ LibBlizzard.OnEvent = function(self, event, ...)
 		-- Iterate widgets queued for disabling after their loading 
 		for widgetName,widgetData in pairs(self.queue) do 
 			if (widgetData.addonName == arg1) then 
-				UIWidgets[widgetName](self, unpack(widgetData.args))
+				UIWidgetsDisable[widgetName](self, unpack(widgetData.args))
 				self.queue[widgetName] = nil
 				found = true
 			else 
@@ -1171,6 +1208,21 @@ LibBlizzard.OnEvent = function(self, event, ...)
 			end
 		end 
 
+		-- Iterate widgets queued for enabling after their loading 
+		for widgetName,widgetData in pairs(self.enableQueue) do 
+			if (widgetData.addonName == arg1) then 
+				UIWidgetsEnable[widgetName](self, unpack(widgetData.args))
+				self.enableQueue[widgetName] = nil
+				found = true
+			else 
+				hasQueued = true
+			end 
+			-- Definitely not the fastest way, but sufficient for our purpose
+			if (found) and (hasQueued) then
+				break
+			end
+		end 
+		
 		-- Iterate widgets queued for styling after their loading
 		for widgetName, widgetData in pairs(self.stylingQueue) do 
 			if (widgetData.addonName == arg1) then 
@@ -1196,11 +1248,32 @@ end
 
 -- Library Public API
 -----------------------------------------------------------------
+LibBlizzard.EnableUIWidget = function(self, name, ...)
+	-- Just silently fail for widgets that don't exist.
+	-- Makes it much simpler during development, 
+	-- and much easier in the future to upgrade.
+	if (not UIWidgetsEnable[name]) then 
+		print(("LibBlizzard: The UI widget '%s' does not have an Enable method."):format(name))
+		return 
+	end 
+	local dependency = UIWidgetDependency[name]
+	if (dependency) then 
+		if (not IsAddOnLoaded(dependency)) then 
+			LibBlizzard.enableQueue[name] = { addonName = dependency, args = { ... } }
+			if (not LibBlizzard:IsEventRegistered("ADDON_LOADED", "OnEvent")) then 
+				LibBlizzard:RegisterEvent("ADDON_LOADED", "OnEvent")
+			end 
+			return 
+		end 
+	end 
+	UIWidgetsEnable[name](LibBlizzard, ...)
+end
+
 LibBlizzard.DisableUIWidget = function(self, name, ...)
 	-- Just silently fail for widgets that don't exist.
 	-- Makes it much simpler during development, 
 	-- and much easier in the future to upgrade.
-	if (not UIWidgets[name]) then 
+	if (not UIWidgetsDisable[name]) then 
 		print(("LibBlizzard: The UI widget '%s' does not exist."):format(name))
 		return 
 	end 
@@ -1214,7 +1287,28 @@ LibBlizzard.DisableUIWidget = function(self, name, ...)
 			return 
 		end 
 	end 
-	UIWidgets[name](LibBlizzard, ...)
+	UIWidgetsDisable[name](LibBlizzard, ...)
+end
+
+LibBlizzard.StyleUIWidget = function(self, name, ...)
+	-- Just silently fail for widgets that don't exist.
+	-- Makes it much simpler during development, 
+	-- and much easier in the future to upgrade.
+	if (not UIWidgetStyling[name]) then 
+		print(("LibBlizzard: The UI widget '%s' does not exist."):format(name))
+		return 
+	end 
+	local dependency = UIWidgetDependency[name]
+	if (dependency) then 
+		if (not IsAddOnLoaded(dependency)) then 
+			LibBlizzard.stylingQueue[name] = { addonName = dependency, args = { ... } }
+			if (not LibBlizzard:IsEventRegistered("ADDON_LOADED", "OnEvent")) then 
+				LibBlizzard:RegisterEvent("ADDON_LOADED", "OnEvent")
+			end 
+			return 
+		end 
+	end 
+	UIWidgetStyling[name](LibBlizzard, ...)
 end
 
 LibBlizzard.DisableUIMenuOption = function(self, option_shrink, option_name)
@@ -1280,33 +1374,13 @@ LibBlizzard.DisableUIMenuPage = function(self, panel_id, panel_name)
 	end 
 end
 
-LibBlizzard.StyleUIWidget = function(self, name, ...)
-	-- Just silently fail for widgets that don't exist.
-	-- Makes it much simpler during development, 
-	-- and much easier in the future to upgrade.
-	if (not UIWidgetStyling[name]) then 
-		print(("LibBlizzard: The UI widget '%s' does not exist."):format(name))
-		return 
-	end 
-	local dependency = UIWidgetDependency[name]
-	if (dependency) then 
-		if (not IsAddOnLoaded(dependency)) then 
-			LibBlizzard.stylingQueue[name] = { addonName = dependency, args = { ... } }
-			if (not LibBlizzard:IsEventRegistered("ADDON_LOADED", "OnEvent")) then 
-				LibBlizzard:RegisterEvent("ADDON_LOADED", "OnEvent")
-			end 
-			return 
-		end 
-	end 
-	UIWidgetStyling[name](LibBlizzard, ...)
-end
-
 -- Module embedding
 local embedMethods = {
-	StyleUIWidget = true,
 	DisableUIMenuOption = true,
 	DisableUIMenuPage = true,
-	DisableUIWidget = true
+	DisableUIWidget = true,
+	EnableUIWidget = true,
+	StyleUIWidget = true
 }
 
 LibBlizzard.Embed = function(self, target)

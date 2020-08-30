@@ -5,7 +5,6 @@ if (not Core) then
 end
 
 local Module = Core:NewModule("ChatFilters", "LibFrame", "LibClientBuild")
---Module:SetIncompatible("Prat-3.0")
 
 -- Lua API
 local hooksecurefunc = hooksecurefunc
