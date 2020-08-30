@@ -4,10 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.0.400-RC] 2020-08-31
+## [2.0.400-RC] 2020-08-30
 ### Added
+- Hunters (Retail) now both have aura filter choices, as well as a few aura lists to make them viable (which was missing in the previous update). 
 - You can now also disable on-screen raid warnings, boss and monster emotes, boss kill announcements, level up announcements and loot announcements from the HUD menu!
 
+## Fixed
+- Made the method used to hide various HUD widgets a bit safer, to avoid some logon bugs when switching character.
 
 ## [2.0.399-RC] 2020-08-30
 - Continuing the work on 9.0.1 compatibility, though chances are there will still be endgame bugs on the PTR and in the beta. Please do NOT report them. They are per say not "real" bugs, I just haven't reached that point yet. I am not in the beta, and the PTR takes 5-10 minutes to log into, then I get randomly disconnected after 2-3 minutes. Working there is hard. And takes time. 

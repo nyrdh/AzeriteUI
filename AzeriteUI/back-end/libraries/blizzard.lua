@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 52)
+local LibBlizzard = Wheel:Set("LibBlizzard", 53)
 if (not LibBlizzard) then 
 	return
 end
@@ -502,16 +502,9 @@ UIWidgetDependency["Banners"] = "Blizzard_ObjectiveTracker"
 UIWidgetsDisable["Banners"] = function(self)
 	local frame = ObjectiveTrackerBonusBannerFrame
 	if (frame) then
-		frame.PlayBanner = nil
-		frame.StopBanner = nil
-		frame:SetParent(UIHider)
-	end
-	local frame = BossBanner
-	if (frame) then
-		frame.PlayBanner = nil
-		frame.StopBanner = nil
-		frame:SetScript("OnEvent", nil)
-		frame:UnregisterAllEvents()
+		--frame.PlayBanner = nil
+		--frame.StopBanner = nil
+		ObjectiveTrackerBonusBannerFrame_StopBanner(frame)
 		frame:SetParent(UIHider)
 	end
 end
@@ -521,19 +514,13 @@ UIWidgetsEnable["Banners"] = function(self)
 		frame:SetParent(UIParent)
 		ObjectiveTrackerBonusBannerFrame_OnLoad(frame)
 	end
-	local frame = BossBanner
-	if (frame) then
-		frame:SetScript("OnEvent", BossBanner_OnEvent)
-		frame:SetScript("OnUpdate", BossBanner_OnUpdate)
-		BossBanner_OnLoad(frame)
-	end
 end
 
 UIWidgetsDisable["BossBanners"] = function(self)
 	local frame = BossBanner
 	BossBanner_Stop(frame)	
-	frame.PlayBanner = nil
-	frame.StopBanner = nil
+	--frame.PlayBanner = nil
+	--frame.StopBanner = nil
 	frame:UnregisterAllEvents()
 	frame:SetScript("OnEvent", nil)
 	frame:SetScript("OnUpdate", nil)
