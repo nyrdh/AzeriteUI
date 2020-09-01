@@ -49,6 +49,7 @@ local IsClassic = Module:IsClassic()
 local IsRetail = Module:IsRetail()
 
 -- Blizzard textures we use 
+local BLANK = "|T"..GetMedia("blank")..":14:14:-2:1|t" -- 1:1
 local BOSS_TEXTURE = "|TInterface\\TargetingFrame\\UI-TargetingFrame-Skull:14:14:-2:1|t" -- 1:1
 local FFA_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-FFA:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
 local FACTION_ALLIANCE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Alliance:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
@@ -105,21 +106,64 @@ local formatMoney = function(money)
 	return moneyString
 end
 
+local hooks = {}
+local align
+align = function(self)
+	-- Check points to avoid indents
+	local pointID = 1
+	local point,anchor,rpoint,x,y = self:GetPoint(pointID)
+	while (point) do
+		if (point == "LEFT") and (rpoint == "LEFT") and (x < 9 or x > 11) then
+			-- 10 is the tooltip default for only text,
+			-- ~28 is the default when textures are visible
+			self:SetPoint(point,anchor,rpoint,10,y)
+		end
+		pointID = pointID + 1
+		point,anchor,rpoint,x,y = self:GetPoint(pointID)
+	end
+	-- Attempt to fix the fucked up width and alignment in 9.0.1.
+	local tooltip = self:GetParent()
+	local tooltipName = tooltip:GetName()
+	local maxWidth = 0
+	for i = tooltip:NumLines(), 1, -1 do
+		local line = _G[tooltipName.."TextLeft"..i]
+		if (line) then
+			local msg = line:GetText()
+			if (msg and msg ~= "") then
+				local parentWidth = tooltip:GetWidth()
+				local width = line:GetUnboundedStringWidth()
+				if (width < 480) then
+					maxWidth = math.max(width, maxWidth)
+				end
+			end
+		end
+	end
+	if (maxWidth > 300) then
+		tooltip:SetMinimumWidth(maxWidth + 20)
+	else
+		tooltip:SetMinimumWidth(0)
+	end
+	tooltip:Show()
+end
+
 -- Add or replace a line of text in the tooltip
 local AddIndexedLine = function(tooltip, lineIndex, msg, r, g, b)
 	r = r or Colors.offwhite[1]
 	g = g or Colors.offwhite[2]
 	b = b or Colors.offwhite[3]
+	local line
 	local numLines = tooltip:NumLines()
 	if (lineIndex > numLines) then 
 		Tooltip_AddLine(tooltip, msg, r, g, b)
+		line = _G[tooltip:GetName().."TextLeft"..(numLines + 1)]
 	else
-		local left = _G[tooltip:GetName().."TextLeft"..lineIndex]
-		left:SetText(msg)
+		line = _G[tooltip:GetName().."TextLeft"..lineIndex]
+		line:SetText(msg)
 		if (r and g and b) then 
-			left:SetTextColor(r, g, b)
+			line:SetTextColor(r, g, b)
 		end
 	end
+	align(line)
 	return lineIndex + 1
 end
 
@@ -359,6 +403,7 @@ local OnTooltipShow = function(tooltip)
 	if (GameTooltipText:GetFontObject() ~= lineFontObject) then 
 		GameTooltipText:SetFontObject(lineFontObject)
 	end
+
 end
 
 local OnTooltipHide = function(tooltip)
@@ -380,6 +425,7 @@ local OnTooltipAddLine = function(tooltip, msg)
 	for i = 2, tooltip:NumLines() do
 		local line = _G[tooltip:GetName().."TextLeft"..i]
 		if line then
+			align(line)
 			local text = line:GetText()
 			-- We found the new line
 			if (text == msg) then
@@ -404,6 +450,7 @@ local OnTooltipAddDoubleLine = function(tooltip, leftText, rightText)
 			local leftMsg = left:GetText()
 			local rightMsg = right:GetText()
 			if (leftMsg == leftText) or (rightMsg == rightText) then
+				align(left)
 				left:SetText("")
 				right:SetText("")
 				return
@@ -461,7 +508,7 @@ local OnTooltipSetItem = function(tooltip)
 					end
 
 					tooltip.vendorSellLineID = tooltip:NumLines() + 1
-					Tooltip_AddLine(tooltip, " ")
+					Tooltip_AddLine(tooltip, BLANK)
 					Tooltip_AddDoubleLine(tooltip, label, price, color[1], color[2], color[3], color[1], color[2], color[3])
 
 					-- Not doing this yet. But we will. Oh yes we will. 
@@ -496,25 +543,14 @@ local OnTooltipSetUnit = function(tooltip)
 	tooltip.unit = unit
 
 	-- Kill off texts
-	local numLines = tooltip:NumLines()
 	local tooltipName = tooltip:GetName()
+	local numLines = tooltip:NumLines()
 	local lineIndex = 1
 	for i = numLines,1,-1 do 
 		local left = _G[tooltipName.."TextLeft"..i]
 		local right = _G[tooltipName.."TextRight"..i]
 		if (left) then
-			-- Check to points to avoid indents
-			local pointID = 1
-			local point,anchor,rpoint,x,y = left:GetPoint(pointID)
-			while (point) do
-				if (point == "LEFT") and (rpoint == "LEFT") then
-					-- 10 is the tooltip default for only text,
-					-- ~28 is the default when textures are visible
-					left:SetPoint(point,anchor,rpoint,10,y)
-				end
-				pointID = pointID + 1
-				point,anchor,rpoint,x,y = left:GetPoint(pointID)
-			end
+			align(left)
 			left:SetText("")
 		end
 		if (right) then
@@ -646,7 +682,7 @@ local OnTooltipSetUnit = function(tooltip)
 		-- Add quest objectives
 		if (data.objectives) then
 			for objectiveID, objectiveData in ipairs(data.objectives) do
-				lineIndex = AddIndexedLine(tooltip, lineIndex, " ")
+				lineIndex = AddIndexedLine(tooltip, lineIndex, BLANK) -- this ends up at the end(..?)
 				lineIndex = AddIndexedLine(tooltip, lineIndex, objectiveData.questTitle, Colors.title[1], Colors.title[2], Colors.title[3])
 
 				for objectiveID, questObjectiveData in ipairs(objectiveData.questObjectives) do
@@ -679,7 +715,7 @@ local OnTooltipSetUnit = function(tooltip)
 					local QuestieTooltips = QuestieLoader:ImportModule("QuestieTooltips")
 					local tooltipData = QuestieTooltips:GetTooltip("m_" .. npc_id)
 					if (tooltipData) then
-						lineIndex = AddIndexedLine(tooltip, lineIndex, " ")
+						lineIndex = AddIndexedLine(tooltip, lineIndex, BLANK)
 						for _, v in pairs (tooltipData) do
 							v = v:gsub("|","||")
 							v = v:gsub("\n","||newline") -- not encountered this yet
@@ -699,6 +735,13 @@ local OnTooltipSetUnit = function(tooltip)
 		bar:SetPoint("TOPLEFT", tooltip, "BOTTOMLEFT", 9, -3)
 		bar:SetPoint("TOPRIGHT", tooltip, "BOTTOMRIGHT", -9, -3)
 		bar:SetStatusBarColor(r, g, b)
+	end
+
+	for i = 1,lineIndex do
+		local line = _G[tooltipName.."TextLeft"..i]
+		if (line) then
+			align(line)
+		end
 	end
 
 	-- We don't want additions.

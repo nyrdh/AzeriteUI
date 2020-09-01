@@ -16,6 +16,9 @@ assert(LibAuraData, ADDON.." requires LibAuraData to be loaded.")
 local LibPlayerData = Wheel("LibPlayerData")
 assert(LibPlayerData, ADDON.." requires LibPlayerData to be loaded.")
 
+local LibFontTool = Wheel("LibFontTool")
+assert(LibFontTool, ADDON.." requires LibFontTool to be loaded.")
+
 -- Lua API
 local _G = _G
 local bit_band = bit.band
@@ -62,7 +65,6 @@ local InfoFlags = LibAuraData:GetAllAuraInfoFlags() -- Aura info flags
 -- Local Databases
 local auraUserFlags = {} -- Aura filter flags 
 local colorDB = {} -- Addon color schemes
-local fontsDB = { normal = {}, outline = {}, chatNormal = {}, chatOutline = {} } -- Addon fonts
 
 -- List of units we all count as the player
 local unitIsPlayer = { player = true, 	pet = true }
@@ -124,31 +126,6 @@ local createColorGroup = function(group)
 		tbl[i] = createColor(v)
 	end 
 	return tbl
-end 
-
--- Populate Font Tables
------------------------------------------------------------------
-do 
-	local fontPrefix = GetAddOnMetadata(ADDON, "X-FontPrefix") 
-	local chatPrefix = GetAddOnMetadata(ADDON, "X-ChatPrefix") 
-	for i = 9,100 do 
-		local fontNormal = _G[fontPrefix .. i]
-		if fontNormal then 
-			fontsDB.normal[i] = fontNormal
-		end
-		local fontOutline = _G[fontPrefix .. i .. "_Outline"]
-		if fontOutline then 
-			fontsDB.outline[i] = fontOutline
-		end
-		local fontChatNormal = _G[chatPrefix .. i]
-		if fontChatNormal then 
-			fontsDB.chatNormal[i] = fontChatNormal
-		end
-		local fontChatOutline = _G[chatPrefix .. i .. "_Outline"]
-		if fontChatOutline then 
-			fontsDB.chatOutline[i] = fontChatOutline
-		end 
-	end 
 end 
 
 -- Populate Color Tables
@@ -1591,14 +1568,8 @@ Private.GetAuraFilterFunc = function(name, suffix)
 	return strictFilter
 end
 
--- Return a font object
-Private.GetFont = function(size, useOutline, useChatFont)
-	if (useChatFont) then 
-		return fontsDB[useOutline and "chatOutline" or "chatNormal"][size]
-	else
-		return fontsDB[useOutline and "outline" or "normal"][size]
-	end
-end
+-- Proxy the shit out of this
+Private.GetFont = function(...) return LibFontTool:GetFont(...) end
 
 -- Return a media file
 Private.GetMedia = function(name, type) 

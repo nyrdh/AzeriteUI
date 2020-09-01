@@ -3,7 +3,6 @@ local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
-
 Core:NewModule("ChatBubbles", "LibChatBubble").OnEnable = function(self)
 	-- Enable styling
 	self:EnableBubbleStyling()

@@ -14,10 +14,6 @@
 ## X-Website: https://www.patreon.com/goldpawsstuff
 ## X-License: Custom
 
-# Global templates
-FontStyles.xml
-Templates.xml
-
 # External libraries, not made by us.
 # Loaded first, so our own can assume they exist.
 back-end\external.xml
@@ -26,6 +22,7 @@ back-end\external.xml
 back-end\wheel.lua
 back-end\libraries.xml
 back-end\plugins.xml
+back-end\tools.xml
 
 # Addon localization.
 locale\enUS.lua

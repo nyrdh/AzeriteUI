@@ -342,6 +342,15 @@ local validateResults = function(data)
 	return nil -- nothing existed, do not return the data table
 end
 
+-- Strip away superfluous space
+local clearSpace = function(msg)
+	if (msg) then
+		msg = string_gsub(msg, "^(%s+)", "")
+		msg = string_gsub(msg, "(%s+)$", "")
+	end
+	return msg
+end 
+
 -- Library API
 ---------------------------------------------------------
 -- *Methods will return nil if no data was found, 
@@ -1747,14 +1756,14 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 
 					-- Set a new local objective ID
 					objectiveID = #objectives + 1
-					objectives[objectiveID] = { questTitle = titleText or "", questObjectives = {} }
+					objectives[objectiveID] = { questTitle = clearSpace(titleText or ""), questObjectives = {} }
 				end
 
 				-- Store the data we've found about this objective
 				local questObjectives = objectives[objectiveID].questObjectives
 				questObjectives[#questObjectives + 1] = {
 					objectiveType = objectiveType,
-					objectiveText = objectiveText
+					objectiveText = clearSpace(objectiveText)
 				}
 
 				-- Store or update the current objective's lineID

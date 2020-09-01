@@ -14,6 +14,7 @@
 <Script file='libraries\locale.lua'/>
 <Script file='libraries\module.lua'/>
 <Script file='libraries\playerdata.lua'/>
+<Script file='libraries\quest.lua'/>
 <Script file='libraries\securehook.lua'/>
 <Script file='libraries\shine.lua'/>
 <Script file='libraries\slash.lua'/>
@@ -40,6 +41,7 @@
 <Script file='libraries\spellhighlight.lua'/>
 
 <!-- media widget libs -->
+<Script file='libraries\durability.lua'/>
 <Script file='libraries\orb.lua'/>
 <Script file='libraries\statusbar.lua'/>
 <Script file='libraries\spinbar.lua'/>

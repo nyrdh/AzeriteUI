@@ -1,4 +1,4 @@
-local LibBagButton = Wheel:Set("LibBagButton", 5)
+local LibBagButton = Wheel:Set("LibBagButton", 6)
 if (not LibBagButton) then	
 	return
 end

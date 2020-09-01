@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 79)
+local LibTooltip = Wheel:Set("LibTooltip", 80)
 if (not LibTooltip) then
 	return
 end
@@ -1831,7 +1831,7 @@ Tooltip.IsUnit = function(self, unit)
 	local ourUnit = self:GetTooltipUnit()
 	return ourUnit and UnitExists(unit) and UnitIsUnit(unit, ourUnit) or false
 end
-	
+
 Tooltip.AddLine = function(self, msg, r, g, b, wrap)
 
 	-- Increment the line counter
