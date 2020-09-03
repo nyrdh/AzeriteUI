@@ -4,6 +4,11 @@ if (not Core) then
 	return 
 end
 
+-- Blizzard Bag Styling
+Core:NewModule("BlizzardBagButtons", "LibBlizzard").OnEnable = function(self)
+	self:StyleUIWidget("BagButtons")
+end 
+
 -- Blizzard Chat Bubble Styling
 Core:NewModule("ChatBubbles", "LibChatBubble").OnEnable = function(self)
 	-- Enable styling
@@ -54,7 +59,7 @@ Core:NewModule("BlizzardPopupStyling", "LibBlizzard").OnInit = function(self)
 end
 
 -- Blizzard WorldMap Styling
-Core:NewModule("BlizzardWorldMap", "LibEvent", "LibBlizzard", "LibClientBuild", "LibSecureHook").OnEnable = function(self)
+Core:NewModule("BlizzardWorldMap", "LibBlizzard").OnEnable = function(self)
 	self:StyleUIWidget("WorldMap")
 end 
 

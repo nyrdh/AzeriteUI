@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 53)
+local LibBlizzard = Wheel:Set("LibBlizzard", 54)
 if (not LibBlizzard) then 
 	return
 end
@@ -891,6 +891,64 @@ end
 
 -- Widget Styling Pool
 -----------------------------------------------------------------
+UIWidgetStyling["BagButtons"] = function(self, ...)
+	-- Attempt to hook the bag bar to the bags
+	-- Retrieve the first slot button and the backpack
+	local firstSlot = CharacterBag0Slot
+	local backpack = ContainerFrame1
+
+	-- These should always exist, but Blizz do have a way of changing things,
+	-- and I prefer having functionality not be applied in a future update 
+	-- rather than having the UI break from nil bugs. 
+	if (firstSlot and backpack) then 
+		firstSlot:ClearAllPoints()
+		firstSlot:SetPoint("TOPRIGHT", backpack, "BOTTOMRIGHT", -6, 0)
+		local strata = backpack:GetFrameStrata()
+		local level = backpack:GetFrameLevel()
+		local slotSize = 30
+		local previous
+		for i = 0,3 do 
+			-- Always check for existence, 
+			-- because nothing is ever guaranteed. 
+			local slot = _G["CharacterBag"..i.."Slot"]
+			local tex = _G["CharacterBag"..i.."SlotNormalTexture"]
+			if slot then 
+				slot:SetParent(backpack)
+				slot:SetSize(slotSize,slotSize) 
+				slot:SetFrameStrata(strata)
+				slot:SetFrameLevel(level)
+
+				-- Remove that fugly outer border
+				if tex then 
+					tex:SetTexture("")
+					tex:SetAlpha(0)
+				end
+				
+				-- Re-anchor the slots to remove space
+				if (i == 0) then
+					slot:ClearAllPoints()
+					slot:SetPoint("TOPRIGHT", backpack, "BOTTOMRIGHT", -6, 4)
+				else 
+					slot:ClearAllPoints()
+					slot:SetPoint("RIGHT", previous, "LEFT", 0, 0)
+				end
+				previous = slot
+			end 
+		end 
+
+		local keyring = KeyRingButton
+		if (keyring) then 
+			keyring:SetParent(backpack)
+			keyring:SetHeight(slotSize) 
+			keyring:SetFrameStrata(strata)
+			keyring:SetFrameLevel(level)
+			keyring:ClearAllPoints()
+			keyring:SetPoint("RIGHT", previous, "LEFT", 0, 0)
+			previous = keyring
+		end
+	end 
+end
+
 UIWidgetStyling["GameMenu"] = function(self, ...)
 
 end
