@@ -14,9 +14,6 @@ Core:RegisterSavedVariablesGlobal(ADDON.."_DB")
 -- Make sure that duplicate UIs aren't loaded
 Core:SetIncompatible(Core:GetInterfaceList())
 
--- Dev switch. Might need this permantently.
-local DISABLE_STARTUP_FADE = true
-
 -- Lua API
 local _G = _G
 local ipairs = ipairs
@@ -87,40 +84,6 @@ local SECURE = {
 	]=]
 }
 
-local Minimap_ZoomInClick = function()
-	if MinimapZoomIn:IsEnabled() then 
-		MinimapZoomOut:Enable()
-		Minimap:SetZoom(Minimap:GetZoom() + 1)
-		if (Minimap:GetZoom() == (Minimap:GetZoomLevels() - 1)) then
-			MinimapZoomIn:Disable()
-		end
-	end 
-end
-
-local Minimap_ZoomOutClick = function()
-	if MinimapZoomOut:IsEnabled() then 
-		MinimapZoomIn:Enable()
-		Minimap:SetZoom(Minimap:GetZoom() - 1)
-		if (Minimap:GetZoom() == 0) then
-			MinimapZoomOut:Disable()
-		end
-	end 
-end
-
-local fixMinimap = function()
-	local currentZoom = Minimap:GetZoom()
-	local maxLevels = Minimap:GetZoomLevels()
-	if currentZoom and maxLevels then 
-		if maxLevels > currentZoom then 
-			Minimap_ZoomInClick()
-			Minimap_ZoomOutClick()
-		else
-			Minimap_ZoomOutClick()
-			Minimap_ZoomInClick()
-		end 
-	end 
-end
-
 local alreadyFixed
 local fixMacroIcons = function() 
 	if InCombatLockdown() or alreadyFixed then 
@@ -172,10 +135,6 @@ Core.OnModeToggle = function(self, modeName)
 	elseif (modeName == "reloadUI") then 
 		ReloadUI()
 	end
-end
-
-Core.GetPrefix = function(self)
-	return ADDON
 end
 
 Core.GetSecureUpdater = function(self)
@@ -603,11 +562,7 @@ Core.ApplyExperimentalFeatures = function(self)
 	-- Add a command to manually update macro icons
 	self:RegisterChatCommand("fix", fixMacroIcons)
 
-	-- Workaround for the completely random bg popup taints in 1.13.3.
-	-- Going with Tukz way of completely hiding the broken popup,
-	-- instead of just modifying the button away as I initially did.
-	-- No point adding more sources of taint to the tainted element.
-	-- CHECK: Is this a retail problem too?
+	-- Workaround for the completely random bg popup taints in Classic 1.13.x.
 	if (IsClassic) then
 		local battleground = self:CreateFrame("Frame", nil, "UICenter")
 		battleground:SetSize(574, 40)
@@ -778,13 +733,6 @@ Core.OnInit = function(self)
 	self.db = GetConfig(ADDON)
 	self.layout = GetLayout(ADDON)
 
-	-- Hide the entire UI from the start
-	if (not DISABLE_STARTUP_FADE) then
-		if self.layout.FadeInUI then 
-			self:GetFrame("UICenter"):SetAlpha(0)
-		end
-	end
-
 	-- In case some other jokers have disabled these, we add them back to avoid a World of Bugs.
 	-- RothUI used to remove the two first, and a lot of people missed his documentation on how to get them back. 
 	-- I personally removed the objective's tracker for a while in DiabolicUI, which led to pain. Lots of pain.
@@ -830,10 +778,11 @@ Core.OnInit = function(self)
 end 
 
 Core.OnEnable = function(self)
+	local layout = self.layout
 
 	-- Disable most of the BlizzardUI, to give room for our own!
 	------------------------------------------------------------------------------------
-	for widget,state in pairs(self.layout.DisableUIWidgets) do 
+	for widget,state in pairs(layout.DisableUIWidgets) do 
 		if (state) then 
 			self:DisableUIWidget(widget)
 		end 
@@ -841,45 +790,19 @@ Core.OnEnable = function(self)
 
 	-- Disable complete interface options menu pages we don't need
 	------------------------------------------------------------------------------------
-	local updateBarToggles
-	for id,page in pairs(self.layout.DisableUIMenuPages) do 
-		if (page.ID == 5) or (page.Name == "InterfaceOptionsActionBarsPanel") then 
-			updateBarToggles = true 
-		end 
+	for id,page in pairs(layout.DisableUIMenuPages) do 
 		self:DisableUIMenuPage(page.ID, page.Name)
 	end 
 
 	-- Disable single interface options we don't need
 	------------------------------------------------------------------------------------
-	for id,option in pairs(self.layout.DisableUIMenuOptions) do 
+	for id,option in pairs(layout.DisableUIMenuOptions) do 
 		self:DisableUIMenuOption(option.Shrink, option.Name)
 	end 
-
-	-- Working around Blizzard bugs and issues I've discovered
-	------------------------------------------------------------------------------------
-	-- In theory this shouldn't have any effect since we're not using the Blizzard bars. 
-	-- But by removing the menu panels above we're preventing the blizzard UI from calling it, 
-	-- and for some reason it is required to be called at least once, 
-	-- or the game won't fire off the events that tell the UI that the player has an active pet out. 
-	-- In other words: without it both the pet bar and pet unitframe will fail after a /reload
-	if updateBarToggles then 
-		SetActionBarToggles(nil, nil, nil, nil, nil)
-	end
 
 	-- Experimental stuff we move to relevant modules once done
 	------------------------------------------------------------------------------------
 	self:ApplyExperimentalFeatures()
-
-	-- Apply startup smoothness and sweetness
-	------------------------------------------------------------------------------------
-	if (not DISABLE_STARTUP_FADE) then
-		if (self.layout.FadeInUI) or (self.layout.ShowWelcomeMessage) then 
-			self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
-			if (self.layout.FadeInUI) then 
-				self:RegisterEvent("PLAYER_LEAVING_WORLD", "OnEvent")
-			end
-		end 
-	end
 
 	-- Make sure frame references to secure frames are in place for the menu
 	------------------------------------------------------------------------------------
@@ -887,70 +810,21 @@ Core.OnEnable = function(self)
 
 	-- Listen for when the user closes the debugframe directly
 	------------------------------------------------------------------------------------
-	self:RegisterMessage("GP_DEBUG_FRAME_CLOSED", "OnEvent")
+	self:RegisterMessage("GP_DEBUG_FRAME_CLOSED", "OnEvent") 
+
+	-- Various logon updates
+	------------------------------------------------------------------------------------
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 end 
 
 Core.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then 
-		if (not DISABLE_STARTUP_FADE) and (self.layout.FadeInUI) then 
-			self.frame = self.frame or CreateFrame("Frame")
-			self.frame.alpha = 0
-			self.frame.elapsed = 0
-			self.frame.totalDelay = 0
-			self.frame.totalElapsed = 0
-			self.frame.fadeDuration = self.layout.FadeInSpeed or 1.5
-			self.frame.delayDuration = self.layout.FadeInDelay or 1.5
-			self.frame:SetScript("OnUpdate", function(self, elapsed) 
-				self.elapsed = self.elapsed + elapsed
-				if (self.elapsed < 1/60) then 
-					return 
-				end 
-				fixMacroIcons()
-				if self.fading then 
-					self.totalElapsed = self.totalElapsed + self.elapsed
-					self.alpha = self.totalElapsed / self.fadeDuration
-					if (self.alpha >= 1) then 
-						Core:GetFrame("UICenter"):SetAlpha(1)
-						self.alpha = 0
-						self.elapsed = 0
-						self.totalDelay = 0
-						self.totalElapsed = 0
-						self.fading = nil
-						self:SetScript("OnUpdate", nil)
-						fixMinimap()
-						fixMacroIcons()
-						return 
-					else 
-						Core:GetFrame("UICenter"):SetAlpha(self.alpha)
-					end 
-				else
-					self.totalDelay = self.totalDelay + self.elapsed
-					if self.totalDelay >= self.delayDuration then 
-						self.fading = true 
-					end
-				end 
-				self.elapsed = 0
-			end)
-		end
 		self:UpdateAspectRatio()
 
-	elseif (event == "PLAYER_LEAVING_WORLD") then
-		if (not DISABLE_STARTUP_FADE) and (self.layout.FadeInUI) then 
-			if self.frame then 
-				self.frame:SetScript("OnUpdate", nil)
-				self.alpha = 0
-				self.elapsed = 0
-				self.totalDelay = 0
-				self.totalElapsed = 0
-				self.fading = nil
-			end
-			self:GetFrame("UICenter"):SetAlpha(0)
-		end
 	elseif (event == "GP_DEBUG_FRAME_CLOSED") then 
 		-- This fires from the module back-end when 
 		-- the debug console was manually closed by the user.
 		-- We need to update our saved setting here.
-		local db = GetConfig(ADDON, "global")
-		db.enableDebugConsole = false
+		GetConfig(ADDON, "global").enableDebugConsole = false
 	end 
 end 
