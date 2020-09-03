@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 54)
+local LibBlizzard = Wheel:Set("LibBlizzard", 55)
 if (not LibBlizzard) then 
 	return
 end
@@ -1468,7 +1468,7 @@ LibBlizzard.DisableUIMenuPage = function(self, panel_id, panel_name)
 	-- and disable its automatic cancel/okay functionality
 	-- this is needed, or the option will be reset when the menu closes
 	-- it is also a major source of taint related to the Compact group frames!
-	if panel_id then
+	if (panel_id) then
 		local category = _G["InterfaceOptionsFrameCategoriesButton" .. panel_id]
 		if category then
 			category:SetScale(0.00001)
@@ -1476,7 +1476,7 @@ LibBlizzard.DisableUIMenuPage = function(self, panel_id, panel_name)
 			button = true
 		end
 	end
-	if panel_name then
+	if (panel_name) then
 		local panel = _G[panel_name]
 		if panel then
 			panel:SetParent(UIHider)
@@ -1489,6 +1489,13 @@ LibBlizzard.DisableUIMenuPage = function(self, panel_id, panel_name)
 			window = true
 		end
 	end
+	-- By removing the menu panels above we're preventing the blizzard UI from calling it, 
+	-- and for some reason it is required to be called at least once, 
+	-- or the game won't fire off the events that tell the UI that the player has an active pet out. 
+	-- In other words: without it both the pet bar and pet unitframe will fail after a /reload
+	if (panel_id == 5) or (panel_name == "InterfaceOptionsActionBarsPanel") then 
+		SetActionBarToggles(nil, nil, nil, nil, nil)
+	end 
 	if (panel_id and not button) then
 		print(("LibBlizzard: The panel button with id '%.0f' does not exist."):format(panel_id))
 	end 
