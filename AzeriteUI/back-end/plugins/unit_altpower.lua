@@ -25,6 +25,7 @@ local UnitPowerMax = UnitPowerMax
 -- Sourced from BlizzardInterfaceResources/Resources/EnumerationTables.lua
 local ALTERNATE_POWER_INDEX = Enum and Enum.PowerType.Alternate or ALTERNATE_POWER_INDEX or 10
 
+-- Sourced from Interface/AddOns/Blizzard_Deprecated/Deprecated_8_3_0.lua
 if (not GetAlternatePowerInfoByID) then
 	GetAlternatePowerInfoByID = function(barID)
 		local GetUnitPowerBarInfoByID = GetUnitPowerBarInfoByID
@@ -36,7 +37,6 @@ if (not GetAlternatePowerInfoByID) then
 		end
 	end
 end
-
 if (not UnitAlternatePowerInfo) then
 	UnitAlternatePowerInfo = function(unit)
 		local barID = UnitPowerBarID(unit)
@@ -228,5 +228,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do
-	Lib:RegisterElement("AltPower", Enable, Disable, Proxy, 14)
+	Lib:RegisterElement("AltPower", Enable, Disable, Proxy, 15)
 end 

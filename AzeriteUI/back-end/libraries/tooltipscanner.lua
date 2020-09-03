@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 58)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 59)
 if (not LibTooltipScanner) then	
 	return
 end

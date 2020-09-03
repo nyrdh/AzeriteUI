@@ -3,7 +3,7 @@
 ## Title: |c00000002|r|cff7284abA|r|cff6a7a9ez|r|cff617092e|r|cff596785r|r|cff505d78i|r|cff48536bt|r|cff3f495fe|r|cffffffffUI|r |cfffff5692.0|r
 ## Author: Daniel Troko, Lars Norberg
 ## Notes: Custom user graphical interface.|n|nDesign by Daniel Troko.|nCode by Lars Norberg.|n|n|cff4488ffPayPal|r|cffffffff:|r |n|cffffffffwww.paypal.me/GoldpawsStuff|r|n|n|cff4488ffPatreon|r|cffffffff:|r |n|cffffffffwww.patreon.com/GoldpawsStuff|r
-## Version: 2.0-Alpha
+## Version: 2.1-RC
 ## DefaultState: Enabled
 ## SavedVariables: AzeriteUI_DB
 ## OptionalDeps: Clique
@@ -50,33 +50,26 @@ front-end\stylesheet.lua
 # all others are children of this one. 
 front-end\root.lua
 
-# Modules which mostly modify Blizzard elements.
-front-end\blizzard\chatbubbles.lua
-front-end\blizzard\chatwindows.lua
-front-end\blizzard\floaters.lua
-front-end\blizzard\fonts.lua
-front-end\blizzard\gamemenu.lua
-front-end\blizzard\micromenu.lua
-front-end\blizzard\minimap.lua
-front-end\blizzard\objectivestracker.lua
-front-end\blizzard\popups.lua
-front-end\blizzard\timers.lua
-front-end\blizzard\tooltips.lua
-front-end\blizzard\worldmap.lua
-
-# Modules that mostly create new custom elements.
-front-end\custom\actionbars.lua
-front-end\custom\bindings.lua
-front-end\custom\chatfilters.lua
-front-end\custom\explorer.lua
-front-end\custom\floaters.lua
-front-end\custom\grouptools.lua
-front-end\custom\nameplates.lua
-front-end\custom\tooltips.lua
-front-end\custom\unitframes.lua
-
-# Configuration
-front-end\custom\menu.lua
+# Modules.
+front-end\modules\actionbars.lua
+front-end\modules\bindings.lua
+front-end\modules\chatfilters.lua
+front-end\modules\chatwindows.lua
+front-end\modules\explorer.lua
+front-end\modules\floaters.lua
+front-end\modules\fonts.lua
+front-end\modules\gamemenu.lua
+front-end\modules\grouptools.lua
+front-end\modules\menu.lua
+front-end\modules\micromenu.lua
+front-end\modules\minimap.lua
+front-end\modules\misc.lua
+front-end\modules\nameplates.lua
+front-end\modules\objectivestracker.lua
+front-end\modules\timers.lua
+front-end\modules\tooltips.lua
+front-end\modules\tooltips-blizzard.lua
+front-end\modules\unitframes.lua
 
 # All module incompatibilities in one place.
 front-end\incompatibilities.lua

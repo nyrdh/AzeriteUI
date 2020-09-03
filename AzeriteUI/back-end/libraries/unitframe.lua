@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 77)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 78)
 if (not LibUnitFrame) then	
 	return
 end
@@ -150,30 +150,6 @@ for powerType, powerColor in pairs(PowerBarColor) do
 		end  
 	end 
 end 
-
--- Add support for custom class colors
-local customClassColors = function()
-	if CUSTOM_CLASS_COLORS then
-		local updateColors = function()
-			Colors.class = prepareGroup(CUSTOM_CLASS_COLORS)
-			for frame in pairs(frames) do 
-				frame:OverrideAllElements("CustomClassColors", frame.unit)
-			end 
-		end
-		updateColors()
-		CUSTOM_CLASS_COLORS:RegisterCallback(updateColors)
-		return true
-	end
-end
-if (not customClassColors()) then
-	LibUnitFrame.CustomClassColors = function(self, event, ...)
-		if customClassColors() then
-			self:UnregisterEvent("ADDON_LOADED", "CustomClassColors")
-			self.Listener = nil
-		end
-	end 
-	LibUnitFrame:RegisterEvent("ADDON_LOADED", "CustomClassColors")
-end
 
 -- Secure Snippets
 --------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 80)
+local LibTooltip = Wheel:Set("LibTooltip", 81)
 if (not LibTooltip) then
 	return
 end
@@ -142,7 +142,7 @@ local blizzardTips = {
 	"ShoppingTooltip1",
 	"ShoppingTooltip2",
 	"ShoppingTooltip3",
-	"WorldMapTooltip", -- Deprecated in 8.1.5
+	--"WorldMapTooltip", -- Deprecated in 8.1.5 > GameTooltip
 	"WorldMapCompareTooltip1",
 	"WorldMapCompareTooltip2",
 	"WorldMapCompareTooltip3",
@@ -382,30 +382,6 @@ for powerType, powerColor in pairs(PowerBarColor) do
 		end  
 	end 
 end 
-
--- Add support for custom class colors
-local customClassColors = function()
-	if CUSTOM_CLASS_COLORS then
-		local updateColors = function()
-			Colors.class = prepareGroup(CUSTOM_CLASS_COLORS)
-			for frame in pairs(frames) do 
-				frame:UpdateAllElements("CustomClassColors", frame.unit)
-			end 
-		end
-		updateColors()
-		CUSTOM_CLASS_COLORS:RegisterCallback(updateColors)
-		return true
-	end
-end
-if (not customClassColors()) then
-	LibTooltip.CustomClassColors = function(self, event, ...)
-		if customClassColors() then
-			self:UnregisterEvent("ADDON_LOADED", "CustomClassColors")
-			self.Listener = nil
-		end
-	end 
-	LibTooltip:RegisterEvent("ADDON_LOADED", "CustomClassColors")
-end
 
 -- Library hardcoded fallbacks
 local LibraryDefaults = {
@@ -659,12 +635,6 @@ end
 
 Tooltip.GetBar = function(self, barIndex)
 	return self.bars[barIndex]
-end
-
-Tooltip.GetHealthBar = function(self, barIndex)
-end
-
-Tooltip.GetPowerBar = function(self, barIndex)
 end
 
 -- Update the color of the tooltip's current unit

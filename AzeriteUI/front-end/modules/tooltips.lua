@@ -7,16 +7,8 @@ end
 local Module = Core:NewModule("Tooltips", "LibEvent", "LibDB", "LibTooltip")
 
 -- Lua API
-local _G = _G
-local math_floor = math.floor
-local tostring = tostring
 
 -- WoW API
-local GetQuestGreenRange = _G.GetQuestGreenRange
-local InCombatLockdown = _G.InCombatLockdown
-local IsInInstance = _G.IsInInstance 
-local SetCVar = _G.SetCVar
-local UnitReaction = _G.UnitReaction
 
 -- Private API
 local Colors = Private.Colors
@@ -34,7 +26,7 @@ end
 
 -- Add some of our own stuff to our tooltips.
 -- Making this a proxy of the standard post creation method.
-Module.PostCreateTooltips = function(self)
+Module.PostCreateCustomTips = function(self)
 	self:ForAllTooltips(function(tooltip) 
 		self:PostCreateTooltip(tooltip)
 	end) 
@@ -43,7 +35,7 @@ end
 -- Set defalut values for all our tooltips
 -- The modules can overwrite this by adding their own settings, 
 -- this is just the fallbacks to have a consistent base look.
-Module.StyleTooltips = function(self)
+Module.StyleCustomTips = function(self)
 	self:SetDefaultTooltipBackdrop(self.layout.TooltipBackdrop)
 	self:SetDefaultTooltipBackdropColor(unpack(self.layout.TooltipBackdropColor)) 
 	self:SetDefaultTooltipBackdropBorderColor(unpack(self.layout.TooltipBackdropBorderColor)) 
@@ -78,21 +70,21 @@ Module.StyleTooltips = function(self)
 
 	-- Post update tooltips already created
 	-- with some important values
-	self:PostCreateTooltips()
+	self:PostCreateCustomTips()
 end 
 
 Module.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_LOGIN") then 
-		self:PostCreateTooltips()
+		self:PostCreateCustomTips()
 	end 
 end 
 
 Module.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
-	self:StyleTooltips()
+	self:StyleCustomTips()
 end 
 
 Module.OnEnable = function(self)
-	self:PostCreateTooltips()
+	self:PostCreateCustomTips()
 	self:RegisterEvent("PLAYER_LOGIN", "OnEvent")
 end 

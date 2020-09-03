@@ -18,7 +18,6 @@ local GetTime = GetTime
 local GetUnitPowerBarInfo = GetUnitPowerBarInfo
 local GetUnitPowerBarInfoByID = GetUnitPowerBarInfoByID
 local GetUnitPowerBarStringsByID = GetUnitPowerBarStringsByID
-local UnitAlternatePowerCounterInfo = UnitAlternatePowerCounterInfo
 local UnitPowerBarTimerInfo = UnitPowerBarTimerInfo
 
 -- Constants for client version
@@ -32,20 +31,13 @@ local GetLayout = Private.GetLayout
 local ALT_POWER_TYPE_COUNTER = ALT_POWER_TYPE_COUNTER or 4
 
 -- Deprecated API
+-- Sourced from Interface/AddOns/Blizzard_Deprecated/Deprecated_8_3_0.lua
 if (not GetAlternatePowerInfoByID) then
 	GetAlternatePowerInfoByID = function(barID)
 		local barInfo = GetUnitPowerBarInfoByID(barID)
 		if (barInfo) then
 			local name, tooltip, cost = GetUnitPowerBarStringsByID(barID)
 			return barInfo.barType,barInfo.minPower, barInfo.startInset, barInfo.endInset, barInfo.smooth, barInfo.hideFromOthers, barInfo.showOnRaid, barInfo.opaqueSpark, barInfo.opaqueFlash, barInfo.anchorTop, name, tooltip, cost, barInfo.ID, barInfo.forcePercentage, barInfo.sparkUnderFrame
-		end
-	end
-end
-if (not UnitAlternatePowerCounterInfo) then
-	UnitAlternatePowerCounterInfo = function(unit)
-		local barInfo = GetUnitPowerBarInfo(unit)
-		if (barInfo) then
-			return barInfo.fractionalCounter, barInfo.animateNumbers
 		end
 	end
 end

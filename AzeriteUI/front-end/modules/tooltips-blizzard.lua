@@ -9,6 +9,7 @@ local Module = Core:NewModule("BlizzardTooltips", "LibEvent", "LibDB", "LibFrame
 -- Lua API
 local _G = _G
 local math_floor = math.floor
+local math_max = math.max
 local math_mod = math.fmod
 local string_find = string.find
 local string_format = string.format
@@ -57,14 +58,7 @@ local FACTION_NEUTRAL_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Neutral:14:
 local FACTION_HORDE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Horde:14:14:-4:0:64:64:0:40:0:40|t" -- 1:1
 
 -- Method template
-local Tooltip = CreateFrame("GameTooltip", ADDON.."TooltipMethodTemplate", WorldFrame, "GameTooltipTemplate")
-local TooltipMethods = getmetatable(Tooltip).__index
-
--- Original Blizzard methods we need
-local Tooltip_AddLine = TooltipMethods.AddLine
-local Tooltip_AddDoubleLine = TooltipMethods.AddDoubleLine
-local Tooltip_SetText = TooltipMethods.SetText
-local Tooltip_SetTextColor = TooltipMethods.SetTextColor
+local meta = getmetatable(CreateFrame("GameTooltip", nil, WorldFrame, "GameTooltipTemplate")).__index
 
 -- Lockdowns
 local LOCKDOWNS = {}
@@ -84,9 +78,9 @@ end
 
 -- Make the money display pretty
 local formatMoney = function(money)
-	local gold = math_floor(money / (COPPER_PER_SILVER * SILVER_PER_GOLD))
-	local silver = math_floor((money - (gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER)
-	local copper = math_mod(money, COPPER_PER_SILVER)
+	local gold = math_floor(money / (100 * 100))
+	local silver = math_floor((money - (gold * 100 * 100)) / 100)
+	local copper = math_mod(money, 100)
 	
 	local goldIcon = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,0,32)
 	local silverIcon = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 32,64,0,32)
@@ -133,7 +127,7 @@ align = function(self)
 				local parentWidth = tooltip:GetWidth()
 				local width = line:GetUnboundedStringWidth()
 				if (width < 480) then
-					maxWidth = math.max(width, maxWidth)
+					maxWidth = math_max(width, maxWidth)
 				end
 			end
 		end
@@ -154,7 +148,7 @@ local AddIndexedLine = function(tooltip, lineIndex, msg, r, g, b)
 	local line
 	local numLines = tooltip:NumLines()
 	if (lineIndex > numLines) then 
-		Tooltip_AddLine(tooltip, msg, r, g, b)
+		meta.AddLine(tooltip, msg, r, g, b)
 		line = _G[tooltip:GetName().."TextLeft"..(numLines + 1)]
 	else
 		line = _G[tooltip:GetName().."TextLeft"..lineIndex]
@@ -508,8 +502,8 @@ local OnTooltipSetItem = function(tooltip)
 					end
 
 					tooltip.vendorSellLineID = tooltip:NumLines() + 1
-					Tooltip_AddLine(tooltip, BLANK)
-					Tooltip_AddDoubleLine(tooltip, label, price, color[1], color[2], color[3], color[1], color[2], color[3])
+					meta.AddLine(tooltip, BLANK)
+					meta.AddDoubleLine(tooltip, label, price, color[1], color[2], color[3], color[1], color[2], color[3])
 
 					-- Not doing this yet. But we will. Oh yes we will. 
 					--LOCKDOWNS[tooltip] = true

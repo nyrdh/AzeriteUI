@@ -492,7 +492,7 @@ ActionButton.UpdateMouseOver = function(self)
 			self.Darken:SetAlpha(self.Darken.normal)
 		end 
 		if self.Border then 
-			self.Border:SetVertexColor(Colors.ui.stone[1], Colors.ui.stone[2], Colors.ui.stone[3], 1)
+			self.Border:SetVertexColor(Colors.ui[1], Colors.ui[2], Colors.ui[3], 1)
 		end 
 		if self.Glow then 
 			self.Glow:Hide()

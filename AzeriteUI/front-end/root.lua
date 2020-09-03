@@ -27,14 +27,7 @@ local string_match = string.match
 local tonumber = tonumber
 
 -- WoW API
-local BNGetFriendGameAccountInfo = BNGetFriendGameAccountInfo
-local BNGetNumFriendGameAccounts = BNGetNumFriendGameAccounts
-local BNGetNumFriends = BNGetNumFriends
-local DisableAddOn = DisableAddOn
 local EnableAddOn = EnableAddOn
-local GetFriendInfo = C_FriendList.GetFriendInfo
-local GetNumFriends = C_FriendList.GetNumFriends
-local IsInGroup = IsInGroup
 local IsInInstance = IsInInstance
 local IsInRaid = IsInRaid
 local LoadAddOn = LoadAddOn
@@ -909,7 +902,7 @@ Core.ApplyExperimentalFeatures = function(self)
 			border:SetPoint("CENTER", 0, 0)
 			border:SetBackdrop({ edgeFile = GetMedia("aura_border"), edgeSize = 12 })
 			border:SetBackdropColor(0,0,0,0)
-			border:SetBackdropBorderColor(Colors.ui.stone[1] *.3, Colors.ui.stone[2] *.3, Colors.ui.stone[3] *.3)
+			border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
 			button.Border = border
 
 			local icon = button:CreateTexture()
