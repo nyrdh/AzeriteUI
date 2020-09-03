@@ -1,4 +1,4 @@
-local LibColorTool = Wheel:Set("LibColorTool", 1)
+local LibColorTool = Wheel:Set("LibColorTool", 2)
 if (not LibColorTool) then
 	return
 end
@@ -226,7 +226,7 @@ Colors.power.INSANITY = createColor(102/255, 64/255, 204/255) -- Shadow Priests
 Colors.power.LUNAR_POWER = createColor(121/255, 152/255, 192/255) -- Balance Druid Astral Power 
 Colors.power.MAELSTROM = createColor(0/255, 188/255, 255/255) -- Elemental Shamans
 Colors.power.MANA = createColor(80/255, 116/255, 255/255) -- Druid, Hunter, Mage, Paladin, Priest, Shaman, Warlock
-Colors.power.PAIN = createColor(190 *.75/255, 255 *.75/255, 0/255) 
+Colors.power.PAIN = createColor(142/255, 191/255, 0/255) 
 Colors.power.RAGE = createColor(215/255, 7/255, 7/255) -- Druids, Warriors
 Colors.power.RUNIC_POWER = createColor(0/255, 236/255, 255/255) -- Death Knights
 
@@ -276,11 +276,10 @@ Colors.reaction[1] = createColor(205/255, 46/255, 36/255) -- hated
 Colors.reaction[2] = createColor(205/255, 46/255, 36/255) -- hostile
 Colors.reaction[3] = createColor(192/255, 68/255, 0/255) -- unfriendly
 Colors.reaction[4] = createColor(249/255, 188/255, 65/255) -- neutral 
---Colors.reaction[4] = createColor(249/255, 158/255, 35/255) -- neutral 
-Colors.reaction[5] = createColor(64/255, 131/255, 38/255) -- friendly
-Colors.reaction[6] = createColor(64/255, 131/255, 69/255) -- honored
-Colors.reaction[7] = createColor(64/255, 131/255, 104/255) -- revered
-Colors.reaction[8] = createColor(64/255, 131/255, 131/255) -- exalted
+Colors.reaction[5] = createColor( 64/255, 131/255, 38/255) -- friendly
+Colors.reaction[6] = createColor( 64/255, 131/255, 69/255) -- honored
+Colors.reaction[7] = createColor( 64/255, 131/255, 104/255) -- revered
+Colors.reaction[8] = createColor( 64/255, 131/255, 131/255) -- exalted
 Colors.reaction.civilian = createColor(64/255, 131/255, 38/255) -- used for friendly player nameplates
 
 -- friendship
@@ -298,10 +297,10 @@ Colors.friendship[8] = Colors.reaction[8] -- Best Friend (exalted color) - brawl
 
 -- player specializations
 Colors.specialization = {}
-Colors.specialization[1] = createColor(0/255, 215/255, 59/255)
+Colors.specialization[1] = createColor( 0/255, 215/255, 59/255)
 Colors.specialization[2] = createColor(217/255, 33/255, 0/255)
 Colors.specialization[3] = createColor(218/255, 30/255, 255/255)
-Colors.specialization[4] = createColor(48/255, 156/255, 255/255)
+Colors.specialization[4] = createColor( 48/255, 156/255, 255/255)
 
 -- timers (breath, fatigue, etc)
 Colors.timer = {}
@@ -328,28 +327,23 @@ Colors.zone.hostile = createColor(175/255, 76/255, 56/255)
 Colors.zone.sanctuary = createColor(104/255, 204/255, 239/255)
 Colors.zone.unknown = createColor(255/255, 234/255, 137/255) -- instances, bgs, contested zones on pve realms 
 
--- Item rarity coloring
+-- item rarity coloring
 Colors.blizzquality = createColorGroup(ITEM_QUALITY_COLORS)
 Colors.quality = {}
 Colors.quality[0] = createColor(157/255, 157/255, 157/255) -- Poor
 Colors.quality[1] = createColor(240/255, 240/255, 240/255) -- Common
---Colors.quality[2] = createColor( 30/255, 255/255,   0/255) -- Uncommon
-Colors.quality[2] = createColor( 30/255, 178/255,   0/255) -- Uncommon
-Colors.quality[3] = createColor(  0/255, 112/255, 221/255) -- Rare
-Colors.quality[4] = createColor(163/255,  53/255, 238/255) -- Epic
---Colors.quality[5] = createColor(255/255, 128/255,   0/255) -- Legendary
-Colors.quality[5] = createColor(225/255,  96/255,   0/255) -- Legendary
+Colors.quality[2] = createColor( 30/255, 178/255, 0/255) -- Uncommon
+Colors.quality[3] = createColor( 0/255, 112/255, 221/255) -- Rare
+Colors.quality[4] = createColor(163/255, 53/255, 238/255) -- Epic
+Colors.quality[5] = createColor(225/255, 96/255, 0/255) -- Legendary
 Colors.quality[6] = createColor(230/255, 204/255, 128/255) -- Artifact
---Colors.quality[7] = createColor(  0/255, 204/255, 255/255) -- Heirloom
---Colors.quality[8] = createColor(  0/255, 204/255, 255/255) -- Blizard
 Colors.quality[7] = createColor( 79/255, 196/255, 225/255) -- Heirloom
 Colors.quality[8] = createColor( 79/255, 196/255, 225/255) -- Blizard
 
 -- world quest quality coloring
--- using item rarities for these colors
-if (not IsRetailShadowlands) then
-	Colors.worldquestquality = {}
-	Colors.worldquestquality[LE_WORLD_QUEST_QUALITY_COMMON] = Colors.quality[ITEM_QUALITY_COMMON]
-	Colors.worldquestquality[LE_WORLD_QUEST_QUALITY_RARE] = Colors.quality[ITEM_QUALITY_RARE]
-	Colors.worldquestquality[LE_WORLD_QUEST_QUALITY_EPIC] = Colors.quality[ITEM_QUALITY_EPIC]
-end
+-- *using item rarities for these colors
+-- *the globals I use for reference are gone in 9.0.1.
+Colors.worldquestquality = {}
+Colors.worldquestquality[LE_WORLD_QUEST_QUALITY_COMMON or 1] = Colors.quality[1]
+Colors.worldquestquality[LE_WORLD_QUEST_QUALITY_RARE or 2] = Colors.quality[3]
+Colors.worldquestquality[LE_WORLD_QUEST_QUALITY_EPIC or 3] = Colors.quality[4]

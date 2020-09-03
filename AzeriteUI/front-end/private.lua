@@ -69,6 +69,8 @@ local auraUserFlags = {} -- Aura filter flags
 
 -- Color Tables
 -----------------------------------------------------------------
+-- We start with the base colors, 
+-- and only add or change what is specific to this UI.
 local Colors = LibColorTool:GetColorTable()
 do 
 	-- Our player health bar color
@@ -78,37 +80,25 @@ do
 	Colors.ui = Colors:CreateColor(192/255, 192/255, 192/255)
 
 	-- Power Colors
-	local Fast = Colors:CreateColor(0/255, 208/255, 176/255) 
-	local Slow = Colors:CreateColor(116/255, 156/255, 255/255)
-	local Angry = Colors:CreateColor(156/255, 116/255, 255/255)
+	local fast = Colors:CreateColor(0/255, 208/255, 176/255) 
+	local slow = Colors:CreateColor(116/255, 156/255, 255/255)
+	local angry = Colors:CreateColor(156/255, 116/255, 255/255)
 
-	Colors.power.ENERGY_CRYSTAL = Fast -- Rogues, Druids
-	Colors.power.FOCUS_CRYSTAL = Slow -- Hunters Pets (?)
-	Colors.power.FURY_CRYSTAL = Angry -- Havoc Demon Hunter 
-	Colors.power.INSANITY_CRYSTAL = Angry -- Shadow Priests
-	Colors.power.LUNAR_POWER_CRYSTAL = Slow -- Balance Druid Astral Power 
-	Colors.power.MAELSTROM_CRYSTAL = Slow -- Elemental Shamans
-	Colors.power.PAIN_CRYSTAL = Angry -- Vengeance Demon Hunter 
-	Colors.power.RAGE_CRYSTAL = Angry -- Druids, Warriors
-	Colors.power.RUNIC_POWER_CRYSTAL = Slow -- Death Knights
+	Colors.power.ENERGY_CRYSTAL = fast -- Rogues, Druids
+	Colors.power.FOCUS_CRYSTAL = slow -- Hunters Pets (?)
+	Colors.power.FURY_CRYSTAL = angry -- Havoc Demon Hunter 
+	Colors.power.INSANITY_CRYSTAL = angry -- Shadow Priests
+	Colors.power.LUNAR_POWER_CRYSTAL = slow -- Balance Druid Astral Power 
+	Colors.power.MAELSTROM_CRYSTAL = slow -- Elemental Shamans
+	Colors.power.PAIN_CRYSTAL = angry -- Vengeance Demon Hunter 
+	Colors.power.RAGE_CRYSTAL = angry -- Druids, Warriors
+	Colors.power.RUNIC_POWER_CRYSTAL = slow -- Death Knights
 
 	-- Only occurs when the orb is manually disabled by the player.
 	Colors.power.MANA_CRYSTAL = Colors:CreateColor(101/255, 93/255, 191/255) -- Druid, Hunter, Mage, Paladin, Priest, Shaman, Warlock
 
 	-- Orb Power Colors
 	Colors.power.MANA_ORB = Colors:CreateColor(135/255, 125/255, 255/255) -- Druid, Hunter, Mage, Paladin, Priest, Shaman, Warlock
-
-	-- Standard Power Colors
-	Colors.power.ENERGY = Colors:CreateColor(254/255, 245/255, 145/255) -- Rogues, Druids
-	Colors.power.FURY = Colors:CreateColor(255/255, 0/255, 111/255) -- Vengeance Demon Hunter
-	Colors.power.FOCUS = Colors:CreateColor(125/255, 168/255, 195/255) -- Hunter Pets
-	Colors.power.INSANITY = Colors:CreateColor(102/255, 64/255, 204/255) -- Shadow Priests 
-	Colors.power.LUNAR_POWER = Colors:CreateColor(121/255, 152/255, 192/255) -- Balance Druid Astral Power 
-	Colors.power.MAELSTROM = Colors:CreateColor(0/255, 188/255, 255/255) -- Elemental Shamans
-	Colors.power.MANA = Colors:CreateColor(80/255, 116/255, 255/255) -- Druid, Hunter, Mage, Paladin, Priest, Shaman, Warlock
-	Colors.power.PAIN = Colors:CreateColor(190 *.75/255, 255 *.75/255, 0/255) 
-	Colors.power.RAGE = Colors:CreateColor(215/255, 7/255, 7/255) -- Druids, Warriors
-	Colors.power.RUNIC_POWER = Colors:CreateColor(0/255, 236/255, 255/255) -- Death Knights
 end 
 
 -- Aura Filter Bitflags
