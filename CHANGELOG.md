@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.401-RC] 2020-09-04
+- Bumping the minor addon version because of backwards incompatible file structure, not because of any sparkling new feature.
+- Extra important to remember to exit the game client before updating now, as I'm in the process of re-arranging the file structure, squashing down some of the content, and moving all we can to a generic back-end which works for all our user interfaces, not just this one. I'm doing this in a manner that should make no difference to the regular user, but will cause some extra work for tinkerers that manually modify the files, as most of the editable ones in the front-end now have changed position. In the end the UI will be easier to edit, though, so hang in there!
+
+### Changed
+- Swapped the middle and right click actions on the cogwheel button. Middle button now opens the user interface menu, and right button opens the Blizzard micro menu and access to the standard game panels. The left click action to toggle your bags remain unchanged.
+
+### Fixed
+- Fixed an issue where the saved aspect ratio wasn't updated on logon or reloads, just on settings changes. 
+- Fixed an issue where enabling the pet bar during combat would cause the explorer mode mouseover anchors to bug out.
+- Fixed an issue where the pet bar would remain hidden on mouseover until fade settings change, if the bar was initially disabled upon login or reload and changed to enabled.
+
 ## [2.0.400-RC] 2020-08-30
 ### Added
 - Hunters (Retail) now both have aura filter choices, as well as a few aura lists to make them viable (which was missing in the previous update). 

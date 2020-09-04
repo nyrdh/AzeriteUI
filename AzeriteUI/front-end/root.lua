@@ -807,6 +807,7 @@ Core.OnEnable = function(self)
 	-- Make sure frame references to secure frames are in place for the menu
 	------------------------------------------------------------------------------------
 	self:UpdateSecureUpdater()
+	self:UpdateAspectRatio()
 
 	-- Listen for when the user closes the debugframe directly
 	------------------------------------------------------------------------------------
