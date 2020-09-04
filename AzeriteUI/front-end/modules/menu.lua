@@ -752,19 +752,58 @@ Module.AddOptionsToMenuButton = function(self)
 	if (not self.addedToMenuButton) then 
 		self.addedToMenuButton = true
 
-		local menuWindow = self:GetConfigWindow()
+		local leftIcon = "|TInterface\\TutorialFrame\\UI-TUTORIAL-FRAME:20:15:0:0:512:512:1:76:218:318|t "
+		local middleIcon = "|TInterface\\TutorialFrame\\UI-TUTORIAL-FRAME:20:15:0:0:512:512:1:76:118:218|t "
+		local rightIcon = "|TInterface\\TutorialFrame\\UI-TUTORIAL-FRAME:20:15:0:0:512:512:1:76:321:421|t "
+
 		local toggleButton = self:GetToggleButton()
-		toggleButton:SetFrameRef("OptionsMenu", menuWindow)
-		toggleButton:SetAttribute("rightclick", secureSnippets.menuToggle)
+
+		-- Toggle backpack (Left)
+		toggleButton.leftButtonTooltip = leftIcon .. BACKPACK_TOOLTIP
 		toggleButton:SetAttribute("leftclick", secureSnippets.bagToggle)
-		toggleButton.ToggleAllBags = function(self)
-			ToggleAllBags()
-		end
+		toggleButton.ToggleAllBags = function() ToggleAllBags() end
+
+		-- Toggle addon menu (Middle)
+		local menuWindow = self:GetConfigWindow()
+		toggleButton.middleButtonTooltip = middleIcon .. OPTIONS_MENU
+		toggleButton:SetFrameRef("OptionsMenu", menuWindow)
+		toggleButton:SetAttribute("middleclick", secureSnippets.menuToggle)
 		for reference,frame in pairs(self:GetAutoHideReferences()) do 
 			menuWindow:SetFrameRef(reference,frame)
 		end 
-		toggleButton.leftButtonTooltip = "|TInterface\\TutorialFrame\\UI-TUTORIAL-FRAME:20:15:0:0:512:512:1:76:218:318|t " .. BACKPACK_TOOLTIP
-		toggleButton.rightButtonTooltip = "|TInterface\\TutorialFrame\\UI-TUTORIAL-FRAME:20:15:0:0:512:512:1:76:321:421|t " .. OPTIONS_MENU
+
+		-- Toggle micro menu (Right)
+		local microModule = Core:GetModule("BlizzardMicroMenu", true)
+		if (microModule) then
+			local microMenu = microModule:GetConfigWindow()
+			toggleButton.rightButtonTooltip = rightIcon .. L["Game Panels"]
+			toggleButton:SetFrameRef("MicroMenu", microMenu)
+			toggleButton:SetAttribute("rightclick", [[
+				local window = self:GetFrameRef("MicroMenu");
+				if window:IsShown() then
+					window:Hide();
+				else
+					local window2 = self:GetFrameRef("OptionsMenu"); 
+					if (window2 and window2:IsShown()) then 
+						window2:Hide(); 
+					end 
+					window:Show();
+					window:RegisterAutoHide(.75);
+					window:AddToAutoHide(self);
+					local autohideCounter = 1
+					local autohideFrame = window:GetFrameRef("autohide"..autohideCounter);
+					while autohideFrame do 
+						window:AddToAutoHide(autohideFrame);
+						autohideCounter = autohideCounter + 1;
+						autohideFrame = window:GetFrameRef("autohide"..autohideCounter);
+					end 
+				end
+			]])
+			for reference,frame in pairs(microModule:GetAutoHideReferences()) do 
+				microMenu:SetFrameRef(reference,frame)
+			end 
+		end
+
 	end
 end 
 
