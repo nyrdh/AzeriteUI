@@ -254,10 +254,12 @@ local secureSnippets = {
 
 		if (name == "change-extrabuttonsvisibility") then 
 			self:SetAttribute("extraButtonsVisibility", value); 
+			self:CallMethod("UpdateFadeAnchors"); 
 			self:CallMethod("UpdateFading"); 
 		
 		elseif (name == "change-petbarvisibility") then 
 				self:SetAttribute("petBarVisibility", value); 
+				self:CallMethod("UpdateFadeAnchors"); 
 				self:CallMethod("UpdateFading"); 
 	
 		elseif (name == "change-extrabuttonscount") then 
@@ -306,6 +308,8 @@ local secureSnippets = {
 
 			-- lua callback to update the explorer mode anchors to the current layout
 			self:CallMethod("UpdateExplorerModeAnchors"); 
+			self:CallMethod("UpdateFadeAnchors"); 
+			self:CallMethod("UpdateFading"); 
 			
 		elseif (name == "change-buttonlock") then 
 			self:SetAttribute("buttonLock", value and true or false); 
@@ -1227,7 +1231,7 @@ end
 
 -- Return the actionbar frame for the explorer mode mouseover
 Module.GetOverlayFrame = function(self)
-	return self.frame
+	return self.frameOverlay
 end
 
 -- Return the pet actionbar frame for the explorer mode mouseover
@@ -1504,11 +1508,12 @@ Module.UpdateFadeAnchors = function(self)
 	end 
 
 	-- Setup main frame anchors for explorer mode! 
-	self.frame:ClearAllPoints()
-	self.frame:SetPoint("TOP", Buttons[mTop], "TOP", 0, 0)
-	self.frame:SetPoint("BOTTOM", Buttons[mBottom], "BOTTOM", 0, 0)
-	self.frame:SetPoint("LEFT", Buttons[mLeft], "LEFT", 0, 0)
-	self.frame:SetPoint("RIGHT", Buttons[mRight], "RIGHT", 0, 0)
+	local overlayFrame = self:GetOverlayFrame()
+	overlayFrame:ClearAllPoints()
+	overlayFrame:SetPoint("TOP", Buttons[mTop], "TOP", 0, 0)
+	overlayFrame:SetPoint("BOTTOM", Buttons[mBottom], "BOTTOM", 0, 0)
+	overlayFrame:SetPoint("LEFT", Buttons[mLeft], "LEFT", 0, 0)
+	overlayFrame:SetPoint("RIGHT", Buttons[mRight], "RIGHT", 0, 0)
 
 	-- If we have hoverbuttons, setup the anchors
 	if (left and right and top and bottom) then 
@@ -1726,9 +1731,15 @@ Module.OnInit = function(self)
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
 
-	-- Create master- and overlay frames used for explorer mode.
+	-- Create master frame. This one becomes secure.
 	self.frame = self:CreateFrame("Frame", nil, "UICenter")
+
+	-- Create overlay frames used for explorer mode.
+	self.frameOverlay = self:CreateFrame("Frame", nil, "UICenter")
 	self.frameOverlayPet = self:CreateFrame("Frame", nil, "UICenter")
+
+	-- Apply overlay alpha to the master frame.
+	hooksecurefunc(self.frameOverlay, "SetAlpha", function(_,alpha) self.frame:SetAlpha(alpha) end)
 
 	-- Spawn the bars
 	self:SpawnActionBars()
