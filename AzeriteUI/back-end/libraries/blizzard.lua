@@ -953,6 +953,19 @@ UIWidgetStyling["GameMenu"] = function(self, ...)
 
 end
 
+UIWidgetStyling["ObjectiveTracker"] = IsClassic and function(self, ...)
+
+
+
+
+end
+
+or IsRetail and function(self, ...)
+
+
+
+end
+
 UIWidgetStyling["PopUps"] = function(self, ...)
 
 	-- Retrieve styling data

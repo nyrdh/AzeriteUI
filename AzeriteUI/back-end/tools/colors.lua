@@ -1,3 +1,10 @@
+--[[--
+
+The purpose of this tool is to supply a basic color table,
+which the requesting module can edit or add to later.
+
+--]]--
+
 local LibColorTool = Wheel:Set("LibColorTool", 2)
 if (not LibColorTool) then
 	return

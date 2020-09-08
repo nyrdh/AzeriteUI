@@ -1,3 +1,11 @@
+--[[--
+
+The purpose of this tool is to supply basic aura tags
+and an all purpose aura filter with settings stored 
+on a widgetcontainer aura plugin element.
+
+--]]--
+
 local LibAuraTool = Wheel:Set("LibAuraTool", 1)
 if (not LibAuraTool) then
 	return

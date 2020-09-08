@@ -5,7 +5,7 @@ if (not Core) then
 end
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-local Module = Core:NewModule("BlizzardObjectivesTracker", "LibEvent", "LibFrame", "LibClientBuild")
+local Module = Core:NewModule("BlizzardObjectivesTracker", "LibEvent", "LibFrame", "LibClientBuild", "LibBlizzard")
 
 -- Lua API
 local _G = _G
@@ -514,27 +514,30 @@ end
 Module.CreateDriver = function(self)
 	local layout = self.layout
 
-	if (layout.HideInCombat or layout.HideInBossFights) then 
+	if (layout.HideInCombat or layout.HideInBossFights or layout.HideInVehicles or layout.HideInArena) then 
 		local driverFrame = self:CreateFrame("Frame", nil, _G.UIParent, "SecureHandlerAttributeTemplate")
 
 		driverFrame:HookScript("OnShow", function()
-			if (ObjectiveTrackerFrame) then
-				ObjectiveTrackerFrame:SetAlpha(.9)
-			end
-			if (QuestWatchFrame) then
-				QuestWatchFrame:SetAlpha(.9)
+			local tracker = QuestWatchFrame or ObjectiveTrackerFrame
+			if (tracker) then
+				tracker:SetAlpha(.9)
 			end
 			self.frame.cover:Hide()
 		end)
 
 		driverFrame:HookScript("OnHide", function() 
-			if (ObjectiveTrackerFrame) then
-				ObjectiveTrackerFrame:SetAlpha(0)
+			local tracker = QuestWatchFrame or ObjectiveTrackerFrame
+			if (tracker) then
+				tracker:SetAlpha(0)
+				self.frame.cover:SetFrameStrata(tracker:GetFrameStrata())
+				self.frame.cover:SetFrameLevel(tracker:GetFrameLevel() + 5)
+				self.frame.cover:ClearAllPoints()
+				self.frame.cover:SetAllPoints(tracker)
+				self.frame.cover:SetHitRectInsets(-40, -80, -40, 40)
+				self.frame.cover:Show()
+			else
+				self.frame.cover:Hide()
 			end
-			if (QuestWatchFrame) then
-				QuestWatchFrame:SetAlpha(0)
-			end
-			self.frame.cover:Show()
 		end)
 
 		driverFrame:SetAttribute("_onattributechanged", [=[
@@ -552,8 +555,13 @@ Module.CreateDriver = function(self)
 		]=])
 
 		local driver = "hide;show"
-		if (IsRetail) and (layout.HideInArena) then 
-			driver = "[@arena1,exists][@arena2,exists][@arena3,exists][@arena4,exists][@arena5,exists]" .. driver
+		if (IsRetail) then 
+			if (layout.HideInVehicles) then
+				driver = "[overridebar][possessbar][shapeshift][vehicleui]"  .. driver
+			end 
+			if (layout.HideInArena) then 
+				driver = "[@arena1,exists][@arena2,exists][@arena3,exists][@arena4,exists][@arena5,exists]" .. driver
+			end
 		end
 		if (layout.HideInBossFights) then
 			driver = "[@boss1,exists][@boss2,exists][@boss3,exists][@boss4,exists]" .. driver

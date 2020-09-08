@@ -1,3 +1,11 @@
+--[[--
+
+The purpose of this tool is to supply on-demand font objects
+created, sorted and stored based on size, style and type, 
+without the need for the front-end modules to worry about global names.
+
+--]]--
+
 local LibFontTool = Wheel:Set("LibFontTool", 1)
 if (not LibFontTool) then
 	return

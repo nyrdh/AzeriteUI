@@ -2383,7 +2383,6 @@ if (IsClassic) then
 	Layouts.BlizzardObjectivesTracker = {
 		FontObject = GetFont(13, true),
 		FontObjectTitle = GetFont(15, true),
-		--HideInArena = true, -- Retail/TBC
 		HideInBossFights = true,
 		HideInCombat = false,
 		MaxHeight = 1080 - (260 + 380),
@@ -2404,6 +2403,7 @@ if (IsRetail) then
 		MaxHeight = 480,
 		HideInCombat = false, 
 		HideInBossFights = true, 
+		HideInVehicles = false,
 		HideInArena = true
 	}
 end
