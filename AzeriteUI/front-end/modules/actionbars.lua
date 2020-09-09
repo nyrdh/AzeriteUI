@@ -1055,25 +1055,30 @@ Module.SpawnTotemBar = function(self)
 	-- 	Can't remove button methods like SetPoint to prevent blizzard repositioning
 	-- 	Can't really mess with PetFrame hide/show either, it needs to remain whatever Blizzard intended.
 
+	local totemScale = 1.5 
+	local width, height = 37*4 + (-4)*3, 37 -- (136*37) size of the totem buttons, plus space between them
+
 	-- Just for my own reference:
 	-- 	player castbar "BOTTOM", "UICenter", "BOTTOM", 0, 290
 	-- 	player altpower "BOTTOM", "UICenter", "BOTTOM", 0, 340 ("CENTER", "UICenter", "CENTER", 0, -189)
 	local totemHolderFrame = self:CreateFrame("Frame", nil, "UICenter")
 	totemHolderFrame:SetSize(2,2)
-	totemHolderFrame:Place("BOTTOM", "UICenter", "BOTTOM", 0, 390)
+	totemHolderFrame:Place("BOTTOM", self:GetFrame("Minimap"), "TOP", 0, 60)
+	--totemHolderFrame:Place("BOTTOM", "UICenter", "BOTTOM", 0, 390)
 	
 	-- Scaling it up get a more fitting size,
 	-- without messing with actual relative
 	-- positioning of the buttons.
-	local totemScale = 1.5 
-	local totems = TotemFrame -- original size is 128x53
-	totems:SetParent(totemHolderFrame)
-	totems:SetScale(totemScale)
+	local totemFrame = TotemFrame -- original size is 128x53
+	totemFrame:SetParent(totemHolderFrame)
+	totemFrame:SetScale(totemScale)
+	totemFrame:SetSize(width, height)
+	
 
 	local hidden = CreateFrame("Frame")
 	hidden:Hide()
 
-	for i = 1, MAX_TOTEMS do
+	for i = 1,4 do -- MAX_TOTEMS = 4
 		local buttonName = "TotemFrameTotem"..i
 		local button = _G[buttonName]
 		local buttonBackground = _G[buttonName.."Background"]
@@ -1098,16 +1103,23 @@ Module.SpawnTotemBar = function(self)
 						region:SetSize(256*.25,256*.25)
 						borderFrame = child
 						borderTexture = region
+						break
 					end
 				end
 			end
+			if (borderFrame and borderTexture) then
+				break
+			end
 		end
+		button.borderFrame = borderFrame
+		button.borderTexture = borderTexture
 
 		local duration = borderFrame:CreateFontString()
 		duration:SetDrawLayer("OVERLAY")
 		duration:SetPoint("CENTER", button, "BOTTOMRIGHT", -8, 10)
 		duration:SetFontObject(GetFont(9,true))
 		duration:SetAlpha(.75)
+
 		button.duration = duration
 	end
 
@@ -1124,29 +1136,25 @@ Module.SpawnTotemBar = function(self)
 	end
 	hooksecurefunc("TotemButton_Update", totemButtonUpdate)
 
-	local totemEvent, totemFrameUpdate
-	totemEvent = function(self, event, ...)
-		if (event == "PLAYER_REGEN_ENABLED") then
-			self:UnregisterEvent("PLAYER_REGEN_ENABLED", totemEvent)
-		end
-		totemFrameUpdate()
-	end
-	totemFrameUpdate = function()
+	local totemUpdate
+	totemUpdate = function(self, event, ...)
 		if (InCombatLockdown()) then
-			return self:RegisterEvent("PLAYER_REGEN_ENABLED", totemEvent)
+			self:RegisterEvent("PLAYER_REGEN_ENABLED", totemUpdate)
+			return
 		end
-		local point, anchor = totems:GetPoint()
+		if (event == "PLAYER_REGEN_ENABLED") then
+			self:UnregisterEvent("PLAYER_REGEN_ENABLED", totemUpdate)
+		end
+		local point, anchor = totemFrame:GetPoint()
 		if (anchor ~= totemHolderFrame) then
-			totems:ClearAllPoints()
-			totems:SetPoint("CENTER", totemHolderFrame, "CENTER", 0, 0)
-		end
-		local parent = totems:GetParent()
-		if (parent ~= totemHolderFrame) then
-			totems:SetParent(totemHolderFrame)
+			totemFrame:ClearAllPoints()
+			totemFrame:SetPoint("CENTER", totemHolderFrame, "CENTER", 0, 0)
 		end
 	end
-	hooksecurefunc(TotemFrame, "SetPoint", totemFrameUpdate)
-	totemFrameUpdate(totems)
+	hooksecurefunc(TotemFrame, "SetPoint", totemUpdate)
+
+	-- Initial update to position it
+	totemUpdate()
 end
 
 Module.SpawnExitButton = function(self)

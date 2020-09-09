@@ -73,6 +73,9 @@ local MAX_COMBO_POINTS = MAX_COMBO_POINTS or 5
 
 -- AuraIDs
 local SOUL_FRAGMENTS_ID = 203981
+local SOUL_FRAGMENTS_IDs = {
+	[203981] = true
+}
 
 -- Class specific info
 local _, PLAYERCLASS = UnitClass("player")
@@ -605,7 +608,7 @@ if (IsRetail) then
 				if (not name) then 
 					break 
 				end
-				if (spellID == SOUL_FRAGMENTS_ID) then
+				if (spellID) and ((spellID == SOUL_FRAGMENTS_ID) or (SOUL_FRAGMENTS_IDs[spellID])) then
 					min = count
 				end
 				id = id + 1
@@ -1099,5 +1102,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 40)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 41)
 end 
