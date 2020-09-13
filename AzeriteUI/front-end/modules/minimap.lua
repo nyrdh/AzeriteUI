@@ -253,11 +253,11 @@ local Toggle_UpdateTooltip = function(toggle)
 			tooltip:AddDoubleLine(L["Rested Bonus: "], fullXPString:format(normal..short(restedLeft)..NC, normal..short(max * 1.5)..NC, highlight..math_floor(restedLeft/(max * 1.5)*100).."%"..NC), rh, gh, bh, rgg, ggg, bgg)
 		end
 		
-		if (restState == 1) then
-			if resting and restedTimeLeft and restedTimeLeft > 0 then
+		if (restState) and (restState == 1) then
+			if (resting) and (restedTimeLeft) and (restedTimeLeft > 0) then
 				tooltip:AddLine(" ")
 				--tooltip:AddLine(L["Resting"], rh, gh, bh)
-				if restedTimeLeft > hour*2 then
+				if (restedTimeLeft > hour*2) then
 					tooltip:AddLine(L["You must rest for %s additional hours to become fully rested."]:format(highlight..math_floor(restedTimeLeft/hour)..NC), r, g, b, true)
 				else
 					tooltip:AddLine(L["You must rest for %s additional minutes to become fully rested."]:format(highlight..math_floor(restedTimeLeft/minute)..NC), r, g, b, true)
@@ -267,7 +267,7 @@ local Toggle_UpdateTooltip = function(toggle)
 				--tooltip:AddLine(L["Rested"], rh, gh, bh)
 				tooltip:AddLine(L["%s of normal experience gained from monsters."]:format(shortXPString:format((mult or 1)*100)), rg, gg, bg, true)
 			end
-		elseif (restState >= 2) then
+		elseif (restState) and (restState >= 2) then
 			if not(restedTimeLeft and restedTimeLeft > 0) then 
 				tooltip:AddLine(" ")
 				tooltip:AddLine(L["You should rest at an Inn."], rr, gr, br)

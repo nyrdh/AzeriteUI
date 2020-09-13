@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.402-RC] 2020-09-13
+### Changed
+- The retail Shaman totembar is now located above the minimap. Might seem a bit out of the way, but that is the point. I kept accidentally clicking off totems when it was placed in the middle, and I wasn't the only one.
+
+### Fixed
+- Fixed an issue where zoning into a rested area sometimes could cause a bug if the rested xp information wasn't available from the game yet.
+
 ## [2.1.401-RC] 2020-09-04
 - Bumping the minor addon version because of backwards incompatible file structure, not because of any sparkling new feature.
 - Extra important to remember to exit the game client before updating now, as I'm in the process of re-arranging the file structure, squashing down some of the content, and moving all we can to a generic back-end which works for all our user interfaces, not just this one. I'm doing this in a manner that should make no difference to the regular user, but will cause some extra work for tinkerers that manually modify the files, as most of the editable ones in the front-end now have changed position. In the end the UI will be easier to edit, though, so hang in there!

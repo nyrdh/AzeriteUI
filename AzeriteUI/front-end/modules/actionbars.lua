@@ -1138,13 +1138,14 @@ Module.SpawnTotemBar = function(self)
 
 	local totemUpdate
 	totemUpdate = function(self, event, ...)
-		if (InCombatLockdown()) then
-			self:RegisterEvent("PLAYER_REGEN_ENABLED", totemUpdate)
-			return
-		end
-		if (event == "PLAYER_REGEN_ENABLED") then
-			self:UnregisterEvent("PLAYER_REGEN_ENABLED", totemUpdate)
-		end
+		-- Trying the tainty way
+		--if (InCombatLockdown()) then
+		--	self:RegisterEvent("PLAYER_REGEN_ENABLED", totemUpdate)
+		--	return
+		--end
+		--if (event == "PLAYER_REGEN_ENABLED") then
+		--	self:UnregisterEvent("PLAYER_REGEN_ENABLED", totemUpdate)
+		--end
 		local point, anchor = totemFrame:GetPoint()
 		if (anchor ~= totemHolderFrame) then
 			totemFrame:ClearAllPoints()
