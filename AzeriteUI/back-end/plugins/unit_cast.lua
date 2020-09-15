@@ -170,19 +170,27 @@ local updateSpellQueueDisplay = function(element)
 
 	local ms = updateSpellQueueValue(element)
 	local max = element.total or element.max
+	local value
 
-	-- Don't allow values above max, it'd look wrong
-	local value = ms / 1e3
-	if (value > max) then
-		value = max
-	end
+	-- This could be a forced update,
+	-- and can cause a division by zero.
+	if (ms and max) then
+		-- Don't allow values above max, it'd look wrong
+		local value = ms / 1e3
+		if (value > max) then
+			value = max
+		end
 
-	-- Hide the overlay if it'd take up less than 5% of your bar, 
-	-- or if the total length of the window is shorter than 100ms. 
-	local ratio = value / max 
-	if (ratio < .05) or (ms < 100) then 
+		-- Hide the overlay if it'd take up less than 5% of your bar, 
+		-- or if the total length of the window is shorter than 100ms. 
+		local ratio = value / max 
+		if (ratio < .05) or (ms < 100) then 
+			value = 0
+		end 
+	else
+		max = 1
 		value = 0
-	end 
+	end
 
 	element.SpellQueue:SetMinMaxValues(0, max)
 	element.SpellQueue:SetValue(value, true)
@@ -704,5 +712,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 45)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 46)
 end 

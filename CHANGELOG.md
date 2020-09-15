@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.403-RC] 2020-09-15
+### Changed
+- Fixed an issue where sometimes when accepting flights in quest could cause the pet frame to hover in mid-air with no playerframe for a few seconds.
+
+### Fixed
+- Fixed a division by zero that sometimes could occur within the cast element on some forced updates.
+
 ## [2.1.402-RC] 2020-09-13
 ### Changed
 - The retail Shaman totembar is now located above the minimap. Might seem a bit out of the way, but that is the point. I kept accidentally clicking off totems when it was placed in the middle, and I wasn't the only one.

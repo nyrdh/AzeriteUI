@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 78)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 79)
 if (not LibUnitFrame) then	
 	return
 end
@@ -338,10 +338,16 @@ LibUnitFrame.GetUnitFrameVisibilityDriver = function(self, unit, hideInVehicles)
 		end
 	elseif (unit == "pet") then
 		if (IsRetail) then
+			-- Adding this to avoid situations where the player frame is hidden, 
+			-- yet a pet frame hovers in mid-air.
+			-- This only happens in short periods, like when a quest requires you to 
+			-- take a flight on a dragon to fly to or return to someplace.
+			-- Still, looks silly. We want it fixed.
+			local prefix = "[@player,noexists]hide;"
 			if (hideInVehicles) then
-				visDriver = "[vehicleui]hide;[@pet,exists]show;hide"
+				visDriver = prefix .. "[vehicleui]hide;[@pet,exists]show;hide"
 			else
-				visDriver = "[@pet,exists][nooverridebar,vehicleui]show;hide"
+				visDriver = prefix .. "[@pet,exists][nooverridebar,vehicleui]show;hide"
 			end
 		end
 	else
