@@ -174,9 +174,9 @@ local updateSpellQueueDisplay = function(element)
 
 	-- This could be a forced update,
 	-- and can cause a division by zero.
-	if (ms and max) then
+	if (ms and (max and max > 0)) then
 		-- Don't allow values above max, it'd look wrong
-		local value = ms / 1e3
+		value = ms / 1e3
 		if (value > max) then
 			value = max
 		end
@@ -187,6 +187,7 @@ local updateSpellQueueDisplay = function(element)
 		if (ratio < .05) or (ms < 100) then 
 			value = 0
 		end 
+
 	else
 		max = 1
 		value = 0
@@ -194,6 +195,7 @@ local updateSpellQueueDisplay = function(element)
 
 	element.SpellQueue:SetMinMaxValues(0, max)
 	element.SpellQueue:SetValue(value, true)
+
 end
 
 local UpdateColor = function(element, unit)
@@ -712,5 +714,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 46)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 47)
 end 

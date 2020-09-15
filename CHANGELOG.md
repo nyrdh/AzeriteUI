@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.404-RC] 2020-09-15
+### Fixed
+- Fixed the previous fix.
+
 ## [2.1.403-RC] 2020-09-15
 ### Changed
 - Fixed an issue where sometimes when accepting flights in quest could cause the pet frame to hover in mid-air with no playerframe for a few seconds.
