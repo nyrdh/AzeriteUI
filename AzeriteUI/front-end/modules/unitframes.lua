@@ -127,6 +127,7 @@ local SECURE = {
 			local owner = self:GetFrameRef("Owner"); 
 			self:SetAttribute("enableClassPower", value); 
 			local forceDisable = self:GetAttribute("forceDisableClassPower"); 
+
 			if (value) and (not forceDisable) then 
 				owner:CallMethod("EnableElement", "ClassPower"); 
 				owner:CallMethod("UpdateAllElements"); 
@@ -2342,12 +2343,13 @@ end
 
 UnitFramePlayerHUD.OnEnable = function(self)
 
+	-- Handle castbar visibility
 	self:RegisterEvent("CVAR_UPDATE", "OnEvent")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("VARIABLES_LOADED", "OnEvent")
+	self:UpdateCastBarVisibility(self:GetCastBarVisibility())
 
-	if (not self.db.enableCast) or (GetCVarBool("nameplateShowSelf")) then 
-		self.frame:DisableElement("Cast")
-	end
+	-- Handle classpower visibility
 	if (not self.db.enableClassPower) or (self:IsAddOnEnabled("SimpleClassPower")) then 
 		self.frame:DisableElement("ClassPower")
 	end
@@ -2355,28 +2357,41 @@ end
 
 UnitFramePlayerHUD.OnEvent = function(self, event, ...)
 	local arg1, arg2 = ...
-	if ((event == "CVAR_UPDATE") and (arg1 == "DISPLAY_PERSONAL_RESOURCE")) then 
 
-		-- Disable cast element if personal resource display is enabled. 
-		-- We follow the event returns here instead of querying the cvar.
+	local shouldEnable
+	if (event == "CVAR_UPDATE") then 
+		-- Bail out for irrelevant cvar changes.
+		if (arg1 ~= "DISPLAY_PERSONAL_RESOURCE") then
+			return
+		end	
+		-- Check for event args, as the real CVar isn't updated yet.
 		if (arg2 == "0") and (self.db.enableCast) then 
-			self.frame:EnableElement("Cast")
-
-		-- Forcefully hide cast element when PRD is there.
-		elseif (arg2 == "1") or (not self.db.enableCast) then 
-			self.frame:DisableElement("Cast")
+			shouldEnable = true
 		end
-	elseif (event == "VARIABLES_LOADED") then 
-
-		-- Disable cast element if personal resource display is enabled
-		if (GetCVarBool("nameplateShowSelf")) or (not self.db.enableCast) then 
-			self.frame:DisableElement("Cast")
-
-		-- Only enable cast element if user chose to.
-		elseif (self.db.enableCast) then
-			self.frame:EnableElement("Cast")
-		end
+	else 
+		-- Use the standard check for other events.
+		shouldEnable = self:GetCastBarVisibility()
 	end 
+
+	-- Toggle the element.
+	self:UpdateCastBarVisibility(shouldEnable)
+end
+
+UnitFramePlayerHUD.GetCastBarVisibility = function(self)
+	if (not GetCVarBool("nameplateShowSelf")) and (self.db.enableCast) then
+		return true
+	end
+end
+
+UnitFramePlayerHUD.UpdateCastBarVisibility = function(self, shouldEnable)
+	local isEnabled = self.frame:IsElementEnabled("Cast")
+	if (shouldEnable) and (not isEnabled) then
+		self.frame:EnableElement("Cast")
+		self.frame.Cast:ForceUpdate()
+
+	elseif (not shouldEnable) and (isEnabled) then
+		self.frame:DisableElement("Cast")
+	end
 end
 
 -----------------------------------------------------------

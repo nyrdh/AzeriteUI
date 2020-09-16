@@ -114,6 +114,7 @@ local GetHolder = function(object, ...)
 	if (not holder) then
 		holder = Module:CreateFrame("Frame", nil, "UICenter")
 		holder:SetSize(2,2)
+		holder:SetFrameStrata("LOW")
 		HolderCache[object] = holder
 	end
 

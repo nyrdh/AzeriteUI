@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.405-RC] 2020-09-16
+### Changed
+- Lowered the frame strata of most blizzard floating widgets (like the vehicle seat indicator) to prevent them from overlapping Immersion dialog choices.
+
+### Fixed
+- Changed how the floating castbar is toggled, so it shouldn't be invisible on first time logins for new characters anymore. 
+
 ## [2.1.404-RC] 2020-09-15
 ### Fixed
 - Fixed the previous fix.
