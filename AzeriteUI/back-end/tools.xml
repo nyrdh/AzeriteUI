@@ -9,4 +9,7 @@
 <!-- User tagged auras -->
 <Script file='tools\auras.lua'/>
 
+<!-- Chat filters -->
+<Script file='tools\chat.lua'/>
+
 </Ui>

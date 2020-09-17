@@ -1392,54 +1392,6 @@ Module.GetFadeFramePet = function(self)
 	return PetBarHoverFrame
 end
 
--- Create or return the secure frame for the menu.
-Module.GetSecureUpdater = function(self)
-	if (not self.proxyUpdater) then
-		-- Secure frame used by the menu system to interact with our secure buttons.
-		local proxy = self:CreateFrame("Frame", nil, parent, "SecureHandlerAttributeTemplate")
-
-		-- Add some module methods to the proxy.
-		for _,method in pairs({
-			"UpdateCastOnDown",
-			"UpdateFading",
-			"UpdateFadeAnchors",
-			"UpdateExplorerModeAnchors",
-			"UpdateButtonCount"
-		}) do
-			proxy[method] = function() self[method](self) end
-		end
-	
-		-- Copy all saved settings to our secure proxy frame.
-		for key,value in pairs(self.db) do 
-			proxy:SetAttribute(key,value)
-		end 
-	
-		-- Create tables to hold the buttons
-		-- within the restricted environment.
-		proxy:Execute([=[ 
-			Buttons = table.new();
-			Pagers = table.new();
-			PetButtons = table.new();
-			PetPagers = table.new();
-			StanceButtons = table.new();
-		]=])
-	
-		-- Apply references and attributes used for updates.
-		proxy:SetFrameRef("UICenter", self:GetFrame("UICenter"))
-		proxy:SetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE", BOTTOMLEFT_ACTIONBAR_PAGE)
-		proxy:SetAttribute("BOTTOMRIGHT_ACTIONBAR_PAGE", BOTTOMRIGHT_ACTIONBAR_PAGE)
-		proxy:SetAttribute("RIGHT_ACTIONBAR_PAGE", RIGHT_ACTIONBAR_PAGE)
-		proxy:SetAttribute("LEFT_ACTIONBAR_PAGE", LEFT_ACTIONBAR_PAGE)
-		proxy:SetAttribute("arrangeButtons", secureSnippets.arrangeButtons)
-		proxy:SetAttribute("arrangePetButtons", secureSnippets.arrangePetButtons)
-		proxy:SetAttribute("_onattributechanged", secureSnippets.attributeChanged)
-	
-		-- Reference it for later use
-		self.proxyUpdater = proxy
-	end
-	return self.proxyUpdater
-end
-
 -- Setters
 ----------------------------------------------------
 Module.SetForcedVisibility = function(self, force)
@@ -1739,6 +1691,35 @@ Module.OnInit = function(self)
 	)
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
+
+	local OptionsMenu = Core:GetModule("OptionsMenu", true)
+	if (OptionsMenu) then
+		local callbackFrame = OptionsMenu:CreateCallbackFrame(self)
+		callbackFrame:AssignSettings(self.db)
+		callbackFrame:AssignProxyMethods("UpdateCastOnDown", "UpdateFading", "UpdateFadeAnchors", "UpdateExplorerModeAnchors", "UpdateButtonCount")
+
+		-- Create tables to hold the buttons
+		-- within the restricted environment.
+		callbackFrame:Execute([=[ 
+			Buttons = table.new();
+			Pagers = table.new();
+			PetButtons = table.new();
+			PetPagers = table.new();
+			StanceButtons = table.new();
+		]=])
+
+		-- Apply references and attributes used for updates.
+		callbackFrame:AssignAttributes(
+			"BOTTOMLEFT_ACTIONBAR_PAGE", BOTTOMLEFT_ACTIONBAR_PAGE,
+			"BOTTOMRIGHT_ACTIONBAR_PAGE", BOTTOMRIGHT_ACTIONBAR_PAGE,
+			"RIGHT_ACTIONBAR_PAGE", RIGHT_ACTIONBAR_PAGE,
+			"LEFT_ACTIONBAR_PAGE", LEFT_ACTIONBAR_PAGE,
+			"arrangeButtons", secureSnippets.arrangeButtons,
+			"arrangePetButtons", secureSnippets.arrangePetButtons
+		)
+
+		callbackFrame:AssignCallback(secureSnippets.attributeChanged)
+	end
 
 	-- Create master frame. This one becomes secure.
 	self.frame = self:CreateFrame("Frame", nil, "UICenter")

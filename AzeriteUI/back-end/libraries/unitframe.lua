@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 79)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 80)
 if (not LibUnitFrame) then	
 	return
 end
@@ -17,6 +17,9 @@ assert(LibWidgetContainer, "LibUnitFrame requires LibWidgetContainer to be loade
 
 local LibTooltip = Wheel("LibTooltip")
 assert(LibTooltip, "LibUnitFrame requires LibTooltip to be loaded.")
+
+local LibSound = Wheel("LibSound")
+assert(LibSound, "LibUnitFrame requires LibSound to be loaded.")
 
 LibEvent:Embed(LibUnitFrame)
 LibFrame:Embed(LibUnitFrame)
@@ -47,6 +50,8 @@ local ToggleDropDownMenu = ToggleDropDownMenu
 local UnitExists = UnitExists
 local UnitGUID = UnitGUID
 local UnitHasVehicleUI = UnitHasVehicleUI
+local UnitIsEnemy = UnitIsEnemy
+local UnitIsFriend = UnitIsFriend
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
@@ -275,6 +280,21 @@ UnitFrame.OverrideAllElementsOnChangedGUID = function(self, event, ...)
 			local OnEnter = self:GetScript("OnEnter")
 			if (OnEnter) then
 				OnEnter(self)
+			end
+		end
+		if (unit == "target") and (not self.noTargetChangeSoundFX) then
+			if (UnitExists("target")) then
+				-- Play a fitting sound depending on what kind of target we gained
+				if (UnitIsEnemy("target", "player")) then
+					LibSound:PlaySoundKitID(SOUNDKIT.IG_CREATURE_AGGRO_SELECT, "SFX")
+				elseif (UnitIsFriend("player", "target")) then
+					LibSound:PlaySoundKitID(SOUNDKIT.IG_CHARACTER_NPC_SELECT, "SFX")
+				else
+					LibSound:PlaySoundKitID(SOUNDKIT.IG_CREATURE_NEUTRAL_SELECT, "SFX")
+				end
+			else
+				-- Play a sound indicating we lost our target
+				LibSound:PlaySoundKitID(SOUNDKIT.INTERFACE_SOUND_LOST_TARGET_UNIT, "SFX")
 			end
 		end
 		return self:UpdateAllElements(event, ...)

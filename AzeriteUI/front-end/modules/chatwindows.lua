@@ -1020,29 +1020,20 @@ Module.OnInit = function(self)
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
 
-	-- Create a secure proxy frame for the menu system
-	local callbackFrame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
-	callbackFrame.UpdateChatOutlines = function() self:UpdateChatOutlines() end
-
-	-- Register module db with the secure proxy
-	for key,value in pairs(self.db) do 
-		callbackFrame:SetAttribute(key,value)
-	end 
-
-	-- Now that attributes have been defined, attach the onattribute script
-	callbackFrame:SetAttribute("_onattributechanged", [=[
-		if name then 
-			name = string.lower(name); 
-		end 
-		if (name == "change-enablechatoutline") then 
-			self:SetAttribute("enableChatOutline", value); 
-			self:CallMethod("UpdateChatOutlines"); 
-		end 
-	]=])
-
-	-- Attach a getter method for the menu to the module
-	self.GetSecureUpdater = function(self) 
-		return callbackFrame 
+	local OptionsMenu = Core:GetModule("OptionsMenu", true)
+	if (OptionsMenu) then
+		local callbackFrame = OptionsMenu:CreateCallbackFrame(self)
+		callbackFrame:AssignProxyMethods("UpdateChatOutlines")
+		callbackFrame:AssignSettings(self.db)
+		callbackFrame:AssignCallback([=[
+			if name then 
+				name = string.lower(name); 
+			end 
+			if (name == "change-enablechatoutline") then 
+				self:SetAttribute("enableChatOutline", value); 
+				self:CallMethod("UpdateChatOutlines"); 
+			end 
+		]=])
 	end
 	
 	self:SetUpAlphaScripts()

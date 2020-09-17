@@ -344,10 +344,6 @@ Module.PostUpdateCVars = function(self, event, ...)
 	SetNamePlateSelfClickThrough(db.clickThroughSelf)
 end
 
-Module.GetSecureUpdater = function(self)
-	return self.proxyUpdater
-end
-
 Module.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then 
 		self:PostUpdateCVars()
@@ -357,37 +353,35 @@ end
 Module.OnInit = function(self)
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
+	
+	local OptionsMenu = Core:GetModule("OptionsMenu", true)
+	if (OptionsMenu) then
+		local callbackFrame = OptionsMenu:CreateCallbackFrame(self)
+		callbackFrame:AssignProxyMethods("PostUpdateSettings", "PostUpdateCVars")
+		callbackFrame:AssignSettings(self.db)
+		callbackFrame:AssignCallback([=[
+			if name then 
+				name = string.lower(name); 
+			end 
+			if (name == "change-enableauras") then 
+				self:SetAttribute("enableAuras", value); 
+				self:CallMethod("PostUpdateSettings"); 
 
-	local proxy = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
-	proxy.PostUpdateSettings = function() self:PostUpdateSettings() end
-	proxy.PostUpdateCVars = function() self:PostUpdateCVars() end
-	for key,value in pairs(self.db) do 
-		proxy:SetAttribute(key,value)
-	end 
-	proxy:SetAttribute("_onattributechanged", [=[
-		if name then 
-			name = string.lower(name); 
-		end 
-		if (name == "change-enableauras") then 
-			self:SetAttribute("enableAuras", value); 
-			self:CallMethod("PostUpdateSettings"); 
+			elseif (name == "change-clickthroughenemies") then
+				self:SetAttribute("clickThroughEnemies", value); 
+				self:CallMethod("PostUpdateCVars"); 
 
-		elseif (name == "change-clickthroughenemies") then
-			self:SetAttribute("clickThroughEnemies", value); 
-			self:CallMethod("PostUpdateCVars"); 
+			elseif (name == "change-clickthroughfriends") then 
+				self:SetAttribute("clickThroughFriends", value); 
+				self:CallMethod("PostUpdateCVars"); 
 
-		elseif (name == "change-clickthroughfriends") then 
-			self:SetAttribute("clickThroughFriends", value); 
-			self:CallMethod("PostUpdateCVars"); 
+			elseif (name == "change-clickthroughself") then 
+				self:SetAttribute("clickThroughSelf", value); 
+				self:CallMethod("PostUpdateCVars"); 
 
-		elseif (name == "change-clickthroughself") then 
-			self:SetAttribute("clickThroughSelf", value); 
-			self:CallMethod("PostUpdateCVars"); 
-
-		end 
-	]=])
-
-	self.proxyUpdater = proxy
+			end 
+		]=])
+	end
 end 
 
 Module.OnEnable = function(self)

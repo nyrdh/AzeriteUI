@@ -56,9 +56,6 @@ local L = Wheel("LibLocale"):GetLocale(ADDON)
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 
--- Just because we repeat them so many times
-local MenuButtonFontSize, MenuButtonW, MenuButtonH = 14, 300, 50
-
 -- Generic single colored texture
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
 local NEW = "*"
@@ -121,53 +118,85 @@ if (gameLocale == "zhCN") then
 	end
 end 
 
---local tooltipBorder = GetMedia("tooltip_border_blizzcompatible")
-local tooltipBorder = GetMedia("tooltip_border_hex")
-local tooltipInset = 10.5
-local buttonSpacing = 8 -- 10
+------------------------------------------------
+-- Backdrops
+------------------------------------------------
+-- Just all the backdrops gathered in one place
+local BACKDROPS = {
+
+	-- Most unit frame auras
+	AuraBorder = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
+
+	-- Nameplate auras and other small frames
+	AuraBorderSmall = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
+
+	-- Blizzard micro menu
+	ConfigWindow = {
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
+		edgeFile = GetMedia("tooltip_border"), edgeSize = 23, 
+		insets = { top = 17.25, bottom = 17.25, left = 17.25, right = 17.25 }
+	},
+
+	-- Popup window background
+	Popup = {
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
+		edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 23,  
+		insets = { top = 7.5, bottom = 7.5, left = 7.5, right = 7.5 }
+	},
+
+	-- Popup window buttons
+	PopupButton = {
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
+		edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 18,
+		insets = { left = 6, right = 6, top = 6, bottom = 6 }
+	},
+
+	-- Popup window input boxes
+	PopupEditBox = {
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
+		edgeFile = [[Interface\ChatFrame\ChatFrameBackground]], edgeSize = 1,
+		insets = { left = -6, right = -6, top = 0, bottom = 0 }
+	},
+
+	-- Tooltips and most standard frames
+	Tooltips = {
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false,
+		edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
+		insets = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
+	}
+
+}
 
 ------------------------------------------------
 -- Module Callbacks
 ------------------------------------------------
--- Not really following any plan here,
--- except trying to keep anything related to
--- styling out of the module front-end code.
-local Core_Window_CreateBorder = function(self)
-	local mod = 1 -- .75
+-- Used for methods that need to create a backdrop on-the-fly
+local GetBorder = function(self, edgeFile, edgeSize, bgFile, bgInsets, offsetX, offsetY)
 	local border = self:CreateFrame("Frame")
 	border:SetFrameLevel(self:GetFrameLevel()-1)
-	border:SetPoint("TOPLEFT", -6, 8) -- -6, 8
-	border:SetPoint("BOTTOMRIGHT", 6, -8) -- 6, -8
+	border:SetPoint("TOPLEFT", -(offsetX or 6), (offsetY or 8))
+	border:SetPoint("BOTTOMRIGHT", (offsetX or 6), -(offsetY or 8))
 	border:SetBackdrop({
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = tooltipBorder,
+		bgFile = bgFile or [[Interface\ChatFrame\ChatFrameBackground]],
+		edgeFile = edgeFile or GetMedia("tooltip_border_hex"),
 		edgeSize = 32, 
 		tile = false, 
 		insets = { 
-			top = tooltipInset, 
-			bottom = tooltipInset, 
-			left = tooltipInset, 
-			right = tooltipInset 
+			top = bgInsets or 10.5, 
+			bottom = bgInsets or 10.5, 
+			left = bgInsets or 10.5, 
+			right = bgInsets or 10.5 
 		}
 	})
 	border:SetBackdropBorderColor(1, 1, 1, 1)
 	border:SetBackdropColor(.05, .05, .05, .85)
-
 	return border
-end
-
-local Core_Window_OnHide = function(self)
-	self:GetParent():Update()
-end
-
-local Core_Window_OnShow = function(self)
-	self:GetParent():Update()
 end
 
 local Core_MenuButton_PostCreate = function(self, text, ...)
 	local msg = self:CreateFontString()
 	msg:SetPoint("CENTER", 0, 0)
-	msg:SetFontObject(GetFont(MenuButtonFontSize, false))
+	msg:SetFontObject(GetFont(14, false))
 	msg:SetJustifyH("RIGHT")
 	msg:SetJustifyV("TOP")
 	msg:SetIndentedWordWrap(false)
@@ -217,7 +246,7 @@ local Core_MenuButton_PostCreate = function(self, text, ...)
 	return self
 end
 
-local Core_MenuButton_Layers_PostUpdate = function(self)
+local Core_MenuButton_PostUpdate = function(self)
 	local isPushed = self.isDown or self.isChecked or self.windowIsShown
 	local show = isPushed and self.PushedBackdrop or self.NormalBackdrop
 	local hide = isPushed and self.NormalBackdrop or self.PushedBackdrop
@@ -263,19 +292,9 @@ local ActionButton_StackCount_PostUpdate = function(self, count)
 	end 
 end
 
--- General bind mode border creation method
-local BindMode_MenuWindow_CreateBorder = Core_Window_CreateBorder
-
--- Binding Dialogue MenuButton
-local BindMode_MenuButton_PostCreate = Core_MenuButton_PostCreate
-local BindMode_MenuButton_PostUpdate = Core_MenuButton_Layers_PostUpdate
-
 -- BindButton PostCreate 
 local BindMode_BindButton_PostCreate = function(self)
-	--print("self,bind", self.button:GetWidth(), self:GetWidth())
-
 	local width, height = self.button:GetSize()
-	
 	self.bg:ClearAllPoints()
 	self.bg:SetPoint("CENTER", 0, 0)
 	self.bg:SetTexture(GetMedia("actionbutton_circular_mask"))
@@ -297,48 +316,6 @@ end
 -- BindButton PostLeave graphic updates
 local BindMode_BindButton_PostLeave = function(self)
 	self.bg:SetVertexColor(.4, .6, .9, .75)
-end
-
--- Blizzard GameMenu Button Post Updates
-local Blizzard_GameMenu_Button_PostCreate = Core_MenuButton_PostCreate 
-local Blizzard_GameMenu_Button_PostUpdate = Core_MenuButton_Layers_PostUpdate
-
--- Blizzard MicroMenu Button Post Updates
-local BlizzardMicroMenu_Button_PostCreate = Core_MenuButton_PostCreate
-local BlizzardMicroMenu_Button_PostUpdate = Core_MenuButton_Layers_PostUpdate
-
--- Group Tools Menu Button Creation 
-local GroupTools_Button_PostCreate = function(self) end 
-
--- Group Tools Menu Button Disable
-local GroupTools_Button_OnDisable = function(self) end
-
--- Group Tools Menu Button Enable
-local GroupTools_Button_OnEnable = function(self) end
-
--- Group Tools Menu Window Border
-local GroupTools_Window_CreateBorder = function(self)
-	local mod = 1 -- not .75 as the rest?
-	local border = self:CreateFrame("Frame")
-	border:SetFrameLevel(self:GetFrameLevel()-1)
-	border:SetPoint("TOPLEFT", -23*mod, 23*mod)
-	border:SetPoint("BOTTOMRIGHT", 23*mod, -23*mod)
-	border:SetBackdrop({
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = GetMedia("tooltip_border"),
-		edgeSize = 32*mod, 
-		tile = false, 
-		insets = { 
-			top = 23*mod, 
-			bottom = 23*mod, 
-			left = 23*mod, 
-			right = 23*mod 
-		}
-	})
-	border:SetBackdropBorderColor(1, 1, 1, 1)
-	border:SetBackdropColor(.05, .05, .05, .85)
-
-	return border
 end
 
 local Minimap_Clock_OverrideValue = function(element, h, m, suffix)
@@ -1839,7 +1816,7 @@ local Template_SmallFrame = {
 local Template_SmallFrame_Auras = setmetatable({
 	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
 	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
-	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
+	AuraBorderBackdrop = BACKDROPS.AuraBorder,
 	AuraBorderBackdropColor = { 0, 0, 0, 0 },
 	AuraBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
 	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
@@ -2084,7 +2061,7 @@ Defaults.ActionBarMain = {
 }
 
 Defaults.ChatFilters = {
-	enableAllChatFilters = true, -- enable chat filters to pretty things up!
+	--enableAllChatFilters = true, -- enable chat filters to pretty things up!
 	enableChatStyling = true,
 	enableMonsterFilter = true,
 	enableBossFilter = true,
@@ -2141,9 +2118,6 @@ Defaults.UnitFrameRaid = {
 -- like which way tooltips grow, where the default position of all tooltips are,
 -- where the integrated MBB button is placed, and so on. 
 -- Not all of those can be changed through the layout, some things are in the modules.
--- 
--- I know you like to tinker, but regardless of what some of you think, 
--- it's never enough "just to change a few lines of code" to modify the layouts.
 local Layouts = {}
 
 -- Addon Core
@@ -2189,10 +2163,10 @@ Layouts[ADDON] = {
 	MenuBorderBackdropBorderColor = { 1, 1, 1, 1 },
 	MenuBorderBackdropColor = { .05, .05, .05, .85 },
 	MenuButton_PostCreate = Core_MenuButton_PostCreate, 
-	MenuButton_PostUpdate = Core_MenuButton_Layers_PostUpdate,
-	MenuButtonSize = { MenuButtonW, MenuButtonH },
+	MenuButton_PostUpdate = Core_MenuButton_PostUpdate,
+	MenuButtonSize = { 300, 50 },
 	MenuButtonSizeMod = .75, 
-	MenuButtonSpacing = buttonSpacing, 
+	MenuButtonSpacing = 8, 
 	MenuPlace = { "BOTTOMRIGHT", -41, 32 },
 	MenuSize = { 320 -10, 70 }, 
 	MenuToggleButtonSize = { 48, 48 }, 
@@ -2201,9 +2175,7 @@ Layouts[ADDON] = {
 	MenuToggleButtonIconPlace = { "CENTER", 0, 0 },
 	MenuToggleButtonIconSize = { 96, 96 },
 	MenuToggleButtonIconColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	MenuWindow_CreateBorder = Core_Window_CreateBorder,
-	MenuWindow_OnHide = Core_Window_OnHide, 
-	MenuWindow_OnShow = Core_Window_OnShow
+	MenuWindow_CreateBorder = function(self) return GetBorder(self) end
 }
 
 -- Blizzard Chat Frames
@@ -2307,38 +2279,28 @@ Layouts.BlizzardFonts = {
 
 -- Blizzard Game Menu (Esc)
 Layouts.BlizzardGameMenu = {
-	MenuButton_PostCreate = Blizzard_GameMenu_Button_PostCreate,
-	MenuButton_PostUpdate = Blizzard_GameMenu_Button_PostUpdate,
-	MenuButtonSize = { MenuButtonW, MenuButtonH },
+	MenuButton_PostCreate = Core_MenuButton_PostCreate,
+	MenuButton_PostUpdate = Core_MenuButton_PostUpdate,
+	MenuButtonSize = { 300, 50 },
 	MenuButtonSizeMod = .75, 
-	MenuButtonSpacing = buttonSpacing
+	MenuButtonSpacing = 8
 }
 
 -- Blizzard MicroMenu
 Layouts.BlizzardMicroMenu = {
-	ButtonFont = GetFont(MenuButtonFontSize, false),
+	ButtonFont = GetFont(14, false),
 	ButtonFontColor = { 0, 0, 0 }, 
 	ButtonFontShadowColor = { 1, 1, 1, .5 },
 	ButtonFontShadowOffset = { 0, -.85 },
-	ConfigWindowBackdrop = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = GetMedia("tooltip_border"),
-		edgeSize = 32 *.75, 
-		insets = { 
-			top = 23 *.75, 
-			bottom = 23 *.75, 
-			left = 23 *.75, 
-			right = 23 *.75 
-		}
-	},
-	MenuButton_PostCreate = BlizzardMicroMenu_Button_PostCreate,
-	MenuButton_PostUpdate = BlizzardMicroMenu_Button_PostUpdate, 
+	ConfigWindowBackdrop = BACKDROPS.ConfigWindow,
+	MenuButton_PostCreate = Core_MenuButton_PostCreate,
+	MenuButton_PostUpdate = Core_MenuButton_PostUpdate, 
 	MenuButtonNormalColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
-	MenuButtonSize = { MenuButtonW, MenuButtonH },
+	MenuButtonSize = { 300, 50 },
 	MenuButtonSizeMod = .75, 
-	MenuButtonSpacing = buttonSpacing, 
+	MenuButtonSpacing = 8, 
 	MenuButtonTitleColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
-	MenuWindow_CreateBorder = Core_Window_CreateBorder
+	MenuWindow_CreateBorder = function(self) return GetBorder(self) end
 }
 
 -- Blizzard Timers (mirror, quest)
@@ -2410,34 +2372,16 @@ end
 
 -- Blizzard Popup Styling
 Layouts.BlizzardPopupStyling = {
-	EditBoxBackdrop = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeSize = 1,
-		tile = false,
-		insets = { left = -6, right = -6, top = 0, bottom = 0 }
-	},
+	EditBoxBackdrop = BACKDROPS.PopupEditBox,
 	EditBoxBackdropColor = { 0, 0, 0, 0 },
 	EditBoxBackdropBorderColor = { .15, .1, .05, 1 },
 	EditBoxInsets = { 6, 6, 0, 0 },
-	PopupBackdrop = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = tooltipBorder, 
-		edgeSize = 32*3/4, 
-		tile = false, 
-		insets = { top = tooltipInset*3/4, bottom = tooltipInset*3/4, left = tooltipInset*3/4, right = tooltipInset*3/4 }
-	},
+	PopupBackdrop = BACKDROPS.Popup,
 	PopupBackdropOffsets = { 4, 4, 4, 4 },
 	PopupBackdropColor = { .05, .05, .05, .85 },
 	PopupBackdropBorderColor = { 1, 1, 1, 1 },
-	PopupButtonBackdrop = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = tooltipBorder,
-		edgeSize = 32*2/3,
-		tile = false, 
-		insets = { left = (2 + 8)*2/3, right = (2 + 8)*2/3, top = (2 + 8)*2/3, bottom = (2 + 8)*2/3 }
-	},
-	PopupButtonBackdropOffsets = { (3 + 8)*2/3, (3 + 8)*2/3, (3 + 8)*2/3 -2, (3 + 8)*2/3 -2 },
+	PopupButtonBackdrop = BACKDROPS.PopupButton,
+	PopupButtonBackdropOffsets = { 20/3, 20/3, 20/3-2, 20/3-2 },
 	PopupButtonBackdropColor = { .05, .05, .05, .75 },
 	PopupButtonBackdropBorderColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
 	PopupButtonBackdropHoverColor = { .1, .1, .1, .75 },
@@ -2447,11 +2391,7 @@ Layouts.BlizzardPopupStyling = {
 
 -- Blizzard Tooltips
 Layouts.BlizzardTooltips = {
-	TooltipBackdrop = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
-		edgeFile = tooltipBorder, edgeSize = 32, 
-		insets = { top = tooltipInset, bottom = tooltipInset, left = tooltipInset, right = tooltipInset }
-	},
+	TooltipBackdrop = BACKDROPS.Tooltips,
 	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
 	TooltipBackdropColor = { .05, .05, .05, .85 },
 	TooltipStatusBarTexture = GetMedia("statusbar_normal")
@@ -2668,12 +2608,12 @@ Layouts.Bindings = {
 	BindButton_PostEnter = BindMode_BindButton_PostEnter,
 	BindButton_PostLeave = BindMode_BindButton_PostLeave,
 	BindButton_PostUpdate = BindMode_BindButton_PostUpdate,
-	MenuButton_PostCreate = BindMode_MenuButton_PostCreate,
-	MenuButton_PostUpdate = BindMode_MenuButton_PostUpdate, 
-	MenuButtonSize = { MenuButtonW, MenuButtonH },
+	MenuButton_PostCreate = Core_MenuButton_PostCreate,
+	MenuButton_PostUpdate = Core_MenuButton_PostUpdate, 
+	MenuButtonSize = { 300, 50 },
 	MenuButtonSizeMod = .75, 
-	MenuButtonSpacing = buttonSpacing, 
-	MenuWindow_CreateBorder = BindMode_MenuWindow_CreateBorder,
+	MenuButtonSpacing = 8, 
+	MenuWindow_CreateBorder = function(self) return GetBorder(self) end,
 	Place = { "TOP", "UICenter", "TOP", 0, -100 }, 
 	Size = { 520, 180 }
 }
@@ -2708,10 +2648,7 @@ Layouts.GroupTools = {
 	MenuToggleButtonIconPlace = { "CENTER", 0, 0 }, 
 	MenuToggleButtonIconSize = { 64*.75, 128*.75 }, 
 	MenuToggleButtonIconColor = { 1, 1, 1 }, 
-	MenuWindow_CreateBorder = GroupTools_Window_CreateBorder,
-	OnButtonDisable = GroupTools_Button_OnDisable, 
-	OnButtonEnable = GroupTools_Button_OnEnable,
-	PostCreateButton = GroupTools_Button_PostCreate, 
+	MenuWindow_CreateBorder = function(self) return GetBorder(self, GetMedia("tooltip_border"), 23, nil, nil, 23, 23) end,
 	RaidRoleRaidTargetTexture = GetMedia("raid_target_icons"),
 	RaidTargetIcon1Place = { "TOP", -80, -140 + 86 },
 	RaidTargetIcon2Place = { "TOP", -28, -140 + 86 },
@@ -2882,7 +2819,7 @@ Layouts.NamePlates = {
 	PostCreateAuraButton = NamePlates_Auras_PostCreateButton,
 	PostUpdateAuraButton = NamePlates_Auras_PostUpdateButton,
 	AuraAnchor = "Health", 
-	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
+	AuraBorderBackdrop = BACKDROPS.AuraBorderSmall,
 	AuraBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
 	AuraBorderBackdropColor = { 0, 0, 0, 0 },
 	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
@@ -3161,13 +3098,7 @@ Layouts.Tooltips = {
 	PostCreateBar = Tooltip_Bar_PostCreate,
 	PostCreateLinePair = Tooltip_LinePair_PostCreate,
 	PostCreateTooltip = Tooltip_PostCreate,
-	TooltipBackdrop = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], 
-		edgeFile = tooltipBorder, 
-		edgeSize = 32, 
-		insets = { top = tooltipInset, bottom = tooltipInset, left = tooltipInset, right = tooltipInset },
-		tile = false
-	},
+	TooltipBackdrop = BACKDROPS.Tooltips,
 	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
 	TooltipBackdropColor = { .05, .05, .05, .85 },
 	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -(48 + 58 + 213), (107 + 59) }, 
@@ -3181,7 +3112,7 @@ Layouts.Tooltips = {
 Layouts.UnitFramePlayer = { 
 	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
 	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
-	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
+	AuraBorderBackdrop = BACKDROPS.AuraBorder,
 	AuraBorderBackdropColor = { 0, 0, 0, 0 },
 	AuraBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
 	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
@@ -3611,7 +3542,7 @@ Layouts.UnitFramePlayerHUD = {
 Layouts.UnitFrameTarget = { 
 	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
 	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
-	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
+	AuraBorderBackdrop = BACKDROPS.AuraBorder,
 	AuraBorderBackdropColor = { 0, 0, 0, 0 },
 	AuraBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 }, 
 	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
@@ -4181,7 +4112,7 @@ Layouts.UnitFrameParty = setmetatable({
 	AuraTimeFont = GetFont(11, true),
 	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
 	AuraBorderFrameSize = { 30 + 10, 30 + 10 },
-	AuraBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
+	AuraBorderBackdrop = BACKDROPS.AuraBorderSmall,
 	AuraBorderBackdropColor = { 0, 0, 0, 0 },
 	AuraBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
 	Size = { 130, 130 }, 
@@ -4230,7 +4161,7 @@ Layouts.UnitFrameParty = setmetatable({
 	GroupAuraButtonTimeColor = { 250/255, 250/255, 250/255, .85 },
 	GroupAuraButtonBorderFramePlace = { "CENTER", 0, 0 }, 
 	GroupAuraButtonBorderFrameSize = { 36 + 16, 36 + 16 },
-	GroupAuraButtonBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
+	GroupAuraButtonBorderBackdrop = BACKDROPS.AuraBorder,
 	GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
 	GroupAuraButtonBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
 	GroupAuraButtonDisableMouse = true, 
@@ -4582,7 +4513,7 @@ Layouts.UnitFrameRaid = setmetatable({
 	GroupAuraButtonTimeColor = { 250/255, 250/255, 250/255, .85 },
 	GroupAuraButtonBorderFramePlace = { "CENTER", 0, 0 }, 
 	GroupAuraButtonBorderFrameSize = { 24 + 12, 24 + 12 },
-	GroupAuraButtonBorderBackdrop = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
+	GroupAuraButtonBorderBackdrop = BACKDROPS.AuraBorderSmall,
 	GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
 	GroupAuraButtonBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
 	GroupAuraButtonDisableMouse = true, 

@@ -60,8 +60,6 @@ local RegisterAttributeDriver = RegisterAttributeDriver
 local UnitClass = UnitClass
 local UnitExists = UnitExists
 local UnitIsAFK = UnitIsAFK
-local UnitIsEnemy = UnitIsEnemy
-local UnitIsFriend = UnitIsFriend
 local UnitIsPlayer = UnitIsPlayer
 local UnitLevel = UnitLevel
 
@@ -83,6 +81,7 @@ local _,PlayerLevel = UnitLevel("player")
 -- Secure Stuff
 -----------------------------------------------------------
 -- All secure code snippets
+-- TODO: Move to stylesheet. 
 local SECURE = {
 
 	-- Called on the group headers
@@ -173,7 +172,7 @@ local SECURE = {
 			local Owner = self:GetFrameRef("Owner"); 
 
 			-- set flag for healer mode 
-			Owner:SetAttribute("inHealerMode", value); 
+			Owner:SetAttribute("useAlternateLayout", value); 
 
 			-- Update the layout 
 			Owner:RunAttribute("sortFrames"); 
@@ -182,14 +181,14 @@ local SECURE = {
 
 	-- Called on the party frame group header
 	Party_SortFrames = [=[
-		local inHealerMode = self:GetAttribute("inHealerMode"); 
+		local useAlternateLayout = self:GetAttribute("useAlternateLayout"); 
 
 		local anchorPoint; 
 		local anchorFrame; 
 		local growthX; 
 		local growthY; 
 
-		if (not inHealerMode) then 
+		if (not useAlternateLayout) then 
 			anchorPoint = "%s"; 
 			anchorFrame = self; 
 			growthX = %.0f;
@@ -259,7 +258,7 @@ local SECURE = {
 		elseif (name == "change-enablehealermode") then 
 			self:SetAttribute("enableHealerMode", value); -- store the setting(?)
 			local Owner = self:GetFrameRef("Owner"); -- retrieve the raid header frame
-			Owner:SetAttribute("inHealerMode", value); -- set flag for healer mode
+			Owner:SetAttribute("useAlternateLayout", value); -- set flag for healer mode
 			Owner:RunAttribute("sortFrames"); -- Update the layout 
 		end 
 	]=], 
@@ -267,7 +266,7 @@ local SECURE = {
 	-- Called on the raid frame group header
 	Raid_SortFrames = [=[
 		local groupLayout = self:GetAttribute("groupLayout"); 
-		local inHealerMode = self:GetAttribute("inHealerMode"); 
+		local useAlternateLayout = self:GetAttribute("useAlternateLayout"); 
 
 		local anchor; 
 		local colSize; 
@@ -314,7 +313,7 @@ local SECURE = {
 			return 
 		end 
 
-		if inHealerMode then 
+		if useAlternateLayout then 
 			anchor = self:GetFrameRef("HealerModeAnchor"); 
 			growthY = growthYHealerMode; 
 			groupAnchor = groupAnchorHealerMode; 
@@ -343,30 +342,20 @@ local SECURE = {
 
 -- Create a secure callback frame our menu system can use
 -- to alter unitframe setting while engaged in combat.
+-- TODO: Make this globally accessible to the entire addon, 
+-- and move all these little creation methods away from the modules.
 local CreateSecureCallbackFrame = function(module, owner, db, script)
 
-	-- Create a secure proxy frame for the menu system
-	local callbackFrame = module:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
+	local OptionsMenu = Core:GetModule("OptionsMenu", true)
+	if (not OptionsMenu) then
+		return
+	end
 
-	-- Attach the module's frame to the proxy
+	local callbackFrame = OptionsMenu:CreateCallbackFrame(module)
 	callbackFrame:SetFrameRef("Owner", owner)
+	callbackFrame:AssignSettings(db)
+	callbackFrame:AssignCallback(script)
 
-	-- Register module db with the secure proxy
-	if db then 
-		for key,value in pairs(db) do 
-			callbackFrame:SetAttribute(key,value)
-		end 
-	end
-
-	-- Now that attributes have been defined, attach the onattribute script
-	callbackFrame:SetAttribute("_onattributechanged", script)
-
-	-- Attach a getter method for the menu to the module
-	module.GetSecureUpdater = function(self) 
-		return callbackFrame 
-	end
-
-	-- Return the proxy updater to the module
 	return callbackFrame
 end
 
@@ -2419,19 +2408,8 @@ end
 
 UnitFrameTarget.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_TARGET_CHANGED") then
-		if UnitExists("target") then
-			-- Play a fitting sound depending on what kind of target we gained
-			if UnitIsEnemy("target", "player") then
-				self:PlaySoundKitID(SOUNDKIT.IG_CREATURE_AGGRO_SELECT, "SFX")
-			elseif UnitIsFriend("player", "target") then
-				self:PlaySoundKitID(SOUNDKIT.IG_CHARACTER_NPC_SELECT, "SFX")
-			else
-				self:PlaySoundKitID(SOUNDKIT.IG_CREATURE_NEUTRAL_SELECT, "SFX")
-			end
+		if (UnitExists("target")) then
 			self.frame:PostUpdateTextures()
-		else
-			-- Play a sound indicating we lost our target
-			self:PlaySoundKitID(SOUNDKIT.INTERFACE_SOUND_LOST_TARGET_UNIT, "SFX")
 		end
 	elseif (event == "GP_AURA_FILTER_MODE_CHANGED") then
 		local auras = self.frame.Auras
@@ -2468,63 +2446,6 @@ UnitFramePet.OnInit = function(self)
 	self.frame = self:SpawnUnitFrame("pet", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StylePetFrame(frame, unit, id, self.layout, ...)
 	end)
-
-	-- Pet Happiness
-	if (IsClassic) then
-		local GetPetHappiness = GetPetHappiness
-		local HasPetUI = HasPetUI
-
-		-- Parent it to the pet frame, so its visibility and fading follows that automatically. 
-		local happyContainer = CreateFrame("Frame", nil, self.frame)
-		local happy = happyContainer:CreateFontString()
-		happy:SetFontObject(Private.GetFont(12,true))
-		happy:SetPoint("BOTTOM", self:GetFrame("UICenter"), "BOTTOM", 0, 10)
-		happy.msg = "|cffffffff"..HAPPINESS..":|r %s |cff888888(%s)|r |cffffffff- "..STAT_DPS_SHORT..":|r %s"
-		happy.msgShort = "|cffffffff"..HAPPINESS..":|r %s |cffffffff- "..STAT_DPS_SHORT..":|r %s"
-
-		happy.Update = function(element)
-
-			local happiness, damagePercentage, loyaltyRate = GetPetHappiness()
-			local _, hunterPet = HasPetUI()
-			if (not (happiness or hunterPet)) then
-				return element:Hide()
-			end
-
-			-- Happy
-			local level, damage
-			if (happiness == 3) then
-				level = "|cff20c000" .. PET_HAPPINESS3 .. "|r"
-				damage = "|cff20c000" .. damagePercentage .. "|r"
-
-			-- Content
-			elseif (happiness == 2) then
-				level = "|cfffe8a0e" .. PET_HAPPINESS2 .. "|r"
-				damage = "|cfffe8a0e" .. damagePercentage .. "|r"
-
-			-- Unhappy
-			else
-				level = "|cffff0303" .. PET_HAPPINESS1 .. "|r"
-				damage = "|cffff0303" .. damagePercentage .. "|r"
-			end
-
-			if (loyaltyRate and (loyaltyRate > 0)) then 
-				element:SetFormattedText(element.msg, level, loyaltyRate, damage)
-			else 
-				element:SetFormattedText(element.msgShort, level, damage)
-			end 
-
-			element:Show()
-		end
-
-		happyContainer:SetScript("OnEvent", function(self, event, ...) 
-			happy:Update()
-		end)
-
-		happyContainer:RegisterEvent("PLAYER_ENTERING_WORLD")
-		happyContainer:RegisterEvent("PET_UI_UPDATE")
-		happyContainer:RegisterEvent("UNIT_HAPPINESS")
-		happyContainer:RegisterUnitEvent("UNIT_PET", "player")
-	end
 end 
 
 -----------------------------------------------------------
@@ -2558,7 +2479,7 @@ UnitFrameParty.OnInit = function(self)
 	self.frame:SetFrameRef("HealerModeAnchor", self.frame.healerAnchor)
 
 	self.frame:Execute(SECURE.FrameTable_Create)
-	self.frame:SetAttribute("inHealerMode", GetConfig(ADDON).enableHealerMode)
+	self.frame:SetAttribute("useAlternateLayout", GetConfig(ADDON).enableHealerMode)
 	self.frame:SetAttribute("sortFrames", SECURE.Party_SortFrames:format(
 		self.layout.GroupAnchor, 
 		self.layout.GrowthX, 
@@ -2611,7 +2532,7 @@ UnitFrameRaid.OnInit = function(self)
 	self.frame.healerAnchor:Place(unpack(self.layout.AlternatePlace)) 
 	self.frame:SetFrameRef("HealerModeAnchor", self.frame.healerAnchor)
 	self.frame:Execute(SECURE.FrameTable_Create)
-	self.frame:SetAttribute("inHealerMode", GetConfig(ADDON).enableHealerMode)
+	self.frame:SetAttribute("useAlternateLayout", GetConfig(ADDON).enableHealerMode)
 	self.frame:SetAttribute("enableRaidFrames", self.db.enableRaidFrames)
 	self.frame:SetAttribute("sortFrames", SECURE.Raid_SortFrames:format(
 		self.layout.GroupSizeNormal, 

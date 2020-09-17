@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 54)
+local LibNamePlate = Wheel:Set("LibNamePlate", 55)
 if (not LibNamePlate) then	
 	return
 end
@@ -976,7 +976,6 @@ LibNamePlate.UpdateNamePlateOptions = function(self)
 	self:ForAllEmbeds("PostUpdateNamePlateOptions")
 end
 
--- TODO: Make this useful. 
 LibNamePlate.UpdateAllScales = function(self)
 	if (oldScale ~= LibNamePlate.SCALE) then
 		for baseFrame, plate in pairs(allPlates) do

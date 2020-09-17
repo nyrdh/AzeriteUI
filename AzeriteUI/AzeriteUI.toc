@@ -53,7 +53,6 @@ front-end\root.lua
 # Modules.
 front-end\modules\actionbars.lua
 front-end\modules\bindings.lua
-front-end\modules\chatfilters.lua
 front-end\modules\chatwindows.lua
 front-end\modules\explorer.lua
 front-end\modules\floaters.lua

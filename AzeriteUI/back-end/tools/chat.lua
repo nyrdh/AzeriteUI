@@ -1,10 +1,37 @@
-local ADDON, Private = ...
-local Core = Wheel("LibModule"):GetModule(ADDON)
-if (not Core) then 
-	return 
+--[[--
+
+The purpose of this tool is to supply 
+basic filters for chat output.
+
+--]]--
+
+local LibChatTool = Wheel:Set("LibChatTool", 1)
+if (not LibChatTool) then
+	return
 end
 
-local Module = Core:NewModule("ChatFilters", "LibFrame", "LibClientBuild")
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "LibChatTool requires LibClientBuild to be loaded.")
+
+local LibEvent = Wheel("LibEvent")
+assert(LibEvent, "LibChatTool requires LibEvent to be loaded.")
+
+local LibColorTool = Wheel("LibColorTool")
+assert(LibColorTool, "LibChatTool requires LibColorTool to be loaded.")
+
+LibEvent:Embed(LibChatTool)
+
+-- Library registries
+LibChatTool.embeds = LibChatTool.embeds or {}
+LibChatTool.filterStatus = LibChatTool.filterStatus or {}
+LibChatTool.methodCache = LibChatTool.methodCache or {}
+
+-- Filter Cache
+local Filters = {}
+
+-- Speed!
+local FilterStatus = LibChatTool.filterStatus
+local MethodCache = LibChatTool.methodCache
 
 -- Lua API
 local hooksecurefunc = hooksecurefunc
@@ -32,29 +59,14 @@ local RaidNotice_AddMessage = RaidNotice_AddMessage
 -- WoW Objects
 local CHAT_FRAMES = CHAT_FRAMES
 
--- Private API
-local Colors = Private.Colors
-local GetConfig = Private.GetConfig
-local GetLayout = Private.GetLayout
-local GetMedia = Private.GetMedia
-
 -- Constants
-local IsClassic = Module:IsClassic()
-local IsRetail = Module:IsRetail()
-
--- Caches
-local Templates = {}
-
--- Method Caches
-local ChatFrame_AddMessage = {}
-
--- TODO!
--- - Gather all output patterns in a table
--- - Gather all filters in a system,
---   with event, conditionals and solutions.
-
+local Colors = LibColorTool:GetColorTable()
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
 local PlayerFaction, PlayerFactionLabel = UnitFactionGroup("player")
 
+-- Stuff we need to clean up
+-----------------------------------------------------------------
 -- Chat output templates
 local sign, value, label = "|cffeaeaea", "|cfff0f0f0", "|cffffb200"
 local red = "|cffcc0000"
@@ -96,9 +108,14 @@ local getFilter = function(msg)
 end
 
 -- Money Icon Strings
-local L_GOLD = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,0,32)
-local L_SILVER = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 32,64,0,32)
-local L_COPPER = string_format([[|T%s:16:16:-2:0:64:64:%d:%d:%d:%d|t]], GetMedia("coins"), 0,32,32,64)
+local L_GOLD_DEFAULT = string_format("|TInterface\\MoneyFrame\\UI-GoldIcon:16:16:2:0|t")
+local L_GOLD = L_GOLD_DEFAULT
+
+local L_SILVER_DEFAULT = string_format("|TInterface\\MoneyFrame\\UI-SilverIcon:16:16:2:0|t")
+local L_SILVER = L_SILVER_DEFAULT
+
+local L_COPPER_DEFAULT = string_format("|TInterface\\MoneyFrame\\UI-CopperIcon:16:16:2:0|t")
+local L_COPPER = L_COPPER_DEFAULT
 
 -- Search Patterns
 local P_GOLD = getFilter(GOLD_AMOUNT) -- "%d Gold"
@@ -240,15 +257,17 @@ table_insert(Replacements, 	{ "^(.-|h) yells", "%1" })
 table_insert(Replacements, 	{ "<"..AFK..">", "|cffFF0000<"..AFK..">|r " })
 table_insert(Replacements, 	{ "<"..DND..">", "|cffE7E716<"..DND..">|r " })
 
+-- Utility Functions
+-----------------------------------------------------------------
 -- Custom method for filtering messages
-local ChatFrameAddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
+local AddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
 	if (not msg) or (msg == "") then
 		return
 	end
 
 	-- Only do this if the option is enabled,
 	-- but always go through our proxy method here regardless.
-	if (Module.db.enableAllChatFilters) then
+	if (FilterStatus.All) then
 		for i,info in ipairs(Replacements) do
 			msg = string_gsub(msg, info[1], info[2])
 		end
@@ -271,30 +290,21 @@ local ChatFrameAddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
 	end
 
 	-- Return the new message to the old method
-	return ChatFrame_AddMessage[frame](frame, msg, r, g, b, chatID, ...)
+	return MethodCache[frame](frame, msg, r, g, b, chatID, ...)
 end
-
--- Proxy functions to module methods,
--- primarily used to directly hook blizzard functions.
-local ChatFilterProxy = function(...) return Module:OnChatMessage(...) end
-local ChatSetupProxy = function(...) return Module:OnCreateChatFrame(...) end
 
 -- Make the money display pretty
 local CreateMoneyString = function(gold, silver, copper)
 	local moneyString
-
 	if (gold > 0) then 
 		moneyString = string_format("|cfff0f0f0%d|r%s", gold, L_GOLD)
 	end
-
 	if (silver > 0) then 
 		moneyString = (moneyString and moneyString.." " or "") .. string_format("|cfff0f0f0%d|r%s", silver, L_SILVER)
 	end
-
 	if (copper > 0) then 
 		moneyString = (moneyString and moneyString.." " or "") .. string_format("|cfff0f0f0%d|r%s", copper, L_COPPER)
 	end 
-
 	return moneyString
 end
 
@@ -302,97 +312,23 @@ local SendMonsterMessage = function(chatType, message, monster, ...)
 	RaidNotice_AddMessage(RaidBossEmoteFrame, string_format(message, monster), ChatTypeInfo[chatType])
 end
 
-Module.UpdateChatFilters = function(self)
-	-- Styling
-	if (self.db.enableChatStyling) then
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_COMBAT_FACTION_CHANGE", ChatFilterProxy) -- reputation
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_COMBAT_XP_GAIN", ChatFilterProxy) -- xp
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_CURRENCY", ChatFilterProxy) -- money loot
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_LOOT", ChatFilterProxy) -- item loot
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONEY", ChatFilterProxy) -- money loot
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_SKILL", ChatFilterProxy) -- skill ups
-		if (IsRetail) then
-			ChatFrame_AddMessageEventFilter("CHAT_MSG_ACHIEVEMENT", ChatFilterProxy)
-		end
-	else
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_COMBAT_FACTION_CHANGE", ChatFilterProxy) -- reputation
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_COMBAT_XP_GAIN", ChatFilterProxy) -- xp
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_CURRENCY", ChatFilterProxy) -- money loot
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_LOOT", ChatFilterProxy) -- item loot
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONEY", ChatFilterProxy) -- money loot
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SKILL", ChatFilterProxy) -- skill ups
-		if (IsRetail) then
-			ChatFrame_RemoveMessageEventFilter("CHAT_MSG_ACHIEVEMENT", ChatFilterProxy)
-		end
-	end
-
-	-- Monster Filter
-	if (self.db.enableMonsterFilter) then
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_SAY", ChatFilterProxy)
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_YELL", ChatFilterProxy)
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_EMOTE", ChatFilterProxy)
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_WHISPER", ChatFilterProxy)
-	else
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_SAY", ChatFilterProxy)
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_YELL", ChatFilterProxy)
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_EMOTE", ChatFilterProxy)
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_WHISPER", ChatFilterProxy)
-	end
-
-	-- Boss Filter
-	if (self.db.enableBossFilter) then
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_BOSS_EMOTE", ChatFilterProxy)
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_BOSS_WHISPER", ChatFilterProxy)
-	else
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_RAID_BOSS_EMOTE", ChatFilterProxy)
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_RAID_BOSS_WHISPER", ChatFilterProxy)
-	end
-
-	-- Spam Filter
-	if (self.db.enableSpamFilter) then
-		-- This kills off blizzard's interfering bg spam filter,
-		-- and prevents it from adding their additional leave/join messages.
-		BattlegroundChatFilters:StopBGChatFilter()
-		BattlegroundChatFilters:UnregisterAllEvents()
-		BattlegroundChatFilters:SetScript("OnUpdate", nil)
-		BattlegroundChatFilters:SetScript("OnEvent", nil)
-	else
-		-- (Re)start blizzard's interfering bg spam filter,
-		-- which in my opinion creates as much spam as it removes.
-		BattlegroundChatFilters:OnLoad()
-		BattlegroundChatFilters:SetScript("OnEvent", BattlegroundChatFilters.OnEvent)
-		if (not BattlegroundChatFilters:GetScript("OnUpdate")) then
-			local _, instanceType = IsInInstance()
-			if (instanceType == "pvp") then
-				BattlegroundChatFilters:StartBGChatFilter()
-			end
-		end
-	end
-
-	-- Used by both styling and spam filters.
-	if (self.db.enableSpamFilter) or (self.db.enableChatStyling) then
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", ChatFilterProxy)
-	else
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", ChatFilterProxy)
-	end
-end
-
 -- Apply custom methods to the chat frames
-Module.OnCreateChatFrame = function(self, frame)
-	if (ChatFrame_AddMessage[frame]) then
-		return
-	end
+local CacheMessageMethod = function(frame)
 
-	-- Copy the current AddMessage method from the frame.
-	-- *this also functions as our "has been handled" indicator.
-	ChatFrame_AddMessage[frame] = frame.AddMessage
+	-- Multiple library instances could be hooked, 
+	if (not MethodCache[frame]) then
+
+		-- Copy the current AddMessage method from the frame.
+		-- *this also functions as our "has been handled" indicator.
+		MethodCache[frame] = frame.AddMessage
+	end
 
 	-- Replace with our filtered AddMessage method.
-	frame.AddMessage = ChatFrameAddMessageFiltered
+	-- We do this always.
+	frame.AddMessage = AddMessageFiltered
 end
 
--- Handler for most chat filters
-Module.OnChatMessage = function(self, frame, event, message, author, ...)
+local OnChatMessage = function(frame, event, message, author, ...)
 	if (message == ERR_NOT_IN_RAID) then
 		return true
 	
@@ -554,7 +490,7 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 		-- Make a system that pairs patterns with solutions,
 		-- describing if it allows multiple, should block, replace, etc.
 
-		if (self.db.enableChatStyling) then
+		if (FilterStatus.Styling) then
 
 			-- Followers
 			if (IsRetail) then
@@ -693,7 +629,7 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 		end
 
 		-- Hide selected stuff from various other events
-		if (self.db.enableSpamFilter) then
+		if (FilterStatus.Spam) then
 			for i,pattern in ipairs(FilteredGlobals) do
 				if (string_match(message,pattern)) then
 					return true
@@ -706,55 +642,156 @@ Module.OnChatMessage = function(self, frame, event, message, author, ...)
 	return false, message, author, ...
 end
 
-Module.OnInit = function(self)
-	self.db = GetConfig(self:GetName())
-	self.layout = GetLayout(self:GetName())
-
-	-- Setup all initial chat frames
-	for _,chatFrameName in ipairs(CHAT_FRAMES) do ChatSetupProxy(_G[chatFrameName]) end
-
-	-- Hook creation of temporary windows
-	hooksecurefunc("FCF_OpenTemporaryWindow", function() ChatSetupProxy((FCF_GetCurrentChatFrame())) end)
-	
-	-- Create a secure proxy frame for the menu system
-	local callbackFrame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
-	callbackFrame.UpdateChatFilters = function() self:UpdateChatFilters() end
-
-	-- Register module db with the secure proxy
-	for key,value in pairs(self.db) do 
-		callbackFrame:SetAttribute(key,value)
-	end 
-
-	-- Now that attributes have been defined, attach the onattribute script
-	callbackFrame:SetAttribute("_onattributechanged", [=[
-		if name then 
-			name = string.lower(name); 
-		end 
-		if (name == "change-enablechatstyling") then
-			self:SetAttribute("enableChatStyling", value); 
-			self:CallMethod("UpdateChatFilters"); 
-
-		elseif (name == "change-enablemonsterfilter") then
-			self:SetAttribute("enableMonsterFilter", value); 
-			self:CallMethod("UpdateChatFilters"); 
-
-		elseif (name == "change-enablebossfilter") then
-			self:SetAttribute("enableBossFilter", value); 
-			self:CallMethod("UpdateChatFilters"); 
-
-		elseif (name == "change-enablespamfilter") then
-			self:SetAttribute("enableSpamFilter", value); 
-			self:CallMethod("UpdateChatFilters"); 
-		end 
-	]=])
-
-	-- Attach a getter method for the menu to the module
-	self.GetSecureUpdater = function(self) 
-		return callbackFrame 
+-- Tool API
+-----------------------------------------------------------------
+LibChatTool.SetChatFilterEnabled = function(self, filterType, shouldEnable)
+	local filter = Filters[filterType]
+	if (not filter) then
+		return
 	end
+	local filterEnabled = FilterStatus[filterType]
+	if (shouldEnable) and (not filterEnabled) then
+		FilterStatus[filterType] = true
+		filter.Enable(self)
 
+	elseif (not shouldEnable) and (filterEnabled) then
+		FilterStatus[filterType] = nil
+		filter.Disable(self)
+	end
 end
 
-Module.OnEnable = function(self)
-	self:UpdateChatFilters()
+LibChatTool.SetChatFilterMoneyTextures = function(self, goldTextureString, silverTextureString, copperTextureString)
+	L_GOLD = goldTextureString or L_GOLD_DEFAULT
+	L_SILVER = silverTextureString or L_SILVER_DEFAULT
+	L_COPPER = copperTextureString or L_COPPER_DEFAULT
 end
+
+-- Re-enable all active filters. Use on library updates.
+LibChatTool.UpdateAllFilters = function(self)
+	for filterType,isEnabled in pairs(FilterStatus) do
+		if (isEnabled) then
+			local filter = Filters[filterType]
+			filter:Disable()
+			filter:Enable()
+		end
+	end
+end
+
+local embedMethods = {
+	SetChatFilterEnabled = true,
+	SetChatFilterMoneyTextures = true
+}
+
+LibChatTool.Embed = function(self, target)
+	for method in pairs(embedMethods) do
+		target[method] = self[method]
+	end
+	self.embeds[target] = true
+	return target
+end
+
+-- Upgrade existing embeds, if any
+for target in pairs(LibChatTool.embeds) do
+	LibChatTool:Embed(target)
+end
+
+Filters.Styling = {
+	Enable = function(module)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_COMBAT_FACTION_CHANGE", OnChatMessage) -- reputation
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_COMBAT_XP_GAIN", OnChatMessage) -- xp
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_CURRENCY", OnChatMessage) -- money loot
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_LOOT", OnChatMessage) -- item loot
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONEY", OnChatMessage) -- money loot
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_SKILL", OnChatMessage) -- skill ups
+		if (IsRetail) then
+			ChatFrame_AddMessageEventFilter("CHAT_MSG_ACHIEVEMENT", OnChatMessage)
+		end
+
+		-- Used by both styling and spam filters.
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", OnChatMessage)
+	end,
+	Disable = function(module)
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_COMBAT_FACTION_CHANGE", OnChatMessage) -- reputation
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_COMBAT_XP_GAIN", OnChatMessage) -- xp
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_CURRENCY", OnChatMessage) -- money loot
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_LOOT", OnChatMessage) -- item loot
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONEY", OnChatMessage) -- money loot
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SKILL", OnChatMessage) -- skill ups
+		if (IsRetail) then
+			ChatFrame_RemoveMessageEventFilter("CHAT_MSG_ACHIEVEMENT", OnChatMessage)
+		end
+
+		-- Used by both styling and spam filters.
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", OnChatMessage)
+	end
+}
+
+Filters.Spam = {
+	Enable = function(module)
+
+		-- This kills off blizzard's interfering bg spam filter,
+		-- and prevents it from adding their additional leave/join messages.
+		BattlegroundChatFilters:StopBGChatFilter()
+		BattlegroundChatFilters:UnregisterAllEvents()
+		BattlegroundChatFilters:SetScript("OnUpdate", nil)
+		BattlegroundChatFilters:SetScript("OnEvent", nil)
+
+		-- Used by both styling and spam filters.
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", OnChatMessage)
+	end,
+	Disable = function(module)
+
+		-- (Re)start blizzard's interfering bg spam filter,
+		-- which in my opinion creates as much spam as it removes.
+		BattlegroundChatFilters:OnLoad()
+		BattlegroundChatFilters:SetScript("OnEvent", BattlegroundChatFilters.OnEvent)
+		if (not BattlegroundChatFilters:GetScript("OnUpdate")) then
+			local _, instanceType = IsInInstance()
+			if (instanceType == "pvp") then
+				BattlegroundChatFilters:StartBGChatFilter()
+			end
+		end
+
+		-- Used by both styling and spam filters.
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", OnChatMessage)
+	end
+}
+
+Filters.Boss = {
+	Enable = function(module)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_BOSS_EMOTE", OnChatMessage)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_BOSS_WHISPER", OnChatMessage)
+	end,
+	Disable = function(module)
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_RAID_BOSS_EMOTE", OnChatMessage)
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_RAID_BOSS_WHISPER", OnChatMessage)
+	end
+}
+
+Filters.Monster = {
+	Enable = function(module)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_SAY", OnChatMessage)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_YELL", OnChatMessage)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_EMOTE", OnChatMessage)
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_WHISPER", OnChatMessage)
+	end,
+	Disable = function(module)
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_SAY", OnChatMessage)
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_YELL", OnChatMessage)
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_EMOTE", OnChatMessage)
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_WHISPER", OnChatMessage)
+	end
+}
+
+-- Setup all initial chat frames
+for _,chatFrameName in ipairs(CHAT_FRAMES) do 
+	CacheMessageMethod(_G[chatFrameName]) 
+end
+
+-- Hook creation of temporary windows
+hooksecurefunc("FCF_OpenTemporaryWindow", function() 
+	CacheMessageMethod((FCF_GetCurrentChatFrame())) 
+end)
+
+-- Update existing filters
+LibChatTool:UpdateAllFilters()

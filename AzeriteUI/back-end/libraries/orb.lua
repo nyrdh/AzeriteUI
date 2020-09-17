@@ -1,4 +1,4 @@
-local LibOrb = Wheel:Set("LibOrb", 19)
+local LibOrb = Wheel:Set("LibOrb", 20)
 if (not LibOrb) then	
 	return
 end
@@ -529,9 +529,6 @@ LibOrb.CreateOrb = function(self, parent, rotateClockwise, speedModifier)
 	orbTex1:SetDrawLayer("BACKGROUND", 0)
 	orbTex1:SetAllPoints()
 
-	-- TODO: Get rid of these animation layers, 
-	-- we should be able to do it ourselves in BfA
-	-- where SetRotation and SetTexCoord can be used together. 
 	local orbTex1AnimGroup = orbTex1:CreateAnimationGroup()    
 	local orbTex1Anim = orbTex1AnimGroup:CreateAnimation("Rotation")
 	orbTex1Anim:SetDegrees(rotateClockwise and -360 or 360)

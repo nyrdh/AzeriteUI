@@ -506,22 +506,6 @@ Module.CreateLeaderTools = function(self)
 	self:UpdateAll()
 end
 
-Module.GetSecureUpdater = function(self)
-	if (not self.proxyUpdater) then 
-
-		-- Create a secure proxy frame for the menu system. 
-		local callbackFrame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
-	
-		-- Now that attributes have been defined, attach the onattribute script.
-		callbackFrame:SetAttribute("_onattributechanged", SECURE.HealerMode_SecureCallback)
-
-		self.proxyUpdater = callbackFrame
-	end
-
-	-- Return the proxy updater to the module
-	return self.proxyUpdater
-end
-
 Module.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then
 		self:ToggleLeaderTools()
@@ -564,6 +548,12 @@ end
 
 Module.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
+
+	local OptionsMenu = Core:GetModule("OptionsMenu", true)
+	if (OptionsMenu) then
+		local callbackFrame = OptionsMenu:CreateCallbackFrame(self)
+		callbackFrame:AssignCallback(SECURE.HealerMode_SecureCallback)
+	end
 end 
 
 Module.OnEnable = function(self)

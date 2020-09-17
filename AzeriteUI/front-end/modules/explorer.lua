@@ -94,51 +94,34 @@ Module.OnInit = function(self)
 	)
 	self.db = GetConfig(self:GetName())
 
-	local proxy = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
-	for _,method in ipairs({ 
-		"PostUpdatePlayerFading",
-		"PostUpdateTrackerFading",
-		"PostUpdateExplorerChat"
-	}) do
-		proxy[method] = function() self[method](self) end
+	local OptionsMenu = Core:GetModule("OptionsMenu", true)
+	if (OptionsMenu) then
+		local callbackFrame = OptionsMenu:CreateCallbackFrame(self)
+		callbackFrame:AssignProxyMethods("PostUpdatePlayerFading", "PostUpdateTrackerFading", "PostUpdateExplorerChat")
+		callbackFrame:AssignSettings(self.db)
+		callbackFrame:AssignCallback([=[
+			if (not name) then
+				return 
+			end 
+			name = string.lower(name); 
+			if (name == "change-enableexplorer") then 
+				self:SetAttribute("enableExplorer", value); 
+				self:CallMethod("PostUpdatePlayerFading"); 
+
+			elseif (name == "change-enabletrackerfading") then 
+				self:SetAttribute("enableTrackerFading", value); 
+				self:CallMethod("PostUpdateTrackerFading"); 
+
+			elseif (name == "change-enableexplorerchat") then
+				self:SetAttribute("enableExplorerChat", value); 
+				self:CallMethod("PostUpdateExplorerChat"); 
+			end 
+		]=])
 	end
-	for key,value in pairs(self.db) do 
-		proxy:SetAttribute(key,value)
-	end 
-	proxy:SetAttribute("_onattributechanged", [=[
-		if (not name) then
-			return 
-		end 
-
-		-- Seems to be some inconsistencies in name returns, 
-		-- so we make it lower case to avoid issues. 
-		name = string.lower(name); 
-
-		-- Identify what attribute or setting was change
-		if (name == "change-enableexplorer") then 
-			self:SetAttribute("enableExplorer", value); 
-			self:CallMethod("PostUpdatePlayerFading"); 
-
-		elseif (name == "change-enabletrackerfading") then 
-			self:SetAttribute("enableTrackerFading", value); 
-			self:CallMethod("PostUpdateTrackerFading"); 
-
-		elseif (name == "change-enableexplorerchat") then
-			self:SetAttribute("enableExplorerChat", value); 
-			self:CallMethod("PostUpdateExplorerChat"); 
-		end 
-
-	]=])
-
-	self.proxyUpdater = proxy
 end 
 
 Module.OnEnable = function(self)
 	self:PostUpdatePlayerFading()
 	self:PostUpdateTrackerFading()
 	self:PostUpdateExplorerChat()
-end
-
-Module.GetSecureUpdater = function(self)
-	return self.proxyUpdater
 end

@@ -733,60 +733,42 @@ Module.OnInit = function(self)
 	self.db.enableBGSanityFilter = nil
 	self.layout = GetLayout(self:GetName())
 
-	-- Create a secure proxy frame for the menu system
-	local callbackFrame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
+	local OptionsMenu = Core:GetModule("OptionsMenu", true)
+	if (OptionsMenu) then
+		local callbackFrame = OptionsMenu:CreateCallbackFrame(self)
+		callbackFrame:AssignProxyMethods("UpdateAlertFrames", "UpdateAnnouncements", "UpdateObjectivesTracker", "UpdateTalkingHead", "UpdateWarnings")
+		callbackFrame:AssignSettings(self.db)
+		callbackFrame:AssignCallback([=[
+			if (name) then 
+				name = string.lower(name); 
+				if (name == "change-enabletalkinghead") then 
+					self:SetAttribute("enableTalkingHead", value); 
+					self:CallMethod("UpdateTalkingHead"); 
 
-	-- Add proxy methods
-	for _,method in pairs({
-			"UpdateAlertFrames",
-			"UpdateAnnouncements",
-			"UpdateObjectivesTracker",
-			"UpdateTalkingHead",
-			"UpdateWarnings"
-		}) do
-		callbackFrame[method] = function() self[method](self) end 
-	end
+				elseif (name == "change-enablealerts") then 
+					self:SetAttribute("enableAlerts", value); 
+					self:CallMethod("UpdateAlertFrames"); 
 
-	-- Register module db with the secure proxy
-	for key,value in pairs(self.db) do 
-		callbackFrame:SetAttribute(key,value)
-	end 
+				elseif (name == "change-enableannouncements") then 
+					self:SetAttribute("enableAnnouncements", value); 
+					self:CallMethod("UpdateAnnouncements"); 
 
-	-- Now that attributes have been defined, attach the onattribute script
-	callbackFrame:SetAttribute("_onattributechanged", [=[
-		if (name) then 
-			name = string.lower(name); 
-			if (name == "change-enabletalkinghead") then 
-				self:SetAttribute("enableTalkingHead", value); 
-				self:CallMethod("UpdateTalkingHead"); 
+				elseif (name == "change-enableraidwarnings") then 
+					self:SetAttribute("enableRaidWarnings", value); 
+					self:CallMethod("UpdateWarnings"); 
 
-			elseif (name == "change-enablealerts") then 
-				self:SetAttribute("enableAlerts", value); 
-				self:CallMethod("UpdateAlertFrames"); 
+				elseif (name == "change-enableraidbossemotes") then 
+					self:SetAttribute("enableRaidBossEmotes", value); 
+					self:CallMethod("UpdateWarnings"); 
 
-			elseif (name == "change-enableannouncements") then 
-				self:SetAttribute("enableAnnouncements", value); 
-				self:CallMethod("UpdateAnnouncements"); 
-
-			elseif (name == "change-enableraidwarnings") then 
-				self:SetAttribute("enableRaidWarnings", value); 
-				self:CallMethod("UpdateWarnings"); 
-
-			elseif (name == "change-enableraidbossemotes") then 
-				self:SetAttribute("enableRaidBossEmotes", value); 
-				self:CallMethod("UpdateWarnings"); 
-
-			elseif (name == "change-enableobjectivestracker") then 
-				self:SetAttribute("enableObjectivesTracker", value); 
-				self:CallMethod("UpdateObjectivesTracker"); 
+				elseif (name == "change-enableobjectivestracker") then 
+					self:SetAttribute("enableObjectivesTracker", value); 
+					self:CallMethod("UpdateObjectivesTracker"); 
+				end 
 			end 
-		end 
-	]=])
-
-	-- Attach a getter method for the menu to the module
-	self.GetSecureUpdater = function(self) 
-		return callbackFrame 
+		]=])
 	end
+
 end 
 
 Module.OnEnable = function(self)
