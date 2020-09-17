@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.406-RC] 2020-09-17
+- Continuing the work of squashing all we can into the back-end sections.
+
+### Changed
+- There may or may not be some additional chat styling attached to the chat styling setting now.
+
+### Fixed
+- The player area should no longer fade out when you have a vehicle actionbar. This was causing problems with some world quests like the psycho turtles ones.
+
 ## [2.1.405-RC] 2020-09-16
 ### Changed
 - Lowered the frame strata of most blizzard floating widgets (like the vehicle seat indicator) to prevent them from overlapping Immersion dialog choices.
