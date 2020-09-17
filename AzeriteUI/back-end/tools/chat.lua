@@ -267,7 +267,7 @@ local AddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
 
 	-- Only do this if the option is enabled,
 	-- but always go through our proxy method here regardless.
-	if (FilterStatus.All) then
+	if (FilterStatus.Styling) then
 		for i,info in ipairs(Replacements) do
 			msg = string_gsub(msg, info[1], info[2])
 		end
