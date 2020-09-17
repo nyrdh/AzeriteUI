@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 37)
+local LibFader = Wheel:Set("LibFader", 38)
 if (not LibFader) then	
 	return
 end
@@ -535,7 +535,8 @@ LibFader.OnEvent = function(self, event, ...)
 	elseif (event == "UNIT_ENTERING_VEHICLE") 
 		or (event == "UNIT_ENTERED_VEHICLE") 
 		or (event == "UNIT_EXITING_VEHICLE") 
-		or (event == "UNIT_EXITED_VEHICLE") then 
+		or (event == "UNIT_EXITED_VEHICLE")
+		or (event == "UPDATE_VEHICLE_ACTIONBAR") then 
 		self:CheckVehicle()
 
 	elseif (event == "UNIT_POWER_FREQUENT") 
@@ -724,6 +725,7 @@ if (IsRetail) then
 	LibFader:RegisterEvent("PLAYER_FOCUS_CHANGED", "OnEvent") 
 	LibFader:RegisterEvent("UPDATE_OVERRIDE_ACTIONBAR", "OnEvent") 
 	LibFader:RegisterEvent("UPDATE_POSSESS_BAR", "OnEvent") 
+	LibFader:RegisterEvent("UPDATE_VEHICLE_ACTIONBAR", "OnEvent", "player") 
 	LibFader:RegisterUnitEvent("UNIT_ENTERED_VEHICLE", "OnEvent", "player") 
 	LibFader:RegisterUnitEvent("UNIT_ENTERING_VEHICLE", "OnEvent", "player") 
 	LibFader:RegisterUnitEvent("UNIT_EXITED_VEHICLE", "OnEvent", "player") 
