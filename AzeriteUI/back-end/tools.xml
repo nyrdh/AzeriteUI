@@ -12,4 +12,7 @@
 <!-- Chat filters -->
 <Script file='tools\chat.lua'/>
 
+<!-- UI Switcher -->
+<Script file='tools\switcher.lua'/>
+
 </Ui>

@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 
 -- Wooh! 
-local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibSwitcher", "LibAuraData", "LibAura", "LibClientBuild")
+local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibSwitcherTool", "LibAuraData", "LibAura", "LibClientBuild")
 
 -- Tell the back-end what addon to look for before 
 -- initializing this module and all its submodules. 

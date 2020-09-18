@@ -1,4 +1,4 @@
-local LibFrame = Wheel:Set("LibFrame", 65)
+local LibFrame = Wheel:Set("LibFrame", 66)
 if (not LibFrame) then	
 	return
 end
@@ -36,7 +36,8 @@ local math_min = math.min
 local pairs = pairs
 local pcall = pcall
 local select = select
-local string_join = string_join
+local string_format = string.format
+local string_join = string.join
 local string_match = string.match
 local type = type
 
@@ -183,7 +184,7 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 -- Translate keywords to frame handles used for anchoring.

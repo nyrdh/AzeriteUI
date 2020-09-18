@@ -27,7 +27,6 @@
 <!-- core libs II, require core libs -->
 <Script file='libraries\frame.lua'/>
 <Script file='libraries\scale.lua'/>
-<Script file='libraries\switcher.lua'/>
 <Script file='libraries\widgetcontainer.lua'/>
 
 <!-- data libs, require core libs I-II -->

@@ -1,16 +1,16 @@
-local LibSwitcher = Wheel:Set("LibSwitcher", 5)
-if (not LibSwitcher) then
+local LibSwitcherTool = Wheel:Set("LibSwitcherTool", 7)
+if (not LibSwitcherTool) then
 	return
 end
 
 local LibModule = Wheel("LibModule")
-assert(LibModule, "LibSwitcher requires LibModule to be loaded.")
+assert(LibModule, "LibSwitcherTool requires LibModule to be loaded.")
 
 local LibSlash = Wheel("LibSlash")
-assert(LibSlash, "LibSwitcher requires LibSlash to be loaded.")
+assert(LibSlash, "LibSwitcherTool requires LibSlash to be loaded.")
 
 -- We want this embedded
-LibSlash:Embed(LibSwitcher)
+LibSlash:Embed(LibSwitcherTool)
 
 -- Lua API
 local _G = _G
@@ -28,13 +28,13 @@ local tonumber = tonumber
 local type = type
 
 -- WoW API
-local DisableAddOn = _G.DisableAddOn
-local EnableAddOn = _G.EnableAddOn
-local ReloadUI = _G.ReloadUI
+local DisableAddOn = DisableAddOn
+local EnableAddOn = EnableAddOn
+local ReloadUI = ReloadUI
 
 -- Library registries
-LibSwitcher.embeds = LibSwitcher.embeds or {}
-LibSwitcher.switches = LibSwitcher.switches or { Addons = {}, Cmds = {} }
+LibSwitcherTool.embeds = LibSwitcherTool.embeds or {}
+LibSwitcherTool.switches = LibSwitcherTool.switches or { Addons = {}, Cmds = {} }
 
 -- Keep the actual list of available UIs local.
 local CurrentProjects = { Addons = {}, Cmds = {} }
@@ -83,9 +83,9 @@ local KnownProjects = {
 }
 
 -- Shortcuts for quality of life.
-local Switches = LibSwitcher.switches
-local Addons = LibSwitcher.switches.Addons
-local Cmds = LibSwitcher.switches.Cmds
+local Switches = LibSwitcherTool.switches
+local Addons = LibSwitcherTool.switches.Addons
+local Cmds = LibSwitcherTool.switches.Cmds
 
 ----------------------------------------------------------------
 -- Utility Functions
@@ -100,7 +100,7 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 ----------------------------------------------------------------
@@ -113,7 +113,7 @@ local OnChatCommand = function(editBox, ...)
 	end 
 	local targetAddon = CurrentProjects.Cmds[cmd]
 	if targetAddon then 
-		LibSwitcher:SwitchToInterface(targetAddon)
+		LibSwitcherTool:SwitchToInterface(targetAddon)
 	end 
 end 
 
@@ -148,18 +148,18 @@ local UpdateInterfaceSwitches = function()
 	end 
 	-- Register the commands. 
 	if (counter > 0) then 
-		LibSwitcher:RegisterChatCommand("go", OnChatCommand, true)
-		LibSwitcher:RegisterChatCommand("goto", OnChatCommand, true)
+		LibSwitcherTool:RegisterChatCommand("go", OnChatCommand, true)
+		LibSwitcherTool:RegisterChatCommand("goto", OnChatCommand, true)
 	else
-		LibSwitcher:UnregisterChatCommand("go")
-		LibSwitcher:UnregisterChatCommand("goto")
+		LibSwitcherTool:UnregisterChatCommand("go")
+		LibSwitcherTool:UnregisterChatCommand("goto")
 	end 
 end
 
 ----------------------------------------------------------------
 -- Public API
 ----------------------------------------------------------------
-LibSwitcher.AddInterfaceSwitch = function(self, addon, ...)
+LibSwitcherTool.AddInterfaceSwitch = function(self, addon, ...)
 	check(addon, 1, "string")
 	-- Silently fail if the addon already has been registered
 	if Addons[addon] then 
@@ -180,7 +180,7 @@ LibSwitcher.AddInterfaceSwitch = function(self, addon, ...)
 	end 
 end
 
-LibSwitcher.SwitchToInterface = function(self, targetAddon)
+LibSwitcherTool.SwitchToInterface = function(self, targetAddon)
 	check(targetAddon, 1, "string")
 	-- Silently fail if an unavailable project is requested
 	if (not CurrentProjects.Addons[targetAddon]) then 
@@ -198,7 +198,7 @@ LibSwitcher.SwitchToInterface = function(self, targetAddon)
 end
 
 -- Return a list of available interface addon names. 
-LibSwitcher.GetInterfaceList = function(self)
+LibSwitcherTool.GetInterfaceList = function(self)
 	-- Generate a new list each time this is called, 
 	-- as we don't want to provide any access to our own tables. 
 	local listCopy = {}
@@ -212,7 +212,7 @@ end
 
 -- Return an iterator of available interface addon names.
 -- The key is the addon name, the value is whether its currently enabled. 
-LibSwitcher.GetInterfaceIterator = function(self)
+LibSwitcherTool.GetInterfaceIterator = function(self)
 	-- Generate a new list each time this is called, 
 	-- as we don't want to provide any access to our own tables. 
 	local listCopy = {}
@@ -234,7 +234,7 @@ local embedMethods = {
 	SwitchToInterface = true
 }
 
-LibSwitcher.Embed = function(self, target)
+LibSwitcherTool.Embed = function(self, target)
 	for method in pairs(embedMethods) do
 		target[method] = self[method]
 	end
@@ -243,6 +243,6 @@ LibSwitcher.Embed = function(self, target)
 end
 
 -- Upgrade existing embeds, if any
-for target in pairs(LibSwitcher.embeds) do
-	LibSwitcher:Embed(target)
+for target in pairs(LibSwitcherTool.embeds) do
+	LibSwitcherTool:Embed(target)
 end

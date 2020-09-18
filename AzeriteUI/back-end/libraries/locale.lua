@@ -1,4 +1,4 @@
-local LibLocale = Wheel:Set("LibLocale", 6)
+local LibLocale = Wheel:Set("LibLocale", 7)
 if (not LibLocale) then	
 	return
 end
@@ -13,6 +13,7 @@ local rawget = rawget
 local rawset = rawset
 local select = select
 local setmetatable = setmetatable
+local string_format = string.format
 local string_join = string.join
 local string_match = string.match
 local type = type
@@ -32,13 +33,13 @@ end
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if (type(value) == select(i, ...)) then 
+		if type(value) == select(i, ...) then 
 			return 
 		end
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 -- Metatable used to read locales

@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 80)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 81)
 if (not LibUnitFrame) then	
 	return
 end
@@ -28,6 +28,9 @@ LibWidgetContainer:Embed(LibUnitFrame)
 
 -- Lua API
 local _G = _G
+local assert = assert
+local debugstack = debugstack
+local error = error
 local math_floor = math.floor
 local pairs = pairs
 local select = select
@@ -39,6 +42,7 @@ local string_match = string.match
 local table_insert = table.insert
 local table_remove = table.remove
 local tonumber = tonumber
+local type = type
 local unpack = unpack
 
 -- Blizzard API
@@ -174,7 +178,7 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 -- Library Updates

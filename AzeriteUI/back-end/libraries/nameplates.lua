@@ -30,6 +30,9 @@ LibStatusBar:Embed(LibNamePlate)
 
 -- Lua API
 local _G = _G
+local assert = assert
+local debugstack = debugstack
+local error = error
 local ipairs = ipairs
 local math_ceil = math.ceil
 local math_floor = math.floor
@@ -37,12 +40,16 @@ local pairs = pairs
 local select = select
 local setmetatable = setmetatable
 local string_find = string.find
+local string_format = string.format
+local string_join = string.join
+local string_match = string.match
 local table_insert = table.insert
 local table_remove = table.remove
 local table_sort = table.sort
 local table_wipe = table.wipe
 local tonumber = tonumber
 local tostring = tostring
+local type = type
 local unpack = unpack
 
 -- WoW API
@@ -278,7 +285,7 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 --Return rounded number

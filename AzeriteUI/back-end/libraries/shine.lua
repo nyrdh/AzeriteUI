@@ -10,6 +10,7 @@ local debugstack = debugstack
 local error = error
 local pairs = pairs
 local select = select
+local string_format = string.format
 local string_join = string.join
 local string_match = string.match
 local type = type
@@ -18,7 +19,6 @@ local type = type
 
 -- Library registries
 LibShine.embeds = LibShine.embeds or {}
-
 
 -- Syntax check 
 local check = function(value, num, ...)
@@ -30,9 +30,8 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
-
 
 local embedMethods = {
 }

@@ -1,4 +1,4 @@
-local LibChatWindow, version = Wheel:Set("LibChatWindow", 30)
+local LibChatWindow, version = Wheel:Set("LibChatWindow", 31)
 if (not LibChatWindow) then	
 	return
 end
@@ -33,6 +33,7 @@ local ipairs = ipairs
 local pairs = pairs
 local select = select
 local string_find = string.find
+local string_format = string.format
 local string_join = string.join
 local string_match = string.match
 local table_insert = table.insert
@@ -68,13 +69,13 @@ local SetAlpha = LibChatWindow.frame.SetAlpha
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if (type(value) == select(i, ...)) then 
+		if type(value) == select(i, ...) then 
 			return 
 		end
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 -- module post create/post handle updates

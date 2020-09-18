@@ -1,4 +1,4 @@
-local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 5)
+local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 6)
 if (not LibSpellHighlight) then
 	return
 end
@@ -176,7 +176,7 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 -- Public API

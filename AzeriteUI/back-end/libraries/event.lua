@@ -1,5 +1,4 @@
-local LibEvent = Wheel:Set("LibEvent", 4
-)
+local LibEvent = Wheel:Set("LibEvent", 5)
 if (not LibEvent) then 
 	return
 end
@@ -11,6 +10,7 @@ local debugstack = debugstack
 local error = error
 local pairs = pairs
 local select = select
+local string_format = string.format
 local string_join = string.join
 local string_match = string.match
 local type = type
@@ -36,13 +36,13 @@ local frame = LibEvent.frame
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if (type(value) == select(i, ...)) then 
+		if type(value) == select(i, ...) then 
 			return 
 		end
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 -- Called for the first instance of an event registered to this library

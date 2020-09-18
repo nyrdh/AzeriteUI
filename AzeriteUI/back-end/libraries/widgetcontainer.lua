@@ -1,4 +1,4 @@
-local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 23)
+local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 24)
 if (not LibWidgetContainer) then	
 	return
 end
@@ -74,7 +74,7 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 -- Embed source methods into target.

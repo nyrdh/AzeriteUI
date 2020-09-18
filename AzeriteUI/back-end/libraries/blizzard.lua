@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 55)
+local LibBlizzard = Wheel:Set("LibBlizzard", 56)
 if (not LibBlizzard) then 
 	return
 end
@@ -80,13 +80,13 @@ local UIWidgetDependency = {} -- Dependencies, applies to all
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if (type(value) == select(i, ...)) then 
+		if type(value) == select(i, ...) then 
 			return 
 		end
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 -- Proxy function to retrieve the actual frame whether 

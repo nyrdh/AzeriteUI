@@ -1,4 +1,4 @@
-local LibStatusBar = Wheel:Set("LibStatusBar", 55)
+local LibStatusBar = Wheel:Set("LibStatusBar", 56)
 if (not LibStatusBar) then
 	return
 end
@@ -11,6 +11,7 @@ LibFrame:Embed(LibStatusBar)
 -- Lua API
 local _G = _G
 local assert = assert
+local debugstack = debugstack
 local error = error
 local ipairs = ipairs
 local math_abs = math.abs
@@ -19,6 +20,9 @@ local math_max = math.max
 local pairs = pairs
 local select = select
 local setmetatable = setmetatable
+local string_format = string.format
+local string_join = string.join
+local string_match = string.match
 local tonumber = tonumber
 local type = type
 
@@ -39,13 +43,13 @@ local Textures = LibStatusBar.textures
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if type(value) == select(i, ...) then
-			return
+		if type(value) == select(i, ...) then 
+			return 
 		end
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 ----------------------------------------------------------------

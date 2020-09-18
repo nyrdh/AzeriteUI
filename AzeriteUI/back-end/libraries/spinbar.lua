@@ -4,7 +4,7 @@
 -- The thread that started it: 
 -- http://www.wowinterface.com/forums/showthread.php?t=45918
 
-local LibSpinBar = Wheel:Set("LibSpinBar", 14)
+local LibSpinBar = Wheel:Set("LibSpinBar", 15)
 if (not LibSpinBar) then	
 	return
 end
@@ -27,6 +27,7 @@ local math_rad = math.rad
 local math_sin = math.sin 
 local pairs = pairs
 local select = select
+local string_format = string.format
 local string_join = string.join
 local string_match = string.match
 local type = type
@@ -55,7 +56,6 @@ local ROOT_OF_HALF = math_sqrt(.5) -- just something we need to calculate center
 ----------------------------------------------------------------
 -- Utility functions
 ----------------------------------------------------------------
-
 -- Syntax check 
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
@@ -66,14 +66,12 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
-
 
 ----------------------------------------------------------------
 -- SpinBar template
 ----------------------------------------------------------------
-
 -- The virtual bar objects that the modules can manipulate
 local SpinBar = LibSpinBar:CreateFrame("Frame")
 local SpinBar_MT = { __index = SpinBar }

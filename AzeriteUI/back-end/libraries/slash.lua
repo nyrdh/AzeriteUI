@@ -1,4 +1,4 @@
-local LibSlash = Wheel:Set("LibSlash", 7)
+local LibSlash = Wheel:Set("LibSlash", 8)
 if (not LibSlash) then	
 	return
 end
@@ -11,6 +11,7 @@ local error = error
 local pairs = pairs
 local select = select
 local string_find = string.find
+local string_format = string.format
 local string_gsub = string.gsub
 local string_join = string.join
 local string_lower = string.lower
@@ -46,7 +47,7 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 local parseArguments = function(msg)

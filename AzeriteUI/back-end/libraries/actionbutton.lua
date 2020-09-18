@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 102)
+local LibSecureButton = Wheel:Set("LibSecureButton", 103)
 if (not LibSecureButton) then
 	return
 end
@@ -251,7 +251,7 @@ end
 ----------------------------------------------------
 -- Syntax check 
 local check = function(value, num, ...)
-	assert(type(num) == "number", ("Bad argument #%d to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
+	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
 		if type(value) == select(i, ...) then 
 			return 
@@ -259,7 +259,7 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%d to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 local nameHelper = function(self, id, buttonType)

@@ -1,4 +1,4 @@
-local LibDB = Wheel:Set("LibDB", 18)
+local LibDB = Wheel:Set("LibDB", 19)
 if (not LibDB) then	
 	return
 end
@@ -10,6 +10,7 @@ local debugstack = debugstack
 local error = error
 local pairs = pairs
 local select = select
+local string_format = string.format
 local string_join = string.join
 local string_match = string.match
 local tostring = tostring
@@ -42,13 +43,13 @@ setmetatable(configs, { __index = function(tbl,key) tbl[key] = {} return tbl[key
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if (type(value) == select(i, ...)) then 
+		if type(value) == select(i, ...) then 
 			return 
 		end
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 -- Deep copy a table into a new table 

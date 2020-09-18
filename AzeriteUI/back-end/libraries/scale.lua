@@ -1,4 +1,4 @@
-local LibScale = Wheel:Set("LibScale", 1)
+local LibScale = Wheel:Set("LibScale", 2)
 if (not LibScale) then	
 	return
 end
@@ -25,17 +25,18 @@ local error = error
 local math_floor = math.floor
 local pairs = pairs
 local select = select
+local string_format = string.format
 local string_join = string.join
 local string_match = string.match
 local type = type
 
 -- WoW API
-local CreateFrame = _G.CreateFrame
-local InCombatLockdown = _G.InCombatLockdown
+local CreateFrame = CreateFrame
+local InCombatLockdown = InCombatLockdown
 
 -- WoW Objects
-local UIParent = _G.UIParent
-local WorldFrame = _G.WorldFrame
+local UIParent = UIParent
+local WorldFrame = WorldFrame
 
 -- Library registries
 LibScale.embeds = LibScale.embeds or {}
@@ -43,7 +44,6 @@ LibScale.embeds = LibScale.embeds or {}
 
 -- Utility Functions
 -----------------------------------------------------------------
-
 -- Syntax check 
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
@@ -54,15 +54,11 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
-
-
-
 
 -- Library API
 -----------------------------------------------------------------
-
 LibScale.GetFrameSize = function(self, frame)
 	local width, height = frame:GetSize()
 	return math_floor(width + .5), math_floor(height + .5)

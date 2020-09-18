@@ -1,4 +1,4 @@
-local LibModule = Wheel:Set("LibModule", 35)
+local LibModule = Wheel:Set("LibModule", 36)
 if (not LibModule) then	
 	return
 end
@@ -23,6 +23,7 @@ local math_ceil = math.ceil
 local pairs = pairs
 local select = select
 local setmetatable = setmetatable
+local string_format = string.format
 local string_join = string.join
 local string_lower = string.lower
 local string_match = string.match
@@ -34,14 +35,14 @@ local tostring = tostring
 local type = type
 
 -- WoW API
-local GetAddOnEnableState = _G.GetAddOnEnableState
-local GetAddOnInfo = _G.GetAddOnInfo
-local GetBuildInfo = _G.GetBuildInfo
-local GetNumAddOns = _G.GetNumAddOns
-local IsAddOnLoaded = _G.IsAddOnLoaded
-local IsLoggedIn = _G.IsLoggedIn
-local IsShiftKeyDown = _G.IsShiftKeyDown
-local UnitName = _G.UnitName
+local GetAddOnEnableState = GetAddOnEnableState
+local GetAddOnInfo = GetAddOnInfo
+local GetBuildInfo = GetBuildInfo
+local GetNumAddOns = GetNumAddOns
+local IsAddOnLoaded = IsAddOnLoaded
+local IsLoggedIn = IsLoggedIn
+local IsShiftKeyDown = IsShiftKeyDown
+local UnitName = UnitName
 
 -- Library registries
 LibModule.addonDependencies = LibModule.addonDependencies or {} -- table holding module/widget/handler dependencies
@@ -191,7 +192,7 @@ local check = function(value, num, ...)
 	end
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(("Bad argument #%.0f to '%s': %s expected, got %s"):format(num, name, types, type(value)), 3)
+	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
 -------------------------------------------------------------
@@ -623,12 +624,12 @@ LibModule.NewModule = function(self, name, ...)
 	check(name, 1, "string")
 
 	-- Don't allow modules to be overwritten
-	if self.modules[name] then
-		return error(("Bad argument #%.0f to '%s': A module named '%s' already exists!"):format(1, "NewModule", name))
+	if (self.modules[name]) then
+		return error(string_format("Bad argument #%.0f to '%s': A module named '%s' already exists!", 1, "NewModule", name))
 	end
 
-	if PRIORITY_HASH[name] then
-		return error(("Bad argument #%.0f to '%s': Illegal module name '%s', pick another!"):format(1, "NewModule", name))
+	if (PRIORITY_HASH[name]) then
+		return error(string_format("Bad argument #%.0f to '%s': Illegal module name '%s', pick another!", 1, "NewModule", name))
 	end
 
 	local module = setmetatable({ modules = {}, moduleLoadPriority = { HIGH = {}, NORMAL = {}, LOW = {}, PLUGIN = {} }, libraries = {} }, module_mt)
@@ -690,13 +691,13 @@ LibModule.ForAll = function(self, func, priorityFilter, ...)
 	check(priorityFilter, 2, "string", "nil")
 
 	-- If a valid priority filter is set, only modules of that given priority will be called.
-	if priorityFilter then
+	if (priorityFilter) then
 		if (not PRIORITY_HASH[priorityFilter]) then
-			return error(("Bad argument #%.0f to '%s': The load priority '%s' is invalid! Valid priorities are: %s"):format(2, "ForAll", priorityFilter, table_concat(PRIORITY_INDEX, ", ")))
+			return error(string_format("Bad argument #%.0f to '%s': The load priority '%s' is invalid! Valid priorities are: %s", 2, "ForAll", priorityFilter, table_concat(PRIORITY_INDEX, ", ")))
 		end
 		for name,module in pairs(self.moduleLoadPriority[priorityFilter]) do
 			if (type(func) == "string") then
-				if module[func] then
+				if (module[func]) then
 					module[func](module, ...)
 				end
 			else
