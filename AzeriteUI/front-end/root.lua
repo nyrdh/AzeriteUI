@@ -32,7 +32,6 @@ local ReloadUI = ReloadUI
 local SetActionBarToggles = SetActionBarToggles
 
 -- Private Addon API
-local GetAuraFilterFunc = Private.GetAuraFilterFunc
 local GetConfig = Private.GetConfig
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
@@ -390,228 +389,227 @@ Core.ApplyExperimentalFeatures = function(self)
 		end)
 	end
 
-		-- Attempt to hide the UI in the rune mini-game
-		if (IsRetail) then
+	-- Attempt to hide the UI in the rune mini-game
+	if (IsRetail) then
 
-			local updateTrackingEvent, onTrackingEvent, checkForActiveGame, findActiveBuffID, restoreUI
-			local isTracking, inGroup, inCombat, inInstance, stopReason, gameRunning
-			local currentGUID
-			local playerGUID = UnitGUID("player")
-			local filter = "HELPFUL PLAYER CANCELABLE"
-	
-			local games = {
-	
-				-- Untangle
-				[298047] = true, -- Arcane Leylock
-				[298565] = true, -- Arcane Leylock
-				[298654] = true, -- Arcane Leylock
-				[298657] = true, -- Arcane Leylock
-				[298659] = true, -- Arcane Leylock
-				
-				-- Puzzle 
-				[298661] = true, -- Arcane Runelock
-				[298663] = true, -- Arcane Runelock
-				[298665] = true  -- Arcane Runelock
-			}
-	
-			local exitButton = self:CreateFrame("Button", nil, "UIParent", "SecureActionButtonTemplate")
-			exitButton:Hide()
-			exitButton:SetFrameStrata("HIGH")
-			exitButton:SetFrameLevel(100)
-			exitButton:Place("TOPRIGHT", -40, -40)
-			exitButton:SetSize(64, 64)
-			exitButton:SetAttribute("type", "macro")
-			exitButton.msg = exitButton:CreateFontString()
-			exitButton.msg:SetFontObject(GameFontNormal)
-			exitButton.msg:SetFont(GameFontNormal:GetFont(), 64, "OUTLINE")
-			exitButton.msg:SetShadowColor(0,0,0,0)
-			exitButton.msg:SetText("X")
-			exitButton.msg:SetPoint("CENTER", 0, 0)
-			exitButton.msg:SetTextColor(1, 0, 0)
-	
-			-- Forcefully hide this in combat.
-			RegisterAttributeDriver(exitButton, "state-visibility", "[combat]hide")
-	
-			-- Search for an active minigame buffID
-			findActiveBuffID = function()
-				local buffID
-				local buffName
-				for i = 1, BUFF_MAX_DISPLAY do 
-					local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = self:GetUnitBuff("player", i, filter)
-	
-					if (name) then 
-						if (spellId and games[spellId]) then 
-							buffID = i
-							buffName = name
-							break
-						end 
-					else 
+		local updateTrackingEvent, onTrackingEvent, checkForActiveGame, findActiveBuffID, restoreUI
+		local isTracking, inGroup, inCombat, inInstance, stopReason, gameRunning
+		local currentGUID
+		local playerGUID = UnitGUID("player")
+		local filter = "HELPFUL PLAYER CANCELABLE"
+
+		local games = {
+
+			-- Untangle
+			[298047] = true, -- Arcane Leylock
+			[298565] = true, -- Arcane Leylock
+			[298654] = true, -- Arcane Leylock
+			[298657] = true, -- Arcane Leylock
+			[298659] = true, -- Arcane Leylock
+			
+			-- Puzzle 
+			[298661] = true, -- Arcane Runelock
+			[298663] = true, -- Arcane Runelock
+			[298665] = true  -- Arcane Runelock
+		}
+
+		local exitButton = self:CreateFrame("Button", nil, "UIParent", "SecureActionButtonTemplate")
+		exitButton:Hide()
+		exitButton:SetFrameStrata("HIGH")
+		exitButton:SetFrameLevel(100)
+		exitButton:Place("TOPRIGHT", -40, -40)
+		exitButton:SetSize(64, 64)
+		exitButton:SetAttribute("type", "macro")
+		exitButton.msg = exitButton:CreateFontString()
+		exitButton.msg:SetFontObject(GameFontNormal)
+		exitButton.msg:SetFont(GameFontNormal:GetFont(), 64, "OUTLINE")
+		exitButton.msg:SetShadowColor(0,0,0,0)
+		exitButton.msg:SetText("X")
+		exitButton.msg:SetPoint("CENTER", 0, 0)
+		exitButton.msg:SetTextColor(1, 0, 0)
+
+		-- Forcefully hide this in combat.
+		RegisterAttributeDriver(exitButton, "state-visibility", "[combat]hide")
+
+		-- Search for an active minigame buffID
+		findActiveBuffID = function()
+			local buffID
+			local buffName
+			for i = 1, BUFF_MAX_DISPLAY do 
+				local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = self:GetUnitBuff("player", i, filter)
+
+				if (name) then 
+					if (spellId and games[spellId]) then 
+						buffID = i
+						buffName = name
 						break
-					end
-				end
-				return buffID, buffName
-			end
-	
-			-- Show the user interface, hide the exitbutton
-			restoreUI = function()
-				local visFrame = self:GetFrame("UICenter"):GetParent()
-				-- This happens automatically in combat by the back-end now,
-				-- we still need to show it when the game ends normally, though.
-				if (not InCombatLockdown()) then 
-					visFrame:Show()
-					exitButton:Hide()
+					end 
+				else 
+					break
 				end
 			end
-	
-			-- Toggle the interface based on the presence of puzzle/untangle auras
-			checkForActiveGame = function()
-				local visFrame = self:GetFrame("UICenter"):GetParent()
-				local buffID, buffName = findActiveBuffID(self)
-				if (buffID) then 
-					if (visFrame:IsShown()) and (not InCombatLockdown()) then 
-						gameRunning = true
-						self:AddDebugMessageFormatted(string_format("MiniGame Enabled: '%s'", buffName))
-						visFrame:Hide()
-						exitButton:Show()
-						exitButton:SetAttribute("macrotext", "/cancelaura "..buffName)
-					end
-				else
-					if (not visFrame:IsShown()) and (not InCombatLockdown()) then
-						-- Only fire this debug message if a game was actually running.
-						-- Had a lot of false positives at reloads and world entries without it.
-						if (gameRunning) then
-							gameRunning = nil
-							self:AddDebugMessageFormatted("MiniGame Ended.")
-						end
-						restoreUI()
-					end
-				end
-			end
-	
-			updateTrackingEvent = function(reason)
-				if (inInstance or inGroup or inCombat) then
-					if (isTracking) then
-	
-						-- Clear the tracking flag
-						isTracking = nil
-	
-						-- Stop tracking
-						self:UnregisterMessage("GP_UNIT_AURA", onTrackingEvent, true)
-	
-						-- Debug output the stop reason
-						if (inInstance) then
-							stopReason = "instance"
-							self:AddDebugMessageFormatted("Disable MiniGame tracking: You're in an instance!")
-						elseif (inGroup) then
-							stopReason = "group"
-							self:AddDebugMessageFormatted("Disable MiniGame tracking: You joined a group!")
-						elseif (inCombat) then
-							stopReason = "combat"
-							self:AddDebugMessageFormatted("Disable MiniGame tracking: You entered combat!")
-						end
-					end
-	
-					-- Always attempt to show the UI,
-					-- regardless of whether nor not we're already tracking.
-					-- You could've joined a group in the middle of the game.
-					restoreUI()
-	
-				else
-					if (not isTracking) then
-						
-						-- Set the tracking flag
-						isTracking = true
-	
-						-- Start tracking
-						self:RegisterMessage("GP_UNIT_AURA", onTrackingEvent)
-	
-						-- Debug output the stop reason
-						if (stopReason == "instance") then
-							self:AddDebugMessageFormatted("Enable MiniGame tracking: You exited the instance!")
-						elseif (stopReason == "group") then
-							self:AddDebugMessageFormatted("Enable MiniGame tracking: You left your group!")
-						elseif (stopReason == "combat") then
-							self:AddDebugMessageFormatted("Enable MiniGame tracking: Your combat ended!")
-						else
-							self:AddDebugMessageFormatted("Enable MiniGame tracking!")
-						end
-	
-						-- Clear the stop reason, only needed it for the above message
-						stopReason = nil
-	
-						-- Only need to check this is we weren't previously tracking.
-						-- The aura event itself will handle it otherwise.
-						checkForActiveGame()
-					end
-				end
-			end
-	
-			onTrackingEvent = function(self, event, ...)
-				if (event == "PLAYER_ENTERING_WORLD") then
-	
-					-- Update flags
-					inCombat = InCombatLockdown()
-					inGroup = IsInRaid()
-					inInstance = IsInInstance()
-	
-					-- Kill it all off in instances
-					if (inInstance) then
-						self:UnregisterEvent("GROUP_ROSTER_UPDATE", onTrackingEvent, true)
-						self:UnregisterEvent("PLAYER_REGEN_DISABLED", onTrackingEvent, true)
-						self:UnregisterEvent("PLAYER_REGEN_ENABLED", onTrackingEvent, true)
-						self:UnregisterMessage("GP_UNIT_AURA", onTrackingEvent, true)
-					else
-						-- Always want these on out in the world
-						self:RegisterEvent("GROUP_ROSTER_UPDATE", onTrackingEvent)
-						self:RegisterEvent("PLAYER_REGEN_DISABLED", onTrackingEvent)
-						self:RegisterEvent("PLAYER_REGEN_ENABLED", onTrackingEvent)
-					end
-	
-					-- Start tracking auras?
-					updateTrackingEvent()
-	
-				elseif (event == "GROUP_ROSTER_UPDATE") then
-	
-					-- Update raidgroup flag
-					inGroup = IsInRaid()
-	
-					-- Start tracking auras?
-					updateTrackingEvent()
-	
-				elseif (event == "PLAYER_REGEN_DISABLED") then
-	
-					-- Update combat flag
-					inCombat = true
-	
-					-- Start tracking auras?
-					updateTrackingEvent()
-	
-				elseif (event == "PLAYER_REGEN_ENABLED") then
-	
-					-- Update combat flag
-					inCombat = nil
-	
-					-- Start tracking auras?
-					updateTrackingEvent()
-	
-				elseif (event == "GP_UNIT_AURA") then
-					local unit = ...
-					if (unit ~= "player") then
-						return
-					end
-	
-					-- Check for active games.
-					-- This should never happen if we're grouped or in combat,
-					-- but better safe and sorry, so we check the flags here too.
-					if (not inCombat) and (not inGroup) then
-						checkForActiveGame()
-					end
-				end
-			end
-			self:RegisterEvent("PLAYER_ENTERING_WORLD", onTrackingEvent)
-	
+			return buffID, buffName
 		end
-	
+
+		-- Show the user interface, hide the exitbutton
+		restoreUI = function()
+			local visFrame = self:GetFrame("UICenter"):GetParent()
+			-- This happens automatically in combat by the back-end now,
+			-- we still need to show it when the game ends normally, though.
+			if (not InCombatLockdown()) then 
+				visFrame:Show()
+				exitButton:Hide()
+			end
+		end
+
+		-- Toggle the interface based on the presence of puzzle/untangle auras
+		checkForActiveGame = function()
+			local visFrame = self:GetFrame("UICenter"):GetParent()
+			local buffID, buffName = findActiveBuffID(self)
+			if (buffID) then 
+				if (visFrame:IsShown()) and (not InCombatLockdown()) then 
+					gameRunning = true
+					self:AddDebugMessageFormatted(string_format("MiniGame Enabled: '%s'", buffName))
+					visFrame:Hide()
+					exitButton:Show()
+					exitButton:SetAttribute("macrotext", "/cancelaura "..buffName)
+				end
+			else
+				if (not visFrame:IsShown()) and (not InCombatLockdown()) then
+					-- Only fire this debug message if a game was actually running.
+					-- Had a lot of false positives at reloads and world entries without it.
+					if (gameRunning) then
+						gameRunning = nil
+						self:AddDebugMessageFormatted("MiniGame Ended.")
+					end
+					restoreUI()
+				end
+			end
+		end
+
+		updateTrackingEvent = function(reason)
+			if (inInstance or inGroup or inCombat) then
+				if (isTracking) then
+
+					-- Clear the tracking flag
+					isTracking = nil
+
+					-- Stop tracking
+					self:UnregisterMessage("GP_UNIT_AURA", onTrackingEvent, true)
+
+					-- Debug output the stop reason
+					if (inInstance) then
+						stopReason = "instance"
+						self:AddDebugMessageFormatted("Disable MiniGame tracking: You're in an instance!")
+					elseif (inGroup) then
+						stopReason = "group"
+						self:AddDebugMessageFormatted("Disable MiniGame tracking: You joined a group!")
+					elseif (inCombat) then
+						stopReason = "combat"
+						self:AddDebugMessageFormatted("Disable MiniGame tracking: You entered combat!")
+					end
+				end
+
+				-- Always attempt to show the UI,
+				-- regardless of whether nor not we're already tracking.
+				-- You could've joined a group in the middle of the game.
+				restoreUI()
+
+			else
+				if (not isTracking) then
+					
+					-- Set the tracking flag
+					isTracking = true
+
+					-- Start tracking
+					self:RegisterMessage("GP_UNIT_AURA", onTrackingEvent)
+
+					-- Debug output the stop reason
+					if (stopReason == "instance") then
+						self:AddDebugMessageFormatted("Enable MiniGame tracking: You exited the instance!")
+					elseif (stopReason == "group") then
+						self:AddDebugMessageFormatted("Enable MiniGame tracking: You left your group!")
+					elseif (stopReason == "combat") then
+						self:AddDebugMessageFormatted("Enable MiniGame tracking: Your combat ended!")
+					else
+						self:AddDebugMessageFormatted("Enable MiniGame tracking!")
+					end
+
+					-- Clear the stop reason, only needed it for the above message
+					stopReason = nil
+
+					-- Only need to check this is we weren't previously tracking.
+					-- The aura event itself will handle it otherwise.
+					checkForActiveGame()
+				end
+			end
+		end
+
+		onTrackingEvent = function(self, event, ...)
+			if (event == "PLAYER_ENTERING_WORLD") then
+
+				-- Update flags
+				inCombat = InCombatLockdown()
+				inGroup = IsInRaid()
+				inInstance = IsInInstance()
+
+				-- Kill it all off in instances
+				if (inInstance) then
+					self:UnregisterEvent("GROUP_ROSTER_UPDATE", onTrackingEvent, true)
+					self:UnregisterEvent("PLAYER_REGEN_DISABLED", onTrackingEvent, true)
+					self:UnregisterEvent("PLAYER_REGEN_ENABLED", onTrackingEvent, true)
+					self:UnregisterMessage("GP_UNIT_AURA", onTrackingEvent, true)
+				else
+					-- Always want these on out in the world
+					self:RegisterEvent("GROUP_ROSTER_UPDATE", onTrackingEvent)
+					self:RegisterEvent("PLAYER_REGEN_DISABLED", onTrackingEvent)
+					self:RegisterEvent("PLAYER_REGEN_ENABLED", onTrackingEvent)
+				end
+
+				-- Start tracking auras?
+				updateTrackingEvent()
+
+			elseif (event == "GROUP_ROSTER_UPDATE") then
+
+				-- Update raidgroup flag
+				inGroup = IsInRaid()
+
+				-- Start tracking auras?
+				updateTrackingEvent()
+
+			elseif (event == "PLAYER_REGEN_DISABLED") then
+
+				-- Update combat flag
+				inCombat = true
+
+				-- Start tracking auras?
+				updateTrackingEvent()
+
+			elseif (event == "PLAYER_REGEN_ENABLED") then
+
+				-- Update combat flag
+				inCombat = nil
+
+				-- Start tracking auras?
+				updateTrackingEvent()
+
+			elseif (event == "GP_UNIT_AURA") then
+				local unit = ...
+				if (unit ~= "player") then
+					return
+				end
+
+				-- Check for active games.
+				-- This should never happen if we're grouped or in combat,
+				-- but better safe and sorry, so we check the flags here too.
+				if (not inCombat) and (not inGroup) then
+					checkForActiveGame()
+				end
+			end
+		end
+		self:RegisterEvent("PLAYER_ENTERING_WORLD", onTrackingEvent)
+
+	end
 	
 	-- Little trick to show the layout and dimensions
 	-- of the Minimap blip icons on-screen in-game, 

@@ -10,13 +10,13 @@ local Module = Core:NewModule("BlizzardFonts", "LibEvent")
 local ipairs = ipairs
 
 -- WoW API
-local GetLocale = GetLocale
 local InCombatLockdown = InCombatLockdown
 local IsAddOnLoaded = IsAddOnLoaded
 local hooksecurefunc = hooksecurefunc
 
 -- Private API
 local GetLayout = Private.GetLayout
+local GetFont = Private.GetFont
 
 Module.SetFontObjects = function(self)
 	-- Various chat constants
@@ -38,7 +38,7 @@ Module.SetFontObjects = function(self)
 	-- Chat Bubble Font
 	-- This is what chat bubbles inherit from. 
 	-- We should use this in our custom bubbles too.
-	ChatBubbleFont:SetFontObject(self.layout.ChatBubbleFont)
+	ChatBubbleFont:SetFontObject(self.layout.BlizzChatBubbleFont)
 end
 
 Module.SetCombatText = function(self)
@@ -116,12 +116,6 @@ Module.OnEvent = function(self, event, ...)
 end
 
 Module.OnInit = function(self)
-	self.layout = GetLayout(self:GetName())
-
-	-- This new one only affects the style and shadow of the chat font, 
-	-- and the size, style and shadow of the chat bubble font.  
-	self:SetFontObjects()
-
 	-- Note: This whole damn thing taints in Classic, or is it from somewhere else?
 	-- After disabling it, the same guildcontrol taint still occurred, just with no named source. Weird. 
 	if (IsAddOnLoaded("Blizzard_CombatText")) then
@@ -130,3 +124,8 @@ Module.OnInit = function(self)
 		self:RegisterEvent("ADDON_LOADED", "OnEvent")
 	end
 end
+
+-- This new one only affects the style and shadow of the chat font, 
+-- and the size, style and shadow of the chat bubble font.  
+Module.layout = GetLayout(Module:GetName())
+Module:SetFontObjects()

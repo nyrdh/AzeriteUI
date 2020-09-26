@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("BlizzardFloaterHUD", "LOW", "LibEvent", "LibFrame", "LibTooltip", "LibDB", "LibBlizzard", "LibClientBuild")
+local Module = Core:NewModule("BlizzardFloaterHUD", "LOW", "LibMessage", "LibEvent", "LibFrame", "LibTooltip", "LibDB", "LibBlizzard", "LibClientBuild")
 
 -- Lua API
 local _G = _G
@@ -331,26 +331,23 @@ Module.UpdateObjectivesTracker = function(self, event, ...)
 	end
 	if (event == "PLAYER_REGEN_ENABLED") then
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "UpdateObjectivesTracker")
-	--elseif (event == "ADDON_LOADED") then
-	--	local addon = ...
-	--	if (addon == "Blizzard_ObjectiveTracker") then 
-	--		self:UnregisterEvent("ADDON_LOADED", "UpdateObjectivesTracker")
-	--	else
-	--		return
-	--	end
 	end
-	--if (not IsAddOnLoaded("Blizzard_ObjectiveTracker")) then
-	--end
 	local BlizzardObjectivesTracker = Core:GetModule("BlizzardObjectivesTracker", true)
-	if (BlizzardObjectivesTracker) and not (BlizzardObjectivesTracker:IsIncompatible() or BlizzardObjectivesTracker:DependencyFailed())then
+	if (BlizzardObjectivesTracker) and not(BlizzardObjectivesTracker:IsIncompatible() or BlizzardObjectivesTracker:DependencyFailed()) then
 		local frame = BlizzardObjectivesTracker.frame
 		if (frame) then
 			if (self.db.enableObjectivesTracker) then
-				frame:Show()
+				if (not frame:IsShown()) then
+					frame:Show()
+					self:SendMessage("GP_BLIZZARD_TRACKER_SHOWN")
+				end
 			else
-				frame:Hide()
-				if (frame.cover) then
-					frame.cover:Hide()
+				if (frame:IsShown()) then
+					frame:Hide()
+					if (frame.cover) then
+						frame.cover:Hide()
+					end
+					self:SendMessage("GP_BLIZZARD_TRACKER_HIDDEN")
 				end
 			end
 		end

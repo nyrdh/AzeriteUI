@@ -1,4 +1,4 @@
-local LibChatBubble = Wheel:Set("LibChatBubble", 18)
+local LibChatBubble = Wheel:Set("LibChatBubble", 19)
 if (not LibChatBubble) then	
 	return
 end
@@ -28,8 +28,8 @@ local select = select
 local tostring = tostring
 
 -- WoW API
-local C_ChatBubbles_GetAllChatBubbles = C_ChatBubbles.GetAllChatBubbles
 local CreateFrame = CreateFrame
+local GetAllChatBubbles = C_ChatBubbles.GetAllChatBubbles
 local InCombatLockdown = InCombatLockdown
 local IsInInstance = IsInInstance
 local SetCVar = SetCVar
@@ -53,6 +53,8 @@ LibChatBubble.messageToSender = LibChatBubble.messageToSender or {}
 LibChatBubble.customBubbles = LibChatBubble.customBubbles or {} -- local bubble registry
 LibChatBubble.numChildren = LibChatBubble.numChildren or -1 -- worldframe children
 LibChatBubble.numBubbles = LibChatBubble.numBubbles or 0 -- worldframe customBubbles
+LibChatBubble.fontObject = LibChatBubble.fontObject or Game12Font_o1
+LibChatBubble.fontSize = LibChatBubble.fontSize or 12
 
 -- Visibility settings
 for k,v in pairs({
@@ -80,16 +82,15 @@ local bubbleUpdater = LibChatBubble.BubbleUpdater
 local messageToGUID = LibChatBubble.messageToGUID
 local messageToSender = LibChatBubble.messageToSender
 
-local minsize, maxsize, fontsize = 12, 16, 12 -- bubble font size
 local offsetX, offsetY = 0, -100 -- bubble offset from its original position
 
 local getPadding = function()
-	return fontsize / 1.2
+	return LibChatBubble.fontSize/1.2
 end
 
 -- let the bubble size scale from 400 to 660ish (font size 22)
 local getMaxWidth = function()
-	return 400 + math_floor((fontsize - 12)/22 * 260)
+	return 400 + math_floor((LibChatBubble.fontSize - 12)/22 * 260)
 end
 
 local getBackdrop = function(scale) 
@@ -125,7 +126,7 @@ local OnUpdate = function(self)
 	-- 		bubble, customBubble.blizzardText = original bubble and message
 	-- 		customBubbles[bubble], customBubbles[bubble].text = our custom bubble and message
 	local scale = WorldFrame:GetHeight()/UIParent:GetHeight()
-	for _, bubble in pairs(C_ChatBubbles_GetAllChatBubbles()) do
+	for _, bubble in pairs(GetAllChatBubbles()) do
 
 		if (not customBubbles[bubble]) then 
 			LibChatBubble:InitBubble(bubble)
@@ -192,8 +193,6 @@ local OnUpdate = function(self)
 			end
 		end
 	end
-
-
 	for bubble in pairs(customBubbles) do 
 		if (not bubble:IsShown()) and (customBubbles[bubble]:IsShown()) then 
 			customBubbles[bubble]:Hide()
@@ -232,6 +231,23 @@ LibChatBubble.EnableBlizzard = function(self, bubble)
 	end
 end
 
+LibChatBubble.SetBubbleFontObject = function(self, fontObject)
+	LibChatBubble.fontObject = fontObject
+	fontObject = LibChatBubble:GetFontObject()
+
+	local font, fontSize = fontObject:GetFont()
+	LibChatBubble.fontSize = fontSize
+
+	for bubble,customBubble in pairs(customBubbles) do
+		customBubble.text:SetFontObject(fontObject)
+	end
+end
+
+LibChatBubble.GetFontObject = function(self)
+	return LibChatBubble.fontObject or Game12Font_o1
+end
+
+
 LibChatBubble.InitBubble = function(self, bubble)
 	LibChatBubble.numBubbles = LibChatBubble.numBubbles + 1
 
@@ -248,7 +264,7 @@ LibChatBubble.InitBubble = function(self, bubble)
 	
 	customBubble.text = customBubble:CreateFontString()
 	customBubble.text:SetPoint("BOTTOMLEFT", 12, 12)
-	customBubble.text:SetFontObject(Game12Font_o1) 
+	customBubble.text:SetFontObject(LibChatBubble:GetFontObject()) 
 	customBubble.text:SetShadowOffset(0, 0)
 	customBubble.text:SetShadowColor(0, 0, 0, 0)
 	
@@ -372,7 +388,7 @@ LibChatBubble.DisableBubbleStyling = function(self)
 end 
 
 LibChatBubble.GetAllChatBubbles = function(self)
-	return pairs(C_ChatBubbles_GetAllChatBubbles())
+	return pairs(GetAllChatBubbles())
 end
 
 LibChatBubble.OnEvent = function(self, event, ...)
@@ -451,6 +467,7 @@ end
 local embedMethods = {
 	EnableBubbleStyling = true,
 	DisableBubbleStyling = true,
+	SetBubbleFontObject = true,
 	SetBubblePostCreateFunc = true,
 	SetBubblePostUpdateFunc = true,
 	SetBubbleVisibleInInstances = true,

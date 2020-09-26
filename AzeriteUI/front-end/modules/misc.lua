@@ -19,6 +19,9 @@ Core:NewModule("ChatBubbles", "LibChatBubble").OnEnable = function(self)
 	self:SetBubblePostCreateFunc()
 	self:SetBubblePostCreateFunc()
 
+	-- Set OUR bubble font. Does not affect blizzard bubbles.
+	self:SetBubbleFontObject(Private.GetLayout("BlizzardFonts").ChatBubbleFont)
+
 	-- Keep them visible in the world
 	self:SetBubbleVisibleInWorld(true)
 
@@ -117,4 +120,59 @@ Core:NewModule("ChatFilters", "LibChatTool").OnInit = function(self)
 		]=])
 	end
 
+end
+
+-- Keybind Interface Styling
+Core:NewModule("Bindings", "PLUGIN", "LibBindTool").OnInit = function(self)
+
+	-- Replace library localization with our own, if it exists.
+	local L = Wheel("LibLocale"):GetLocale(ADDON)
+	local locales = self:GetKeybindLocales()
+	for key,value in pairs(locales) do
+		-- Don't trigger our locale library's metatable,
+		-- as it creates all unknown locale entries on the fly.
+		local locale = rawget(L,key)
+		if (locale) then
+			locales[key] = locale
+		end
+	end
+
+	-- Style the keybind interface
+	local layout = Private.GetLayout(self:GetName())
+	for _,frame in ipairs({ self:GetKeybindFrame(), self:GetKeybindDiscardFrame() }) do
+
+		frame.ApplyButton:SetNormalTextureSize(unpack(layout.MenuButtonSize))
+		frame.ApplyButton:SetNormalTexture(layout.MenuButtonNormalTexture)
+		frame.ApplyButton.Msg:SetTextColor(unpack(layout.MenuButtonTextColor))
+		frame.ApplyButton.Msg:SetShadowColor(unpack(layout.MenuButtonTextShadowColor))
+		frame.ApplyButton.Msg:SetShadowOffset(unpack(layout.MenuButtonTextShadowOffset))
+
+		frame.CancelButton:SetNormalTextureSize(unpack(layout.MenuButtonSize))
+		frame.CancelButton:SetNormalTexture(layout.MenuButtonNormalTexture)
+		frame.CancelButton.Msg:SetTextColor(unpack(layout.MenuButtonTextColor))
+		frame.CancelButton.Msg:SetShadowColor(unpack(layout.MenuButtonTextShadowColor))
+		frame.CancelButton.Msg:SetShadowOffset(unpack(layout.MenuButtonTextShadowOffset))
+
+		if (layout.MenuWindowGetBorder) then
+			frame.border = layout.MenuWindowGetBorder(frame)
+		end
+	end
+
+	-- Register the actionbuttons with the keybind handler
+	local ActionBarMain = Core:GetModule("ActionBarMain", true)
+	if ActionBarMain then 
+		for id,button in ActionBarMain:GetButtons() do 
+			local bindFrame = self:RegisterButtonForBinding(button)
+			local width, height = button:GetSize()
+			bindFrame.bg:SetTexture(layout.BindButtonTexture)
+			bindFrame.bg:SetSize(width + layout.BindButtonOffset, height + layout.BindButtonOffset)
+	
+		end
+		for id,button in ActionBarMain:GetPetButtons() do 
+			local bindFrame = self:RegisterButtonForBinding(button)
+			local width, height = button:GetSize()
+			bindFrame.bg:SetTexture(layout.BindButtonTexture)
+			bindFrame.bg:SetSize(width + layout.BindButtonOffset, height + layout.BindButtonOffset)
+		end
+	end 
 end

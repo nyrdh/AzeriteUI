@@ -1,7 +1,10 @@
 --[[--
 
 The purpose of this file is to supply all the front-end modules 
-with static layout data used during the setup phase. 
+with static layout data used during the setup phase, as well as
+with any custom colors, fonts and aura tables local to the addon only. 
+
+Some of the methods here are just proxies for tool our library methods.
 
 --]]--
 
@@ -12,6 +15,15 @@ assert(LibClientBuild, ADDON.." requires LibClientBuild to be loaded.")
 
 local LibDB = Wheel("LibDB")
 assert(LibDB, ADDON.." requires LibDB to be loaded.")
+
+local LibAuraTool = Wheel("LibAuraTool")
+assert(LibAuraTool, ADDON.." requires LibAuraTool to be loaded.")
+
+local LibColorTool = Wheel("LibColorTool")
+assert(LibColorTool, ADDON.." requires LibColorTool to be loaded.")
+
+local LibFontTool = Wheel("LibFontTool")
+assert(LibFontTool, ADDON.." requires LibFontTool to be loaded.")
 
 -- Lua API
 local _G = _G
@@ -45,12 +57,14 @@ local UnitIsUnit = UnitIsUnit
 local UnitLevel = UnitLevel
 local UnitPowerMax = UnitPowerMax
 
--- Private Addon API
-local GetAuraFilterFunc = Private.GetAuraFilterFunc
-local GetFont = Private.GetFont
-local GetMedia = Private.GetMedia
-local Colors = Private.Colors
+-- Addon localization
 local L = Wheel("LibLocale"):GetLocale(ADDON)
+
+-- Private API
+local Colors = LibColorTool:GetColorTable()
+local GetAuraFilterFunc = function(...) return LibAuraTool:GetAuraFilter(...) end
+local GetFont = function(...) return LibFontTool:GetFont(...) end
+local GetMedia = function(name, type) return ([[Interface\AddOns\%s\media\%s.%s]]):format(ADDON, name, type or "tga") end
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
@@ -117,6 +131,36 @@ if (gameLocale == "zhCN") then
 		end 
 	end
 end 
+
+-----------------------------------------------------------------
+-- Color Tables
+-----------------------------------------------------------------
+-- Our player health bar color
+Colors.health = Colors:CreateColor(245/255, 0/255, 45/255)
+
+-- Global UI vertex coloring
+Colors.ui = Colors:CreateColor(192/255, 192/255, 192/255)
+
+-- Power Crystal Colors
+local fast = Colors:CreateColor(0/255, 208/255, 176/255) 
+local slow = Colors:CreateColor(116/255, 156/255, 255/255)
+local angry = Colors:CreateColor(156/255, 116/255, 255/255)
+
+Colors.power.ENERGY_CRYSTAL = fast -- Rogues, Druids
+Colors.power.FOCUS_CRYSTAL = slow -- Hunter Pets (?)
+Colors.power.FURY_CRYSTAL = angry -- Havoc Demon Hunter 
+Colors.power.INSANITY_CRYSTAL = angry -- Shadow Priests
+Colors.power.LUNAR_POWER_CRYSTAL = slow -- Balance Druid Astral Power 
+Colors.power.MAELSTROM_CRYSTAL = slow -- Elemental Shamans
+Colors.power.PAIN_CRYSTAL = angry -- Vengeance Demon Hunter 
+Colors.power.RAGE_CRYSTAL = angry -- Druids, Warriors
+Colors.power.RUNIC_POWER_CRYSTAL = slow -- Death Knights
+
+-- Only occurs when the orb is manually disabled by the player.
+Colors.power.MANA_CRYSTAL = Colors:CreateColor(101/255, 93/255, 191/255) -- Druid, Hunter (Classic), Mage, Paladin, Priest, Shaman, Warlock
+
+-- Orb Power Colors
+Colors.power.MANA_ORB = Colors:CreateColor(135/255, 125/255, 255/255) -- Druid, Hunter (Classic), Mage, Paladin, Priest, Shaman, Warlock
 
 ------------------------------------------------
 -- Backdrops
@@ -290,32 +334,6 @@ local ActionButton_StackCount_PostUpdate = function(self, count)
 	if self.Rank then 
 		self.Rank:SetShown((count == 0))
 	end 
-end
-
--- BindButton PostCreate 
-local BindMode_BindButton_PostCreate = function(self)
-	local width, height = self.button:GetSize()
-	self.bg:ClearAllPoints()
-	self.bg:SetPoint("CENTER", 0, 0)
-	self.bg:SetTexture(GetMedia("actionbutton_circular_mask"))
-	self.bg:SetSize(width + 8, height + 8) -- icon is 44, 44
-	self.bg:SetVertexColor(.4, .6, .9, .75)
-	self.msg:SetFontObject(GetFont(16, true))
-end
-
--- BindButton PostUpdate
-local BindMode_BindButton_PostUpdate = function(self)
-	self.bg:SetVertexColor(.4, .6, .9, .75)
-end
-
--- BindButton PostEnter graphic updates 
-local BindMode_BindButton_PostEnter = function(self)
-	self.bg:SetVertexColor(.4, .6, .9, 1)
-end
-
--- BindButton PostLeave graphic updates
-local BindMode_BindButton_PostLeave = function(self)
-	self.bg:SetVertexColor(.4, .6, .9, .75)
 end
 
 local Minimap_Clock_OverrideValue = function(element, h, m, suffix)
@@ -2204,6 +2222,13 @@ Layouts.BlizzardChatFrames = {
 	EditBoxOffsetH = 15
 }
 
+-- Because it's chaotic having these all over the place.
+local FloaterSlots = {
+	ExtraButton = { "CENTER", "UICenter", "BOTTOMRIGHT", -482, 360 }, -- "CENTER", "UICenter", "CENTER", 237, -60
+	VehicleSeatSelector = { "CENTER", "UICenter", "BOTTOMRIGHT", -480, 210 }, -- "CENTER", "UICenter", "CENTER", 424, 0
+	Durability = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 }, -- "CENTER", "UICenter", "CENTER", 190, 0
+}
+
 -- Blizzard Floaters
 Layouts.BlizzardFloaterHUD = {
 	AlertFramesAnchor = "BOTTOM",
@@ -2222,13 +2247,13 @@ Layouts.BlizzardFloaterHUD = {
 	ExtraActionButtonCooldownBlingTexture = GetMedia("blank"),
 	ExtraActionButtonCooldownPlace = { "CENTER", 0, 0 },
 	ExtraActionButtonCooldownSize = { 44, 44 },
-	ExtraActionButtonCooldownSwipeColor = { 0, 0, 0, .5 },
+	ExtraActionButtonCooldownSwipeColor = { 0, 0, 0, .75 },
 	ExtraActionButtonCooldownSwipeTexture = GetMedia("actionbutton_circular_mask"),
 	ExtraActionButtonCount = GetFont(18, true),
 	ExtraActionButtonCountJustifyH = "CENTER",
 	ExtraActionButtonCountJustifyV = "BOTTOM",
 	ExtraActionButtonCountPlace = { "BOTTOMRIGHT", -3, 3 },
-	ExtraActionButtonFramePlace = { "CENTER", "UICenter", "CENTER", 210 + 27, -60 },
+	ExtraActionButtonFramePlace = FloaterSlots.ExtraButton,
 	ExtraActionButtonIconSize = { 44, 44 },
 	ExtraActionButtonIconMaskTexture = GetMedia("actionbutton_circular_mask"),  
 	ExtraActionButtonIconPlace = { "CENTER", 0, 0 },
@@ -2245,7 +2270,7 @@ Layouts.BlizzardFloaterHUD = {
 	ExtraActionButtonSize = { 64, 64 },
 	QuestTimerFramePlace = { "CENTER", UIParent, "CENTER", 0, 220 },
 	TalkingHeadFramePlace = { "TOP", "UICenter", "TOP", 0, -(60 + 40) },
-	VehicleSeatIndicatorPlace = { "CENTER", "UICenter", "CENTER", 424, 0 },
+	VehicleSeatIndicatorPlace = FloaterSlots.VehicleSeatSelector,
 	ZoneAbilityButtonBorderColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
 	ZoneAbilityButtonBorderDrawLayer = { "BORDER", 1 },
 	ZoneAbilityButtonBorderPlace = { "CENTER", 0, 0 },
@@ -2261,7 +2286,7 @@ Layouts.BlizzardFloaterHUD = {
 	ZoneAbilityButtonCountPlace = { "BOTTOMRIGHT", -3, 3 },
 	ZoneAbilityButtonCountJustifyH = "CENTER",
 	ZoneAbilityButtonCountJustifyV = "BOTTOM",
-	ZoneAbilityButtonFramePlace = { "CENTER", "UICenter", "CENTER", 210 + 27, -60 },
+	ZoneAbilityButtonFramePlace = FloaterSlots.ExtraButton,
 	ZoneAbilityButtonIconMaskTexture = GetMedia("actionbutton_circular_mask"),
 	ZoneAbilityButtonIconPlace = { "CENTER", 0, 0 },
 	ZoneAbilityButtonIconSize = { 44, 44 },
@@ -2273,8 +2298,9 @@ Layouts.BlizzardFloaterHUD = {
 
 -- Blizzard font replacements
 Layouts.BlizzardFonts = {
-	ChatBubbleFont = GetFont(10, true),
-	ChatFont = GetFont(15, true)
+	BlizzChatBubbleFont = GetFont(10, true, false),
+	ChatBubbleFont = GetFont(12, true, false),
+	ChatFont = GetFont(15, true, true)
 }
 
 -- Blizzard Game Menu (Esc)
@@ -2604,23 +2630,20 @@ Layouts.ActionBarMain = {
 
 -- Bind Mode
 Layouts.Bindings = {
-	BindButton_PostCreate = BindMode_BindButton_PostCreate,
-	BindButton_PostEnter = BindMode_BindButton_PostEnter,
-	BindButton_PostLeave = BindMode_BindButton_PostLeave,
-	BindButton_PostUpdate = BindMode_BindButton_PostUpdate,
-	MenuButton_PostCreate = Core_MenuButton_PostCreate,
-	MenuButton_PostUpdate = Core_MenuButton_PostUpdate, 
-	MenuButtonSize = { 300, 50 },
-	MenuButtonSizeMod = .75, 
-	MenuButtonSpacing = 8, 
-	MenuWindow_CreateBorder = function(self) return GetBorder(self) end,
-	Place = { "TOP", "UICenter", "TOP", 0, -100 }, 
-	Size = { 520, 180 }
+	BindButtonOffset = 8, 
+	BindButtonTexture = GetMedia("actionbutton_circular_mask"),
+	MenuButtonNormalTexture = GetMedia("menu_button_disabled"),
+	MenuButtonPushedTexture = GetMedia("menu_button_pushed"),
+	MenuButtonSize = { 256, 64 },
+	MenuButtonTextColor = { 0, 0, 0 },
+	MenuButtonTextShadowColor = { 1, 1, 1, .5 },
+	MenuButtonTextShadowOffset = { 0, -.85 },
+	MenuWindowGetBorder = function(self) return GetBorder(self) end
 }
 
 -- Floaters. Durability only currently. 
 Layouts.FloaterHUD = {
-	Place = { "CENTER", "UICenter", "CENTER", 190, 0 }
+	Place = FloaterSlots.Durability
 }
 
 -- Group Leader Tools
@@ -4670,6 +4693,10 @@ Layouts.UnitFrameToT = setmetatable({
 ------------------------------------------------
 -- Private Addon API
 ------------------------------------------------
+Private.Colors = Colors
+Private.GetFont = GetFont
+Private.GetMedia = GetMedia
+
 -- Use a hidden setting in the perChar database to store the settings profile
 local GetProfile = function()
 	local db = Private.GetConfig(ADDON, "character") -- crossing the beams!
@@ -4693,5 +4720,13 @@ Private.GetDefaults = function(name)
 	return Defaults[name] 
 end 
 
--- Retrieve layout
-Private.GetLayout = function(moduleName) return Layouts[moduleName] end 
+-- Retrieve static layout data for a named module
+Private.GetLayout = function(moduleName) 
+	return Layouts[moduleName] 
+end 
+
+-- Whether or not aura filters are in forced slack mode.
+-- This happens if aura data isn't available for the current class.
+Private.IsForcingSlackAuraFilterMode = function() 
+	return LibAuraTool:IsForcingSlackAuraFilterMode() 
+end

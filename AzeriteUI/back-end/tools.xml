@@ -12,6 +12,9 @@
 <!-- Chat filters -->
 <Script file='tools\chat.lua'/>
 
+<!-- Keybinds -->
+<Script file='tools\binds.lua'/>
+
 <!-- UI Switcher -->
 <Script file='tools\switcher.lua'/>
 

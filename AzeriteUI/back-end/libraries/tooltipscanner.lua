@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 60)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 61)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -32,6 +32,7 @@ local GetActionCount = GetActionCount
 local GetActionLossOfControlCooldown = GetActionLossOfControlCooldown
 local GetActionText = GetActionText
 local GetActionTexture = GetActionTexture
+local GetContainerItemID = GetContainerItemID
 local GetDetailedItemLevelInfo = GetDetailedItemLevelInfo 
 local GetGuildBankItemInfo = GetSpecializationRole
 local GetGuildInfo = GetGuildInfo
@@ -1923,12 +1924,12 @@ LibTooltipScanner.GetTooltipDataForItemLink = function(self, itemLink, tbl)
 	end 
 end
 
--- Returns data about the exact bag- or bank slot. Will return all current mofidications.
+-- Returns data about the exact bag- or bank slot. Will return all current modifications.
 LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID, tbl)
 	ClearScanner()
 
 	local itemID = GetContainerItemID(bagID, slotID)
-	if itemID then 
+	if (itemID) then 
 		local hasCooldown, repairCost = Scanner:SetBagItem(bagID, slotID)
 
 		tbl = tbl or {}
@@ -1936,12 +1937,16 @@ LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID,
 			tbl[i] = nil
 		end 
 
+		local itemLink = GetContainerItemLink(bagID, slotID)
+
+
+
 		return validateResults(tbl)
 	end 
 
 end
 
--- Returns data about the exact guild bank slot. Will return all current mofidications.
+-- Returns data about the exact guild bank slot. Will return all current modifications.
 LibTooltipScanner.GetTooltipDataForGuildBankSlot = function(self, tabID, slotID, tbl)
 	ClearScanner()
 

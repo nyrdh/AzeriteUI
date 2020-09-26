@@ -328,121 +328,6 @@ local secureSnippets = {
 	]=]
 }
 
--- Keybind abbrevations. Do not localize these.
-local ShortKey = {
-	-- Keybinds (visible on the actionbuttons)
-	["Alt"] = "A",
-	["Left Alt"] = "LA",
-	["Right Alt"] = "RA",
-	["Ctrl"] = "C",
-	["Left Ctrl"] = "LC",
-	["Right Ctrl"] = "RC",
-	["Shift"] = "S",
-	["Left Shift"] = "LS",
-	["Right Shift"] = "RS",
-	["NumPad"] = "N", 
-	["Backspace"] = "BS",
-	["Button1"] = "B1",
-	["Button2"] = "B2",
-	["Button3"] = "B3",
-	["Button4"] = "B4",
-	["Button5"] = "B5",
-	["Button6"] = "B6",
-	["Button7"] = "B7",
-	["Button8"] = "B8",
-	["Button9"] = "B9",
-	["Button10"] = "B10",
-	["Button11"] = "B11",
-	["Button12"] = "B12",
-	["Button13"] = "B13",
-	["Button14"] = "B14",
-	["Button15"] = "B15",
-	["Button16"] = "B16",
-	["Button17"] = "B17",
-	["Button18"] = "B18",
-	["Button19"] = "B19",
-	["Button20"] = "B20",
-	["Button21"] = "B21",
-	["Button22"] = "B22",
-	["Button23"] = "B23",
-	["Button24"] = "B24",
-	["Button25"] = "B25",
-	["Button26"] = "B26",
-	["Button27"] = "B27",
-	["Button28"] = "B28",
-	["Button29"] = "B29",
-	["Button30"] = "B30",
-	["Button31"] = "B31",
-	["Capslock"] = "Cp",
-	["Clear"] = "Cl",
-	["Delete"] = "Del",
-	["End"] = "End",
-	["Enter"] = "Ent",
-	["Return"] = "Ret",
-	["Home"] = "Hm",
-	["Insert"] = "Ins",
-	["Help"] = "Hlp",
-	["Mouse Wheel Down"] = "WD",
-	["Mouse Wheel Up"] = "WU",
-	["Num Lock"] = "NL",
-	["Page Down"] = "PD",
-	["Page Up"] = "PU",
-	["Print Screen"] = "Prt",
-	["Scroll Lock"] = "SL",
-	["Spacebar"] = "Sp",
-	["Tab"] = "Tb",
-	["Down Arrow"] = "Dn",
-	["Left Arrow"] = "Lf",
-	["Right Arrow"] = "Rt",
-	["Up Arrow"] = "Up"
-}
-
--- Hotkey abbreviations for better readability
-local getBindingKeyText = function(key)
-	if key then
-		key = key:upper()
-		key = key:gsub(" ", "")
-
-		key = key:gsub("ALT%-", ShortKey["Alt"])
-		key = key:gsub("CTRL%-", ShortKey["Ctrl"])
-		key = key:gsub("SHIFT%-", ShortKey["Shift"])
-		key = key:gsub("NUMPAD", ShortKey["NumPad"])
-
-		key = key:gsub("PLUS", "%+")
-		key = key:gsub("MINUS", "%-")
-		key = key:gsub("MULTIPLY", "%*")
-		key = key:gsub("DIVIDE", "%/")
-
-		key = key:gsub("BACKSPACE", ShortKey["Backspace"])
-
-		for i = 1,31 do
-			key = key:gsub("BUTTON" .. i, ShortKey["Button" .. i])
-		end
-
-		key = key:gsub("CAPSLOCK", ShortKey["Capslock"])
-		key = key:gsub("CLEAR", ShortKey["Clear"])
-		key = key:gsub("DELETE", ShortKey["Delete"])
-		key = key:gsub("END", ShortKey["End"])
-		key = key:gsub("HOME", ShortKey["Home"])
-		key = key:gsub("INSERT", ShortKey["Insert"])
-		key = key:gsub("MOUSEWHEELDOWN", ShortKey["Mouse Wheel Down"])
-		key = key:gsub("MOUSEWHEELUP", ShortKey["Mouse Wheel Up"])
-		key = key:gsub("NUMLOCK", ShortKey["Num Lock"])
-		key = key:gsub("PAGEDOWN", ShortKey["Page Down"])
-		key = key:gsub("PAGEUP", ShortKey["Page Up"])
-		key = key:gsub("SCROLLLOCK", ShortKey["Scroll Lock"])
-		key = key:gsub("SPACEBAR", ShortKey["Spacebar"])
-		key = key:gsub("TAB", ShortKey["Tab"])
-
-		key = key:gsub("DOWNARROW", ShortKey["Down Arrow"])
-		key = key:gsub("LEFTARROW", ShortKey["Left Arrow"])
-		key = key:gsub("RIGHTARROW", ShortKey["Right Arrow"])
-		key = key:gsub("UPARROW", ShortKey["Up Arrow"])
-
-		return key
-	end
-end
-
 -- Aimed to be compact and displayed on buttons
 local formatCooldownTime = function(time)
 	if (time > DAY) then -- more than a day
@@ -468,17 +353,6 @@ end
 -- ActionButton Template (Custom Methods)
 ----------------------------------------------------
 local ActionButton = {}
-
-ActionButton.GetBindingTextAbbreviated = function(self)
-	return getBindingKeyText(self:GetBindingText())
-end
-
-ActionButton.UpdateBinding = function(self)
-	local Keybind = self.Keybind
-	if Keybind then 
-		Keybind:SetText(self:GetBindingTextAbbreviated() or "")
-	end 
-end
 
 ActionButton.UpdateMouseOver = function(self)
 	if (self.isMouseOver) then 
@@ -931,8 +805,6 @@ PetButton.PostUpdate = function(self)
 	self:UpdateMouseOver()
 end
 
-PetButton.GetBindingTextAbbreviated = ActionButton.GetBindingTextAbbreviated
-PetButton.UpdateBinding = ActionButton.UpdateBinding
 PetButton.UpdateMouseOver = ActionButton.UpdateMouseOver
 PetButton.PostEnter = ActionButton.PostEnter
 PetButton.PostLeave = ActionButton.PostLeave
@@ -1665,6 +1537,10 @@ Module.OnEvent = function(self, event, ...)
 		IN_COMBAT = false
 	elseif (event == "ACTIONBAR_SLOT_CHANGED") then
 		self:UpdateButtonGrids()
+	elseif (event == "GP_FORCED_ACTIONBAR_VISIBILITY_REQUESTED") then
+		self:SetForcedVisibility(true)
+	elseif (event == "GP_FORCED_ACTIONBAR_VISIBILITY_CANCELED") then
+		self:SetForcedVisibility(false)
 	elseif (event == "PET_BAR_UPDATE") then
 		self:UpdateExplorerModeAnchors()
 	else

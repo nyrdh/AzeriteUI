@@ -1,4 +1,4 @@
-local LibDurability = Wheel:Set("LibDurability", 2)
+local LibDurability = Wheel:Set("LibDurability", 3)
 if (not LibDurability) then
 	return
 end
@@ -47,6 +47,7 @@ local inventorySlots = {
 }
 
 local inventoryColors = {
+	default = { 1, 1, 1, .5 },
 	[1] = { 1, .82, .18 },
 	[2] = { .93, .07, .07 }
 }
@@ -77,7 +78,7 @@ LibDurability.OnEvent = function(self, event, ...)
 	end
 end
 
-LibDurability.UpdateDurabilityWidget = function(self, frame)
+LibDurability.UpdateDurabilityWidget = function(self, frame, forced)
 	local numAlerts = 0
 	local texture, showDurability
 	local hasLeft, hasRight
@@ -96,6 +97,9 @@ LibDurability.UpdateDurabilityWidget = function(self, frame)
 
 		local alert = GetInventoryAlertStatus(index)
 		local color = alert and inventoryColors[alert]
+		if (forced and not color) then
+			color = inventoryColors.default
+		end
 		if (color) then
 			texture:SetVertexColor(color[1], color[2], color[3], 1.0)
 			if (value.showSeparate) then
@@ -140,7 +144,7 @@ LibDurability.UpdateDurabilityWidget = function(self, frame)
 	end
 	frame:SetWidth(width)
 
-	if (numAlerts > 0) then
+	if (numAlerts > 0) or (forced) then
 		frame:Show()
 	else
 		frame:Hide()
@@ -246,6 +250,10 @@ LibDurability.GetDurabilityWidget = function(self)
 
 		-- Assign default texture
 		frame:SetTexture(durabilityPath)
+
+		frame.Update = function(self, forced)
+			LibDurability:UpdateDurabilityWidget(self, forced)
+		end
 
 		Widgets[self] = frame
 		

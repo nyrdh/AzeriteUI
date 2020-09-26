@@ -1,4 +1,4 @@
-local LibSecureHook = Wheel:Set("LibSecureHook", 8)
+local LibSecureHook = Wheel:Set("LibSecureHook", 10)
 if (not LibSecureHook) then	
 	return
 end
@@ -38,35 +38,52 @@ local check = function(value, num, ...)
 	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
+local getUniqueID = function(self, uniqueID, hook)
+	return uniqueID or (self:GetName()).."_"..hook
+end
+
 -- @input 
 -- globalName, hook[, uniqueID]
 -- globalTable, methodName, hook[, uniqueID]
 LibSecureHook.ClearSecureHook = function(self, ...)
-	local numArgs = select("#", ...)
-	if (numArgs == 2) then 
-		local global, hook = ...
+	if (type(...) == "string") then 
+		local global, hook, uniqueID = ...
 
 		check(global, 1, "string")
 		check(hook, 2, "function", "string")
+		check(uniqueID, 3, "string", "nil")
 
 		local ref = _G[global]
-		local hookList = SecureHooks[ref]
-
-		if (hookList) then 
-			for id = #hookList,1,-1 do 
-				local func = hookList[id]
-				if (func == hook) then 
-					table_remove(hookList, id)
-				end 
-			end 			
+		if (not ref) then 
+			return 
 		end 
 
-	elseif (numArgs == 3) then 
-		local global, method, hook = ...
+		local hookList = SecureHooks[ref]
+		if (hookList) then 
+			if (type(hook) == "string") then 
+				uniqueID = getUniqueID(self, uniqueID, hook)
+				Modules[uniqueID] = nil
+			end
+
+			if (uniqueID) then
+				hookList.unique[uniqueID] = nil
+			else
+				for id = #hookList,1,-1 do 
+					local func = hookList[id]
+					if (func == hook) then 
+						table_remove(hookList, id)
+					end 
+				end 			
+			end
+		end 
+
+	elseif (type(...) == "table") then 
+		local global, method, hook, uniqueID = ...
 
 		check(global, 1, "table")
 		check(method, 2, "string")
 		check(hook, 3, "function", "string")
+		check(uniqueID, 4, "string", "nil")
 
 		local ref = global[method]
 		if (not ref) then 
@@ -75,13 +92,23 @@ LibSecureHook.ClearSecureHook = function(self, ...)
 
 		local hookList = SecureHooks[ref]
 		if (hookList) then 
-			for id = #hookList,1,-1 do 
-				local func = hookList[id]
-				if (func == hook) then 
-					table_remove(hookList, id)
-				end 
-			end 			
-		end 
+			if (type(hook) == "string") then 
+				uniqueID = getUniqueID(self, uniqueID, hook)
+				Modules[uniqueID] = nil
+			end
+
+			if (uniqueID) then
+				hookList.unique[uniqueID] = nil
+			else
+				for id = #hookList,1,-1 do 
+					local func = hookList[id]
+					if (func == hook) then 
+						table_remove(hookList, id)
+					end 
+				end 			
+			end
+		end
+
 	end 
 end 
 
@@ -103,11 +130,7 @@ LibSecureHook.SetSecureHook = function(self, ...)
 
 		-- If the hook is a method, we need a uniqueID for our module reference list!
 		if (type(hook) == "string") then 
-
-			-- Let's make this backwards compatible and just make up an ID when it's not provided(?)
-			if (not uniqueID) then 
-				uniqueID = (self:GetName()).."_"..hook
-			end
+			uniqueID = getUniqueID(self, uniqueID, hook)
 
 			-- Reference the module
 			Modules[uniqueID] = self
@@ -173,11 +196,7 @@ LibSecureHook.SetSecureHook = function(self, ...)
 
 		-- If the hook is a method, we need a uniqueID for our module reference list!
 		if (type(hook) == "string") then 
-
-			-- Let's make this backwards compatible and just make up an ID when it's not provided(?)
-			if (not uniqueID) then 
-				uniqueID = (self:GetName()).."_"..hook
-			end
+			uniqueID = getUniqueID(self, uniqueID, hook)
 
 			-- Reference the module
 			Modules[uniqueID] = self
