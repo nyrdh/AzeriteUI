@@ -732,6 +732,12 @@ LibBindTool.GetDiscardFrame = function(self)
 end 
 LibBindTool.GetKeybindDiscardFrame = LibBindTool.GetDiscardFrame
 
+-- Retrieve the current locale table.
+-- Going to allow modules to do whatever they want here.
+LibBindTool.GetKeybindLocales = function(self)
+	return L
+end
+
 LibBindTool.GetBindingsTooltip = function(self)
 	return LibBindTool:GetTooltip("GP_KeyBindingsTooltip") or LibBindTool:CreateTooltip("GP_KeyBindingsTooltip")
 end
@@ -740,14 +746,14 @@ end
 ----------------------------------------------------
 -- Check if the bind mode is enabled
 LibBindTool.IsBindModeEnabled = function(self)
-	return self:GetBindingFrame():IsShown()
+	return LibBindTool:GetBindingFrame():IsShown()
 end
 
 -- Callback needed by the menu system to decide 
 -- whether a given mode toggle button is active or not. 
 LibBindTool.IsModeEnabled = function(self, modeName)
 	if (modeName == "bindMode") then 
-		return self:IsBindModeEnabled()
+		return LibBindTool:IsBindModeEnabled()
 	end
 end
 
@@ -755,14 +761,13 @@ end
 -- to switch between modes. 
 LibBindTool.OnModeToggle = function(self, modeName)
 	if (modeName == "bindMode") then 
-		if (self:IsBindModeEnabled()) then 
-			self:DisableBindMode()
+		if (LibBindTool:IsBindModeEnabled()) then 
+			LibBindTool:DisableBindMode()
 		else
-			self:EnableBindMode() 
+			LibBindTool:EnableBindMode() 
 		end
 	end 
 end
-
 
 -- LibBindTool Event & Chat Command Handling
 ----------------------------------------------------
@@ -805,11 +810,7 @@ LibBindTool:Start() -- start this!
 
 -- For front-end overrides
 ----------------------------------------------------
--- Retrieve the current locale table.
--- Going to allow modules to do whatever they want here.
-LibBindTool.GetKeybindLocales = function(self)
-	return L
-end
+
 
 local embedMethods = {
 	GetKeybindFrame = true,

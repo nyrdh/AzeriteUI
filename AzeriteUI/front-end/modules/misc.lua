@@ -125,6 +125,12 @@ end
 -- Keybind Interface Styling
 Core:NewModule("Bindings", "PLUGIN", "LibBindTool").OnInit = function(self)
 
+	-- Proxy the shit out of this
+	local LibBindTool = Wheel("LibBindTool")
+	for _,method in ipairs({ "IsBindModeEnabled", "IsModeEnabled", "OnModeToggle" }) do
+		self[method] = function(_, ...) LibBindTool[method](LibBindTool, ...) end
+	end
+
 	-- Replace library localization with our own, if it exists.
 	local L = Wheel("LibLocale"):GetLocale(ADDON)
 	local locales = self:GetKeybindLocales()
