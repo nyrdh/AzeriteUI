@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 61)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 63)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -32,6 +32,7 @@ local GetActionCount = GetActionCount
 local GetActionLossOfControlCooldown = GetActionLossOfControlCooldown
 local GetActionText = GetActionText
 local GetActionTexture = GetActionTexture
+local GetBestMapForUnit = C_Map.GetBestMapForUnit
 local GetContainerItemID = GetContainerItemID
 local GetDetailedItemLevelInfo = GetDetailedItemLevelInfo 
 local GetGuildBankItemInfo = GetSpecializationRole
@@ -1590,6 +1591,9 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			local isPVP = UnitIsPVP(unit)
 			local isFFA = UnitIsPVPFreeForAll(unit)
 			local pvpName = UnitPVPName(unit)
+			local inParty = UnitInParty(unit)
+			local inRaid = UnitInRaid(unit)
+			local uiMapID = (inParty or inRaid) and GetBestMapForUnit and GetBestMapForUnit(unit)
 			local pvpRankName, pvpRankNumber
 
 			if (GetPVPRankInfo) and (UnitPVPRank) then
@@ -1628,6 +1632,9 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			tbl.pvpName = pvpName
 			tbl.pvpRankName = pvpRankName
 			tbl.pvpRankNumber = pvpRankNumber
+			tbl.inParty = inParty
+			tbl.inRaid = inRaid
+			tbl.uiMapID = uiMapID
 	
 		-- NPCs
 		else 

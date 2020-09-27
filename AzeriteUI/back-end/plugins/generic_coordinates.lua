@@ -4,8 +4,8 @@ local _G = _G
 
 -- WoW API
 local C_Map = _G.C_Map
-local GetBestMapForUnit = C_Map and C_Map.GetBestMapForUnit
-local GetPlayerMapPosition = C_Map and C_Map.GetPlayerMapPosition
+local GetBestMapForUnit = C_Map.GetBestMapForUnit
+local GetPlayerMapPosition = C_Map.GetPlayerMapPosition
 
 -- WoW Frames
 local WorldMapFrame = _G.WorldMapFrame
@@ -72,5 +72,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)), (Wheel("LibMinimap", true)) }) do 
-	Lib:RegisterElement("Coordinates", Enable, Disable, Proxy, 7)
+	Lib:RegisterElement("Coordinates", Enable, Disable, Proxy, 8)
 end 

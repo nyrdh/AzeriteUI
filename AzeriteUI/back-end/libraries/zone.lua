@@ -1,4 +1,4 @@
-local LibZone = Wheel:Set("LibZone", 2)
+local LibZone = Wheel:Set("LibZone", 3)
 if (not LibZone) then
 	return
 end
@@ -18,9 +18,9 @@ local tonumber = tonumber
 local type = type
 
 -- WoW API
-local GetBestMapForUnit = _G.C_Map.GetBestMapForUnit
-local GetMapInfo = _G.C_Map.GetMapInfo
-local UnitFactionGroup = _G.UnitFactionGroup
+local GetBestMapForUnit = C_Map.GetBestMapForUnit
+local GetMapInfo = C_Map.GetMapInfo
+local UnitFactionGroup = UnitFactionGroup
 
 -- Library registries
 LibZone.embeds = LibZone.embeds or {}

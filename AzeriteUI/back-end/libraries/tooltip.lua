@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 82)
+local LibTooltip = Wheel:Set("LibTooltip", 83)
 if (not LibTooltip) then
 	return
 end
@@ -14,6 +14,9 @@ assert(LibSecureHook, "LibTooltip requires LibSecureHook to be loaded.")
 
 local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibTooltip requires LibFrame to be loaded.")
+
+local LibZone = Wheel("LibZone")
+assert(LibZone, "LibTooltip requires LibZone to be loaded.")
 
 local LibTooltipScanner = Wheel("LibTooltipScanner")
 assert(LibTooltipScanner, "LibTooltip requires LibTooltipScanner to be loaded.")
@@ -56,6 +59,7 @@ local type = type
 local unpack = unpack
 
 -- WoW API 
+local GetBestMapForUnit = C_Map.GetBestMapForUnit
 local GetCVarBool = GetCVarBool
 local GetQuestGreenRange = GetQuestGreenRange
 local GetScalingQuestGreenRange = GetScalingQuestGreenRange
@@ -1583,6 +1587,21 @@ Tooltip.SetUnit = function(self, unit)
 					end
 				end
 
+			end 
+
+			if (data.uiMapID) then 
+				local uiMapID = GetBestMapForUnit("player")
+				if (uiMapID ~= data.uiMapID) then 
+					-- Color according to the faction of the tooltip unit's current zone, 
+					-- relative to that zone's standing with the player. 
+					local name, pvpType, label = LibZone:GetPvPType(data.uiMapID)
+					if (name) then 
+						local color = pvpType and colors.zone[pvpType] or colors.zone.unknown
+						self:AddLine(" ")
+						self:AddLine(LOCATION_COLON, colors.quest.gray[1], colors.quest.gray[2], colors.quest.gray[3])
+						self:AddDoubleLine(name, label, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3], color[1], color[2], color[3])
+					end 
+				end
 			end 
 
 			if self:UpdateBarValues(unit, true) then 
