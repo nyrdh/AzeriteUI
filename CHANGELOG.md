@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.407-RC] 2020-09-27
+- More stuff moved into the back-end sections.
+
+### Changed
+- Moved the zone ability button, the extra action button, the durability frame and the vehicle seat selector closer to the minimap and farther away from the center of the screen, as they were all getting in the way of the gameplay.
+
 ## [2.1.406-RC] 2020-09-17
 - Continuing the work of squashing all we can into the back-end sections.
 

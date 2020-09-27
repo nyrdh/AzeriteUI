@@ -26,7 +26,7 @@ assert(LibStatusBar, "LibTooltip requires LibStatusBar to be loaded.")
 
 local LibPlayerData = Wheel("LibPlayerData")
 assert(LibPlayerData, "LibTooltip requires LibPlayerData to be loaded.")
-
+ 
 -- Embed functionality into the library
 LibFrame:Embed(LibTooltip)
 LibEvent:Embed(LibTooltip)
