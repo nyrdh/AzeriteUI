@@ -3,6 +3,7 @@ local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
+
 local Module = Core:NewModule("OptionsMenu", "HIGH", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibClientBuild")
 local MenuTable
 

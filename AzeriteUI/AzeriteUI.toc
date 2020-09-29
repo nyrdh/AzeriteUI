@@ -50,7 +50,7 @@ front-end\root.lua
 front-end\modules\actionbars.lua
 front-end\modules\chatwindows.lua
 front-end\modules\explorer.lua
-front-end\modules\menu.lua
+front-end\modules\menu-addon.lua
 front-end\modules\menu-game.lua
 front-end\modules\menu-gamepanels.lua
 front-end\modules\minimap.lua
