@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.410-RC] 2020-09-29
+- Hard git reset to force the missing file updates. What the actual fuck is going on?
+
 ## [2.1.409-RC] 2020-09-29
 ### Changed
 - Several changes to structure and file names.
