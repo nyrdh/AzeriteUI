@@ -1,4 +1,4 @@
-local LibBagButton = Wheel:Set("LibBagButton", 11)
+local LibBagButton = Wheel:Set("LibBagButton", 13)
 if (not LibBagButton) then	
 	return
 end
@@ -76,6 +76,7 @@ local QueuedContainerIDs = {}
 local QueuedItemIDs = {}
 
 -- Button templates
+local BUTTON_TYPE = IsClassic and "Button" or "ItemButton"
 local ButtonTemplates = {
 	Bag = "ContainerFrameItemButtonTemplate", -- bag itembutton
 	Bank = "BankItemButtonGenericTemplate", -- bank itembutton
@@ -147,7 +148,7 @@ end
 -- and thus do not rely on bag/bank opening events to be shown.
 -- You can use them to track quest items, food, whatever.
 -----------------------------------------------------------------
-local Button = LibBagButton:CreateFrame("ItemButton")
+local Button = LibBagButton:CreateFrame(BUTTON_TYPE)
 local Button_MT = { __index = BagButton }
 
 -- Set the bagID of the button.
@@ -218,7 +219,7 @@ LibBagButton.SpawnItemButton = function(self, bagType)
 
 	--]]--
 
-	itemButton.slot = setmetatable(container:CreateFrame("ItemButton", nil, self:GetFrame("UICenter"), ButtonTemplates[bagID]), Button_MT)
+	itemButton.slot = setmetatable(container:CreateFrame(BUTTON_TYPE, nil, self:GetFrame("UICenter"), ButtonTemplates[bagID]), Button_MT)
 	itemButton.slot:SetAllPoints()
 
 	return itemButton
@@ -287,7 +288,11 @@ LibBagButton.ParseContainerSlot = function(self, bagID, slotID)
 		local Item = self:GetContainerSlotCache(bagID, slotID)
 		if (Item.itemLink ~= itemLink) then
 
-			isQuestItem, questID, isActive = GetContainerItemQuestInfo(bagID, slotID)
+			-- No quest item info in classic
+			if (not IsClassic) then
+				isQuestItem, questID, isActive = GetContainerItemQuestInfo(bagID, slotID)
+			end
+
 			itemName, _, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemIcon, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
 			
 			-- Get some basic info if the item hasn't been cached up yet

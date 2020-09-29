@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.409-RC] 2020-09-29
+### Changed
+- Several changes to structure and file names.
+
+### Fixed
+- Fixed some incompatibilities in a new library that caused errors in WoW Classic.
+
 ## [2.1.408-RC] 2020-09-27
 - We needed an updated file.
 

@@ -40,7 +40,7 @@ locale\zhCN.lua
 locale\zhTW.lua
 
 # Addon specific layout and design. 
-front-end\stylesheet.lua
+front-end\layouts.lua
 
 # Main addon module, 
 # all others are children of this one. 
@@ -50,20 +50,19 @@ front-end\root.lua
 front-end\modules\actionbars.lua
 front-end\modules\chatwindows.lua
 front-end\modules\explorer.lua
-front-end\modules\floaters.lua
-front-end\modules\fonts.lua
-front-end\modules\gamemenu.lua
-front-end\modules\grouptools.lua
 front-end\modules\menu.lua
-front-end\modules\micromenu.lua
+front-end\modules\menu-game.lua
+front-end\modules\menu-gamepanels.lua
 front-end\modules\minimap.lua
 front-end\modules\misc.lua
-front-end\modules\nameplates.lua
+front-end\modules\misc-floaters.lua
+front-end\modules\misc-timers.lua
 front-end\modules\objectivestracker.lua
-front-end\modules\timers.lua
 front-end\modules\tooltips.lua
 front-end\modules\tooltips-blizzard.lua
 front-end\modules\unitframes.lua
+front-end\modules\unitframes-grouptools.lua
+front-end\modules\unitframes-nameplates.lua
 
 # All module incompatibilities in one place.
 front-end\incompatibilities.lua

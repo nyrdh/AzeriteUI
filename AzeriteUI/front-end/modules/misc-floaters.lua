@@ -132,6 +132,7 @@ local CreatePointHook = function(object)
 	-- Don't create multiple hooks
 	if (not FrameCache[object]) then 
 		hooksecurefunc(object, "SetPoint", ResetPoint)
+		FrameCache[object] = true
 	end
 end 
 
@@ -377,46 +378,42 @@ Module.HandleAlertFrames = function(self)
 		hooksecurefunc(alertFrame, "AddAlertFrameSubSystem", AlertSubSystem_AdjustPosition) -- catch stuff made by other addons too.
 		hooksecurefunc(alertFrame, "UpdateAnchors", AlertFrame_PostUpdateAnchors)
 		hooksecurefunc("GroupLootContainer_Update", GroupLootContainer_PostUpdate)
+		FrameCache[alertFrame] = true
 	end
-	FrameCache[alertFrame] = true
 end
 
 Module.HandleBelowMinimapWidgets = function(self)
 
-	local topCenterContainer = UIWidgetTopCenterContainerFrame
+	local tcHolder = self:CreateFrame("Frame", nil, "UICenter")
+	tcHolder:SetPoint("TOP", 0, -30)
+	tcHolder:SetSize(10, 58)
 
-	-- Hide quest tracker when this is visible!
-	local belowMiniMapcontainer = UIWidgetBelowMinimapContainerFrame
+	local tcContainer = UIWidgetTopCenterContainerFrame
+	tcContainer:ClearAllPoints()
+	tcContainer:SetPoint("CENTER", tcHolder)
 
-	local topCenterHolder = self:CreateFrame("Frame", nil, "UICenter")
-	topCenterHolder:SetPoint("TOP", 0, -30)
-	topCenterHolder:SetSize(10, 58)
-
-	local belowMiniMapHolder = self:CreateFrame("Frame", nil, "UICenter")
-	belowMiniMapHolder:Place("BOTTOM", "Minimap", "TOP", 4, 60)
-	belowMiniMapHolder:SetSize(128, 40)
-
-	topCenterContainer:ClearAllPoints()
-	topCenterContainer:SetPoint("CENTER", topCenterHolder)
-
-	belowMiniMapcontainer:ClearAllPoints()
-	belowMiniMapcontainer:SetPoint("CENTER", belowMiniMapHolder, "CENTER")
-
-	hooksecurefunc(topCenterContainer, "SetPoint", function(self, _, b)
-		local holder = topCenterHolder
-		if b and (b ~= holder) then
+	hooksecurefunc(tcContainer, "SetPoint", function(self, _, anchor)
+		if (anchor) and (anchor ~= tcHolder) then
 			self:ClearAllPoints()
-			self:SetPoint("TOP", holder)
-			self:SetParent(holder)
+			self:SetPoint("TOP", tcHolder)
+			self:SetParent(tcHolder)
 		end
 	end)
 
-	hooksecurefunc(belowMiniMapcontainer, "SetPoint", function(self, _, b)
-		local holder = belowMiniMapHolder
-		if b and (b ~= holder) then
+	local bmHolder = self:CreateFrame("Frame", nil, "UICenter")
+	bmHolder:Place("BOTTOM", "Minimap", "TOP", 4, 60)
+	bmHolder:SetSize(128, 40)
+
+	-- Note: Hide quest tracker when this is visible!
+	local bmContainer = UIWidgetBelowMinimapContainerFrame
+	bmContainer:ClearAllPoints()
+	bmContainer:SetPoint("CENTER", bmHolder, "CENTER")
+
+	hooksecurefunc(bmContainer, "SetPoint", function(self, _, anchor)
+		if (anchor) and (anchor ~= bmHolder) then
 			self:ClearAllPoints()
-			self:SetPoint("BOTTOM", holder, "BOTTOM")
-			self:SetParent(holder)
+			self:SetPoint("BOTTOM", bmHolder, "BOTTOM")
+			self:SetParent(bmHolder)
 		end
 	end)
 end
@@ -550,8 +547,8 @@ Module.HandleTalkingHeadFrame = function(self)
 	if (not FrameCache[frame]) then 
 		frame:HookScript("OnShow", AlertFrame_PostUpdateAnchors)
 		frame:HookScript("OnHide", AlertFrame_PostUpdateAnchors)
+		FrameCache[frame] = true
 	end
-	FrameCache[frame] = true
 end
 
 Module.HandleVehicleSeatIndicator = function(self)

@@ -1,4 +1,4 @@
-local LibChatBubble = Wheel:Set("LibChatBubble", 19)
+local LibChatBubble = Wheel:Set("LibChatBubble", 20)
 if (not LibChatBubble) then	
 	return
 end
@@ -229,6 +229,10 @@ LibChatBubble.EnableBlizzard = function(self, bubble)
 		region:SetTexture(texture)
 		region:SetAlpha(1)
 	end
+end
+
+LibChatBubble.SetBlizzardBubbleFontObject = function(self, fontObject)
+	ChatBubbleFont:SetFontObject(fontObject)
 end
 
 LibChatBubble.SetBubbleFontObject = function(self, fontObject)
@@ -467,6 +471,7 @@ end
 local embedMethods = {
 	EnableBubbleStyling = true,
 	DisableBubbleStyling = true,
+	SetBlizzardBubbleFontObject = true,
 	SetBubbleFontObject = true,
 	SetBubblePostCreateFunc = true,
 	SetBubblePostUpdateFunc = true,
