@@ -10,6 +10,7 @@
 <!-- core libs, require callbacks libs or none -->
 <Script file='libraries\auradata.lua'/>
 <Script file='libraries\db.lua'/>
+<Script file='libraries\forge.lua'/>
 <Script file='libraries\hook.lua'/>
 <Script file='libraries\locale.lua'/>
 <Script file='libraries\module.lua'/>

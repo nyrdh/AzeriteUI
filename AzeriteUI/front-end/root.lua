@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 
 -- Wooh! 
-local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibSwitcherTool", "LibAuraData", "LibAura", "LibClientBuild")
+local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibSwitcherTool", "LibAuraData", "LibAura", "LibClientBuild", "LibForge")
 
 -- Tell the back-end what addon to look for before 
 -- initializing this module and all its submodules. 
@@ -739,6 +739,10 @@ Core.OnInit = function(self)
 		"blockCounter"
 	)
 	self.db = GetConfig(ADDON)
+	
+	Private.SetLayout("Generic")
+	Private.SetLayout("Azerite")
+	
 	self.layout = GetLayout(ADDON)
 
 	-- In case some other jokers have disabled these, we add them back to avoid a World of Bugs.
@@ -802,26 +806,9 @@ end
 
 Core.OnEnable = function(self)
 	local layout = self.layout
-
-	-- Disable most of the BlizzardUI, to give room for our own!
-	------------------------------------------------------------------------------------
-	for widget,state in pairs(layout.DisableUIWidgets) do 
-		if (state) then 
-			self:DisableUIWidget(widget)
-		end 
-	end 
-
-	-- Disable complete interface options menu pages we don't need
-	------------------------------------------------------------------------------------
-	for id,page in pairs(layout.DisableUIMenuPages) do 
-		self:DisableUIMenuPage(page.ID, page.Name)
-	end 
-
-	-- Disable single interface options we don't need
-	------------------------------------------------------------------------------------
-	for id,option in pairs(layout.DisableUIMenuOptions) do 
-		self:DisableUIMenuOption(option.Shrink, option.Name)
-	end 
+	if (layout.Forge and layout.Forge.OnEnable) then
+		self:Forge("Module", self, layout.Forge.OnEnable)
+	end
 
 	-- Experimental stuff we move to relevant modules once done
 	------------------------------------------------------------------------------------

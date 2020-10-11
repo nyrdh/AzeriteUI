@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 104)
+local LibSecureButton = Wheel:Set("LibSecureButton", 105)
 if (not LibSecureButton) then
 	return
 end
@@ -802,6 +802,14 @@ end
 
 AnimTemplate.IsPlaying = function(self)
 	return self.isPlaying
+end
+
+AnimTemplate.IsObjectType = function(self, objectType)
+	return objectType == "Animation"
+end
+
+AnimTemplate.GetObjectType = function(self, objectType)
+	return "Animation"
 end
 
 AnimTemplate.SetSpeed = function(self, speed)

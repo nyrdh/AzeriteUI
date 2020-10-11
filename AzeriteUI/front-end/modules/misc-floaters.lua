@@ -551,6 +551,17 @@ Module.HandleTalkingHeadFrame = function(self)
 	end
 end
 
+Module.HandleArcheologyDigsiteProgressBar = function(self)
+	local layout = self.layout
+	local bar = ArcheologyDigsiteProgressBar
+	if (bar) then
+		GetHolder(ArcheologyDigsiteProgressBar, unpack(layout.ArcheologyDigsiteProgressBarPlace))
+		CreatePointHook(ArcheologyDigsiteProgressBar)
+
+		UIPARENT_MANAGED_FRAME_POSITIONS.ArcheologyDigsiteProgressBar = nil
+	end
+end
+
 Module.HandleVehicleSeatIndicator = function(self)
 	local layout = self.layout
 
@@ -772,6 +783,18 @@ Module.OnEnable = function(self)
 		self:HandleQuestTimerFrame()
 	end
 	if (IsRetail) then
+		if (IsAddOnLoaded("Blizzard_ArchaeologyUI")) then
+			self:HandleArcheologyDigsiteProgressBar()
+		else
+			local fix
+			fix = function(self, event, addon) 
+				if (addon == "Blizzard_ArchaeologyUI") then
+					self:UnregisterEvent("ADDON_LOADED", fix)	
+					self:HandleArcheologyDigsiteProgressBar()
+				end
+			end
+			self:RegisterEvent("ADDON_LOADED", fix)
+		end
 		self:HandleBelowMinimapWidgets()
 		self:HandleExtraActionButton()
 		self:HandleVehicleSeatIndicator()

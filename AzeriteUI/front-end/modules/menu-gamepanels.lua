@@ -35,7 +35,7 @@ local IsRetail = Module:IsRetail()
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
 local buttonWidth, buttonHeight, buttonSpacing, sizeMod = 300,50,10, .75
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-local Layout = GetLayout(Module:GetName())
+local Layout
 
 local getBindingKeyForAction = function(action, useNotBound, useParentheses)
 	local key = GetBindingKey(action)
@@ -336,8 +336,10 @@ Module.GetConfigWindow = function(self)
 		configWindow:SetScript("OnShow", ConfigWindow_OnShow)
 		configWindow:SetScript("OnHide", ConfigWindow_OnHide)
 
-		if Layout.MenuWindow_CreateBorder then 
-			Layout.MenuWindow_CreateBorder(configWindow)
+		-- This can be called before OnInit
+		local layout = GetLayout(self:GetName())
+		if layout and layout.MenuWindow_CreateBorder then 
+			layout.MenuWindow_CreateBorder(configWindow)
 		end
 		
 		self.ConfigWindow = configWindow
@@ -533,6 +535,7 @@ Module.ListenForBartender = function(self, event, addon)
 end
 
 Module.OnInit = function(self)
+	Layout = GetLayout(self:GetName())
 	if self:IsAddOnEnabled("Bartender4") then 
 		self:AddDebugMessageFormatted("[Bartender4] detected.")
 		if IsAddOnLoaded("Bartender4") then 

@@ -637,7 +637,7 @@ local Update = function(self, event, unit, ...)
 		end
 
 		-- Store some basic values on the element
-		local forced = forced or guid ~= Auras.guid
+		local forced = forced or (guid ~= Auras.guid) or (not Auras.guid)
 		Auras.guid = guid
 	
 		-- Filter strings
@@ -684,7 +684,7 @@ local Update = function(self, event, unit, ...)
 		end
 
 		-- Store some basic values on the element
-		local forced = forced or guid ~= Buffs.guid
+		local forced = forced or (guid ~= Buffs.guid) or (not Buffs.guid)
 		Buffs.guid = guid
 
 		-- Filter strings
@@ -722,7 +722,7 @@ local Update = function(self, event, unit, ...)
 		end
 
 		-- Store some basic values on the element
-		local forced = forced or guid ~= Debuffs.guid
+		local forced = forced or (guid ~= Debuffs.guid) or (not Debuffs.guid)
 		Debuffs.guid = guid
 		
 		-- Filter strings
@@ -870,5 +870,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 56)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 57)
 end 

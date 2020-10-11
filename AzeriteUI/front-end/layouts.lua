@@ -70,8 +70,6 @@ local GetMedia = function(name, type) return ([[Interface\AddOns\%s\media\%s.%s]
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 
--- Generic single colored texture
-local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
 local NEW = "*"
 
 -- Use a metatable to dynamically create the colors
@@ -325,13 +323,13 @@ end
 local ActionButton_StackCount_PostUpdate = function(self, count)
 	count = tonumber(count) or 0
 	local font = GetFont((count < 10) and 18 or 14, true) 
-	if (self.Count:GetFontObject() ~= font) then 
+	if (self.Count) and (self.Count:GetFontObject() ~= font) then 
 		self.Count:SetFontObject(font)
 	end
 	-- Hide the rank text element if a count exists. 
 	-- I don't think this'll ever happen (?), 
 	-- but better safe than sorry. 
-	if self.Rank then 
+	if (self.Rank) then 
 		self.Rank:SetShown((count == 0))
 	end 
 end
@@ -2027,20 +2025,17 @@ Defaults.BlizzardChatFrames = {
 	enableChatOutline = true -- enable outlined chat for readability
 }
 
-if (IsClassic) then
-	Defaults.BlizzardFloaterHUD = {
-		enableRaidWarnings = true -- not yet implemented!
-	}
-elseif (IsRetail) then
-	Defaults.BlizzardFloaterHUD = {
-		enableAlerts = false, -- spams like crazy. can we filter it? I did in legion. MUST LOOK UP!
-		enableAnnouncements = false, -- level up, loot
-		enableObjectivesTracker = true, -- the blizzard monstrosity
-		enableRaidBossEmotes = true, -- partly needed for instance encounters
-		enableRaidWarnings = true,  -- groups would want this
-		enableTalkingHead = true -- immersive and nice
-	}
-end
+Defaults.BlizzardFloaterHUD = (IsClassic) and {
+	enableRaidWarnings = true -- not yet implemented!
+
+} or (IsRetail) and {
+	enableAlerts = false, -- spams like crazy. can we filter it? I did in legion. MUST LOOK UP!
+	enableAnnouncements = false, -- level up, loot
+	enableObjectivesTracker = true, -- the blizzard monstrosity
+	enableRaidBossEmotes = true, -- partly needed for instance encounters
+	enableRaidWarnings = true,  -- groups would want this
+	enableTalkingHead = true -- immersive and nice
+}
 
 Defaults.ActionBarMain = {
 
@@ -2136,48 +2131,171 @@ Defaults.UnitFrameRaid = {
 -- like which way tooltips grow, where the default position of all tooltips are,
 -- where the integrated MBB button is placed, and so on. 
 -- Not all of those can be changed through the layout, some things are in the modules.
-local Layouts = {}
+local GENERIC_STYLE = "Generic"
+local Layouts = { [GENERIC_STYLE] = {}, Azerite = {}, Diabolic = {}, Legacy = {} }
 
+-- Shortcuts to ease registrations
+local Generic = Layouts[GENERIC_STYLE]
+local Azerite = Layouts.Azerite
+local Diabolic = Layouts.Diabolic
+local Legacy = Layouts.Legacy
+
+local copyTable
+copyTable = function(source, copy)
+	check(source, 1, "table")
+	check(copy, 2, "table", "nil")
+	copy = copy or {}
+	for k,v in pairs(source) do
+		if (type(v) == "table") then
+			copy[k] = copyTable(v)
+		else
+			copy[k] = v
+		end
+	end
+	return copy
+end
+
+------------------------------------------------
+-- Generic
+------------------------------------------------
 -- Addon Core
-Layouts[ADDON] = {
-	DisableUIWidgets = {
-		ActionBars = true,
-		Auras = true,
-		BuffTimer = true, -- Retail
-		--CaptureBar = true, -- Retail. Also contains Azshara Ancient Wards.
-		CastBars = true,
-		Chat = true,
-		Durability = true,
-		Minimap = true,
-		OrderHall = true,
-		--ObjectiveTracker = true, -- Retail
-		PlayerPowerBarAlt = true, -- Retail
-		--QuestWatchFrame = true, -- Classic
-		--TotemFrame = true, -- Retail
-		Tutorials = true,
-		UnitFramePlayer = true,
-		UnitFramePet = true,
-		UnitFrameTarget = true,
-		UnitFrameToT = true,
-		UnitFrameFocus = true, -- Retail
-		UnitFrameParty = true,
-		UnitFrameRaid = true,
-		UnitFrameBoss = true, -- Retail
-		UnitFrameArena = true, -- Classic TBC, Retail
-		--Warnings = true,
-		ZoneText = true
+Generic[ADDON] = {
+	Forge = {
+		OnInit = {
+
+		},
+		OnEnable = {
+			{
+				type = "ExecuteMethods",
+				methods = {
+					{
+						repeatAction = {
+							method = "DisableUIWidget",
+							arguments = {
+								"ActionBars",
+								"Auras",
+								"BuffTimer", -- Retail
+								"CaptureBar", -- Retail. Also contains Azshara Ancient Wards.
+								"CastBars",
+								"Chat",
+								"Durability",
+								"Minimap",
+								"OrderHall",
+								"ObjectiveTracker", -- Retail
+								"PlayerPowerBarAlt", -- Retail
+								"QuestWatchFrame", -- Classic
+								"TotemFrame", -- Retail
+								"Tutorials",
+								"UnitFramePlayer",
+								"UnitFramePet",
+								"UnitFrameTarget",
+								"UnitFrameToT",
+								"UnitFrameFocus", -- Retail
+								"UnitFrameParty",
+								"UnitFrameRaid",
+								"UnitFrameBoss", -- Retail
+								"UnitFrameArena", -- Classic TBC, Retail
+								"Warnings",
+								"ZoneText"						
+							}
+						}
+					},
+					{
+						repeatAction = {
+							method = "DisableUIMenuPage",
+							arguments = {
+								-- pageID, globalName
+								{ 5, "InterfaceOptionsActionBarsPanel" },
+								{ 10, "CompactUnitFrameProfiles" }					
+							}
+						}
+					},
+					{
+						repeatAction = {
+							method = "DisableUIMenuOptions",
+							arguments = {
+								-- shrinkOption, globalName
+								{ true, "InterfaceOptionsCombatPanelTargetOfTarget" },
+								IsRetail and { "Vertical", "InterfaceOptionsNamesPanelUnitNameplatesPersonalResourceOnEnemy" } or nil
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+------------------------------------------------
+-- Azerite
+------------------------------------------------
+-- Addon Core
+Azerite[ADDON] = setmetatable({
+	Forge = {
+		OnInit = {
+
+		},
+		OnEnable = {
+			{
+				type = "ExecuteMethods",
+				methods = {
+					{
+						repeatAction = {
+							method = "DisableUIWidget",
+							arguments = {
+								"ActionBars",
+								"Auras",
+								"BuffTimer", -- Retail
+								--"CaptureBar", -- Retail. Also contains Azshara Ancient Wards.
+								"CastBars",
+								"Chat",
+								"Durability",
+								"Minimap",
+								"OrderHall",
+								--"ObjectiveTracker", -- Retail
+								"PlayerPowerBarAlt", -- Retail
+								--"QuestWatchFrame", -- Classic
+								--"TotemFrame", -- Retail
+								"Tutorials",
+								"UnitFramePlayer",
+								"UnitFramePet",
+								"UnitFrameTarget",
+								"UnitFrameToT",
+								"UnitFrameFocus", -- Retail
+								"UnitFrameParty",
+								"UnitFrameRaid",
+								"UnitFrameBoss", -- Retail
+								"UnitFrameArena", -- Classic TBC, Retail
+								--"Warnings",
+								"ZoneText"						
+							}
+						}
+					},
+					{
+						repeatAction = {
+							method = "DisableUIMenuPage",
+							arguments = {
+								-- pageID, globalName
+								{ 5, "InterfaceOptionsActionBarsPanel" },
+								{ 10, "CompactUnitFrameProfiles" }					
+							}
+						}
+					},
+					{
+						repeatAction = {
+							method = "DisableUIMenuOption",
+							arguments = {
+								-- shrinkOption, globalName
+								{ true, "InterfaceOptionsCombatPanelTargetOfTarget" },
+								IsRetail and { "Vertical", "InterfaceOptionsNamesPanelUnitNameplatesPersonalResourceOnEnemy" } or nil
+							}
+						}
+					}
+				}
+			}
+		}
 	},
-	DisableUIMenuPages = {
-		{ ID = 5, Name = "InterfaceOptionsActionBarsPanel" },
-		{ ID = 10, Name = "CompactUnitFrameProfiles" }
-	},
-	DisableUIMenuOptions = {
-		{ Shrink = true, Name = "InterfaceOptionsCombatPanelTargetOfTarget" },
-		IsRetail and { Shrink = "Vertical", Name = "InterfaceOptionsNamesPanelUnitNameplatesPersonalResourceOnEnemy" } or nil
-	},
-	FadeInDelay = 1.5,
-	FadeInSpeed = .75,
-	FadeInUI = true, 
+
 	MenuBorderBackdropBorderColor = { 1, 1, 1, 1 },
 	MenuBorderBackdropColor = { .05, .05, .05, .85 },
 	MenuButton_PostCreate = Core_MenuButton_PostCreate, 
@@ -2194,10 +2312,11 @@ Layouts[ADDON] = {
 	MenuToggleButtonIconSize = { 96, 96 },
 	MenuToggleButtonIconColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
 	MenuWindow_CreateBorder = function(self) return GetBorder(self) end
-}
+
+}, { __index = Generic[ADDON] })
 
 -- Blizzard Chat Frames
-Layouts.BlizzardChatFrames = {
+Azerite.BlizzardChatFrames = {
 	AlternateChatFramePlace = { "TOPLEFT", 85, -64 },
 	AlternateChatFrameSize = { 499, 176 }, 
 	AlternateClampRectInsets = { -54, -54, -64, -350 },
@@ -2224,13 +2343,21 @@ Layouts.BlizzardChatFrames = {
 
 -- Because it's chaotic having these all over the place.
 local FloaterSlots = {
+	-- Bottomright floaters
+	-- These used to be center right, but was ultimately in the way of gameplay.
 	ExtraButton = { "CENTER", "UICenter", "BOTTOMRIGHT", -482, 360 }, -- "CENTER", "UICenter", "CENTER", 237, -60
 	VehicleSeatSelector = { "CENTER", "UICenter", "BOTTOMRIGHT", -480, 210 }, -- "CENTER", "UICenter", "CENTER", 424, 0
 	Durability = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 }, -- "CENTER", "UICenter", "CENTER", 190, 0
+
+	-- Bottom center floaters
+	-- Below these you'll find 2 potentional rows of actionbuttons, and the petbar.
+	Archeology = { "BOTTOM", "UICenter", "BOTTOM", 0, 390 },
+	AltPower = { "BOTTOM", "UICenter", "BOTTOM", 0, 340 }, -- "CENTER", "UICenter", "CENTER", 0, -(133 + 56)
+	CastBar = { "BOTTOM", "UICenter", "BOTTOM", 0, 290 }, -- CENTER, 0, -133
 }
 
 -- Blizzard Floaters
-Layouts.BlizzardFloaterHUD = {
+Azerite.BlizzardFloaterHUD = {
 	AlertFramesAnchor = "BOTTOM",
 	AlertFramesOffset = -10,
 	AlertFramesPlace = { "TOP", "UICenter", "TOP", 0, -40 },
@@ -2270,6 +2397,8 @@ Layouts.BlizzardFloaterHUD = {
 	ExtraActionButtonSize = { 64, 64 },
 	QuestTimerFramePlace = { "CENTER", UIParent, "CENTER", 0, 220 },
 	TalkingHeadFramePlace = { "TOP", "UICenter", "TOP", 0, -(60 + 40) },
+	ArcheologyDigsiteProgressBarPlace = FloaterSlots.Archeology,
+
 	VehicleSeatIndicatorPlace = FloaterSlots.VehicleSeatSelector,
 	ZoneAbilityButtonBorderColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
 	ZoneAbilityButtonBorderDrawLayer = { "BORDER", 1 },
@@ -2297,14 +2426,14 @@ Layouts.BlizzardFloaterHUD = {
 }
 
 -- Blizzard font replacements
-Layouts.BlizzardFonts = {
+Azerite.BlizzardFonts = {
 	BlizzChatBubbleFont = GetFont(10, true, false),
 	ChatBubbleFont = GetFont(12, true, false),
 	ChatFont = GetFont(15, true, true)
 }
 
 -- Blizzard Game Menu (Esc)
-Layouts.BlizzardGameMenu = {
+Azerite.BlizzardGameMenu = {
 	MenuButton_PostCreate = Core_MenuButton_PostCreate,
 	MenuButton_PostUpdate = Core_MenuButton_PostUpdate,
 	MenuButtonSize = { 300, 50 },
@@ -2313,7 +2442,7 @@ Layouts.BlizzardGameMenu = {
 }
 
 -- Blizzard MicroMenu
-Layouts.BlizzardMicroMenu = {
+Azerite.BlizzardMicroMenu = {
 	ButtonFont = GetFont(14, false),
 	ButtonFontColor = { 0, 0, 0 }, 
 	ButtonFontShadowColor = { 1, 1, 1, .5 },
@@ -2330,7 +2459,7 @@ Layouts.BlizzardMicroMenu = {
 }
 
 -- Blizzard Timers (mirror, quest)
-Layouts.BlizzardTimers = {
+Azerite.BlizzardTimers = {
 	MirrorAnchor = Wheel("LibFrame"):GetFrame(),
 	MirrorAnchorOffsetX = 0,
 	MirrorAnchorOffsetY = -370, 
@@ -2367,37 +2496,32 @@ Layouts.BlizzardTimers = {
 }
 
 -- Blizzard Objectives Tracker
-if (IsClassic) then
-	Layouts.BlizzardObjectivesTracker = {
-		FontObject = GetFont(13, true),
-		FontObjectTitle = GetFont(15, true),
-		HideInBossFights = true,
-		HideInCombat = false,
-		MaxHeight = 1080 - (260 + 380),
-		Place = { "BOTTOMRIGHT", -60, 380 },
-		Scale = 1.0, 
-		SpaceBottom = 380, 
-		SpaceTop = 260, 
-		Width = 255 -- 280 is classic default
-	}
-end
-if (IsRetail) then
-	Layouts.BlizzardObjectivesTracker = {
-		Place = { "TOPRIGHT", -60, -260 },
-		Width = 235, -- 235 default
-		Scale = 1.1, 
-		SpaceTop = 260, 
-		SpaceBottom = 330, 
-		MaxHeight = 480,
-		HideInCombat = false, 
-		HideInBossFights = true, 
-		HideInVehicles = false,
-		HideInArena = true
-	}
-end
+Azerite.BlizzardObjectivesTracker = (IsClassic) and {
+	FontObject = GetFont(13, true),
+	FontObjectTitle = GetFont(15, true),
+	HideInBossFights = true,
+	HideInCombat = false,
+	MaxHeight = 1080 - (260 + 380),
+	Place = { "BOTTOMRIGHT", -60, 380 },
+	Scale = 1.0, 
+	SpaceBottom = 380, 
+	SpaceTop = 260, 
+	Width = 255 -- 280 is classic default
+} or (IsRetail) and {
+	Place = { "TOPRIGHT", -60, -260 },
+	Width = 235, -- 235 default
+	Scale = 1.1, 
+	SpaceTop = 260, 
+	SpaceBottom = 330, 
+	MaxHeight = 480,
+	HideInCombat = false, 
+	HideInBossFights = true, 
+	HideInVehicles = false,
+	HideInArena = true
+}
 
 -- Blizzard Popup Styling
-Layouts.BlizzardPopupStyling = {
+Azerite.BlizzardPopupStyling = {
 	EditBoxBackdrop = BACKDROPS.PopupEditBox,
 	EditBoxBackdropColor = { 0, 0, 0, 0 },
 	EditBoxBackdropBorderColor = { .15, .1, .05, 1 },
@@ -2416,7 +2540,7 @@ Layouts.BlizzardPopupStyling = {
 }
 
 -- Blizzard Tooltips
-Layouts.BlizzardTooltips = {
+Azerite.BlizzardTooltips = {
 	TooltipBackdrop = BACKDROPS.Tooltips,
 	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
 	TooltipBackdropColor = { .05, .05, .05, .85 },
@@ -2424,101 +2548,30 @@ Layouts.BlizzardTooltips = {
 }
 
 -- Blizzard World Map
-Layouts.BlizzardWorldMap = {}
+Azerite.BlizzardWorldMap = {}
 
 -- ActionBars
-local pm = 3/4
-Layouts.ActionBarMain = {
+Azerite.ActionBarMain = {
 
-	PetBackdropColor = { 2/3, 2/3, 2/3, 1 },
-	PetBackdropDrawLayer = { "BACKGROUND", 1 },
-	PetBackdropPlace = { "CENTER", 0, 0 },
-	PetBackdropSize = { 64/(122/256)*pm, 64/(122/256)*pm },
-	PetBackdropTexture = GetMedia("actionbutton-backdrop"),
-	PetBorderColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
-	PetBorderDrawLayer = { "BORDER", 1 },
-	PetBorderPlace = { "CENTER", 0, 0 },
-	PetBorderSize = { 64/(122/256)*pm, 64/(122/256)*pm },
-	PetBorderTexture = GetMedia("actionbutton-border"),
-	PetButtonHitRects = { -4, -4, -4, -4 },
-	PetButtonSize = { 64*pm, 64*pm },
-	PetChargeCooldownBlingColor = { 0, 0, 0, 0 },
-	PetChargeCooldownBlingTexture = GetMedia("blank"),
-	PetChargeCooldownPlace = { "CENTER", 0, 0 },
-	PetChargeCooldownSize = { 44*pm, 44*pm },
-	PetChargeCooldownSwipeColor = { 0, 0, 0, .5 },
-	PetChargeCooldownSwipeTexture = GetMedia("actionbutton-mask-circular"),
-	PetCheckedBlendMode = "ADD",
-	PetCheckedColor = { .9, .8, .1, .3 },
-	PetCheckedDrawLayer = { "ARTWORK", 2 },
-	PetCheckedPlace = { "CENTER", 0, 0 },
-	PetCheckedSize = { 44, 44 },
-	PetCooldownBlingColor = { 0, 0, 0 , 0 },
-	PetCooldownBlingTexture = GetMedia("blank"),
-	PetCooldownCountColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .85 },
-	PetCooldownCountFont = GetFont(16, true),
-	PetCooldownCountJustifyH = "CENTER",
-	PetCooldownCountJustifyV = "MIDDLE",
-	PetCooldownCountPlace = { "CENTER", 1, 0 },
-	PetCooldownCountShadowOffset = { 0, 0 },
-	PetCooldownCountShadowColor = { 0, 0, 0, 1 },
-	PetCooldownPlace = { "CENTER", 0, 0 },
-	PetCooldownSize = { 44*pm, 44*pm },
+	ChargeCooldownSwipeColor = { 0, 0, 0, .5 },
+	CooldownSwipeColor = { 0, 0, 0, .75 },
+
 	PetCooldownSwipeColor = { 0, 0, 0, .75 },
-	PetCooldownSwipeTexture = GetMedia("actionbutton-mask-circular"),
-	PetCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	PetCountFont = GetFont(11, true),
-	PetCountJustifyH = "CENTER",
-	PetCountJustifyV = "BOTTOM",
-	PetCountMaxDisplayed = 99,
-	PetCountPlace = { "BOTTOMRIGHT", -3, 3 },
-	PetCountPostUpdate = ActionButton_StackCount_PostUpdate, 
-	PetCountShadowColor = { 0, 0, 0, 1 },
-	PetCountShadowOffset = { 0, 0 },
-	PetFlashColor = { 1, 0, 0, .25 },
-	PetFlashDrawLayer = { "ARTWORK", 2 },
-	PetFlashPlace = { "CENTER", 0, 0 },
-	PetFlashSize = { 44*pm, 44*pm },
-	PetFlashTexture = [[Interface\ChatFrame\ChatFrameBackground]],
-	PetGlowBlendMode = "ADD",
-	PetGlowColor = { 1, 1, 1, .5 },
-	PetGlowDrawLayer = { "ARTWORK", 1 },
-	PetGlowPlace = { "CENTER", 0, 0 },
-	PetGlowSize = { 44/(122/256)*pm,44/(122/256)*pm },
-	PetGlowTexture = GetMedia("actionbutton-glow-white"),
-	PetIconPlace = { "CENTER", 0, 0 },
-	PetIconSize = { 44*pm, 44*pm },
-	PetKeybindColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 },
-	PetKeybindFont = GetFont(12, true),
-	PetKeybindJustifyH = "CENTER",
-	PetKeybindJustifyV = "BOTTOM",
-	PetKeybindPlace = { "TOPLEFT", 0, 0 },
-	PetKeybindShadowColor = { 0, 0, 0, 1 },
-	PetKeybindShadowOffset = { 0, 0 },
-	PetMaskTexture = GetMedia("actionbutton-mask-circular"),
-	PetPushedBlendMode = "ADD",
-	PetPushedColor = { 1, 1, 1, .15 },
-	PetPushedDrawLayer = { "ARTWORK", 1 },
-	PetPushedPlace = { "CENTER", 0, 0 },
-	PetPushedSize = { 44*pm, 44*pm },
-	PetShowChargeCooldownBling = false,
-	PetShowChargeCooldownSwipe = true,
-	PetShowCooldownSwipe = true,
-	PetShowCooldownBling = true,
-	PetSpellAutoCastAntsColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
-	PetSpellAutoCastAntsGrid = { 512, 512, 96, 96, 25 },
-	PetSpellAutoCastAntsSpeed = 1/30,
-	PetSpellAutoCastAntsTexture = GetMedia("actionbutton-ants-small-grid"),
-	PetSpellAutoCastGlowColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3], .25 },
-	PetSpellAutoCastGlowGrid = { 512, 512, 96, 96, 25 },
-	PetSpellAutoCastGlowSpeed = 1/30,
-	PetSpellAutoCastGlowTexture = GetMedia("actionbutton-ants-small-glow-grid"),
-	PetSpellAutoCastPlace = { "CENTER", 0, 0 },
-	PetSpellAutoCastSize = { 50*pm, 50*pm },
-	PetSpellHighlightPlace = { "CENTER", 0, 0 },
-	PetSpellHighlightSize = { 64/(122/256)*pm, 64/(122/256)*pm },
-	PetSpellHighlightTexture = GetMedia("actionbutton-spellhighlight"),
-	PetSpellHighlightColor = { 255/255, 225/255, 125/255, .75 },
+	PetChargeCooldownSwipeColor = { 0, 0, 0, .5 },
+
+	ExitButtonPlace = { "CENTER", "Minimap", "CENTER", -math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
+	ExitButtonSize = { 32, 32 },
+	ExitButtonTexturePath = GetMedia("icon_exit_flight"),
+	ExitButtonTexturePlace = { "CENTER", 0, 0 }, 
+	ExitButtonTextureSize = { 80, 80 }, 
+
+	TooltipColorNameAsSpellWithUse = true, -- color item name as a spell (not by rarity) when it has a Use effect
+	TooltipHideBindsWithUse = true, -- hide item bind status when it has a Use effect
+	TooltipHideEquipTypeWithUse = false, -- hide item equip location and item type with Use effect
+	TooltipHideItemLevelWithUse = true, -- hide item level when it has a Use effect 
+	TooltipHideStatsWithUse = true, -- hide item stats when it has a Use effect
+	TooltipHideUniqueWithUse = true, -- hide item unique status when it has a Use effect
+
 	PetTooltipColorNameAsSpellWithUse = true, -- color item name as a spell (not by rarity) when it has a Use effect
 	PetTooltipHideBindsWithUse = true, -- hide item bind status when it has a Use effect
 	PetTooltipHideEquipTypeWithUse = false, -- hide item equip location and item type with Use effect
@@ -2526,110 +2579,539 @@ Layouts.ActionBarMain = {
 	PetTooltipHideStatsWithUse = true, -- hide item stats when it has a Use effect
 	PetTooltipHideUniqueWithUse = true, -- hide item unique status when it has a Use effect
 
-	BackdropColor = { 2/3, 2/3, 2/3, 1 },
-	BackdropDrawLayer = { "BACKGROUND", 1 },
-	BackdropPlace = { "CENTER", 0, 0 },
-	BackdropSize = { 64/(122/256), 64/(122/256) },
-	BackdropTexture = GetMedia("actionbutton-backdrop"),
-	BorderColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
-	BorderDrawLayer = { "BORDER", 1 },
-	BorderPlace = { "CENTER", 0, 0 },
-	BorderSize = { 64/(122/256), 64/(122/256) },
-	BorderTexture = GetMedia("actionbutton-border"),
-	ButtonHitRects = { -4, -4, -4, -4 },
-	ButtonSize = { 64, 64 },
-	ChargeCooldownBlingColor = { 0, 0, 0, 0 },
-	ChargeCooldownBlingTexture = GetMedia("blank"),
-	ChargeCooldownPlace = { "CENTER", 0, 0 },
-	ChargeCooldownSize = { 44, 44 },
-	ChargeCooldownSwipeColor = { 0, 0, 0, .5 },
-	ChargeCooldownSwipeTexture = GetMedia("actionbutton-mask-circular"),
-	CheckedBlendMode = "ADD",
-	CheckedColor = { .9, .8, .1, .3 },
-	CheckedDrawLayer = { "ARTWORK", 2 },
-	CheckedPlace = { "CENTER", 0, 0 },
-	CheckedSize = { 44, 44 },
-	CooldownBlingColor = { 0, 0, 0 , 0 },
-	CooldownBlingTexture = GetMedia("blank"),
-	CooldownCountColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .85 },
-	CooldownCountFont = GetFont(16, true),
-	CooldownCountJustifyH = "CENTER",
-	CooldownCountJustifyV = "MIDDLE",
-	CooldownCountPlace = { "CENTER", 1, 0 },
-	CooldownCountShadowOffset = { 0, 0 },
-	CooldownCountShadowColor = { 0, 0, 0, 1 },
-	CooldownPlace = { "CENTER", 0, 0 },
-	CooldownSize = { 44, 44 },
-	CooldownSwipeColor = { 0, 0, 0, .75 },
-	CooldownSwipeTexture = GetMedia("actionbutton-mask-circular"),
-	CountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	CountFont = GetFont(18, true),
-	CountJustifyH = "CENTER",
-	CountJustifyV = "BOTTOM",
-	CountMaxDisplayed = 99,
-	CountPlace = { "BOTTOMRIGHT", -3, 3 },
-	CountPostUpdate = ActionButton_StackCount_PostUpdate, 
-	CountShadowColor = { 0, 0, 0, 1 },
-	CountShadowOffset = { 0, 0 },
-	ExitButtonPlace = { "CENTER", "Minimap", "CENTER", -math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
-	ExitButtonSize = { 32, 32 },
-	ExitButtonTexturePath = GetMedia("icon_exit_flight"),
-	ExitButtonTexturePlace = { "CENTER", 0, 0 }, 
-	ExitButtonTextureSize = { 80, 80 }, 
-	FlashColor = { 1, 0, 0, .25 },
-	FlashDrawLayer = { "ARTWORK", 2 },
-	FlashPlace = { "CENTER", 0, 0 },
-	FlashSize = { 44, 44 },
-	FlashTexture = [[Interface\ChatFrame\ChatFrameBackground]],
-	GlowBlendMode = "ADD",
-	GlowColor = { 1, 1, 1, .5 },
-	GlowDrawLayer = { "ARTWORK", 1 },
-	GlowPlace = { "CENTER", 0, 0 },
-	GlowSize = { 44/(122/256),44/(122/256) },
-	GlowTexture = GetMedia("actionbutton-glow-white"),
-	IconPlace = { "CENTER", 0, 0 },
-	IconSize = { 44, 44 },
-	KeybindColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 },
-	KeybindFont = GetFont(15, true),
-	KeybindJustifyH = "CENTER",
-	KeybindJustifyV = "BOTTOM",
-	KeybindPlace = { "TOPLEFT", 5, -5 },
-	KeybindShadowColor = { 0, 0, 0, 1 },
-	KeybindShadowOffset = { 0, 0 },
-	MaskTexture = GetMedia("actionbutton-mask-circular"),
-	PushedBlendMode = "ADD",
-	PushedColor = { 1, 1, 1, .15 },
-	PushedDrawLayer = { "ARTWORK", 1 },
-	PushedPlace = { "CENTER", 0, 0 },
-	PushedSize = { 44, 44 },
-	ShowChargeCooldownBling = false,
-	ShowChargeCooldownSwipe = true,
-	ShowCooldownSwipe = true,
-	ShowCooldownBling = true,
-	SpellAutoCastAntsColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
-	SpellAutoCastAntsGrid = { 512, 512, 96, 96, 25 },
-	SpellAutoCastAntsSpeed = 1/15,
-	SpellAutoCastAntsTexture = GetMedia("actionbutton-ants-small-grid"),
-	SpellAutoCastGlowColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3], .25 },
-	SpellAutoCastGlowGrid = { 512, 512, 96, 96, 25 },
-	SpellAutoCastGlowSpeed = 1/15,
-	SpellAutoCastGlowTexture = GetMedia("actionbutton-ants-small-glow-grid"),
-	SpellAutoCastPlace = { "CENTER", 0, 0 },
-	SpellAutoCastSize = { 50, 50 },
-	SpellHighlightPlace = { "CENTER", 0, 0 },
-	SpellHighlightSize = { 64/(122/256), 64/(122/256) },
-	SpellHighlightTexture = GetMedia("actionbutton-spellhighlight"),
-	SpellHighlightColor = { 255/255, 225/255, 125/255, .75 },
-	TooltipColorNameAsSpellWithUse = true, -- color item name as a spell (not by rarity) when it has a Use effect
-	TooltipHideBindsWithUse = true, -- hide item bind status when it has a Use effect
-	TooltipHideEquipTypeWithUse = false, -- hide item equip location and item type with Use effect
-	TooltipHideItemLevelWithUse = true, -- hide item level when it has a Use effect 
-	TooltipHideStatsWithUse = true, -- hide item stats when it has a Use effect
-	TooltipHideUniqueWithUse = true -- hide item unique status when it has a Use effect
+	WidgetForge = {
+		PetActionButton = {
+			{
+				-- Only set the parent in modifiable widgets if it is your intention to change it.
+				-- Otherwise the code will assume the owner is the parent, and leave it as is,
+				-- which is what we want in the majority of cases.
+				type = "ModifyWidgets",
+				widgets = {
+					{
+						-- Note that a missing ownerKey or parentKey
+						-- will apply these changes to the original object instead.
+						parent = nil, ownerKey = nil, 
+						chain = {
+							"SetSize", { 48, 48 }, 
+							"SetHitBox", { -4, -4, -4, -4 }
+						},
+						values = {
+							"colors", Colors,
+							"maxDisplayCount", 99,
+							"PostUpdateCount", ActionButton_StackCount_PostUpdate,
+							"PostUpdateCooldown", function(self, cooldownObject) 
+								cooldownObject:SetSwipeColor(0, 0, 0, .75)
+							end,
+							"PostUpdateChargeCooldown", function(self, cooldownObject) 
+								cooldownObject:SetSwipeColor(0, 0, 0, .5)
+							end
+						}
+					},
+					{
+						parent = nil, ownerKey = "Icon", objectType = "Texture",
+						chain = {
+							"SetSize", { 33, 33 },
+							"SetPosition", { "CENTER", 0, 0 }, 
+							"ClearTexture", 
+							"SetMask", GetMedia("actionbutton-mask-circular")
+						}
+					},
+					{
+						-- If the owner does not have the ownerDependencyKey key, this item will be skipped.
+						parent = nil, ownerKey = "Pushed", ownerDependencyKey = "SetPushedTexture", objectType = "Texture",
+						chain = {
+							"SetSize", { 33, 33 }, 
+							"SetDrawLayer", { "ARTWORK", 1 },
+							"SetPosition", { "CENTER", 0, 0 },
+							"SetMask", GetMedia("actionbutton-mask-circular"),
+							"SetColorTexture", { 1, 1, 1, .15 }
+						}
+					},
+					{
+						-- If the owner does not have the ownerDependencyKey key, this item will be skipped.
+						parent = nil, ownerKey = nil, ownerDependencyKey = "SetPushedTexture",
+						chain = {
+							"SetPushedTextureKey", "Pushed",
+							"SetPushedTextureMask", GetMedia("actionbutton-mask-circular"),
+							"SetPushedTextureBlendMode", "ADD",
+							"SetPushedTextureDrawLayer", { "ARTWORK", 1 }
+						}
+					},
+					{
+						parent = nil, ownerKey = "Flash", objectType = "Texture",
+						chain = {
+							"SetSize", { 33, 33 },
+							"SetPosition", { "CENTER", 0, 0 }, 
+							"SetDrawLayer", { "ARTWORK", 2 },
+							"SetTexture", [=[Interface\ChatFrame\ChatFrameBackground]=],
+							"SetVertexColor", { 1, 0, 0, .25 },
+							"SetMask", GetMedia("actionbutton-mask-circular")
+						}
+					},
+					{
+						parent = nil, ownerKey = "Cooldown", objectType = "Frame", objectSubType = "Cooldown",
+						chain = {
+							"SetSize", { 33, 33 },
+							"SetPosition", { "CENTER", 0, 0 }, 
+							"SetSwipeTexture", GetMedia("actionbutton-mask-circular"),
+							"SetDrawSwipe", true,
+							"SetBlingTexture", { GetMedia("blank"), 0, 0, 0 , 0 },
+							"SetDrawBling", true
+						}
+					},
+					{
+						parent = nil, ownerKey = "ChargeCooldown", objectType = "Frame", objectSubType = "Cooldown",
+						chain = {
+							"SetSize", { 33, 33 },
+							"SetPosition", { "CENTER", 0, 0 }, 
+							"SetSwipeTexture", { GetMedia("actionbutton-mask-circular"), 0, 0, 0, .5 },
+							"SetSwipeColor", { 0, 0, 0, .5 },
+							"SetBlingTexture", { GetMedia("blank"), 0, 0, 0 , 0 },
+							"SetDrawSwipe", true,
+							"SetDrawBling", false
+						}
+					},
+					{
+						parent = nil, ownerKey = "CooldownCount", objectType = "FontString", 
+						chain = {
+							"SetPosition", { "CENTER", 1, 0 },
+							"SetFontObject", GetFont(16, true),
+							"SetJustifyH", "CENTER",
+							"SetJustifyV", "MIDDLE",
+							"SetShadowOffset", { 0, 0 },
+							"SetShadowColor", { 0, 0, 0, 1 },
+							"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .85 }
+						}
+					},
+					{
+						parent = nil, ownerKey = "Count", objectType = "FontString", 
+						chain = {
+							"SetPosition", { "BOTTOMRIGHT", -3, 3 },
+							"SetFontObject", GetFont(11, true),
+							"SetJustifyH", "CENTER",
+							"SetJustifyV", "BOTTOM",
+							"SetShadowOffset", { 0, 0 },
+							"SetShadowColor", { 0, 0, 0, 1 },
+							"SetTextColor", { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 }
+						}
+					},
+					{
+						parent = nil, ownerKey = "Keybind", objectType = "FontString", 
+						chain = {
+							"SetPosition", { "TOPLEFT", 5, -5 },
+							"SetFontObject", GetFont(12, true),
+							"SetJustifyH", "CENTER",
+							"SetJustifyV", "BOTTOM",
+							"SetShadowOffset", { 0, 0 },
+							"SetShadowColor", { 0, 0, 0, 1 },
+							"SetTextColor", { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 }
+						}
+					},
+					--[[
+					{
+						parent = nil, ownerKey = "SpellHighlight", objectType = "Frame", 
+						chain = {
+							"SetPosition", { "CENTER", 0, 0 },
+							"SetSize", { 48/(122/256), 48/(122/256) }
+						}
+					},
+					{
+						parent = nil, ownerKey = "SpellHighlight,Texture", objectType = "Texture", 
+						chain = {
+							"SetTexture", GetMedia("actionbutton-spellhighlight"),
+							"SetVertexColor", { 255/255, 225/255, 125/255, .75 },
+						}
+					},
+					--]]--
+					{
+						parent = nil, ownerKey = "SpellAutoCast", objectType = "Frame", 
+						chain = {
+							"SetPosition", { "CENTER", 0, 0 },
+							"SetSize", { 37.5, 37.5 }
+						}
+					},
+					{
+						parent = nil, ownerKey = "SpellAutoCast,Ants", objectType = "Texture", 
+						chain = {
+							"SetTexture", GetMedia("actionbutton-ants-small-grid"),
+							"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
+						}
+					},
+					{
+						parent = nil, ownerKey = "SpellAutoCast,Ants,Anim", objectType = "Animation", 
+						chain = {
+							"SetSpeed", 1/15,
+							"SetGrid", { 512, 512, 96, 96, 25 },
+						}
+					},
+
+					{
+						parent = nil, ownerKey = "SpellAutoCast,Glow", objectType = "Texture", 
+						chain = {
+							"SetTexture", GetMedia("actionbutton-ants-small-glow-grid"),
+							"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], .25 },
+						}
+					},
+					{
+						parent = nil, ownerKey = "SpellAutoCast,Glow,Anim", objectType = "Animation", 
+						chain = {
+							"SetSpeed", 1/15,
+							"SetGrid", { 512, 512, 96, 96, 25 },
+						}
+					},
+
+				}
+			},
+			{
+				type = "CreateWidgets",
+				widgets = {
+					{
+						parent = "self", ownerKey = "Backdrop", objectType = "Texture",
+						chain = {
+							"SetSize", { 48/(122/256), 48/(122/256) },
+							"SetPoint", { "CENTER", 0, 0 },
+							"SetDrawLayer", { "BACKGROUND", 1 },
+							"SetVertexColor", { 2/3, 2/3, 2/3, 1 },
+							"SetTexture", GetMedia("actionbutton-backdrop")
+						}
+					},
+					{
+						-- If the owner does not have the ownerDependencyKey key, this item will be skipped.
+						parent = "self", ownerKey = "Checked", ownerDependencyKey = "SetCheckedTexture", objectType = "Texture",
+						chain = {
+							"SetDrawLayer", { "ARTWORK", 2 },
+							"SetSize", { 33, 33 },
+							"SetPosition", { "CENTER", 0, 0 },
+							"SetMask", GetMedia("actionbutton-mask-circular"),
+							"SetColorTexture", { .9, .8, .1, .3 }
+						}
+					},
+					{
+						-- If the owner does not have the ownerDependencyKey key, this item will be skipped.
+						ownerDependencyKey = "SetCheckedTexture",
+						chain = {
+							"SetCheckedTextureKey", "Checked",
+							"SetCheckedTextureMask", GetMedia("actionbutton-mask-circular"),
+							"SetCheckedTextureBlendMode", "ADD",
+							"SetCheckedTextureDrawLayer", { "ARTWORK", 1 }
+						},
+					},
+					{
+						parent = "self", ownerKey = "Darken", objectType = "Texture",
+						chain = {
+							"SetDrawLayer", { "BACKGROUND", 3 },
+							"SetSize", { 33, 33 },
+							"SetAllPointsToParentKey", "Icon",
+							"SetMask", GetMedia("actionbutton-mask-circular"),
+							"SetTexture", [=[Interface\ChatFrame\ChatFrameBackground]=],
+							"SetVertexColor", { 0, 0, 0 }
+						},
+						values = {
+							"highlight", 0,
+							"normal", .15
+						}
+					},
+					{
+						parent = "self", ownerKey = "BorderFrame", objectType = "Frame", objectSubType = "Frame",
+						chain = {
+							"SetFrameLevelOffset", 5,
+							"SetAllPointsToParent"
+						}
+					},
+					{
+						-- Note that the "Border" object already exists, 
+						-- so to avoid problems related to that, 
+						-- we chose to simply rename our own custom element instead.
+						parent = "self,BorderFrame", ownerKey = "ButtonBorder", objectType = "Texture",
+						chain = {
+							"SetPosition", { "CENTER", 0, 0 },
+							"SetDrawLayer", { "BORDER", 1 },
+							"SetSize", { 48/(122/256), 48/(122/256) },
+							"SetTexture", GetMedia("actionbutton-border"),
+							"SetVertexColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 }
+						}
+					},
+					{
+						parent = "self,Overlay", ownerKey = "Glow", objectType = "Texture",
+						chain = {
+							"SetHidden",
+							"SetDrawlayer", { "ARTWORK", 1 },
+							"SetSize", { 33/(122/256), 33/(122/256) },
+							"SetPoint", { "CENTER", 0, 0 },
+							"SetTexture", GetMedia("actionbutton-glow-white"),
+							"SetVertexColor", { 1, 1, 1, .5 },
+							"SetBlendMode", "ADD"
+						}
+					}					
+				}
+			}
+		},
+
+		ActionButton = {
+			{
+				-- Only set the parent in modifiable widgets if it is your intention to change it.
+				-- Otherwise the code will assume the owner is the parent, and leave it as is,
+				-- which is what we want in the majority of cases.
+				type = "ModifyWidgets",
+				widgets = {
+					{
+						-- Note that a missing ownerKey or parentKey
+						-- will apply these changes to the original object instead.
+						parent = nil, ownerKey = nil, 
+						chain = {
+							"SetSize", { 64, 64 }, 
+							"SetHitBox", { -4, -4, -4, -4 }
+						},
+						values = {
+							"colors", Colors,
+							"maxDisplayCount", 99,
+							"PostUpdateCount", ActionButton_StackCount_PostUpdate,
+							"PostUpdateCooldown", function(self, cooldownObject) 
+								cooldownObject:SetSwipeColor(0, 0, 0, .75)
+							end,
+							"PostUpdateChargeCooldown", function(self, cooldownObject) 
+								cooldownObject:SetSwipeColor(0, 0, 0, .5)
+							end
+						}
+					},
+					{
+						parent = nil, ownerKey = "Icon", objectType = "Texture",
+						chain = {
+							"SetSize", { 44, 44 },
+							"SetPosition", { "CENTER", 0, 0 }, 
+							"ClearTexture", 
+							"SetMask", GetMedia("actionbutton-mask-circular")
+						}
+					},
+					{
+						-- If the owner does not have the ownerDependencyKey key, this item will be skipped.
+						parent = nil, ownerKey = "Pushed", ownerDependencyKey = "SetPushedTexture", objectType = "Texture",
+						chain = {
+							"SetSize", { 44, 44 }, 
+							"SetDrawLayer", { "ARTWORK", 1 },
+							"SetPosition", { "CENTER", 0, 0 },
+							"SetMask", GetMedia("actionbutton-mask-circular"),
+							"SetColorTexture", { 1, 1, 1, .15 }
+						}
+					},
+					{
+						-- If the owner does not have the ownerDependencyKey key, this item will be skipped.
+						parent = nil, ownerKey = nil, ownerDependencyKey = "SetPushedTexture",
+						chain = {
+							"SetPushedTextureKey", "Pushed",
+							"SetPushedTextureBlendMode", "ADD",
+							"SetPushedTextureDrawLayer", { "ARTWORK", 1 }
+						}
+					},
+					{
+						parent = nil, ownerKey = "Flash", objectType = "Texture",
+						chain = {
+							"SetSize", { 44, 44 },
+							"SetPosition", { "CENTER", 0, 0 }, 
+							"SetDrawLayer", { "ARTWORK", 2 },
+							"SetTexture", [[Interface\ChatFrame\ChatFrameBackground]],
+							"SetVertexColor", { 1, 0, 0, .25 },
+							"SetMask", GetMedia("actionbutton-mask-circular")
+						}
+					},
+					{
+						parent = nil, ownerKey = "Cooldown", objectType = "Frame", objectSubType = "Cooldown",
+						chain = {
+							"SetSize", { 44, 44 },
+							"SetPosition", { "CENTER", 0, 0 }, 
+							"SetSwipeTexture", GetMedia("actionbutton-mask-circular"),
+							"SetDrawSwipe", true,
+							"SetBlingTexture", { GetMedia("blank"), 0, 0, 0 , 0 },
+							"SetDrawBling", true
+						}
+					},
+					{
+						parent = nil, ownerKey = "ChargeCooldown", objectType = "Frame", objectSubType = "Cooldown",
+						chain = {
+							"SetSize", { 44, 44 },
+							"SetPosition", { "CENTER", 0, 0 }, 
+							"SetSwipeTexture", { GetMedia("actionbutton-mask-circular"), 0, 0, 0, .5 },
+							"SetSwipeColor", { 0, 0, 0, .5 },
+							"SetBlingTexture", { GetMedia("blank"), 0, 0, 0 , 0 },
+							"SetDrawSwipe", true,
+							"SetDrawBling", false
+						}
+					},
+					{
+						parent = nil, ownerKey = "CooldownCount", objectType = "FontString", 
+						chain = {
+							"SetPosition", { "CENTER", 1, 0 },
+							"SetFontObject", GetFont(16, true),
+							"SetJustifyH", "CENTER",
+							"SetJustifyV", "MIDDLE",
+							"SetShadowOffset", { 0, 0 },
+							"SetShadowColor", { 0, 0, 0, 1 },
+							"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .85 }
+						}
+					},
+					{
+						parent = nil, ownerKey = "Count", objectType = "FontString", 
+						chain = {
+							"SetPosition", { "BOTTOMRIGHT", -3, 3 },
+							"SetFontObject", GetFont(18, true),
+							"SetJustifyH", "CENTER",
+							"SetJustifyV", "BOTTOM",
+							"SetShadowOffset", { 0, 0 },
+							"SetShadowColor", { 0, 0, 0, 1 },
+							"SetTextColor", { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 }
+						}
+					},
+					{
+						parent = nil, ownerKey = "Keybind", objectType = "FontString", 
+						chain = {
+							"SetPosition", { "TOPLEFT", 5, -5 },
+							"SetFontObject", GetFont(15, true),
+							"SetJustifyH", "CENTER",
+							"SetJustifyV", "BOTTOM",
+							"SetShadowOffset", { 0, 0 },
+							"SetShadowColor", { 0, 0, 0, 1 },
+							"SetTextColor", { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 }
+						}
+					},
+					{
+						parent = nil, ownerKey = "SpellHighlight", objectType = "Frame", 
+						chain = {
+							"SetPosition", { "CENTER", 0, 0 },
+							"SetSize", { 64/(122/256), 64/(122/256) }
+						}
+					},
+					{
+						parent = nil, ownerKey = "SpellHighlight,Texture", objectType = "Texture", 
+						chain = {
+							"SetTexture", GetMedia("actionbutton-spellhighlight"),
+							"SetVertexColor", { 255/255, 225/255, 125/255, .75 },
+						}
+					},
+					{
+						parent = nil, ownerKey = "SpellAutoCast", objectType = "Frame", 
+						chain = {
+							"SetPosition", { "CENTER", 0, 0 },
+							"SetSize", { 50, 50 }
+						}
+					},
+					{
+						parent = nil, ownerKey = "SpellAutoCast,Ants", objectType = "Texture", 
+						chain = {
+							"SetTexture", GetMedia("actionbutton-ants-small-grid"),
+							"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
+						}
+					},
+					{
+						parent = nil, ownerKey = "SpellAutoCast,Ants,Anim", objectType = "Animation", 
+						chain = {
+							"SetSpeed", 1/15,
+							"SetGrid", { 512, 512, 96, 96, 25 },
+						}
+					},
+
+					{
+						parent = nil, ownerKey = "SpellAutoCast,Glow", objectType = "Texture", 
+						chain = {
+							"SetTexture", GetMedia("actionbutton-ants-small-glow-grid"),
+							"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], .25 },
+						}
+					},
+					{
+						parent = nil, ownerKey = "SpellAutoCast,Glow,Anim", objectType = "Animation", 
+						chain = {
+							"SetSpeed", 1/15,
+							"SetGrid", { 512, 512, 96, 96, 25 },
+						}
+					},
+			
+				}
+			},
+			{
+				type = "CreateWidgets",
+				widgets = {
+					{
+						parent = "self", ownerKey = "Backdrop", objectType = "Texture",
+						chain = {
+							"SetSize", { 64/(122/256), 64/(122/256) },
+							"SetPoint", { "CENTER", 0, 0 },
+							"SetDrawLayer", { "BACKGROUND", 1 },
+							"SetVertexColor", { 2/3, 2/3, 2/3, 1 },
+							"SetTexture", GetMedia("actionbutton-backdrop")
+						}
+					},
+					{
+						-- If the owner does not have the ownerDependencyKey key, this item will be skipped.
+						parent = "self", ownerKey = "Checked", ownerDependencyKey = "SetCheckedTexture", objectType = "Texture",
+						chain = {
+							"SetDrawLayer", { "ARTWORK", 2 },
+							"SetSize", { 44, 44 },
+							"SetPosition", { "CENTER", 0, 0 },
+							"SetMask", GetMedia("actionbutton-mask-circular"),
+							"SetColorTexture", { .9, .8, .1, .3 }
+						}
+					},
+					{
+						-- If the owner does not have the ownerDependencyKey key, this item will be skipped.
+						ownerDependencyKey = "SetCheckedTexture",
+						chain = {
+							"SetCheckedTextureKey", "Checked",
+							"SetCheckedTextureBlendMode", "ADD",
+							"SetCheckedTextureDrawLayer", { "ARTWORK", 1 }
+						},
+					},
+					{
+						parent = "self", ownerKey = "Darken", objectType = "Texture",
+						chain = {
+							"SetDrawLayer", { "BACKGROUND", 3 },
+							"SetSize", { 44, 44 },
+							"SetAllPointsToParentKey", "Icon",
+							"SetMask", GetMedia("actionbutton-mask-circular"),
+							"SetTexture", [=[Interface\ChatFrame\ChatFrameBackground]=],
+							"SetVertexColor", { 0, 0, 0 }
+						},
+						values = {
+							"highlight", 0,
+							"normal", .15
+						}
+					},
+					{
+						parent = "self", ownerKey = "BorderFrame", objectType = "Frame", objectSubType = "Frame",
+						chain = {
+							"SetFrameLevelOffset", 5,
+							"SetAllPointsToParent"
+						}
+					},
+					{
+						parent = "self,BorderFrame", ownerKey = "Border", objectType = "Texture",
+						chain = {
+							"SetPoint", { "CENTER", 0, 0 },
+							"SetDrawLayer", { "BORDER", 1 },
+							"SetSize", { 64/(122/256), 64/(122/256) },
+							"SetTexture", GetMedia("actionbutton-border"),
+							"SetVertexColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 }
+						}
+					},
+					{
+						parent = "self,Overlay", ownerKey = "Glow", objectType = "Texture",
+						chain = {
+							"SetHidden",
+							"SetDrawlayer", { "ARTWORK", 1 },
+							"SetSize", { 44/(122/256),44/(122/256) },
+							"SetPoint", { "CENTER", 0, 0 },
+							"SetTexture", GetMedia("actionbutton-glow-white"),
+							"SetVertexColor", { 1, 1, 1, .5 },
+							"SetBlendMode", "ADD"
+						}
+					}
+				}
+			}
+		}
+	}
+
 }
 
 -- Bind Mode
-Layouts.Bindings = {
+Azerite.Bindings = {
 	BindButtonOffset = 8, 
 	BindButtonTexture = GetMedia("actionbutton-mask-circular"),
 	MenuButtonNormalTexture = GetMedia("menu_button_disabled"),
@@ -2642,12 +3124,12 @@ Layouts.Bindings = {
 }
 
 -- Floaters. Durability only currently. 
-Layouts.FloaterHUD = {
+Azerite.FloaterHUD = {
 	Place = FloaterSlots.Durability
 }
 
 -- Group Leader Tools
-Layouts.GroupTools = {
+Azerite.GroupTools = {
 	ConvertButtonPlace = { "TOP", 0, -360 + 140 }, 
 	ConvertButtonSize = { 300*.75, 50*.75 },
 	ConvertButtonTextColor = { 0, 0, 0 }, 
@@ -2693,7 +3175,7 @@ Layouts.GroupTools = {
 }
 
 -- Minimap
-Layouts.Minimap = {
+Azerite.Minimap = {
 	AP_OverrideValue = Minimap_AP_OverrideValue,
 	BattleGroundEyeColor = { .90, .95, 1 }, 
 	BattleGroundEyePlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
@@ -2838,7 +3320,7 @@ Layouts.Minimap = {
 }
 
 -- NamePlates
-Layouts.NamePlates = {
+Azerite.NamePlates = {
 	PostCreateAuraButton = NamePlates_Auras_PostCreateButton,
 	PostUpdateAuraButton = NamePlates_Auras_PostUpdateButton,
 	AuraAnchor = "Health", 
@@ -3117,14 +3599,14 @@ Layouts.NamePlates = {
 }
 
 -- Custom Tooltips
-Layouts.Tooltips = {
+Azerite.Tooltips = {
 	PostCreateBar = Tooltip_Bar_PostCreate,
 	PostCreateLinePair = Tooltip_LinePair_PostCreate,
 	PostCreateTooltip = Tooltip_PostCreate,
 	TooltipBackdrop = BACKDROPS.Tooltips,
 	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
 	TooltipBackdropColor = { .05, .05, .05, .85 },
-	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -(48 + 58 + 213), (107 + 59) }, 
+	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -319, 166 }, 
 	TooltipStatusBarTexture = GetMedia("statusbar-dark")
 }
 
@@ -3132,7 +3614,7 @@ Layouts.Tooltips = {
 -- Unit Frame Layouts
 ------------------------------------------------
 -- Player
-Layouts.UnitFramePlayer = { 
+Azerite.UnitFramePlayer = { 
 	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
 	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
 	AuraBorderBackdrop = BACKDROPS.AuraBorder,
@@ -3445,7 +3927,7 @@ Layouts.UnitFramePlayer = {
 }
 
 -- PlayerHUD (combo points and castbar)
-Layouts.UnitFramePlayerHUD = {
+Azerite.UnitFramePlayerHUD = {
 	CastBarColor = { 70/255, 255/255, 131/255, .69 },
 	CastBarOrientation = "RIGHT",
 	CastTimeToHoldFailed = .5,
@@ -3466,7 +3948,7 @@ Layouts.UnitFramePlayerHUD = {
 	CastBarNameJustifyH = "CENTER",
 	CastBarNameJustifyV = "MIDDLE",
 	CastBarNamePlace = { "TOP", 0, -(12 + 14) },
-	CastBarPlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 250 + 40 }, -- CENTER, 0, -133
+	CastBarPlace = FloaterSlots.CastBar,
 	CastBarSize = Constant.SmallBar,
 	CastBarShieldColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
 	CastBarShieldDrawLayer = { "BACKGROUND", 1 }, 
@@ -3487,7 +3969,7 @@ Layouts.UnitFramePlayerHUD = {
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	CastBarSpellQueuePlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 250 + 40 }, 
+	CastBarSpellQueuePlace = FloaterSlots.CastBar, 
 	CastBarSpellQueueSize = Constant.SmallBar,
 	CastBarSpellQueueTexture = Constant.SmallBarTexture, 
 	CastBarSpellQueueColor = { 1, 1, 1, .5 },
@@ -3535,7 +4017,7 @@ Layouts.UnitFramePlayerHUD = {
 	PlayerAltPowerBarNameJustifyV = "MIDDLE",
 	PlayerAltPowerBarNamePlace = { "TOP", 0, -(12 + 14) },
 	PlayerAltPowerBarOrientation = "RIGHT",
-	PlayerAltPowerBarPlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 340 }, -- "CENTER", "UICenter", "CENTER", 0, -(133 + 56)
+	PlayerAltPowerBarPlace = FloaterSlots.AltPower,
 	PlayerAltPowerBarSize = Constant.SmallBar,
 	PlayerAltPowerBarSparkMap = {
 		top = {
@@ -3562,7 +4044,7 @@ Layouts.UnitFramePlayerHUD = {
 }
 
 -- Target
-Layouts.UnitFrameTarget = { 
+Azerite.UnitFrameTarget = { 
 	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
 	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
 	AuraBorderBackdrop = BACKDROPS.AuraBorder,
@@ -4012,7 +4494,7 @@ Layouts.UnitFrameTarget = {
 -- Template Unit Frame Layouts
 ------------------------------------------------
 -- Boss 
-Layouts.UnitFrameBoss = setmetatable({
+Azerite.UnitFrameBoss = setmetatable({
 	GrowthX = 0, -- Horizontal growth per new unit
 	GrowthY = -97, -- Vertical growth per new unit
 	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
@@ -4032,7 +4514,7 @@ Layouts.UnitFrameBoss = setmetatable({
 }, { __index = Template_SmallFrameReversed_Auras })
 
 -- 2-5 player groups
-Layouts.UnitFrameParty = setmetatable({
+Azerite.UnitFrameParty = setmetatable({
 
 	HitRectInsets = { 0, 0, 0, -10 },
 
@@ -4348,7 +4830,7 @@ Layouts.UnitFrameParty = setmetatable({
 }, { __index = Template_TinyFrame })
 
 -- Player Pet
-Layouts.UnitFramePet = setmetatable({
+Azerite.UnitFramePet = setmetatable({
 	HealthColorClass = false, -- color players by class 
 	HealthColorDisconnected = false, -- color disconnected units
 	HealthColorHealth = true, -- color anything else in the default health color
@@ -4361,7 +4843,7 @@ Layouts.UnitFramePet = setmetatable({
 
 -- Focus
 if (IsRetail) then
-	Layouts.UnitFrameFocus = setmetatable({
+	Azerite.UnitFrameFocus = setmetatable({
 		AuraProperties = {
 			growthX = "RIGHT", 
 			growthY = "UP", 
@@ -4408,7 +4890,7 @@ if (IsRetail) then
 end
 
 -- 6-40 player groups
-Layouts.UnitFrameRaid = setmetatable({
+Azerite.UnitFrameRaid = setmetatable({
 
 	TargetHighlightSize = { 140 * .94, 90 *.94 },
 	HitRectInsets = { 0, 0, 0, -10 },
@@ -4669,7 +5151,7 @@ Layouts.UnitFrameRaid = setmetatable({
 }, { __index = Template_TinyFrame })
 
 -- Target of Target
-Layouts.UnitFrameToT = setmetatable({
+Azerite.UnitFrameToT = setmetatable({
 	HealthColorClass = true, -- color players by class 
 	HealthColorDisconnected = true, -- color disconnected units
 	HealthColorHealth = false, -- color anything else in the default health color
@@ -4720,9 +5202,30 @@ Private.GetDefaults = function(name)
 	return Defaults[name] 
 end 
 
+-- What layout we're currently using.
+local CURRENT_LAYOUT
+
 -- Retrieve static layout data for a named module
-Private.GetLayout = function(moduleName, variant) 
-	return Layouts[moduleName] 
+-- Will return a specific variation if requested, 
+-- use the current one if a specific is not specified,
+-- or default to generic layouts if nothing is set.
+Private.GetLayout = function(moduleName, layoutName) 
+	local layout
+	if (layoutName) and Layouts[layoutName] then
+		layout = Layouts[layoutName]
+	elseif (CURRENT_LAYOUT) and (Layouts[CURRENT_LAYOUT]) then
+		layout = Layouts[CURRENT_LAYOUT]
+	else
+		layout = Layouts[GENERIC_STYLE]
+	end
+	return layout[moduleName] 
+end 
+
+-- Set which layout variation to use
+Private.SetLayout = function(layoutName) 
+	if (Layouts[layoutName]) then
+		CURRENT_LAYOUT = layoutName
+	end
 end 
 
 -- Whether or not aura filters are in forced slack mode.

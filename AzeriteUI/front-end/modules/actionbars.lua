@@ -9,7 +9,7 @@ end
 -- as bar layouts in our UIs are very non-typical,
 -- and more often than not iconic, integral elements of the design.
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-local Module = Core:NewModule("ActionBarMain", "LibEvent", "LibMessage", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibSecureButton", "LibWidgetContainer", "LibPlayerData", "LibClientBuild")
+local Module = Core:NewModule("ActionBarMain", "LibEvent", "LibMessage", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibSecureButton", "LibWidgetContainer", "LibPlayerData", "LibClientBuild", "LibForge")
 
 -- Lua API
 local _G = _G
@@ -377,14 +377,8 @@ ActionButton.UpdateMouseOver = function(self)
 		end 
 	end 
 end 
-
-ActionButton.PostEnter = function(self)
-	self:UpdateMouseOver()
-end 
-
-ActionButton.PostLeave = function(self)
-	self:UpdateMouseOver()
-end 
+ActionButton.PostEnter = ActionButton.UpdateMouseOver
+ActionButton.PostLeave = ActionButton.UpdateMouseOver
 
 ActionButton.SetRankVisibility = function(self, visible)
 	if (not IsClassic) then
@@ -479,333 +473,29 @@ ActionButton.PostUpdate = function(self)
 end 
 
 ActionButton.PostCreate = function(self, ...)
+	-- Coding for troglodytes.
 	local layout = Module.layout
-
-	self:SetSize(unpack(layout.ButtonSize))
-	self:SetHitRectInsets(unpack(layout.ButtonHitRects))
-
-	-- Assign our own global custom colors
-	self.colors = Colors
-
-	-- Restyle the blizz layers
-	-----------------------------------------------------
-	self.Icon:SetSize(unpack(layout.IconSize))
-	self.Icon:ClearAllPoints()
-	self.Icon:SetPoint(unpack(layout.IconPlace))
-
-	-- If SetTexture hasn't been called, the mask and probably texcoords won't stick. 
-	-- This started happening in build 8.1.0.29600 (March 5th, 2019), or at least that's when I noticed.
-	-- Does not appear to be related to whether GetTexture() has a return value or not. 
-	self.Icon:SetTexture("") 
-	self.Icon:SetMask(layout.MaskTexture)
-
-	self.Pushed:SetDrawLayer(unpack(layout.PushedDrawLayer))
-	self.Pushed:SetSize(unpack(layout.PushedSize))
-	self.Pushed:ClearAllPoints()
-	self.Pushed:SetPoint(unpack(layout.PushedPlace))
-	self.Pushed:SetMask(layout.MaskTexture)
-	self.Pushed:SetColorTexture(unpack(layout.PushedColor))
-	self:SetPushedTexture(self.Pushed)
-	self:GetPushedTexture():SetBlendMode(layout.PushedBlendMode)
-		
-	-- We need to put it back in its correct drawlayer, 
-	-- or Blizzard will set it to ARTWORK which can lead 
-	-- to it randomly being drawn behind the icon texture. 
-	self:GetPushedTexture():SetDrawLayer(unpack(layout.PushedDrawLayer)) 
-
-	-- Add a simpler checked texture
-	if self.SetCheckedTexture then
-		self.Checked = self.Checked or self:CreateTexture()
-		self.Checked:SetDrawLayer(unpack(layout.CheckedDrawLayer))
-		self.Checked:SetSize(unpack(layout.CheckedSize))
-		self.Checked:ClearAllPoints()
-		self.Checked:SetPoint(unpack(layout.CheckedPlace))
-		self.Checked:SetMask(layout.MaskTexture)
-		self.Checked:SetColorTexture(unpack(layout.CheckedColor))
-		self:SetCheckedTexture(self.Checked)
-		self:GetCheckedTexture():SetBlendMode(layout.CheckedBlendMode)
+	local forge = layout and layout.WidgetForge and layout.WidgetForge.ActionButton
+	if (forge) then
+		Module:Forge("Widget", self, forge)
 	end
-	
-	self.Flash:SetDrawLayer(unpack(layout.FlashDrawLayer))
-	self.Flash:SetSize(unpack(layout.FlashSize))
-	self.Flash:ClearAllPoints()
-	self.Flash:SetPoint(unpack(layout.FlashPlace))
-	self.Flash:SetTexture(layout.FlashTexture)
-	self.Flash:SetVertexColor(unpack(layout.FlashColor))
-	self.Flash:SetMask(layout.MaskTexture)
-
-	self.Cooldown:SetSize(unpack(layout.CooldownSize))
-	self.Cooldown:ClearAllPoints()
-	self.Cooldown:SetPoint(unpack(layout.CooldownPlace))
-	self.Cooldown:SetSwipeTexture(layout.CooldownSwipeTexture)
-	self.Cooldown:SetSwipeColor(unpack(layout.CooldownSwipeColor))
-	self.Cooldown:SetDrawSwipe(layout.ShowCooldownSwipe)
-	self.Cooldown:SetBlingTexture(layout.CooldownBlingTexture, unpack(layout.CooldownBlingColor)) 
-	self.Cooldown:SetDrawBling(layout.ShowCooldownBling)
-
-	self.ChargeCooldown:SetSize(unpack(layout.ChargeCooldownSize))
-	self.ChargeCooldown:ClearAllPoints()
-	self.ChargeCooldown:SetPoint(unpack(layout.ChargeCooldownPlace))
-	self.ChargeCooldown:SetSwipeTexture(layout.ChargeCooldownSwipeTexture, unpack(layout.ChargeCooldownSwipeColor))
-	self.ChargeCooldown:SetSwipeColor(unpack(layout.ChargeCooldownSwipeColor))
-	self.ChargeCooldown:SetBlingTexture(layout.ChargeCooldownBlingTexture, unpack(layout.ChargeCooldownBlingColor)) 
-	self.ChargeCooldown:SetDrawSwipe(layout.ShowChargeCooldownSwipe)
-	self.ChargeCooldown:SetDrawBling(layout.ShowChargeCooldownBling)
-
-	self.CooldownCount:ClearAllPoints()
-	self.CooldownCount:SetPoint(unpack(layout.CooldownCountPlace))
-	self.CooldownCount:SetFontObject(layout.CooldownCountFont)
-	self.CooldownCount:SetJustifyH(layout.CooldownCountJustifyH)
-	self.CooldownCount:SetJustifyV(layout.CooldownCountJustifyV)
-	self.CooldownCount:SetShadowOffset(unpack(layout.CooldownCountShadowOffset))
-	self.CooldownCount:SetShadowColor(unpack(layout.CooldownCountShadowColor))
-	self.CooldownCount:SetTextColor(unpack(layout.CooldownCountColor))
-
-	self.Count:ClearAllPoints()
-	self.Count:SetPoint(unpack(layout.CountPlace))
-	self.Count:SetFontObject(layout.CountFont)
-	self.Count:SetJustifyH(layout.CountJustifyH)
-	self.Count:SetJustifyV(layout.CountJustifyV)
-	self.Count:SetShadowOffset(unpack(layout.CountShadowOffset))
-	self.Count:SetShadowColor(unpack(layout.CountShadowColor))
-	self.Count:SetTextColor(unpack(layout.CountColor))
-
-	self.maxDisplayCount = layout.CountMaxDisplayed
-	self.PostUpdateCount = layout.CountPostUpdate
-
-	self.Keybind:ClearAllPoints()
-	self.Keybind:SetPoint(unpack(layout.KeybindPlace))
-	self.Keybind:SetFontObject(layout.KeybindFont)
-	self.Keybind:SetJustifyH(layout.KeybindJustifyH)
-	self.Keybind:SetJustifyV(layout.KeybindJustifyV)
-	self.Keybind:SetShadowOffset(unpack(layout.KeybindShadowOffset))
-	self.Keybind:SetShadowColor(unpack(layout.KeybindShadowColor))
-	self.Keybind:SetTextColor(unpack(layout.KeybindColor))
-
-	self.SpellHighlight:ClearAllPoints()
-	self.SpellHighlight:SetPoint(unpack(layout.SpellHighlightPlace))
-	self.SpellHighlight:SetSize(unpack(layout.SpellHighlightSize))
-	self.SpellHighlight.Texture:SetTexture(layout.SpellHighlightTexture)
-	self.SpellHighlight.Texture:SetVertexColor(unpack(layout.SpellHighlightColor))
-
-	self.SpellAutoCast:ClearAllPoints()
-	self.SpellAutoCast:SetPoint(unpack(layout.SpellAutoCastPlace))
-	self.SpellAutoCast:SetSize(unpack(layout.SpellAutoCastSize))
-	self.SpellAutoCast.Ants:SetTexture(layout.SpellAutoCastAntsTexture)
-	self.SpellAutoCast.Ants:SetVertexColor(unpack(layout.SpellAutoCastAntsColor))	
-	self.SpellAutoCast.Ants.Anim:SetSpeed(layout.SpellAutoCastAntsSpeed)
-	self.SpellAutoCast.Ants.Anim:SetGrid(unpack(layout.SpellAutoCastAntsGrid))
-	self.SpellAutoCast.Glow:SetTexture(layout.SpellAutoCastGlowTexture)
-	self.SpellAutoCast.Glow:SetVertexColor(unpack(layout.SpellAutoCastGlowColor))	
-	self.SpellAutoCast.Glow.Anim:SetSpeed(layout.SpellAutoCastGlowSpeed)
-	self.SpellAutoCast.Glow.Anim:SetGrid(unpack(layout.SpellAutoCastGlowGrid))
-
-	self.Backdrop = self:CreateTexture()
-	self.Backdrop:SetSize(unpack(layout.BackdropSize))
-	self.Backdrop:SetPoint(unpack(layout.BackdropPlace))
-	self.Backdrop:SetDrawLayer(unpack(layout.BackdropDrawLayer))
-	self.Backdrop:SetTexture(layout.BackdropTexture)
-	self.Backdrop:SetVertexColor(unpack(layout.BackdropColor))
-
-	self.Darken = self:CreateTexture()
-	self.Darken:SetDrawLayer("BACKGROUND", 3)
-	self.Darken:SetSize(unpack(layout.IconSize))
-	self.Darken:SetAllPoints(self.Icon)
-	self.Darken:SetMask(layout.MaskTexture)
-	self.Darken:SetTexture(BLANK_TEXTURE)
-	self.Darken:SetVertexColor(0, 0, 0)
-	self.Darken.highlight = 0
-	self.Darken.normal = .15
-
-	self.BorderFrame = self:CreateFrame("Frame")
-	self.BorderFrame:SetFrameLevel(self:GetFrameLevel() + 5)
-	self.BorderFrame:SetAllPoints(self)
-
-	self.Border = self.BorderFrame:CreateTexture()
-	self.Border:SetPoint(unpack(layout.BorderPlace))
-	self.Border:SetDrawLayer(unpack(layout.BorderDrawLayer))
-	self.Border:SetSize(unpack(layout.BorderSize))
-	self.Border:SetTexture(layout.BorderTexture)
-	self.Border:SetVertexColor(unpack(layout.BorderColor))
-
-	self.Glow = self.Overlay:CreateTexture()
-	self.Glow:SetDrawLayer(unpack(layout.GlowDrawLayer))
-	self.Glow:SetSize(unpack(layout.GlowSize))
-	self.Glow:SetPoint(unpack(layout.GlowPlace))
-	self.Glow:SetTexture(layout.GlowTexture)
-	self.Glow:SetVertexColor(unpack(layout.GlowColor))
-	self.Glow:SetBlendMode(layout.GlowBlendMode)
-	self.Glow:Hide()
 end 
-
-ActionButton.PostUpdateCooldown = function(self, cooldown)
-	local layout = Module.layout
-	cooldown:SetSwipeColor(unpack(layout.CooldownSwipeColor))
-end 
-
-ActionButton.PostUpdateChargeCooldown = function(self, cooldown)
-	local layout = Module.layout
-	cooldown:SetSwipeColor(unpack(layout.ChargeCooldownSwipeColor))
-end
 
 -- PetButton Template (Custom Methods)
 ----------------------------------------------------
 local PetButton = {}
 
 PetButton.PostCreate = function(self, ...)
+	-- Troglodytes will return!
 	local layout = Module.layout
-
-	self:SetSize(unpack(layout.PetButtonSize))
-	self:SetHitRectInsets(unpack(layout.PetButtonHitRects))
-
-	-- Assign our own global custom colors
-	self.colors = Colors
-
-	-- Restyle the blizz layers
-	-----------------------------------------------------
-	self.Icon:SetSize(unpack(layout.PetIconSize))
-	self.Icon:ClearAllPoints()
-	self.Icon:SetPoint(unpack(layout.PetIconPlace))
-
-	-- If SetTexture hasn't been called, the mask and probably texcoords won't stick. 
-	-- This started happening in build 8.1.0.29600 (March 5th, 2019), or at least that's when I noticed.
-	-- Does not appear to be related to whether GetTexture() has a return value or not. 
-	self.Icon:SetTexture("") 
-	self.Icon:SetMask(layout.PetMaskTexture)
-
-	self.Pushed:SetDrawLayer(unpack(layout.PetPushedDrawLayer))
-	self.Pushed:SetSize(unpack(layout.PetPushedSize))
-	self.Pushed:ClearAllPoints()
-	self.Pushed:SetPoint(unpack(layout.PetPushedPlace))
-	self.Pushed:SetMask(layout.PetMaskTexture)
-	self.Pushed:SetColorTexture(unpack(layout.PetPushedColor))
-	self:SetPushedTexture(self.Pushed)
-	self:GetPushedTexture():SetBlendMode(layout.PetPushedBlendMode)
-		
-	-- We need to put it back in its correct drawlayer, 
-	-- or Blizzard will set it to ARTWORK which can lead 
-	-- to it randomly being drawn behind the icon texture. 
-	self:GetPushedTexture():SetDrawLayer(unpack(layout.PetPushedDrawLayer)) 
-
-	self.Checked = self:CreateTexture()
-	self.Checked:SetDrawLayer(unpack(layout.PetCheckedDrawLayer))
-	self.Checked:SetSize(unpack(layout.PetCheckedSize))
-	self.Checked:ClearAllPoints()
-	self.Checked:SetPoint(unpack(layout.PetCheckedPlace))
-	self.Checked:SetTexture(layout.PetMaskTexture)
-	self.Checked:SetVertexColor(unpack(layout.PetCheckedColor))
-	self.Checked:SetBlendMode(layout.PetCheckedBlendMode)
-	self:SetCheckedTexture(self.Checked)
-	self:GetCheckedTexture():SetBlendMode(layout.PetCheckedBlendMode)
-
-	self.Flash:SetDrawLayer(unpack(layout.PetFlashDrawLayer))
-	self.Flash:SetSize(unpack(layout.PetFlashSize))
-	self.Flash:ClearAllPoints()
-	self.Flash:SetPoint(unpack(layout.PetFlashPlace))
-	self.Flash:SetTexture(layout.PetFlashTexture)
-	self.Flash:SetVertexColor(unpack(layout.PetFlashColor))
-	self.Flash:SetMask(layout.PetMaskTexture)
-
-	self.Cooldown:SetSize(unpack(layout.PetCooldownSize))
-	self.Cooldown:ClearAllPoints()
-	self.Cooldown:SetPoint(unpack(layout.PetCooldownPlace))
-	self.Cooldown:SetSwipeTexture(layout.PetCooldownSwipeTexture)
-	self.Cooldown:SetSwipeColor(unpack(layout.PetCooldownSwipeColor))
-	self.Cooldown:SetDrawSwipe(layout.PetShowCooldownSwipe)
-	self.Cooldown:SetBlingTexture(layout.PetCooldownBlingTexture, unpack(layout.PetCooldownBlingColor)) 
-	self.Cooldown:SetDrawBling(layout.PetShowCooldownBling)
-
-	self.ChargeCooldown:SetSize(unpack(layout.PetChargeCooldownSize))
-	self.ChargeCooldown:ClearAllPoints()
-	self.ChargeCooldown:SetPoint(unpack(layout.PetChargeCooldownPlace))
-	self.ChargeCooldown:SetSwipeTexture(layout.PetChargeCooldownSwipeTexture, unpack(layout.PetChargeCooldownSwipeColor))
-	self.ChargeCooldown:SetSwipeColor(unpack(layout.PetChargeCooldownSwipeColor))
-	self.ChargeCooldown:SetBlingTexture(layout.PetChargeCooldownBlingTexture, unpack(layout.PetChargeCooldownBlingColor)) 
-	self.ChargeCooldown:SetDrawSwipe(layout.PetShowChargeCooldownSwipe)
-	self.ChargeCooldown:SetDrawBling(layout.PetShowChargeCooldownBling)
-
-	self.CooldownCount:ClearAllPoints()
-	self.CooldownCount:SetPoint(unpack(layout.PetCooldownCountPlace))
-	self.CooldownCount:SetFontObject(layout.PetCooldownCountFont)
-	self.CooldownCount:SetJustifyH(layout.PetCooldownCountJustifyH)
-	self.CooldownCount:SetJustifyV(layout.PetCooldownCountJustifyV)
-	self.CooldownCount:SetShadowOffset(unpack(layout.PetCooldownCountShadowOffset))
-	self.CooldownCount:SetShadowColor(unpack(layout.PetCooldownCountShadowColor))
-	self.CooldownCount:SetTextColor(unpack(layout.PetCooldownCountColor))
-
-	self.Count:ClearAllPoints()
-	self.Count:SetPoint(unpack(layout.PetCountPlace))
-	self.Count:SetFontObject(layout.PetCountFont)
-	self.Count:SetJustifyH(layout.PetCountJustifyH)
-	self.Count:SetJustifyV(layout.PetCountJustifyV)
-	self.Count:SetShadowOffset(unpack(layout.PetCountShadowOffset))
-	self.Count:SetShadowColor(unpack(layout.PetCountShadowColor))
-	self.Count:SetTextColor(unpack(layout.PetCountColor))
-
-	self.Keybind:ClearAllPoints()
-	self.Keybind:SetPoint(unpack(layout.PetKeybindPlace))
-	self.Keybind:SetFontObject(layout.PetKeybindFont)
-	self.Keybind:SetJustifyH(layout.PetKeybindJustifyH)
-	self.Keybind:SetJustifyV(layout.PetKeybindJustifyV)
-	self.Keybind:SetShadowOffset(unpack(layout.PetKeybindShadowOffset))
-	self.Keybind:SetShadowColor(unpack(layout.PetKeybindShadowColor))
-	self.Keybind:SetTextColor(unpack(layout.PetKeybindColor))
-
-	self.SpellAutoCast:ClearAllPoints()
-	self.SpellAutoCast:SetPoint(unpack(layout.PetSpellAutoCastPlace))
-	self.SpellAutoCast:SetSize(unpack(layout.PetSpellAutoCastSize))
-	self.SpellAutoCast.Ants:SetTexture(layout.PetSpellAutoCastAntsTexture)
-	self.SpellAutoCast.Ants:SetVertexColor(unpack(layout.PetSpellAutoCastAntsColor))
-	self.SpellAutoCast.Ants.Anim:SetSpeed(layout.PetSpellAutoCastAntsSpeed)
-	self.SpellAutoCast.Ants.Anim:SetGrid(unpack(layout.PetSpellAutoCastAntsGrid))
-	self.SpellAutoCast.Glow:SetTexture(layout.PetSpellAutoCastGlowTexture)
-	self.SpellAutoCast.Glow:SetVertexColor(unpack(layout.PetSpellAutoCastGlowColor))
-	self.SpellAutoCast.Glow.Anim:SetSpeed(layout.PetSpellAutoCastGlowSpeed)
-	self.SpellAutoCast.Glow.Anim:SetGrid(unpack(layout.PetSpellAutoCastGlowGrid))
-
-	self.Backdrop = self:CreateTexture()
-	self.Backdrop:SetSize(unpack(layout.PetBackdropSize))
-	self.Backdrop:SetPoint(unpack(layout.PetBackdropPlace))
-	self.Backdrop:SetDrawLayer(unpack(layout.PetBackdropDrawLayer))
-	self.Backdrop:SetTexture(layout.PetBackdropTexture)
-	self.Backdrop:SetVertexColor(unpack(layout.PetBackdropColor))
-
-	self.Darken = self:CreateTexture()
-	self.Darken:SetDrawLayer("BACKGROUND", 3)
-	self.Darken:SetSize(unpack(layout.PetIconSize))
-	self.Darken:SetAllPoints(self.Icon)
-	self.Darken:SetMask(layout.PetMaskTexture)
-	self.Darken:SetTexture(BLANK_TEXTURE)
-	self.Darken:SetVertexColor(0, 0, 0)
-	self.Darken.highlight = 0
-	self.Darken.normal = .15
-
-	self.BorderFrame = self:CreateFrame("Frame")
-	self.BorderFrame:SetFrameLevel(self:GetFrameLevel() + 5)
-	self.BorderFrame:SetAllPoints(self)
-
-	self.Border = self.BorderFrame:CreateTexture()
-	self.Border:SetPoint(unpack(layout.PetBorderPlace))
-	self.Border:SetDrawLayer(unpack(layout.PetBorderDrawLayer))
-	self.Border:SetSize(unpack(layout.PetBorderSize))
-	self.Border:SetTexture(layout.PetBorderTexture)
-	self.Border:SetVertexColor(unpack(layout.PetBorderColor))
-
-	self.Glow = self.Overlay:CreateTexture()
-	self.Glow:SetDrawLayer(unpack(layout.PetGlowDrawLayer))
-	self.Glow:SetSize(unpack(layout.PetGlowSize))
-	self.Glow:SetPoint(unpack(layout.PetGlowPlace))
-	self.Glow:SetTexture(layout.PetGlowTexture)
-	self.Glow:SetVertexColor(unpack(layout.PetGlowColor))
-	self.Glow:SetBlendMode(layout.PetGlowBlendMode)
-	self.Glow:Hide()
+	local forge = layout and layout.WidgetForge and layout.WidgetForge.PetActionButton
+	if (forge) then
+		Module:Forge("Widget", self, forge)
+	end
 end 
 
-PetButton.PostUpdate = function(self)
-	self:UpdateMouseOver()
-end
-
 PetButton.UpdateMouseOver = ActionButton.UpdateMouseOver
+PetButton.PostUpdate = ActionButton.UpdateMouseOver
 PetButton.PostEnter = ActionButton.PostEnter
 PetButton.PostLeave = ActionButton.PostLeave
 
@@ -1034,7 +724,7 @@ Module.SpawnExitButton = function(self)
 	local layout = self.layout
 
 	local button = self:CreateFrame("Button", nil, "UICenter", "SecureActionButtonTemplate")
-	button:SetFrameStrata("MEDIUM")
+	button:SetFrameStrata("LOW") -- MEDIUM is too high, collides with Immersion
 	button:SetFrameLevel(100)
 	button:Place(unpack(layout.ExitButtonPlace))
 	button:SetSize(unpack(layout.ExitButtonSize))

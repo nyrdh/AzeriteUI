@@ -1,4 +1,4 @@
-local LibTime = Wheel:Set("LibTime", 4)
+local LibTime = Wheel:Set("LibTime", 5)
 if (not LibTime) then	
 	return
 end
@@ -40,14 +40,13 @@ local check = function(value, num, ...)
 	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
--- Calculates standard hours
+-- Calculates standard hours from a give 24-hour time
+-- Keep this systematic to the point of moronic, or I'll mess it up again. 
 LibTime.ComputeStandardHours = function(self, hour)
-	if (hour > 12) then
-		return hour - 12, S_PM
-	elseif (hour == 0) then
-		return 12, S_AM
-	else
-		return hour, S_AM
+	if 		(hour == 0) then 					return 12, S_AM 		-- 0 is 12 AM
+	elseif 	(hour > 0) and (hour < 12) then 	return hour, S_AM 		-- 01-11 is 01-11 AM
+	elseif 	(hour == 12) then 					return 12, S_PM 		-- 12 is 12 PM
+	elseif 	(hour > 12) then 					return hour - 12, S_PM 	-- 13-24 is 01-12 PM
 	end
 end
 

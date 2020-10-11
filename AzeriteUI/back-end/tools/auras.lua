@@ -6,7 +6,7 @@ on a widgetcontainer aura plugin element.
 
 --]]--
 
-local LibAuraTool = Wheel:Set("LibAuraTool", 1)
+local LibAuraTool = Wheel:Set("LibAuraTool", 2)
 if (not LibAuraTool) then
 	return
 end
@@ -79,7 +79,8 @@ end
 -- Forcing this for classes still lacking strict filter lists,
 -- or we'd end up with nothing being shown at all.
 local playerClass = select(2, UnitClass("player"))
-local SLACKMODE = (playerClass == "DEATHKNIGHT")
+local SLACKMODE = IsRetailShadowlands -- forcing slack mode until filters can be redone and verified
+			   or (playerClass == "DEATHKNIGHT")
 			   or (playerClass == "DEMONHUNTER")
 			   --or (playerClass == "DRUID")
 			   or (IsClassic and (playerClass == "HUNTER"))
@@ -1302,7 +1303,7 @@ elseif (IsRetail) then
 		AddUserFlags(127372, OnPlayer) 						-- Unstable Serum (Klaxxi Enhancement: Raining Blood)
 		AddUserFlags(240640, OnPlayer) 						-- The Shadow of the Sentinax (Mark of the Sentinax)
 		AddUserFlags(254873, OnPlayer) 						-- Irontide Recruit (Tiragarde Sound Storyline)
-		
+
 		-- Heroism
 		------------------------------------------------------------------------
 		AddUserFlags( 90355, OnPlayer + PrioHigh) 			-- Ancient Hysteria
@@ -1333,6 +1334,7 @@ elseif (IsRetail) then
 		AddUserFlags( 10060, OnPlayer) 						-- Power Infusion
 		AddUserFlags( 15007, OnPlayer + PrioHigh) 			-- Resurrection Sickness
 		AddUserFlags( 64901, OnPlayer) 						-- Symbol of Hope
+		AddUserFlags(279509, OnPlayer) 						-- Witch! (Hallow's End)
 	end
 
 end

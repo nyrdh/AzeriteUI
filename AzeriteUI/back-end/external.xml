@@ -12,7 +12,4 @@
 <!-- Classic Heal Predictions -->
 <Include file='external\LibHealComm-4.0\LibHealComm-4.0.xml'/>
 
-<!-- Classic Threat -->
-<Include file='external\LibThreatClassic2\lib.xml'/>
-
 </Ui>

@@ -1196,14 +1196,14 @@ Module.SetUpMBB = function(self)
 	button:SetFrameLevel(button:GetFrameLevel() + 10) 
 	button:Place(unpack(layout.MBBPlace))
 	button:SetSize(unpack(layout.MBBSize))
-	button:SetFrameStrata("MEDIUM") 
+	button:SetFrameStrata("LOW") -- MEDIUM collides with Immersion 
 
 	local mbbFrame = _G.MBB_MinimapButtonFrame
 	mbbFrame:SetParent(button)
 	mbbFrame:RegisterForDrag()
 	mbbFrame:SetSize(unpack(layout.MBBSize)) 
 	mbbFrame:ClearAllPoints()
-	mbbFrame:SetFrameStrata("MEDIUM") 
+	mbbFrame:SetFrameStrata("LOW") -- MEDIUM collides with Immersion
 	mbbFrame:SetPoint("CENTER", 0, 0)
 	mbbFrame:SetHighlightTexture("") 
 	mbbFrame:DisableDrawLayer("OVERLAY") 

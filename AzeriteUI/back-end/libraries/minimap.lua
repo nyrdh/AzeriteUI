@@ -1,4 +1,4 @@
-local Version = 53
+local Version = 54
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -489,7 +489,7 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 	-- Overlay frame for temporary elements
 	Library.MapOverlay = Library.MapOverlay or Library.MapVisibility:CreateFrame("Frame")
 	Library.MapOverlay:SetAllPoints() -- This will by default fill the entire master frame
-	Library.MapOverlay:SetFrameStrata("MEDIUM")
+	Library.MapOverlay:SetFrameStrata("LOW") -- MEDIUM collides with Immersion
 	Library.MapOverlay:SetFrameLevel(50)
 	
 
