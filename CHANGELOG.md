@@ -4,9 +4,12 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-10-11
+## [Unreleased][3.0.414-Alpha] 2020-10-13
+### Added
+- Added in a theme switcher, allowing us to switch between layouts and variations with a single chat command. This replaces the previously embedded UI switcher which basically did the same, only by toggling addons, not stylesheets.
+
 ### Changed
-- More filename- and structure changes. Eventually only elements directly related to styling should be in the front-end, and ideally we can have these run off instructions provided by the layout file. More changes are coming, and for the most part I won't be describing their nature in the changelog. I advice tinkerers to hold of their edits for a while if they are extensive. 
+- Changed most modules to simply NOT enable themselves if no stylesheet for the current theme was found. This should free us from a lot of development errors, and give us much more freedom as to how and when we add modules to the themes.
 - Lowered the framestrata of various elements to not cover elements from the addon Immersion. We love Immersion.
 - Moved the digsite progress bar slightly upwards, to avoid it colliding with the pet bar, the cast bar and the player alternate power bar. Can we please have MORE bars, Blizzard, because there's not enough. *dripping sarcasm*
 
@@ -14,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The time from 12:00 and 12:59 according to a 24-hour clock should now be labeled PM when using the 12-hour clock, instead of AM as it would previously show. Sorry for years of messing this up, but it's ASS BACKWARDS only ever counting from 1 to 12. The countries using the 12-hour clock should wake up to the 21st century. Hell, even the 20th would do. There. I said it. Bug fixed, though. :)
 
 ### Removed
+- Removed the old and never officially released UI switcher library. Replaced by the aforementioned theme switcher.
 - As Blizzard enabled their threat API for classic in patch 1.13.5, the library LibThreatClassic2 was no longer needed, and thus we have removed it from the addon. This should give a slight performance boost in some cases.
 
 ## [2.1.410-RC] 2020-09-29
