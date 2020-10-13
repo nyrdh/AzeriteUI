@@ -1,10 +1,8 @@
 [ ![Become a Patreon](http://larsnorbergofficial.com/img/social-media-buttons-patreon-small.jpg) ](https://www.patreon.com/goldpawsstuff) 
 
-This is a custom user interface for World of Warcraft, with a fresh new design and brand new custom codebase at its core. Designed by Daniel "Blakmane" Troko & coded by yours truly, Lars "Goldpaw" Norberg. 
+This is a custom user interface suite for World of Warcraft, containing multiple full interfaces in a single addon. Coded and designed by Lars Norberg and Daniel Troconis. 
 
-The motivation of this user interface is immersion, and a more simplified gaming experience then what the "norm" has turned into. This game has SO much information that if not handled carefully becomes cumbersome, therefore blocking the most important asset of the game, the world. The best interface is no interface at all, but in a game such as this that is not possible. But if we have to block away parts of the game world to see information about the game mechanics, then at least let’s make it dynamic, beautiful and in sync with the game's aesthetics. Let's make it Warcraft!  
-
-**When updating from 1.x to 2.x, make sure you first remove the old version before installing the new, or there could be file conflicts and multiple versions active at once!**
+During the 3.0-Alpha phase, theme switching has been enabled with the commands `/go azerite` and `/go legacy`, where they each represent the themes of AzeriteUI and GoldpawUI. Menu options will be added for this later.
 
 ## **Pledge to my work:**  
 * Patreon: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)  
@@ -23,12 +21,12 @@ All feature requests and bug reports for all game versions are done on the main 
 Even though the most recent versions of AzeriteUI are available on GitHub, I recommend using the tagged, public versions on CurseForge and Twitch. Anything else is considered experimental or in the middle of development, and we'll simply ignore any questions or issue reports related to those untagged git versions. 
 
 ### **CurseForge:**
-* AzeriteUI for Classic: [https://www.curseforge.com/wow/addons/azeriteui-classic](https://www.curseforge.com/wow/addons/azeriteui-classic)  
-* AzeriteUI for Retail: [https://www.curseforge.com/wow/addons/azeriteui-retail](https://www.curseforge.com/wow/addons/azeriteui-retail)  
+* Azerite UI Suite for Classic: [https://www.curseforge.com/wow/addons/azeriteui-classic](https://www.curseforge.com/wow/addons/azeriteui-classic)  
+* Azerite UI Suite for Retail: [https://www.curseforge.com/wow/addons/azeriteui-retail](https://www.curseforge.com/wow/addons/azeriteui-retail)  
 
 ### **GitHub:**
-* AzeriteUI for Classic: [github.com/GoldpawsStuff/AzeriteUI](https://github.com/GoldpawsStuff/AzeriteUI)  
-* AzeriteUI for Retail: [github.com/GoldpawsStuff/AzeriteUI_Retail](https://github.com/GoldpawsStuff/AzeriteUI_Retail)  
+* Azerite UI Suite for Classic: [github.com/GoldpawsStuff/AzeriteUI](https://github.com/GoldpawsStuff/AzeriteUI)  
+* Azerite UI Suite for Retail: [github.com/GoldpawsStuff/AzeriteUI_Retail](https://github.com/GoldpawsStuff/AzeriteUI_Retail)  
 
 ## **Recommended addons:**  
 These are some addons I feel go very well together with our user interface. They are not required, but I recommend them as they further enhance the look and functionality in a non-intrusive manner.  
