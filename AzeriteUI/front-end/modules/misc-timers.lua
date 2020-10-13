@@ -407,6 +407,10 @@ end
 
 Module.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
 	self.timers = {} -- all timer data, hashed by bar objects
 
 	if (IsRetail) then

@@ -209,12 +209,15 @@ end
 
 Module.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
-	self.frame = GameMenuFrame
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
+	local UICenter = self:GetFrame("UICenter")
 
 	-- does this taint? :/
-	local UICenter = self:GetFrame("UICenter")
+	self.frame = GameMenuFrame
 	self.frame:SetParent(UICenter)
-
 	self.buttons = {
 		{ content = GameMenuButtonHelp, label = GAMEMENU_HELP },
 		{ content = GameMenuButtonStore, label = BLIZZARD_STORE },

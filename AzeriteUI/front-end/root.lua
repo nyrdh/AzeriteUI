@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 
 -- Wooh! 
-local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibSwitcherTool", "LibAuraData", "LibAura", "LibClientBuild", "LibForge")
+local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibAuraData", "LibAura", "LibClientBuild", "LibForge")
 
 -- Tell the back-end what addon to look for before 
 -- initializing this module and all its submodules. 
@@ -10,9 +10,6 @@ Core:SetAddon(ADDON)
 -- Tell the backend where our saved variables are found.
 -- *it's important that we're doing this here, before any module configs are created.
 Core:RegisterSavedVariablesGlobal(ADDON.."_DB")
-
--- Make sure that duplicate UIs aren't loaded
-Core:SetIncompatible(Core:GetInterfaceList())
 
 -- Lua API
 local _G = _G
@@ -731,6 +728,19 @@ Core.OnChatCommand = function(self, editBox, msg)
 	self:UpdateDebugConsole()
 end
 
+Core.SetTheme = function(self, editBox, theme)
+	local new 
+	if (theme == "azerite") or ((theme == "azeriteui")) or (theme == "az") or (theme == "azui") then
+		new = "Azerite"
+	elseif (theme == "legacy") or (theme == "goldpaw") or (theme == "goldpawui")  or (theme == "gui") then
+		new = "Legacy"
+	end
+	if (new) and (new ~= self.db.theme) then
+		self.db.theme = new
+		ReloadUI()
+	end
+end
+
 Core.OnInit = function(self)
 	self:PurgeSavedSettingFromAllProfiles(ADDON, 
 		"blockGroupInvites", 
@@ -740,9 +750,17 @@ Core.OnInit = function(self)
 	)
 	self.db = GetConfig(ADDON)
 	
-	Private.SetLayout("Generic")
-	Private.SetLayout("Azerite")
+	-- This sets the fallback layouts used when 
+	-- the requested module isn't found in the current.
+	--Private.SetFallbackLayout("Generic")
 	
+	-- This sets the current layout. 
+	-- This will be moved to a user setting when implemented.
+	Private.SetLayout(self.db.theme)
+
+	-- Mini theme switcher. Sticking to the "go" command.
+	self:RegisterChatCommand("go", "SetTheme")
+
 	self.layout = GetLayout(ADDON)
 
 	-- In case some other jokers have disabled these, we add them back to avoid a World of Bugs.
@@ -806,7 +824,7 @@ end
 
 Core.OnEnable = function(self)
 	local layout = self.layout
-	if (layout.Forge and layout.Forge.OnEnable) then
+	if (layout and layout.Forge and layout.Forge.OnEnable) then
 		self:Forge("Module", self, layout.Forge.OnEnable)
 	end
 

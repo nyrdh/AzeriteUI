@@ -1,4 +1,4 @@
-local LibSlash = Wheel:Set("LibSlash", 8)
+local LibSlash = Wheel:Set("LibSlash", 9)
 if (not LibSlash) then	
 	return
 end
@@ -89,7 +89,8 @@ LibSlash.RegisterChatCommand = function(self, command, func, forced)
 	-- Register the function called by the command 
 	if (type(func) == "function") then 
 		SlashCmdList[name] = function(msg, editBox)
-			func(editBox, parseArguments(msg))
+			-- Make the arguments lower case, we don't want case sensitivity here. 
+			func(editBox, parseArguments(string_lower(msg)))
 		end 
 	else 
 		local module = self -- overdoing the locals?

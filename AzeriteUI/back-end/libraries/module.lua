@@ -1,4 +1,4 @@
-local LibModule = Wheel:Set("LibModule", 36)
+local LibModule = Wheel:Set("LibModule", 39)
 if (not LibModule) then	
 	return
 end
@@ -48,6 +48,7 @@ local UnitName = UnitName
 LibModule.addonDependencies = LibModule.addonDependencies or {} -- table holding module/widget/handler dependencies
 LibModule.addonIncompatibilities = LibModule.addonIncompatibilities or {} -- table holding module/widget/handler incompatibilities
 LibModule.addonIsLoaded = LibModule.addonIsLoaded or {}
+LibModule.userDisabledModules = LibModule.userDisabledModules or {}
 LibModule.embeds = LibModule.embeds or {}
 LibModule.enabledModules = LibModule.enabledModules or {}
 LibModule.frame = LibModule.frame or CreateFrame("Frame") -- why?
@@ -69,6 +70,7 @@ local addonDependencies = LibModule.addonDependencies
 local addonIncompatibilities = LibModule.addonIncompatibilities
 local addonIsLoaded = LibModule.addonIsLoaded
 local debugFrame = LibModule.debugFrame
+local userDisabledModules = LibModule.userDisabledModules
 local enabledModules = LibModule.enabledModules 
 local initializedModules = LibModule.initializedModules 
 local moduleAddon = LibModule.moduleAddon
@@ -200,6 +202,10 @@ end
 -------------------------------------------------------------
 local ModuleProtoType = {
 	Init = function(self, ...)
+		if (self:IsUserDisabled()) or (self:DependencyFailed()) then
+			return
+		end
+
 		local isIncompatible, conflictingAddon = self:IsIncompatible()
 		if (isIncompatible) then 
 			if (self:IsTopLevel()) then 
@@ -211,8 +217,6 @@ local ModuleProtoType = {
 				end 
 				return
 			end 
-		elseif (self:DependencyFailed()) then
-			return
 		end
 
 		local event, arg1 = ...
@@ -256,12 +260,17 @@ local ModuleProtoType = {
 	end,
 
 	Enable = function(self, ...)
-		if (self:IsIncompatible() or self:DependencyFailed()) then
+		if (self:IsUserDisabled()) or (self:DependencyFailed()) or (self:IsIncompatible()) then
 			return
 		end
 		if (not enabledModules[self]) then 
 			if (not initializedModules[self]) then 
 				self:Init("Forced")
+
+				-- The module could've been disabled during its init phase.
+				if (self:IsUserDisabled()) then
+					return
+				end
 			end
 			enabledModules[self] = true
 
@@ -299,6 +308,26 @@ local ModuleProtoType = {
 
 			return self.OnDisable and self:OnDisable(...)
 		end
+	end,
+
+	SetUserDisabled = function(self, disable)
+		if (disable) then
+			userDisabledModules[self] = true
+		else
+			userDisabledModules[self] = nil
+		end
+	end,
+
+	IsUserDisabled = function(self)
+		return userDisabledModules[self]
+	end,
+
+	IsEnabled = function(self)
+		return enabledModules[self]
+	end,
+
+	IsInitialized = function(self)
+		return initializedModules[self]
 	end,
 
 	IsIncompatible = function(self)

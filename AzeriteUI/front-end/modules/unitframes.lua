@@ -2239,6 +2239,10 @@ end
 UnitFramePlayer.OnInit = function(self)
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
 	self.frame = self:SpawnUnitFrame("player", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StylePlayerFrame(frame, unit, id, self.layout, ...)
 	end)
@@ -2321,6 +2325,10 @@ end
 UnitFramePlayerHUD.OnInit = function(self)
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
 	self.frame = self:SpawnUnitFrame("player", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StylePlayerHUDFrame(frame, unit, id, self.layout, ...)
 	end)
@@ -2388,6 +2396,10 @@ end
 -----------------------------------------------------------
 UnitFrameTarget.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
 	self.frame = self:SpawnUnitFrame("target", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StyleTargetFrame(frame, unit, id, self.layout, ...)
 	end)
@@ -2432,6 +2444,10 @@ end
 if (UnitFrameFocus) then
 	UnitFrameFocus.OnInit = function(self)
 		self.layout = GetLayout(self:GetName())
+		if (not self.layout) then
+			return self:SetUserDisabled(true)
+		end
+	
 		self.frame = self:SpawnUnitFrame("focus", "UICenter", function(frame, unit, id, _, ...)
 			return UnitStyles.StyleFocusFrame(frame, unit, id, self.layout, ...)
 		end)
@@ -2443,6 +2459,10 @@ end
 -----------------------------------------------------------
 UnitFramePet.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
 	self.frame = self:SpawnUnitFrame("pet", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StylePetFrame(frame, unit, id, self.layout, ...)
 	end)
@@ -2453,6 +2473,10 @@ end
 -----------------------------------------------------------
 UnitFrameToT.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
 	self.frame = self:SpawnUnitFrame("targettarget", "UICenter", function(frame, unit, id, _, ...)
 		return UnitStyles.StyleToTFrame(frame, unit, id, self.layout, ...)
 	end)
@@ -2468,6 +2492,10 @@ UnitFrameParty.OnInit = function(self)
 
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
 
 	self.frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame:SetSize(unpack(self.layout.Size))
@@ -2523,7 +2551,10 @@ UnitFrameRaid.OnInit = function(self)
 
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
-	
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
 	self.frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame:SetSize(1,1)
 	self.frame:Place(unpack(self.layout.Place)) 
@@ -2592,6 +2623,10 @@ end
 -- These don't really exist in classic, right?
 UnitFrameBoss.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
 	self.frame = {}
 
 	local style = function(frame, unit, id, _, ...)

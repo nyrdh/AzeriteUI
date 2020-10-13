@@ -1257,6 +1257,9 @@ Module.OnInit = function(self)
 	)
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
 
 	local OptionsMenu = Core:GetModule("OptionsMenu", true)
 	if (OptionsMenu) then

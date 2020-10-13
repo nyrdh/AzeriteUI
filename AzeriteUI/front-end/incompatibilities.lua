@@ -4,6 +4,17 @@ if (not Core) then
 	return 
 end
 for moduleName,list in pairs({
+	[ADDON] = {
+		--["AzeriteUI"] = true,
+		["DiabolicUI"] = true,
+		["ElvUI"] = true,
+		["GoldieSix"] = true,
+		["GoldpawUI"] = true,
+		["GoldpawUI7"] = true,
+		["KkthnxUI"] = true,
+		["SpartanUI"] = true,
+		["TukUI"] = true
+	},
 	BlizzardChatFrames = {
 		["Glass"] = true,
 		["Prat-3.0"] = true
@@ -44,7 +55,7 @@ for moduleName,list in pairs({
 		["sArena"] = true
 	}
 }) do
-	local module = Core:GetModule(moduleName)
+	local module = (moduleName == ADDON) and Core or Core:GetModule(moduleName)
 	if (module) then
 		for addonName,isIncompatible in pairs(list) do
 			if (isIncompatible) then

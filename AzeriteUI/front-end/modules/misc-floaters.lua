@@ -734,9 +734,13 @@ Module.OnEvent = function(self, event, ...)
 end
 
 Module.OnInit = function(self)
+	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
 	self.db = GetConfig(self:GetName())
 	self.db.enableBGSanityFilter = nil
-	self.layout = GetLayout(self:GetName())
 
 	local OptionsMenu = Core:GetModule("OptionsMenu", true)
 	if (OptionsMenu) then

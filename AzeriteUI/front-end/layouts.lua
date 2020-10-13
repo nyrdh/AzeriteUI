@@ -2009,6 +2009,9 @@ Defaults[ADDON] = {
 	-- Sets the aura filter level 
 	auraFilter = "strict", -- strict/slack
 
+	-- yay!
+	theme = "Azerite", -- Current variations are Azerite and Legacy. Diabolic IS coming too!
+
 	-- Enables a layout switch targeted towards healers
 	enableHealerMode = false,
 
@@ -2195,7 +2198,6 @@ Generic[ADDON] = {
 								"UnitFrameRaid",
 								"UnitFrameBoss", -- Retail
 								"UnitFrameArena", -- Classic TBC, Retail
-								"Warnings",
 								"ZoneText"						
 							}
 						}
@@ -2212,7 +2214,7 @@ Generic[ADDON] = {
 					},
 					{
 						repeatAction = {
-							method = "DisableUIMenuOptions",
+							method = "DisableUIMenuOption",
 							arguments = {
 								-- shrinkOption, globalName
 								{ true, "InterfaceOptionsCombatPanelTargetOfTarget" },
@@ -2295,7 +2297,9 @@ Azerite[ADDON] = setmetatable({
 			}
 		}
 	},
+}, { __index = Generic[ADDON] })
 
+Azerite.OptionsMenu = {
 	MenuBorderBackdropBorderColor = { 1, 1, 1, 1 },
 	MenuBorderBackdropColor = { .05, .05, .05, .85 },
 	MenuButton_PostCreate = Core_MenuButton_PostCreate, 
@@ -2312,8 +2316,7 @@ Azerite[ADDON] = setmetatable({
 	MenuToggleButtonIconSize = { 96, 96 },
 	MenuToggleButtonIconColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
 	MenuWindow_CreateBorder = function(self) return GetBorder(self) end
-
-}, { __index = Generic[ADDON] })
+}
 
 -- Blizzard Chat Frames
 Azerite.BlizzardChatFrames = {
@@ -5202,23 +5205,29 @@ Private.GetDefaults = function(name)
 	return Defaults[name] 
 end 
 
--- What layout we're currently using.
-local CURRENT_LAYOUT
+-- What layout we're currently using, and the fallback for unknowns.
+local CURRENT_LAYOUT, FALLBACK_LAYOUT
 
 -- Retrieve static layout data for a named module
 -- Will return a specific variation if requested, 
 -- use the current one if a specific is not specified,
--- or default to generic layouts if nothing is set.
+-- or default to fallbacks or generic layouts if nothing is set.
 Private.GetLayout = function(moduleName, layoutName) 
-	local layout
-	if (layoutName) and Layouts[layoutName] then
-		layout = Layouts[layoutName]
-	elseif (CURRENT_LAYOUT) and (Layouts[CURRENT_LAYOUT]) then
-		layout = Layouts[CURRENT_LAYOUT]
+	local layout 
+	if (layoutName) and Layouts[layoutName] and Layouts[layoutName][moduleName] then
+		layout = Layouts[layoutName][moduleName]
 	else
-		layout = Layouts[GENERIC_STYLE]
+		if (CURRENT_LAYOUT) and (Layouts[CURRENT_LAYOUT]) and (Layouts[CURRENT_LAYOUT][moduleName]) then
+			layout = Layouts[CURRENT_LAYOUT][moduleName]
+
+		elseif (FALLBACK_LAYOUT) and (Layouts[FALLBACK_LAYOUT]) and (Layouts[FALLBACK_LAYOUT][moduleName]) then
+			layout = Layouts[FALLBACK_LAYOUT][moduleName]
+
+		elseif (GENERIC_STYLE) and (Layouts[GENERIC_STYLE]) and (Layouts[GENERIC_STYLE][moduleName]) then
+			layout = Layouts[GENERIC_STYLE][moduleName]
+		end
 	end
-	return layout[moduleName] 
+	return layout
 end 
 
 -- Set which layout variation to use
@@ -5227,6 +5236,21 @@ Private.SetLayout = function(layoutName)
 		CURRENT_LAYOUT = layoutName
 	end
 end 
+
+-- Set which fallback variation to use
+Private.SetFallbackLayout = function(layoutName) 
+	if (Layouts[layoutName]) then
+		FALLBACK_LAYOUT = layoutName
+	end
+end 
+
+Private.GetFallbackLayoutID = function()
+	return FALLBACK_LAYOUT
+end
+
+Private.GetLayoutID = function()
+	return CURRENT_LAYOUT
+end
 
 -- Whether or not aura filters are in forced slack mode.
 -- This happens if aura data isn't available for the current class.

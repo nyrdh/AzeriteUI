@@ -19,12 +19,15 @@ Core:NewModule("ChatBubbles", "LibChatBubble").OnEnable = function(self)
 	self:SetBubblePostCreateFunc()
 	self:SetBubblePostCreateFunc()
 
-	-- Set Blizzard Chat Bubble Font
-	-- This applies to bubbles when the UI is disabled, or in instances.
-	self:SetBlizzardBubbleFontObject(Private.GetLayout("BlizzardFonts").BlizzChatBubbleFont)
+	local layout = Private.GetLayout("BlizzardFonts")
+	if (layout) then
+		-- Set Blizzard Chat Bubble Font
+		-- This applies to bubbles when the UI is disabled, or in instances.
+		self:SetBlizzardBubbleFontObject(layout.BlizzChatBubbleFont)
 
-	-- Set OUR bubble font. Does not affect blizzard bubbles.
-	self:SetBubbleFontObject(Private.GetLayout("BlizzardFonts").ChatBubbleFont)
+		-- Set OUR bubble font. Does not affect blizzard bubbles.
+		self:SetBubbleFontObject(layout.ChatBubbleFont)
+	end
 
 	-- Keep them visible in the world
 	self:SetBubbleVisibleInWorld(true)
@@ -54,8 +57,6 @@ Core:NewModule("BlizzardFonts", "LibEvent").OnInit = function(self)
 	local IsAddOnLoaded = IsAddOnLoaded
 	local hooksecurefunc = hooksecurefunc
 
-	local layout = Private.GetLayout(self:GetName())
-
 	-- Chat window chat heights
 	if (CHAT_FONT_HEIGHTS) then 
 		for i = #CHAT_FONT_HEIGHTS, 1, -1 do  
@@ -65,12 +66,6 @@ Core:NewModule("BlizzardFonts", "LibEvent").OnInit = function(self)
 			CHAT_FONT_HEIGHTS[i] = v
 		end
 	end 
-
-	-- Chat Font
-	-- This is the cont used by chat windows and inputboxes. 
-	-- When set early enough in the loading process, all windows inherit this.
-	-- Note: Doesn't seem to have any effect anymore, must be done somewhere else. Just skip it?
-	--ChatFontNormal:SetFontObject(layout.ChatFont)
 
 	self.UpdateDisplayedMessages = function(self, event, ...)
 		if (InCombatLockdown()) then 
@@ -159,6 +154,9 @@ end
 -- Blizzard PopUp Styling
 Core:NewModule("BlizzardPopupStyling", "LibBlizzard").OnInit = function(self)
 	local layout = Private.GetLayout(self:GetName())
+	if (not layout) then
+		return self:SetUserDisabled(true)
+	end
 	self:StyleUIWidget("PopUps", 
 		layout.PopupBackdrop, 
 		layout.PopupBackdropOffsets,
@@ -185,7 +183,11 @@ end
 
 -- Custom Durability Widget
 Core:NewModule("FloaterHUD", "LibDurability").OnInit = function(self)
-	self:GetDurabilityWidget():Place(unpack(Private.GetLayout(self:GetName()).Place))
+	local layout = Private.GetLayout(self:GetName())
+	if (not layout) then
+		return self:SetUserDisabled(true)
+	end
+	self:GetDurabilityWidget():Place(unpack(layout.Place))
 end
 
 -- Chat Filters
@@ -358,6 +360,9 @@ Core:NewModule("Bindings", "PLUGIN", "LibBindTool").OnInit = function(self)
 
 	-- Style the keybind interface
 	local layout = Private.GetLayout(self:GetName())
+	if (not layout) then
+		return self:SetUserDisabled(true)
+	end
 	for _,frame in ipairs({ self:GetKeybindFrame(), self:GetKeybindDiscardFrame() }) do
 
 		frame.ApplyButton:SetNormalTextureSize(unpack(layout.MenuButtonSize))

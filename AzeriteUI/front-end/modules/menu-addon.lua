@@ -914,7 +914,10 @@ Module.PostUpdateOptions = function(self, event, ...)
 end 
 
 Module.OnInit = function(self)
-	self.layout = GetLayout(ADDON)
+	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
 	self:CreateMenuTable()
 	self:AddOptionsToMenuWindow()
 end 
@@ -978,6 +981,10 @@ Module.CreateCallbackFrame = function(self, module)
 	end
 
 	return callbackFrame
+end
+
+Module.ShouldHaveMenu = function(self, module)
+	return module and not(module:IsUserDisabled() or module:IsIncompatible() or module:DependencyFailed())
 end
 
 Module.CreateMenuTable = function(self)
@@ -1096,7 +1103,7 @@ Module.CreateMenuTable = function(self)
 	
 	-- Actionbars
 	local ActionBarMain = Core:GetModule("ActionBarMain", true)
-	if ActionBarMain and not (ActionBarMain:IsIncompatible() or ActionBarMain:DependencyFailed()) then 
+	if (self:ShouldHaveMenu(ActionBarMain)) then 
 		local ActionBarMenu =  {
 			title = L["ActionBars"], type = nil, hasWindow = true, 
 			buttons = {
@@ -1209,15 +1216,13 @@ Module.CreateMenuTable = function(self)
 			}
 		}
 		local Bindings = Core:GetModule("Bindings", true)
-		if Bindings and not (Bindings:IsIncompatible() or Bindings:DependencyFailed()) then 
-			if Bindings then 
-				table_insert(ActionBarMenu.buttons, {
-					enabledTitle = L_ENABLED:format(L["Bind Mode"]),
-					disabledTitle = L_DISABLED:format(L["Bind Mode"]),
-					type = "TOGGLE_MODE", hasWindow = false, 
-					proxyModule = "Bindings", modeName = "bindMode"
-				})
-			end 
+		if (self:ShouldHaveMenu(Bindings)) then 
+			table_insert(ActionBarMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["Bind Mode"]),
+				disabledTitle = L_DISABLED:format(L["Bind Mode"]),
+				type = "TOGGLE_MODE", hasWindow = false, 
+				proxyModule = "Bindings", modeName = "bindMode"
+			})
 		end 
 		table_insert(ActionBarMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Button Lock"]),
@@ -1271,7 +1276,7 @@ Module.CreateMenuTable = function(self)
 	}
 	-- Only apply these when no conflicting addon is loaded.
 	local BlizzardChatFrames = Core:GetModule("BlizzardChatFrames", true)
-	if BlizzardChatFrames and not (BlizzardChatFrames:IsIncompatible() or BlizzardChatFrames:DependencyFailed()) then 
+	if (self:ShouldHaveMenu(BlizzardChatFrames)) then 
 		table_insert(ChatFrameMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Chat Outline"]),
 			disabledTitle = L_DISABLED:format(L["Chat Outline"]),
@@ -1284,7 +1289,7 @@ Module.CreateMenuTable = function(self)
 
 	-- Nameplates
 	local NamePlates = Core:GetModule("NamePlates", true)
-	if NamePlates and not (NamePlates:IsIncompatible() or NamePlates:DependencyFailed()) then 
+	if (self:ShouldHaveMenu(NamePlates)) then 
 		table_insert(MenuTable, {
 			title = L["NamePlates"], type = nil, hasWindow = true, 
 			buttons = {
@@ -1330,7 +1335,7 @@ Module.CreateMenuTable = function(self)
 	}
 
 	local UnitFrameParty = Core:GetModule("UnitFrameParty", true)
-	if UnitFrameParty and not (UnitFrameParty:IsIncompatible() or UnitFrameParty:DependencyFailed()) then 
+	if (self:ShouldHaveMenu(UnitFrameParty)) then 
 		hasUnits = true
 		table_insert(UnitFrameMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Party Frames"]),
@@ -1342,7 +1347,7 @@ Module.CreateMenuTable = function(self)
 	end
 
 	local UnitFrameRaid = Core:GetModule("UnitFrameRaid", true)
-	if UnitFrameRaid and not (UnitFrameRaid:IsIncompatible() or UnitFrameRaid:DependencyFailed()) then 
+	if (self:ShouldHaveMenu(UnitFrameRaid)) then 
 		hasUnits = true
 		table_insert(UnitFrameMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Raid Frames"]),
@@ -1354,7 +1359,7 @@ Module.CreateMenuTable = function(self)
 	end
 
 	local UnitFramePlayer = Core:GetModule("UnitFramePlayer", true)
-	if UnitFramePlayer and not (UnitFramePlayer:IsIncompatible() or UnitFramePlayer:DependencyFailed())then
+	if (self:ShouldHaveMenu(UnitFramePlayer)) then 
 		if (PlayerClass == "DRUID") or (PlayerClass == "HUNTER") 
 		or (PlayerClass == "PALADIN") or (PlayerClass == "SHAMAN")
 		or (PlayerClass == "MAGE") or (PlayerClass == "PRIEST") or (PlayerClass == "WARLOCK") then
@@ -1374,7 +1379,7 @@ Module.CreateMenuTable = function(self)
 
 	-- HUD
 	local UnitFramePlayerHUD = Core:GetModule("UnitFramePlayerHUD", true)
-	if UnitFramePlayerHUD and not (UnitFramePlayerHUD:IsIncompatible() or UnitFramePlayerHUD:DependencyFailed()) then 
+	if (self:ShouldHaveMenu(UnitFramePlayerHUD)) then 
 		local HUDMenu = {
 			title = L["HUD"], type = nil, hasWindow = true, 
 			buttons = {
@@ -1411,7 +1416,7 @@ Module.CreateMenuTable = function(self)
 
 		-- Objectives Tracker
 		local BlizzardObjectivesTracker = Core:GetModule("BlizzardObjectivesTracker", true)
-		if BlizzardObjectivesTracker and not (BlizzardObjectivesTracker:IsIncompatible() or BlizzardObjectivesTracker:DependencyFailed()) then
+		if (self:ShouldHaveMenu(BlizzardObjectivesTracker)) then 
 			table_insert(HUDMenu.buttons, {
 				enabledTitle = L_ENABLED:format(L["Objectives Tracker"]),
 				disabledTitle = L_DISABLED:format(L["Objectives Tracker"]),
@@ -1464,8 +1469,8 @@ Module.CreateMenuTable = function(self)
 
 	-- Explorer Mode
 	local ExplorerMode = Core:GetModule("ExplorerMode", true)
-	if ExplorerMode and not (ExplorerMode:IsIncompatible() or ExplorerMode:DependencyFailed()) then 
-		table_insert(MenuTable, {
+	if (self:ShouldHaveMenu(ExplorerMode)) then 
+			table_insert(MenuTable, {
 			title = L["Explorer Mode"], type = nil, hasWindow = true, 
 			buttons = {
 				{

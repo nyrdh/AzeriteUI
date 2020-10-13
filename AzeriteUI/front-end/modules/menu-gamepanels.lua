@@ -331,7 +331,7 @@ Module.GetConfigWindow = function(self)
 		configWindow:Hide()
 		configWindow:SetFrameStrata("DIALOG")
 		configWindow:SetFrameLevel(1000)
-		configWindow:Place(unpack(GetLayout(ADDON).MenuPlace))
+		configWindow:Place(unpack(GetLayout("OptionsMenu").MenuPlace))
 		configWindow:EnableMouse(true)
 		configWindow:SetScript("OnShow", ConfigWindow_OnShow)
 		configWindow:SetScript("OnHide", ConfigWindow_OnHide)
@@ -536,6 +536,11 @@ end
 
 Module.OnInit = function(self)
 	Layout = GetLayout(self:GetName())
+	self.layout = Layout
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
 	if self:IsAddOnEnabled("Bartender4") then 
 		self:AddDebugMessageFormatted("[Bartender4] detected.")
 		if IsAddOnLoaded("Bartender4") then 

@@ -592,6 +592,10 @@ end
 
 Module.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
+
 	self.frame = self:CreateFrame("Frame", nil, "UICenter")
 	self.frame:SetFrameStrata("LOW")
 
