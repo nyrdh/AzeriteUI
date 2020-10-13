@@ -87,10 +87,12 @@ local spellTypeColor = setmetatable({
 ------------------------------------------------
 -- Utility Functions
 ------------------------------------------------
-local degreesToRadiansConstant = 360 * 2*math_pi
+-- Proper conversion constant.
+local deg2rad = math_pi / 180
 local degreesToRadians = function(degrees)
-	return degrees/degreesToRadiansConstant
+	return degrees*deg2rad
 end 
+
 
 local getTimeStrings = function(h, m, suffix, useStandardTime, abbreviateSuffix)
 	if (useStandardTime) then 
@@ -371,14 +373,6 @@ local Minimap_Performance_PlaceFunc = function(performanceFrame, Handler)
 	performanceFrame:SetPoint("BOTTOMRIGHT", Handler.FrameRate, "BOTTOMRIGHT", 0, 0)
 end
 
-local Minimap_Performance_Latency_PlaceFunc = function(Handler) 
-	return "BOTTOMRIGHT", Handler.Zone, "TOPRIGHT", 0, 6 
-end
-
-local Minimap_Performance_FrameRate_PlaceFunc = function(Handler) 
-	return "BOTTOM", Handler.Clock, "TOP", 0, 6 
-end 
-
 local Minimap_AP_OverrideValue = function(element, min, max, level)
 	local value = element.Value or element:IsObjectType("FontString") and element 
 	if value.showDeficit then 
@@ -483,10 +477,6 @@ local Minimap_XP_OverrideValue = function(element, min, max, restedLeft, restedT
 		end 
 	end 
 end 
-
-local Minimap_ZoneName_PlaceFunc = function(Handler) 
-	return "BOTTOMRIGHT", Handler.Clock, "BOTTOMLEFT", -8, 0 
-end
 
 -- Retail Personal Resource Display
 local NamePlates_PreUpdate = function(plate, event, unit)
@@ -2580,7 +2570,7 @@ Azerite.ActionBarMain = {
 	PetCooldownSwipeColor = { 0, 0, 0, .75 },
 	PetChargeCooldownSwipeColor = { 0, 0, 0, .5 },
 
-	ExitButtonPlace = { "CENTER", "Minimap", "CENTER", -math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
+	ExitButtonPlace = { "CENTER", "Minimap", "CENTER", -math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
 	ExitButtonSize = { 32, 32 },
 	ExitButtonTexturePath = GetMedia("icon_exit_flight"),
 	ExitButtonTexturePlace = { "CENTER", 0, 0 }, 
@@ -3203,7 +3193,7 @@ Azerite.GroupTools = {
 Azerite.Minimap = {
 	AP_OverrideValue = Minimap_AP_OverrideValue,
 	BattleGroundEyeColor = { .90, .95, 1 }, 
-	BattleGroundEyePlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
+	BattleGroundEyePlace = { "CENTER", math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
 	BattleGroundEyeSize = { 64, 64 }, 
 	BattleGroundEyeTexture = GetMedia("group-finder-eye-green"),
 	BlipTextures = 
@@ -3231,9 +3221,9 @@ Azerite.Minimap = {
 	FrameRate_OverrideValue = Minimap_FrameRate_OverrideValue,
 	FrameRateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
 	FrameRateFont = GetFont(12, true), 
-	FrameRatePlaceFunc = Minimap_Performance_FrameRate_PlaceFunc, 
+	FrameRatePlaceFunc = function(Handler) return "BOTTOM", Handler.Clock, "TOP", 0, 6 end, 
 	GroupFinderEyeColor = { .90, .95, 1 }, 
-	GroupFinderEyePlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
+	GroupFinderEyePlace = { "CENTER", math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
 	GroupFinderEyeSize = { 64, 64 }, 
 	GroupFinderEyeTexture = GetMedia("group-finder-eye-green"),
 	GroupFinderQueueStatusPlace = { "BOTTOMRIGHT", _G.QueueStatusMinimapButton, "TOPLEFT", 0, 0 },
@@ -3260,13 +3250,13 @@ Azerite.Minimap = {
 	Latency_OverrideValue = Minimap_Latency_OverrideValue,
 	LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
 	LatencyFont = GetFont(12, true), 
-	LatencyPlaceFunc = Minimap_Performance_Latency_PlaceFunc, 
+	LatencyPlaceFunc = function(Handler) return "BOTTOMRIGHT", Handler.Zone, "TOPRIGHT", 0, 6 end, 
 	MailPlace = Wheel("LibModule"):IsAddOnEnabled("MBB") and { "BOTTOMRIGHT", -(31 + 213 + 40), 35 } or { "BOTTOMRIGHT", -(31 + 213), 35 },
 	MailSize = { 43, 32 },
 	MailTexture = GetMedia("icon_mail"),
 	MailTextureDrawLayer = { "ARTWORK", 1 },
 	MailTexturePlace = { "CENTER", 0, 0 }, 
-	MailTextureRotation = 15 * (2*math_pi)/360,
+	MailTextureRotation = 15*deg2rad,
 	MailTextureSize = { 66, 66 },
 	MapBackdropColor = { 0, 0, 0, .75 }, 
 	MapBackdropTexture = GetMedia("minimap_mask_circle"),
@@ -3336,13 +3326,62 @@ Azerite.Minimap = {
 	TrackingButtonIconBgTexture = GetMedia("hp_critter_case_glow"),
 	TrackingButtonIconMask = GetMedia("hp_critter_case_glow"), -- actionbutton-mask-circular
 	TrackingButtonIconSize = { 28, 28 },
-	TrackingButtonPlace = { "CENTER", math_cos(45*math_pi/180) * (213/2 + 10), math_sin(45*math_pi/180) * (213/2 + 10) }, 
-	TrackingButtonPlaceAlternate = { "CENTER", math_cos(22.*math_pi/180) * (213/2 + 10), math_sin(22.5*math_pi/180) * (213/2 + 10) }, 
+	TrackingButtonPlace = { "CENTER", math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
+	TrackingButtonPlaceAlternate = { "CENTER", math_cos(22.*deg2rad) * (213/2 + 10), math_sin(22.5*deg2rad) * (213/2 + 10) }, 
 	TrackingButtonSize = { 56, 56 }, 
 	XP_OverrideValue = Minimap_XP_OverrideValue,
-	ZonePlaceFunc = Minimap_ZoneName_PlaceFunc,
-	ZoneFont = GetFont(15, true)
+	ZonePlaceFunc = function(Handler) return "BOTTOMRIGHT", Handler.Clock, "BOTTOMLEFT", -8, 0 end,
+	ZoneFont = GetFont(15, true),
+	UseBars = true, -- copout
 }
+Legacy.Minimap = setmetatable({
+	UseBars = false,
+	BattleGroundEyePlace = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
+	GroupFinderEyePlace = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
+	TrackingButtonPlace = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
+	TrackingButtonPlaceAlternate = { "CENTER", math_cos(22.5*deg2rad) * (196/2 + 10), math_sin(22.5*deg2rad) * (196/2 + 10) }, 
+	ZoneAlpha = .75,
+	ZonePlaceFunc = function(Handler) return "TOP", Handler, "BOTTOM", 0, -36 end,
+	ZoneFont = GetFont(14, true),
+
+	MBBPlace = { "TOPRIGHT", 24, 20 },
+	PerformanceFramePlaceFunc = function(Handler) return "TOP", Handler.Zone, "BOTTOM", 0, -6	end,
+	PerformanceFramePlaceAdvancedFunc = false,
+	Performance_PostUpdate = function(element)
+		local self = element._owner
+	
+		local latency = self.Latency
+		local framerate = self.FrameRate
+	
+		local fsize = framerate:GetStringWidth()
+		local lsize = latency:GetStringWidth()
+	
+		if (fsize and lsize) then 
+			local performanceFrame = latency:GetParent()
+			performanceFrame:SetSize(fsize + 6 + lsize, math_ceil(math_max(framerate:GetHeight(), latency:GetHeight())))
+		end 
+	end,
+	Place = { "TOPRIGHT", "UICenter", "TOPRIGHT", -54, -60 }, 
+	Size = { 200, 200 }, 
+
+	FrameRate_OverrideValue = function(element, fps) element:SetFormattedText("%.0f|cff888888%s|r", math_floor(fps), FPS_ABBR) end,
+	Latency_OverrideValue = function(element, home, world) element:SetFormattedText("%.0f|cff888888%s|r", math_floor(world), MILLISECONDS_ABBR) end,
+	ClockFont = GetFont(14, true),
+	ClockFrameInOverlay = true,
+	ClockPlace = { "BOTTOM", 0, 10 },
+	CompassRadiusInset = 2, -- move the text 2 points closer to the center of the map
+	CoordinatePlace = { "TOP", 4, -12 },
+	CoordFrameInOverlay = true, 
+	FrameRatePlaceFunc = function(Handler) return "LEFT", Handler.Latency, "RIGHT", 6, 0 end, 
+ 	GroupFinderQueueStatusPlace = { "TOPRIGHT", _G.QueueStatusMinimapButton, "BOTTOMLEFT", 0, 0 },
+	LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	LatencyFont = GetFont(12, true), 
+	LatencyPlaceFunc = function(Handler) return "TOPLEFT", Handler.PerformanceFrame, "TOPLEFT", 0, 0 end, 
+	MailPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -20, 10 },
+	MapBorderSize = { 256, 256 }, 
+	MapBorderTexture = GetMedia("minimap-border-legacy"),
+
+} , { __index = Azerite.Minimap })
 
 -- NamePlates
 Azerite.NamePlates = {

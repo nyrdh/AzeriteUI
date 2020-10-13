@@ -907,157 +907,164 @@ Module.SetUpMinimap = function(self)
 	framerate:Place(layout.FrameRatePlaceFunc(Handler)) 
 	latency:Place(layout.LatencyPlaceFunc(Handler)) 
 
-	layout.PerformanceFramePlaceAdvancedFunc(performanceFrame, Handler)
+	if (layout.PerformanceFramePlaceAdvancedFunc) then
+		layout.PerformanceFramePlaceAdvancedFunc(performanceFrame, Handler)
+	elseif (layout.PerformanceFramePlaceFunc) then
+		performanceFrame:Place(layout.PerformanceFramePlaceFunc(Handler))
+	end
 
 	-- Ring frame
-	local ringFrame = Handler:CreateOverlayFrame()
-	ringFrame:Hide()
-	ringFrame:SetAllPoints() -- set it to cover the map
-	ringFrame:EnableMouse(true) -- make sure minimap blips and their tooltips don't punch through
-	ringFrame:SetScript("OnEnter", RingFrame_OnEnter)
-	ringFrame:SetScript("OnLeave", RingFrame_OnLeave)
+	if (layout.UseBars) then
 
-	ringFrame:HookScript("OnShow", function() 
-		local compassFrame = Wheel("LibMinimap"):GetCompassFrame()
-		if (compassFrame) then 
-			compassFrame.supressCompass = true
-		end 
-	end)
+		local ringFrame = Handler:CreateOverlayFrame()
+		ringFrame:Hide()
+		ringFrame:SetAllPoints() -- set it to cover the map
+		ringFrame:EnableMouse(true) -- make sure minimap blips and their tooltips don't punch through
+		ringFrame:SetScript("OnEnter", RingFrame_OnEnter)
+		ringFrame:SetScript("OnLeave", RingFrame_OnLeave)
 
-	ringFrame:HookScript("OnHide", function() 
-		local compassFrame = Wheel("LibMinimap"):GetCompassFrame()
-		if compassFrame then 
-			compassFrame.supressCompass = nil
-		end 
-	end)
+		ringFrame:HookScript("OnShow", function() 
+			local compassFrame = Wheel("LibMinimap"):GetCompassFrame()
+			if (compassFrame) then 
+				compassFrame.supressCompass = true
+			end 
+		end)
 
-	-- Wait with this until now to trigger compass visibility changes
-	ringFrame:SetShown(db.stickyBars) 
+		ringFrame:HookScript("OnHide", function() 
+			local compassFrame = Wheel("LibMinimap"):GetCompassFrame()
+			if compassFrame then 
+				compassFrame.supressCompass = nil
+			end 
+		end)
 
-	-- ring frame backdrops
-	local ringFrameBg = ringFrame:CreateTexture()
-	ringFrameBg:SetPoint(unpack(layout.RingFrameBackdropPlace))
-	ringFrameBg:SetSize(unpack(layout.RingFrameBackdropSize))  
-	ringFrameBg:SetDrawLayer(unpack(layout.RingFrameBackdropDrawLayer))
-	ringFrameBg:SetTexture(layout.RingFrameBackdropTexture)
-	ringFrameBg:SetVertexColor(unpack(layout.RingFrameBackdropColor))
-	ringFrame.Bg = ringFrameBg
+		-- Wait with this until now to trigger compass visibility changes
+		ringFrame:SetShown(db.stickyBars) 
 
-	-- Toggle button for ring frame
-	local toggle = Handler:CreateOverlayFrame()
-	toggle:SetFrameLevel(toggle:GetFrameLevel() + 10) -- need this above the ring frame and the rings
-	toggle:SetPoint("CENTER", Handler, "BOTTOM", 2, -6)
-	toggle:SetSize(unpack(layout.ToggleSize))
-	toggle:EnableMouse(true)
-	toggle:SetScript("OnEnter", Toggle_OnEnter)
-	toggle:SetScript("OnLeave", Toggle_OnLeave)
-	toggle:SetScript("OnMouseUp", Toggle_OnMouseUp)
-	toggle._owner = Handler
-	ringFrame._owner = toggle
-	toggle.Frame = ringFrame
+		-- ring frame backdrops
+		local ringFrameBg = ringFrame:CreateTexture()
+		ringFrameBg:SetPoint(unpack(layout.RingFrameBackdropPlace))
+		ringFrameBg:SetSize(unpack(layout.RingFrameBackdropSize))  
+		ringFrameBg:SetDrawLayer(unpack(layout.RingFrameBackdropDrawLayer))
+		ringFrameBg:SetTexture(layout.RingFrameBackdropTexture)
+		ringFrameBg:SetVertexColor(unpack(layout.RingFrameBackdropColor))
+		ringFrame.Bg = ringFrameBg
 
-	local toggleBackdrop = toggle:CreateTexture()
-	toggleBackdrop:SetDrawLayer("BACKGROUND")
-	toggleBackdrop:SetSize(unpack(layout.ToggleBackdropSize))
-	toggleBackdrop:SetPoint("CENTER", 0, 0)
-	toggleBackdrop:SetTexture(layout.ToggleBackdropTexture)
-	toggleBackdrop:SetVertexColor(unpack(layout.ToggleBackdropColor))
+		-- Toggle button for ring frame
+		local toggle = Handler:CreateOverlayFrame()
+		toggle:SetFrameLevel(toggle:GetFrameLevel() + 10) -- need this above the ring frame and the rings
+		toggle:SetPoint("CENTER", Handler, "BOTTOM", 2, -6)
+		toggle:SetSize(unpack(layout.ToggleSize))
+		toggle:EnableMouse(true)
+		toggle:SetScript("OnEnter", Toggle_OnEnter)
+		toggle:SetScript("OnLeave", Toggle_OnLeave)
+		toggle:SetScript("OnMouseUp", Toggle_OnMouseUp)
+		toggle._owner = Handler
+		ringFrame._owner = toggle
+		toggle.Frame = ringFrame
 
-	Handler.Toggle = toggle
+		local toggleBackdrop = toggle:CreateTexture()
+		toggleBackdrop:SetDrawLayer("BACKGROUND")
+		toggleBackdrop:SetSize(unpack(layout.ToggleBackdropSize))
+		toggleBackdrop:SetPoint("CENTER", 0, 0)
+		toggleBackdrop:SetTexture(layout.ToggleBackdropTexture)
+		toggleBackdrop:SetVertexColor(unpack(layout.ToggleBackdropColor))
+
+		Handler.Toggle = toggle
 	
-	-- outer ring
-	local ring1 = ringFrame:CreateSpinBar()
-	ring1:SetPoint(unpack(layout.OuterRingPlace))
-	ring1:SetSize(unpack(layout.OuterRingSize)) 
-	ring1:SetSparkOffset(layout.OuterRingSparkOffset)
-	ring1:SetSparkFlash(unpack(layout.OuterRingSparkFlash))
-	ring1:SetSparkBlendMode(layout.OuterRingSparkBlendMode)
-	ring1:SetClockwise(layout.OuterRingClockwise) 
-	ring1:SetDegreeOffset(layout.OuterRingDegreeOffset) 
-	ring1:SetDegreeSpan(layout.OuterRingDegreeSpan)
-	ring1.showSpark = layout.OuterRingShowSpark 
-	ring1.colorXP = layout.OuterRingColorXP
-	ring1.colorPower = layout.OuterRingColorPower 
-	ring1.colorStanding = layout.OuterRingColorStanding 
-	ring1.colorValue = layout.OuterRingColorValue 
-	ring1.backdropMultiplier = layout.OuterRingBackdropMultiplier 
-	ring1.sparkMultiplier = layout.OuterRingSparkMultiplier
+		-- outer ring
+		local ring1 = ringFrame:CreateSpinBar()
+		ring1:SetPoint(unpack(layout.OuterRingPlace))
+		ring1:SetSize(unpack(layout.OuterRingSize)) 
+		ring1:SetSparkOffset(layout.OuterRingSparkOffset)
+		ring1:SetSparkFlash(unpack(layout.OuterRingSparkFlash))
+		ring1:SetSparkBlendMode(layout.OuterRingSparkBlendMode)
+		ring1:SetClockwise(layout.OuterRingClockwise) 
+		ring1:SetDegreeOffset(layout.OuterRingDegreeOffset) 
+		ring1:SetDegreeSpan(layout.OuterRingDegreeSpan)
+		ring1.showSpark = layout.OuterRingShowSpark 
+		ring1.colorXP = layout.OuterRingColorXP
+		ring1.colorPower = layout.OuterRingColorPower 
+		ring1.colorStanding = layout.OuterRingColorStanding 
+		ring1.colorValue = layout.OuterRingColorValue 
+		ring1.backdropMultiplier = layout.OuterRingBackdropMultiplier 
+		ring1.sparkMultiplier = layout.OuterRingSparkMultiplier
 
-	-- outer ring value text
-	local ring1Value = ring1:CreateFontString()
-	ring1Value:SetPoint(unpack(layout.OuterRingValuePlace))
-	ring1Value:SetJustifyH(layout.OuterRingValueJustifyH)
-	ring1Value:SetJustifyV(layout.OuterRingValueJustifyV)
-	ring1Value:SetFontObject(layout.OuterRingValueFont)
-	ring1Value.showDeficit = layout.OuterRingValueShowDeficit 
-	ring1.Value = ring1Value
+		-- outer ring value text
+		local ring1Value = ring1:CreateFontString()
+		ring1Value:SetPoint(unpack(layout.OuterRingValuePlace))
+		ring1Value:SetJustifyH(layout.OuterRingValueJustifyH)
+		ring1Value:SetJustifyV(layout.OuterRingValueJustifyV)
+		ring1Value:SetFontObject(layout.OuterRingValueFont)
+		ring1Value.showDeficit = layout.OuterRingValueShowDeficit 
+		ring1.Value = ring1Value
 
-	-- outer ring value description text
-	local ring1ValueDescription = ring1:CreateFontString()
-	ring1ValueDescription:SetPoint(unpack(layout.OuterRingValueDescriptionPlace))
-	ring1ValueDescription:SetWidth(layout.OuterRingValueDescriptionWidth)
-	ring1ValueDescription:SetTextColor(unpack(layout.OuterRingValueDescriptionColor))
-	ring1ValueDescription:SetJustifyH(layout.OuterRingValueDescriptionJustifyH)
-	ring1ValueDescription:SetJustifyV(layout.OuterRingValueDescriptionJustifyV)
-	ring1ValueDescription:SetFontObject(layout.OuterRingValueDescriptionFont)
-	ring1ValueDescription:SetIndentedWordWrap(false)
-	ring1ValueDescription:SetWordWrap(true)
-	ring1ValueDescription:SetNonSpaceWrap(false)
-	ring1.Value.Description = ring1ValueDescription
+		-- outer ring value description text
+		local ring1ValueDescription = ring1:CreateFontString()
+		ring1ValueDescription:SetPoint(unpack(layout.OuterRingValueDescriptionPlace))
+		ring1ValueDescription:SetWidth(layout.OuterRingValueDescriptionWidth)
+		ring1ValueDescription:SetTextColor(unpack(layout.OuterRingValueDescriptionColor))
+		ring1ValueDescription:SetJustifyH(layout.OuterRingValueDescriptionJustifyH)
+		ring1ValueDescription:SetJustifyV(layout.OuterRingValueDescriptionJustifyV)
+		ring1ValueDescription:SetFontObject(layout.OuterRingValueDescriptionFont)
+		ring1ValueDescription:SetIndentedWordWrap(false)
+		ring1ValueDescription:SetWordWrap(true)
+		ring1ValueDescription:SetNonSpaceWrap(false)
+		ring1.Value.Description = ring1ValueDescription
 
-	local outerPercent = toggle:CreateFontString()
-	outerPercent:SetDrawLayer("OVERLAY")
-	outerPercent:SetJustifyH("CENTER")
-	outerPercent:SetJustifyV("MIDDLE")
-	outerPercent:SetFontObject(layout.OuterRingValuePercentFont)
-	outerPercent:SetShadowOffset(0, 0)
-	outerPercent:SetShadowColor(0, 0, 0, 0)
-	outerPercent:SetPoint("CENTER", 1, -1)
-	ring1.Value.Percent = outerPercent
+		local outerPercent = toggle:CreateFontString()
+		outerPercent:SetDrawLayer("OVERLAY")
+		outerPercent:SetJustifyH("CENTER")
+		outerPercent:SetJustifyV("MIDDLE")
+		outerPercent:SetFontObject(layout.OuterRingValuePercentFont)
+		outerPercent:SetShadowOffset(0, 0)
+		outerPercent:SetShadowColor(0, 0, 0, 0)
+		outerPercent:SetPoint("CENTER", 1, -1)
+		ring1.Value.Percent = outerPercent
 
-	-- inner ring 
-	local ring2 = ringFrame:CreateSpinBar()
-	ring2:SetPoint(unpack(layout.InnerRingPlace))
-	ring2:SetSize(unpack(layout.InnerRingSize)) 
-	ring2:SetSparkSize(unpack(layout.InnerRingSparkSize))
-	ring2:SetSparkInset(layout.InnerRingSparkInset)
-	ring2:SetSparkOffset(layout.InnerRingSparkOffset)
-	ring2:SetSparkFlash(unpack(layout.InnerRingSparkFlash))
-	ring2:SetSparkBlendMode(layout.InnerRingSparkBlendMode)
-	ring2:SetClockwise(layout.InnerRingClockwise) 
-	ring2:SetDegreeOffset(layout.InnerRingDegreeOffset) 
-	ring2:SetDegreeSpan(layout.InnerRingDegreeSpan)
-	ring2:SetStatusBarTexture(layout.InnerRingBarTexture)
-	ring2.showSpark = layout.InnerRingShowSpark 
-	ring2.colorXP = layout.InnerRingColorXP
-	ring2.colorPower = layout.InnerRingColorPower 
-	ring2.colorStanding = layout.InnerRingColorStanding 
-	ring2.colorValue = layout.InnerRingColorValue 
-	ring2.backdropMultiplier = layout.InnerRingBackdropMultiplier 
-	ring2.sparkMultiplier = layout.InnerRingSparkMultiplier
+		-- inner ring 
+		local ring2 = ringFrame:CreateSpinBar()
+		ring2:SetPoint(unpack(layout.InnerRingPlace))
+		ring2:SetSize(unpack(layout.InnerRingSize)) 
+		ring2:SetSparkSize(unpack(layout.InnerRingSparkSize))
+		ring2:SetSparkInset(layout.InnerRingSparkInset)
+		ring2:SetSparkOffset(layout.InnerRingSparkOffset)
+		ring2:SetSparkFlash(unpack(layout.InnerRingSparkFlash))
+		ring2:SetSparkBlendMode(layout.InnerRingSparkBlendMode)
+		ring2:SetClockwise(layout.InnerRingClockwise) 
+		ring2:SetDegreeOffset(layout.InnerRingDegreeOffset) 
+		ring2:SetDegreeSpan(layout.InnerRingDegreeSpan)
+		ring2:SetStatusBarTexture(layout.InnerRingBarTexture)
+		ring2.showSpark = layout.InnerRingShowSpark 
+		ring2.colorXP = layout.InnerRingColorXP
+		ring2.colorPower = layout.InnerRingColorPower 
+		ring2.colorStanding = layout.InnerRingColorStanding 
+		ring2.colorValue = layout.InnerRingColorValue 
+		ring2.backdropMultiplier = layout.InnerRingBackdropMultiplier 
+		ring2.sparkMultiplier = layout.InnerRingSparkMultiplier
 
-	-- inner ring value text
-	local ring2Value = ring2:CreateFontString()
-	ring2Value:SetPoint("BOTTOM", ringFrameBg, "CENTER", 0, 2)
-	ring2Value:SetJustifyH("CENTER")
-	ring2Value:SetJustifyV("TOP")
-	ring2Value:SetFontObject(layout.InnerRingValueFont)
-	ring2Value.showDeficit = true  
-	ring2.Value = ring2Value
+		-- inner ring value text
+		local ring2Value = ring2:CreateFontString()
+		ring2Value:SetPoint("BOTTOM", ringFrameBg, "CENTER", 0, 2)
+		ring2Value:SetJustifyH("CENTER")
+		ring2Value:SetJustifyV("TOP")
+		ring2Value:SetFontObject(layout.InnerRingValueFont)
+		ring2Value.showDeficit = true  
+		ring2.Value = ring2Value
 
-	local innerPercent = ringFrame:CreateFontString()
-	innerPercent:SetDrawLayer("OVERLAY")
-	innerPercent:SetJustifyH("CENTER")
-	innerPercent:SetJustifyV("MIDDLE")
-	innerPercent:SetFontObject(layout.InnerRingValuePercentFont)
-	innerPercent:SetShadowOffset(0, 0)
-	innerPercent:SetShadowColor(0, 0, 0, 0)
-	innerPercent:SetPoint("CENTER", ringFrameBg, "CENTER", 2, -64)
-	ring2.Value.Percent = innerPercent
+		local innerPercent = ringFrame:CreateFontString()
+		innerPercent:SetDrawLayer("OVERLAY")
+		innerPercent:SetJustifyH("CENTER")
+		innerPercent:SetJustifyV("MIDDLE")
+		innerPercent:SetFontObject(layout.InnerRingValuePercentFont)
+		innerPercent:SetShadowOffset(0, 0)
+		innerPercent:SetShadowColor(0, 0, 0, 0)
+		innerPercent:SetPoint("CENTER", ringFrameBg, "CENTER", 2, -64)
+		ring2.Value.Percent = innerPercent
 
-	-- Store the bars locally
-	Spinner[1] = ring1
-	Spinner[2] = ring2
+		-- Store the bars locally
+		Spinner[1] = ring1
+		Spinner[2] = ring2
+	end
 
 	-- Classic Tracking button
 	if (IsClassic) then
@@ -1152,8 +1159,6 @@ Module.SetUpMinimap = function(self)
 
 	-- Retail groupfinder eye
 	if (IsRetail) then
-
-
 		local queueButton = QueueStatusMinimapButton
 		if queueButton then 
 			local button = Handler:CreateOverlayFrame()
@@ -1298,6 +1303,9 @@ end
 
 Module.UpdateBars = function(self, event, ...)
 	local layout = self.layout
+	if (not layout.UseBars) then
+		return
+	end
 
 	local Handler = self:GetMinimapHandler()
 	local hasXP = self:PlayerHasXP()
@@ -1581,7 +1589,9 @@ Module.OnInit = function(self)
 		end 
 	end 
 
-	self:UpdateBars()
+	if (self.layout.UseBars) then
+		self:UpdateBars()
+	end
 end 
 
 Module.OnEnable = function(self)
@@ -1592,7 +1602,6 @@ Module.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_LEVEL_UP", "OnEvent")
 	--self:RegisterEvent("PLAYER_XP_UPDATE", "OnEvent") -- not sure why I removed this, but surely a reason.
 	self:RegisterEvent("UPDATE_FACTION", "OnEvent")
-
 
 	if (IsRetail) then
 		self:RegisterEvent("AZERITE_ITEM_EXPERIENCE_CHANGED", "OnEvent") -- bar count updates

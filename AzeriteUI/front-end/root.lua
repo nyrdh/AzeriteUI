@@ -729,12 +729,16 @@ Core.OnChatCommand = function(self, editBox, msg)
 end
 
 Core.SetTheme = function(self, editBox, theme)
+	-- Do a minimum amount of control here, 
+	-- as this is connected to saved settings.
+	-- We don't want crazy results saved.
 	local new 
 	if (theme == "azerite") or ((theme == "azeriteui")) or (theme == "az") or (theme == "azui") then
 		new = "Azerite"
 	elseif (theme == "legacy") or (theme == "goldpaw") or (theme == "goldpawui")  or (theme == "gui") then
 		new = "Legacy"
 	end
+	-- Only apply the setting and force a reload upon actual changes.
 	if (new) and (new ~= self.db.theme) then
 		self.db.theme = new
 		ReloadUI()

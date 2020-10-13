@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased][3.0.414-Alpha] 2020-10-13
 ### Added
 - Added in a theme switcher, allowing us to switch between layouts and variations with a single chat command. This replaces the previously embedded UI switcher which basically did the same, only by toggling addons, not stylesheets.
+- Added in multiple Legacy theme elements.
 
 ### Changed
 - Changed most modules to simply NOT enable themselves if no stylesheet for the current theme was found. This should free us from a lot of development errors, and give us much more freedom as to how and when we add modules to the themes.
