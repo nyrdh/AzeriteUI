@@ -293,7 +293,7 @@ Core:NewModule("ExplorerMode", "PLUGIN", "LibMessage", "LibEvent", "LibDB", "Lib
 	
 	self.SetAttachExplorerFrame = function(self, moduleName, isAttached)
 		local module = Core:GetModule(moduleName, true)
-		if (module) and not(module:IsIncompatible() or module:DependencyFailed()) then 
+		if (module) and not(module:IsUserDisabled() or module:IsIncompatible() or module:DependencyFailed()) then 
 			local method = isAttached and "RegisterObjectFade" or "UnregisterObjectFade"
 			if (module.GetExplorerModeFrameAnchors) then
 				for _,frame in ipairs({ module:GetExplorerModeFrameAnchors() }) do

@@ -25,6 +25,7 @@ local Windows = Module.windows
 local _G = _G
 local math_min = math.min
 local table_insert = table.insert
+local table_sort = table.sort
 
 -- Private API
 local Colors = Private.Colors
@@ -48,6 +49,22 @@ local _,PlayerClass = UnitClass("player")
 
 -- Number of buttons in total, for naming.
 local NUM_BUTTONS = 0
+
+-- Utility
+--------------------------------------------------------------------------
+local sort_out_nils = function(a,b)
+	if (a ~= nil) then
+		return true
+	else
+		return false
+	end
+end
+local clean = function(source)
+	if (source) then
+		table_sort(source, sort_out_nils)
+		return source
+	end
+end
 
 -- Define all templates, they are cross-references later on.
 --------------------------------------------------------------------------
@@ -988,6 +1005,10 @@ Module.ShouldHaveMenu = function(self, module)
 end
 
 Module.CreateMenuTable = function(self)
+	local theme = Private.GetLayoutID()
+	local IsLegacy = theme == "Legacy"
+	local IsAzerite = theme == "Azerite"
+
 	MenuTable = {}
 
 	-- Let's color enabled/disabled entries entirely, 
@@ -1106,8 +1127,8 @@ Module.CreateMenuTable = function(self)
 	if (self:ShouldHaveMenu(ActionBarMain)) then 
 		local ActionBarMenu =  {
 			title = L["ActionBars"], type = nil, hasWindow = true, 
-			buttons = {
-				{
+			buttons = clean({
+				IsAzerite and {
 					title = L["More Buttons"], type = nil, hasWindow = true, 
 					buttons = {
 						{
@@ -1166,8 +1187,8 @@ Module.CreateMenuTable = function(self)
 							proxyModule = "ActionBarMain"
 						}
 					}
-				}, 
-				{
+				} or nil, 
+				IsAzerite and {
 					title = L["Pet Bar"], type = nil, hasWindow = true, 
 					buttons = {
 						{
@@ -1205,7 +1226,7 @@ Module.CreateMenuTable = function(self)
 							proxyModule = "ActionBarMain"
 						}
 					},
-				},
+				} or nil,
 				{
 					enabledTitle = L_ENABLED:format(L["Cast on Down"]),
 					disabledTitle = L_DISABLED:format(L["Cast on Down"]),
@@ -1213,7 +1234,7 @@ Module.CreateMenuTable = function(self)
 					configDB = "ActionBarMain", configKey = "castOnDown", 
 					proxyModule = "ActionBarMain"
 				}
-			}
+			})
 		}
 		local Bindings = Core:GetModule("Bindings", true)
 		if (self:ShouldHaveMenu(Bindings)) then 
@@ -1292,15 +1313,15 @@ Module.CreateMenuTable = function(self)
 	if (self:ShouldHaveMenu(NamePlates)) then 
 		table_insert(MenuTable, {
 			title = L["NamePlates"], type = nil, hasWindow = true, 
-			buttons = {
+			buttons = clean({
 				-- Disable player auras
-				{
+				IsAzerite and {
 					enabledTitle = L_ENABLED:format(L["Auras"]),
 					disabledTitle = L_DISABLED:format(L["Auras"]),
 					type = "TOGGLE_VALUE", 
 					configDB = "NamePlates", configKey = "enableAuras", 
 					proxyModule = "NamePlates"
-				},
+				} or nil,
 				-- Click-through settings
 				{
 					title = MAKE_UNINTERACTABLE, type = nil, hasWindow = true, 
@@ -1321,7 +1342,7 @@ Module.CreateMenuTable = function(self)
 						}
 					}
 				}
-			}
+			})
 		})
 	end 
 
@@ -1334,43 +1355,47 @@ Module.CreateMenuTable = function(self)
 		}
 	}
 
-	local UnitFrameParty = Core:GetModule("UnitFrameParty", true)
-	if (self:ShouldHaveMenu(UnitFrameParty)) then 
-		hasUnits = true
-		table_insert(UnitFrameMenu.buttons, {
-			enabledTitle = L_ENABLED:format(L["Party Frames"]),
-			disabledTitle = L_DISABLED:format(L["Party Frames"]),
-			type = "TOGGLE_VALUE", 
-			configDB = "UnitFrameParty", configKey = "enablePartyFrames", 
-			proxyModule = "UnitFrameParty"
-		})
-	end
-
-	local UnitFrameRaid = Core:GetModule("UnitFrameRaid", true)
-	if (self:ShouldHaveMenu(UnitFrameRaid)) then 
-		hasUnits = true
-		table_insert(UnitFrameMenu.buttons, {
-			enabledTitle = L_ENABLED:format(L["Raid Frames"]),
-			disabledTitle = L_DISABLED:format(L["Raid Frames"]),
-			type = "TOGGLE_VALUE", 
-			configDB = "UnitFrameRaid", configKey = "enableRaidFrames", 
-			proxyModule = "UnitFrameRaid"
-		})
-	end
-
-	local UnitFramePlayer = Core:GetModule("UnitFramePlayer", true)
-	if (self:ShouldHaveMenu(UnitFramePlayer)) then 
-		if (PlayerClass == "DRUID") or (PlayerClass == "HUNTER") 
-		or (PlayerClass == "PALADIN") or (PlayerClass == "SHAMAN")
-		or (PlayerClass == "MAGE") or (PlayerClass == "PRIEST") or (PlayerClass == "WARLOCK") then
+	if (IsAzerite) then
+		local UnitFrameParty = Core:GetModule("UnitFrameParty", true)
+		if (self:ShouldHaveMenu(UnitFrameParty)) then 
 			hasUnits = true
 			table_insert(UnitFrameMenu.buttons, {
-				enabledTitle = L_ENABLED:format(L["Use Mana Orb"]),
-				disabledTitle = L_DISABLED:format(L["Use Mana Orb"]),
+				enabledTitle = L_ENABLED:format(L["Party Frames"]),
+				disabledTitle = L_DISABLED:format(L["Party Frames"]),
 				type = "TOGGLE_VALUE", 
-				configDB = "UnitFramePlayer", configKey = "enablePlayerManaOrb", 
-				proxyModule = "UnitFramePlayer"
+				configDB = "UnitFrameParty", configKey = "enablePartyFrames", 
+				proxyModule = "UnitFrameParty"
 			})
+		end
+
+		local UnitFrameRaid = Core:GetModule("UnitFrameRaid", true)
+		if (self:ShouldHaveMenu(UnitFrameRaid)) then 
+			hasUnits = true
+			table_insert(UnitFrameMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["Raid Frames"]),
+				disabledTitle = L_DISABLED:format(L["Raid Frames"]),
+				type = "TOGGLE_VALUE", 
+				configDB = "UnitFrameRaid", configKey = "enableRaidFrames", 
+				proxyModule = "UnitFrameRaid"
+			})
+		end
+	end
+
+	if (IsAzerite) then
+		local UnitFramePlayer = Core:GetModule("UnitFramePlayer", true)
+		if (self:ShouldHaveMenu(UnitFramePlayer)) then 
+			if (PlayerClass == "DRUID") or (PlayerClass == "HUNTER") 
+			or (PlayerClass == "PALADIN") or (PlayerClass == "SHAMAN")
+			or (PlayerClass == "MAGE") or (PlayerClass == "PRIEST") or (PlayerClass == "WARLOCK") then
+				hasUnits = true
+				table_insert(UnitFrameMenu.buttons, {
+					enabledTitle = L_ENABLED:format(L["Use Mana Orb"]),
+					disabledTitle = L_DISABLED:format(L["Use Mana Orb"]),
+					type = "TOGGLE_VALUE", 
+					configDB = "UnitFramePlayer", configKey = "enablePlayerManaOrb", 
+					proxyModule = "UnitFramePlayer"
+				})
+			end
 		end
 	end
 	if (hasUnits) then
@@ -1382,25 +1407,27 @@ Module.CreateMenuTable = function(self)
 	if (self:ShouldHaveMenu(UnitFramePlayerHUD)) then 
 		local HUDMenu = {
 			title = L["HUD"], type = nil, hasWindow = true, 
-			buttons = {
-				{
+			buttons = clean({
+				IsAzerite and {
 					enabledTitle = L_ENABLED:format(L["CastBar"]),
 					disabledTitle = L_DISABLED:format(L["CastBar"]),
 					type = "TOGGLE_VALUE", 
 					configDB = "UnitFramePlayerHUD", configKey = "enableCast", 
 					proxyModule = "UnitFramePlayerHUD"
-				}
-			}
+				} or nil
+			})
 		}
 		-- Only insert this entry if SimpleClassPower isn't loaded. 
-		if (not self:IsAddOnEnabled("SimpleClassPower")) then 
-			table_insert(HUDMenu.buttons, {
-				enabledTitle = L_ENABLED:format(L["ClassPower"]),
-				disabledTitle = L_DISABLED:format(L["ClassPower"]),
-				type = "TOGGLE_VALUE", 
-				configDB = "UnitFramePlayerHUD", configKey = "enableClassPower", 
-				proxyModule = "UnitFramePlayerHUD"
-			})
+		if (IsAzerite) then
+			if (not self:IsAddOnEnabled("SimpleClassPower")) then 
+				table_insert(HUDMenu.buttons, {
+					enabledTitle = L_ENABLED:format(L["ClassPower"]),
+					disabledTitle = L_DISABLED:format(L["ClassPower"]),
+					type = "TOGGLE_VALUE", 
+					configDB = "UnitFramePlayerHUD", configKey = "enableClassPower", 
+					proxyModule = "UnitFramePlayerHUD"
+				})
+			end
 		end
 
 		if (IsRetail) then
@@ -1468,45 +1495,49 @@ Module.CreateMenuTable = function(self)
 	end
 
 	-- Explorer Mode
-	local ExplorerMode = Core:GetModule("ExplorerMode", true)
-	if (self:ShouldHaveMenu(ExplorerMode)) then 
-			table_insert(MenuTable, {
-			title = L["Explorer Mode"], type = nil, hasWindow = true, 
-			buttons = {
-				{
-					title = L["Chat Positioning"],
-					enabledTitle = L_ENABLED:format(L["Chat Positioning"]),
-					disabledTitle = L_DISABLED:format(L["Chat Positioning"]),
-					type = "TOGGLE_VALUE", 
-					configDB = "ExplorerMode", configKey = "enableExplorerChat", 
-					isSlave = true, slaveDB = "ExplorerMode", slaveKey = "enableExplorer",
-					proxyModule = "ExplorerMode"
-				},
-				{
-					enabledTitle = L_ENABLED:format(L["Player Fading"]),
-					disabledTitle = L_DISABLED:format(L["Player Fading"]),
-					type = "TOGGLE_VALUE", 
-					configDB = "ExplorerMode", configKey = "enableExplorer", 
-					proxyModule = "ExplorerMode"
-				},
-				{
-					enabledTitle = L_ENABLED:format(L["Tracker Fading"]),
-					disabledTitle = L_DISABLED:format(L["Tracker Fading"]),
-					type = "TOGGLE_VALUE", 
-					configDB = "ExplorerMode", configKey = "enableTrackerFading", 
-					proxyModule = "ExplorerMode"
-				}		
-			}
-		})
+	if (IsAzerite) then
+		local ExplorerMode = Core:GetModule("ExplorerMode", true)
+		if (self:ShouldHaveMenu(ExplorerMode)) then 
+				table_insert(MenuTable, {
+				title = L["Explorer Mode"], type = nil, hasWindow = true, 
+				buttons = {
+					{
+						title = L["Chat Positioning"],
+						enabledTitle = L_ENABLED:format(L["Chat Positioning"]),
+						disabledTitle = L_DISABLED:format(L["Chat Positioning"]),
+						type = "TOGGLE_VALUE", 
+						configDB = "ExplorerMode", configKey = "enableExplorerChat", 
+						isSlave = true, slaveDB = "ExplorerMode", slaveKey = "enableExplorer",
+						proxyModule = "ExplorerMode"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["Player Fading"]),
+						disabledTitle = L_DISABLED:format(L["Player Fading"]),
+						type = "TOGGLE_VALUE", 
+						configDB = "ExplorerMode", configKey = "enableExplorer", 
+						proxyModule = "ExplorerMode"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["Tracker Fading"]),
+						disabledTitle = L_DISABLED:format(L["Tracker Fading"]),
+						type = "TOGGLE_VALUE", 
+						configDB = "ExplorerMode", configKey = "enableTrackerFading", 
+						proxyModule = "ExplorerMode"
+					}		
+				}
+			})
+		end 
 	end 
 
 	-- Healer Layout
-	table_insert(MenuTable, {
-		enabledTitle = L_ENABLED:format(L["Healer Mode"]),
-		disabledTitle = L_DISABLED:format(L["Healer Mode"]),
-		type = "TOGGLE_VALUE", 
-		configDB = ADDON, configKey = "enableHealerMode", 
-		proxyModule = nil, useCore = true, modeName = "healerMode"
-	})
+	if (IsAzerite) then
+		table_insert(MenuTable, {
+			enabledTitle = L_ENABLED:format(L["Healer Mode"]),
+			disabledTitle = L_DISABLED:format(L["Healer Mode"]),
+			type = "TOGGLE_VALUE", 
+			configDB = ADDON, configKey = "enableHealerMode", 
+			proxyModule = nil, useCore = true, modeName = "healerMode"
+		})
+	end
 
 end

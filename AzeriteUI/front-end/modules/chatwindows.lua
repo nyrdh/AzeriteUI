@@ -448,7 +448,9 @@ end
 Module.UpdateChatDockPosition = function(self)
 	local layout = self.layout
 	local frame = self.frame 
-	if frame then 
+	-- Not the most elegant solution, but it prevents explorer mode movement if the theme doesn't support it, 
+	-- without affecting any of the currently registered events or callbacks. Easiest way right now.
+	if (frame) and (layout.DefaultChatFramePlaceFaded) and (layout.DefaultClampRectInsetsFaded) then 
 		frame:ClearAllPoints()
 		local coreDB = GetConfig(ADDON)
 		if (coreDB and coreDB.enableHealerMode) then 
@@ -1060,12 +1062,16 @@ Module.OnEnable = function(self)
 	self:RegisterEvent("VOICE_CHAT_CHANNEL_MEMBER_MUTE_FOR_ME_CHANGED", "OnEvent")
 	self:RegisterEvent("VOICE_CHAT_CHANNEL_MEMBER_MUTE_FOR_ALL_CHANGED", "OnEvent")
 	self:RegisterEvent("VOICE_CHAT_CHANNEL_MEMBER_SILENCED_CHANGED", "OnEvent")
-	self:RegisterMessage("GP_EXPLORER_CHAT_ENABLED", "OnEvent")
-	self:RegisterMessage("GP_EXPLORER_CHAT_DISABLED", "OnEvent")
-	self:RegisterMessage("GP_EXPLORER_MODE_ENABLED", "OnEvent")
-	self:RegisterMessage("GP_EXPLORER_MODE_DISABLED", "OnEvent")
-	self:RegisterMessage("GP_FADER_STATE_ACHIEVED", "OnEvent")
-	self:RegisterMessage("GP_FADER_STATE_LOST", "OnEvent")
+
+	if (self.layout) and (self.layout.DefaultChatFramePlaceFaded) and (self.layout.DefaultClampRectInsetsFaded) then
+		self:RegisterMessage("GP_EXPLORER_CHAT_ENABLED", "OnEvent")
+		self:RegisterMessage("GP_EXPLORER_CHAT_DISABLED", "OnEvent")
+		self:RegisterMessage("GP_EXPLORER_MODE_ENABLED", "OnEvent")
+		self:RegisterMessage("GP_EXPLORER_MODE_DISABLED", "OnEvent")
+		self:RegisterMessage("GP_FADER_STATE_ACHIEVED", "OnEvent")
+		self:RegisterMessage("GP_FADER_STATE_LOST", "OnEvent")
+	end
+	
 	self:RegisterMessage("GP_INTERFACE_SCALE_UPDATE", "OnEvent")
 	self:RegisterMessage("GP_WORLD_SCALE_UPDATE", "OnEvent")
 end 
