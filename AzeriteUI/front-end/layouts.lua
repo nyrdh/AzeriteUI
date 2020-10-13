@@ -2345,14 +2345,14 @@ Azerite.BlizzardChatFrames = {
 }
 
 Legacy.BlizzardChatFrames = setmetatable({
-	AlternateChatFramePlace = nil,
-	AlternateChatFrameSize = nil, 
-	AlternateClampRectInsets = nil, 
+	AlternateChatFramePlace = false,
+	AlternateChatFrameSize = false, 
+	AlternateClampRectInsets = false, 
 	DefaultChatFramePlace = { "BOTTOMLEFT", 70, 54 },
 	DefaultChatFrameSize = { 420, 160 }, -- way too large to fit down there; 419, 196
 	DefaultClampRectInsets = { -54, -54, -54, -54 },
-	DefaultChatFramePlaceFaded = nil, 
-	DefaultClampRectInsetsFaded = nil
+	DefaultChatFramePlaceFaded = false, 
+	DefaultClampRectInsetsFaded = false
 
 }, { __index = Azerite.BlizzardChatFrames })
 
