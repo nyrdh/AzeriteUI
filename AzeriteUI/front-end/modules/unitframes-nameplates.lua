@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("NamePlates", "LibEvent", "LibNamePlate", "LibDB", "LibFrame", "LibClientBuild")
+local Module = Core:NewModule("NamePlates", "LibEvent", "LibNamePlate", "LibDB", "LibFrame", "LibClientBuild", "LibForge")
 
 -- WoW API
 local GetQuestGreenRange = GetQuestGreenRange
@@ -84,7 +84,15 @@ end
 Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	local db = self.db
 	local layout = self.layout
-	
+
+	-- If a forge exists, we leave it all to that.
+	local forge = layout and layout.WidgetForge and layout.WidgetForge.NamePlate
+	if (forge) then
+		return self:Forge("Widget", plate, forge)
+	end
+
+	-- the old way
+
 	plate:SetSize(unpack(layout.Size))
 	plate.colors = Colors
 	plate.layout = layout

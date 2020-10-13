@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 55)
+local LibNamePlate = Wheel:Set("LibNamePlate", 56)
 if (not LibNamePlate) then	
 	return
 end
@@ -473,6 +473,10 @@ end
 
 NamePlate.UpdateScale = function(self)
 	self:SetScale(LibNamePlate.SCALE * self.baseFrame:GetScale())
+end
+
+NamePlate.GetBaseFrame = function(self)
+	return self.baseFrame
 end
 
 NamePlate.OnShow = function(self, event, unit)

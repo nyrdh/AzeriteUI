@@ -207,6 +207,12 @@ local BACKDROPS = {
 		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false,
 		edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
 		insets = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
+	}, 
+
+	GenericBorder = {
+		bgFile = nil, tile = false, 
+		edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
+		insets = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
 	}
 
 }
@@ -3661,6 +3667,74 @@ Azerite.NamePlates = {
 	ThreatTexture = GetMedia("nameplate_glow"),
 
 }
+-- Diabolic, 72,8 (-12)
+Legacy.NamePlates = setmetatable({
+
+	WidgetForge = {
+		NamePlate = {
+
+		}
+	},
+
+	Size = { 96, 28 },
+
+	HealthSize = { 96, 12 }, 
+	HealthPlace = { "TOP", 0, -2 },
+	HealthTexCoord = { 0, 1, 0, 1 },
+	HealthTexture = GetMedia("statusbar-normal"),
+
+	GlowSize = { 256, 64 },
+	GlowPlace = { "CENTER", 0, 0 },
+	GlowTexture = GetMedia("statusbar-glow-large-legacy"),
+
+	HealthBackdropColor = { 1, 1, 1, 1 },
+	HealthBackdropDrawLayer = { "BACKGROUND", -2 },
+	HealthBackdropPlace = { "CENTER", 0, 0 },
+	HealthBackdropSize = { 96,12 },
+	HealthBackdropTexture = GetMedia("statusbar-backdrop"),
+
+	CastSize = { 96, 12 }, 
+	CastPlace = { "TOP", 0, -16 },
+	CastPlacePlayer = { "TOP", 0, -(2 + 16 + 4 + 16) },
+	CastTexture = GetMedia("statusbar-power"),
+	CastTexCoord = { 0, 1, 0, 1 },
+
+	CastBackdropPlace = { "CENTER", 0, 0 },
+	CastBackdropSize = { 96, 12 },
+	CastBackdropTexture = GetMedia("statusbar-backdrop-dark"),
+
+	CastShieldPlace = { "CENTER", 0, 0 }, 
+	CastShieldSize = { 124, 69 },
+	CastShieldTexture = GetMedia("cast_back_spiked"),
+
+	CastBarSpellQueuePlace = { "CENTER", 0, 0 }, 
+	CastBarSpellQueueSize = { 96, 12 },
+	CastBarSpellQueueTexture = GetMedia("statusbar-power"), 
+	CastBarSpellQueueCastTexCoord = { 0, 1, 0, 1 },
+	CastBarSpellQueueColor = { 1, 1, 1, .5 },
+	CastBarSpellQueueOrientation = "LEFT",
+
+	PowerPlace = { "TOP", 0, -16 },
+	PowerSize = { 96, 12 }, 
+	PowerTexCoord = { 0, 1, 0, 1 },
+	PowerTexture = GetMedia("statusbar-power"),
+	PowerBackdropColor = { 1, 1, 1, 1 },
+	PowerBackdropDrawLayer = { "BACKGROUND", -2 },
+	PowerBackdropPlace = { "CENTER", 0, 0 },
+	PowerBackdropSize = { 96, 12 },
+	PowerBackdropTexture = GetMedia("statusbar-backdrop-dark"),
+
+	ThreatPlace = { "CENTER", 0, 0 },
+	ThreatSize = { 96, 12 },
+	ThreatTexture = GetMedia("statusbar-threat"),
+	ThreatDrawLayer = { "BORDER", 1 },
+
+	CastSparkMap = false,
+	CastBarSpellQueueSparkMap = false,
+	HealthSparkMap = false,
+	PowerSparkMap = false,
+
+}, { __index = Azerite.NamePlates })
 
 -- Custom Tooltips
 Azerite.Tooltips = {
@@ -3991,6 +4065,162 @@ Azerite.UnitFramePlayer = {
 	WinterVeilPowerPlace = { "CENTER", -2, 24 },
 	WinterVeilPowerTexture = GetMedia("seasonal_winterveil_crystal"), 
 	WinterVeilPowerSize = { 120 / ((255-50*2)/255), 140 / ((255-37*2)/255) }
+}
+
+Legacy.UnitFramePlayer = {
+	WidgetForge = {
+		-- Create layered scaffold frames
+		{
+			type = "CreateWidgets",
+			widgets = {
+				{
+					parent = "self", ownerKey = "BackdropScaffold", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 0 }
+				},
+				{
+					parent = "self", ownerKey = "ContentScaffold", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 10 }
+				},
+				{
+					parent = "self", ownerKey = "BorderScaffold", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 25 }
+				},
+				{
+					parent = "self", ownerKey = "OverlayScaffold", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 30 }
+				}
+			}
+		},
+		{
+			-- Only set the parent in modifiable widgets if it is your intention to change it.
+			-- Otherwise the code will assume the owner is the parent, and leave it as is,
+			-- which is what we want in the majority of cases.
+			type = "ModifyWidgets",
+			widgets = {
+				-- Setup main frame
+				{
+					-- Note that a missing ownerKey
+					-- will apply these changes to the original object instead.
+					parent = nil, ownerKey = nil, 
+					chain = {
+						"SetSize", { 316, 86 }, "SetHitBox", { -4, -4, -4, -4 },
+						"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -210, 290 }
+					},
+					values = {
+						"colors", Colors
+					}
+				},
+				-- Setup backdrop and border
+				{
+					parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+					chain = {
+						"SetBackdrop", { BACKDROPS.GenericBorder },
+						"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
+						"ClearAllPoints", "SetPoint", { "TOPLEFT", -3, 3 }, "SetPoint", { "BOTTOMRIGHT", 3, -3 }
+					}
+
+				}
+			}
+		},
+		-- Create child widgets
+		{
+			type = "CreateWidgets",
+			widgets = {
+				{
+					parent = "self,ContentScaffold", ownerKey = "Health", objectType = "Frame", objectSubType = "StatusBar",
+					chain = {
+						"SetOrientation", "RIGHT",
+						"SetFlippedHorizontally", false,
+						"SetSmartSmoothing", true,
+						"SetFrameLevelOffset", 2, 
+						"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
+						"SetSize", { 300, 52 }, -- 18
+						"SetStatusBarTexture", GetMedia("statusbar-power")
+					},
+					values = {
+						"colorClass", true, -- color players by class 
+						"colorDisconnected", false, -- color disconnected units
+						"colorHealth", true, -- color anything else in the default health color
+						"colorReaction", true, -- color NPCs by their reaction standing with us
+						"colorTapped", false, -- color tap denied units 
+						"colorThreat", false, -- color non-friendly by threat
+						"frequent", true, -- listen to frequent health events for more accurate updates
+						"predictThreshold", .01
+					}
+				},
+				{
+					parent = "self,Health", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
+				},
+				{
+					parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+					chain = {
+						"SetDrawLayer", { "BACKGROUND", 1 },
+						"SetPosition", { "TOPLEFT", 0, 0 },
+						"SetSize", { 300, 52 },
+						"SetTexture", GetMedia("statusbar-dark"),
+						"SetVertexColor", { .1, .1, .1, 1 }
+					}
+				},
+				{
+					parent = "self,Health", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
+				},
+				{
+					parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+					chain = {
+						"SetDrawLayer", { "ARTWORK", 1 },
+						"SetPosition", { "TOPLEFT", 0, 0 },
+						"SetSize", { 300, 52 },
+						"SetTexture", GetMedia("statusbar-normal-overlay")	
+					}
+				},
+				{
+					parent = "self,ContentScaffold", ownerKey = "Power", objectType = "Frame", objectSubType = "StatusBar",
+					chain = {
+						"SetOrientation", "RIGHT",
+						"SetFlippedHorizontally", false,
+						"SetSmartSmoothing", true,
+						"SetFrameLevelOffset", 2, 
+						"SetPosition", { "BOTTOMLEFT", 8, 8 }, -- relative to unit frame
+						"SetSize", { 300, 18 }, 
+						"SetStatusBarTexture", GetMedia("statusbar-power")
+					},
+					values = {
+						"frequent", true -- listen to frequent health events for more accurate updates
+					}
+				},
+				{
+					parent = "self,Power", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
+				},
+				{
+					parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+					chain = {
+						"SetDrawLayer", { "BACKGROUND", -2 },
+						"SetPosition", { "BOTTOMRIGHT", 0, 0 },
+						"SetSize", { 300, 18 },
+						"SetTexture", GetMedia("statusbar-dark"),
+						"SetVertexColor", { .1, .1, .1, 1 }
+					}
+				},
+				{
+					parent = "self,Power", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
+				},
+				{
+					parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+					chain = {
+						"SetDrawLayer", { "ARTWORK", 1 },
+						"SetPosition", { "BOTTOMRIGHT", 0, 0 },
+						"SetSize", { 300, 18 },
+						"SetTexture", GetMedia("statusbar-normal-overlay")	
+					}
+				},
+
+			}
+		}
+	}
 }
 
 -- PlayerHUD (combo points and castbar)
@@ -4555,6 +4785,162 @@ Azerite.UnitFrameTarget = {
 	ThreatPortraitPlace = { "CENTER", -1, 2 + 1 },
 	ThreatPortraitSize = { 187, 187 },
 	ThreatPortraitTexture = GetMedia("portrait_frame_glow")
+}
+
+Legacy.UnitFrameTarget = {
+	WidgetForge = {
+		-- Create layered scaffold frames
+		{
+			type = "CreateWidgets",
+			widgets = {
+				{
+					parent = "self", ownerKey = "BackdropScaffold", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 0 }
+				},
+				{
+					parent = "self", ownerKey = "ContentScaffold", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 10 }
+				},
+				{
+					parent = "self", ownerKey = "BorderScaffold", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 25 }
+				},
+				{
+					parent = "self", ownerKey = "OverlayScaffold", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 30 }
+				}
+			}
+		},
+		{
+			-- Only set the parent in modifiable widgets if it is your intention to change it.
+			-- Otherwise the code will assume the owner is the parent, and leave it as is,
+			-- which is what we want in the majority of cases.
+			type = "ModifyWidgets",
+			widgets = {
+				-- Setup main frame
+				{
+					-- Note that a missing ownerKey
+					-- will apply these changes to the original object instead.
+					parent = nil, ownerKey = nil, 
+					chain = {
+						"SetSize", { 316, 86 }, "SetHitBox", { -4, -4, -4, -4 },
+						"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 210, 290 }
+					},
+					values = {
+						"colors", Colors
+					}
+				},
+				-- Setup backdrop and border
+				{
+					parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+					chain = {
+						"SetBackdrop", { BACKDROPS.GenericBorder },
+						"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
+						"ClearAllPoints", "SetPoint", { "TOPLEFT", -3, 3 }, "SetPoint", { "BOTTOMRIGHT", 3, -3 }
+					}
+
+				}
+			}
+		},
+		-- Create child widgets
+		{
+			type = "CreateWidgets",
+			widgets = {
+				{
+					parent = "self,ContentScaffold", ownerKey = "Health", objectType = "Frame", objectSubType = "StatusBar",
+					chain = {
+						"SetOrientation", "LEFT",
+						"SetFlippedHorizontally", true,
+						"SetSmartSmoothing", true,
+						"SetFrameLevelOffset", 2, 
+						"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
+						"SetSize", { 300, 52 }, -- 18
+						"SetStatusBarTexture", GetMedia("statusbar-power")
+					},
+					values = {
+						"colorClass", true, -- color players by class 
+						"colorDisconnected", false, -- color disconnected units
+						"colorHealth", true, -- color anything else in the default health color
+						"colorReaction", true, -- color NPCs by their reaction standing with us
+						"colorTapped", false, -- color tap denied units 
+						"colorThreat", false, -- color non-friendly by threat
+						"frequent", true, -- listen to frequent health events for more accurate updates
+						"predictThreshold", .01
+					}
+				},
+				{
+					parent = "self,Health", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
+				},
+				{
+					parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+					chain = {
+						"SetDrawLayer", { "BACKGROUND", 1 },
+						"SetPosition", { "TOPLEFT", 0, 0 },
+						"SetSize", { 300, 52 },
+						"SetTexture", GetMedia("statusbar-dark"),
+						"SetVertexColor", { .1, .1, .1, 1 }
+					}
+				},
+				{
+					parent = "self,Health", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
+				},
+				{
+					parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+					chain = {
+						"SetDrawLayer", { "ARTWORK", 1 },
+						"SetPosition", { "TOPLEFT", 0, 0 },
+						"SetSize", { 300, 52 },
+						"SetTexture", GetMedia("statusbar-normal-overlay")	
+					}
+				},
+				{
+					parent = "self,ContentScaffold", ownerKey = "Power", objectType = "Frame", objectSubType = "StatusBar",
+					chain = {
+						"SetOrientation", "LEFT",
+						"SetFlippedHorizontally", true,
+						"SetSmartSmoothing", true,
+						"SetFrameLevelOffset", 2, 
+						"SetPosition", { "BOTTOMLEFT", 8, 8 }, -- relative to unit frame
+						"SetSize", { 300, 18 }, 
+						"SetStatusBarTexture", GetMedia("statusbar-power")
+					},
+					values = {
+						"frequent", true -- listen to frequent health events for more accurate updates
+					}
+				},
+				{
+					parent = "self,Power", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
+				},
+				{
+					parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+					chain = {
+						"SetDrawLayer", { "BACKGROUND", -2 },
+						"SetPosition", { "BOTTOMRIGHT", 0, 0 },
+						"SetSize", { 300, 18 },
+						"SetTexture", GetMedia("statusbar-dark"),
+						"SetVertexColor", { .1, .1, .1, 1 }
+					}
+				},
+				{
+					parent = "self,Power", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
+					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
+				},
+				{
+					parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+					chain = {
+						"SetDrawLayer", { "ARTWORK", 1 },
+						"SetPosition", { "BOTTOMRIGHT", 0, 0 },
+						"SetSize", { 300, 18 },
+						"SetTexture", GetMedia("statusbar-normal-overlay")	
+					}
+				},
+
+			}
+		}
+	}
 }
 
 ------------------------------------------------

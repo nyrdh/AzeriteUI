@@ -23,20 +23,20 @@ local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Primary Units
-local UnitFramePlayer = Core:NewModule("UnitFramePlayer", "LibDB", "LibMessage", "LibEvent", "LibUnitFrame", "LibFrame")
-local UnitFramePlayerHUD = Core:NewModule("UnitFramePlayerHUD", "LibDB", "LibEvent", "LibUnitFrame", "LibFrame")
-local UnitFrameTarget = Core:NewModule("UnitFrameTarget", "LibMessage", "LibEvent", "LibUnitFrame", "LibSound")
+local UnitFramePlayer = Core:NewModule("UnitFramePlayer", "LibDB", "LibMessage", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge")
+local UnitFramePlayerHUD = Core:NewModule("UnitFramePlayerHUD", "LibDB", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge")
+local UnitFrameTarget = Core:NewModule("UnitFrameTarget", "LibMessage", "LibEvent", "LibUnitFrame", "LibSound", "LibForge")
 
 -- Secondary Units
-local UnitFramePet = Core:NewModule("UnitFramePet", "LibUnitFrame", "LibFrame")
-local UnitFrameToT = Core:NewModule("UnitFrameToT", "LibUnitFrame")
-local UnitFrameFocus = (IsRetail) and Core:NewModule("UnitFrameFocus", "LibMessage", "LibUnitFrame")
+local UnitFramePet = Core:NewModule("UnitFramePet", "LibUnitFrame", "LibFrame", "LibForge")
+local UnitFrameToT = Core:NewModule("UnitFrameToT", "LibUnitFrame", "LibForge")
+local UnitFrameFocus = (IsRetail) and Core:NewModule("UnitFrameFocus", "LibMessage", "LibUnitFrame", "LibForge")
 
 -- Grouped Units
-local UnitFrameArena = (IsRetail) and Core:NewModule("UnitFrameArena", "LibDB", "LibMessage", "LibUnitFrame", "LibFrame")
-local UnitFrameBoss = Core:NewModule("UnitFrameBoss", "LibUnitFrame", "LibMessage")
-local UnitFrameParty = Core:NewModule("UnitFrameParty", "LibDB", "LibMessage", "LibFrame", "LibUnitFrame")
-local UnitFrameRaid = Core:NewModule("UnitFrameRaid", "LibDB", "LibFrame", "LibUnitFrame", "LibBlizzard")
+local UnitFrameArena = (IsRetail) and Core:NewModule("UnitFrameArena", "LibDB", "LibMessage", "LibUnitFrame", "LibFrame", "LibForge")
+local UnitFrameBoss = Core:NewModule("UnitFrameBoss", "LibUnitFrame", "LibMessage", "LibForge")
+local UnitFrameParty = Core:NewModule("UnitFrameParty", "LibDB", "LibMessage", "LibFrame", "LibUnitFrame", "LibForge")
+local UnitFrameRaid = Core:NewModule("UnitFrameRaid", "LibDB", "LibFrame", "LibUnitFrame", "LibBlizzard", "LibForge")
 
 -- Keep these local
 local UnitStyles = {} 
@@ -1205,7 +1205,14 @@ end
 -----------------------------------------------------------
 -- Singular Unit Styling
 -----------------------------------------------------------
-UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
+UnitStyles.StylePlayerFrame = function(self, unit, id, ...)
+
+	-- If a forge exists, we leave it all to that.
+	local layout, module = ...
+	local forge = layout and layout.WidgetForge and layout.WidgetForge
+	if (forge) then
+		return module:Forge("Widget", self, forge)
+	end
 
 	-- Frame
 	-----------------------------------------------------------
@@ -1783,7 +1790,14 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 	
 end
 
-UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
+UnitStyles.StyleTargetFrame = function(self, unit, id, ...)
+
+	-- If a forge exists, we leave it all to that.
+	local layout, module = ...
+	local forge = layout and layout.WidgetForge and layout.WidgetForge
+	if (forge) then
+		return module:Forge("Widget", self, forge)
+	end
 
 	self.layout = layout
 	self.colors = Colors
@@ -2243,19 +2257,21 @@ UnitFramePlayer.OnInit = function(self)
 		return self:SetUserDisabled(true)
 	end
 
-	self.frame = self:SpawnUnitFrame("player", "UICenter", function(frame, unit, id, _, ...)
-		return UnitStyles.StylePlayerFrame(frame, unit, id, self.layout, ...)
-	end)
+	-- How this is called:
+	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
+	self.frame = self:SpawnUnitFrame("player", "UICenter", UnitStyles.StylePlayerFrame, self.layout, self) 
 
 	-- Apply the aura filter
 	local auras = self.frame.Auras
-	local filterMode = Core.db.auraFilter
-	auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
-	auras.enableSpamMode = filterMode == "spam" or nil
-	auras:ForceUpdate()
+	if (auras) then
+		local filterMode = Core.db.auraFilter
+		auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
+		auras.enableSpamMode = filterMode == "spam" or nil
+		auras:ForceUpdate()
+	end
 
 	self.frame.EnableManaOrb = function()
-		if (self.frame.ExtraPower) then
+		if (self.frame.ExtraPower) and (self.frame.Power) then
 			self.frame.Power.ignoredResource = self.layout.PowerIgnoredResource
 			self.frame.Power:ForceUpdate()
 			self.frame:EnableElement("ExtraPower")
@@ -2264,7 +2280,7 @@ UnitFramePlayer.OnInit = function(self)
 	end
 
 	self.frame.DisableManaOrb = function()
-		if (self.frame.ExtraPower) then
+		if (self.frame.ExtraPower) and (self.frame.Power) then
 			self.frame.Power.ignoredResource = nil
 			self.frame.Power:ForceUpdate()
 			self.frame:DisableElement("ExtraPower")
@@ -2308,18 +2324,21 @@ UnitFramePlayer.OnEvent = function(self, event, ...)
 		end
 	elseif (event == "GP_AURA_FILTER_MODE_CHANGED") then
 		local auras = self.frame.Auras
+		if (auras) then
+			local filterMode = ...
+			if (filterMode == "strict") and (auras.enableSlackMode or auras.enableSpamMode)
+			or (filterMode == "slack") and (auras.enableSpamMode or not auras.enableSlackMode)
+			or (filterMode == "spam") and not(auras.enableSpamMode and auras.enableSlackMode) then
 
-		local filterMode = ...
-		if (filterMode == "strict") and (auras.enableSlackMode or auras.enableSpamMode)
-		or (filterMode == "slack") and (auras.enableSpamMode or not auras.enableSlackMode)
-		or (filterMode == "spam") and not(auras.enableSpamMode and auras.enableSlackMode) then
-
-			auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
-			auras.enableSpamMode = filterMode == "spam" or nil
-			auras:ForceUpdate()
+				auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
+				auras.enableSpamMode = filterMode == "spam" or nil
+				auras:ForceUpdate()
+			end
 		end
 	end
-	self.frame:PostUpdateTextures(PlayerLevel)
+	if (self.frame.PostUpdateTextures) then
+		self.frame:PostUpdateTextures(PlayerLevel)
+	end
 end
 
 UnitFramePlayerHUD.OnInit = function(self)
@@ -2400,17 +2419,18 @@ UnitFrameTarget.OnInit = function(self)
 		return self:SetUserDisabled(true)
 	end
 
-	self.frame = self:SpawnUnitFrame("target", "UICenter", function(frame, unit, id, _, ...)
-		return UnitStyles.StyleTargetFrame(frame, unit, id, self.layout, ...)
-	end)
+	-- How this is called:
+	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
+	self.frame = self:SpawnUnitFrame("target", "UICenter", UnitStyles.StyleTargetFrame, self.layout, self) 
 
 	-- Apply the aura filter
 	local auras = self.frame.Auras
-	local filterMode = Core.db.auraFilter
-	auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
-	auras.enableSpamMode = filterMode == "spam" or nil
-	auras:ForceUpdate()
-
+	if (auras) then
+		local filterMode = Core.db.auraFilter
+		auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
+		auras.enableSpamMode = filterMode == "spam" or nil
+		auras:ForceUpdate()
+	end
 end 
 
 UnitFrameTarget.OnEnable = function(self)
@@ -2421,19 +2441,22 @@ end
 UnitFrameTarget.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_TARGET_CHANGED") then
 		if (UnitExists("target")) then
-			self.frame:PostUpdateTextures()
+			if (self.frame.PostUpdateTextures) then
+				self.frame:PostUpdateTextures()
+			end
 		end
 	elseif (event == "GP_AURA_FILTER_MODE_CHANGED") then
 		local auras = self.frame.Auras
+		if (auras) then
+			local filterMode = ...
+			if (filterMode == "strict") and (auras.enableSlackMode or auras.enableSpamMode)
+			or (filterMode == "slack") and (auras.enableSpamMode or not auras.enableSlackMode)
+			or (filterMode == "spam") and not(auras.enableSpamMode and auras.enableSlackMode) then
 
-		local filterMode = ...
-		if (filterMode == "strict") and (auras.enableSlackMode or auras.enableSpamMode)
-		or (filterMode == "slack") and (auras.enableSpamMode or not auras.enableSlackMode)
-		or (filterMode == "spam") and not(auras.enableSpamMode and auras.enableSlackMode) then
-
-			auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
-			auras.enableSpamMode = filterMode == "spam" or nil
-			auras:ForceUpdate()
+				auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
+				auras.enableSpamMode = filterMode == "spam" or nil
+				auras:ForceUpdate()
+			end
 		end
 	end
 end

@@ -733,7 +733,7 @@ Core.SetTheme = function(self, editBox, theme)
 	-- as this is connected to saved settings.
 	-- We don't want crazy results saved.
 	local new 
-	if (theme == "azerite") or ((theme == "azeriteui")) or (theme == "az") or (theme == "azui") then
+	if (theme == "console") or (theme == "blakmane") or (theme == "blakmaneui") or (theme == "azerite") or ((theme == "azeriteui")) or (theme == "az") or (theme == "azui") then
 		new = "Azerite"
 	elseif (theme == "legacy") or (theme == "goldpaw") or (theme == "goldpawui")  or (theme == "gui") then
 		new = "Legacy"

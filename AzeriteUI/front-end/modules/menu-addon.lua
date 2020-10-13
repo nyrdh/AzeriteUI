@@ -25,6 +25,7 @@ local Windows = Module.windows
 local _G = _G
 local math_min = math.min
 local table_insert = table.insert
+local table_remove = table.remove
 local table_sort = table.sort
 
 -- Private API
@@ -52,16 +53,13 @@ local NUM_BUTTONS = 0
 
 -- Utility
 --------------------------------------------------------------------------
-local sort_out_nils = function(a,b)
-	if (a ~= nil) then
-		return true
-	else
-		return false
-	end
-end
 local clean = function(source)
 	if (source) then
-		table_sort(source, sort_out_nils)
+		for i = #source,1,-1 do
+			if (not source[i]) then
+				table_remove(source, i)
+			end
+		end
 		return source
 	end
 end
@@ -1187,7 +1185,7 @@ Module.CreateMenuTable = function(self)
 							proxyModule = "ActionBarMain"
 						}
 					}
-				} or nil, 
+				} or false, 
 				IsAzerite and {
 					title = L["Pet Bar"], type = nil, hasWindow = true, 
 					buttons = {
@@ -1226,7 +1224,7 @@ Module.CreateMenuTable = function(self)
 							proxyModule = "ActionBarMain"
 						}
 					},
-				} or nil,
+				} or false,
 				{
 					enabledTitle = L_ENABLED:format(L["Cast on Down"]),
 					disabledTitle = L_DISABLED:format(L["Cast on Down"]),
@@ -1321,7 +1319,7 @@ Module.CreateMenuTable = function(self)
 					type = "TOGGLE_VALUE", 
 					configDB = "NamePlates", configKey = "enableAuras", 
 					proxyModule = "NamePlates"
-				} or nil,
+				} or false,
 				-- Click-through settings
 				{
 					title = MAKE_UNINTERACTABLE, type = nil, hasWindow = true, 
@@ -1414,7 +1412,7 @@ Module.CreateMenuTable = function(self)
 					type = "TOGGLE_VALUE", 
 					configDB = "UnitFramePlayerHUD", configKey = "enableCast", 
 					proxyModule = "UnitFramePlayerHUD"
-				} or nil
+				} or false
 			})
 		}
 		-- Only insert this entry if SimpleClassPower isn't loaded. 
@@ -1495,37 +1493,48 @@ Module.CreateMenuTable = function(self)
 	end
 
 	-- Explorer Mode
-	if (IsAzerite) then
+	if (IsAzerite or IsLegacy) then
 		local ExplorerMode = Core:GetModule("ExplorerMode", true)
 		if (self:ShouldHaveMenu(ExplorerMode)) then 
+			if (IsAzerite) then
 				table_insert(MenuTable, {
-				title = L["Explorer Mode"], type = nil, hasWindow = true, 
-				buttons = {
-					{
-						title = L["Chat Positioning"],
-						enabledTitle = L_ENABLED:format(L["Chat Positioning"]),
-						disabledTitle = L_DISABLED:format(L["Chat Positioning"]),
-						type = "TOGGLE_VALUE", 
-						configDB = "ExplorerMode", configKey = "enableExplorerChat", 
-						isSlave = true, slaveDB = "ExplorerMode", slaveKey = "enableExplorer",
-						proxyModule = "ExplorerMode"
-					},
-					{
-						enabledTitle = L_ENABLED:format(L["Player Fading"]),
-						disabledTitle = L_DISABLED:format(L["Player Fading"]),
-						type = "TOGGLE_VALUE", 
-						configDB = "ExplorerMode", configKey = "enableExplorer", 
-						proxyModule = "ExplorerMode"
-					},
-					{
-						enabledTitle = L_ENABLED:format(L["Tracker Fading"]),
-						disabledTitle = L_DISABLED:format(L["Tracker Fading"]),
-						type = "TOGGLE_VALUE", 
-						configDB = "ExplorerMode", configKey = "enableTrackerFading", 
-						proxyModule = "ExplorerMode"
-					}		
-				}
-			})
+					title = L["Explorer Mode"], type = nil, hasWindow = true, 
+					buttons = {
+						{
+							title = L["Chat Positioning"],
+							enabledTitle = L_ENABLED:format(L["Chat Positioning"]),
+							disabledTitle = L_DISABLED:format(L["Chat Positioning"]),
+							type = "TOGGLE_VALUE", 
+							configDB = "ExplorerMode", configKey = "enableExplorerChat", 
+							isSlave = true, slaveDB = "ExplorerMode", slaveKey = "enableExplorer",
+							proxyModule = "ExplorerMode"
+						},
+						{
+							enabledTitle = L_ENABLED:format(L["Player Fading"]),
+							disabledTitle = L_DISABLED:format(L["Player Fading"]),
+							type = "TOGGLE_VALUE", 
+							configDB = "ExplorerMode", configKey = "enableExplorer", 
+							proxyModule = "ExplorerMode"
+						},
+						{
+							enabledTitle = L_ENABLED:format(L["Tracker Fading"]),
+							disabledTitle = L_DISABLED:format(L["Tracker Fading"]),
+							type = "TOGGLE_VALUE", 
+							configDB = "ExplorerMode", configKey = "enableTrackerFading", 
+							proxyModule = "ExplorerMode"
+						}
+					}
+				})
+
+			elseif (IsLegacy) then
+				table_insert(MenuTable, {
+					enabledTitle = L_ENABLED:format(L["Explorer Mode"]),
+					disabledTitle = L_DISABLED:format(L["Explorer Mode"]),
+					type = "TOGGLE_VALUE", 
+					configDB = "ExplorerMode", configKey = "enableExplorer", 
+					proxyModule = "ExplorerMode"
+				})
+			end
 		end 
 	end 
 

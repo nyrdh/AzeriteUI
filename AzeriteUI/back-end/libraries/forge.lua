@@ -1,4 +1,4 @@
-local LibForge = Wheel:Set("LibForge", 1)
+local LibForge = Wheel:Set("LibForge", 2)
 if (not LibForge) then
 	return
 end
@@ -72,6 +72,10 @@ end
 -- A return value indicates this method had no input arguments, 
 -- and affects how the Chain function progresses towards the next method.
 local WidgetMethods = {
+	ClearAllPoints = function(widget)
+		widget:ClearAllPoints("")
+		return true
+	end,
 	ClearTexture = function(widget)
 		widget:SetTexture("")
 		return true
@@ -233,8 +237,16 @@ LibForge.Forge = function(self, forgeType, ...)
 						if (not widget) then
 							if (item.objectType == "Texture") then
 								widget = parent:CreateTexture()
+
+							elseif (item.objectType == "FontString") then
+								widget = parent:CreateFontString()
+
 							elseif (item.objectType == "Frame") then
-								widget = parent:CreateFrame(item.objectSubType)
+								if (item.objectSubType == "StatusBar") and (parent.CreateStatusBar) then
+									widget = parent:CreateStatusBar()
+								else
+									widget = parent:CreateFrame(item.objectSubType)
+								end
 							end
 						else
 							-- Object may exist at the right key relative to its indended parent, 
