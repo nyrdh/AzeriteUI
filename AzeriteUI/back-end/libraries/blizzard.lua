@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 56)
+local LibBlizzard = Wheel:Set("LibBlizzard", 58)
 if (not LibBlizzard) then 
 	return
 end
@@ -191,7 +191,9 @@ UIWidgetsDisable["ActionBars"] = IsClassic and function(self)
 		if (_G[object]) then 
 			_G[object]:UnregisterAllEvents()
 		else 
-			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			if (self.AddDebugMessageFormatted) then
+				self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			end
 		end
 	end 
 	for _,object in pairs({
@@ -213,7 +215,9 @@ UIWidgetsDisable["ActionBars"] = IsClassic and function(self)
 		if (_G[object]) then 
 			_G[object]:SetParent(UIHider)
 		else 
-			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			if (self.AddDebugMessageFormatted) then
+				self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			end
 		end
 	end 
 	for _,object in pairs({
@@ -224,7 +228,9 @@ UIWidgetsDisable["ActionBars"] = IsClassic and function(self)
 		if (_G[object]) then 
 			_G[object]:Hide()
 		else 
-			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			if (self.AddDebugMessageFormatted) then
+				self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			end
 		end
 	end 
 	for _,object in pairs({
@@ -280,7 +286,9 @@ or IsRetail and function(self)
 		if (_G[object]) then 
 			_G[object]:UnregisterAllEvents()
 		else 
-			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			if (self.AddDebugMessageFormatted) then
+				self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			end
 		end
 	end 
 	for _,object in pairs({
@@ -306,7 +314,9 @@ or IsRetail and function(self)
 		if (_G[object]) then 
 			_G[object]:SetParent(UIHider)
 		else 
-			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			if (self.AddDebugMessageFormatted) then
+				self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			end
 		end
 	end 
 	for _,object in pairs({
@@ -325,7 +335,9 @@ or IsRetail and function(self)
 		if (_G[object]) then 
 			_G[object]:Hide()
 		else 
-			print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			if (self.AddDebugMessageFormatted) then
+				self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			end
 		end
 	end 
 	for _,object in pairs({
@@ -542,7 +554,10 @@ UIWidgetsDisable["Minimap"] = function(self)
 		if (_G[object]) then 
 			_G[object]:UnregisterAllEvents()
 		else
-			--print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			-- Spammy, it's too many expansion differences(?)
+			--if (self.AddDebugMessageFormatted) then
+			--	self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			--end
 		end 
 	end 
 	for _,object in pairs({
@@ -568,7 +583,9 @@ UIWidgetsDisable["Minimap"] = function(self)
 		if (_G[object]) then 
 			_G[object]:SetParent(UIHider)
 		else
-			--print(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			--if (self.AddDebugMessageFormatted) then
+			--	self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			--end
 		end 
 	end 
 
@@ -1389,7 +1406,9 @@ LibBlizzard.EnableUIWidget = function(self, name, ...)
 	-- Makes it much simpler during development, 
 	-- and much easier in the future to upgrade.
 	if (not UIWidgetsEnable[name]) then 
-		print(("LibBlizzard: The UI widget '%s' does not have an Enable method."):format(name))
+		if (self.AddDebugMessageFormatted) then
+			self:AddDebugMessageFormatted(("LibBlizzard: The UI widget '%s' does not have an Enable method."):format(name))
+		end
 		return 
 	end 
 	local dependency = UIWidgetDependency[name]
@@ -1410,7 +1429,9 @@ LibBlizzard.DisableUIWidget = function(self, name, ...)
 	-- Makes it much simpler during development, 
 	-- and much easier in the future to upgrade.
 	if (not UIWidgetsDisable[name]) then 
-		print(("LibBlizzard: The UI widget '%s' does not exist."):format(name))
+		if (self.AddDebugMessageFormatted) then
+			self:AddDebugMessageFormatted(("LibBlizzard: The UI widget '%s' does not exist."):format(name))
+		end
 		return 
 	end 
 	local dependency = UIWidgetDependency[name]
@@ -1431,7 +1452,9 @@ LibBlizzard.StyleUIWidget = function(self, name, ...)
 	-- Makes it much simpler during development, 
 	-- and much easier in the future to upgrade.
 	if (not UIWidgetStyling[name]) then 
-		print(("LibBlizzard: The UI widget '%s' does not exist."):format(name))
+		if (self.AddDebugMessageFormatted) then
+			self:AddDebugMessageFormatted(("LibBlizzard: The UI widget '%s' does not exist."):format(name))
+		end
 		return 
 	end 
 	local dependency = UIWidgetDependency[name]
@@ -1450,7 +1473,9 @@ end
 LibBlizzard.DisableUIMenuOption = function(self, option_shrink, option_name)
 	local option = _G[option_name]
 	if not(option) or not(option.IsObjectType) or not(option:IsObjectType("Frame")) then
-		print(("LibBlizzard: The menu option '%s' does not exist."):format(option_name))
+		if (self.AddDebugMessageFormatted) then
+			self:AddDebugMessageFormatted(("LibBlizzard: The menu option '%s' does not exist."):format(option_name))
+		end
 		return
 	end
 	option:SetParent(UIHider)
@@ -1510,10 +1535,14 @@ LibBlizzard.DisableUIMenuPage = function(self, panel_id, panel_name)
 		SetActionBarToggles(nil, nil, nil, nil, nil)
 	end 
 	if (panel_id and not button) then
-		print(("LibBlizzard: The panel button with id '%.0f' does not exist."):format(panel_id))
+		if (self.AddDebugMessageFormatted) then
+			self:AddDebugMessageFormatted(("LibBlizzard: The panel button with id '%.0f' does not exist."):format(panel_id))
+		end
 	end 
 	if (panel_name and not window) then
-		print(("LibBlizzard: The menu panel named '%s' does not exist."):format(panel_name))
+		if (self.AddDebugMessageFormatted) then
+			self:AddDebugMessageFormatted(("LibBlizzard: The menu panel named '%s' does not exist."):format(panel_name))
+		end
 	end 
 end
 
