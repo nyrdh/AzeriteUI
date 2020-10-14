@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 56)
+local LibNamePlate = Wheel:Set("LibNamePlate", 58)
 if (not LibNamePlate) then	
 	return
 end
@@ -471,8 +471,11 @@ NamePlate.UpdateFrameLevel = function(self)
 	end
 end
 
+-- Doesn't appear to be called anymore?
 NamePlate.UpdateScale = function(self)
-	self:SetScale(LibNamePlate.SCALE * self.baseFrame:GetScale())
+	local scale = LibNamePlate.SCALE * self.baseFrame:GetScale()
+	--print("Setting scale of "..self:GetName().." to ".. scale)
+	self:SetScale(scale)
 end
 
 NamePlate.GetBaseFrame = function(self)
@@ -847,7 +850,8 @@ end
 -- This is where a name plate is first created, 
 -- but it hasn't been assigned a unit (Legion) or shown yet.
 LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
-	local plate = setmetatable(self:CreateFrame("Frame", "GP_" .. (name or baseFrame:GetName()), WorldFrame), NamePlate_MT)
+	-- Parent them to the baseFrame, or scaling simply won't work anymore
+	local plate = setmetatable(self:CreateFrame("Frame", "GP_" .. (name or baseFrame:GetName()), baseFrame), NamePlate_MT)
 	plate.frameLevel = FRAMELEVEL_CURRENT -- storing the framelevel
 	plate.targetAlpha = 0
 	plate.currentAlpha = 0
@@ -881,7 +885,8 @@ LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
 	baseFrame:HookScript("OnHide", function(baseFrame) plate:OnHide() end)
 
 	-- Follow the blizzard scale changes.
-	baseFrame:HookScript("OnSizeChanged", function() plate:UpdateScale() end)
+	-- Does not appear to follow scale changes in 9.0.1.
+	--baseFrame:HookScript("OnSizeChanged", function() plate:UpdateScale() end)
 
 	-- Since constantly updating frame levels can cause quite the performance drop, 
 	-- we're just giving each frame a set frame level when they spawn. 
@@ -1036,8 +1041,8 @@ LibNamePlate.OnEvent = function(self, event, ...)
 			end
 		end	
 		
-	--elseif (event == "VARIABLES_LOADED") then
-		--self:UpdateNamePlateOptions()
+	elseif (event == "VARIABLES_LOADED") then
+		self:UpdateNamePlateOptions()
 	
 	elseif (event == "PLAYER_ENTERING_WORLD") then
 		IN_COMBAT = InCombatLockdown() and true or false

@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.417-RC] 2020-10-15
+### Added
+- Added updated and rearranged minimap blip icons for WoW client patch 9.0.1.
+
+### Changed
+- Holy Power should now be visible for all paladins.
+
+### Fixed
+- Worked around an issue with nameplate scaling introduced in WoW client patch 9.0.1, where our nameplates wouldn't follow the blizzard nameplate scaling, resulting in the nameplates often getting stuck at near zero size at the beginning of a fight.
+
 ## [3.0.416-RC] 2020-10-14
 ### Changed
 - Changed most modules to simply NOT enable themselves if no stylesheet for the current theme was found. This should free us from a lot of development errors, and give us much more freedom as to how and when we add modules to the themes.

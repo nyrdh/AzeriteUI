@@ -616,13 +616,13 @@ Core.ApplyExperimentalFeatures = function(self)
 		if (false) then
 			-- By setting a single point, but not any sizes, 
 			-- the texture is shown in its original size and dimensions!
-			local f = UIParent:CreateTexture()
+			local f = self:GetFrame("UICenter"):CreateTexture()
 			f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]])
 			f:SetPoint("CENTER")
 
 			-- Add a little backdrop for easy
 			-- copy & paste from screenshots!
-			local g = UIParent:CreateTexture()
+			local g = self:GetFrame("UICenter"):CreateTexture()
 			g:SetColorTexture(0,.7,0,.25)
 			g:SetAllPoints(f)
 		end

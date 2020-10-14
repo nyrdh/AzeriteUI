@@ -980,7 +980,7 @@ if (IsRetail) then
 			newType = "Chi"
 		elseif (PLAYERCLASS == "MONK") and (spec == SPEC_MONK_BREWMASTER) and (not element.ignoreStagger) then 
 			newType = "Stagger"
-		elseif ((PLAYERCLASS == "PALADIN") and (spec == SPEC_PALADIN_RETRIBUTION) and (level >= PALADINPOWERBAR_SHOW_LEVEL)) and (not element.ignoreHolyPower)then
+		elseif ((PLAYERCLASS == "PALADIN") and (level >= PALADINPOWERBAR_SHOW_LEVEL)) and (not element.ignoreHolyPower)then
 			newType = "HolyPower"
 		elseif (PLAYERCLASS == "ROGUE") and (not element.ignoreComboPoints) then 
 			newType = "ComboPoints"
@@ -1102,5 +1102,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 41)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 42)
 end 
