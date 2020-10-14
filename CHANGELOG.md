@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.0.417-RC] 2020-10-15
+## [3.0.418-RC] 2020-10-14
+- Add back some Blizzard API methods just to make maxDPS function. Temporary fix.
+
+## [3.0.417-RC] 2020-10-14
 ### Added
 - Added updated and rearranged minimap blip icons for WoW client patch 9.0.1.
 
