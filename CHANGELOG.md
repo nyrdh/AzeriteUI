@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.419-RC] 2020-10-15
+### Fixed
+- Absorb bars should once again be visible on all units.
+- Absorb values should once again be visible on the player- and target unitframes.
+
 ## [3.0.418-RC] 2020-10-14
 - Add back some Blizzard API methods just to make maxDPS function. Temporary fix.
 
