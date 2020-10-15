@@ -260,6 +260,14 @@ local UpdateOrientations = function(health)
 	local orientationFlippedH = health:IsFlippedHorizontally()
 	local orientationFlippedV = health:IsFlippedVertically()
 
+	local mirrorOrientation =  orientation == "LEFT" and "RIGHT" 
+	or orientation == "RIGHT" and "LEFT" 
+	or orientation == "UP" and "DOWN"
+	or orientation == "DOWN" and "UP"
+
+	local mirrorFlippedH = (mirrorOrientation == "RIGHT") and true or false
+	local mirrorFlippedV = (mirrorOrientation == "DOWN") and true or false
+
 	local preview = health.Preview
 	preview:SetOrientation(orientation) 
 	preview:SetFlippedHorizontally(orientationFlippedH)
@@ -403,7 +411,7 @@ local Update = function(self, event, unit)
 		local maxAbsorb = health.maxAbsorb or maxAbsorbDisplaySize
 		local hasOverAbsorb = (allAbsorbs > 0) and (curHealth + allIncomingHeal + allAbsorbs >= maxHealth)
 		local absorbDisplay = (allAbsorbs > maxHealth*maxAbsorb) and maxHealth*maxAbsorb or allAbsorbs
-		if (absorbDisplay < maxHealth * (health.absorbThreshold or .1)) then 
+		if (absorbDisplay < maxHealth * (health.absorbThreshold or .05)) then 
 			absorbDisplay = 0
 		end
 
@@ -560,8 +568,6 @@ local Enable = function(self)
 		health.PostUpdateStatusBarTexture = UpdateStatusBarTextures
 		health.PostUpdateTexCoord = UpdateTexCoords
 
-		-- IsRetailShadowlands
-
 		-- Health events
 		if (health.frequent) and (not IsRetailShadowlands) then
 			self:RegisterEvent("UNIT_HEALTH_FREQUENT", Proxy)
@@ -674,5 +680,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 53)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 54)
 end 

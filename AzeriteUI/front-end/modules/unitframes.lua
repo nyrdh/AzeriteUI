@@ -1287,6 +1287,21 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, ...)
 	healthVal:SetTextColor(unpack(layout.HealthValueColor))
 	self.Health.Value = healthVal
 
+	if (IsRetail) then
+		local absorbVal = overlay:CreateFontString()
+		if layout.HealthAbsorbValuePlaceFunction then 
+			absorbVal:SetPoint(layout.HealthAbsorbValuePlaceFunction(self))
+		else 
+			absorbVal:SetPoint(unpack(layout.HealthAbsorbValuePlace))
+		end 
+		absorbVal:SetDrawLayer(unpack(layout.HealthAbsorbValueDrawLayer))
+		absorbVal:SetJustifyH(layout.HealthAbsorbValueJustifyH)
+		absorbVal:SetJustifyV(layout.HealthAbsorbValueJustifyV)
+		absorbVal:SetFontObject(layout.HealthAbsorbValueFont)
+		absorbVal:SetTextColor(unpack(layout.HealthAbsorbValueColor))
+		self.Health.ValueAbsorb = absorbVal 
+	end
+
 	-- Power 
 	-----------------------------------------------------------
 	local power = backdrop:CreateStatusBar()
@@ -1851,6 +1866,21 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, ...)
 	healthBg:SetTexCoord(unpack(layout.HealthBackdropTexCoord))
 	self.Health.Bg = healthBg
 
+	if (IsRetail) then
+		local absorbVal = overlay:CreateFontString()
+		if layout.HealthAbsorbValuePlaceFunction then 
+			absorbVal:SetPoint(layout.HealthAbsorbValuePlaceFunction(self))
+		else 
+			absorbVal:SetPoint(unpack(layout.HealthAbsorbValuePlace))
+		end 
+		absorbVal:SetDrawLayer(unpack(layout.HealthAbsorbValueDrawLayer))
+		absorbVal:SetJustifyH(layout.HealthAbsorbValueJustifyH)
+		absorbVal:SetJustifyV(layout.HealthAbsorbValueJustifyV)
+		absorbVal:SetFontObject(layout.HealthAbsorbValueFont)
+		absorbVal:SetTextColor(unpack(layout.HealthAbsorbValueColor))
+		self.Health.ValueAbsorb = absorbVal 
+	end
+	
 	-- Power 
 	local power = overlay:CreateStatusBar()
 	power:SetSize(unpack(layout.PowerSize))
