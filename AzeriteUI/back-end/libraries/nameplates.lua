@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 58)
+local LibNamePlate = Wheel:Set("LibNamePlate", 59)
 if (not LibNamePlate) then	
 	return
 end
@@ -513,6 +513,7 @@ NamePlate.OnShow = function(self, event, unit)
 		self:PreUpdate("OnShow", unit)
 	end 
 	self:KillBlizzard()
+	self:UpdateScale() -- might be needed in 9.0.1
 	self:Show() -- make the fully transparent frame visible
 
 	-- this will trigger the fadein 
@@ -886,7 +887,7 @@ LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
 
 	-- Follow the blizzard scale changes.
 	-- Does not appear to follow scale changes in 9.0.1.
-	--baseFrame:HookScript("OnSizeChanged", function() plate:UpdateScale() end)
+	baseFrame:HookScript("OnSizeChanged", function() plate:UpdateScale() end)
 
 	-- Since constantly updating frame levels can cause quite the performance drop, 
 	-- we're just giving each frame a set frame level when they spawn. 
