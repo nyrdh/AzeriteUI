@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.0.420-RC] 2020-10-16
+## [3.0.420-RC] 2020-10-17
+### Added
+- You can now keybind the Azerite options menu. You can find it in Blizzard's keybind interface under the AddOns category towards the bottom, where other addons such as Bagnon and GatherMate2 live too. 
+
 ### Fixed
 - Fixed some inconsistencies with return values in the cast library, which caused issues such as all channeled casts being displayed as uninterruptable.
+- Fixed an issue that would cause the zone ability button to not be properly styled on the initial login if the button was visible in your current zone.
+- Fixed an issue that sometimes would cause the quest tracker to not be styled or positioned on the initial login.
 
 ## [3.0.419-RC] 2020-10-15
 ### Fixed

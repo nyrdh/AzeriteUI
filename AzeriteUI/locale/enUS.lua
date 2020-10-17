@@ -141,6 +141,7 @@ L["CastBar"] = true
 L["ClassPower"] = true
 L["Alerts"] = true
 L["Kills, Levels, Loot"] = true
+L["Monster Emotes"] = true
 L["Raid Warnings"] = true
 L["TalkingHead"] = true
 L["Objectives Tracker"] = true

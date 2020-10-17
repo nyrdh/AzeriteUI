@@ -4130,6 +4130,7 @@ Legacy.UnitFramePlayer = {
 						"SetStatusBarTexture", GetMedia("statusbar-power")
 					},
 					values = {
+						"colorAbsorb", true, -- tint absorb overlay
 						"colorClass", true, -- color players by class 
 						"colorDisconnected", false, -- color disconnected units
 						"colorHealth", true, -- color anything else in the default health color
@@ -4268,6 +4269,20 @@ Legacy.UnitFramePlayer = {
 					}
 				},
 
+				-- Power Bar Value
+				{
+					parent = "self,Power", parentKey = "Value", objectType = "FontString", 
+					chain = {
+						"SetPosition", { "CENTER", 0, 0 },
+						"SetDrawLayer", { "OVERLAY", 1 }, 
+						"SetJustifyH", "CENTER", 
+						"SetJustifyV", "MIDDLE",
+						"SetFontObject", GetFont(15,true),
+						"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+						"SetParentToOwnerKey", "OverlayScaffold"
+					}
+				},
+				
 				-- Unit Name
 				{
 					parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
@@ -4937,6 +4952,7 @@ Legacy.UnitFrameTarget = {
 						"SetStatusBarTexture", GetMedia("statusbar-power")
 					},
 					values = {
+						"colorAbsorb", true, -- tint absorb overlay
 						"colorClass", true, -- color players by class 
 						"colorDisconnected", true, -- color disconnected units
 						"colorHealth", true, -- color anything else in the default health color
@@ -5072,6 +5088,20 @@ Legacy.UnitFrameTarget = {
 						"SetPosition", { "BOTTOMRIGHT", 0, 0 },
 						"SetSize", { 300, 18 },
 						"SetTexture", GetMedia("statusbar-normal-overlay")	
+					}
+				},
+
+				-- Power Bar Value
+				{
+					parent = "self,Power", parentKey = "Value", objectType = "FontString", 
+					chain = {
+						"SetPosition", { "CENTER", 0, 0 },
+						"SetDrawLayer", { "OVERLAY", 1 }, 
+						"SetJustifyH", "CENTER", 
+						"SetJustifyV", "MIDDLE",
+						"SetFontObject", GetFont(15,true),
+						"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+						"SetParentToOwnerKey", "OverlayScaffold"
 					}
 				},
 

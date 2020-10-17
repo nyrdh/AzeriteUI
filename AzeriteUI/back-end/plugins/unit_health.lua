@@ -251,7 +251,7 @@ local UpdateColors = function(health, unit, min, max)
 
 		-- Dynamically tint the absorb bar towards the health color
 		local absorb = health.Absorb
-		if (absorb) then
+		if (absorb and health.colorAbsorb) then
 			local aR = r + (1 - r)*1/2
 			local aG = g + (1 - g)*1/3
 			local aB = b + (1 - b)*1/2
@@ -623,7 +623,7 @@ local Enable = function(self)
 			end 
 	
 			if (not health.Absorb) then 
-				local absorbAlpha = (string_find(unit, "raid") or string_find(unit, "party")) and .75 or ((unit == "player") or (unit == "target")) and .5 or .35
+				local absorbAlpha = (string_find(unit, "raid") or string_find(unit, "party")) and .5 or ((unit == "player") or (unit == "target")) and .35 or .25
 				local absorb = health:CreateStatusBar()
 				absorb._owner = health
 				absorb:SetAllPoints(health)
@@ -690,5 +690,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 56)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 57)
 end 

@@ -493,6 +493,10 @@ Module.PositionRetailTracker = function(self, event, ...)
 	if (not ObjectiveTrackerFrame) then
 		return
 	end
+	-- This sometimes happen on login, not on reloads.
+	if (not self.ObjectiveFrameHolder) then
+		return self:InitRetailTracker()
+	end
 	local _,anchor = ObjectiveTrackerFrame:GetPoint()
 	if (anchor ~= self.ObjectiveFrameHolder) then
 		if (not ObjectiveTrackerFrame:IsUserPlaced()) then
@@ -571,7 +575,7 @@ Module.CreateDriver = function(self)
 end
 
 Module.OnEvent = function(self, event, ...)
-	if (event == "ADDON_LOADED") then 
+	if (event == "ADDON_LOADED") then
 		local addon = ...
 		if (addon == "Blizzard_ObjectiveTracker") then 
 			self:UnregisterEvent("ADDON_LOADED", "OnEvent")

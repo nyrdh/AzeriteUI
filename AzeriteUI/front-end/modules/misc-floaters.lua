@@ -708,6 +708,9 @@ Module.HandleZoneAbilityButton = function(self)
 
 	button:HookScript("OnShow", handle)
 	button:HookScript("OnHide", handle)
+
+	-- Need this, or it won't be styled at initial login.
+	self:RegisterEvent("SPELLS_CHANGED", handle)
 end
 
 -- Startup & Init
