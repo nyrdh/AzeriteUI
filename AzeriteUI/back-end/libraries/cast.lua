@@ -475,7 +475,7 @@ if (IsRetail) then
 
 	-- @return spellName, spellText, spellIcon, castStart, castEnd, isTradeSkill, notInterruptible, spellID
 	LibCast.UnitChannelInfo = function(self, unit)
-		local spellName, spellText, spellIcon, castStart, castEnd, isTradeSkill, castID, notInterruptible, spellID = UnitChannelInfo(unit)
+		local spellName, spellText, spellIcon, castStart, castEnd, isTradeSkill, notInterruptible, spellID = UnitChannelInfo(unit)
 		if (spellName) then
 			return spellName, spellText, spellIcon, castStart/1e3, castEnd/1e3, isTradeSkill, notInterruptible, spellID
 		end

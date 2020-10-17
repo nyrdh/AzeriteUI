@@ -119,6 +119,11 @@ end
 -- Spell Cast Updates
 -----------------------------------------------------------
 local clear = function(element)
+	element.casting = nil
+	element.channeling = nil
+	element.tradeskill = nil
+	element.notInterruptible = nil
+	element.total = nil
 	element.name = nil
 	element.text = nil
 	if (element.Name) then 
@@ -230,9 +235,6 @@ local OnUpdate = function(element, elapsed)
 	if (not unit) or (not UnitExists(unit)) or (UnitIsDeadOrGhost(unit)) then 
 		clear(element)
 		element:Hide()
-		element.casting = nil
-		element.channeling = nil
-		element.tradeskill = nil
 		element.max = 0
 		element.delay = 0
 		if (element.PostUpdate) then 
@@ -246,9 +248,6 @@ local OnUpdate = function(element, elapsed)
 		if (duration >= element.max) then
 			clear(element) 
 			element:Hide()
-			element.casting = nil
-			element.channeling = nil
-			element.tradeskill = nil
 			element.max = 0
 			element.delay = 0
 			if (element.PostUpdate) then 
@@ -271,7 +270,7 @@ local OnUpdate = function(element, elapsed)
 		element.duration = duration
 		element:SetValue(duration)
 		if (element.PostUpdate) then 
-			element:PostUpdate(unit, duration, element.max, element.delay)
+			element:PostUpdate(unit)
 		end
 
 	elseif (element.channeling) then
@@ -279,9 +278,8 @@ local OnUpdate = function(element, elapsed)
 		if (duration <= 0) then
 			clear(element)
 			element:Hide()
-			element.casting = nil
-			element.channeling = nil
-			element.tradeskill = nil
+			element.max = 0
+			element.delay = 0
 			if (element.PostUpdate) then 
 				return element:PostUpdate(unit)
 			end
@@ -302,7 +300,7 @@ local OnUpdate = function(element, elapsed)
 		element.duration = duration
 		element:SetValue(duration)
 		if (element.PostUpdate) then 
-			element:PostUpdate(unit, duration)
+			element:PostUpdate(unit)
 		end
 		
 	elseif (element.failedMessageTimer) then 
@@ -317,8 +315,8 @@ local OnUpdate = function(element, elapsed)
 	else
 		clear(element)
 		element:Hide()
-		element.casting = nil
-		element.channeling = nil
+		element.max = 0
+		element.delay = 0
 		if (element.PostUpdate) then
 			return element:PostUpdate(unit)
 		end
@@ -361,7 +359,6 @@ Update = function(self, event, unit, ...)
 			element.channeling = nil
 			element.notInterruptible = notInterruptible
 			element.tradeskill = isTradeSkill
-			element.total = nil
 			element.starttime = nil
 			element.failedMessageTimer = nil
 			element:SetMinMaxValues(0, element.total or element.max, true)
@@ -399,11 +396,6 @@ Update = function(self, event, unit, ...)
 		end
 		
 		clear(element)
-		element.tradeskill = nil
-		element.total = nil
-		element.casting = nil
-		element.channeling = nil
-		element.notInterruptible = nil
 
 		if (element.Shield) then 
 			element.Shield:Hide() 
@@ -439,11 +431,6 @@ Update = function(self, event, unit, ...)
 		clear(element)
 		element:Hide()
 		element:SetScript("OnUpdate", nil)
-		element.casting = nil
-		element.channeling = nil
-		element.notInterruptible = nil
-		element.total = nil
-		element.tradeskill = nil
 		element.failedMessageTimer = nil
 
 		-- Clear leftovers from earlier casts
@@ -463,11 +450,6 @@ Update = function(self, event, unit, ...)
 		end
 
 		clear(element)
-		element.casting = nil
-		element.channeling = nil
-		element.notInterruptible = nil
-		element.total = nil
-		element.tradeskill = nil
 
 		if (element.Shield) then 
 			element.Shield:Hide() 
@@ -523,7 +505,7 @@ Update = function(self, event, unit, ...)
 		end
 
 	elseif (event == "GP_SPELL_CAST_DELAYED") then
-		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible = LibCast:UnitCastingInfo(unit)
+		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = LibCast:UnitCastingInfo(unit)
 		if (not startTime) or (not element.duration) then 
 			return 
 		end
@@ -538,7 +520,7 @@ Update = function(self, event, unit, ...)
 		element:SetValue(duration)
 		
 	elseif (event == "GP_SPELL_CAST_CHANNEL_START") then	
-		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible = LibCast:UnitChannelInfo(unit)
+		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = LibCast:UnitChannelInfo(unit)
 		if (name) then
 			local max = endTime - startTime
 			local duration = endTime - GetTime()
@@ -586,7 +568,7 @@ Update = function(self, event, unit, ...)
 		end
 		
 	elseif (event == "GP_SPELL_CAST_CHANNEL_UPDATE") then
-		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible = LibCast:UnitChannelInfo(unit)
+		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = LibCast:UnitChannelInfo(unit)
 		if (not name) or (not element.duration) then 
 			return 
 		end
@@ -615,11 +597,6 @@ Update = function(self, event, unit, ...)
 			clear(element)
 			element:Hide()
 			element:SetScript("OnUpdate", nil)
-			element.casting = nil
-			element.channeling = nil
-			element.notInterruptible = nil
-			element.tradeskill = nil
-			element.total = nil
 			element.max = 0
 			element.delay = 0
 			element.failedMessageTimer = nil
@@ -649,9 +626,6 @@ local Enable = function(self)
 		element.ForceUpdate = ForceUpdate
 		clear(element)
 		element:Hide()
-		element.casting = nil
-		element.channeling = nil
-		element.tradeskill = nil
 		element.max = 0
 		element.delay = 0
 
@@ -704,9 +678,6 @@ local Disable = function(self)
 		element:SetScript("OnUpdate", nil)
 		element:Hide()
 		clear(element)
-		element.casting = nil
-		element.channeling = nil
-		element.tradeskill = nil
 		element.max = 0
 		element.delay = 0
 	end
@@ -714,5 +685,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 47)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 48)
 end 

@@ -35,9 +35,6 @@ local Colors = Private.Colors
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 
--- Tracking Flags
-local IN_COMBAT, IN_BOSS_FIGHT, IN_ARENA
-
 -- Constants for client version
 local IsClassic = Module:IsClassic()
 local IsRetail = Module:IsRetail()

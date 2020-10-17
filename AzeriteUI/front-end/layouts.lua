@@ -607,21 +607,37 @@ local NamePlates_Auras_PostUpdateButton = function(element, button)
 end
 
 local NamePlates_CastBar_PostUpdate = function(cast, unit)
-	if cast.notInterruptible then
+
+	-- Protected cast graphics
+	if (cast.notInterruptible) and (not cast.isProtected) then
 
 		-- Set it to the protected look 
-		if (cast.currentStyle ~= "protected") then 
-			cast:SetSize(68, 9)
-			cast:ClearAllPoints()
-			cast:SetPoint("TOPLEFT", cast:GetParent():GetWidth()/2 - cast:GetWidth()/2, -26)
-			cast:SetStatusBarTexture(GetMedia("cast_bar"))
-			cast:SetTexCoord(0, 1, 0, 1)
-			cast.Bg:SetSize(68, 9)
-			cast.Bg:SetTexture(GetMedia("cast_bar"))
-			cast.Bg:SetVertexColor(.15, .15, .15, 1)
-			cast.currentStyle = "protected"
-		end 
+		cast:SetSize(68, 9)
+		cast:ClearAllPoints()
+		cast:SetPoint("TOPLEFT", cast:GetParent():GetWidth()/2 - cast:GetWidth()/2, -26)
+		cast:SetStatusBarTexture(GetMedia("cast_bar"))
+		cast:SetTexCoord(0, 1, 0, 1)
+		cast.Bg:SetSize(68, 9)
+		cast.Bg:SetTexture(GetMedia("cast_bar"))
+		cast.Bg:SetVertexColor(.15, .15, .15, 1)
+		cast.isProtected = true
 
+	elseif (not cast.notInterruptible) and (cast.isProtected) then
+
+		-- Return to standard castbar styling and position 
+		cast:SetSize(84, 14)
+		cast:ClearAllPoints()
+		cast:SetPoint("TOPLEFT", cast:GetParent():GetWidth()/2 - cast:GetWidth()/2, -20)
+		cast:SetStatusBarTexture(GetMedia("nameplate_bar"))
+		cast:SetTexCoord(14/256, 242/256, 14/64, 50/64)
+		cast.Bg:SetSize(84*256/228, 14*64/36)
+		cast.Bg:SetTexture(GetMedia("nameplate_backdrop"))
+		cast.Bg:SetVertexColor(1, 1, 1, 1)
+		cast.isProtected = nil 
+	end
+
+	-- Bar coloring
+	if (cast.notInterruptible) then
 		-- Color the bar appropriately
 		if UnitIsPlayer(unit) then 
 			if UnitIsEnemy(unit, "player") then 
@@ -634,41 +650,30 @@ local NamePlates_CastBar_PostUpdate = function(cast, unit)
 		else 
 			cast:SetStatusBarColor(Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3]) 
 		end 
-	else 
-		-- Return to standard castbar styling and position 
-		if (cast.currentStyle == "protected") then 
-			cast:SetSize(84, 14)
-			cast:ClearAllPoints()
-			cast:SetPoint("TOPLEFT", cast:GetParent():GetWidth()/2 - cast:GetWidth()/2, -20)
-			cast:SetStatusBarTexture(GetMedia("nameplate_bar"))
-			cast:SetTexCoord(14/256, 242/256, 14/64, 50/64)
-			cast.Bg:SetSize(84*256/228, 14*64/36)
-			cast.Bg:SetTexture(GetMedia("nameplate_backdrop"))
-			cast.Bg:SetVertexColor(1, 1, 1, 1)
-			cast.currentStyle = nil 
-		end 
-
+	else
 		-- Standard bar coloring
 		cast:SetStatusBarColor(Colors.cast[1], Colors.cast[2], Colors.cast[3]) 
-	end 
+	end
 
 	-- Reposition cast name based on cast type.
 	-- This must happen on every cast, as it depends on the cast name width, which changes.
-	cast.Name:ClearAllPoints()
-	if (cast.currentStyle == "protected") then
+	if (cast.isProtected) then
+		cast.Name:ClearAllPoints()
 		cast.Name:SetPoint("TOPLEFT", cast:GetWidth()/2 - cast.Name:GetStringWidth()/2, -20)
 	else
+		cast.Name:ClearAllPoints()
 		cast.Name:SetPoint("TOPLEFT", cast:GetWidth()/2 - cast.Name:GetStringWidth()/2, -18)
 	end
 
-	local self = cast._owner
-	if (not self) then 
-		return 
-	end 
-	unit = unit or self.unit
-	if (unit) then
-		self:PostUpdate(unit)
-	end
+	-- Why did I need this again...?
+	--local self = cast._owner
+	--if (not self) then 
+	--	return 
+	--end 
+	--unit = unit or self.unit
+	--if (unit) then
+	--	self:PostUpdate(unit)
+	--end
 end
 
 local NamePlates_PostUpdate = function(self, event, unit, ...)
@@ -2291,6 +2296,26 @@ Azerite[ADDON] = setmetatable({
 	},
 }, { __index = Generic[ADDON] })
 
+Legacy[ADDON] = setmetatable({
+	Forge = setmetatable({
+		OnInit = {
+			{
+				type = "ExecuteMethods",
+				methods = {
+					{
+						chain = {
+							"SetObjectFadeDurationOut", .15,
+							"SetObjectFadeHold", .5
+						}
+					}
+				}
+			}
+		},
+		OnEnable = Azerite[ADDON].Forge.OnEnable,
+	}, { __index = Azerite[ADDON].Forge })
+}, { __index = Azerite[ADDON] })
+
+
 Azerite.OptionsMenu = {
 	MenuBorderBackdropBorderColor = { 1, 1, 1, 1 },
 	MenuBorderBackdropColor = { .05, .05, .05, .85 },
@@ -2527,6 +2552,29 @@ Azerite.BlizzardObjectivesTracker = (IsClassic) and {
 	SpaceTop = 260, 
 	SpaceBottom = 330, 
 	MaxHeight = 480,
+	HideInCombat = false, 
+	HideInBossFights = true, 
+	HideInVehicles = false,
+	HideInArena = true
+}
+Legacy.BlizzardObjectivesTracker = (IsClassic) and {
+	FontObject = GetFont(13, true),
+	FontObjectTitle = GetFont(15, true),
+	HideInBossFights = true,
+	HideInCombat = false,
+	MaxHeight = 1080 - (60 + 380),
+	Place = { "BOTTOMRIGHT", -60, 60 },
+	Scale = 1.0, 
+	SpaceBottom = 380, 
+	SpaceTop = 260, 
+	Width = 255 -- 280 is classic default
+} or (IsRetail) and {
+	Place = { "TOPRIGHT", -60, -380 },
+	Width = 235, -- 235 default
+	Scale = 1.1, 
+	SpaceTop = 260, 
+	SpaceBottom = 330, 
+	MaxHeight = 1080 - (60 + 380),
 	HideInCombat = false, 
 	HideInBossFights = true, 
 	HideInVehicles = false,
@@ -3668,73 +3716,8 @@ Azerite.NamePlates = {
 	ThreatTexture = GetMedia("nameplate_glow"),
 
 }
--- Diabolic, 72,8 (-12)
+
 Legacy.NamePlates = setmetatable({
-
-	WidgetForge = {
-		NamePlate = {
-
-		}
-	},
-
-	Size = { 96, 28 },
-
-	HealthSize = { 96, 12 }, 
-	HealthPlace = { "TOP", 0, -2 },
-	HealthTexCoord = { 0, 1, 0, 1 },
-	HealthTexture = GetMedia("statusbar-normal"),
-
-	GlowSize = { 256, 64 },
-	GlowPlace = { "CENTER", 0, 0 },
-	GlowTexture = GetMedia("statusbar-glow-large-legacy"),
-
-	HealthBackdropColor = { 1, 1, 1, 1 },
-	HealthBackdropDrawLayer = { "BACKGROUND", -2 },
-	HealthBackdropPlace = { "CENTER", 0, 0 },
-	HealthBackdropSize = { 96,12 },
-	HealthBackdropTexture = GetMedia("statusbar-backdrop"),
-
-	CastSize = { 96, 12 }, 
-	CastPlace = { "TOP", 0, -16 },
-	CastPlacePlayer = { "TOP", 0, -(2 + 16 + 4 + 16) },
-	CastTexture = GetMedia("statusbar-power"),
-	CastTexCoord = { 0, 1, 0, 1 },
-
-	CastBackdropPlace = { "CENTER", 0, 0 },
-	CastBackdropSize = { 96, 12 },
-	CastBackdropTexture = GetMedia("statusbar-backdrop-dark"),
-
-	CastShieldPlace = { "CENTER", 0, 0 }, 
-	CastShieldSize = { 124, 69 },
-	CastShieldTexture = GetMedia("cast_back_spiked"),
-
-	CastBarSpellQueuePlace = { "CENTER", 0, 0 }, 
-	CastBarSpellQueueSize = { 96, 12 },
-	CastBarSpellQueueTexture = GetMedia("statusbar-power"), 
-	CastBarSpellQueueCastTexCoord = { 0, 1, 0, 1 },
-	CastBarSpellQueueColor = { 1, 1, 1, .5 },
-	CastBarSpellQueueOrientation = "LEFT",
-
-	PowerPlace = { "TOP", 0, -16 },
-	PowerSize = { 96, 12 }, 
-	PowerTexCoord = { 0, 1, 0, 1 },
-	PowerTexture = GetMedia("statusbar-power"),
-	PowerBackdropColor = { 1, 1, 1, 1 },
-	PowerBackdropDrawLayer = { "BACKGROUND", -2 },
-	PowerBackdropPlace = { "CENTER", 0, 0 },
-	PowerBackdropSize = { 96, 12 },
-	PowerBackdropTexture = GetMedia("statusbar-backdrop-dark"),
-
-	ThreatPlace = { "CENTER", 0, 0 },
-	ThreatSize = { 96, 12 },
-	ThreatTexture = GetMedia("statusbar-threat"),
-	ThreatDrawLayer = { "BORDER", 1 },
-
-	CastSparkMap = false,
-	CastBarSpellQueueSparkMap = false,
-	HealthSparkMap = false,
-	PowerSparkMap = false,
-
 }, { __index = Azerite.NamePlates })
 
 -- Custom Tooltips
@@ -4098,6 +4081,7 @@ Legacy.UnitFramePlayer = {
 				}
 			}
 		},
+		-- Position and style the main frame
 		{
 			-- Only set the parent in modifiable widgets if it is your intention to change it.
 			-- Otherwise the code will assume the owner is the parent, and leave it as is,
@@ -4133,6 +4117,7 @@ Legacy.UnitFramePlayer = {
 		{
 			type = "CreateWidgets",
 			widgets = {
+				-- Health Bar
 				{
 					parent = "self,ContentScaffold", ownerKey = "Health", objectType = "Frame", objectSubType = "StatusBar",
 					chain = {
@@ -4152,13 +4137,16 @@ Legacy.UnitFramePlayer = {
 						"colorTapped", false, -- color tap denied units 
 						"colorThreat", false, -- color non-friendly by threat
 						"frequent", true, -- listen to frequent health events for more accurate updates
-						"predictThreshold", .01
+						"predictThreshold", .01,
+						"absorbOverrideAlpha", .75
 					}
 				},
+				-- Health Bar Backdrop Frame
 				{
 					parent = "self,Health", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
 					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
 				},
+				-- Health Bar Backdrop Texture
 				{
 					parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
 					chain = {
@@ -4169,10 +4157,12 @@ Legacy.UnitFramePlayer = {
 						"SetVertexColor", { .1, .1, .1, 1 }
 					}
 				},
+				-- Health Bar Overlay Frame
 				{
 					parent = "self,Health", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
 					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
 				},
+				-- Health Bar Overlay Texture
 				{
 					parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
 					chain = {
@@ -4182,6 +4172,55 @@ Legacy.UnitFramePlayer = {
 						"SetTexture", GetMedia("statusbar-normal-overlay")	
 					}
 				},
+
+				-- Health Bar Value
+				{
+					parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+					chain = {
+						"SetPosition", { "RIGHT", -16, -1 },
+						"SetDrawLayer", { "OVERLAY", 1 }, 
+						"SetJustifyH", "RIGHT", 
+						"SetJustifyV", "MIDDLE",
+						"SetFontObject", GetFont(15,true),
+						"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+						"SetParentToOwnerKey", "OverlayScaffold"
+					}
+				},
+
+				-- Health Bar Absorb Value
+				{
+					parent = "self,Health", parentKey = "ValueAbsorb", objectType = "FontString", 
+					chain = {
+						"SetPosition", function(self, owner, ...) 
+							self:ClearAllPoints()
+							self:SetPoint("RIGHT", owner.Health.Value, "LEFT", -13, 0)
+						end, 
+						"SetDrawLayer", { "OVERLAY", 1 }, 
+						"SetJustifyH", "RIGHT", 
+						"SetJustifyV", "MIDDLE",
+						"SetFontObject", GetFont(15,true),
+						"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+						"SetParentToOwnerKey", "OverlayScaffold"
+					}
+
+				},
+				
+				-- Health Bar Overlay Cast Bar
+				{
+					parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
+					chain = {
+						"SetOrientation", "RIGHT",
+						"SetFlippedHorizontally", false,
+						"SetSmartSmoothing", true,
+						"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+						"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
+						"SetSize", { 300, 52 }, -- 18
+						"SetStatusBarTexture", GetMedia("statusbar-power"),
+						"SetStatusBarColor", { 1, 1, 1, .25 }
+					}
+				},
+
+				-- Power Bar
 				{
 					parent = "self,ContentScaffold", ownerKey = "Power", objectType = "Frame", objectSubType = "StatusBar",
 					chain = {
@@ -4197,10 +4236,12 @@ Legacy.UnitFramePlayer = {
 						"frequent", true -- listen to frequent health events for more accurate updates
 					}
 				},
+				-- Power Bar Backdrop Frame
 				{
 					parent = "self,Power", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
 					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
 				},
+				-- Power Bar Backdrop Texture
 				{
 					parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
 					chain = {
@@ -4211,10 +4252,12 @@ Legacy.UnitFramePlayer = {
 						"SetVertexColor", { .1, .1, .1, 1 }
 					}
 				},
+				-- Power Bar Overlay Frame
 				{
 					parent = "self,Power", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
 					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
 				},
+				-- Power Bar Overlay Texture
 				{
 					parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
 					chain = {
@@ -4224,6 +4267,27 @@ Legacy.UnitFramePlayer = {
 						"SetTexture", GetMedia("statusbar-normal-overlay")	
 					}
 				},
+
+				-- Unit Name
+				{
+					parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+					chain = {
+						"SetPosition", { "LEFT", 24, 9 },
+						"SetDrawLayer", { "OVERLAY", 1 }, 
+						"SetJustifyH", "LEFT", 
+						"SetJustifyV", "MIDDLE",
+						"SetFontObject", GetFont(13,true),
+						"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+						"SetSize", { 220, 14 }, 
+					},
+					values = {
+						"maxChars", 16,
+						"showLevel", true,
+						"showLevelLast", false,
+						"useSmartName", true
+					}
+
+				}
 
 			}
 		}
@@ -4824,6 +4888,7 @@ Legacy.UnitFrameTarget = {
 				}
 			}
 		},
+		-- Position and style the main frame
 		{
 			-- Only set the parent in modifiable widgets if it is your intention to change it.
 			-- Otherwise the code will assume the owner is the parent, and leave it as is,
@@ -4859,6 +4924,7 @@ Legacy.UnitFrameTarget = {
 		{
 			type = "CreateWidgets",
 			widgets = {
+				-- Health Bar
 				{
 					parent = "self,ContentScaffold", ownerKey = "Health", objectType = "Frame", objectSubType = "StatusBar",
 					chain = {
@@ -4872,19 +4938,22 @@ Legacy.UnitFrameTarget = {
 					},
 					values = {
 						"colorClass", true, -- color players by class 
-						"colorDisconnected", false, -- color disconnected units
+						"colorDisconnected", true, -- color disconnected units
 						"colorHealth", true, -- color anything else in the default health color
 						"colorReaction", true, -- color NPCs by their reaction standing with us
 						"colorTapped", false, -- color tap denied units 
 						"colorThreat", false, -- color non-friendly by threat
 						"frequent", true, -- listen to frequent health events for more accurate updates
-						"predictThreshold", .01
+						"predictThreshold", .01,
+						"absorbOverrideAlpha", .75
 					}
 				},
+				-- Health Bar Backdrop Frame
 				{
 					parent = "self,Health", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
 					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
 				},
+				-- Health Bar Backdrop Texture
 				{
 					parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
 					chain = {
@@ -4895,10 +4964,12 @@ Legacy.UnitFrameTarget = {
 						"SetVertexColor", { .1, .1, .1, 1 }
 					}
 				},
+				-- Health Bar Overlay Frame
 				{
 					parent = "self,Health", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
 					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
 				},
+				-- Health Bar Overlay Texture
 				{
 					parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
 					chain = {
@@ -4908,6 +4979,55 @@ Legacy.UnitFrameTarget = {
 						"SetTexture", GetMedia("statusbar-normal-overlay")	
 					}
 				},
+
+				-- Health Bar Value
+				{
+					parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+					chain = {
+						"SetPosition", { "LEFT", 16, -1 },
+						"SetDrawLayer", { "OVERLAY", 1 }, 
+						"SetJustifyH", "LEFT", 
+						"SetJustifyV", "MIDDLE",
+						"SetFontObject", GetFont(15,true),
+						"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+						"SetParentToOwnerKey", "OverlayScaffold"
+					}
+				},
+
+				-- Health Bar Absorb Value
+				{
+					parent = "self,Health", parentKey = "ValueAbsorb", objectType = "FontString", 
+					chain = {
+						"SetPosition", function(self, owner, ...) 
+							self:ClearAllPoints()
+							self:SetPoint("LEFT", owner.Health.Value, "RIGHT", 13, 0)
+						end, 
+						"SetDrawLayer", { "OVERLAY", 1 }, 
+						"SetJustifyH", "LEFT", 
+						"SetJustifyV", "MIDDLE",
+						"SetFontObject", GetFont(15,true),
+						"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+						"SetParentToOwnerKey", "OverlayScaffold"
+					}
+
+				},
+				
+				-- Health Bar Overlay Cast Bar
+				{
+					parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
+					chain = {
+						"SetOrientation", "LEFT",
+						"SetFlippedHorizontally", true,
+						"SetSmartSmoothing", true,
+						"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+						"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
+						"SetSize", { 300, 52 }, -- 18
+						"SetStatusBarTexture", GetMedia("statusbar-power"),
+						"SetStatusBarColor", { 1, 1, 1, .25 }
+					}
+				},
+
+				-- Power Bar
 				{
 					parent = "self,ContentScaffold", ownerKey = "Power", objectType = "Frame", objectSubType = "StatusBar",
 					chain = {
@@ -4923,10 +5043,12 @@ Legacy.UnitFrameTarget = {
 						"frequent", true -- listen to frequent health events for more accurate updates
 					}
 				},
+				-- Power Bar Backdrop Frame
 				{
 					parent = "self,Power", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
 					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
 				},
+				-- Power Bar Backdrop Texture
 				{
 					parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
 					chain = {
@@ -4937,10 +5059,12 @@ Legacy.UnitFrameTarget = {
 						"SetVertexColor", { .1, .1, .1, 1 }
 					}
 				},
+				-- Power Bar Overlay Frame
 				{
 					parent = "self,Power", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
 					chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
 				},
+				-- Power Bar Overlay Texture
 				{
 					parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
 					chain = {
@@ -4950,6 +5074,27 @@ Legacy.UnitFrameTarget = {
 						"SetTexture", GetMedia("statusbar-normal-overlay")	
 					}
 				},
+
+				-- Unit Name
+				{
+					parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+					chain = {
+						"SetPosition", { "RIGHT", -24, 9 },
+						"SetDrawLayer", { "OVERLAY", 1 }, 
+						"SetJustifyH", "RIGHT", 
+						"SetJustifyV", "MIDDLE",
+						"SetFontObject", GetFont(13,true),
+						"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+						"SetSize", { 220, 14 }, 
+					},
+					values = {
+						"maxChars", 16,
+						"showLevel", true,
+						"showLevelLast", false,
+						"useSmartName", true
+					}
+
+				}
 
 			}
 		}

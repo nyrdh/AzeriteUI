@@ -24,6 +24,9 @@ local unpack = unpack
 -- Library registries
 LibForge.embeds = LibForge.embeds or {}
 
+-- Track current object without passing or storing it
+local CURRENT_OBJECT
+
 ----------------------------------------------------------------
 -- Utility Functions
 ----------------------------------------------------------------
@@ -97,9 +100,22 @@ local WidgetMethods = {
 	SetHitBox = function(widget, ...)
 		widget:SetHitRectInsets(...)
 	end,
+	SetParentToOwnerKey = function(widget, ownerKey)
+		if (CURRENT_OBJECT) then
+			local parent = trackParentKeys(CURRENT_OBJECT, ownerKey)
+			if (parent) then
+				widget:SetParent(parent)
+			end
+		end
+	end,
 	SetPosition = function(widget, ...)
-		widget:ClearAllPoints()
-		widget:SetPoint(...)
+		if (type((...)) == "function") then
+			local func = ...
+			func(widget, CURRENT_OBJECT, select(2, ...))
+		else
+			widget:ClearAllPoints()
+			widget:SetPoint(...)
+		end
 	end,
 	SetCheckedTextureKey = function(widget, parentKey)
 		widget:SetCheckedTexture(trackParentKeys(widget, parentKey))
@@ -188,6 +204,8 @@ LibForge.Forge = function(self, forgeType, ...)
 		if (not object) or (not forgedata) then
 			return
 		end
+
+		CURRENT_OBJECT = object
 
 		-- Iterate workorders in the forgedata
 		for _,workorder in ipairs(forgedata) do
@@ -369,11 +387,15 @@ LibForge.Forge = function(self, forgeType, ...)
 			end
 		end
 
+		CURRENT_OBJECT = nil
+
 	elseif (forgeType == "Module") then
 		local object, forgedata = ...
 		if (not object) or (not forgedata) then
 			return
 		end
+
+		CURRENT_OBJECT = object
 
 		-- Iterate workorders in the forgedata
 		for _,workorder in ipairs(forgedata) do
@@ -416,6 +438,8 @@ LibForge.Forge = function(self, forgeType, ...)
 		
 			end
 		end
+
+		CURRENT_OBJECT = nil
 
 	end
 

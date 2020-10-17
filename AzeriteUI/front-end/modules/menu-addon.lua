@@ -790,11 +790,27 @@ Module.GetOptionsMenuTooltip = function(self)
 	return self:GetTooltip(ADDON.."_OptionsMenuTooltip") or self:CreateTooltip(ADDON.."_OptionsMenuTooltip")
 end
 
+Module.UpdateBindings = function(self)
+	local toggleButton = self:GetToggleButton()
+	if (toggleButton) then
+		ClearOverrideBindings(toggleButton) 
+		local bindingAction = "AZERITEUI_OPTIONS_MENU"
+		for keyNumber = 1, select("#", GetBindingKey(bindingAction)) do 
+			local key = select(keyNumber, GetBindingKey(bindingAction)) 
+			if (key and (key ~= "")) then
+				SetOverrideBindingClick(toggleButton, false, key, toggleButton:GetName(), "MiddleButton") 
+			end
+		end
+	end
+end
+
 Module.GetToggleButton = function(self)
 	if (not self.ToggleButton) then 
 		local layout = self.layout
-		local toggleButton = setmetatable(self:CreateFrame("CheckButton", ADDON.."_ConfigMenu_ToggleButton", "UICenter", "SecureHandlerClickTemplate"), Toggle_MT)
+		local toggleButton = self:CreateFrame("CheckButton", ADDON.."_ConfigMenu_ToggleButton", "UICenter", "SecureHandlerClickTemplate")
 		toggleButton.layout = layout
+		toggleButton.OnEnter = Toggle.OnEnter
+		toggleButton.OnLeave = Toggle.OnLeave
 		toggleButton:SetFrameStrata("DIALOG")
 		toggleButton:SetFrameLevel(50)
 		toggleButton:SetSize(unpack(layout.MenuToggleButtonSize))
@@ -821,7 +837,6 @@ Module.GetToggleButton = function(self)
 				end
 			end
 		]])
-
 		toggleButton.Icon = toggleButton:CreateTexture()
 		toggleButton.Icon:SetTexture(layout.MenuToggleButtonIcon)
 		toggleButton.Icon:SetSize(unpack(layout.MenuToggleButtonIconSize))
@@ -830,6 +845,9 @@ Module.GetToggleButton = function(self)
 		toggleButton.Icon:SetVertexColor(unpack(layout.MenuToggleButtonIconColor))
 
 		self.ToggleButton = toggleButton
+
+		self:RegisterEvent("UPDATE_BINDINGS", "UpdateBindings")
+		self:UpdateBindings()
 	end 
 	return self.ToggleButton
 end
@@ -1309,6 +1327,7 @@ Module.CreateMenuTable = function(self)
 	-- Nameplates
 	local NamePlates = Core:GetModule("NamePlates", true)
 	if (self:ShouldHaveMenu(NamePlates)) then 
+		
 		table_insert(MenuTable, {
 			title = L["NamePlates"], type = nil, hasWindow = true, 
 			buttons = clean({
@@ -1342,6 +1361,7 @@ Module.CreateMenuTable = function(self)
 				}
 			})
 		})
+
 	end 
 
 	-- Unitframes

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.420-RC] 2020-10-16
+### Fixed
+- Fixed some inconsistencies with return values in the cast library, which caused issues such as all channeled casts being displayed as uninterruptable.
+
 ## [3.0.419-RC] 2020-10-15
 ### Fixed
 - Absorb bars should once again be visible on all units.

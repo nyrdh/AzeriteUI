@@ -1,3 +1,6 @@
 ﻿<Bindings>
 
+	<Binding name="AZERITEUI_OPTIONS_MENU" runOnUp="false" header="AZERITEUI" category="ADDONS">
+	</Binding>
+
 </Bindings>

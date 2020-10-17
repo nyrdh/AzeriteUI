@@ -248,6 +248,15 @@ local UpdateColors = function(health, unit, min, max)
 		end 
 		health:SetStatusBarColor(r, g, b)
 		health.Preview:SetStatusBarColor(r, g, b)
+
+		-- Dynamically tint the absorb bar towards the health color
+		local absorb = health.Absorb
+		if (absorb) then
+			local aR = r + (1 - r)*1/2
+			local aG = g + (1 - g)*1/3
+			local aB = b + (1 - b)*1/2
+			absorb:SetStatusBarColor(aR, aG, aB)
+		end
 	end 
 	
 	if (health.PostUpdateColor) then 
@@ -614,13 +623,14 @@ local Enable = function(self)
 			end 
 	
 			if (not health.Absorb) then 
+				local absorbAlpha = (string_find(unit, "raid") or string_find(unit, "party")) and .75 or ((unit == "player") or (unit == "target")) and .5 or .35
 				local absorb = health:CreateStatusBar()
 				absorb._owner = health
 				absorb:SetAllPoints(health)
 				absorb:SetFrameLevel(health:GetFrameLevel() + 3)
 				absorb:SetSparkTexture(health:GetSparkTexture())
 				absorb:SetStatusBarColor(1, 1, 1)
-				absorb:SetAlpha((string_find(unit, "raid") or string_find(unit, "party")) and .5 or ((unit == "player") or (unit == "target")) and .35 or .25)
+				absorb:SetAlpha(health.absorbOverrideAlpha or absorbAlpha)
 				health.Absorb = absorb
 			end 
 		end
@@ -680,5 +690,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 54)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 56)
 end 

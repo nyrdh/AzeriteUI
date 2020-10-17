@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 
 -- Wooh! 
-local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibAuraData", "LibAura", "LibClientBuild", "LibForge")
+local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibAuraData", "LibAura", "LibClientBuild", "LibForge", "LibFader")
 
 -- Tell the back-end what addon to look for before 
 -- initializing this module and all its submodules. 
@@ -10,6 +10,10 @@ Core:SetAddon(ADDON)
 -- Tell the backend where our saved variables are found.
 -- *it's important that we're doing this here, before any module configs are created.
 Core:RegisterSavedVariablesGlobal(ADDON.."_DB")
+
+-- Keybind localization
+BINDING_HEADER_AZERITEUI = GetAddOnMetadata(ADDON, "Title")
+BINDING_NAME_AZERITEUI_OPTIONS_MENU = OPTIONS_MENU or "Options Menu"
 
 -- Lua API
 local _G = _G
@@ -199,33 +203,34 @@ end
 -- I haven't yet decided whether to put into modules or the back-end.
 Core.ApplyExperimentalFeatures = function(self)
 
-	-- Minifix for MaxDPS for now
-	if (not ActionButton_GetPagedID) then
-		ActionButton_GetPagedID = function(self)
-				return self.action
-		end
-	end
-	if (not ActionButton_CalculateAction) then
-		ActionButton_CalculateAction = function(self, button)
-			if ( not button ) then
-				button = SecureButton_GetEffectiveButton(self);
-			end
-			if ( self:GetID() > 0 ) then
-				local page = SecureButton_GetModifiedAttribute(self, "actionpage", button);
-				if ( not page ) then
-					page = GetActionBarPage();
-					if ( self.isExtra ) then
-						page = GetExtraBarIndex();
-					elseif ( self.buttonType == "MULTICASTACTIONBUTTON" ) then
-						page = GetMultiCastBarIndex();
-					end
-				end
-				return (self:GetID() + ((page - 1) * NUM_ACTIONBAR_BUTTONS));
-			else
-				return SecureButton_GetModifiedAttribute(self, "action", button) or 1;
-			end
-		end
-	end
+	-- Minifix for MaxDps for now
+	-- Fixed in MaxDps v9.0.0 Oct 16th 2020
+	--if (not ActionButton_GetPagedID) then
+	--	ActionButton_GetPagedID = function(self)
+	--			return self.action
+	--	end
+	--end
+	--if (not ActionButton_CalculateAction) then
+	--	ActionButton_CalculateAction = function(self, button)
+	--		if ( not button ) then
+	--			button = SecureButton_GetEffectiveButton(self);
+	--		end
+	--		if ( self:GetID() > 0 ) then
+	--			local page = SecureButton_GetModifiedAttribute(self, "actionpage", button);
+	--			if ( not page ) then
+	--				page = GetActionBarPage();
+	--				if ( self.isExtra ) then
+	--					page = GetExtraBarIndex();
+	--				elseif ( self.buttonType == "MULTICASTACTIONBUTTON" ) then
+	--					page = GetMultiCastBarIndex();
+	--				end
+	--			end
+	--			return (self:GetID() + ((page - 1) * NUM_ACTIONBAR_BUTTONS));
+	--		else
+	--			return SecureButton_GetModifiedAttribute(self, "action", button) or 1;
+	--		end
+	--	end
+	--end
 
 	-- Register addon specific aura filters.
 	-- These can be accessed by the other modules by calling 
@@ -852,6 +857,13 @@ Core.OnInit = function(self)
 		-- Add in a chat command to quickly load the console
 		self:RegisterChatCommand("enableconsole", "LoadDebugConsole")
 	end
+
+	-- Apply theme based edits.	
+	local layout = self.layout
+	if (layout and layout.Forge and layout.Forge.OnInit) then
+		self:Forge("Module", self, layout.Forge.OnInit)
+	end
+
 end 
 
 Core.OnEnable = function(self)
