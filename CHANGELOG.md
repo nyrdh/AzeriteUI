@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed an issue that would cause the zone ability button to not be properly styled on the initial login if the button was visible in your current zone.
 - Fixed an issue that sometimes would cause the quest tracker to not be styled or positioned on the initial login.
 
+### Removed
+- Removed a temporary workaround to make the addon MaxDPS work properly in WoW Client Patch 9.0.1. The issue was fixed upstream on MaxDPS' end, and our fix is no longer required. So go update it, slackers!
+
 ## [3.0.419-RC] 2020-10-15
 ### Fixed
 - Absorb bars should once again be visible on all units.
