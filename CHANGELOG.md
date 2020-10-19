@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2020-10-19
+### Changed
+- Modified the aura plugin back-end to parse and sort the entire aura table before deciding on visibility. 
+- Various work on the Legacy theme.
+
 ## [3.0.420-RC] 2020-10-17
 ### Added
 - You can now keybind the Azerite options menu. You can find it in Blizzard's keybind interface under the AddOns category towards the bottom, where other addons such as Bagnon and GatherMate2 live too. 

@@ -29,13 +29,17 @@ local BLING_TEXTURE = [[Interface\Cooldown\star4]]
 local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
 local DEBUFF_MAX_DISPLAY = DEBUFF_MAX_DISPLAY
 
--- Aura Cache
-local Cache = {}
+-- Aura Caches
+local DisplayCache = {} -- display caches after custom filter and visibility limits
+local FullBuffCache = {} -- full buff caches according to current filter
+local FullDebuffCache = {} -- full debuff caches according to current filter
 
 -- Constants
 local DAY, HOUR, MINUTE = 86400, 3600, 60
 local LONG_THRESHOLD = MINUTE*3
 local HZ = 1/20
+
+local IN_COMBAT
 
 -- Utility Functions
 -----------------------------------------------------
@@ -330,7 +334,7 @@ end
 
 -- Let's keep the sorting as simplistic as possible.
 local auraSortFunction = function(a,b)
-	if (a) and (b) then
+	if (a) and (b) and (a.id) and (b.id) then
 		if (a.isCastByPlayer == b.isCastByPlayer) then
 			if (a.expirationTime == b.expirationTime) then
 				if (a.name) and (b.name) then
@@ -345,9 +349,10 @@ local auraSortFunction = function(a,b)
 	end
 end
 
-local IterateBuffs = function(element, unit, filter, customFilter, visible)
-	local visibleBuffs = 0 -- total number of visible buffs
-	local visible = visible or 0 -- total number of visible auras so far
+local CacheBuffs = function(element, unit, filter, customFilter)
+
+	local cache = FullBuffCache[element]
+	local numAuras = 0
 
 	-- Iterate helpful auras
 	for i = 1, BUFF_MAX_DISPLAY do 
@@ -365,10 +370,10 @@ local IterateBuffs = function(element, unit, filter, customFilter, visible)
 
 		-- Run the custom filter method, if it exists
 		local auraPriority, isFiltered
-		if customFilter then 
+		if (customFilter) then 
 			local displayAura, displayPriority, filtered = customFilter(element, true, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
 
-			if displayAura then 
+			if (displayAura) then 
 				auraPriority = displayPriority
 			else 
 				name = nil
@@ -376,38 +381,23 @@ local IterateBuffs = function(element, unit, filter, customFilter, visible)
 			isFiltered = filtered
 		end 
 		
-		if name then 
+		if (name) then 
+			numAuras = numAuras + 1
 
-			-- Stop iteration if we've hit the maximum displayed 
-			if (element.maxVisible and (element.maxVisible == visible)) or (element.maxBuffs and (element.maxBuffs == visibleBuffs)) then 
-				break 
-			end 
-
-			visible = visible + 1
-			visibleBuffs = visibleBuffs + 1
-
-			-- Can't have frames that only are referenced by indexed table entries, 
-			-- we need a hashed key or for some reason /framestack will bug out. 
-			local visibleKey = tostring(visible)
-
-			if (not element[visibleKey]) then
-
-				-- Create a new button, and initially hide it while setting it up
-				element[visibleKey] = (element.CreateButton or CreateAuraButton) (element)
-				element[visibleKey]:Hide()
+			if (not cache[numAuras]) then
+				cache[numAuras] = {}
 			end
 
-			local button = element[visibleKey]
-			button:SetID(i)
-
-			-- store current aura details on the aura button
+			local button = cache[numAuras]
+			button.id = i
 			button.isBuff = true
 			button.unit = unit
 			button.filter = filter
 			button.name = name
+			button.icon = icon
 			button.count = count
 			button.debuffType = debuffType
-			button.duration = duration
+			button.duration = duration or 0
 			button.expirationTime = expirationTime
 			button.unitCaster = unitCaster
 			button.isStealable = isStealable
@@ -416,70 +406,34 @@ local IterateBuffs = function(element, unit, filter, customFilter, visible)
 			button.isOwnedByPlayer = isOwnedByPlayer
 			button.auraPriority = auraPriority
 			button.isFiltered = isFiltered
-
-			-- Update the icon texture
-			button.Icon:SetTexture(icon)
-
-			-- Update stack counts
-			button.Count:SetText((count > 1) and count or "")
-
-			-- Update timers
-			Aura_SetTimer(button, duration, expirationTime)
-
-			-- Run module post updates
-			if element.PostUpdateButton then
-				element:PostUpdateButton(button, "Iteration")
-			end
-
-			-- Show the button if it was hidden
-			if (not button:IsShown()) then
-				button:Show()
-			end
-
 		end 
 	end 
 
-	local offset = visible - visibleBuffs
+	-- Clear superflous entries 
+	if (#cache > numAuras) then
+		for i = #cache, numAuras+1,-1  do
+			local button = cache[i]
+			for j in pairs(button) do
+				button[j] = nil
+			end
+		end
+	end
 
-	-- Sort them
-	local cache = Cache[element]
-	for i = 1,visibleBuffs do
-		local position = offset + i
-		local index = tostring(position)
-		cache[i] = element[index]
-	end
-	for i = visibleBuffs+1,#cache do
-		cache[i] = nil
-	end
 	table_sort(cache, element.customSort or auraSortFunction)
-
-	-- Position them all
-	for i = 1,visibleBuffs do
-		local position = offset + i
-		local index = tostring(position)
-		local button = cache[i]
-
-		-- Position the button
-		SetAuraButtonPosition(element, button, position)
-	end
-
-	return visible, visibleBuffs
 end
 
-local IterateDebuffs = function(element, unit, filter, customFilter, visible)
+local CacheDebuffs = function(element, unit, filter, customFilter)
 
-	local visibleDebuffs = 0 -- total number of visible debuffs
-	local visible = visible or 0 -- total number of visible auras so far
-	
-	local debuffCache = LibAura:GetUnitDebuffCacheByFilter(unit, filter)
+	local cache = FullDebuffCache[element]
+	local numAuras = 0
 
-	-- Iterate harmful auras
-	for i = 1, DEBUFF_MAX_DISPLAY do
-		
-		-- Retrieve debuff information
+	-- Iterate helpful auras
+	for i = 1, DEBUFF_MAX_DISPLAY do 
+
+		-- Retrieve buff information
 		local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = LibAura:GetUnitDebuff(unit, i, filter)
 
-		-- No name means no more debuffs matching the filter
+		-- No name means no more buffs matching the filter
 		if (not name) then
 			break
 		end
@@ -489,50 +443,34 @@ local IterateDebuffs = function(element, unit, filter, customFilter, visible)
 
 		-- Run the custom filter method, if it exists
 		local auraPriority, isFiltered
-		if customFilter then 
-			local displayAura, displayPriority, filtered = customFilter(element, false, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3) 
-			
-			if displayAura then 
+		if (customFilter) then 
+			local displayAura, displayPriority, filtered = customFilter(element, false, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3)
+
+			if (displayAura) then 
 				auraPriority = displayPriority
 			else 
 				name = nil
 			end 
 			isFiltered = filtered
 		end 
+		
+		if (name) then 
+			numAuras = numAuras + 1
 
-		if name then 
-
-			-- Stop iteration if we've hit the maximum displayed 
-			if (element.maxVisible and (element.maxVisible == visible)) or (element.maxDebuffs and (element.maxDebuffs == visibleDebuffs)) then 
-				break 
-			end 
-
-			visible = visible + 1
-			visibleDebuffs = visibleDebuffs + 1
-
-
-			-- Can't have frames that only are referenced by indexed table entries, 
-			-- we need a hashed key or for some reason /framestack will bug out. 
-			local visibleKey = tostring(visible)
-
-			if (not element[visibleKey]) then
-
-				-- Create a new button, and initially hide it while setting it up
-				element[visibleKey] = (element.CreateButton or CreateAuraButton) (element)
-				element[visibleKey]:Hide()
+			if (not cache[numAuras]) then
+				cache[numAuras] = {}
 			end
 
-			local button = element[visibleKey]
-			button:SetID(i)
-
-			-- store current aura details on the aura button
+			local button = cache[numAuras]
+			button.id = i
 			button.isBuff = false
 			button.unit = unit
 			button.filter = filter
 			button.name = name
+			button.icon = icon
 			button.count = count
 			button.debuffType = debuffType
-			button.duration = duration
+			button.duration = duration or 0
 			button.expirationTime = expirationTime
 			button.unitCaster = unitCaster
 			button.isStealable = isStealable
@@ -541,47 +479,206 @@ local IterateDebuffs = function(element, unit, filter, customFilter, visible)
 			button.isOwnedByPlayer = isOwnedByPlayer
 			button.auraPriority = auraPriority
 			button.isFiltered = isFiltered
-
-			-- Update the icon texture
-			button.Icon:SetTexture(icon)
-
-			-- Update stack counts
-			button.Count:SetText((count > 1) and count or "")
-
-			-- Update timers
-			Aura_SetTimer(button, duration, expirationTime)
-
-			-- Run module post updates
-			if element.PostUpdateButton then
-				element:PostUpdateButton(button, "Iteration")
-			end
-
-			-- Show the button if it was hidden
-			if (not button:IsShown()) then
-				button:Show()
-			end
 		end 
 	end 
+
+	-- Clear superflous entries 
+	if (#cache > numAuras) then
+		for i = #cache, numAuras+1,-1  do
+			local button = cache[i]
+			for j in pairs(button) do
+				button[j] = nil
+			end
+		end
+	end
+
+	table_sort(cache, element.customSort or auraSortFunction)
+end
+
+local IterateBuffs = function(element, unit, filter, visible)
+	local visibleBuffs = 0 -- total number of visible buffs
+	local visible = visible or 0 -- total number of visible auras so far
+
+	-- Iterate helpful auras
+	for i,cache in ipairs(FullBuffCache[element]) do 
+		if (not cache.id) then
+			break
+		end
+
+		-- Stop iteration if we've hit the maximum displayed 
+		if (element.maxVisible and (element.maxVisible == visible)) or (element.maxBuffs and (element.maxBuffs == visibleBuffs)) then 
+			break 
+		end 
+
+		visible = visible + 1
+		visibleBuffs = visibleBuffs + 1
+
+		-- Can't have frames that only are referenced by indexed table entries, 
+		-- we need a hashed key or for some reason /framestack will bug out. 
+		local visibleKey = tostring(visible)
+
+		if (not element[visibleKey]) then
+
+			-- Create a new button, and initially hide it while setting it up
+			element[visibleKey] = (element.CreateButton or CreateAuraButton) (element)
+			element[visibleKey]:Hide()
+		end
+
+		local button = element[visibleKey]
+		button:SetID(cache.id)
+		button.isBuff = cache.isBuff
+		button.unit = cache.unit
+		button.filter = cache.filter
+		button.name = cache.name
+		button.icon = cache.icon
+		button.count = cache.count
+		button.debuffType = cache.debuffType
+		button.duration = cache.duration
+		button.expirationTime = cache.expirationTime
+		button.unitCaster = cache.unitCaster
+		button.isStealable = cache.isStealable
+		button.isBossDebuff = cache.isBossDebuff
+		button.isCastByPlayer = cache.isCastByPlayer
+		button.isOwnedByPlayer = cache.isOwnedByPlayer
+		button.auraPriority = cache.auraPriority
+		button.isFiltered = cache.isFiltered
+
+		-- Update the icon texture
+		button.Icon:SetTexture(button.icon)
+
+		-- Update stack counts
+		button.Count:SetText((button.count > 1) and button.count or "")
+
+		-- Update timers
+		Aura_SetTimer(button, button.duration, button.expirationTime)
+
+		-- Run module post updates
+		if (element.PostUpdateButton) then
+			element:PostUpdateButton(button, "Iteration")
+		end
+
+		-- Show the button if it was hidden
+		if (not button:IsShown()) then
+			button:Show()
+		end
+	end 
+
+	local offset = visible - visibleBuffs
+
+	-- Sort them
+	--local cache = DisplayCache[element]
+	--for i = 1,visibleBuffs do
+	--	local position = offset + i
+	--	local index = tostring(position)
+	--	cache[i] = element[index]
+	--end
+	--for i = visibleBuffs+1,#cache do
+	--	cache[i] = nil
+	--end
+	--table_sort(cache, element.customSort or auraSortFunction)
+
+	-- Position them all
+	for i = 1,visibleBuffs do
+		local position = offset + i
+		local index = tostring(position)
+		local button = element[index]
+
+		-- Position the button
+		SetAuraButtonPosition(element, button, position)
+	end
+
+	return visible, visibleBuffs
+end
+
+local IterateDebuffs = function(element, unit, filter, visible)
+
+	local visibleDebuffs = 0 -- total number of visible debuffs
+	local visible = visible or 0 -- total number of visible auras so far
+	
+	-- Iterate helpful auras
+	for i,cache in ipairs(FullDebuffCache[element]) do 
+		if (not cache.id) then
+			break
+		end
+
+		-- Stop iteration if we've hit the maximum displayed 
+		if (element.maxVisible and (element.maxVisible == visible)) or (element.maxDebuffs and (element.maxDebuffs == visibleBuffs)) then 
+			break 
+		end 
+
+		visible = visible + 1
+		visibleDebuffs = visibleDebuffs + 1
+
+		-- Can't have frames that only are referenced by indexed table entries, 
+		-- we need a hashed key or for some reason /framestack will bug out. 
+		local visibleKey = tostring(visible)
+
+		if (not element[visibleKey]) then
+
+			-- Create a new button, and initially hide it while setting it up
+			element[visibleKey] = (element.CreateButton or CreateAuraButton) (element)
+			element[visibleKey]:Hide()
+		end
+
+		local button = element[visibleKey]
+		button:SetID(cache.id)
+		button.isBuff = cache.isBuff
+		button.unit = cache.unit
+		button.filter = cache.filter
+		button.name = cache.name
+		button.icon = cache.icon
+		button.count = cache.count
+		button.debuffType = cache.debuffType
+		button.duration = cache.duration
+		button.expirationTime = cache.expirationTime
+		button.unitCaster = cache.unitCaster
+		button.isStealable = cache.isStealable
+		button.isBossDebuff = cache.isBossDebuff
+		button.isCastByPlayer = cache.isCastByPlayer
+		button.isOwnedByPlayer = cache.isOwnedByPlayer
+		button.auraPriority = cache.auraPriority
+		button.isFiltered = cache.isFiltered
+
+		-- Update the icon texture
+		button.Icon:SetTexture(button.icon)
+
+		-- Update stack counts
+		button.Count:SetText((button.count > 1) and button.count or "")
+
+		-- Update timers
+		Aura_SetTimer(button, button.duration, button.expirationTime)
+
+		-- Run module post updates
+		if (element.PostUpdateButton) then
+			element:PostUpdateButton(button, "Iteration")
+		end
+
+		-- Show the button if it was hidden
+		if (not button:IsShown()) then
+			button:Show()
+		end
+	end 
+
 
 	local offset = visible - visibleDebuffs
 
 	-- Sort them
-	local cache = Cache[element]
-	for i = 1,visibleDebuffs do
-		local position = offset + i
-		local index = tostring(position)
-		cache[i] = element[index]
-	end
-	for i = visibleDebuffs+1,#cache do
-		cache[i] = nil
-	end
-	table_sort(cache, element.customSort or auraSortFunction)
+	--local cache = DisplayCache[element]
+	--for i = 1,visibleDebuffs do
+	--	local position = offset + i
+	--	local index = tostring(position)
+	--	cache[i] = element[index]
+	--end
+	--for i = visibleDebuffs+1,#cache do
+	--	cache[i] = nil
+	--end
+	--table_sort(cache, element.customSort or auraSortFunction)
 
 	-- Position them all
 	for i = 1,visibleDebuffs do
 		local position = offset + i
 		local index = tostring(position)
-		local button = cache[i]
+		local button = element[index]
 
 		-- Position the button
 		SetAuraButtonPosition(element, button, position)
@@ -605,7 +702,7 @@ local EvaluateVisibilities = function(element, visible)
 
 	-- Decide visibility of the whole frame
 	if (visible == 0) then 
-		if element:IsShown() then
+		if (element:IsShown()) then
 			element:Hide()
 		end
 	else 
@@ -620,19 +717,25 @@ local Update = function(self, event, unit, ...)
 		return 
 	end 
 
+	if (event == "PLAYER_ENTERING_WORLD") then
+		IN_COMBAT = true
+	elseif (event == "PLAYER_REGEN_DISABLED") then
+		IN_COMBAT = true
+	elseif (event == "PLAYER_REGEN_ENABLED") then
+		IN_COMBAT = nil
+	end
+
 	-- Different GUID means a different player or NPC,
 	-- so we want updates to be instant, not smoothed. 
 	local guid = UnitGUID(unit)
 	local forced = event == "Forced"
 
-	-- All three elements can actually contain both buffs and debuffs,
-	-- their element names are only indicating their default behavior. 
 	local Auras = self.Auras
 	local Buffs = self.Buffs
 	local Debuffs = self.Debuffs
 
-	if Auras then 
-		if Auras.PreUpdate then
+	if (Auras) then 
+		if (Auras.PreUpdate) then
 			Auras:PreUpdate(unit)
 		end
 
@@ -640,28 +743,32 @@ local Update = function(self, event, unit, ...)
 		local forced = forced or (guid ~= Auras.guid) or (not Auras.guid)
 		Auras.guid = guid
 	
-		-- Filter strings
+		-- Filter strings passed to the blizzard API calls
 		local buffFilter = Auras.filter or Auras.filterBuffs 
 		local debuffFilter = Auras.filter or Auras.filterDebuffs
 		
-		-- Filter functions
+		-- Filter functions used to filter the displayed auras
 		local buffFilterFunc = Auras.func or Auras.funcBuffs 
 		local debuffFilterFunc = Auras.func or Auras.funcDebuffs
 
-		-- Forcefully register cache the auras for the relevant filters
-		-- This is to ensure force updates actually have the right filters and fully updated caches
-		if forced then 
+		-- Force the back-end to cache the auras for the relevant filters
+		if (forced) then 
 			LibAura:CacheUnitBuffsByFilter(unit, buffFilter)
 			LibAura:CacheUnitDebuffsByFilter(unit, debuffFilter)
 		end 
 
+		-- Create local, sorted, cache copies
+		CacheBuffs(Auras, unit, buffFilter, buffFilterFunc)
+		CacheDebuffs(Auras, unit, debuffFilter, debuffFilterFunc)
+
+		-- Decide what to show
 		local visible, visibleBuffs, visibleDebuffs = 0, 0, 0
-		if Auras.debuffsFirst then 
-			visible, visibleDebuffs = IterateDebuffs(Auras, unit, debuffFilter, debuffFilterFunc, visible) 
-			visible, visibleBuffs = IterateBuffs(Auras, unit, buffFilter, buffFilterFunc, visible)
+		if (Auras.debuffsFirst) then 
+			visible, visibleDebuffs = IterateDebuffs(Auras, unit, debuffFilter, visible) 
+			visible, visibleBuffs = IterateBuffs(Auras, unit, buffFilter, visible)
 		else 
-			visible, visibleBuffs = IterateBuffs(Auras, unit, buffFilter, buffFilterFunc, visible)
-			visible, visibleDebuffs = IterateDebuffs(Auras, unit, debuffFilter, debuffFilterFunc, visible)
+			visible, visibleBuffs = IterateBuffs(Auras, unit, buffFilter, visible)
+			visible, visibleDebuffs = IterateDebuffs(Auras, unit, debuffFilter, visible)
 		end 
 
 		-- Add in meta-info for filters
@@ -670,16 +777,17 @@ local Update = function(self, event, unit, ...)
 		Auras.visibleDebuffs = visibleDebuffs
 		Auras.hasBuffs = visibleBuffs > 0
 		Auras.hasDebuffs = visibleDebuffs > 0
+		Auras.inCombat = IN_COMBAT
 
 		EvaluateVisibilities(Auras, visible)
 
-		if Auras.PostUpdate then 
+		if (Auras.PostUpdate) then 
 			Auras:PostUpdate(unit, visible)
 		end 
 	end 
 
-	if Buffs then 
-		if Buffs.PreUpdate then
+	if (Buffs) then 
+		if (Buffs.PreUpdate) then
 			Buffs:PreUpdate(unit)
 		end
 
@@ -687,20 +795,23 @@ local Update = function(self, event, unit, ...)
 		local forced = forced or (guid ~= Buffs.guid) or (not Buffs.guid)
 		Buffs.guid = guid
 
-		-- Filter strings
+		-- Filter strings passed to the blizzard API calls
 		local buffFilter = Buffs.filter or Buffs.filterBuffs 
 		
-		-- Filter functions
+		-- Filter functions used to filter the displayed auras
 		local buffFilterFunc = Buffs.func or Buffs.funcBuffs 
 
-		-- Forcefully register cache the auras for the relevant filters
-		-- This is to ensure force updates actually have the right filters and fully updated caches
-		if forced then 
+		-- Force the back-end to cache the auras for the relevant filters
+		if (forced) then 
 			LibAura:CacheUnitBuffsByFilter(unit, buffFilter)
 		end 
 
+		-- Create a local, sorted, cache copy
+		CacheBuffs(Buffs, unit, buffFilter, buffFilterFunc)
+
+		-- Decide what to show
 		local visible, visibleBuffs, visibleDebuffs = 0, 0, 0
-		visible, visibleBuffs = IterateBuffs(Buffs, unit, buffFilter, buffFilterFunc, visible)
+		visible, visibleBuffs = IterateBuffs(Buffs, unit, buffFilter, visible)
 
 		-- Add in meta-info for filters
 		Buffs.visibleAuras = visible
@@ -708,16 +819,17 @@ local Update = function(self, event, unit, ...)
 		Buffs.visibleDebuffs = visibleDebuffs
 		Buffs.hasBuffs = visibleBuffs > 0
 		Buffs.hasDebuffs = visibleDebuffs > 0
+		Buffs.inCombat = IN_COMBAT
 
 		EvaluateVisibilities(Buffs, visible)
 
-		if Buffs.PostUpdate then 
+		if (Buffs.PostUpdate) then 
 			Buffs:PostUpdate(unit, visible)
 		end 
 	end 
 
-	if Debuffs then 
-		if Debuffs.PreUpdate then
+	if (Debuffs) then 
+		if (Debuffs.PreUpdate) then
 			Debuffs:PreUpdate(unit)
 		end
 
@@ -725,20 +837,23 @@ local Update = function(self, event, unit, ...)
 		local forced = forced or (guid ~= Debuffs.guid) or (not Debuffs.guid)
 		Debuffs.guid = guid
 		
-		-- Filter strings
+		-- Filter strings passed to the blizzard API calls
 		local debuffFilter = Debuffs.filter or Debuffs.filterDebuffs
 		
-		-- Filter functions
+		-- Filter functions used to filter the displayed auras
 		local debuffFilterFunc = Debuffs.func or Debuffs.funcDebuffs
 
-		-- Forcefully register cache the auras for the relevant filters
-		-- This is to ensure force updates actually have the right filters and fully updated caches
-		if forced then 
+		-- Force the back-end to cache the auras for the relevant filters
+		if (forced) then 
 			LibAura:CacheUnitDebuffsByFilter(unit, debuffFilter)
 		end 
 
+		-- Create a local, sorted, cache copy
+		CacheDebuffs(Debuffs, unit, debuffFilter, debuffFilterFunc)
+
+		-- Decide what to show
 		local visible, visibleBuffs, visibleDebuffs = 0, 0, 0
-		visible, visibleDebuffs = IterateDebuffs(Debuffs, unit, debuffFilter, debuffFilterFunc, visible)
+		visible, visibleDebuffs = IterateDebuffs(Debuffs, unit, debuffFilter, visible)
 
 		-- Add in meta-info for filters
 		Debuffs.visibleAuras = visible
@@ -746,10 +861,11 @@ local Update = function(self, event, unit, ...)
 		Debuffs.visibleDebuffs = visibleDebuffs
 		Debuffs.hasBuffs = visibleBuffs > 0
 		Debuffs.hasDebuffs = visibleDebuffs > 0
+		Debuffs.inCombat = IN_COMBAT
 
 		EvaluateVisibilities(Debuffs, visible)
 
-		if Debuffs.PostUpdate then 
+		if (Debuffs.PostUpdate) then 
 			Debuffs:PostUpdate(unit, visible)
 		end 
 	end 
@@ -776,21 +892,25 @@ local Enable = function(self)
 			Auras._owner = self
 			Auras.unit = unit
 			Auras.ForceUpdate = ForceUpdate
-			Cache[Auras] = Cache[Auras] or {}
+			DisplayCache[Auras] = DisplayCache[Auras] or {}
+			FullBuffCache[Auras] = FullBuffCache[Auras] or {}
+			FullDebuffCache[Auras] = FullDebuffCache[Auras] or {}
 		end
 
 		if (Buffs) then
 			Buffs._owner = self
 			Buffs.unit = unit
 			Buffs.ForceUpdate = ForceUpdate
-			Cache[Buffs] = Cache[Buffs] or {}
+			DisplayCache[Buffs] = DisplayCache[Buffs] or {}
+			FullBuffCache[Buffs] = FullBuffCache[Buffs] or {}
 		end
 		
 		if (Debuffs) then
 			Debuffs._owner = self
 			Debuffs.unit = unit
 			Debuffs.ForceUpdate = ForceUpdate
-			Cache[Debuffs] = Cache[Debuffs] or {}
+			DisplayCache[Debuffs] = DisplayCache[Debuffs] or {}
+			FullDebuffCache[Debuffs] = FullDebuffCache[Debuffs] or {}
 		end
 
 		local frequent = (Auras and Auras.frequent) or (Buffs and Buffs.frequent) or (Debuffs and Debuffs.frequent)
@@ -829,24 +949,36 @@ local Disable = function(self)
 		if (Auras) then
 			Auras.unit = nil
 			Auras:Hide()
-			if (Cache[Auras]) then 
-				table_wipe(Cache[Auras])
+			if (DisplayCache[Auras]) then 
+				table_wipe(DisplayCache[Auras])
+			end
+			if (FullBuffCache[Auras]) then 
+				table_wipe(FullBuffCache[Auras])
+			end
+			if (FullDebuffCache[Auras]) then 
+				table_wipe(FullDebuffCache[Auras])
 			end
 		end
 	
 		if (Buffs) then
 			Buffs.unit = nil
 			Buffs:Hide()
-			if (Cache[Buffs]) then 
-				table_wipe(Cache[Buffs])
+			if (DisplayCache[Buffs]) then 
+				table_wipe(DisplayCache[Buffs])
+			end
+			if (FullBuffCache[Buffs]) then 
+				table_wipe(FullBuffCache[Buffs])
 			end
 		end
 	
 		if (Debuffs) then
 			Debuffs.unit = nil
 			Debuffs:Hide()
-			if (Cache[Debuffs]) then 
-				table_wipe(Cache[Debuffs])
+			if (DisplayCache[Debuffs]) then 
+				table_wipe(DisplayCache[Debuffs])
+			end
+			if (FullDebuffCache[Debuffs]) then 
+				table_wipe(FullDebuffCache[Debuffs])
 			end
 		end
 	
@@ -870,5 +1002,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 57)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 61)
 end 

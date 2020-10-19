@@ -887,6 +887,7 @@ Module.SetUpMinimap = function(self)
 	framerate:SetFontObject(layout.FrameRateFont)
 	framerate:SetTextColor(unpack(layout.FrameRateColor))
 	framerate.OverrideValue = layout.FrameRate_OverrideValue
+	framerate.PostUpdate = layout.Performance_PostUpdate
 
 	Handler.FrameRate = framerate
 
@@ -897,6 +898,7 @@ Module.SetUpMinimap = function(self)
 	latency:SetFontObject(layout.LatencyFont)
 	latency:SetTextColor(unpack(layout.LatencyColor))
 	latency.OverrideValue = layout.Latency_OverrideValue
+	latency.PostUpdate = layout.Performance_PostUpdate
 
 	Handler.Latency = latency
 	
@@ -904,14 +906,15 @@ Module.SetUpMinimap = function(self)
 	performanceFrame:SetScript("OnEnter", Performance_OnEnter)
 	performanceFrame:SetScript("OnLeave", Performance_OnLeave)
 	
-	framerate:Place(layout.FrameRatePlaceFunc(Handler)) 
-	latency:Place(layout.LatencyPlaceFunc(Handler)) 
-
 	if (layout.PerformanceFramePlaceAdvancedFunc) then
 		layout.PerformanceFramePlaceAdvancedFunc(performanceFrame, Handler)
 	elseif (layout.PerformanceFramePlaceFunc) then
 		performanceFrame:Place(layout.PerformanceFramePlaceFunc(Handler))
 	end
+
+	framerate:Place(layout.FrameRatePlaceFunc(Handler)) 
+	latency:Place(layout.LatencyPlaceFunc(Handler)) 
+
 
 	-- Ring frame
 	if (layout.UseBars) then

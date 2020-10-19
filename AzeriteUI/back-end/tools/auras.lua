@@ -31,7 +31,6 @@ local type = type
 -- WoW API
 local GetSpellInfo = GetSpellInfo
 local GetTime = GetTime
-local UnitAffectingCombat = UnitAffectingCombat
 local UnitCanAttack = UnitCanAttack
 local UnitClass = UnitClass
 local UnitClassification = UnitClassification
@@ -164,8 +163,8 @@ local PrioHigh 			= 2^21 -- High priority, shown first after boss
 local PrioBoss 			= 2^22 -- Same priority as boss debuffs
 
 -- Some constants to avoid a million auraIDs
-local L_DRINK = GetSpellInfo(430)
-local L_FOOD = GetSpellInfo(433)
+local L_DRINK = GetSpellInfo(430) -- 104270
+local L_FOOD = GetSpellInfo(433) -- 104935
 
 -- Shorthand tags for quality of life, following the guidelines above.
 -- Note: Do NOT add any of these together, they must be used as the ONLY tag when used!
@@ -334,7 +333,7 @@ local checkCombatConditionals = function(...)
 
 	-- Only show out of combat
 	if (UserFlags[spellID]) then
-		if (HasUserFlags(spellID, NoCombat) and (UnitAffectingCombat("player"))) then
+		if (HasUserFlags(spellID, NoCombat) and (element.inCombat)) then
 
 			-- Do we need to warn about this running out mid combat?
 			if (checkWarningConditionals(...)) then
@@ -352,6 +351,128 @@ end
 
 -- Back-end expects these return values from any filter:
 -- @return displayAura <boolean>, displayPriority <number,nil>, isFiltered <boolean>
+local auraFilterLegacy = function(...)
+	local element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = ...
+
+	-- Show all boss or encounter debuffs
+	if (isBossDebuff) then
+		return true
+	end
+
+	-- Show Eat/Drink on player(?)
+	if (name == L_DRINK) or (name == L_FOOD) then
+		return true, nil, hideFilteredSpellID
+	end
+
+	local isYou = (unit == "player") or UnitIsUnit("player", unit)
+	local isEnemy = (not isYou) and UnitCanAttack("player", unit)
+	local isFriend = (not isYou) and UnitIsFriend("player", unit)
+
+	-- Hide player debuffs
+	if (isYou) then
+		if (not isBuff) then
+			return false, nil, hideUnfilteredSpellID
+		end
+	
+	-- Hide enemy buffs
+	elseif (isEnemy) then
+		if (isBuff) then
+			return false, nil, hideUnfilteredSpellID
+		end
+
+	-- Hide friend debuffs
+	elseif (isFriend) then
+		if (not isBuff) then
+			return false, nil, hideUnfilteredSpellID
+		end
+	end
+
+	-- Show anything explicitly whitelisted
+	if (checkWhitelistConditionals(...)) then
+		return true, nil, hideFilteredSpellID
+
+	-- Hide anything explicitly blacklisted
+	elseif (checkBlacklistConditionals(...)) then
+		return false, nil, hideFilteredSpellID
+	end	
+
+	-- Show time based debuffs from environment or NPCs
+	--if (not isBuff) and (UnitIsUnit(unit, "player")) and (not unitCaster or not UnitIsPlayer(unitCaster)) then
+	if (not isBuff) and ((not unitCaster) or (not UnitIsPlayer(unitCaster))) then
+		if (checkTimeAndStackbasedConditionals(...)) then
+			return true, nil, hideUnfilteredSpellID
+		end
+	end
+
+	-- Show time based auras from any sources.
+	if (checkTimeAndStackbasedConditionals(...)) then
+		return true, nil, hideUnfilteredSpellID
+	end
+	
+	-- Hide everything else
+	return false, nil, hideUnfilteredSpellID
+end
+
+-- Back-end expects these return values from any filter:
+-- @return displayAura <boolean>, displayPriority <number,nil>, isFiltered <boolean>
+local auraFilterLegacySecondary = function(...)
+	local element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = ...
+
+	-- Hide all boss or encounter debuffs
+	if (isBossDebuff) then
+		return false, nil, hideUnfilteredSpellID
+	end
+
+	local isYou = (unit == "player") or UnitIsUnit("player", unit)
+	local isEnemy = (not isYou) and UnitCanAttack("player", unit)
+	local isFriend = (not isYou) and UnitIsFriend("player", unit)
+
+	-- Hide player buffs
+	if (isYou) then
+		if (isBuff) then
+			return false, nil, hideUnfilteredSpellID
+		end
+	
+	-- Hide enemy debuffs
+	elseif (isEnemy) then
+		if (not isBuff) then
+			return false, nil, hideUnfilteredSpellID
+		end
+
+	-- Hide friend buffs
+	elseif (isFriend) then
+		if (isBuff) then
+			return false, nil, hideUnfilteredSpellID
+		end
+	end
+
+	-- Show anything explicitly whitelisted
+	if (checkWhitelistConditionals(...)) then
+		return true, nil, hideFilteredSpellID
+
+	-- Hide anything explicitly blacklisted
+	elseif (checkBlacklistConditionals(...)) then
+		return false, nil, hideFilteredSpellID
+	end	
+
+	-- Show time based debuffs from environment or NPCs
+	if (not isBuff) and (UnitIsUnit(unit, "player")) and (not unitCaster or not UnitIsPlayer(unitCaster)) then
+		if (checkTimeAndStackbasedConditionals(...)) then
+			return true, nil, hideUnfilteredSpellID
+		end
+	end
+
+	-- Show time based auras from any sources.
+	if (checkTimeAndStackbasedConditionals(...)) then
+		return true, nil, hideUnfilteredSpellID
+	end
+	
+	-- Hide everything else
+	return false, nil, hideUnfilteredSpellID
+end
+
+-- Back-end expects these return values from any filter:
+-- @return displayAura <boolean>, displayPriority <number,nil>, isFiltered <boolean>
 local auraFilter = function(...)
 	local element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = ...
 
@@ -364,12 +485,12 @@ local auraFilter = function(...)
 	if (name == L_DRINK) or (name == L_FOOD) then
 		return true, nil, hideFilteredSpellID
 	end
-	
+
 	-- Show anything explicitly whitelisted
 	if (checkWhitelistConditionals(...)) then
 		return true, nil, hideFilteredSpellID
 
-	-- Show anything explicitly blacklisted
+	-- Hide anything explicitly blacklisted
 	elseif (checkBlacklistConditionals(...)) then
 		return false, nil, hideFilteredSpellID
 
@@ -398,19 +519,19 @@ local auraFilter = function(...)
 	end
 
 	-- Show static crap out of combat
-	if ((SLACKMODE) or (element.enableSpamMode)) and (not UnitAffectingCombat("player")) then
+	if ((SLACKMODE) or (element.enableSpamMode)) and (not element.inCombat) then
 		if (not duration) or (duration == 0) then
 			return true, nil, hideUnfilteredSpellID
 		else
 			if (isBuff) then 
 				if (timeLeft and (timeLeft > 0) and (timeLeft > buffDurationThreshold))
 				or (duration and (duration > 0) and (duration > buffDurationThreshold)) then
-					return true
+					return true, nil, hideUnfilteredSpellID
 				end
 			else 
 				if (timeLeft and (timeLeft > 0) and (timeLeft > debuffDurationThreshold))
 				or (duration and (duration > 0) and (duration > debuffDurationThreshold)) then
-					return true
+					return true, nil, hideUnfilteredSpellID
 				end
 			end
 		end
@@ -424,7 +545,14 @@ end
 -----------------------------------------------------------------
 -- Returns a copy of our primary filter function
 LibAuraTool.GetAuraFilter = function(self, ...)
-	return auraFilter
+	local filterType = ...
+	if (filterType == "legacy") then
+		return auraFilterLegacy
+	elseif (filterType == "legacy-secondary") then
+		return auraFilterLegacySecondary
+	else
+		return auraFilter
+	end
 end
 
 -- Returns a populated user tagged aura table, but doesn't affect our original.
@@ -1328,8 +1456,10 @@ elseif (IsRetail) then
 		-- Other big ones
 		------------------------------------------------------------------------
 		AddUserFlags( 67556, OnPlayer) 						-- Cooking Speed
+		AddUserFlags( 24735, OnPlayer) 						-- Ghost Costume (Hallow's End)
 		AddUserFlags(243138, OnPlayer) 						-- Happy Feet event 
 		AddUserFlags(246050, OnPlayer) 						-- Happy Feet buff gained restoring health
+		AddUserFlags( 24711, OnPlayer) 						-- Ninja Costume (Hallow's End)
 		AddUserFlags( 33206, OnPlayer) 						-- Pain Suppression
 		AddUserFlags( 10060, OnPlayer) 						-- Power Infusion
 		AddUserFlags( 15007, OnPlayer + PrioHigh) 			-- Resurrection Sickness

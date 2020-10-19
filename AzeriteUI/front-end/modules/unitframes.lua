@@ -1211,7 +1211,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, ...)
 	local layout, module = ...
 	local forge = layout and layout.WidgetForge and layout.WidgetForge
 	if (forge) then
-		return module:Forge("Widget", self, forge)
+		return module:Forge("Widget", self, forge, layout.ButtonForge, module)
 	end
 
 	-- Frame
@@ -1811,7 +1811,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, ...)
 	local layout, module = ...
 	local forge = layout and layout.WidgetForge and layout.WidgetForge
 	if (forge) then
-		return module:Forge("Widget", self, forge)
+		return module:Forge("Widget", self, forge, layout.ButtonForge, module)
 	end
 
 	self.layout = layout

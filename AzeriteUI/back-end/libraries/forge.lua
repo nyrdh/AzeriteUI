@@ -1,4 +1,4 @@
-local LibForge = Wheel:Set("LibForge", 2)
+local LibForge = Wheel:Set("LibForge", 5)
 if (not LibForge) then
 	return
 end
@@ -9,6 +9,7 @@ local assert = assert
 local debugstack = debugstack
 local error = error
 local ipairs = ipairs
+local math_floor = math.floor
 local pairs = pairs
 local select = select
 local string_find = string.find
@@ -116,6 +117,12 @@ local WidgetMethods = {
 			widget:ClearAllPoints()
 			widget:SetPoint(...)
 		end
+	end,
+	SetSizeOffset = function(widget, offsetX, offsetY)
+		local width, height = widget:GetParent():GetSize()
+		local newWidth = math_floor(width + .5) + offsetX
+		local newHeight = math_floor(height + .5) + (offsetY or offsetX)
+		widget:SetSize(newWidth, newHeight)
 	end,
 	SetCheckedTextureKey = function(widget, parentKey)
 		widget:SetCheckedTexture(trackParentKeys(widget, parentKey))
@@ -285,7 +292,14 @@ LibForge.Forge = function(self, forgeType, ...)
 								local key,value
 								local currentValue, numValues = 1, #item.values
 								while (currentValue < numValues) do
-									widget[item.values[currentValue]] = item.values[currentValue + 1]
+									key,value = item.values[currentValue], item.values[currentValue + 1]
+									if (type(value) == "string") then
+										local paramID = tonumber(string_match(value, ":PARAM(%d+):"))
+										if (paramID) then
+											value = select(paramID + 2, ...)
+										end
+									end
+									widget[key] = value
 									currentValue = currentValue + 2
 								end
 							end
@@ -376,10 +390,18 @@ LibForge.Forge = function(self, forgeType, ...)
 							local key,value
 							local currentValue, numValues = 1, #item.values
 							while (currentValue < numValues) do
-								widget[item.values[currentValue]] = item.values[currentValue + 1]
+								key,value = item.values[currentValue], item.values[currentValue + 1]
+								if (type(value) == "string") then
+									local paramID = tonumber(string_match(value, ":PARAM(%d+):"))
+									if (paramID) then
+										value = select(paramID + 2, ...)
+									end
+								end
+								widget[key] = value
 								currentValue = currentValue + 2
 							end
 						end
+
 					end
 
 				end
@@ -429,7 +451,14 @@ LibForge.Forge = function(self, forgeType, ...)
 						local key,value
 						local currentValue, numValues = 1, #item.values
 						while (currentValue < numValues) do
-							widget[item.values[currentValue]] = item.values[currentValue + 1]
+							key,value = item.values[currentValue], item.values[currentValue + 1]
+							if (type(value) == "string") then
+								local paramID = tonumber(string_match(value, ":PARAM(%d+):"))
+								if (paramID) then
+									value = select(paramID + 2, ...)
+								end
+							end
+							widget[key] = value
 							currentValue = currentValue + 2
 						end
 					end

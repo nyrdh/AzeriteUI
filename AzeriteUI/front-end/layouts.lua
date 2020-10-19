@@ -817,7 +817,7 @@ end
 
 -- Custom aura sorting for the player frame.
 local PlayerFrame_AuraSortFunction = function(a,b)
-	if (a) and (b) then
+	if (a) and (b) and (a.id) and (b.id) then
 		if (a.expirationTime == b.expirationTime) then
 			if (a.name) and (b.name) then
 				return (a.name > b.name)
@@ -830,7 +830,7 @@ end
 
 -- Custom aura sorting for the target frame.
 local TargetFrame_AuraSortFunction = function(a,b)
-	if (a) and (b) then
+	if (a) and (b) and (a.id) and (b.id) then
 		if (a.isCastByPlayer == b.isCastByPlayer) then
 			if (a.expirationTime == b.expirationTime) then
 				if (a.name) and (b.name) then
@@ -3390,18 +3390,30 @@ Azerite.Minimap = {
 	UseBars = true, -- copout
 }
 Legacy.Minimap = setmetatable({
-	UseBars = false,
+	Size = { 200, 200 }, 
+	Place = { "TOPRIGHT", "UICenter", "TOPRIGHT", -54, -60 }, 
+
+	-- Border icon positions
 	BattleGroundEyePlace = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
 	GroupFinderEyePlace = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
 	TrackingButtonPlace = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
 	TrackingButtonPlaceAlternate = { "CENTER", math_cos(22.5*deg2rad) * (196/2 + 10), math_sin(22.5*deg2rad) * (196/2 + 10) }, 
-	ZoneAlpha = .75,
-	ZonePlaceFunc = function(Handler) return "TOP", Handler, "BOTTOM", 0, -36 end,
-	ZoneFont = GetFont(14, true),
 
+	-- Element positions
 	MBBPlace = { "TOPRIGHT", 24, 20 },
+	ClockPlace = { "BOTTOM", 0, 10 },
+	CoordinatePlace = { "TOP", 4, -12 },
+	GroupFinderQueueStatusPlace = { "TOPRIGHT", _G.QueueStatusMinimapButton, "BOTTOMLEFT", 0, 0 },
+	MailPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -62, 12 },
+
+	-- Element position functions
+	ZonePlaceFunc = function(Handler) return "TOP", Handler, "BOTTOM", 0, -36 end,
 	PerformanceFramePlaceFunc = function(Handler) return "TOP", Handler.Zone, "BOTTOM", 0, -6	end,
-	PerformanceFramePlaceAdvancedFunc = false,
+	LatencyPlaceFunc = function(Handler) return "TOPLEFT", Handler.PerformanceFrame, "TOPLEFT", 0, 0 end, 
+	FrameRatePlaceFunc = function(Handler) return "LEFT", Handler.Latency, "RIGHT", 6, 0 end, 
+
+	FrameRate_OverrideValue = function(element, fps) element:SetFormattedText("%.0f|cff888888%s|r", math_floor(fps), FPS_ABBR) end,
+	Latency_OverrideValue = function(element, home, world) element:SetFormattedText("%.0f|cff888888%s|r", math_floor(world), MILLISECONDS_ABBR) end,
 	Performance_PostUpdate = function(element)
 		local self = element._owner
 	
@@ -3416,25 +3428,22 @@ Legacy.Minimap = setmetatable({
 			performanceFrame:SetSize(fsize + 6 + lsize, math_ceil(math_max(framerate:GetHeight(), latency:GetHeight())))
 		end 
 	end,
-	Place = { "TOPRIGHT", "UICenter", "TOPRIGHT", -54, -60 }, 
-	Size = { 200, 200 }, 
 
-	FrameRate_OverrideValue = function(element, fps) element:SetFormattedText("%.0f|cff888888%s|r", math_floor(fps), FPS_ABBR) end,
-	Latency_OverrideValue = function(element, home, world) element:SetFormattedText("%.0f|cff888888%s|r", math_floor(world), MILLISECONDS_ABBR) end,
 	ClockFont = GetFont(14, true),
-	ClockFrameInOverlay = true,
-	ClockPlace = { "BOTTOM", 0, 10 },
-	CompassRadiusInset = 2, -- move the text 2 points closer to the center of the map
-	CoordinatePlace = { "TOP", 4, -12 },
-	CoordFrameInOverlay = true, 
-	FrameRatePlaceFunc = function(Handler) return "LEFT", Handler.Latency, "RIGHT", 6, 0 end, 
- 	GroupFinderQueueStatusPlace = { "TOPRIGHT", _G.QueueStatusMinimapButton, "BOTTOMLEFT", 0, 0 },
-	LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 	LatencyFont = GetFont(12, true), 
-	LatencyPlaceFunc = function(Handler) return "TOPLEFT", Handler.PerformanceFrame, "TOPLEFT", 0, 0 end, 
-	MailPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -20, 10 },
+	ZoneFont = GetFont(14, true),
+
+	ClockFrameInOverlay = true,
+	CompassRadiusInset = 2, -- move the text 2 points closer to the center of the map
+	CoordFrameInOverlay = true, 
+	LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 	MapBorderSize = { 256, 256 }, 
 	MapBorderTexture = GetMedia("minimap-border-legacy"),
+	UseBars = false,
+	ZoneAlpha = .75,
+	PerformanceFramePlaceAdvancedFunc = false,
+
+
 
 } , { __index = Azerite.Minimap })
 
@@ -4302,8 +4311,333 @@ Legacy.UnitFramePlayer = {
 						"useSmartName", true
 					}
 
+				},
+
+				-- Auras
+				{
+					parent = "self,ContentScaffold", ownerKey = "Auras", objectType = "Frame", objectSubType = "Frame",
+					chain = {
+						"SetSize", { 304, 84 },
+						"SetPoint", { "TOPRIGHT", -7, 96 }
+					},
+					values = {
+						"auraSize", 40, 
+						"auraWidth", false, 
+						"auraHeight", false,
+						"customSort", function(a,b)
+							if (a) and (b) and (a.id) and (b.id) then
+								-- If one of the auras are static
+								if (a.duration == 0) or (b.duration == 0) then
+									-- If both are static, sort by name
+									if (a.duration == b.duration) then
+										if (a.name) and (b.name) then
+											return (a.name > b.name)
+										end
+									else
+										-- Put the static one last
+										return (b.duration == 0)
+									end
+								else
+									-- If both expire at the same time
+									if (a.expirationTime == b.expirationTime) then
+										-- Sort by name
+										if (a.name) and (b.name) then
+											return (a.name > b.name)
+										end
+									else
+										-- Sort by remaining time, first expiring first.
+										return (a.expirationTime < b.expirationTime) 
+									end
+								end
+							end
+						end,
+						"debuffsFirst", false, 
+						"disableMouse", false, 
+						"filter", false, 
+						"filterBuffs", false, 
+						"filterDebuffs", false, 
+						"func", GetAuraFilterFunc("legacy"), 
+						"funcBuffs", false,
+						"funcDebuffs", false,
+						"growthX", "LEFT", 
+						"growthY", "UP", 
+						"maxBuffs", false, 
+						"maxDebuffs", false, 
+						"maxVisible", 21, 
+						"showDurations", true, 
+						"showSpirals", false, 
+						"showLongDurations", true,
+						"spacingH", 4, 
+						"spacingV", 4, 
+						"tooltipAnchor", false,
+						"tooltipDefaultPosition", false, 
+						"tooltipOffsetX", 8,
+						"tooltipOffsetY", 16,
+						"tooltipPoint", "BOTTOMRIGHT",
+						"tooltipRelPoint", "TOPRIGHT",
+						"ButtonForge", ":PARAM1:", 
+						"ButtonModule", ":PARAM2:", 
+						"PostCreateButton", function(element, button)
+							local module = element.ButtonModule
+							local forge = element.ButtonForge
+							if (forge) and (module) then
+								return module:Forge("Widget", button, forge)
+							end
+						end,
+						"PostUpdateButton", function(element, button)
+							local unit = button.unit
+
+							local isEnemy = UnitCanAttack("player", unit) -- UnitIsEnemy(unit, "player")
+							local isFriend = UnitIsFriend("player", unit)
+							local isYou = UnitIsUnit("player", unit)
+
+							-- Border
+							if (isFriend) then
+								if (button.isBuff) then 
+									button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
+								else
+									local color = Colors.debuff[button.debuffType or "none"]
+									if color then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
+									end 
+								end
+							else 
+								if (button.isStealable) then 
+									local color = Colors.power.ARCANE_CHARGES
+									if (color) then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
+									end 
+								elseif (button.isBuff) then 
+									button.Border:SetBackdropBorderColor(Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+								else
+									local color = Colors.debuff.none
+									if (color) then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
+									end 
+								end
+							end
+						
+							-- Icon
+							if (isYou) then
+								button.Icon:SetDesaturated(false)
+							elseif (isFriend) then
+								if (button.isBuff) then
+									if (button.isCastByPlayer) then 
+										button.Icon:SetDesaturated(false)
+									else
+										button.Icon:SetDesaturated(true)
+									end
+								else
+									button.Icon:SetDesaturated(false)
+								end
+							else
+								if (button.isBuff) then 
+									button.Icon:SetDesaturated(false)
+								else
+									if (button.isCastByPlayer) then 
+										button.Icon:SetDesaturated(false)
+									else
+										button.Icon:SetDesaturated(true)
+									end
+								end
+							end
+						end
+					}
+				},
+
+				-- DeBuffs
+				{
+					parent = "self,ContentScaffold", ownerKey = "Debuffs", objectType = "Frame", objectSubType = "Frame",
+					chain = {
+						"SetSize", { 140, 104 },
+						"SetPoint", { "TOPRIGHT", -321, 1 }
+					},
+					values = {
+						"auraSize", 32, 
+						"auraWidth", false, 
+						"auraHeight", false,
+						"customSort", function(a,b)
+							if (a) and (b) and (a.id) and (b.id) then
+								-- If one of the auras are static
+								if (a.duration == 0) or (b.duration == 0) then
+									-- If both are static, sort by name
+									if (a.duration == b.duration) then
+										if (a.name) and (b.name) then
+											return (a.name > b.name)
+										end
+									else
+										-- Put the static one last
+										return (b.duration == 0)
+									end
+								else
+									-- If both expire at the same time
+									if (a.expirationTime == b.expirationTime) then
+										-- Sort by name
+										if (a.name) and (b.name) then
+											return (a.name > b.name)
+										end
+									else
+										-- Sort by remaining time, first expiring first.
+										return (a.expirationTime < b.expirationTime) 
+									end
+								end
+							end
+						end,
+						"debuffsFirst", false, 
+						"disableMouse", false, 
+						"filter", false, 
+						"filterBuffs", false, 
+						"filterDebuffs", false, 
+						"func", GetAuraFilterFunc("legacy-secondary"), 
+						"funcBuffs", false,
+						"funcDebuffs", false,
+						"growthX", "LEFT", 
+						"growthY", "DOWN", 
+						"maxBuffs", false, 
+						"maxDebuffs", false, 
+						"maxVisible", 12, 
+						"showDurations", true, 
+						"showSpirals", false, 
+						"showLongDurations", true,
+						"spacingH", 4, 
+						"spacingV", 4, 
+						"tooltipAnchor", false,
+						"tooltipDefaultPosition", false, 
+						"tooltipOffsetX", 8,
+						"tooltipOffsetY", 16,
+						"tooltipPoint", "BOTTOMRIGHT",
+						"tooltipRelPoint", "TOPRIGHT",
+						"ButtonForge", ":PARAM1:", 
+						"ButtonModule", ":PARAM2:", 
+						"PostCreateButton", function(element, button)
+							local module = element.ButtonModule
+							local forge = element.ButtonForge
+							if (forge) and (module) then
+								return module:Forge("Widget", button, forge)
+							end
+						end,
+						"PostUpdateButton", function(element, button)
+							local unit = button.unit
+
+							local isEnemy = UnitIsEnemy(unit, "player")
+							local isFriend = UnitIsFriend("player", unit)
+							local isYou = UnitIsUnit("player", unit)
+
+							-- Border
+							if (isFriend) then
+								if (button.isBuff) then 
+									button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
+								else
+									local color = Colors.debuff[button.debuffType or "none"]
+									if color then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
+									end 
+								end
+							else 
+								if (button.isStealable) then 
+									local color = Colors.power.ARCANE_CHARGES
+									if (color) then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
+									end 
+								elseif (button.isBuff) then 
+									button.Border:SetBackdropBorderColor(Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+								else
+									local color = Colors.debuff.none
+									if (color) then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
+									end 
+								end
+							end
+						
+							-- Icon
+							if (isYou) then
+								button.Icon:SetDesaturated(false)
+							elseif (isFriend) then
+								if (button.isBuff) then
+									if (button.isCastByPlayer) then 
+										button.Icon:SetDesaturated(false)
+									else
+										button.Icon:SetDesaturated(true)
+									end
+								else
+									button.Icon:SetDesaturated(false)
+								end
+							else
+								if (button.isBuff) then 
+									button.Icon:SetDesaturated(false)
+								else
+									if (button.isCastByPlayer) then 
+										button.Icon:SetDesaturated(false)
+									else
+										button.Icon:SetDesaturated(true)
+									end
+								end
+							end
+						end
+					}
 				}
 
+
+			}
+		}
+	},
+
+	-- Applied to aura buttons
+	-- Keep these in a manner that works without knowing the size.
+	ButtonForge = {
+		{
+			type = "ModifyWidgets",
+			widgets = {
+				{
+					parent = nil, ownerKey = "Icon", objectType = "Texture",
+					chain = {
+						"SetPosition", { "CENTER", 0, 0 },
+						"SetTexCoord", { 5/64, 59/64, 5/64, 59/64 },
+						"SetSizeOffset", -10
+					} 
+				},
+				{
+					parent = nil, ownerKey = "Count", objectType = "FontString",
+					chain = {
+						"SetPosition", { "BOTTOMRIGHT", 2, -2 },
+						"SetFontObject", GetFont(14, true),
+						"SetTextColor", { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 }
+					}
+				},
+				{
+					parent = nil, ownerKey = "Time", objectType = "FontString",
+					chain = {
+						"SetPosition", { "TOPLEFT", -2, 2 },
+						"SetFontObject", GetFont(14, true)
+					}
+				}
+			}
+		},
+		{
+			type = "CreateWidgets",
+			widgets = {
+				{
+					parent = "self", ownerKey = "Border", objectType = "Frame", objectSubType = "Frame",
+					chain = {
+						"SetFrameLevelOffset", 2,
+						"SetBackdrop", { BACKDROPS.AuraBorder },
+						"SetBackdropBorderColor", { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3, 1 },
+						"ClearAllPoints", "SetPoint", { "TOPLEFT", -7, 7 }, "SetPoint", { "BOTTOMRIGHT", 7, -7 }
+					}
+
+				}
 			}
 		}
 	}
@@ -5120,15 +5454,479 @@ Legacy.UnitFrameTarget = {
 					values = {
 						"maxChars", 16,
 						"showLevel", true,
-						"showLevelLast", false,
+						"showLevelLast", true,
 						"useSmartName", true
 					}
 
+				},
+
+				-- Auras
+				{
+					parent = "self,ContentScaffold", ownerKey = "Auras", objectType = "Frame", objectSubType = "Frame",
+					chain = {
+						"SetSize", { 304, 84 },
+						"SetPoint", { "TOPLEFT", 7, 96 }
+					},
+					values = {
+						"auraSize", 40, 
+						"auraWidth", false, 
+						"auraHeight", false,
+						"customSort", function(a,b)
+							if (a) and (b) and (a.id) and (b.id) then
+								-- If one of the auras are static
+								if (a.duration == 0) or (b.duration == 0) then
+									-- If both are static, sort by name
+									if (a.duration == b.duration) then
+										if (a.name) and (b.name) then
+											return (a.name > b.name)
+										end
+									else
+										-- Put the static one last
+										return (b.duration == 0)
+									end
+								else
+									-- If both expire at the same time
+									if (a.expirationTime == b.expirationTime) then
+										-- Sort by name
+										if (a.name) and (b.name) then
+											return (a.name > b.name)
+										end
+									else
+										-- Sort by remaining time, first expiring first.
+										return (a.expirationTime < b.expirationTime) 
+									end
+								end
+							end
+						end,
+						"debuffsFirst", false, 
+						"disableMouse", false, 
+						"filter", false, 
+						"filterBuffs", false, 
+						"filterDebuffs", false, 
+						"func", GetAuraFilterFunc("legacy"), 
+						"funcBuffs", false,
+						"funcDebuffs", false,
+						"growthX", "RIGHT", 
+						"growthY", "UP", 
+						"maxBuffs", false, 
+						"maxDebuffs", false, 
+						"maxVisible", 21, 
+						"showDurations", true, 
+						"showSpirals", false, 
+						"showLongDurations", true,
+						"spacingH", 4, 
+						"spacingV", 4, 
+						"tooltipAnchor", false,
+						"tooltipDefaultPosition", false, 
+						"tooltipOffsetX", 8,
+						"tooltipOffsetY", 16,
+						"tooltipPoint", "BOTTOMLEFT",
+						"tooltipRelPoint", "TOPLEFT",
+						"ButtonForge", ":PARAM1:", 
+						"ButtonModule", ":PARAM2:", 
+						"PostCreateButton", function(element, button)
+							local module = element.ButtonModule
+							local forge = element.ButtonForge
+							if (forge) and (module) then
+								return module:Forge("Widget", button, forge)
+							end
+						end,
+						"PostUpdateButton", function(element, button)
+							local unit = button.unit
+
+							local isEnemy = UnitIsEnemy(unit, "player")
+							local isFriend = UnitIsFriend("player", unit)
+							local isYou = UnitIsUnit("player", unit)
+
+							-- Border
+							if (isFriend) then
+								if (button.isBuff) then 
+									button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
+								else
+									local color = Colors.debuff[button.debuffType or "none"]
+									if color then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
+									end 
+								end
+							else 
+								if (button.isStealable) then 
+									local color = Colors.power.ARCANE_CHARGES
+									if (color) then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
+									end 
+								elseif (button.isBuff) then 
+									button.Border:SetBackdropBorderColor(Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+								else
+									local color = Colors.debuff.none
+									if (color) then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
+									end 
+								end
+							end
+						
+							-- Icon
+							if (isYou) then
+								button.Icon:SetDesaturated(false)
+							elseif (isFriend) then
+								if (button.isBuff) then
+									if (button.isCastByPlayer) then 
+										button.Icon:SetDesaturated(false)
+									else
+										button.Icon:SetDesaturated(true)
+									end
+								else
+									button.Icon:SetDesaturated(false)
+								end
+							else
+								if (button.isBuff) then 
+									button.Icon:SetDesaturated(false)
+								else
+									if (button.isCastByPlayer) then 
+										button.Icon:SetDesaturated(false)
+									else
+										button.Icon:SetDesaturated(true)
+									end
+								end
+							end
+						end
+					}
+				},
+
+				-- Buffs
+				{
+					parent = "self,ContentScaffold", ownerKey = "Buffs", objectType = "Frame", objectSubType = "Frame",
+					chain = {
+						"SetSize", { 140, 104 },
+						"SetPoint", { "TOPLEFT", 321, 1 }
+					},
+					values = {
+						"auraSize", 32, 
+						"auraWidth", false, 
+						"auraHeight", false,
+						"customSort", function(a,b)
+							if (a) and (b) and (a.id) and (b.id) then
+								-- If one of the auras are static
+								if (a.duration == 0) or (b.duration == 0) then
+									-- If both are static, sort by name
+									if (a.duration == b.duration) then
+										if (a.name) and (b.name) then
+											return (a.name > b.name)
+										end
+									else
+										-- Put the static one last
+										return (b.duration == 0)
+									end
+								else
+									-- If both expire at the same time
+									if (a.expirationTime == b.expirationTime) then
+										-- Sort by name
+										if (a.name) and (b.name) then
+											return (a.name > b.name)
+										end
+									else
+										-- Sort by remaining time, first expiring first.
+										return (a.expirationTime < b.expirationTime) 
+									end
+								end
+							end
+						end,
+						"debuffsFirst", false, 
+						"disableMouse", false, 
+						"filter", false, 
+						"filterBuffs", false, 
+						"filterDebuffs", false, 
+						"func", GetAuraFilterFunc("legacy-secondary"), 
+						"funcBuffs", false,
+						"funcDebuffs", false,
+						"growthX", "RIGHT", 
+						"growthY", "DOWN", 
+						"maxBuffs", false, 
+						"maxDebuffs", false, 
+						"maxVisible", 12, 
+						"showDurations", true, 
+						"showSpirals", false, 
+						"showLongDurations", true,
+						"spacingH", 4, 
+						"spacingV", 4, 
+						"tooltipAnchor", false,
+						"tooltipDefaultPosition", false, 
+						"tooltipOffsetX", 8,
+						"tooltipOffsetY", 16,
+						"tooltipPoint", "BOTTOMLEFT",
+						"tooltipRelPoint", "TOPLEFT",
+						"ButtonForge", ":PARAM1:", 
+						"ButtonModule", ":PARAM2:", 
+						"PostCreateButton", function(element, button)
+							local module = element.ButtonModule
+							local forge = element.ButtonForge
+							if (forge) and (module) then
+								return module:Forge("Widget", button, forge)
+							end
+						end,
+						"PostUpdateButton", function(element, button)
+							local unit = button.unit
+
+							local isEnemy = UnitIsEnemy(unit, "player")
+							local isFriend = UnitIsFriend("player", unit)
+							local isYou = UnitIsUnit("player", unit)
+
+							-- Border
+							if (isFriend) then
+								if (button.isBuff) then 
+									button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
+								else
+									local color = Colors.debuff[button.debuffType or "none"]
+									if color then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
+									end 
+								end
+							else 
+								if (button.isStealable) then 
+									local color = Colors.power.ARCANE_CHARGES
+									if (color) then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
+									end 
+								elseif (button.isBuff) then 
+									button.Border:SetBackdropBorderColor(Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+								else
+									local color = Colors.debuff.none
+									if (color) then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
+									end 
+								end
+							end
+						
+							-- Icon
+							if (isYou) then
+								button.Icon:SetDesaturated(false)
+							elseif (isFriend) then
+								if (button.isBuff) then
+									if (button.isCastByPlayer) then 
+										button.Icon:SetDesaturated(false)
+									else
+										button.Icon:SetDesaturated(true)
+									end
+								else
+									button.Icon:SetDesaturated(false)
+								end
+							else
+								if (button.isBuff) then 
+									button.Icon:SetDesaturated(false)
+								else
+									if (button.isCastByPlayer) then 
+										button.Icon:SetDesaturated(false)
+									else
+										button.Icon:SetDesaturated(true)
+									end
+								end
+							end
+						end
+					}
+				},
+
+				-- DeBuffs
+				{
+					parent = "self,ContentScaffold", ownerKey = "Debuffs", objectType = "Frame", objectSubType = "Frame",
+					chain = {
+						"SetSize", { 140, 104 },
+						"SetPoint", { "TOPLEFT", 321, 1 }
+					},
+					values = {
+						"auraSize", 32, 
+						"auraWidth", false, 
+						"auraHeight", false,
+						"customSort", function(a,b)
+							if (a) and (b) and (a.id) and (b.id) then
+								-- If one of the auras are static
+								if (a.duration == 0) or (b.duration == 0) then
+									-- If both are static, sort by name
+									if (a.duration == b.duration) then
+										if (a.name) and (b.name) then
+											return (a.name > b.name)
+										end
+									else
+										-- Put the static one last
+										return (b.duration == 0)
+									end
+								else
+									-- If both expire at the same time
+									if (a.expirationTime == b.expirationTime) then
+										-- Sort by name
+										if (a.name) and (b.name) then
+											return (a.name > b.name)
+										end
+									else
+										-- Sort by remaining time, first expiring first.
+										return (a.expirationTime < b.expirationTime) 
+									end
+								end
+							end
+						end,
+						"debuffsFirst", false, 
+						"disableMouse", false, 
+						"filter", false, 
+						"filterBuffs", false, 
+						"filterDebuffs", false, 
+						"func", GetAuraFilterFunc("legacy-secondary"), 
+						"funcBuffs", false,
+						"funcDebuffs", false,
+						"growthX", "RIGHT", 
+						"growthY", "DOWN", 
+						"maxBuffs", false, 
+						"maxDebuffs", false, 
+						"maxVisible", 12, 
+						"showDurations", true, 
+						"showSpirals", false, 
+						"showLongDurations", true,
+						"spacingH", 4, 
+						"spacingV", 4, 
+						"tooltipAnchor", false,
+						"tooltipDefaultPosition", false, 
+						"tooltipOffsetX", 8,
+						"tooltipOffsetY", 16,
+						"tooltipPoint", "BOTTOMLEFT",
+						"tooltipRelPoint", "TOPLEFT",
+						"ButtonForge", ":PARAM1:", 
+						"ButtonModule", ":PARAM2:", 
+						"PostCreateButton", function(element, button)
+							local module = element.ButtonModule
+							local forge = element.ButtonForge
+							if (forge) and (module) then
+								return module:Forge("Widget", button, forge)
+							end
+						end,
+						"PostUpdateButton", function(element, button)
+							local unit = button.unit
+
+							local isEnemy = UnitIsEnemy(unit, "player")
+							local isFriend = UnitIsFriend("player", unit)
+							local isYou = UnitIsUnit("player", unit)
+
+							-- Border
+							if (isFriend) then
+								if (button.isBuff) then 
+									button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
+								else
+									local color = Colors.debuff[button.debuffType or "none"]
+									if color then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
+									end 
+								end
+							else 
+								if (button.isStealable) then 
+									local color = Colors.power.ARCANE_CHARGES
+									if (color) then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
+									end 
+								elseif (button.isBuff) then 
+									button.Border:SetBackdropBorderColor(Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+								else
+									local color = Colors.debuff.none
+									if (color) then 
+										button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+									else
+										button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
+									end 
+								end
+							end
+						
+							-- Icon
+							if (isYou) then
+								button.Icon:SetDesaturated(false)
+							elseif (isFriend) then
+								if (button.isBuff) then
+									if (button.isCastByPlayer) then 
+										button.Icon:SetDesaturated(false)
+									else
+										button.Icon:SetDesaturated(true)
+									end
+								else
+									button.Icon:SetDesaturated(false)
+								end
+							else
+								if (button.isBuff) then 
+									button.Icon:SetDesaturated(false)
+								else
+									if (button.isCastByPlayer) then 
+										button.Icon:SetDesaturated(false)
+									else
+										button.Icon:SetDesaturated(true)
+									end
+								end
+							end
+						end
+					}
 				}
+				
 
 			}
 		}
+	},
+
+	-- Applied to aura buttons
+	-- Keep these in a manner that works without knowing the size.
+	ButtonForge = {
+		{
+			type = "ModifyWidgets",
+			widgets = {
+				{
+					parent = nil, ownerKey = "Icon", objectType = "Texture",
+					chain = {
+						"SetPosition", { "CENTER", 0, 0 },
+						"SetTexCoord", { 5/64, 59/64, 5/64, 59/64 },
+						"SetSizeOffset", -10
+					} 
+				},
+				{
+					parent = nil, ownerKey = "Count", objectType = "FontString",
+					chain = {
+						"SetPosition", { "BOTTOMRIGHT", 2, -2 },
+						"SetFontObject", GetFont(14, true),
+						"SetTextColor", { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 }
+					}
+				},
+				{
+					parent = nil, ownerKey = "Time", objectType = "FontString",
+					chain = {
+						"SetPosition", { "TOPLEFT", -2, 2 },
+						"SetFontObject", GetFont(14, true)
+					}
+				}
+			}
+		},
+		{
+			type = "CreateWidgets",
+			widgets = {
+				{
+					parent = "self", ownerKey = "Border", objectType = "Frame", objectSubType = "Frame",
+					chain = {
+						"SetFrameLevelOffset", 2,
+						"SetBackdrop", { BACKDROPS.AuraBorder },
+						"SetBackdropBorderColor", { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3, 1 },
+						"ClearAllPoints", "SetPoint", { "TOPLEFT", -7, 7 }, "SetPoint", { "BOTTOMRIGHT", 7, -7 }
+					}
+
+				}
+			}
+		}
 	}
+
 }
 
 ------------------------------------------------
