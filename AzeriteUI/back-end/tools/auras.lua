@@ -78,8 +78,7 @@ end
 -- Forcing this for classes still lacking strict filter lists,
 -- or we'd end up with nothing being shown at all.
 local playerClass = select(2, UnitClass("player"))
-local SLACKMODE = IsRetailShadowlands -- forcing slack mode until filters can be redone and verified
-			   or (playerClass == "DEATHKNIGHT")
+local SLACKMODE = (playerClass == "DEATHKNIGHT")
 			   or (playerClass == "DEMONHUNTER")
 			   --or (playerClass == "DRUID")
 			   or (IsClassic and (playerClass == "HUNTER"))
@@ -1459,6 +1458,7 @@ elseif (IsRetail) then
 		AddUserFlags( 24735, OnPlayer) 						-- Ghost Costume (Hallow's End)
 		AddUserFlags(243138, OnPlayer) 						-- Happy Feet event 
 		AddUserFlags(246050, OnPlayer) 						-- Happy Feet buff gained restoring health
+		AddUserFlags( 24710, OnPlayer) 						-- Ninja Costume (Hallow's End)
 		AddUserFlags( 24711, OnPlayer) 						-- Ninja Costume (Hallow's End)
 		AddUserFlags( 33206, OnPlayer) 						-- Pain Suppression
 		AddUserFlags( 10060, OnPlayer) 						-- Power Infusion

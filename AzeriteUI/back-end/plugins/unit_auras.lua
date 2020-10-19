@@ -742,6 +742,7 @@ local Update = function(self, event, unit, ...)
 		-- Store some basic values on the element
 		local forced = forced or (guid ~= Auras.guid) or (not Auras.guid)
 		Auras.guid = guid
+		Auras.inCombat = IN_COMBAT
 	
 		-- Filter strings passed to the blizzard API calls
 		local buffFilter = Auras.filter or Auras.filterBuffs 
@@ -777,7 +778,6 @@ local Update = function(self, event, unit, ...)
 		Auras.visibleDebuffs = visibleDebuffs
 		Auras.hasBuffs = visibleBuffs > 0
 		Auras.hasDebuffs = visibleDebuffs > 0
-		Auras.inCombat = IN_COMBAT
 
 		EvaluateVisibilities(Auras, visible)
 
@@ -794,6 +794,7 @@ local Update = function(self, event, unit, ...)
 		-- Store some basic values on the element
 		local forced = forced or (guid ~= Buffs.guid) or (not Buffs.guid)
 		Buffs.guid = guid
+		Buffs.inCombat = IN_COMBAT
 
 		-- Filter strings passed to the blizzard API calls
 		local buffFilter = Buffs.filter or Buffs.filterBuffs 
@@ -819,7 +820,6 @@ local Update = function(self, event, unit, ...)
 		Buffs.visibleDebuffs = visibleDebuffs
 		Buffs.hasBuffs = visibleBuffs > 0
 		Buffs.hasDebuffs = visibleDebuffs > 0
-		Buffs.inCombat = IN_COMBAT
 
 		EvaluateVisibilities(Buffs, visible)
 
@@ -836,6 +836,7 @@ local Update = function(self, event, unit, ...)
 		-- Store some basic values on the element
 		local forced = forced or (guid ~= Debuffs.guid) or (not Debuffs.guid)
 		Debuffs.guid = guid
+		Debuffs.inCombat = IN_COMBAT
 		
 		-- Filter strings passed to the blizzard API calls
 		local debuffFilter = Debuffs.filter or Debuffs.filterDebuffs
@@ -861,7 +862,6 @@ local Update = function(self, event, unit, ...)
 		Debuffs.visibleDebuffs = visibleDebuffs
 		Debuffs.hasBuffs = visibleBuffs > 0
 		Debuffs.hasDebuffs = visibleDebuffs > 0
-		Debuffs.inCombat = IN_COMBAT
 
 		EvaluateVisibilities(Debuffs, visible)
 

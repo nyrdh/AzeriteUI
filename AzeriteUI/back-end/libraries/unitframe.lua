@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 81)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 82)
 if (not LibUnitFrame) then	
 	return
 end

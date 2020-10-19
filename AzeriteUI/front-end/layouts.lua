@@ -2130,7 +2130,7 @@ Defaults.UnitFrameRaid = {
 -- 
 -- I advice tinkerers to be careful when changing these,
 -- as most modules assume that other modules have the settings I gave them.
--- This means that if you change somethng like let's say the position
+-- This means that if you change something like let's say the position
 -- of the minimap, you'll also have to change a variety of other things
 -- like which way tooltips grow, where the default position of all tooltips are,
 -- where the integrated MBB button is placed, and so on. 
@@ -3432,10 +3432,10 @@ Legacy.Minimap = setmetatable({
 	ClockFont = GetFont(14, true),
 	LatencyFont = GetFont(12, true), 
 	ZoneFont = GetFont(14, true),
-
 	ClockFrameInOverlay = true,
 	CompassRadiusInset = 2, -- move the text 2 points closer to the center of the map
 	CoordFrameInOverlay = true, 
+	FrameRateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 	LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 	MapBorderSize = { 256, 256 }, 
 	MapBorderTexture = GetMedia("minimap-border-legacy"),
@@ -4104,7 +4104,7 @@ Legacy.UnitFramePlayer = {
 					parent = nil, ownerKey = nil, 
 					chain = {
 						"SetSize", { 316, 86 }, "SetHitBox", { -4, -4, -4, -4 },
-						"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -210, 290 }
+						"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -210, 210 }
 					},
 					values = {
 						"colors", Colors
@@ -4381,7 +4381,7 @@ Legacy.UnitFramePlayer = {
 							local module = element.ButtonModule
 							local forge = element.ButtonForge
 							if (forge) and (module) then
-								return module:Forge("Widget", button, forge)
+								return module:Forge(button, forge)
 							end
 						end,
 						"PostUpdateButton", function(element, button)
@@ -4519,7 +4519,7 @@ Legacy.UnitFramePlayer = {
 							local module = element.ButtonModule
 							local forge = element.ButtonForge
 							if (forge) and (module) then
-								return module:Forge("Widget", button, forge)
+								return module:Forge(button, forge)
 							end
 						end,
 						"PostUpdateButton", function(element, button)
@@ -5251,7 +5251,7 @@ Legacy.UnitFrameTarget = {
 					parent = nil, ownerKey = nil, 
 					chain = {
 						"SetSize", { 316, 86 }, "SetHitBox", { -4, -4, -4, -4 },
-						"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 210, 290 }
+						"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 210, 210 }
 					},
 					values = {
 						"colors", Colors
@@ -5291,8 +5291,8 @@ Legacy.UnitFrameTarget = {
 						"colorDisconnected", true, -- color disconnected units
 						"colorHealth", true, -- color anything else in the default health color
 						"colorReaction", true, -- color NPCs by their reaction standing with us
-						"colorTapped", false, -- color tap denied units 
-						"colorThreat", false, -- color non-friendly by threat
+						"colorTapped", true, -- color tap denied units 
+						"colorThreat", true, -- color non-friendly by threat
 						"frequent", true, -- listen to frequent health events for more accurate updates
 						"predictThreshold", .01,
 						"absorbOverrideAlpha", .75
@@ -5528,7 +5528,7 @@ Legacy.UnitFrameTarget = {
 							local module = element.ButtonModule
 							local forge = element.ButtonForge
 							if (forge) and (module) then
-								return module:Forge("Widget", button, forge)
+								return module:Forge(button, forge)
 							end
 						end,
 						"PostUpdateButton", function(element, button)
@@ -5666,7 +5666,7 @@ Legacy.UnitFrameTarget = {
 							local module = element.ButtonModule
 							local forge = element.ButtonForge
 							if (forge) and (module) then
-								return module:Forge("Widget", button, forge)
+								return module:Forge(button, forge)
 							end
 						end,
 						"PostUpdateButton", function(element, button)
@@ -5804,7 +5804,7 @@ Legacy.UnitFrameTarget = {
 							local module = element.ButtonModule
 							local forge = element.ButtonForge
 							if (forge) and (module) then
-								return module:Forge("Widget", button, forge)
+								return module:Forge(button, forge)
 							end
 						end,
 						"PostUpdateButton", function(element, button)

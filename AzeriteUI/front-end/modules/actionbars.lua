@@ -477,7 +477,7 @@ ActionButton.PostCreate = function(self, ...)
 	local layout = Module.layout
 	local forge = layout and layout.WidgetForge and layout.WidgetForge.ActionButton
 	if (forge) then
-		Module:Forge("Widget", self, forge)
+		Module:Forge(self, forge)
 	end
 end 
 
@@ -490,7 +490,7 @@ PetButton.PostCreate = function(self, ...)
 	local layout = Module.layout
 	local forge = layout and layout.WidgetForge and layout.WidgetForge.PetActionButton
 	if (forge) then
-		Module:Forge("Widget", self, forge)
+		Module:Forge(self, forge)
 	end
 end 
 

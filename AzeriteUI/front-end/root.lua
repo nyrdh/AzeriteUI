@@ -761,18 +761,27 @@ Core.OnChatCommand = function(self, editBox, msg)
 	self:UpdateDebugConsole()
 end
 
+-- Let's overdo this.
+local themes = {
+	az = "Azerite",
+	azui = "Azerite",
+	azerite = "Azerite",
+	azeriteui = "Azerite",
+	legacy = "Legacy",
+	gui = "Legacy",
+	goldpaw = "Legacy",
+	goldpawui = "Legacy",
+	blakmane = "Azerite",
+	blakmaneui = "Azerite"
+}
+
 Core.SetTheme = function(self, editBox, theme)
 	-- Do a minimum amount of control here, 
 	-- as this is connected to saved settings.
 	-- We don't want crazy results saved.
-	local new 
-	if (theme == "console") or (theme == "blakmane") or (theme == "blakmaneui") or (theme == "azerite") or ((theme == "azeriteui")) or (theme == "az") or (theme == "azui") then
-		new = "Azerite"
-	elseif (theme == "legacy") or (theme == "goldpaw") or (theme == "goldpawui")  or (theme == "gui") then
-		new = "Legacy"
-	end
-	-- Only apply the setting and force a reload upon actual changes.
+	local new = theme and themes[theme] 
 	if (new) and (new ~= self.db.theme) then
+		-- Only apply the setting and force a reload upon actual changes.
 		self.db.theme = new
 		ReloadUI()
 	end
@@ -861,7 +870,7 @@ Core.OnInit = function(self)
 	-- Apply theme based edits.	
 	local layout = self.layout
 	if (layout and layout.Forge and layout.Forge.OnInit) then
-		self:Forge("Module", self, layout.Forge.OnInit)
+		self:Forge(self, layout.Forge.OnInit)
 	end
 
 end 
@@ -869,7 +878,7 @@ end
 Core.OnEnable = function(self)
 	local layout = self.layout
 	if (layout and layout.Forge and layout.Forge.OnEnable) then
-		self:Forge("Module", self, layout.Forge.OnEnable)
+		self:Forge(self, layout.Forge.OnEnable)
 	end
 
 	-- Experimental stuff we move to relevant modules once done

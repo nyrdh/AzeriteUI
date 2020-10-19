@@ -1,4 +1,4 @@
-local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 24)
+local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 25)
 if (not LibWidgetContainer) then	
 	return
 end
@@ -11,6 +11,9 @@ assert(LibEvent, "LibWidgetContainer requires LibEvent to be loaded.")
 
 local LibFrame = Wheel("LibFrame")
 assert(LibFrame, "LibWidgetContainer requires LibFrame to be loaded.")
+
+local LibForge = Wheel("LibForge")
+assert(LibForge, "LibWidgetContainer requires LibForge to be loaded.")
 
 -- Embed event functionality into this
 LibMessage:Embed(LibWidgetContainer)
@@ -581,6 +584,11 @@ LibWidgetContainer.CreateWidgetContainer = function(self, frameType, parent, tem
 	-- we sure we want to be doing this?
 	frame:SetFrameStrata("LOW")
 	frame:SetFrameLevel(1000)
+
+	-- Embed forging and chaining directly in the containers.
+	-- They will all be needing it anyway soon, 
+	-- so no use to go the long way around module embedding.
+	LibForge:Embed(frame)
 	
 	return LibWidgetContainer:InitWidgetContainer(frame, unit, styleFunc, ...)
 end

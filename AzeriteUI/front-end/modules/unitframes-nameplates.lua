@@ -88,7 +88,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	-- If a forge exists, we leave it all to that.
 	local forge = layout and layout.WidgetForge and layout.WidgetForge.NamePlate
 	if (forge) then
-		return self:Forge("Widget", plate, forge)
+		return self:Forge(plate, forge)
 	end
 
 	-- the old way

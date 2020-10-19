@@ -1,4 +1,4 @@
-local LibForge = Wheel:Set("LibForge", 5)
+local LibForge = Wheel:Set("LibForge", 6)
 if (not LibForge) then
 	return
 end
@@ -45,12 +45,11 @@ local check = function(value, num, ...)
 end
 
 -- Find an object based on a source object and a path of comma-separated keys.
-local delimiter = ","
 local trackParentKeys = function(object, path)
 	local target = object
 	if (path) then 
-		if (string_find(path, delimiter)) then
-			local trail = { string_split(delimiter, path) }
+		if (string_find(path, ",")) then
+			local trail = { string_split(",", path) }
 			for _,nextPath in ipairs(trail) do
 				if (nextPath == "self") then
 					target = object
@@ -69,6 +68,21 @@ local trackParentKeys = function(object, path)
 	return target or object
 end
 
+-- Unpack tables consisting of arguments,
+-- but avoid attempting to unpack textures, fontstrings or frames.
+local parseArguments = function(args)
+	if (type(args) == "table") and (not args.GetObjectType) then
+		return unpack(args)
+	else
+		return args
+	end
+end
+
+-- Check for object type and existence, all in one.
+local isObjectType = function(widget, objectType)
+	return (widget) and (objectType) and (widget.IsObjectType) and (widget:IsObjectType(objectType))
+end
+
 ----------------------------------------------------------------
 -- Methods
 ----------------------------------------------------------------
@@ -77,7 +91,7 @@ end
 -- and affects how the Chain function progresses towards the next method.
 local WidgetMethods = {
 	ClearAllPoints = function(widget)
-		widget:ClearAllPoints("")
+		widget:ClearAllPoints()
 		return true
 	end,
 	ClearTexture = function(widget)
@@ -90,6 +104,18 @@ local WidgetMethods = {
 	end,
 	SetAllPointsToParentKey = function(widget, parentKey)
 		widget:SetAllPoints(trackParentKeys(widget:GetParent(), parentKey))
+	end,
+	SetCheckedTextureBlendMode = function(widget, ...)
+		widget:GetCheckedTexture():SetBlendMode(...)
+	end,
+	SetCheckedTextureDrawLayer = function(widget, ...)
+		widget:GetCheckedTexture():SetDrawLayer(...)
+	end,
+	SetCheckedTextureKey = function(widget, parentKey)
+		widget:SetCheckedTexture(trackParentKeys(widget, parentKey))
+	end,
+	SetCheckedTextureMask = function(widget, ...)
+		widget:GetCheckedTexture():SetMask(...)
 	end,
 	SetFrameLevelOffset = function(widget, offset)
 		widget:SetFrameLevel(widget:GetParent():GetFrameLevel() + offset)
@@ -118,27 +144,6 @@ local WidgetMethods = {
 			widget:SetPoint(...)
 		end
 	end,
-	SetSizeOffset = function(widget, offsetX, offsetY)
-		local width, height = widget:GetParent():GetSize()
-		local newWidth = math_floor(width + .5) + offsetX
-		local newHeight = math_floor(height + .5) + (offsetY or offsetX)
-		widget:SetSize(newWidth, newHeight)
-	end,
-	SetCheckedTextureKey = function(widget, parentKey)
-		widget:SetCheckedTexture(trackParentKeys(widget, parentKey))
-	end,
-	SetCheckedTextureBlendMode = function(widget, ...)
-		widget:GetCheckedTexture():SetBlendMode(...)
-	end,
-	SetCheckedTextureDrawLayer = function(widget, ...)
-		widget:GetCheckedTexture():SetDrawLayer(...)
-	end,
-	SetCheckedTextureMask = function(widget, ...)
-		widget:GetCheckedTexture():SetMask(...)
-	end,
-	SetPushedTextureKey = function(widget, parentKey)
-		widget:SetPushedTexture(trackParentKeys(widget, parentKey))
-	end,
 	SetPushedTextureBlendMode = function(widget, ...)
 		widget:GetPushedTexture():SetBlendMode(...)
 	end,
@@ -147,11 +152,16 @@ local WidgetMethods = {
 	end,
 	SetPushedTextureMask = function(widget, ...)
 		widget:GetPushedTexture():SetMask(...)
+	end,
+	SetPushedTextureKey = function(widget, parentKey)
+		widget:SetPushedTexture(trackParentKeys(widget, parentKey))
+	end,
+	SetSizeOffset = function(widget, offsetX, offsetY)
+		local width, height = widget:GetParent():GetSize()
+		local newWidth = math_floor(width + .5) + offsetX
+		local newHeight = math_floor(height + .5) + (offsetY or offsetX)
+		widget:SetSize(newWidth, newHeight)
 	end
-}
-
-local ModuleMethods = {
-
 }
 
 ----------------------------------------------------------------
@@ -159,323 +169,277 @@ local ModuleMethods = {
 ----------------------------------------------------------------
 -- Perform multiple methods to a widget at once.
 -- This also accepts custom method names as listed above.
-LibForge.Chain = function(self, widget, ...) 
-	if (not widget) then
+LibForge.Chain = function(self, widget, chaindata) 
+	check(widget, 1, "table", "nil")
+	check(chaindata, 2, "table", "nil")
+
+	-- Silently fail if not data is passed.
+	if (not widget) or (not chaindata) then
 		return
 	end
-	local numArgs = select("#", ...)
+
+	local numArgs = #chaindata
 	local currentArg = 1
 	local func, method, args
 	while (currentArg <= numArgs) do
 		local noInputArgs
-		method, args = select(currentArg, ...)
+		method, args = chaindata[currentArg], chaindata[currentArg + 1]
 		if (type(method) == "string") then
 			if (WidgetMethods[method]) then
-				-- Unpack tables consisting of arguments,
-				-- but avoid attempting to unpack textures, fontstrings or frames.
-				if (type(args) == "table") and (not args.GetObjectType) then
-					noInputArgs = WidgetMethods[method](widget, unpack(args))
-				else
-					noInputArgs = WidgetMethods[method](widget, args)
-				end
+				noInputArgs = WidgetMethods[method](widget, parseArguments(args))
 			else
 				func = widget[method]
 				if (func) then
-					-- Unpack tables consisting of arguments,
-					-- but avoid attempting to unpack textures, fontstrings or frames.
-					if (type(args) == "table") and (not args.GetObjectType) then
-						func(widget, unpack(args))
-					else
-						func(widget, args)
-					end
+					func(widget, parseArguments(args))
 				end
 			end
 		elseif (type(method) == "function") then
-			-- Unpack tables consisting of arguments,
-			-- but avoid attempting to unpack textures, fontstrings or frames.
-			if (type(args) == "table") and (not args.GetObjectType) then
-				method(widget, unpack(args))
-			else
-				method(widget, args)
-			end
+			method(widget, parseArguments(args))
 		end
 		currentArg = currentArg + (noInputArgs and 1 or 2)
 	end
 end
 
--- Widget forge.
-LibForge.Forge = function(self, forgeType, ...)
+-- Apply a list of values to a widget.
+-- String values will be keyword parsed.
+LibForge.Decorate = function(self, widget, values, ...)
+	check(widget, 1, "table", "nil")
+	check(values, 2, "table", "nil")
 
-	if (forgeType == "Widget") then
-		local object, forgedata = ...
-		if (not object) or (not forgedata) then
-			return
-		end
+	-- Silently fail if not data is passed.
+	if (not widget) or (not values) then
+		return
+	end
 
-		CURRENT_OBJECT = object
-
-		-- Iterate workorders in the forgedata
-		for _,workorder in ipairs(forgedata) do
-
-			-- Workorder is to create widgets
-			if (workorder.type == "CreateWidgets") then
-
-				-- Iterate widgets to be created or modelled
-				for _,item in ipairs(workorder.widgets) do
-
-					-- This will hold the widget
-					local widget
-
-					-- This will be the parent, if creation is needed.
-					local parent 
-
-					-- Figure out who the parent is
-					local owner = object -- this is always the owner
-					if (item.parent) and ((item.ownerKey) or (item.parentKey)) then
-						parent = trackParentKeys(owner, item.parent) -- the parent can differ
-
-						-- Check if the widget already exists, as we're only going to modify this time, not create.
-						local oldWidget = item.ownerKey and owner[item.ownerKey] or item.parentKey and parent[item.parentKey]
-						if (oldWidget) and (oldWidget.IsObjectType and oldWidget:IsObjectType(item.objectType)) then
-							widget = oldWidget
-						end
-					else
-						-- When parent and keys are omitted,
-						-- we assume we are modifying the object itself. 
-						widget = object
-					end
-					
-					-- Skip it if a dependency fails.
-					local dependencyFailed
-					if (item.ownerDependencyKey) then
-						local key = trackParentKeys(owner, item.ownerDependencyKey)
-						if (not key) then
-							widget = nil
-							dependencyFailed = true
-						end
-					end
-
-					-- Skip this if a dependency check failed.
-					if (not dependencyFailed) then
-
-						-- Create the widget if it doesn't exist, or exist of the wrong type.
-						if (not widget) then
-							if (item.objectType == "Texture") then
-								widget = parent:CreateTexture()
-
-							elseif (item.objectType == "FontString") then
-								widget = parent:CreateFontString()
-
-							elseif (item.objectType == "Frame") then
-								if (item.objectSubType == "StatusBar") and (parent.CreateStatusBar) then
-									widget = parent:CreateStatusBar()
-								else
-									widget = parent:CreateFrame(item.objectSubType)
-								end
-							end
-						else
-							-- Object may exist at the right key relative to its indended parent, 
-							-- but with the wrong parent. Fix it if that is the case.
-							if (item.parent) then
-								widget:SetParent(parent)
-							end
-						end
-
-						if (widget) then
-							-- Apply any methods
-							if (item.chain) then
-								self:Chain(widget, unpack(item.chain))
-							end
-
-							-- Assign values
-							if (item.values) then
-								local key,value
-								local currentValue, numValues = 1, #item.values
-								while (currentValue < numValues) do
-									key,value = item.values[currentValue], item.values[currentValue + 1]
-									if (type(value) == "string") then
-										local paramID = tonumber(string_match(value, ":PARAM(%d+):"))
-										if (paramID) then
-											value = select(paramID + 2, ...)
-										end
-									end
-									widget[key] = value
-									currentValue = currentValue + 2
-								end
-							end
-
-							-- Key the widget to its owner or parent
-							if (item.ownerKey) then
-								owner[item.ownerKey] = widget
-
-							elseif (item.parentKey) then
-								parent[item.parentKey] = widget
-							end
-						end
-
-					end
-
+	local key,value
+	local currentValue, numValues = 1, #values
+	while (currentValue < numValues) do
+		key,value = values[currentValue], values[currentValue + 1]
+		
+		if (type(value) == "string") then
+			if (value == ":MODULE:") then 
+				value = self
+			else
+				local paramID = tonumber(string_match(value, ":PARAM(%d+):"))
+				if (paramID) then
+					value = select(paramID, ...)
 				end
-			
-			elseif (workorder.type == "ModifyWidgets") then
+			end
+		end
+		
+		widget[key] = value
+		currentValue = currentValue + 2
+	end
+end
 
-				-- Iterate widgets to be created or modelled
-				for _,item in ipairs(workorder.widgets) do
+-- Widget forge.
+LibForge.Forge = function(self, object, forgedata, ...)
+	check(object, 1, "table", "nil")
+	check(forgedata, 2, "table", "nil")
 
-					-- This will hold the widget
-					local widget  
+	-- Silently fail if not data is passed.
+	if (not object) or (not forgedata) then
+		return
+	end
 
-					-- Figure out where the widget is
-					local owner = object -- this is always the owner
-					if (item.parent) and (item.ownerKey or item.parentKey) then
-						local parent
-						if (item.parent and item.parentKey) then
-							parent = trackParentKeys(owner, item.parent) -- the parent can differ
+	-- Set the current object
+	CURRENT_OBJECT = object
+
+	-- Iterate workorders in the forgedata
+	for _,workorder in ipairs(forgedata) do
+
+		-- Workorder is to create widgets
+		if (workorder.type == "CreateWidgets") then
+
+			-- Iterate widgets to be created or modelled
+			for _,item in ipairs(workorder.widgets) do
+
+				-- This will hold the widget
+				local widget
+
+				-- This will be the parent, if creation is needed.
+				local parent 
+
+				-- Figure out who the parent is
+				local owner = object -- this is always the owner
+				if (item.parent) and ((item.ownerKey) or (item.parentKey)) then
+					parent = trackParentKeys(owner, item.parent) -- the parent can differ
+
+					-- Check if the widget already exists, as we're only going to modify this time, not create.
+					local oldWidget = item.ownerKey and owner[item.ownerKey] or item.parentKey and parent[item.parentKey]
+					if (isObjectType(oldWidget, item.objectType)) then
+						widget = oldWidget
+					end
+				else
+					-- When parent and keys are omitted,
+					-- we assume we are modifying the object itself. 
+					widget = object
+				end
+				
+				-- Skip it if a dependency fails.
+				local dependencyFailed
+				if (item.ownerDependencyKey) then
+					local key = trackParentKeys(owner, item.ownerDependencyKey)
+					if (not key) then
+						widget = nil
+						dependencyFailed = true
+					end
+				end
+
+				-- Skip this if a dependency check failed.
+				if (not dependencyFailed) then
+
+					-- Create the widget if it doesn't exist, or exist of the wrong type.
+					if (not widget) then
+						if (item.objectType == "Texture") then
+							widget = parent:CreateTexture()
+
+						elseif (item.objectType == "FontString") then
+							widget = parent:CreateFontString()
+
+						elseif (item.objectType == "Frame") then
+							if (item.objectSubType == "StatusBar") and (parent.CreateStatusBar) then
+								widget = parent:CreateStatusBar()
+							else
+								widget = parent:CreateFrame(item.objectSubType)
+							end
 						end
-
-						-- Check if the widget already exists, as we're only going to modify this time, not create.
-						local oldWidget
-						if (item.ownerKey) then
-							oldWidget = trackParentKeys(owner, item.ownerKey)
-						elseif (parent) and (item.parentKey) then
-							oldWidget = trackParentKeys(parent, item.parentKey)
-						end
-						if (oldWidget) and (oldWidget.IsObjectType and oldWidget:IsObjectType(item.objectType)) then
-							widget = oldWidget
-						end
-
-					elseif (item.ownerKey) then
-
-						local oldWidget
-						if (item.ownerKey) then
-							oldWidget = trackParentKeys(owner, item.ownerKey)
-						end
-						if (oldWidget) and (oldWidget.IsObjectType and oldWidget:IsObjectType(item.objectType)) then
-							widget = oldWidget
-						end
-
 					else
-						-- When parent and keys are omitted,
-						-- we assume we are modifying the object itself. 
-						widget = object
-					end
-
-					-- Skip it if a dependency fails.
-					if (item.ownerDependencyKey) then
-						local key = trackParentKeys(owner, item.ownerDependencyKey)
-						if (not key) then
-							widget = nil
-						end
-					end
-
-					-- This may not exist, we could've had an invalid parent or key.
-					if (widget) then
-
 						-- Object may exist at the right key relative to its indended parent, 
 						-- but with the wrong parent. Fix it if that is the case.
 						if (item.parent) then
-							local parent = trackParentKeys(owner, item.parent)
-							if (parent) then
-								widget:SetParent(parent)
-							end
+							widget:SetParent(parent)
 						end
+					end
+
+					-- This may not exist, we could've had an invalid parent or key, 
+					-- or could be a failed dependency causing it not to be created,
+					-- or could even be a widget type not currently supported by the forge.
+					if (widget) then
 
 						-- Apply any methods
-						if (item.chain) then
-							self:Chain(widget, unpack(item.chain))
-						end
+						self:Chain(widget, item.chain) 
 
 						-- Assign values
-						if (item.values) then
-							local key,value
-							local currentValue, numValues = 1, #item.values
-							while (currentValue < numValues) do
-								key,value = item.values[currentValue], item.values[currentValue + 1]
-								if (type(value) == "string") then
-									local paramID = tonumber(string_match(value, ":PARAM(%d+):"))
-									if (paramID) then
-										value = select(paramID + 2, ...)
-									end
-								end
-								widget[key] = value
-								currentValue = currentValue + 2
-							end
+						self:Decorate(widget, item.values, ...) 
+					
+						-- Key the widget to its owner or parent.
+						-- This should only happen in widget creation, not modification.
+						if (item.ownerKey) then
+							owner[item.ownerKey] = widget
+						elseif (item.parentKey) then
+							parent[item.parentKey] = widget
 						end
 
 					end
-
 				end
-		
 			end
-		end
+		
+		elseif (workorder.type == "ModifyWidgets") then
 
-		CURRENT_OBJECT = nil
+			-- Iterate widgets to be created or modelled
+			for _,item in ipairs(workorder.widgets) do
 
-	elseif (forgeType == "Module") then
-		local object, forgedata = ...
-		if (not object) or (not forgedata) then
-			return
-		end
+				-- This will hold the widget
+				local widget  
 
-		CURRENT_OBJECT = object
+				-- Figure out where the widget is
+				local owner = object -- this is always the owner
+				if (item.parent) and (item.ownerKey or item.parentKey) then
+					local parent
+					if (item.parent and item.parentKey) then
+						parent = trackParentKeys(owner, item.parent) -- the parent can differ
+					end
 
-		-- Iterate workorders in the forgedata
-		for _,workorder in ipairs(forgedata) do
+					-- Check if the widget already exists, as we're only going to modify this time, not create.
+					local oldWidget
+					if (item.ownerKey) then
+						oldWidget = trackParentKeys(owner, item.ownerKey)
+					elseif (parent) and (item.parentKey) then
+						oldWidget = trackParentKeys(parent, item.parentKey)
+					end
+					if (isObjectType(oldWidget, item.objectType)) then
+						widget = oldWidget
+					end
 
-			if (workorder.type == "ExecuteMethods") then
+				elseif (item.ownerKey) then
 
-				-- Iterate widgets to be created or modelled
-				for _,item in ipairs(workorder.methods) do
+					local oldWidget
+					if (item.ownerKey) then
+						oldWidget = trackParentKeys(owner, item.ownerKey)
+					end
+					if (isObjectType(oldWidget, item.objectType)) then
+						widget = oldWidget
+					end
 
-					if (item.repeatAction) then
-						local method = item.repeatAction.method
-						for _,args in ipairs(item.repeatAction.arguments) do
-							-- Unpack tables consisting of arguments,
-							-- but avoid attempting to unpack textures, fontstrings or frames.
-							if (type(args) == "table") and (not args.GetObjectType) then
-								object[method](object, unpack(args))
-							else
-								object[method](object, args)
-							end
+				else
+					-- When parent and keys are omitted,
+					-- we assume we are modifying the object itself. 
+					widget = object
+				end
 
+				-- Skip it if a dependency fails.
+				if (item.ownerDependencyKey) then
+					local key = trackParentKeys(owner, item.ownerDependencyKey)
+					if (not key) then
+						widget = nil
+					end
+				end
+
+				-- This may not exist, we could've had an invalid parent or key.
+				if (widget) then
+
+					-- Object may exist at the right key relative to its indended parent, 
+					-- but with the wrong parent. Fix it if that is the case.
+					if (item.parent) then
+						local parent = trackParentKeys(owner, item.parent)
+						if (parent) then
+							widget:SetParent(parent)
 						end
 					end
 
 					-- Apply any methods
-					if (item.chain) then
-						self:Chain(object, unpack(item.chain))
-					end
+					self:Chain(widget, item.chain) 
 
 					-- Assign values
-					if (item.values) then
-						local key,value
-						local currentValue, numValues = 1, #item.values
-						while (currentValue < numValues) do
-							key,value = item.values[currentValue], item.values[currentValue + 1]
-							if (type(value) == "string") then
-								local paramID = tonumber(string_match(value, ":PARAM(%d+):"))
-								if (paramID) then
-									value = select(paramID + 2, ...)
-								end
-							end
-							widget[key] = value
-							currentValue = currentValue + 2
-						end
-					end
+					self:Decorate(widget, item.values, ...) 
 
 				end
-		
-			end
-		end
 
-		CURRENT_OBJECT = nil
+			end
+	
+		elseif (workorder.type == "ExecuteMethods") then
+
+			-- Iterate widgets to be created or modelled
+			for _,item in ipairs(workorder.methods) do
+
+				if (item.repeatAction) then
+					local method = item.repeatAction.method
+					for _,args in ipairs(item.repeatAction.arguments) do
+						object[method](object, parseArguments(args))
+					end
+				end
+
+				-- Apply any methods
+				self:Chain(object, item.chain) 
+
+				-- Assign values
+				self:Decorate(object, item.values, ...) 
+
+			end
+	
+		end
 
 	end
 
+	-- Clear the current object.
+	-- Do not return or stop parsing before this. 
+	CURRENT_OBJECT = nil
 end
 
 local embedMethods = {
 	Chain = true, 
+	Decorate = true,
 	Forge = true
 }
 
