@@ -375,9 +375,6 @@ local CacheBuffs = function(element, unit, filter, customFilter)
 			if (displayAura) then 
 				auraPriority = displayPriority
 			else 
-				if (unit == "player") then
-					print("hiding", name)
-				end
 				name = nil
 			end 
 			isFiltered = filtered
