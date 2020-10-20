@@ -6,7 +6,7 @@ on a widgetcontainer aura plugin element.
 
 --]]--
 
-local LibAuraTool = Wheel:Set("LibAuraTool", 2)
+local LibAuraTool = Wheel:Set("LibAuraTool", 3)
 if (not LibAuraTool) then
 	return
 end
@@ -1371,6 +1371,11 @@ elseif (IsRetail) then
 		AddUserFlags( 11426, ByPlayer) 						-- Ice Barrier (PlayerBuff) CHECK!
 		AddUserFlags( 12472, Boost) 						-- Icy Veins
 
+		-- Mage Azerite Traits
+		------------------------------------------------------------------------
+		AddUserFlags(280177, ByPlayer) 						-- Cauterizing Blink
+		
+
 	end
 
 	-- Blacklists
@@ -1455,16 +1460,78 @@ elseif (IsRetail) then
 		-- Other big ones
 		------------------------------------------------------------------------
 		AddUserFlags( 67556, OnPlayer) 						-- Cooking Speed
-		AddUserFlags( 24735, OnPlayer) 						-- Ghost Costume (Hallow's End)
 		AddUserFlags(243138, OnPlayer) 						-- Happy Feet event 
 		AddUserFlags(246050, OnPlayer) 						-- Happy Feet buff gained restoring health
-		AddUserFlags( 24710, OnPlayer) 						-- Ninja Costume (Hallow's End)
-		AddUserFlags( 24711, OnPlayer) 						-- Ninja Costume (Hallow's End)
 		AddUserFlags( 33206, OnPlayer) 						-- Pain Suppression
 		AddUserFlags( 10060, OnPlayer) 						-- Power Infusion
 		AddUserFlags( 15007, OnPlayer + PrioHigh) 			-- Resurrection Sickness
 		AddUserFlags( 64901, OnPlayer) 						-- Symbol of Hope
-		AddUserFlags(279509, OnPlayer) 						-- Witch! (Hallow's End)
+
+		-- Fucking Costumes (Hallow's End)
+		------------------------------------------------------------------------
+		AddUserFlags(172010, OnPlayer) 						-- Abomination Costume
+		AddUserFlags(218132, OnPlayer) 						-- Banshee Costume
+		AddUserFlags( 24732, OnPlayer) 						-- Bat Costume
+		AddUserFlags(191703, OnPlayer) 						-- Bat Costume
+		AddUserFlags(285521, OnPlayer) 						-- Blue Dragon Body Costume
+		AddUserFlags(285519, OnPlayer) 						-- Blue Dragon Head Costume
+		AddUserFlags(285523, OnPlayer) 						-- Blue Dragon Tail Costume
+		AddUserFlags( 97135, OnPlayer) 						-- Children's Costume Aura
+		AddUserFlags(257204, OnPlayer) 						-- Dirty Horse Costume
+		AddUserFlags(257205, OnPlayer) 						-- Dirty Horse Costume
+		AddUserFlags(191194, OnPlayer) 						-- Exquisite Deathwing Costume
+		AddUserFlags(192472, OnPlayer) 						-- Exquisite Deathwing Costume
+		AddUserFlags(217917, OnPlayer) 						-- Exquisite Grommash Costume
+		AddUserFlags(171958, OnPlayer) 						-- Exquisite Lich King Costume
+		AddUserFlags(190837, OnPlayer) 						-- Exquisite VanCleef Costume
+		AddUserFlags(246237, OnPlayer) 						-- Exquisite Xavius Costume
+		AddUserFlags(191210, OnPlayer) 						-- Gargoyle Costume
+		AddUserFlags(172015, OnPlayer) 						-- Geist Costume
+		AddUserFlags( 24735, OnPlayer) 						-- Ghost Costume
+		AddUserFlags( 24736, OnPlayer) 						-- Ghost Costume
+		AddUserFlags(191700, OnPlayer) 						-- Ghost Costume
+		AddUserFlags(191698, OnPlayer) 						-- Ghost Costume
+		AddUserFlags(172008, OnPlayer) 						-- Ghoul Costume
+		AddUserFlags(285522, OnPlayer) 						-- Green Dragon Body Costume
+		AddUserFlags(285520, OnPlayer) 						-- Green Dragon Head Costume
+		AddUserFlags(285524, OnPlayer) 						-- Green Dragon Tail Costume
+		AddUserFlags(246242, OnPlayer) 						-- Horse Head Costume
+		AddUserFlags(246241, OnPlayer) 						-- Horse Tail Costume
+		AddUserFlags(177656, OnPlayer) 						-- Kor'kron Foot Soldier Costume
+		AddUserFlags(177657, OnPlayer) 						-- Kor'kron Foot Soldier Costume
+		AddUserFlags( 24712, OnPlayer) 						-- Leper Gnome Costume
+		AddUserFlags( 24713, OnPlayer) 						-- Leper Gnome Costume
+		AddUserFlags(191701, OnPlayer) 						-- Leper Gnome Costume
+		AddUserFlags(171479, OnPlayer) 						-- "Lil' Starlet" Costume
+		AddUserFlags(171470, OnPlayer) 						-- "Mad Alchemist" Costume
+		AddUserFlags(191211, OnPlayer) 						-- Nerubian Costume
+		AddUserFlags( 24710, OnPlayer) 						-- Ninja Costume
+		AddUserFlags( 24711, OnPlayer) 						-- Ninja Costume
+		AddUserFlags(191686, OnPlayer) 						-- Ninja Costume
+		AddUserFlags( 24708, OnPlayer) 						-- Pirate Costume
+		AddUserFlags(173958, OnPlayer) 						-- Pirate Costume
+		AddUserFlags(173959, OnPlayer) 						-- Pirate Costume
+		AddUserFlags(191682, OnPlayer) 						-- Pirate Costume
+		AddUserFlags(191683, OnPlayer) 						-- Pirate Costume
+		AddUserFlags( 61716, OnPlayer) 						-- Rabbit Costume
+		AddUserFlags(233598, OnPlayer) 						-- Red Dragon Body Costume
+		AddUserFlags(233594, OnPlayer) 						-- Red Dragon Head Costume
+		AddUserFlags(233599, OnPlayer) 						-- Red Dragon Tail Costume
+		AddUserFlags( 30167, OnPlayer) 						-- Red Ogre Costume
+		AddUserFlags(102362, OnPlayer) 						-- Red Ogre Mage Costume
+		AddUserFlags( 24723, OnPlayer) 						-- Skeleton Costume
+		AddUserFlags(191702, OnPlayer) 						-- Skeleton Costume
+		AddUserFlags(172003, OnPlayer) 						-- Slime Costume
+		AddUserFlags(172020, OnPlayer) 						-- Spider Costume
+		AddUserFlags( 99976, OnPlayer) 						-- Squashling Costume
+		AddUserFlags(243321, OnPlayer) 						-- Tranquil Mechanical Yeti Costume
+		AddUserFlags(178306, OnPlayer) 						-- Warsong Orc Costume
+		AddUserFlags(178307, OnPlayer) 						-- Warsong Orc Costume
+		AddUserFlags(191208, OnPlayer) 						-- Wight Costume
+		AddUserFlags( 24740, OnPlayer) 						-- Wisp Costume
+		AddUserFlags(279509, OnPlayer) 						-- Witch!
+		AddUserFlags(171930, OnPlayer) 						-- "Yipp-Saron" Costume
+		
 	end
 
 end

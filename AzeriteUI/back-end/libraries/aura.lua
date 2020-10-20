@@ -1,4 +1,4 @@
-local LibAura = Wheel:Set("LibAura", 32)
+local LibAura = Wheel:Set("LibAura", 33)
 if (not LibAura) then
 	return
 end
@@ -141,12 +141,28 @@ local parseFilter = function(filter)
 	end
 
 	-- parse the string, ignore separator types and order
+
+	-- debuffs
 	local harmful = string_match(filter, "HARMFUL")
+
+	-- buffs
 	local helpful = string_match(filter, "HELPFUL")
-	local player = string_match(filter, "PLAYER") -- auras that were applied by the player
-	local raid = string_match(filter, "RAID") -- auras that can be applied (if HELPFUL) or dispelled (if HARMFUL) by the player
-	local cancelable = string_match(filter, "CANCELABLE") -- buffs that can be removed (such as by right-clicking or using the /cancelaura command)
-	local not_cancelable = string_match(filter, "NOT_CANCELABLE") -- buffs that cannot be removed
+
+	-- auras that were applied by the player
+	local player = string_match(filter, "PLAYER") 
+
+	-- auras that can be applied (if HELPFUL) or dispelled (if HARMFUL) by the player
+	local raid = string_match(filter, "RAID") 
+
+	-- buffs that cannot be removed
+	local not_cancelable = string_match(filter, "NOT_CANCELABLE") 
+	if (not_cancelable) then
+		-- Dumb way to avoid NOT_CANCELABLE also firing for CANCELABLE
+		filter = string_gsub(filter, "NOT_CANCELABLE", "")
+	end
+
+	-- buffs that can be removed (such as by right-clicking or using the /cancelaura command)
+	local cancelable = string_match(filter, "CANCELABLE") 
 
 	-- return a nil value for invalid filters. 
 	-- *this might cause an error, but that is the intention.
@@ -154,15 +170,12 @@ local parseFilter = function(filter)
 		return 
 	end
 
-	-- always include these, as we're always using UnitAura() to retrieve buffs/debuffs.
-	local parsedFilter
-	if (harmful) then 
-		parsedFilter = "HARMFUL"
-	else 
-		parsedFilter = "HELPFUL" -- default when no help/harm is mentioned
-	end 
+	-- Always include these, as we're always using UnitAura() to retrieve buffs/debuffs.
+	-- Default to buffs when no help/harm is mentioned. 
+	local parsedFilter = (harmful) and "HARMFUL" or "HELPFUL"
 
-	-- return a parsed filter with arguments separated by spaces, and in our preferred order
+	-- Return a parsed filter with arguments separated by spaces, and in our preferred order.
+	-- This way filters with the same arguments can be directly compared later on.
 	return parsedFilter .. (player and " PLAYER" or "") 
 						.. (raid and " RAID" or "") 
 						.. (cancelable and " CANCELABLE" or "") 
@@ -251,10 +264,11 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 	local unitGUID = UnitGUID(queryUnit or unit)
 	local destCache = AuraCacheByGUID[unitGUID]
 
-	local hasBuffs, hasDebuffs
-	local hasPoison, hasCurse, hasDisease, hasMagic
+	local numBuffs, numDebuffs = 0,0
+	local numPoison, numCurse, numDisease, numMagic, numBoss = 0,0,0,0,0
 
-	local counter, limit = 0, string_match(filter, "HARMFUL") and DEBUFF_MAX_DISPLAY or BUFF_MAX_DISPLAY
+	local isHarmful = string_match(filter, "HARMFUL")
+	local counter, limit = 0, isHarmful and DEBUFF_MAX_DISPLAY or BUFF_MAX_DISPLAY
 	for i = 1,limit do 
 
 		-- Retrieve buff information
@@ -282,6 +296,8 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 		end
 
 		-- This just makes more sense, and it works.
+		-- The blizzard flag just shows if the player CAN cast it, 
+		-- while we're interested if in the player ACTUALLY did it.
 		isCastByPlayer = unitCaster == "player"
 
 		-- Cache up the values for the aura index.
@@ -312,6 +328,23 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 		end 
 
 		counter = counter + 1
+		
+		if (isBossDebuff) then
+			numBoss = numBoss + 1
+		end
+
+		if (isHarmful) then
+			if (debuffType == "Magic") then
+				numMagic = numMagic + 1
+			elseif (debuffType == "Curse") then
+				numCurse = numCurse + 1
+			elseif (debuffType == "Disease") then
+				numDisease = numDisease + 1
+			elseif (debuffType == "Poison") then
+				numPoison = numPoison + 1 
+			end
+		end
+
 	end 
 
 	-- Clear out old, if any
@@ -323,6 +356,16 @@ LibAura.CacheUnitAurasByFilter = function(self, unit, filter)
 			end 
 		end
 	end
+
+	-- Add meta info for parsing
+	cache.numAuras = counter
+	cache.numBuffs = (not isHarmful) and counter or 0
+	cache.numDebuffs = (isHarmful) and counter or 0
+	cache.numBoss = numBoss
+	cache.numMagic = numMagic
+	cache.numCurse = numCurse
+	cache.numDisease = numDisease
+	cache.numPoison = numPoison
 	
 	-- return cache and aura count for this filter and unit
 	return cache, counter
@@ -346,7 +389,7 @@ end
 LibAura.GetUnitAura = function(self, unit, auraID, filter)
 	local cache = self:GetUnitAuraCacheByFilter(unit, filter)
 	local aura = cache and cache[auraID]
-	if aura then 
+	if (aura) then 
 		return aura[1], aura[2], aura[3], aura[4], aura[5], aura[6], aura[7], aura[8], aura[9], aura[10], aura[11], aura[12], aura[13], aura[14], aura[15], aura[16], aura[17], aura[18]
 	end 
 end
@@ -354,7 +397,7 @@ end
 LibAura.GetUnitBuff = function(self, unit, auraID, filter)
 	local cache = self:GetUnitBuffCacheByFilter(unit, filter)
 	local aura = cache and cache[auraID]
-	if aura then 
+	if (aura) then 
 		return aura[1], aura[2], aura[3], aura[4], aura[5], aura[6], aura[7], aura[8], aura[9], aura[10], aura[11], aura[12], aura[13], aura[14], aura[15], aura[16], aura[17], aura[18]
 	end 
 end
@@ -362,7 +405,7 @@ end
 LibAura.GetUnitDebuff = function(self, unit, auraID, filter)
 	local cache = self:GetUnitDebuffCacheByFilter(unit, filter)
 	local aura = cache and cache[auraID]
-	if aura then 
+	if (aura) then 
 		return aura[1], aura[2], aura[3], aura[4], aura[5], aura[6], aura[7], aura[8], aura[9], aura[10], aura[11], aura[12], aura[13], aura[14], aura[15], aura[16], aura[17], aura[18]
 	end 
 end
@@ -417,9 +460,9 @@ LibAura.UnregisterAuraWatch = function(self, unit, filter)
 		if (IsClassic) then
 			UnregisterEvent(Frame, "UNIT_SPELLCAST_SUCCEEDED")
 
-			if (playerClass == "ROGUE") or (playerClass == "DRUID") then
-				UnregisterEvent(Frame, "PLAYER_TARGET_CHANGED")
-			end
+			--if (playerClass == "ROGUE") or (playerClass == "DRUID") then
+			--	UnregisterEvent(Frame, "PLAYER_TARGET_CHANGED")
+			--end
 		end
 
 		LibAura.isTracking = nil

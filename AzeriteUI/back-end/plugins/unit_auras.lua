@@ -18,7 +18,6 @@ local CancelUnitBuff = CancelUnitBuff
 local GetTime = GetTime
 local InCombatLockdown = InCombatLockdown
 local UnitExists = UnitExists
-local UnitHasVehicleUI = UnitHasVehicleUI
 
 -- Blizzard Textures
 local EDGE_LOC_TEXTURE = [[Interface\Cooldown\edge-LoC]]
@@ -64,7 +63,7 @@ end
 -- Aura Button Template
 -----------------------------------------------------
 local Aura_OnClick = function(button, buttonPressed, down)
-	if button.OnClick then 
+	if (button.OnClick) then 
 		return button:OnClick(buttonPressed, down)
 	end 
 	-- Only called if no override exists above
@@ -78,13 +77,13 @@ local Aura_OnClick = function(button, buttonPressed, down)
 end
 
 local Aura_PreClick = function(button, buttonPressed, down)
-	if button.PreClick then 
+	if (button.PreClick) then 
 		return button:PreClick(buttonPressed, down)
 	end 
 end 
 
 local Aura_PostClick = function(button, buttonPressed, down)
-	if button.PostClick then 
+	if (button.PostClick) then 
 		return button:PostClick(buttonPressed, down)
 	end 
 end 
@@ -95,15 +94,15 @@ local Aura_UpdateTooltip = function(button)
 	tooltip:SetMinimumWidth(160)
 	tooltip.hideSpellID = button.isFiltered
 	local element = button._owner
-	if element.tooltipDefaultPosition then 
+	if (element.tooltipDefaultPosition) then 
 		tooltip:SetDefaultAnchor(button)
-	elseif element.tooltipPoint then 
+	elseif (element.tooltipPoint) then 
 		tooltip:SetOwner(button)
 		tooltip:Place(element.tooltipPoint, element.tooltipAnchor or button, element.tooltipRelPoint or element.tooltipPoint, element.tooltipOffsetX or 0, element.tooltipOffsetY or 0)
 	else 
 		tooltip:SetSmartAnchor(button, element.tooltipOffsetX or 10, element.tooltipOffsetY or 10)
 	end 
-	if button.isBuff then 
+	if (button.isBuff) then 
 		tooltip:SetUnitBuff(button.unit, button:GetID(), button.filter)
 	else 
 		tooltip:SetUnitDebuff(button.unit, button:GetID(), button.filter)
@@ -111,19 +110,19 @@ local Aura_UpdateTooltip = function(button)
 end
 
 local Aura_OnEnter = function(button)
-	if button.OnEnter then 
+	if (button.OnEnter) then 
 		return button:OnEnter()
 	end 
 	button.isMouseOver = true
 	button.UpdateTooltip = Aura_UpdateTooltip
 	button:UpdateTooltip()
-	if button.PostEnter then 
+	if (button.PostEnter) then 
 		return button:PostEnter()
 	end 
 end
 
 local Aura_OnLeave = function(button)
-	if button.OnLeave then 
+	if (button.OnLeave) then 
 		return button:OnLeave()
 	end 
 
@@ -132,13 +131,13 @@ local Aura_OnLeave = function(button)
 	local tooltip = button:GetTooltip()
 	tooltip:Hide()
 
-	if button.PostLeave then 
+	if (button.PostLeave) then 
 		return button:PostLeave()
 	end 
 end
 
 local Aura_SetCooldownTimer = function(button, start, duration)
-	if button._owner.showSpirals then
+	if (button._owner.showSpirals) then
 		local cooldown = button.Cooldown
 		cooldown:SetSwipeColor(0, 0, 0, .75)
 		cooldown:SetDrawEdge(false)
@@ -156,7 +155,7 @@ local Aura_SetCooldownTimer = function(button, start, duration)
 end 
 
 local Aura_UpdateTimer = function(button, elapsed)
-	if button.Time then
+	if (button.Time) then
 		button.elapsed = (button.elapsed or 0) + elapsed
 		if (button.elapsed >= HZ) then
 			local element = button._owner
@@ -184,7 +183,7 @@ end
 
 -- Use this to initiate the timer bars and spirals on the auras
 local Aura_SetTimer = function(button, fullDuration, expirationTime)
-	if (fullDuration and (fullDuration > 0)) then
+	if (fullDuration) and (fullDuration > 0) then
 		button.fullDuration = fullDuration
 		button.timeStarted = expirationTime - fullDuration
 		button.timeLeft = expirationTime - GetTime()
@@ -198,7 +197,7 @@ local Aura_SetTimer = function(button, fullDuration, expirationTime)
 		button.timeStarted = 0
 		button.timeLeft = 0
 	end
-	if (button:IsShown() and button._owner.PostUpdateButton) then
+	if (button:IsShown()) and (button._owner.PostUpdateButton) then
 		button._owner:PostUpdateButton(button, "Timer")
 	end
 end
@@ -376,6 +375,9 @@ local CacheBuffs = function(element, unit, filter, customFilter)
 			if (displayAura) then 
 				auraPriority = displayPriority
 			else 
+				if (unit == "player") then
+					print("hiding", name)
+				end
 				name = nil
 			end 
 			isFiltered = filtered
@@ -757,12 +759,27 @@ local Update = function(self, event, unit, ...)
 			LibAura:CacheUnitBuffsByFilter(unit, buffFilter)
 			LibAura:CacheUnitDebuffsByFilter(unit, debuffFilter)
 		end 
+	
+		-- Retrieve full back-end caches for meta parsing 
+		local buffCache = LibAura:GetUnitBuffCacheByFilter(unit, buffFilter)
+		local debuffCache = LibAura:GetUnitDebuffCacheByFilter(unit, debuffFilter)
 
-		-- Create local, sorted, cache copies
+		-- Store meta info from the full cache,
+		-- so that the sorting filters in turn have access to this.
+		Auras.numAuras = buffCache.numAuras + debuffCache.numAuras
+		Auras.numBuffs = buffCache.numBuffs
+		Auras.numDebuffs = debuffCache.numDebuffs
+		Auras.numBoss = debuffCache.numDebuffs
+		Auras.numMagic = debuffCache.numDebuffs
+		Auras.numCurse = debuffCache.numDebuffs
+		Auras.numDisease = debuffCache.numDebuffs
+		Auras.numPoison = debuffCache.numDebuffs
+
+		-- Create local, filtered, sorted, cache copies
 		CacheBuffs(Auras, unit, buffFilter, buffFilterFunc)
 		CacheDebuffs(Auras, unit, debuffFilter, debuffFilterFunc)
 
-		-- Decide what to show
+		-- Decide what to show based on available space
 		local visible, visibleBuffs, visibleDebuffs = 0, 0, 0
 		if (Auras.debuffsFirst) then 
 			visible, visibleDebuffs = IterateDebuffs(Auras, unit, debuffFilter, visible) 
@@ -772,7 +789,7 @@ local Update = function(self, event, unit, ...)
 			visible, visibleDebuffs = IterateDebuffs(Auras, unit, debuffFilter, visible)
 		end 
 
-		-- Add in meta-info for filters
+		-- Add in meta-info for post updates
 		Auras.visibleAuras = visible
 		Auras.visibleBuffs = visibleBuffs
 		Auras.visibleDebuffs = visibleDebuffs
@@ -807,14 +824,28 @@ local Update = function(self, event, unit, ...)
 			LibAura:CacheUnitBuffsByFilter(unit, buffFilter)
 		end 
 
-		-- Create a local, sorted, cache copy
+		-- Retrieve full back-end caches for meta parsing 
+		local buffCache = LibAura:GetUnitBuffCacheByFilter(unit, buffFilter)
+
+		-- Store meta info from the full cache,
+		-- so that the sorting filters in turn have access to this.
+		Buffs.numAuras = buffCache.numAuras
+		Buffs.numBuffs = buffCache.numBuffs
+		Buffs.numDebuffs = buffCache.numDebuffs
+		Buffs.numBoss = buffCache.numDebuffs
+		Buffs.numMagic = buffCache.numDebuffs
+		Buffs.numCurse = buffCache.numDebuffs
+		Buffs.numDisease = buffCache.numDebuffs
+		Buffs.numPoison = buffCache.numDebuffs
+		
+		-- Create a local, filtered, sorted, cache copy
 		CacheBuffs(Buffs, unit, buffFilter, buffFilterFunc)
 
-		-- Decide what to show
+		-- Decide what to show based on available space
 		local visible, visibleBuffs, visibleDebuffs = 0, 0, 0
 		visible, visibleBuffs = IterateBuffs(Buffs, unit, buffFilter, visible)
 
-		-- Add in meta-info for filters
+		-- Add in meta-info for post updates
 		Buffs.visibleAuras = visible
 		Buffs.visibleBuffs = visibleBuffs
 		Buffs.visibleDebuffs = visibleDebuffs
@@ -849,14 +880,28 @@ local Update = function(self, event, unit, ...)
 			LibAura:CacheUnitDebuffsByFilter(unit, debuffFilter)
 		end 
 
-		-- Create a local, sorted, cache copy
+		-- Retrieve full back-end caches for meta parsing 
+		local debuffCache = LibAura:GetUnitDebuffCacheByFilter(unit, debuffFilter)
+
+		-- Store meta info from the full cache,
+		-- so that the sorting filters in turn have access to this.
+		Debuffs.numAuras = debuffCache.numAuras
+		Debuffs.numBuffs = debuffCache.numBuffs
+		Debuffs.numDebuffs = debuffCache.numDebuffs
+		Debuffs.numBoss = debuffCache.numDebuffs
+		Debuffs.numMagic = debuffCache.numDebuffs
+		Debuffs.numCurse = debuffCache.numDebuffs
+		Debuffs.numDisease = debuffCache.numDebuffs
+		Debuffs.numPoison = debuffCache.numDebuffs
+		
+		-- Create a local, filtered, sorted, cache copy
 		CacheDebuffs(Debuffs, unit, debuffFilter, debuffFilterFunc)
 
-		-- Decide what to show
+		-- Decide what to show based on available space
 		local visible, visibleBuffs, visibleDebuffs = 0, 0, 0
 		visible, visibleDebuffs = IterateDebuffs(Debuffs, unit, debuffFilter, visible)
 
-		-- Add in meta-info for filters
+		-- Add in meta-info for post updates
 		Debuffs.visibleAuras = visible
 		Debuffs.visibleBuffs = visibleBuffs
 		Debuffs.visibleDebuffs = visibleDebuffs
@@ -1002,5 +1047,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 61)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 62)
 end 

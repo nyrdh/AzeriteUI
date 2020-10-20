@@ -4104,10 +4104,11 @@ Legacy.UnitFramePlayer = {
 					parent = nil, ownerKey = nil, 
 					chain = {
 						"SetSize", { 316, 86 }, "SetHitBox", { -4, -4, -4, -4 },
-						"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -210, 210 }
+						"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -210, 250 }
 					},
 					values = {
-						"colors", Colors
+						"colors", Colors,
+						"hideInVehicles", true
 					}
 				},
 				-- Setup backdrop and border
@@ -5251,10 +5252,11 @@ Legacy.UnitFrameTarget = {
 					parent = nil, ownerKey = nil, 
 					chain = {
 						"SetSize", { 316, 86 }, "SetHitBox", { -4, -4, -4, -4 },
-						"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 210, 210 }
+						"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 210, 250 }
 					},
 					values = {
-						"colors", Colors
+						"colors", Colors,
+						"hideInVehicles", true
 					}
 				},
 				-- Setup backdrop and border
