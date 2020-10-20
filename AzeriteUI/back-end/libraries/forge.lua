@@ -237,8 +237,15 @@ LibForge.Forge = function(self, object, forgedata, ...)
 	check(object, 1, "table", "nil")
 	check(forgedata, 2, "table", "nil")
 
+	-- Assume this is embedded into something 
+	-- that wishes to do some self-forging.
+	if (object) and (not forgedata) then
+		forgedata = object
+		object = self
+	end
+
 	-- Silently fail if not data is passed.
-	if (not object) or (not forgedata) then
+	if (not forgedata) then
 		return
 	end
 
@@ -435,6 +442,9 @@ LibForge.Forge = function(self, object, forgedata, ...)
 	-- Clear the current object.
 	-- Do not return or stop parsing before this. 
 	CURRENT_OBJECT = nil
+
+	-- Let this indicate a success 
+	return true
 end
 
 local embedMethods = {

@@ -4,8 +4,9 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-10-19
+## [Unreleased] 2020-10-20
 ### Changed
+- Started moving the new forge driven schematic tables to their own aptly named area in the folder hierarchy.
 - Modified the aura plugin back-end to parse and sort the entire aura table before deciding on visibility. 
 - Various work on the Legacy theme.
 

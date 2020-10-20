@@ -38,7 +38,10 @@ locale\zhCN.lua
 locale\zhTW.lua  
 
 # Addon specific layout and design. 
-front-end\layouts.lua
+front-end\api.lua
+
+# Where tinkerers should tinker. 
+tinkertown\tinkertown.xml
 
 # Main addon module, 
 # all others are children of this one. 

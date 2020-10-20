@@ -378,30 +378,6 @@ end
 -----------------------------------------------------------
 -- Templates
 -----------------------------------------------------------
--- Boss
-local positionHeaderFrame = function(self, unit, id, layout)
-	-- Todo: iterate on this for a grid layout
-	local id = tonumber(id)
-	if id then 
-		local place = { unpack(layout.Place) }
-		local growthX = layout.GrowthX
-		local growthY = layout.GrowthY
-
-		if (growthX and growthY) then 
-			if (type(place[#place]) == "number") then 
-				place[#place - 1] = place[#place - 1] + growthX*(id-1)
-				place[#place] = place[#place] + growthY*(id-1)
-			else 
-				place[#place + 1] = growthX
-				place[#place + 1] = growthY
-			end 
-		end 
-		self:Place(unpack(place))
-	else 
-		self:Place(unpack(layout.Place)) 
-	end
-end
-
 -- Boss, Pet, ToT
 local StyleSmallFrame = function(self, unit, id, layout, ...)
 
@@ -412,7 +388,26 @@ local StyleSmallFrame = function(self, unit, id, layout, ...)
 	self:SetFrameLevel(self:GetFrameLevel() + layout.FrameLevel)
 
 	if (unit:match("^boss(%d+)")) then 
-		positionHeaderFrame(self, unit, id, layout)
+		-- Todo: iterate on this for a grid layout
+		local id = tonumber(id)
+		if id then 
+			local place = { unpack(layout.Place) }
+			local growthX = layout.GrowthX
+			local growthY = layout.GrowthY
+
+			if (growthX and growthY) then 
+				if (type(place[#place]) == "number") then 
+					place[#place - 1] = place[#place - 1] + growthX*(id-1)
+					place[#place] = place[#place] + growthY*(id-1)
+				else 
+					place[#place + 1] = growthX
+					place[#place + 1] = growthY
+				end 
+			end 
+			self:Place(unpack(place))
+		else 
+			self:Place(unpack(layout.Place)) 
+		end
 	else
 		self:Place(unpack(layout.Place)) 
 	end 
@@ -1205,14 +1200,7 @@ end
 -----------------------------------------------------------
 -- Singular Unit Styling
 -----------------------------------------------------------
-UnitStyles.StylePlayerFrame = function(self, unit, id, ...)
-
-	-- If a forge exists, we leave it all to that.
-	local layout, module = ...
-	local forge = layout and layout.WidgetForge and layout.WidgetForge
-	if (forge) then
-		return self:Forge(self, forge, layout.ButtonForge, module)
-	end
+UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 
 	-- Frame
 	-----------------------------------------------------------
@@ -1805,13 +1793,9 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 	
 end
 
-UnitStyles.StyleTargetFrame = function(self, unit, id, ...)
-
-	-- If a forge exists, we leave it all to that.
-	local layout, module = ...
-	local forge = layout and layout.WidgetForge and layout.WidgetForge
-	if (forge) then
-		return self:Forge(self, forge, layout.ButtonForge, module)
+UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
+	if (self:Forge(Private.GetSchematic("UnitFrame::Target"))) then
+		return 
 	end
 
 	self.layout = layout
@@ -2281,6 +2265,14 @@ end
 -- Player
 -----------------------------------------------------------
 UnitFramePlayer.OnInit = function(self)
+	if (Private.HasSchematic("UnitFrame::Player")) then
+		self.db = GetConfig(self:GetName())
+		self.frame = self:SpawnUnitFrame("player", "UICenter", function(self, unit) 
+			self:Forge(Private.GetSchematic("UnitFrame::Player")) 
+		end) 
+		return
+	end
+
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
 	if (not self.layout) then
@@ -2326,6 +2318,9 @@ UnitFramePlayer.OnInit = function(self)
 end 
 
 UnitFramePlayer.OnEnable = function(self)
+	if (Private.HasSchematic("UnitFrame::Player")) then
+		return
+	end
 	self:RegisterEvent("PLAYER_ALIVE", "OnEvent")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("DISABLE_XP_GAIN", "OnEvent")
@@ -2444,6 +2439,14 @@ end
 -- Target
 -----------------------------------------------------------
 UnitFrameTarget.OnInit = function(self)
+	if (Private.HasSchematic("UnitFrame::Target")) then
+		self.db = GetConfig(self:GetName())
+		self.frame = self:SpawnUnitFrame("target", "UICenter", function(self, unit) 
+			self:Forge(Private.GetSchematic("UnitFrame::Target")) 
+		end) 
+		return
+	end
+
 	self.layout = GetLayout(self:GetName())
 	if (not self.layout) then
 		return self:SetUserDisabled(true)
@@ -2464,6 +2467,9 @@ UnitFrameTarget.OnInit = function(self)
 end 
 
 UnitFrameTarget.OnEnable = function(self)
+	if (Private.HasSchematic("UnitFrame::Target")) then
+		return
+	end
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", "OnEvent")
 	self:RegisterMessage("GP_AURA_FILTER_MODE_CHANGED", "OnEvent")
 end
@@ -2500,10 +2506,10 @@ if (UnitFrameFocus) then
 		if (not self.layout) then
 			return self:SetUserDisabled(true)
 		end
-	
-		self.frame = self:SpawnUnitFrame("focus", "UICenter", function(frame, unit, id, _, ...)
-			return UnitStyles.StyleFocusFrame(frame, unit, id, self.layout, ...)
-		end)
+
+		-- How this is called:
+		-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
+		self.frame = self:SpawnUnitFrame("focus", "UICenter", UnitStyles.StyleFocusFrame, self.layout, self) 
 	end
 end
 
@@ -2516,9 +2522,9 @@ UnitFramePet.OnInit = function(self)
 		return self:SetUserDisabled(true)
 	end
 
-	self.frame = self:SpawnUnitFrame("pet", "UICenter", function(frame, unit, id, _, ...)
-		return UnitStyles.StylePetFrame(frame, unit, id, self.layout, ...)
-	end)
+	-- How this is called:
+	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
+	self.frame = self:SpawnUnitFrame("focus", "UICenter", UnitStyles.StylePetFrame, self.layout, self) 
 end 
 
 -----------------------------------------------------------
@@ -2530,9 +2536,12 @@ UnitFrameToT.OnInit = function(self)
 		return self:SetUserDisabled(true)
 	end
 
-	self.frame = self:SpawnUnitFrame("targettarget", "UICenter", function(frame, unit, id, _, ...)
-		return UnitStyles.StyleToTFrame(frame, unit, id, self.layout, ...)
-	end)
+	-- How this is called:
+	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
+	self.frame = self:SpawnUnitFrame("targettarget", "UICenter", UnitStyles.StyleToTFrame, self.layout, self) 
+
+	-- Our frame is sometimes hidden when the unit exists, 
+	-- so we're using this system to let other modules piggyback on this one's decisions.
 	self.frame:HookScript("OnShow", function(self) self:SendMessage("GP_UNITFRAME_TOT_SHOWN") end)
 	self.frame:HookScript("OnHide", function(self) self:SendMessage("GP_UNITFRAME_TOT_HIDDEN") end)
 end 
