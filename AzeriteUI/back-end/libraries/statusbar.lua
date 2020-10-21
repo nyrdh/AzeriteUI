@@ -1,4 +1,4 @@
-local LibStatusBar = Wheel:Set("LibStatusBar", 56)
+local LibStatusBar = Wheel:Set("LibStatusBar", 57)
 if (not LibStatusBar) then
 	return
 end
@@ -27,8 +27,8 @@ local tonumber = tonumber
 local type = type
 
 -- WoW API
-local CreateFrame = _G.CreateFrame
-local GetTime = _G.GetTime
+local CreateFrame = CreateFrame
+local GetTime = GetTime
 
 -- Library registries
 LibStatusBar.bars = LibStatusBar.bars or {}
@@ -645,8 +645,8 @@ StatusBar.SetOrientation = function(self, orientation)
 	end
 end
 
-StatusBar.CreateFrame = function(self, type, name, ...)
-	return self:CreateFrame(type or "Frame", name, Bars[self].scaffold, ...)
+StatusBar.CreateFrame = function(self, type, name, template)
+	return LibFrame:CreateFrame(type or "Frame", name, Bars[self].scaffold, template)
 end
 
 StatusBar.CreateTexture = function(self, ...)
@@ -829,9 +829,6 @@ LibStatusBar.CreateStatusBar = function(self, parent)
 	-- This contains all the methods.
 	local statusbar = CreateFrame("Frame", nil, scaffold)
 	statusbar:SetAllPoints() -- lock down the points before we overwrite the methods
-
-	-- Embed LibFrame's frame creation and methods directly.
-	LibFrame:Embed(statusbar)
 
 	-- Change to our custom metatable and methods.
 	setmetatable(statusbar, StatusBar_MT)

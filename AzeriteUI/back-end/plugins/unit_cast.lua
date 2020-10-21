@@ -366,7 +366,8 @@ Update = function(self, event, unit, ...)
 			element:UpdateColor(unit)
 
 			if (element.Failed) then element.Failed:SetText("") end
-			if (element.Name) then element.Name:SetText(utf8sub(text, 32, true)) end
+			if (element.Name) then element.Name:SetText(utf8sub(text, element.maxNameChars or 32, true)) end
+			--if (element.Name) then element.Name:SetText(utf8sub(text, 16, true)) end
 			if (element.Icon) then element.Icon:SetTexture(texture) end
 			if (element.Value) then element.Value:SetText("") end
 			if (element.Shield) then 
@@ -407,7 +408,7 @@ Update = function(self, event, unit, ...)
 				element.failedMessageTimer = element.timeToHold
 				local msg = element.Failed or element.Value or element.Name
 				if (msg) then 
-					msg:SetText(utf8sub(L_FAILED, 32, true)) 
+					msg:SetText(utf8sub(L_FAILED, element.maxNameChars or 32, true)) 
 				end 
 			else
 				element.failedMessageTimer = nil
@@ -462,7 +463,7 @@ Update = function(self, event, unit, ...)
 				element.failedMessageTimer = element.timeToHold
 				local msg = element.Failed or element.Value or element.Name
 				if (msg) then 
-					msg:SetText(utf8sub(L_INTERRUPTED, 32, true)) 
+					msg:SetText(utf8sub(L_INTERRUPTED, element.maxNameChars or 32, true)) 
 				end 
 			else
 				element.failedMessageTimer = nil
@@ -540,7 +541,7 @@ Update = function(self, event, unit, ...)
 			element:UpdateColor(unit)
 
 			if (element.Failed) then element.Failed:SetText("") end
-			if (element.Name) then element.Name:SetText(utf8sub(name, 32, true)) end
+			if (element.Name) then element.Name:SetText(utf8sub(name, element.maxNameChars or 32, true)) end
 			if (element.Icon) then element.Icon:SetTexture(texture) end
 			if (element.Value) then element.Value:SetText("") end
 			if (element.Shield) then 
@@ -685,5 +686,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 48)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 49)
 end 

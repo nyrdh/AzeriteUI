@@ -2271,46 +2271,46 @@ UnitFramePlayer.OnInit = function(self)
 			self:Forge(Private.GetSchematic("UnitFrame::Player")) 
 		end) 
 		return
-	end
-
-	self.db = GetConfig(self:GetName())
-	self.layout = GetLayout(self:GetName())
-	if (not self.layout) then
-		return self:SetUserDisabled(true)
-	end
-
-	-- How this is called:
-	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
-	self.frame = self:SpawnUnitFrame("player", "UICenter", UnitStyles.StylePlayerFrame, self.layout, self) 
-
-	-- Apply the aura filter
-	local auras = self.frame.Auras
-	if (auras) then
-		local filterMode = Core.db.auraFilter
-		auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
-		auras.enableSpamMode = filterMode == "spam" or nil
-		auras:ForceUpdate()
-	end
-
-	self.frame.EnableManaOrb = function()
-		if (self.frame.ExtraPower) and (self.frame.Power) then
-			self.frame.Power.ignoredResource = self.layout.PowerIgnoredResource
-			self.frame.Power:ForceUpdate()
-			self.frame:EnableElement("ExtraPower")
-			self.frame.ExtraPower:ForceUpdate()
+	else
+		self.db = GetConfig(self:GetName())
+		self.layout = GetLayout(self:GetName())
+		if (not self.layout) then
+			return self:SetUserDisabled(true)
 		end
-	end
 
-	self.frame.DisableManaOrb = function()
-		if (self.frame.ExtraPower) and (self.frame.Power) then
-			self.frame.Power.ignoredResource = nil
-			self.frame.Power:ForceUpdate()
-			self.frame:DisableElement("ExtraPower")
+		-- How this is called:
+		-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
+		self.frame = self:SpawnUnitFrame("player", "UICenter", UnitStyles.StylePlayerFrame, self.layout, self) 
+
+		-- Apply the aura filter
+		local auras = self.frame.Auras
+		if (auras) then
+			local filterMode = Core.db.auraFilter
+			auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
+			auras.enableSpamMode = filterMode == "spam" or nil
+			auras:ForceUpdate()
 		end
-	end
 
-	if (not self.db.enablePlayerManaOrb) then
-		self.frame:DisableManaOrb()
+		self.frame.EnableManaOrb = function()
+			if (self.frame.ExtraPower) and (self.frame.Power) then
+				self.frame.Power.ignoredResource = self.layout.PowerIgnoredResource
+				self.frame.Power:ForceUpdate()
+				self.frame:EnableElement("ExtraPower")
+				self.frame.ExtraPower:ForceUpdate()
+			end
+		end
+
+		self.frame.DisableManaOrb = function()
+			if (self.frame.ExtraPower) and (self.frame.Power) then
+				self.frame.Power.ignoredResource = nil
+				self.frame.Power:ForceUpdate()
+				self.frame:DisableElement("ExtraPower")
+			end
+		end
+
+		if (not self.db.enablePlayerManaOrb) then
+			self.frame:DisableManaOrb()
+		end
 	end
 
 	-- Create a secure proxy updater for the menu system
@@ -2319,6 +2319,9 @@ end
 
 UnitFramePlayer.OnEnable = function(self)
 	if (Private.HasSchematic("UnitFrame::Player")) then
+		return
+	end
+	if (not self.frame) then
 		return
 	end
 	self:RegisterEvent("PLAYER_ALIVE", "OnEvent")
@@ -2331,6 +2334,9 @@ UnitFramePlayer.OnEnable = function(self)
 end
 
 UnitFramePlayer.OnEvent = function(self, event, ...)
+	if (not self.frame) then
+		return
+	end
 	if (event == "PLAYER_ENTERING_WORLD") then
 		if (self.db.enablePlayerManaOrb) then
 			self.frame:EnableManaOrb()
@@ -2367,15 +2373,23 @@ UnitFramePlayer.OnEvent = function(self, event, ...)
 end
 
 UnitFramePlayerHUD.OnInit = function(self)
-	self.db = GetConfig(self:GetName())
-	self.layout = GetLayout(self:GetName())
-	if (not self.layout) then
-		return self:SetUserDisabled(true)
-	end
+	if (Private.HasSchematic("UnitFrame::PlayerHUD")) then
+		self.db = GetConfig(self:GetName())
+		self.frame = self:SpawnUnitFrame("player", "UICenter", function(self, unit) 
+			self:Forge(Private.GetSchematic("UnitFrame::PlayerHUD")) 
+		end) 
+		return
+	else
+		self.db = GetConfig(self:GetName())
+		self.layout = GetLayout(self:GetName())
+		if (not self.layout) then
+			return self:SetUserDisabled(true)
+		end
 
-	self.frame = self:SpawnUnitFrame("player", "UICenter", function(frame, unit, id, _, ...)
-		return UnitStyles.StylePlayerHUDFrame(frame, unit, id, self.layout, ...)
-	end)
+		self.frame = self:SpawnUnitFrame("player", "UICenter", function(frame, unit, id, _, ...)
+			return UnitStyles.StylePlayerHUDFrame(frame, unit, id, self.layout, ...)
+		end)
+	end
 
 	-- Create a secure proxy updater for the menu system
 	local callbackFrame = CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.HUD_SecureCallback)
@@ -2383,6 +2397,9 @@ UnitFramePlayerHUD.OnInit = function(self)
 end 
 
 UnitFramePlayerHUD.OnEnable = function(self)
+	if (not self.frame) then
+		return
+	end
 
 	-- Handle castbar visibility
 	self:RegisterEvent("CVAR_UPDATE", "OnEvent")
@@ -2391,20 +2408,27 @@ UnitFramePlayerHUD.OnEnable = function(self)
 	self:UpdateCastBarVisibility(self:GetCastBarVisibility())
 
 	-- Handle classpower visibility
-	if (not self.db.enableClassPower) or (self:IsAddOnEnabled("SimpleClassPower")) then 
-		self.frame:DisableElement("ClassPower")
+	if (self.frame.ClassPower) then
+		if (not self.db.enableClassPower) or (self:IsAddOnEnabled("SimpleClassPower")) then 
+			self.frame:DisableElement("ClassPower")
+		end
 	end
 end
 
 UnitFramePlayerHUD.OnEvent = function(self, event, ...)
-	local arg1, arg2 = ...
+	if (not self.frame) then
+		return
+	end
 
 	local shouldEnable
 	if (event == "CVAR_UPDATE") then 
+		local arg1, arg2 = ...
+
 		-- Bail out for irrelevant cvar changes.
 		if (arg1 ~= "DISPLAY_PERSONAL_RESOURCE") then
 			return
 		end	
+
 		-- Check for event args, as the real CVar isn't updated yet.
 		if (arg2 == "0") and (self.db.enableCast) then 
 			shouldEnable = true
@@ -2425,6 +2449,9 @@ UnitFramePlayerHUD.GetCastBarVisibility = function(self)
 end
 
 UnitFramePlayerHUD.UpdateCastBarVisibility = function(self, shouldEnable)
+	if (not self.frame) or (not self.frame.Cast) then
+		return
+	end
 	local isEnabled = self.frame:IsElementEnabled("Cast")
 	if (shouldEnable) and (not isEnabled) then
 		self.frame:EnableElement("Cast")
@@ -2445,16 +2472,16 @@ UnitFrameTarget.OnInit = function(self)
 			self:Forge(Private.GetSchematic("UnitFrame::Target")) 
 		end) 
 		return
-	end
+	else
+		self.layout = GetLayout(self:GetName())
+		if (not self.layout) then
+			return self:SetUserDisabled(true)
+		end
 
-	self.layout = GetLayout(self:GetName())
-	if (not self.layout) then
-		return self:SetUserDisabled(true)
+		-- How this is called:
+		-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
+		self.frame = self:SpawnUnitFrame("target", "UICenter", UnitStyles.StyleTargetFrame, self.layout, self) 
 	end
-
-	-- How this is called:
-	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
-	self.frame = self:SpawnUnitFrame("target", "UICenter", UnitStyles.StyleTargetFrame, self.layout, self) 
 
 	-- Apply the aura filter
 	local auras = self.frame.Auras
@@ -2470,11 +2497,17 @@ UnitFrameTarget.OnEnable = function(self)
 	if (Private.HasSchematic("UnitFrame::Target")) then
 		return
 	end
+	if (not self.frame) then
+		return
+	end
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", "OnEvent")
 	self:RegisterMessage("GP_AURA_FILTER_MODE_CHANGED", "OnEvent")
 end
 
 UnitFrameTarget.OnEvent = function(self, event, ...)
+	if (not self.frame) then
+		return
+	end
 	if (event == "PLAYER_TARGET_CHANGED") then
 		if (UnitExists("target")) then
 			if (self.frame.PostUpdateTextures) then

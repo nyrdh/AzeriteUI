@@ -6,7 +6,7 @@ without the need for the front-end modules to worry about global names.
 
 --]]--
 
-local LibFontTool = Wheel:Set("LibFontTool", 1)
+local LibFontTool = Wheel:Set("LibFontTool", 2)
 if (not LibFontTool) then
 	return
 end
@@ -50,7 +50,8 @@ local fontFamily = ({
 
 -- Set the normal font
 local normalFontPath = ({
-	roman = [[Fonts\FRIZQT__.TTF]],
+	--roman = [[Fonts\FRIZQT__.TTF]],
+	roman = [[Fonts\FRIZQT___CYR.TTF]],
 	russian = [[Fonts\FRIZQT___CYR.TTF]],
 	korean = [[Fonts\2002.TTF]],
 	simplifiedchinese = [[Fonts\ARKai_T.ttf]],

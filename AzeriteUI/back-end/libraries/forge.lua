@@ -308,7 +308,7 @@ LibForge.Forge = function(self, object, forgedata, ...)
 							if (item.objectSubType == "StatusBar") and (parent.CreateStatusBar) then
 								widget = parent:CreateStatusBar()
 							else
-								widget = parent:CreateFrame(item.objectSubType)
+								widget = parent:CreateFrame(item.objectSubType, item.objectName, item.objectTemplate)
 							end
 						end
 					else
