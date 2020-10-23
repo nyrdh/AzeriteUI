@@ -4,11 +4,17 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-10-20
+## [Unreleased] 2020-10-23
+- Various work on the Legacy theme which for the most part will remain undocumented for the time being, as it is not even considered an Alpha feature at this point.
+
+### Added
+- All classes and specs can now choose between at least the Slack and Spam aura filters, allowing them to permanently hide various static spam. The Strict filter is currently only available for Mages, Warriors and Druids. I refer to my patreon goals if you wish to know how you can accelerate my work on this: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)
+
 ### Changed
+- Changed the width limitations of worldframe tooltips, as these were weirdly large from Blizzard's end on the 9.0.2 beta realm.
+- Added a lot of predefined font family objects to be able to show unit names in mixed alphabets. Mostly noticable on the 9.0.2 beta realm where people from all over the world is gathered, but should also fix any problems with showing Cyrillic names on EU clients.
 - Started moving the new forge driven schematic tables to their own aptly named area in the folder hierarchy.
-- Modified the aura plugin back-end to parse and sort the entire aura table before deciding on visibility. 
-- Various work on the Legacy theme.
+- Modified the aura plugin back-end to parse and sort the entire aura table before deciding on visibility. Work in progress.
 
 ## [3.0.420-RC] 2020-10-17
 ### Added
