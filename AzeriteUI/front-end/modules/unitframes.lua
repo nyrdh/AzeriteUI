@@ -2286,8 +2286,8 @@ UnitFramePlayer.OnInit = function(self)
 		local auras = self.frame.Auras
 		if (auras) then
 			local filterMode = Core.db.auraFilter
-			auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
-			auras.enableSpamMode = filterMode == "spam" or nil
+			auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
+			auras.enableSpamMode = filterMode == "spam"
 			auras:ForceUpdate()
 		end
 
@@ -2319,6 +2319,7 @@ end
 
 UnitFramePlayer.OnEnable = function(self)
 	if (Private.HasSchematic("UnitFrame::Player")) then
+		self:RegisterMessage("GP_AURA_FILTER_MODE_CHANGED", "OnEvent")
 		return
 	end
 	if (not self.frame) then
@@ -2357,14 +2358,9 @@ UnitFramePlayer.OnEvent = function(self, event, ...)
 		local auras = self.frame.Auras
 		if (auras) then
 			local filterMode = ...
-			if (filterMode == "strict") and (auras.enableSlackMode or auras.enableSpamMode)
-			or (filterMode == "slack") and (auras.enableSpamMode or not auras.enableSlackMode)
-			or (filterMode == "spam") and not(auras.enableSpamMode and auras.enableSlackMode) then
-
-				auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
-				auras.enableSpamMode = filterMode == "spam" or nil
-				auras:ForceUpdate()
-			end
+			auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
+			auras.enableSpamMode = filterMode == "spam"
+			auras:ForceUpdate()
 		end
 	end
 	if (self.frame.PostUpdateTextures) then
@@ -2487,14 +2483,15 @@ UnitFrameTarget.OnInit = function(self)
 	local auras = self.frame.Auras
 	if (auras) then
 		local filterMode = Core.db.auraFilter
-		auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
-		auras.enableSpamMode = filterMode == "spam" or nil
+		auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
+		auras.enableSpamMode = filterMode == "spam"
 		auras:ForceUpdate()
 	end
 end 
 
 UnitFrameTarget.OnEnable = function(self)
 	if (Private.HasSchematic("UnitFrame::Target")) then
+		self:RegisterMessage("GP_AURA_FILTER_MODE_CHANGED", "OnEvent")
 		return
 	end
 	if (not self.frame) then
@@ -2518,14 +2515,9 @@ UnitFrameTarget.OnEvent = function(self, event, ...)
 		local auras = self.frame.Auras
 		if (auras) then
 			local filterMode = ...
-			if (filterMode == "strict") and (auras.enableSlackMode or auras.enableSpamMode)
-			or (filterMode == "slack") and (auras.enableSpamMode or not auras.enableSlackMode)
-			or (filterMode == "spam") and not(auras.enableSpamMode and auras.enableSlackMode) then
-
-				auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
-				auras.enableSpamMode = filterMode == "spam" or nil
-				auras:ForceUpdate()
-			end
+			auras.enableSlackMode = filterMode == "slack" or filterMode == "spam" or nil
+			auras.enableSpamMode = filterMode == "spam" or nil
+			auras:ForceUpdate()
 		end
 	end
 end

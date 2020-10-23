@@ -12,6 +12,9 @@
 ## X-Website: https://www.patreon.com/goldpawsstuff
 ## X-License: Custom
 
+# Global Fonts
+FontStyles.xml
+
 # External libraries, not made by us.
 # Loaded first, so our own can assume they exist.
 back-end\external.xml

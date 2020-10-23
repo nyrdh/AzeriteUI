@@ -725,24 +725,26 @@ local EvaluateVisibilities = function(element, visible)
 end
 
 local Update = function(self, event, unit, ...)
-
-	-- Always process this flag
-	if (event == "PLAYER_ENTERING_WORLD") or (event == "PLAYER_REGEN_ENABLED") then
-		IN_COMBAT = nil
-	elseif (event == "PLAYER_REGEN_DISABLED") then
-		IN_COMBAT = true
-	end
-
-	-- Bail out on missing unit, which should never happen, but does.
 	if (not unit) or (unit ~= self.unit) then 
 		return 
 	end 
 
-	local forced = event == "Forced"
+	if (event == "PLAYER_ENTERING_WORLD") then
+		IN_COMBAT = true
+	elseif (event == "PLAYER_REGEN_DISABLED") then
+		IN_COMBAT = true
+	elseif (event == "PLAYER_REGEN_ENABLED") then
+		IN_COMBAT = nil
+	end
+
+	-- Different GUID means a different player or NPC,
+	-- so we want updates to be instant, not smoothed. 
 	local guid = UnitGUID(unit)
-	local isEnemy = UnitCanAttack("player", unit)
+	local isEnemy = UnitCanAttack("player", unit) -- UnitIsEnemy(unit, "player")
 	local isFriend = UnitIsFriend("player", unit)
 	local isYou = UnitIsUnit("player", unit)
+	local forced = event == "Forced"
+
 
 	local Auras = self.Auras
 	local Buffs = self.Buffs
@@ -838,14 +840,13 @@ local Update = function(self, event, unit, ...)
 		-- Filter functions used to filter the displayed auras
 		local buffFilterFunc = Buffs.func or Buffs.funcBuffs 
 
-		local buffCache
+		-- Force the back-end to cache the auras for the relevant filters
 		if (forced) then 
-			-- Force the back-end to cache the auras for the relevant filters
-			buffCache = LibAura:CacheUnitBuffsByFilter(unit, buffFilter)
-		else
-			-- Retrieve full back-end caches for meta parsing 
-			buffCache = LibAura:GetUnitBuffCacheByFilter(unit, buffFilter)
+			LibAura:CacheUnitBuffsByFilter(unit, buffFilter)
 		end 
+
+		-- Retrieve full back-end caches for meta parsing 
+		local buffCache = LibAura:GetUnitBuffCacheByFilter(unit, buffFilter)
 
 		-- Store meta info from the full cache,
 		-- so that the sorting filters in turn have access to this.
@@ -899,13 +900,12 @@ local Update = function(self, event, unit, ...)
 		local debuffFilterFunc = Debuffs.func or Debuffs.funcDebuffs
 
 		-- Force the back-end to cache the auras for the relevant filters
-		local debuffCache
 		if (forced) then 
-			debuffCache = LibAura:CacheUnitDebuffsByFilter(unit, debuffFilter)
-		else
-			-- Retrieve full back-end caches for meta parsing 
-			debuffCache = LibAura:GetUnitDebuffCacheByFilter(unit, debuffFilter)
+			LibAura:CacheUnitDebuffsByFilter(unit, debuffFilter)
 		end 
+
+		-- Retrieve full back-end caches for meta parsing 
+		local debuffCache = LibAura:GetUnitDebuffCacheByFilter(unit, debuffFilter)
 
 		-- Store meta info from the full cache,
 		-- so that the sorting filters in turn have access to this.
@@ -1071,5 +1071,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 65)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 64)
 end 

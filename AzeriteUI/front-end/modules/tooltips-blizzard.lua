@@ -122,18 +122,25 @@ align = function(self)
 	for i = tooltip:NumLines(), 1, -1 do
 		local line = _G[tooltipName.."TextLeft"..i]
 		if (line) then
+			--line:SetIndentedWordWrap(false)
+			--line:SetWordWrap(true)
 			local msg = line:GetText()
 			if (msg and msg ~= "") then
 				local parentWidth = tooltip:GetWidth()
 				local width = line:GetUnboundedStringWidth()
-				if (width < 480) then
+				if (width < 280) then
 					maxWidth = math_max(width, maxWidth)
 				end
 			end
 		end
 	end
-	if (maxWidth > 300) then
-		tooltip:SetMinimumWidth(maxWidth + 20)
+	-- Tooltips are something like 460px (relative to a 1920px width) wide by default in 9.0.2, 
+	-- which is just waaaay too much. Tons of empty space to the right, and it makes no sense.
+	-- We are limiting this.
+	if (maxWidth > 280) then
+		--tooltip:SetMinimumWidth(maxWidth + 20)
+		tooltip:SetMinimumWidth(280)
+		tooltip:SetWidth(420)
 	else
 		tooltip:SetMinimumWidth(0)
 	end

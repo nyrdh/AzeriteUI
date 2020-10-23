@@ -1055,21 +1055,6 @@ Module.CreateMenuTable = function(self)
 		})
 	end
 
-	--table_insert(DebugMenu.buttons, {
-	--	enabledTitle = L_ENABLED:format(L["Raid Test Mode"]),
-	--	disabledTitle = L_DISABLED:format(L["Raid Test Mode"]),
-	--	type = "TOGGLE_VALUE", 
-	--	configDB = "UnitFrameRaid", configKey = "enableTestMode", 
-	--	proxyModule = "UnitFrameRaid"
-	--})
-	--table_insert(DebugMenu.buttons, {
-	--	enabledTitle = L_ENABLED:format(L["Party Test Mode"]),
-	--	disabledTitle = L_DISABLED:format(L["Party Test Mode"]),
-	--	type = "TOGGLE_VALUE", 
-	--	configDB = "UnitFrameParty", configKey = "enableTestMode", 
-	--	proxyModule = "UnitFrameParty"
-	--})
-
 	table_insert(DebugMenu.buttons, {
 		enabledTitle = L_ENABLED:format(L["Reload UI"]),
 		disabledTitle = L_DISABLED:format(L["Reload UI"]),
@@ -1109,34 +1094,32 @@ Module.CreateMenuTable = function(self)
 
 	-- Aura Filter Options
 	-- *only added for select classes
-	if (not IsForcingSlackAuraFilterMode()) then
-		table_insert(MenuTable, {
-			title = L["Aura Filters"], type = nil, hasWindow = true, 
-			buttons = {
-				{
-					enabledTitle = L_ENABLED:format(L["Strict"]),
-					disabledTitle = L["Strict"],
-					type = "SET_VALUE", 
-					configDB = ADDON, configKey = "auraFilter", optionArgs = { "strict" }, 
-					proxyModule = nil, useCore = true
-				},
-				{
-					enabledTitle = L_ENABLED:format(L["Slack"]),
-					disabledTitle = L["Slack"],
-					type = "SET_VALUE", 
-					configDB = ADDON, configKey = "auraFilter", optionArgs = { "slack" }, 
-					proxyModule = nil, useCore = true
-				},
-				{
-					enabledTitle = L_ENABLED:format(L["Spam"]),
-					disabledTitle = L["Spam"],
-					type = "SET_VALUE", 
-					configDB = ADDON, configKey = "auraFilter", optionArgs = { "spam" }, 
-					proxyModule = nil, useCore = true
-				}
+	table_insert(MenuTable, {
+		title = L["Aura Filters"], type = nil, hasWindow = true, 
+		buttons = clean({
+			(not IsForcingSlackAuraFilterMode()) and {
+				enabledTitle = L_ENABLED:format(L["Strict"]),
+				disabledTitle = L["Strict"],
+				type = "SET_VALUE", 
+				configDB = ADDON, configKey = "auraFilter", optionArgs = { "strict" }, 
+				proxyModule = nil, useCore = true
+			} or false,
+			{
+				enabledTitle = L_ENABLED:format(L["Slack"]),
+				disabledTitle = L["Slack"],
+				type = "SET_VALUE", 
+				configDB = ADDON, configKey = "auraFilter", optionArgs = { "slack" }, 
+				proxyModule = nil, useCore = true
+			},
+			{
+				enabledTitle = L_ENABLED:format(L["Spam"]),
+				disabledTitle = L["Spam"],
+				type = "SET_VALUE", 
+				configDB = ADDON, configKey = "auraFilter", optionArgs = { "spam" }, 
+				proxyModule = nil, useCore = true
 			}
 		})
-	end
+	})
 	
 	-- Actionbars
 	local ActionBarMain = Core:GetModule("ActionBarMain", true)

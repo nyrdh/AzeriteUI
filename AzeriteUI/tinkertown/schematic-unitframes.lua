@@ -1,3 +1,9 @@
+--[[--
+
+	The purpose of this file is to provide
+	forges for the various unitframes.
+
+--]]--
 local ADDON, Private = ...
 
 -- WoW API
@@ -45,16 +51,22 @@ local Aura_SortPrimary = function(a,b)
 	end
 end
 
--- General aura border- and icon coloring.
-local Aura_UpdateColor = function(element, button)
-	local unit = button.unit
+-- General aura button post creating forge
+local Aura_PostCreate = function(element, button)
+	if (element._owner:Forge(button, GetSchematic("Widget::AuraButton::Large"))) then
+		return 
+	end
+end
 
-	local isEnemy = UnitCanAttack("player", unit) -- UnitIsEnemy(unit, "player")
-	local isFriend = UnitIsFriend("player", unit)
-	local isYou = UnitIsUnit("player", unit)
+-- General aura border- and icon coloring.
+local Aura_PostUpdate = function(element, button)
+	local unit = button.unit
+	if (not unit) then
+		return
+	end
 
 	-- Border
-	if (isFriend) then
+	if (element.isFriend) then
 		if (button.isBuff) then 
 			button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
 		else
@@ -86,9 +98,9 @@ local Aura_UpdateColor = function(element, button)
 	end
 
 	-- Icon
-	if (isYou) then
+	if (element.isYou) then
 		button.Icon:SetDesaturated(false)
-	elseif (isFriend) then
+	elseif (element.isFriend) then
 		if (button.isBuff) then
 			if (button.isCastByPlayer) then 
 				button.Icon:SetDesaturated(false)
@@ -153,7 +165,12 @@ Private.RegisterSchematic("UnitFrame::Player", "Legacy", {
 				},
 				values = {
 					"colors", Colors,
-					"hideInVehicles", true
+
+					-- hides when the unit has a vehicleui
+					"hideInVehicles", true, 
+
+					-- hides when the unit is in a vehicle, but lacks a vehicleui (tortollan minigames)
+					"visibilityPreDriver", "[canexitvehicle,novehicleui]hide;" 
 				}
 			},
 			-- Setup backdrop and border
@@ -399,12 +416,8 @@ Private.RegisterSchematic("UnitFrame::Player", "Legacy", {
 					"tooltipOffsetY", 16,
 					"tooltipPoint", "BOTTOMRIGHT",
 					"tooltipRelPoint", "TOPRIGHT",
-					"PostCreateButton", function(element, button)
-						if (element._owner:Forge(button, GetSchematic("Widget::AuraButton::Large"))) then
-							return 
-						end
-					end,
-					"PostUpdateButton", Aura_UpdateColor
+					"PostCreateButton", Aura_PostCreate,
+					"PostUpdateButton", Aura_PostUpdate
 					
 				}
 			},
@@ -445,12 +458,8 @@ Private.RegisterSchematic("UnitFrame::Player", "Legacy", {
 					"tooltipOffsetY", 16,
 					"tooltipPoint", "BOTTOMRIGHT",
 					"tooltipRelPoint", "TOPRIGHT",
-					"PostCreateButton", function(element, button)
-						if (element._owner:Forge(button, GetSchematic("Widget::AuraButton::Large"))) then
-							return 
-						end
-					end,
-					"PostUpdateButton", Aura_UpdateColor
+					"PostCreateButton", Aura_PostCreate,
+					"PostUpdateButton", Aura_PostUpdate
 				}
 			}
 
@@ -459,6 +468,8 @@ Private.RegisterSchematic("UnitFrame::Player", "Legacy", {
 	}
 })
 
+-- Applied to the player HUD elements,
+-- like cast bar, combo points and alt power.
 Private.RegisterSchematic("UnitFrame::PlayerHUD", "Legacy", {
 	-- Create layered scaffold frames
 	{
@@ -496,7 +507,7 @@ Private.RegisterSchematic("UnitFrame::PlayerHUD", "Legacy", {
 				parent = nil, ownerKey = nil, 
 				chain = {
 					"SetSize", { 224, 26 }, "SetHitBox", { -4, -4, -4, -4 },
-					"Place", { "BOTTOM", "UICenter", "BOTTOM", 0, 160 }
+					"Place", { "BOTTOM", "UICenter", "BOTTOM", 0, 210 }
 				},
 				values = {
 					"colors", Colors,
@@ -590,6 +601,18 @@ Private.RegisterSchematic("UnitFrame::PlayerHUD", "Legacy", {
 					"SetParentToOwnerKey", "OverlayScaffold"
 				}
 			},
+			-- Cast Bar Spell Queue
+			{
+				parent = "self,Cast", parentKey = "SpellQueue", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
+					"SetSizeOffset", 0,
+					"SetOrientation", "LEFT",
+					"SetStatusBarTexture", GetMedia("statusbar-power"),
+					"SetStatusBarColor", { 1, 1, 1, .5 },
+					"DisableSmoothing", true
+				}
+			}
 			
 		}
 	}
@@ -638,7 +661,12 @@ Private.RegisterSchematic("UnitFrame::Target", "Legacy", {
 				},
 				values = {
 					"colors", Colors,
-					"hideInVehicles", true
+
+					-- hides when the unit has a vehicleui
+					"hideInVehicles", true, 
+
+					-- hides when the unit is in a vehicle, but lacks a vehicleui (tortollan minigames)
+					"visibilityPreDriver", "[canexitvehicle,novehicleui]hide;" 
 				}
 			},
 			-- Setup backdrop and border
@@ -884,12 +912,8 @@ Private.RegisterSchematic("UnitFrame::Target", "Legacy", {
 					"tooltipOffsetY", 16,
 					"tooltipPoint", "BOTTOMLEFT",
 					"tooltipRelPoint", "TOPLEFT",
-					"PostCreateButton", function(element, button)
-						if (element._owner:Forge(button, GetSchematic("Widget::AuraButton::Large"))) then
-							return 
-						end
-					end,
-					"PostUpdateButton", Aura_UpdateColor
+					"PostCreateButton", Aura_PostCreate,
+					"PostUpdateButton", Aura_PostUpdate
 				}
 			},
 
@@ -929,12 +953,8 @@ Private.RegisterSchematic("UnitFrame::Target", "Legacy", {
 					"tooltipOffsetY", 16,
 					"tooltipPoint", "BOTTOMLEFT",
 					"tooltipRelPoint", "TOPLEFT",
-					"PostCreateButton", function(element, button)
-						if (element._owner:Forge(button, GetSchematic("Widget::AuraButton::Large"))) then
-							return 
-						end
-					end,
-					"PostUpdateButton", Aura_UpdateColor
+					"PostCreateButton", Aura_PostCreate,
+					"PostUpdateButton", Aura_PostUpdate
 				}
 			},
 
@@ -974,12 +994,8 @@ Private.RegisterSchematic("UnitFrame::Target", "Legacy", {
 					"tooltipOffsetY", 16,
 					"tooltipPoint", "BOTTOMLEFT",
 					"tooltipRelPoint", "TOPLEFT",
-					"PostCreateButton", function(element, button)
-						if (element._owner:Forge(button, GetSchematic("Widget::AuraButton::Large"))) then
-							return 
-						end
-					end,
-					"PostUpdateButton", Aura_UpdateColor
+					"PostCreateButton", Aura_PostCreate,
+					"PostUpdateButton", Aura_PostUpdate
 				}
 			}
 

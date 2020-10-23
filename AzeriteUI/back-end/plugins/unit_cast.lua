@@ -367,7 +367,6 @@ Update = function(self, event, unit, ...)
 
 			if (element.Failed) then element.Failed:SetText("") end
 			if (element.Name) then element.Name:SetText(utf8sub(text, element.maxNameChars or 32, true)) end
-			--if (element.Name) then element.Name:SetText(utf8sub(text, 16, true)) end
 			if (element.Icon) then element.Icon:SetTexture(texture) end
 			if (element.Value) then element.Value:SetText("") end
 			if (element.Shield) then 
@@ -686,5 +685,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 49)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 50)
 end 

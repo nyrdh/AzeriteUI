@@ -1,3 +1,10 @@
+--[[--
+
+	The purpose of this file is to provide
+	standarized forges for common widgets,
+	like action- and aura buttons.
+
+--]]--
 local ADDON, Private = ...
 
 -- Private API
@@ -7,7 +14,7 @@ local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia
 local GetSchematic = Private.GetSchematic
 
--- Applied to aura buttons
+-- Applied to aura buttons.
 -- Keep these in a manner that works without knowing the size.
 Private.RegisterSchematic("Widget::AuraButton::Large", "Legacy", {
 	{
@@ -55,3 +62,17 @@ Private.RegisterSchematic("Widget::AuraButton::Large", "Legacy", {
 	}
 })
 
+-- Applied to primary bar action buttons.
+Private.RegisterSchematic("Widget::ActionButton::Normal", "Legacy", {
+
+})
+
+-- Applied to pet-, stance- and additional bars action buttons.
+Private.RegisterSchematic("Widget::ActionButton::Small", "Legacy", {
+
+})
+
+-- Applied to huge floating buttons like zone abilities.
+Private.RegisterSchematic("Widget::ActionButton::Large", "Legacy", {
+
+})

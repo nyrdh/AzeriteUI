@@ -203,6 +203,26 @@ end
 -- I haven't yet decided whether to put into modules or the back-end.
 Core.ApplyExperimentalFeatures = function(self)
 
+	-- Kill of the "help".
+	hooksecurefunc(HelpTip, "Show", function() 
+		if (HelpTip.info) then
+			HelpTip:ForceHideAll()
+		end 
+	end)
+	HelpTip:ForceHideAll()
+
+	-- Kill of tutorials.
+	local noTuts
+	noTuts = function(self, event, ...)
+		if (event == "VARIABLES_LOADED") then
+			self:UnregisterEvent("VARIABLES_LOADED", noTuts)
+		end
+		SetCVar("showTutorials", "0")
+		SetCVar("showNPETutorials", "0")
+	end
+	self:RegisterEvent("VARIABLES_LOADED", noTuts)
+	noTuts()
+
 	-- Minifix for MaxDps for now
 	-- Fixed in MaxDps v9.0.0 Oct 16th 2020
 	--if (not ActionButton_GetPagedID) then

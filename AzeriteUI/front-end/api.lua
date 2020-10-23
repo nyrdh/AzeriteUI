@@ -2461,6 +2461,22 @@ Azerite.BlizzardFloaterHUD = {
 	ZoneAbilityButtonShowCooldownBling = true,
 	ZoneAbilityButtonSize = { 64, 64 }
 }
+Legacy.BlizzardFloaterHUD = setmetatable({
+
+	ExtraActionButtonFramePlace = { "CENTER", "UICenter", "RIGHT", -390, 0 },
+	ZoneAbilityButtonFramePlace = { "CENTER", "UICenter", "RIGHT", -390, 0 },
+	VehicleSeatIndicatorPlace = { "CENTER", "UICenter", "BOTTOMRIGHT", -130, 80 }, 
+
+	-- Bottom center floaters
+	-- Below these you'll find 2 potentional rows of actionbuttons, and the petbar.
+	ArcheologyDigsiteProgressBarPlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 390 },
+	
+	--AltPower = { "BOTTOM", "UICenter", "BOTTOM", 0, 210 + 46 }, 
+	--CastBar = { "BOTTOM", "UICenter", "BOTTOM", 0, 210 }, -- 224, 26 + 8 
+	--ClassPower =  = { "BOTTOM", "UICenter", "BOTTOM", 0, 210 - 46 }
+
+
+}, { __index = Azerite.BlizzardFloaterHUD })
 
 -- Blizzard font replacements
 Azerite.BlizzardFonts = {
@@ -3391,8 +3407,8 @@ Azerite.Minimap = {
 	UseBars = true, -- copout
 }
 Legacy.Minimap = setmetatable({
-	Size = { 200, 200 }, 
-	Place = { "TOPRIGHT", "UICenter", "TOPRIGHT", -54, -60 }, 
+	Size = { 210, 210 }, 
+	Place = { "TOPRIGHT", "UICenter", "TOPRIGHT", -60, -66 }, 
 
 	-- Border icon positions
 	BattleGroundEyePlace = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
@@ -3402,8 +3418,8 @@ Legacy.Minimap = setmetatable({
 
 	-- Element positions
 	MBBPlace = { "TOPRIGHT", 24, 20 },
-	ClockPlace = { "BOTTOM", 0, 10 },
-	CoordinatePlace = { "TOP", 4, -12 },
+	ClockPlace = { "BOTTOM", 0, 12 },
+	CoordinatePlace = { "TOP", 4, -14 },
 	GroupFinderQueueStatusPlace = { "TOPRIGHT", _G.QueueStatusMinimapButton, "BOTTOMLEFT", 0, 0 },
 	MailPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -62, 12 },
 
@@ -3433,15 +3449,19 @@ Legacy.Minimap = setmetatable({
 	ClockFont = GetFont(14, true),
 	LatencyFont = GetFont(12, true), 
 	ZoneFont = GetFont(14, true),
-	ClockFrameInOverlay = true,
-	CompassRadiusInset = 2, -- move the text 2 points closer to the center of the map
-	CoordFrameInOverlay = true, 
+	ZoneAlpha = .75,
+
+	ClockColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	CoordinateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 	FrameRateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 	LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+
+	ClockFrameInOverlay = true,
+	CoordFrameInOverlay = true, 
+	CompassRadiusInset = 2, -- move the text 2 points closer to the center of the map
 	MapBorderSize = { 256, 256 }, 
 	MapBorderTexture = GetMedia("minimap-border-legacy"),
 	UseBars = false,
-	ZoneAlpha = .75,
 	PerformanceFramePlaceAdvancedFunc = false,
 
 

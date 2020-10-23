@@ -627,6 +627,7 @@ Module.HandleZoneAbilityButton = function(self)
 	CreatePointHook(frame)
 
 	-- Take over the mouseover scripts, use our own tooltip
+
 	local button = frame.SpellButton or frame.SpellButtonContainer -- 9.0.1
 	button:ClearAllPoints()
 	button:SetSize(unpack(layout.ZoneAbilityButtonSize))

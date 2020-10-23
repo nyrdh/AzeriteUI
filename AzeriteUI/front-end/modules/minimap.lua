@@ -791,7 +791,7 @@ Module.SetUpMinimap = function(self)
 	mapOverlay:SetVertexColor(unpack(layout.MapOverlayColor))
 	
 	-- Border
-	local border = Handler:CreateOverlayTexture()
+	local border = Handler:CreateBorderTexture()
 	border:SetDrawLayer("BACKGROUND")
 	border:SetTexture(layout.MapBorderTexture)
 	border:SetSize(unpack(layout.MapBorderSize))
@@ -874,7 +874,7 @@ Module.SetUpMinimap = function(self)
 	coordinates:SetTextColor(unpack(layout.CoordinateColor)) 
 	coordinates.OverrideValue = layout.Coordinates_OverrideValue
 	Handler.Coordinates = coordinates
-		
+
 	-- Performance Information
 	local performanceFrame = Handler:CreateBorderFrame()
 	performanceFrame._owner = Handler
