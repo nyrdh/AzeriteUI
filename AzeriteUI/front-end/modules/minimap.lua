@@ -7,10 +7,6 @@ end
 local L = Wheel("LibLocale"):GetLocale(ADDON)
 local Module = Core:NewModule("Minimap", "LibEvent", "LibDB", "LibMinimap", "LibTooltip", "LibTime", "LibSound", "LibPlayerData", "LibClientBuild")
 
--- Don't grab buttons if these are active
-local MBB = Module:IsAddOnEnabled("MBB") 
-local MBF = Module:IsAddOnEnabled("MinimapButtonFrame")
-
 -- Lua API
 local _G = _G
 local ipairs = ipairs
@@ -1274,6 +1270,19 @@ Module.SetUpMBB = function(self)
 	end)
 end
 
+-- Fix the frame strata of the Narcissus button
+Module.SetUpNarcissus = function(self)
+	if (not Narci_MinimapButton) then
+		return
+	end
+	hooksecurefunc(Narci_MinimapButton, "SetFrameStrata", function() 
+		if (Narci_MinimapButton:GetFrameStrata() ~= "MEDIUM") then
+			Narci_MinimapButton:SetFrameStrata("MEDIUM")
+		end
+	end)
+	Narci_MinimapButton:SetFrameStrata("MEDIUM")
+end
+
 -- Perform and initial update of all elements, 
 -- as this is not done automatically by the back-end.
 Module.EnableAllElements = function(self)
@@ -1565,8 +1574,17 @@ Module.OnEvent = function(self, event, ...)
 		local addon = ...
 		if (addon == "MBB") then 
 			self:SetUpMBB()
-			self:UnregisterEvent("ADDON_LOADED", "OnEvent")
+			self.addonCounter = self.addonCounter - 1
+			if (self.addonCounter == 0) then
+				self:UnregisterEvent("ADDON_LOADED", "OnEvent")
+			end
 			return 
+		elseif (addon == "Narcissus") then
+			self:SetUpNarcissus()
+			self.addonCounter = self.addonCounter - 1
+			if (self.addonCounter == 0) then
+				self:UnregisterEvent("ADDON_LOADED", "OnEvent")
+			end
 		end 
 	elseif (event == "UNIT_AURA") then 
 		self:UpdateTracking()
@@ -1581,6 +1599,7 @@ Module.OnInit = function(self)
 	end
 	self.db = GetConfig(self:GetName())
 	self.MBB = self:IsAddOnEnabled("MBB")
+	self.Narcissus = self:IsAddOnEnabled("Narcissus")
 	
 	self:SetUpMinimap()
 
@@ -1588,6 +1607,16 @@ Module.OnInit = function(self)
 		if (IsAddOnLoaded("MBB")) then 
 			self:SetUpMBB()
 		else 
+			self.addonCounter = (self.addonCounter or 0) + 1
+			self:RegisterEvent("ADDON_LOADED", "OnEvent")
+		end 
+	end 
+
+	if (self.Narcissus) then 
+		if (IsAddOnLoaded("Narcissus")) then 
+			self:SetUpNarcissus()
+		else 
+			self.addonCounter = (self.addonCounter or 0) + 1
 			self:RegisterEvent("ADDON_LOADED", "OnEvent")
 		end 
 	end 

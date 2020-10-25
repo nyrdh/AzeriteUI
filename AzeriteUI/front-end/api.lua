@@ -3704,8 +3704,8 @@ Azerite.NamePlates = {
 		-- which the target nameplate will be kept away from. 
 		-- Used to avoid the target plate being overlapped 
 		-- by the target frame or actionbars and keep it in view.
-		nameplateLargeTopInset = .1, -- default .1
-		nameplateOtherTopInset = .1, -- default .08
+		nameplateLargeTopInset = .125, -- default .1
+		nameplateOtherTopInset = .125, -- default .08
 		nameplateLargeBottomInset = .02, -- default .15
 		nameplateOtherBottomInset = .02, -- default .1
 		nameplateClassResourceTopInset = 0,

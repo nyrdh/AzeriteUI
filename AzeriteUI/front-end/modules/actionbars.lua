@@ -63,6 +63,7 @@ local Cache = {} -- cache buttons to separate different ranks of same spell
 local Buttons = {} -- all action buttons
 local PetButtons = {} -- all pet buttons
 local HoverButtons = {} -- all action buttons that can fade out
+local ButtonLookup = {} -- quickly identify a frame as our button
 
 -- Hover frames
 -- *Not related to the explorer mode.
@@ -515,14 +516,14 @@ Module.SpawnActionBars = function(self)
 	-- Primary Action Bar
 	for id = 1,NUM_ACTIONBAR_BUTTONS do 
 		buttonID = buttonID + 1
-		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, 1, id)
+		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, id, 1)
 		HoverButtons[Buttons[buttonID]] = buttonID > numPrimary
 	end 
 
 	-- Secondary Action Bar (Bottom Left)
 	for id = 1,NUM_ACTIONBAR_BUTTONS do 
 		buttonID = buttonID + 1
-		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, BOTTOMLEFT_ACTIONBAR_PAGE, id)
+		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, id, BOTTOMLEFT_ACTIONBAR_PAGE)
 		HoverButtons[Buttons[buttonID]] = true
 	end 
 
@@ -535,25 +536,28 @@ Module.SpawnActionBars = function(self)
 	if (false) then
 		for id = 1,NUM_ACTIONBAR_BUTTONS do 
 			buttonID = buttonID + 1
-			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, BOTTOMRIGHT_ACTIONBAR_PAGE, id)
+			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, id, BOTTOMRIGHT_ACTIONBAR_PAGE)
 		end
 
 		-- Second Side bar (Right)
 		for id = 1,NUM_ACTIONBAR_BUTTONS do 
 			buttonID = buttonID + 1
-			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, RIGHT_ACTIONBAR_PAGE, id)
+			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, id, RIGHT_ACTIONBAR_PAGE)
 		end
 
 		-- Third Side Bar (Left)
 		for id = 1,NUM_ACTIONBAR_BUTTONS do 
 			buttonID = buttonID + 1
-			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, LEFT_ACTIONBAR_PAGE, id)
+			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, id, LEFT_ACTIONBAR_PAGE)
 		end
 	end
 
 	-- Apply common settings to the action buttons.
 	for buttonID,button in ipairs(Buttons) do 
-	
+
+		-- Identify it easily.
+		ButtonLookup[button] = true
+
 		-- Apply saved buttonLock setting
 		button:SetAttribute("buttonLock", db.buttonLock)
 
@@ -580,11 +584,15 @@ Module.SpawnPetBar = function(self)
 	
 	-- Spawn the Pet Bar
 	for id = 1,NUM_PET_ACTION_SLOTS do
-		PetButtons[id] = self:SpawnActionButton("pet", self.frame, PetButton, nil, id)
+		PetButtons[id] = self:SpawnActionButton("pet", self.frame, PetButton, id)
 	end
 
 	-- Apply common stuff to the pet buttons
 	for id,button in pairs(PetButtons) do
+
+		-- Identify it easily.
+		ButtonLookup[button] = true
+
 		-- Apply saved buttonLock setting
 		button:SetAttribute("buttonLock", db.buttonLock)
 
@@ -1213,6 +1221,56 @@ Module.UpdateSettings = function(self, event, ...)
 	self:UpdateTooltipSettings()
 end 
 
+-- MaxDps
+Module.UpdateMaxDps = function(self)
+	if (self.maxDPSHooked) or (not MaxDps) then
+		return
+	end
+	
+	MaxDps.FetchAzeriteUI = function(this)
+		for id,button in self:GetButtons() do
+			this:AddStandardButton(button)
+		end
+		for id,button in self:GetPetButtons() do
+			this:AddStandardButton(button)
+		end
+	end
+	self:AddDebugMessageFormatted("Replaced MaxDps.FetchAzeriteUI to work with our current button system.")
+	
+	-- This is called in their :Fetch() method, 
+	-- so it should be automatically updated for us too.
+	local UpdateButtonGlow = function()
+		if (not MaxDps.db) then
+			return
+		end
+		if (MaxDps.db.global.disableButtonGlow) then
+			self:DisableBlizzardButtonGlow()
+		else
+			self:EnableBlizzardButtonGlow()
+		end
+	end
+	hooksecurefunc(MaxDps, "UpdateButtonGlow", UpdateButtonGlow)
+	self:AddDebugMessageFormatted("Hooked MaxDps blizzard disable setting.")
+
+	--local Glow = MaxDps.Glow
+	--MaxDps.Glow = function(this, button, id, texture, type, color)
+	--	if (not ButtonLookup[button]) then
+	--		return Glow(this, button, id, texture, type, color)
+	--	end
+	--end
+	--self:AddDebugMessageFormatted("Replaced MaxDps.Glow to work with our current theme system.")
+
+	--local HideGlow = MaxDps.HideGlow
+	--MaxDps.HideGlow = function(this, button, id)
+	--	if (not ButtonLookup[button]) then
+	--		return HideGlow(this, button, id)
+	--	end
+	--end
+	--self:AddDebugMessageFormatted("Replaced MaxDps.HideGlow to work with our current theme system.")
+
+	self.maxDPSHooked = true
+end
+
 -- Initialization
 ----------------------------------------------------
 Module.OnEvent = function(self, event, ...)
@@ -1221,6 +1279,7 @@ Module.OnEvent = function(self, event, ...)
 	elseif (event == "PLAYER_ENTERING_WORLD") then
 		IN_COMBAT = false
 		self:UpdateBindings()
+		self:UpdateButtonGrids()
 	elseif (event == "PLAYER_REGEN_DISABLED") then
 		IN_COMBAT = true 
 	elseif (event == "PLAYER_REGEN_ENABLED") then
@@ -1229,10 +1288,18 @@ Module.OnEvent = function(self, event, ...)
 		self:UpdateButtonGrids()
 	elseif (event == "GP_FORCED_ACTIONBAR_VISIBILITY_REQUESTED") then
 		self:SetForcedVisibility(true)
+		self:UpdateButtonGrids()
 	elseif (event == "GP_FORCED_ACTIONBAR_VISIBILITY_CANCELED") then
 		self:SetForcedVisibility(false)
+		self:UpdateButtonGrids()
 	elseif (event == "PET_BAR_UPDATE") then
 		self:UpdateExplorerModeAnchors()
+	elseif (event == "ADDON_LOADED") then
+		local addon = ...
+		if (addon == "MaxDps") then
+			self:UpdateMaxDps()
+			self:UnregisterEvent("ADDON_LOADED", "OnEvent")
+		end
 	else
 		self:UpdateButtonGrids()
 	end 
@@ -1322,6 +1389,14 @@ Module.OnInit = function(self)
 end 
 
 Module.OnEnable = function(self)
+	if (self:IsAddOnEnabled("MaxDps")) then
+		if (IsAddOnLoaded("MaxDps")) then
+			self:UpdateMaxDps()
+		else
+			self:RegisterEvent("ADDON_LOADED", "OnEvent")
+		end
+	end
+
 	self:RegisterEvent("ACTIONBAR_SLOT_CHANGED", "OnEvent")
 	self:RegisterEvent("PET_BAR_UPDATE", "OnEvent")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")

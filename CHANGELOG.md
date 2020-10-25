@@ -1,21 +1,23 @@
 # AzeriteUI Change Log
-All notable changes to this project will be documented in this file. Be aware that the [Unreleased] features might not all be part of the next update, nor will all of them even be available in the latest development version. Instead they are provided to give the users somewhat of a preview of what's to come. 
+All notable changes to this project will be documented in this file. Be aware that the [Unreleased] features are for the most part not yet included in any of the tagged official releases. 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-10-23
+## [Unreleased] 2020-10-25
 - Various work on the Legacy theme which for the most part will remain undocumented for the time being, as it is not even considered an Alpha feature at this point.
+- Started work on much better MaxDps integration in preparation of our upcoming multi-theme system. No extra work is required from MaxDps as we're able to handle this from our end to provide the users with a seamless experience no matter the theme, button shape or bar layout.
 
 ### Added
 - All classes and specs can now choose between at least the Slack and Spam aura filters, allowing them to permanently hide various static spam. The Strict filter is currently only available for Mages, Warriors and Druids. I refer to my patreon goals if you wish to know how you can accelerate my work on this: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)
 
 ### Changed
+- Slightly increased the selected nameplate top inset, to make sure the top row of nameplate auras remains on-screen.
 - Changed the width limitations of worldframe tooltips, as these were weirdly large from Blizzard's end on the 9.0.2 beta realm.
 - Added a lot of predefined font family objects to be able to show unit names in mixed alphabets. Mostly noticable on the 9.0.2 beta realm where people from all over the world is gathered, but should also fix any problems with showing Cyrillic names on EU clients.
 - Started moving the new forge driven schematic tables to their own aptly named area in the folder hierarchy.
 - Modified the aura plugin back-end to parse and sort the entire aura table before deciding on visibility. Work in progress.
-
+ 
 ## [3.0.420-RC] 2020-10-17
 ### Added
 - You can now keybind the Azerite options menu. You can find it in Blizzard's keybind interface under the AddOns category towards the bottom, where other addons such as Bagnon and GatherMate2 live too. 

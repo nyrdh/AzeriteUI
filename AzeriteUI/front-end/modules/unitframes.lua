@@ -2549,7 +2549,7 @@ UnitFramePet.OnInit = function(self)
 
 	-- How this is called:
 	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
-	self.frame = self:SpawnUnitFrame("focus", "UICenter", UnitStyles.StylePetFrame, self.layout, self) 
+	self.frame = self:SpawnUnitFrame("pet", "UICenter", UnitStyles.StylePetFrame, self.layout, self) 
 end 
 
 -----------------------------------------------------------
