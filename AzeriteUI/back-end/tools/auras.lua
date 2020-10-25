@@ -6,7 +6,7 @@ on a widgetcontainer aura plugin element.
 
 --]]--
 
-local LibAuraTool = Wheel:Set("LibAuraTool", 5)
+local LibAuraTool = Wheel:Set("LibAuraTool", 6)
 if (not LibAuraTool) then
 	return
 end
@@ -164,6 +164,7 @@ local PrioBoss 			= 2^22 -- Same priority as boss debuffs
 -- Some constants to avoid a million auraIDs
 local L_DRINK = GetSpellInfo(430) -- 104270
 local L_FOOD = GetSpellInfo(433) -- 104935
+local L_FOOD_N_DRINK = GetSpellInfo(257425)
 
 -- Shorthand tags for quality of life, following the guidelines above.
 -- Note: Do NOT add any of these together, they must be used as the ONLY tag when used!
@@ -359,7 +360,7 @@ local auraFilter = function(...)
 	end
 
 	-- Show Eat/Drink on player(?)
-	if (element.isYou) and ((name == L_DRINK) or (name == L_FOOD)) then
+	if (element.isYou) and ((name == L_DRINK) or (name == L_FOOD) or (name == L_FOOD_N_DRINK)) then
 		return true, nil, hideFilteredSpellID
 	end
 

@@ -204,12 +204,19 @@ end
 Core.ApplyExperimentalFeatures = function(self)
 
 	-- Kill of the "help".
-	hooksecurefunc(HelpTip, "Show", function() 
-		if (HelpTip.info) then
-			HelpTip:ForceHideAll()
-		end 
-	end)
-	HelpTip:ForceHideAll()
+	if (HelpTip) then
+		local hideHelpTip = function() 
+			if (HelpTip.info) then
+				HelpTip:ForceHideAll()
+			end 
+			MainMenuMicroButton_SetAlertsEnabled(false, "backpack")
+		end
+		HelpTip:ForceHideAll()
+		hooksecurefunc(HelpTip, "Show", hideHelpTip)
+	end
+	if (MainMenuMicroButton_SetAlertsEnabled) then
+		MainMenuMicroButton_SetAlertsEnabled(false, "backpack")
+	end
 
 	-- Kill of tutorials.
 	local noTuts
@@ -217,8 +224,11 @@ Core.ApplyExperimentalFeatures = function(self)
 		if (event == "VARIABLES_LOADED") then
 			self:UnregisterEvent("VARIABLES_LOADED", noTuts)
 		end
-		SetCVar("showTutorials", "0")
-		SetCVar("showNPETutorials", "0")
+		for _,cVar in ipairs({ "showTutorials", "showNPETutorials" }) do
+			if (GetCVarDefault(cVar) ~= nil) then
+				SetCVar(cVar, "0")
+			end
+		end
 	end
 	self:RegisterEvent("VARIABLES_LOADED", noTuts)
 	noTuts()
