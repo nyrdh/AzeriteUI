@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-10-26
+## [3.0.421-RC] 2020-10-26
 - Various work on the Legacy theme which for the most part will remain undocumented for the time being, as it is not even considered an Alpha feature at this point.
 - Started work on much better MaxDps integration in preparation of our upcoming multi-theme system. No extra work is required from MaxDps as we're able to handle this from our end to provide the users with a seamless experience no matter the theme, button shape or bar layout.
 
 ### Added
 - All classes and specs can now choose between at least the Slack and Spam aura filters, allowing them to permanently hide various static spam. The Strict filter is currently only available for Mages, Warriors and Druids. I refer to my patreon goals if you wish to know how you can accelerate my work on this: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)
+- Added most Hallow's End costumes to the aura whitelist to easier be able to disable them. Because they suck. >:(
 
 ### Changed
 - To reflect the recent level squish in retail, we have lowered the level where your unit frame loses its noobwood and turns to stone to the level you learn to fly, which now is level 30. The rocky level remains level 40 in classic, as this is when you get your first mount and your build starts to become somewhat usable.
