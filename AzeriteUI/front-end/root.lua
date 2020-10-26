@@ -203,7 +203,7 @@ end
 -- I haven't yet decided whether to put into modules or the back-end.
 Core.ApplyExperimentalFeatures = function(self)
 
-	-- Kill of the "help".
+	-- Kill off the "help".
 	if (HelpTip) then
 		local hideHelpTip = function() 
 			if (HelpTip.info) then
@@ -218,7 +218,7 @@ Core.ApplyExperimentalFeatures = function(self)
 		MainMenuMicroButton_SetAlertsEnabled(false, "backpack")
 	end
 
-	-- Kill of tutorials.
+	-- Kill off tutorials.
 	local noTuts
 	noTuts = function(self, event, ...)
 		if (event == "VARIABLES_LOADED") then
@@ -232,35 +232,6 @@ Core.ApplyExperimentalFeatures = function(self)
 	end
 	self:RegisterEvent("VARIABLES_LOADED", noTuts)
 	noTuts()
-
-	-- Minifix for MaxDps for now
-	-- Fixed in MaxDps v9.0.0 Oct 16th 2020
-	--if (not ActionButton_GetPagedID) then
-	--	ActionButton_GetPagedID = function(self)
-	--			return self.action
-	--	end
-	--end
-	--if (not ActionButton_CalculateAction) then
-	--	ActionButton_CalculateAction = function(self, button)
-	--		if ( not button ) then
-	--			button = SecureButton_GetEffectiveButton(self);
-	--		end
-	--		if ( self:GetID() > 0 ) then
-	--			local page = SecureButton_GetModifiedAttribute(self, "actionpage", button);
-	--			if ( not page ) then
-	--				page = GetActionBarPage();
-	--				if ( self.isExtra ) then
-	--					page = GetExtraBarIndex();
-	--				elseif ( self.buttonType == "MULTICASTACTIONBUTTON" ) then
-	--					page = GetMultiCastBarIndex();
-	--				end
-	--			end
-	--			return (self:GetID() + ((page - 1) * NUM_ACTIONBAR_BUTTONS));
-	--		else
-	--			return SecureButton_GetModifiedAttribute(self, "action", button) or 1;
-	--		end
-	--	end
-	--end
 
 	-- Register addon specific aura filters.
 	-- These can be accessed by the other modules by calling 
