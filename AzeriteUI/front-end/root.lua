@@ -224,10 +224,9 @@ Core.ApplyExperimentalFeatures = function(self)
 		if (event == "VARIABLES_LOADED") then
 			self:UnregisterEvent("VARIABLES_LOADED", noTuts)
 		end
-		for _,cVar in ipairs({ "showTutorials", "showNPETutorials" }) do
-			if (GetCVarDefault(cVar) ~= nil) then
-				SetCVar(cVar, "0")
-			end
+		SetCVar("showTutorials", "0")
+		if (IsRetail) then
+			SetCVar("showNPETutorials", "0")
 		end
 	end
 	self:RegisterEvent("VARIABLES_LOADED", noTuts)
