@@ -8,13 +8,14 @@ local tostring = tostring
 local unpack = unpack
 
 -- WoW API
-local UnitIsConnected = _G.UnitIsConnected
-local UnitIsDeadOrGhost = _G.UnitIsDeadOrGhost
-local UnitIsTapDenied = _G.UnitIsTapDenied 
-local UnitPlayerControlled = _G.UnitPlayerControlled
-local UnitPower = _G.UnitPower
-local UnitPowerMax = _G.UnitPowerMax
-local UnitPowerType = _G.UnitPowerType
+local UnitCanAttack = UnitCanAttack
+local UnitIsConnected = UnitIsConnected
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+local UnitIsTapDenied = UnitIsTapDenied 
+local UnitPlayerControlled = UnitPlayerControlled
+local UnitPower = UnitPower
+local UnitPowerMax = UnitPowerMax
+local UnitPowerType = UnitPowerType
 
 -- Sourced from BlizzardInterfaceResources/Resources/EnumerationTables.lua
 local ALTERNATE_POWER_INDEX = Enum and Enum.PowerType.Alternate or ALTERNATE_POWER_INDEX or 10
@@ -175,7 +176,7 @@ local Update = function(self, event, unit)
 	local dead = UnitIsDeadOrGhost(unit)
 	local min = (disconnected or dead) and 0 or UnitPower(unit, powerID)
 	local max = (disconnected or dead) and 0 or UnitPowerMax(unit, powerID)
-	local tapped = (not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit)
+	local tapped = (not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit) and UnitCanAttack("player", unit)
 
 	if (element.hideWhenEmpty and (min == 0)) or (element.hideWhenDead and dead) then 
 		element:Clear()
@@ -252,5 +253,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Power", Enable, Disable, Proxy, 14)
+	Lib:RegisterElement("Power", Enable, Disable, Proxy, 16)
 end 

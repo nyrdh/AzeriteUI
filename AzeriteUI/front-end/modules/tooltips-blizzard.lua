@@ -25,6 +25,7 @@ local GetItemInfo = GetItemInfo
 local GetMouseFocus = GetMouseFocus
 local GetQuestGreenRange = GetQuestGreenRange
 local GetScalingQuestGreenRange = GetScalingQuestGreenRange
+local UnitCanAttack = UnitCanAttack
 local UnitClass = UnitClass
 local UnitEffectiveLevel = UnitEffectiveLevel
 local UnitExists = UnitExists
@@ -243,7 +244,7 @@ local GetUnitHealthColor = function(unit, data)
 		if (data.isPet and data.petRarity) then 
 			r, g, b = unpack(Colors.quality[data.petRarity - 1])
 		else
-			if ((not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit)) then
+			if ((not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit) and UnitCanAttack("player", unit)) then
 				r, g, b = unpack(Colors.tapped)
 			elseif (not UnitIsConnected(unit)) then
 				r, g, b = unpack(Colors.disconnected)
@@ -263,7 +264,7 @@ local GetUnitHealthColor = function(unit, data)
 			end
 		end 
 	else 
-		if ((not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit)) then
+		if ((not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit) and UnitCanAttack("player", unit)) then
 			r, g, b = unpack(Colors.tapped)
 		elseif (not UnitIsConnected(unit)) then
 			r, g, b = unpack(Colors.disconnected)

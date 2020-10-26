@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 108)
+local LibSecureButton = Wheel:Set("LibSecureButton", 110)
 if (not LibSecureButton) then
 	return
 end
@@ -1103,11 +1103,28 @@ ActionButton.UpdateCooldown = function(self)
 				Cooldown.duration = nil
 				Cooldown.modRate = nil
 				SetCooldown(Cooldown, 0, 0, false)
+				local CooldownCount = self.CooldownCount
+				if (CooldownCount and CooldownCount:IsShown()) then 
+					CooldownCount:SetText("")
+					CooldownCount:Hide()
+				end
 			else 
-				Cooldown.start = start
-				Cooldown.duration = duration
-				Cooldown.modRate = modRate
-				SetCooldown(Cooldown, start, duration, enable, false, modRate)
+				if (duration > 0) then
+					Cooldown.start = start
+					Cooldown.duration = duration
+					Cooldown.modRate = modRate
+					SetCooldown(Cooldown, start, duration, enable, false, modRate)
+				else
+					Cooldown.start = nil
+					Cooldown.duration = nil
+					Cooldown.modRate = nil
+					SetCooldown(Cooldown, 0, 0, false)
+					local CooldownCount = self.CooldownCount
+					if (CooldownCount and CooldownCount:IsShown()) then 
+						CooldownCount:SetText("")
+						CooldownCount:Hide()
+					end
+				end
 			end 
 		end
 
@@ -1248,25 +1265,28 @@ ActionButton.UpdateFlyout = function(self)
 end
 
 ActionButton.UpdateGrid = function(self)
+	local alpha = 0
 	if (self:IsShown()) then 
 		if (self:HasContent()) then
-			self:SetAlpha(1)
+			alpha = 1
 		elseif (CursorHasSpell() or CursorHasItem() or CursorHasMacro()) then
-			self:SetAlpha(1)
+			alpha = 1
 		else 
 			local cursor = GetCursorInfo()
-			if (cursor == "spell") or (cursor == "macro") or (cursor == "mount") or (cursor == "item") or (cursor == "battlepet") or (IsRetail and cursor == "petaction") then 
-				self:SetAlpha(1)
+			if (cursor == "spell") 
+			or (cursor == "macro") 
+			or (cursor == "mount") 
+			or (cursor == "item") 
+			or (cursor == "battlepet") 
+			or (IsRetail and cursor == "petaction") then 
+				alpha = 1
 			else
-				if (self.showGrid) then 
-					self:SetAlpha(self.overrideAlphaWhenEmpty or 1)
-				else 
-					self:SetAlpha(0)
-				end 
+				--if (self.showGrid) then 
+				alpha = self.overrideAlphaWhenEmpty or 0
+				--end 
 			end 
 		end
-	else
-		self:SetAlpha(0)
+		self:SetAlpha(alpha)
 	end
 end
 

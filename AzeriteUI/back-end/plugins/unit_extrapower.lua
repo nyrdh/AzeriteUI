@@ -7,6 +7,7 @@ local tostring = tostring
 local unpack = unpack
 
 -- WoW API
+local UnitCanAttack = UnitCanAttack
 local UnitIsConnected = UnitIsConnected
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitIsTapDenied = UnitIsTapDenied 
@@ -176,7 +177,7 @@ local Update = function(self, event, unit)
 	local dead = UnitIsDeadOrGhost(unit)
 	local min = dead and 0 or UnitPower(unit, powerID)
 	local max = dead and 0 or UnitPowerMax(unit, powerID)
-	local tapped = (not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit)
+	local tapped = (not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit) and UnitCanAttack("player", unit)
 
 	element:SetMinMaxValues(0, max)
 	element:SetValue(min)
@@ -255,5 +256,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ExtraPower", Enable, Disable, Proxy, 7)
+	Lib:RegisterElement("ExtraPower", Enable, Disable, Proxy, 8)
 end 

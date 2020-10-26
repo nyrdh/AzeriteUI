@@ -18,14 +18,15 @@ local unpack = unpack
 -- WoW API
 local IsInGroup = IsInGroup
 local IsInInstance = IsInInstance
+local UnitCanAttack = UnitCanAttack
 local UnitClass = UnitClass
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation
-local UnitIsFriend = UnitIsFriend
 local UnitGUID = UnitGUID
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
 local UnitIsConnected = UnitIsConnected
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+local UnitIsFriend = UnitIsFriend
 local UnitIsPlayer = UnitIsPlayer
 local UnitIsUnit = UnitIsUnit
 local UnitIsTapDenied = UnitIsTapDenied 
@@ -351,7 +352,7 @@ local Update = function(self, event, unit)
 	health.guid = guid
 	health.disconnected = not UnitIsConnected(unit)
 	health.dead = UnitIsDeadOrGhost(unit)
-	health.tapped = (not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit)
+	health.tapped = (not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit) and UnitCanAttack("player", unit)
 
 	-- If the unit is dead or offline, we can skip a lot of stuff, 
 	-- so we're making an exception for this early on. 
@@ -690,5 +691,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 57)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 58)
 end 

@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 83)
+local LibTooltip = Wheel:Set("LibTooltip", 84)
 if (not LibTooltip) then
 	return
 end
@@ -652,7 +652,7 @@ Tooltip.GetUnitHealthColor = function(self, unit)
 		if (self.data.isPet and self.data.petRarity) then 
 			r, g, b = unpack(self.colors.quality[self.data.petRarity - 1])
 		else
-			if ((not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit)) then
+			if ((not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit) and UnitCanAttack("player", unit)) then
 				r, g, b = unpack(self.colors.tapped)
 			elseif (not UnitIsConnected(unit)) then
 				r, g, b = unpack(self.colors.disconnected)
@@ -672,7 +672,7 @@ Tooltip.GetUnitHealthColor = function(self, unit)
 			end
 		end 
 	else 
-		if ((not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit)) then
+		if ((not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit) and UnitCanAttack("player", unit)) then
 			r, g, b = unpack(self.colors.tapped)
 		elseif (not UnitIsConnected(unit)) then
 			r, g, b = unpack(self.colors.disconnected)

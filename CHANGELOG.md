@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-10-25
+## [Unreleased] 2020-10-26
 - Various work on the Legacy theme which for the most part will remain undocumented for the time being, as it is not even considered an Alpha feature at this point.
 - Started work on much better MaxDps integration in preparation of our upcoming multi-theme system. No extra work is required from MaxDps as we're able to handle this from our end to provide the users with a seamless experience no matter the theme, button shape or bar layout.
 
@@ -12,12 +12,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - All classes and specs can now choose between at least the Slack and Spam aura filters, allowing them to permanently hide various static spam. The Strict filter is currently only available for Mages, Warriors and Druids. I refer to my patreon goals if you wish to know how you can accelerate my work on this: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)
 
 ### Changed
+- To reflect the recent level squish in retail, we have lowered the level where your unit frame loses its noobwood and turns to stone to the level you learn to fly, which now is level 30. The rocky level remains level 40 in classic, as this is when you get your first mount and your build starts to become somewhat usable.
 - Slightly increased the selected nameplate top inset, to make sure the top row of nameplate auras remains on-screen.
 - Changed the width limitations of worldframe tooltips, as these were weirdly large from Blizzard's end on the 9.0.2 beta realm.
 - Added a lot of predefined font family objects to be able to show unit names in mixed alphabets. Mostly noticable on the 9.0.2 beta realm where people from all over the world is gathered, but should also fix any problems with showing Cyrillic names on EU clients.
 - Started moving the new forge driven schematic tables to their own aptly named area in the folder hierarchy.
 - Modified the aura plugin back-end to parse and sort the entire aura table before deciding on visibility. Work in progress.
- 
+
+### Fixed
+- Fixed several issues where a unit's name and health would be displayed as tapped, even though this wasn't a unit your faction could attack. 
+
+### Removed
+- Removed the actionbar slot visibility system for empty slots, as it was buggy and not working as intended. We just hide the empty ones for now, as that is consistent, if nothing else.
+
 ## [3.0.420-RC] 2020-10-17
 ### Added
 - You can now keybind the Azerite options menu. You can find it in Blizzard's keybind interface under the AddOns category towards the bottom, where other addons such as Bagnon and GatherMate2 live too. 

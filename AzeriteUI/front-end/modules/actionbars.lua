@@ -1065,102 +1065,11 @@ Module.UpdateFadeAnchors = function(self)
 		petBarHoverFrame:ClearAllPoints()
 		petBarHoverFrame:SetAllPoints(self:GetFrame())
 	end
-
-	self:UpdateButtonGrids()
 end
 
 Module.UpdateButtonCount = function(self)
-	-- Update our smart button grids
-	self:UpdateButtonGrids()
-
 	-- Announce the updated button count to the world
 	self:SendMessage("GP_UPDATE_ACTIONBUTTON_COUNT")
-end
-
-Module.UpdateButtonGrids = function(self)
-	local db = self.db 
-	local numButtons = db.extraButtonsCount + 7
-	local button, buttonHasContent, forceGrid
-
-	if (IsRetail) then
-		-- Completely hide grids in vehicles and event driven bars
-		if (HasOverrideActionBar() or HasTempShapeshiftActionBar() or HasVehicleActionBar()) then
-			for buttonID = numButtons,1,-1 do
-				button = Buttons[buttonID]
-				button.showGrid = nil
-				button.overrideAlphaWhenEmpty = nil
-				button:UpdateGrid()
-			end
-			return
-		end
-	end
-
-	local gapStartTop, gapStartBottom
-	local gapCountTop, gapCountBottom = 0, 0
-	local buttonID = 1
-	while (buttonID <= numButtons) do
-
-		local onMain = (buttonID <= 7)
-		local onBottom = (buttonID <= 24) and ((onMain) or (buttonID%2 == 0))
-		local onTop = (buttonID <= 24) and ((not onMain) and (buttonID%2 > 0))
-
-		button = Buttons[buttonID]
-		button.showGrid = nil
-		button.overrideAlphaWhenEmpty = nil
-
-		if (button:HasContent()) then
-			
-			if (onBottom) then
-				if (gapStartBottom) and (gapStartBottom > 1) then
-					if (gapCountBottom == 1) then
-						for id = gapStartBottom,gapStartBottom+gapCountBottom-1,2 do
-							button = Buttons[id]
-							button.showGrid = true
-							button.overrideAlphaWhenEmpty = .95
-						end
-					end
-				end
-				gapStartBottom = nil
-				gapCountBottom = 0
-
-			elseif (onTop) then
-				if (gapStartTop) and (gapStartTop > 9) then
-					if (gapCountTop == 1) then
-						for id = gapStartTop,gapStartTop+gapCountTop-1,2 do
-							button = Buttons[id]
-							button.showGrid = true
-							button.overrideAlphaWhenEmpty = .95
-						end
-					end
-				end
-				gapStartTop = nil
-				gapCountTop = 0
-			end
-
-		else
-
-			-- We are on bottom row
-			if (onBottom) then
-				if (not gapStartBottom) then
-					gapStartBottom = buttonID
-				end
-				gapCountBottom = gapCountBottom + 1
-
-			-- We are on top Row
-			else
-				if (not gapStartTop) then
-					gapStartTop = buttonID
-				end
-				gapCountTop = gapCountTop + 1
-			end
-		end
-		buttonID = buttonID + 1
-	end
-
-	for buttonID = numButtons,1,-1 do
-		button = Buttons[buttonID]
-		button:UpdateGrid()
-	end
 end
 
 -- Just a proxy for the secure arrangement method.
@@ -1276,32 +1185,32 @@ end
 Module.OnEvent = function(self, event, ...)
 	if (event == "UPDATE_BINDINGS") then 
 		self:UpdateBindings()
+
 	elseif (event == "PLAYER_ENTERING_WORLD") then
 		IN_COMBAT = false
 		self:UpdateBindings()
-		self:UpdateButtonGrids()
+
 	elseif (event == "PLAYER_REGEN_DISABLED") then
 		IN_COMBAT = true 
+
 	elseif (event == "PLAYER_REGEN_ENABLED") then
 		IN_COMBAT = false
-	elseif (event == "ACTIONBAR_SLOT_CHANGED") then
-		self:UpdateButtonGrids()
+
 	elseif (event == "GP_FORCED_ACTIONBAR_VISIBILITY_REQUESTED") then
 		self:SetForcedVisibility(true)
-		self:UpdateButtonGrids()
+
 	elseif (event == "GP_FORCED_ACTIONBAR_VISIBILITY_CANCELED") then
 		self:SetForcedVisibility(false)
-		self:UpdateButtonGrids()
+
 	elseif (event == "PET_BAR_UPDATE") then
 		self:UpdateExplorerModeAnchors()
+
 	elseif (event == "ADDON_LOADED") then
 		local addon = ...
 		if (addon == "MaxDps") then
 			self:UpdateMaxDps()
 			self:UnregisterEvent("ADDON_LOADED", "OnEvent")
 		end
-	else
-		self:UpdateButtonGrids()
 	end 
 end 
 
@@ -1397,15 +1306,9 @@ Module.OnEnable = function(self)
 		end
 	end
 
-	self:RegisterEvent("ACTIONBAR_SLOT_CHANGED", "OnEvent")
 	self:RegisterEvent("PET_BAR_UPDATE", "OnEvent")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnEvent")
 	self:RegisterEvent("UPDATE_BINDINGS", "OnEvent")
-
-	if (IsRetail) then
-		self:RegisterEvent("UPDATE_OVERRIDE_ACTIONBAR", "OnEvent")
-		self:RegisterEvent("UPDATE_VEHICLE_ACTIONBAR", "OnEvent")
-	end
 end
