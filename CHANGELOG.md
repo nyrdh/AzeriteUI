@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.422-RC] 2020-10-27
+### Fixed
+- Role counts, role check and the world marker flag button have returned to our retail group leader tools!
+
 ## [3.0.421-RC] 2020-10-26
 - Various work on the Legacy theme which for the most part will remain undocumented for the time being, as it is not even considered an Alpha feature at this point.
 - Started work on much better MaxDps integration in preparation of our upcoming multi-theme system. No extra work is required from MaxDps as we're able to handle this from our end to provide the users with a seamless experience no matter the theme, button shape or bar layout.

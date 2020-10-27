@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("GroupTools", "PLUGIN", "LibEvent", "LibDB", "LibFader", "LibFrame", "LibSound")
+local Module = Core:NewModule("GroupTools", "PLUGIN", "LibEvent", "LibDB", "LibFader", "LibFrame", "LibSound", "LibClientBuild")
 
 -- Lua API
 local _G = _G
@@ -41,13 +41,21 @@ local SOUNDKIT = SOUNDKIT
 -- WoW Strings
 local CONVERT_TO_PARTY = CONVERT_TO_PARTY
 local CONVERT_TO_RAID = CONVERT_TO_RAID
+local DAMAGER = DAMAGER
+local HEALER = HEALER
 local PARTY_MEMBERS = PARTY_MEMBERS
 local RAID_CONTROL = RAID_CONTROL
 local RAID_MEMBERS = RAID_MEMBERS
 local READY_CHECK = READY_CHECK
+local ROLE_POLL = ROLE_POLL
+local TANK = TANK
+
+-- Client Constants
+local IsClassic = Module:IsClassic()
+local IsRetail = Module:IsRetail()
 
 -- Uncomment to show tools when solo 
-local DEV --= true
+local DEV -- = true
 
 -- Secure Snippets
 local SECURE = {
@@ -199,7 +207,78 @@ Module.UpdateRaidTargets = function(self)
 	end 
 end
 
-Module.UpdateCounts = function(self)
+Module.AddCount = function(self, role, alive)
+	self.roleCounts[role][alive and "alive" or "dead"] = self.roleCounts[role][alive and "alive" or "dead"] + 1
+end
+
+Module.GetCount = function(self, role, alive)
+	return self.roleCounts[role][alive and "alive" or "dead"]
+end
+
+Module.UpdateCounts = (IsRetail) and function(self)
+	local counts = self.roleCounts
+	local alive, dead = 0, 0 
+
+	for role in pairs(counts) do
+		for status in pairs(counts[role]) do
+			counts[role][status] = 0
+		end
+	end
+
+	if IsInRaid() then
+		for i = 1, GetNumGroupMembers() do
+			local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML, combatRole = GetRaidRosterInfo(i)
+			if rank then
+				if isDead then 
+					dead = dead + 1
+					counts[combatRole].dead = counts[combatRole].dead + 1
+				else 
+					alive = alive + 1
+					counts[combatRole].alive = counts[combatRole].alive + 1
+				end 
+			end
+		end
+	else
+	
+		local combatRole = UnitGroupRolesAssigned("player")
+		if UnitIsDeadOrGhost("player") then 
+			dead = dead + 1
+			counts[combatRole].dead = counts[combatRole].dead + 1
+		else 
+			alive = alive + 1
+			counts[combatRole].alive = counts[combatRole].alive + 1
+		end 
+
+		for i = 1, GetNumSubgroupMembers() do
+			local combatRole = UnitGroupRolesAssigned("party" .. i) 
+			if UnitIsDeadOrGhost("party" .. i) then 
+				dead = dead + 1
+				counts[combatRole].dead = counts[combatRole].dead + 1
+			else 
+				alive = alive + 1
+				counts[combatRole].alive = counts[combatRole].alive + 1
+			end 
+		end
+	end	
+
+	local label = IsInRaid() and RAID_MEMBERS or PARTY_MEMBERS
+	if (dead > 0) then
+		self.GroupMemberCount:SetFormattedText("%s: |cffffffff%s|r/|cffffffff%s|r", label, alive, alive + dead)
+	else
+		self.GroupMemberCount:SetFormattedText("%s: |cffffffff%s|r", label, alive)
+	end
+
+	for role,msg in pairs(self.RoleCount) do 
+		count = counts[role]
+		if (count.dead > 0) then 
+			msg:SetFormattedText("%.0f/%.0f", count.alive, count.alive + count.dead)
+		else
+			msg:SetFormattedText("%.0f", count.alive)
+		end 
+	end 
+
+end 
+or (IsClassic) and function(self)
 	local alive, dead = 0, 0 
 
 	if IsInRaid() then
@@ -409,6 +488,77 @@ Module.CreateLeaderTools = function(self)
 	count:SetNonSpaceWrap(false)
 	self.GroupMemberCount = count
 
+	if (IsRetail) then
+
+		self.RoleCount = {}
+
+		local tank = frame:CreateFontString()
+		tank:SetPoint(unpack(self.layout.RoleCountTankPlace))
+		tank:SetFontObject(self.layout.RoleCountTankFont)
+		tank:SetJustifyH("CENTER")
+		tank:SetJustifyV("MIDDLE")
+		tank:SetTextColor(unpack(self.layout.RoleCountTankColor))
+		tank:SetIndentedWordWrap(false)
+		tank:SetWordWrap(false)
+		tank:SetNonSpaceWrap(false)
+		tank:SetFormattedText("%.0f|cff888888/|r%.0f", 0, 0)
+		self.RoleCount.TANK = tank
+
+		local tankIcon = frame:CreateTexture()
+		tankIcon:SetPoint(unpack(self.layout.RoleCountTankTexturePlace))
+		tankIcon:SetSize(unpack(self.layout.RoleCountTankTextureSize))
+		tankIcon:SetTexture(self.layout.RoleCountTankTexture)
+		self.RoleCount.TANK.Icon = tankIcon
+
+		local healer = frame:CreateFontString()
+		healer:SetPoint(unpack(self.layout.RoleCountHealerPlace))
+		healer:SetFontObject(self.layout.RoleCountHealerFont)
+		healer:SetJustifyH("CENTER")
+		healer:SetJustifyV("MIDDLE")
+		healer:SetTextColor(unpack(self.layout.RoleCountHealerColor))
+		healer:SetIndentedWordWrap(false)
+		healer:SetWordWrap(false)
+		healer:SetNonSpaceWrap(false)
+		healer:SetFormattedText("%.0f|cff888888/|r%.0f", 0, 0)
+		self.RoleCount.HEALER = healer
+
+		local healerIcon = frame:CreateTexture()
+		healerIcon:SetPoint(unpack(self.layout.RoleCountHealerTexturePlace))
+		healerIcon:SetSize(unpack(self.layout.RoleCountHealerTextureSize))
+		healerIcon:SetTexture(self.layout.RoleCountHealerTexture)
+		self.RoleCount.HEALER.Icon = healerIcon
+
+		local dps = frame:CreateFontString()
+		dps:SetPoint(unpack(self.layout.RoleCountDPSPlace))
+		dps:SetFontObject(self.layout.RoleCountDPSFont)
+		dps:SetJustifyH("CENTER")
+		dps:SetJustifyV("MIDDLE")
+		dps:SetTextColor(unpack(self.layout.RoleCountDPSColor))
+		dps:SetIndentedWordWrap(false)
+		dps:SetWordWrap(false)
+		dps:SetNonSpaceWrap(false)
+		dps:SetFormattedText("%.0f|cff888888/|r%.0f", 0, 0)
+		self.RoleCount.DAMAGER = dps
+
+		local dpsIcon = frame:CreateTexture()
+		dpsIcon:SetPoint(unpack(self.layout.RoleCountDPSTexturePlace))
+		dpsIcon:SetSize(unpack(self.layout.RoleCountDPSTextureSize))
+		dpsIcon:SetTexture(self.layout.RoleCountDPSTexture)
+		self.RoleCount.DAMAGER.Icon = dpsIcon
+
+		-- Role Counts
+		-- *We're treating no role as a Damager
+		self.roleCounts = setmetatable({ 
+			DAMAGER = { alive = 0, dead = 0 }, 
+			TANK 	= { alive = 0, dead = 0 }, 
+			HEALER 	= { alive = 0, dead = 0 } 
+		}, { 
+			__index = function(t,k) 
+				return rawget(t,k) or rawget(t, "DAMAGER")
+			end 
+		})
+	end
+
 	self.RaidIcons = {}
 	for id = 1,8 do 
 		local button = frame:CreateFrame("CheckButton")
@@ -429,6 +579,42 @@ Module.CreateLeaderTools = function(self)
 		button.Icon = icon
 
 		self.RaidIcons[id] = button
+	end 
+
+	if (IsRetail) then 
+
+		local button = frame:CreateFrame("Button")
+		button:Place(unpack(self.layout.RolePollButtonPlace))
+		button:SetSize(unpack(self.layout.RolePollButtonSize))
+		button:SetScript("OnClick", onRollPollClick)
+		button:SetScript("OnMouseDown", onButtonDown)
+		button:SetScript("OnMouseUp", onButtonUp)
+		button:SetScript("OnEnter", onButtonEnter)
+		button:SetScript("OnLeave", onButtonLeave)
+
+		local msg = button:CreateFontString()
+		msg:SetPoint("CENTER", 0, 0)
+		msg:SetFontObject(self.layout.RolePollButtonTextFont)
+		msg:SetTextColor(unpack(self.layout.RolePollButtonTextColor))
+		msg:SetShadowOffset(unpack(self.layout.RolePollButtonTextShadowOffset))
+		msg:SetShadowColor(unpack(self.layout.RolePollButtonTextShadowColor))
+		msg:SetJustifyH("CENTER")
+		msg:SetJustifyV("MIDDLE")
+		msg:SetIndentedWordWrap(false)
+		msg:SetWordWrap(false)
+		msg:SetNonSpaceWrap(false)
+		msg:SetText(ROLE_POLL)
+		button.Msg = msg
+	
+		local bg = button:CreateTexture()
+		bg:SetDrawLayer("ARTWORK")
+		bg:SetTexture(self.layout.RolePollButtonTextureNormal)
+		bg:SetVertexColor(.9, .9, .9)
+		bg:SetSize(unpack(self.layout.RolePollButtonTextureSize))
+		bg:SetPoint("CENTER", msg, "CENTER", 0, 0)
+		button.Bg = bg
+
+		self.RolePollButton = button
 	end 
 
 	local button = frame:CreateFrame("Button")
@@ -462,6 +648,47 @@ Module.CreateLeaderTools = function(self)
 	bg:SetPoint("CENTER", msg, "CENTER", 0, 0)
 	button.Bg = bg
 	self.ReadyCheckButton = button
+
+	if (IsRetail) then 
+		local button = frame:CreateFrame("Frame")
+		button:Place(unpack(self.layout.WorldMarkerFlagPlace))
+		button:SetSize(unpack(self.layout.WorldMarkerFlagSize))
+
+		local backdrop = button:CreateTexture()
+		backdrop:SetSize(unpack(self.layout.WorldMarkerFlagBackdropSize))
+		backdrop:SetPoint("CENTER", 0, 0)
+		backdrop:SetTexture(self.layout.WorldMarkerFlagBackdropTexture)
+		button.Bg = backdrop
+
+		local content = _G.CompactRaidFrameManagerDisplayFrameLeaderOptionsRaidWorldMarkerButton
+		content:SetParent(button)
+		content.BottomLeft:SetAlpha(0)
+		content.BottomRight:SetAlpha(0)
+		content.BottomMiddle:SetAlpha(0)
+		content.TopMiddle:SetAlpha(0)
+		content.TopLeft:SetAlpha(0)
+		content.TopRight:SetAlpha(0)
+		content.MiddleLeft:SetAlpha(0)
+		content.MiddleRight:SetAlpha(0)
+		content.MiddleMiddle:SetAlpha(0)
+		content:SetHighlightTexture("")
+		content:SetDisabledTexture("")
+		content:SetSize(unpack(self.layout.WorldMarkerFlagContentSize))
+		content:ClearAllPoints()
+		content:SetPoint("CENTER", 0, 0)
+		
+		content:HookScript("OnMouseDown", function() onButtonDown(button) end)
+		content:HookScript("OnMouseUp", function() onButtonUp(button) end)
+		content:HookScript("OnEnter", function() onButtonEnter(button) end)
+		content:HookScript("OnLeave", function() onButtonLeave(button) end)
+
+		button:SetScript("OnEnter", onButtonEnter)
+		button:SetScript("OnLeave", onButtonLeave)
+	
+		-- World Marker Button
+		self.WorldMarkerFlag = button 
+
+	end 
 
 	local button = frame:CreateFrame("CheckButton")
 	button:Place(unpack(self.layout.ConvertButtonPlace))

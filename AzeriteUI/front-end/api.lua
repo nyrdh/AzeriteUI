@@ -3215,7 +3215,7 @@ Azerite.FloaterHUD = {
 }
 
 -- Group Leader Tools
-Azerite.GroupTools = {
+Azerite.GroupTools = IsClassic and {
 	ConvertButtonPlace = { "TOP", 0, -360 + 140 }, 
 	ConvertButtonSize = { 300*.75, 50*.75 },
 	ConvertButtonTextColor = { 0, 0, 0 }, 
@@ -3258,6 +3258,89 @@ Azerite.GroupTools = {
 	ReadyCheckButtonTextShadowOffset = { 0, -.85 }, 
 	ReadyCheckButtonTextureNormal = GetMedia("menu_button_smaller"), 
 	ReadyCheckButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+
+
+} or IsRetail and {
+	ConvertButtonPlace = { "TOP", 0, -360 }, 
+	ConvertButtonSize = { 300*.75, 50*.75 },
+	ConvertButtonTextColor = { 0, 0, 0 }, 
+	ConvertButtonTextFont = GetFont(14, false), 
+	ConvertButtonTextShadowColor = { 1, 1, 1, .5 }, 
+	ConvertButtonTextShadowOffset = { 0, -.85 }, 
+	ConvertButtonTextureNormal = GetMedia("menu_button_disabled"), 
+	ConvertButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+	MemberCountNumberColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
+	MemberCountNumberFont = GetFont(14, true),
+	MemberCountNumberJustifyH = "CENTER",
+	MemberCountNumberJustifyV = "MIDDLE", 
+	MemberCountNumberPlace = { "TOP", 0, -20 }, 
+	MenuAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 22, 350 },
+	MenuPlace = { "TOPLEFT", "UICenter", "TOPLEFT", 22, -42 },
+	MenuSize = { 300*.75 +30, 410 }, 
+	MenuToggleButtonSize = { 48, 48 }, 
+	MenuToggleButtonPlace = { "TOPLEFT", "UICenter", "TOPLEFT", -18, -40 }, 
+	MenuToggleButtonAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", -18, 348 }, 
+	MenuToggleButtonIcon = GetMedia("raidtoolsbutton"), 
+	MenuToggleButtonIconPlace = { "CENTER", 0, 0 }, 
+	MenuToggleButtonIconSize = { 64*.75, 128*.75 }, 
+	MenuToggleButtonIconColor = { 1, 1, 1 }, 
+	MenuWindow_CreateBorder = function(self) return GetBorder(self, GetMedia("tooltip_border"), 23, nil, nil, 23, 23) end,
+	RaidRoleRaidTargetTexture = GetMedia("raid_target_icons"),
+	RaidTargetIcon1Place = { "TOP", -80, -140 },
+	RaidTargetIcon2Place = { "TOP", -28, -140 },
+	RaidTargetIcon3Place = { "TOP",  28, -140 },
+	RaidTargetIcon4Place = { "TOP",  80, -140 },
+	RaidTargetIcon5Place = { "TOP", -80, -190 },
+	RaidTargetIcon6Place = { "TOP", -28, -190 },
+	RaidTargetIcon7Place = { "TOP",  28, -190 },
+	RaidTargetIcon8Place = { "TOP",  80, -190 },
+	RaidTargetIconsSize = { 48, 48 }, 
+	ReadyCheckButtonPlace = { "TOP", -30, -310 }, 
+	ReadyCheckButtonSize = { 300*.75 - 80, 50*.75 },
+	ReadyCheckButtonTextColor = { 0, 0, 0 }, 
+	ReadyCheckButtonTextFont = GetFont(14, false), 
+	ReadyCheckButtonTextShadowColor = { 1, 1, 1, .5 }, 
+	ReadyCheckButtonTextShadowOffset = { 0, -.85 }, 
+	ReadyCheckButtonTextureNormal = GetMedia("menu_button_smaller"), 
+	ReadyCheckButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+
+
+	RoleCountTankPlace = { "TOP", -70, -100 }, 
+	RoleCountTankFont = GetFont(14, true),
+	RoleCountTankColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
+	RoleCountTankTexturePlace = { "TOP", -70, -44 },
+	RoleCountTankTextureSize = { 64, 64 },
+	RoleCountTankTexture = GetMedia("grouprole-icons-tank"),
+	
+	RoleCountHealerPlace = { "TOP", 0, -100 }, 
+	RoleCountHealerFont = GetFont(14, true),
+	RoleCountHealerColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
+	RoleCountHealerTexturePlace = { "TOP", 0, -44 },
+	RoleCountHealerTextureSize = { 64, 64 },
+	RoleCountHealerTexture = GetMedia("grouprole-icons-heal"),
+
+	RoleCountDPSPlace = { "TOP", 70, -100 }, 
+	RoleCountDPSFont = GetFont(14, true),
+	RoleCountDPSColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
+	RoleCountDPSTexturePlace = { "TOP", 70, -44 },
+	RoleCountDPSTextureSize = { 64, 64 },
+	RoleCountDPSTexture = GetMedia("grouprole-icons-dps"),
+
+	RolePollButtonPlace = { "TOP", 0, -260 }, 
+	RolePollButtonSize = { 300*.75, 50*.75 },
+	RolePollButtonTextFont = GetFont(14, false), 
+	RolePollButtonTextColor = { 0, 0, 0 }, 
+	RolePollButtonTextShadowColor = { 1, 1, 1, .5 }, 
+	RolePollButtonTextShadowOffset = { 0, -.85 }, 
+	RolePollButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+	RolePollButtonTextureNormal = GetMedia("menu_button_disabled"), 
+
+	WorldMarkerFlagPlace = { "TOP", 88, -310 }, 
+	WorldMarkerFlagSize = { 70*.75, 50*.75 },
+	WorldMarkerFlagContentSize = { 32, 32 }, 
+	WorldMarkerFlagBackdropSize = { 512 *1/3 *.75, 256 *1/3 *.75 },
+	WorldMarkerFlagBackdropTexture = GetMedia("menu_button_tiny"), 
+
 }
 
 -- Minimap
