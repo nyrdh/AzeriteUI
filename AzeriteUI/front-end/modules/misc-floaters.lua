@@ -438,6 +438,7 @@ Module.HandleExtraActionButton = function(self)
 
 	local frame = ExtraActionBarFrame
 	frame:SetParent(self:GetFrame("UICenter"))
+	frame:EnableMouse(false)
 	frame.ignoreFramePositionManager = true
 
 	GetHolder(frame, unpack(layout.ExtraActionButtonFramePlace))

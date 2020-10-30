@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 58)
+local LibBlizzard = Wheel:Set("LibBlizzard", 59)
 if (not LibBlizzard) then 
 	return
 end
@@ -48,7 +48,6 @@ local UIParent = UIParent
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
-local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 LibBlizzard.embeds = LibBlizzard.embeds or {}
 LibBlizzard.queue = LibBlizzard.queue or {}

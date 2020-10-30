@@ -232,9 +232,10 @@ Module.StyleClassicTracker = function(self)
 	self.frame.holder = scaffold
 	self.frame.cover = mouseKiller
 
+	-- GetScreenHeight() -- this is relative to uiscale: screenHeight * uiScale = 768
 	local top = QuestWatchFrame:GetTop() or 0
 	local bottom = QuestWatchFrame:GetBottom() or 0
-	local screenHeight = GetScreenHeight()
+	local screenHeight = self:GetFrame("UICenter"):GetHeight() -- need to use our parenting frame's height instead.
 	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
 	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
 
@@ -462,8 +463,9 @@ Module.InitRetailTracker = function(self)
 	self.frame.holder = ObjectiveFrameHolder
 	self.frame.cover = ObjectiveFrameCover
 
+	-- GetScreenHeight() -- this is relative to uiscale: screenHeight * uiScale = 768
 	local top = ObjectiveTrackerFrame:GetTop() or 0
-	local screenHeight = GetScreenHeight()
+	local screenHeight = self:GetFrame("UICenter"):GetHeight() -- need to use our parenting frame's height instead.
 	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
 	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
 

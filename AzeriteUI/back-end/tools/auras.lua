@@ -6,7 +6,7 @@ on a widgetcontainer aura plugin element.
 
 --]]--
 
-local LibAuraTool = Wheel:Set("LibAuraTool", 6)
+local LibAuraTool = Wheel:Set("LibAuraTool", 7)
 if (not LibAuraTool) then
 	return
 end
@@ -44,7 +44,6 @@ local UnitLevel = UnitLevel
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
-local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Library registries
 LibAuraTool.embeds = LibAuraTool.embeds or {}

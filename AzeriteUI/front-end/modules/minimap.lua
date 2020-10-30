@@ -5,7 +5,7 @@ if (not Core) then
 end
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-local Module = Core:NewModule("Minimap", "LibEvent", "LibDB", "LibMinimap", "LibTooltip", "LibTime", "LibSound", "LibPlayerData", "LibClientBuild")
+local Module = Core:NewModule("Minimap", "LibEvent", "LibDB", "LibFrame", "LibMinimap", "LibTooltip", "LibTime", "LibSound", "LibPlayerData", "LibClientBuild")
 
 -- Lua API
 local _G = _G
@@ -1275,12 +1275,59 @@ Module.SetUpNarcissus = function(self)
 	if (not Narci_MinimapButton) then
 		return
 	end
-	hooksecurefunc(Narci_MinimapButton, "SetFrameStrata", function() 
-		if (Narci_MinimapButton:GetFrameStrata() ~= "MEDIUM") then
-			Narci_MinimapButton:SetFrameStrata("MEDIUM")
+
+	local Handler = self:GetMinimapHandler()
+	local Holder = Handler:CreateOverlayFrame()
+	local Minimap = self:GetFrame("Minimap")
+	local MinimapButton = Narci_MinimapButton
+
+	MinimapButton:SetScript("OnDragStart", nil)
+	MinimapButton:SetScript("OnDragStop", nil)
+	MinimapButton.DraggingFrame:SetScript("OnUpdate", nil)
+	MinimapButton.DraggingFrame:SetScript("OnHide", nil)
+	MinimapButton.DraggingFrame:Hide()
+	MinimapButton_UpdateAngle = function() end
+
+	Narci_MinimapButton_OnLoad = function() end
+	Narci_MinimapButton_DraggingFrame_OnUpdate = function() end
+
+	local theme = Private.GetLayoutID()
+	local lockdown
+	local SetPosition = function()
+		if (lockdown) then
+			return
 		end
-	end)
-	Narci_MinimapButton:SetFrameStrata("MEDIUM")
+		lockdown = true
+			MinimapButton:SetParent(Holder)
+			MinimapButton:SetFrameStrata("LOW")
+			MinimapButton:SetFrameLevel(62)
+			MinimapButton:ClearAllPoints()
+
+			-- Narci_MinimapButton.Background:SetSize(56,56)
+			
+			if (theme == "Azerite") then
+				MinimapButton:SetSize(56,56) -- 36,36
+				MinimapButton:SetPoint("CENTER", Minimap, "TOP", 0, 8)
+				MinimapButton.Background:SetSize(64,64) -- 42,42
+
+			elseif (theme == "Legacy") then
+				MinimapButton:SetSize(48,48) -- 36,36
+				MinimapButton:SetPoint("CENTER", Minimap, "TOP", 0, 4)
+				MinimapButton.Background:SetVertexColor(.75, .75, .75, 1)
+				MinimapButton.Background:SetSize(52,52) -- 42,42
+				MinimapButton.Color:SetVertexColor(.85, .85, .85, 1)
+			else
+				MinimapButton:SetPoint("CENTER", Minimap, "TOP", 0, 0)
+			end
+		lockdown = nil
+	end
+
+	SetPosition()
+	hooksecurefunc(MinimapButton, "SetFrameStrata", SetPosition)
+	hooksecurefunc(MinimapButton, "SetParent", SetPosition)
+	hooksecurefunc(MinimapButton, "SetPoint", SetPosition)
+	hooksecurefunc(MinimapButton.Background, "SetSize", SetPosition)
+
 end
 
 -- Perform and initial update of all elements, 

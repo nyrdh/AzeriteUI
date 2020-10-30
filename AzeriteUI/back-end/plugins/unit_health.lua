@@ -42,7 +42,6 @@ local S_PLAYER_OFFLINE = PLAYER_OFFLINE
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
-local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Constants
 local _,CLASS = UnitClass("player")
@@ -579,7 +578,7 @@ local Enable = function(self)
 		health.PostUpdateTexCoord = UpdateTexCoords
 
 		-- Health events
-		if (health.frequent) and (not IsRetailShadowlands) then
+		if (health.frequent) and (not IsRetail) then
 			self:RegisterEvent("UNIT_HEALTH_FREQUENT", Proxy)
 		else
 			self:RegisterEvent("UNIT_HEALTH", Proxy)

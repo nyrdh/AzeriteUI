@@ -1,4 +1,4 @@
-local LibPlayerData = Wheel:Set("LibPlayerData", 18)
+local LibPlayerData = Wheel:Set("LibPlayerData", 19)
 if (not LibPlayerData) then
 	return
 end
@@ -39,7 +39,6 @@ local UnitLevel = UnitLevel
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
-local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Library registries
 ---------------------------------------------------------------------	
@@ -161,28 +160,16 @@ if (IsClassic) then
 	end
 
 elseif (IsRetail) then
-	if (IsRetailShadowlands) then
-		-- Returns the maximum level the account has access to 
-		LibPlayerData.GetEffectivePlayerMaxLevel = function()
-			return GetMaxLevelForPlayerExpansion()
-		end
-
-		-- Returns the maximum level in the current expansion 
-		LibPlayerData.GetEffectiveExpansionMaxLevel = function()
-			return GetMaxLevelForPlayerExpansion() -- CHECK!!
-		end
-	else
-		-- Returns the maximum level the account has access to 
-		LibPlayerData.GetEffectivePlayerMaxLevel = function()
-			return MAX_PLAYER_LEVEL_TABLE[GetAccountExpansionLevel()]
-		end
-
-		-- Returns the maximum level in the current expansion 
-		LibPlayerData.GetEffectiveExpansionMaxLevel = function()
-			return MAX_PLAYER_LEVEL_TABLE[GetExpansionLevel()]
-		end
+	
+	-- Returns the maximum level the account has access to 
+	LibPlayerData.GetEffectivePlayerMaxLevel = function()
+		return GetMaxLevelForPlayerExpansion()
 	end
 
+	-- Returns the maximum level in the current expansion 
+	LibPlayerData.GetEffectiveExpansionMaxLevel = function()
+		return GetMaxLevelForPlayerExpansion() -- CHECK!!
+	end
 	-- Is the provided level at the account's maximum level?
 	LibPlayerData.IsUnitLevelAtEffectiveMaxLevel = function(level)
 		return (level >= LibPlayerData.GetEffectivePlayerMaxLevel())

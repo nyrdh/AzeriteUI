@@ -1,4 +1,4 @@
-local LibChatBubble = Wheel:Set("LibChatBubble", 20)
+local LibChatBubble = Wheel:Set("LibChatBubble", 22)
 if (not LibChatBubble) then	
 	return
 end
@@ -38,7 +38,6 @@ local UnitAffectingCombat = UnitAffectingCombat
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
-local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Textures
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
@@ -272,8 +271,18 @@ LibChatBubble.InitBubble = function(self, bubble)
 	customBubble.text:SetShadowOffset(0, 0)
 	customBubble.text:SetShadowColor(0, 0, 0, 0)
 	
+	-- Old way, still active in classic.
+	for i = 1, bubble:GetNumRegions() do
+		local region = select(i, bubble:GetRegions())
+		if (region:GetObjectType() == "Texture") then
+			customBubble.blizzardRegions[region] = region:GetTexture()
+		elseif (region:GetObjectType() == "FontString") then
+			customBubble.blizzardText = region
+		end
+	end
+
 	-- Chat bubble has been moved to a nameless subframe in 9.0.1
-	if (IsRetailShadowlands) then
+	if (not customBubble.blizzardText) then
 		for i = 1, bubble:GetNumChildren() do
 			local child = select(i, select(i, bubble:GetChildren()))
 			if (child:GetObjectType() == "Frame") and (child.String) and (child.Center) then
@@ -287,17 +296,8 @@ LibChatBubble.InitBubble = function(self, bubble)
 				end
 			end
 		end
-	else
-		for i = 1, bubble:GetNumRegions() do
-			local region = select(i, bubble:GetRegions())
-			if (region:GetObjectType() == "Texture") then
-				customBubble.blizzardRegions[region] = region:GetTexture()
-			elseif (region:GetObjectType() == "FontString") then
-				customBubble.blizzardText = region
-			end
-		end
 	end
-
+	
 	customBubbles[bubble] = customBubble
 
 	-- Only disable the Blizzard bubble outside of instances, 

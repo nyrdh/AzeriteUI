@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 59)
+local LibNamePlate = Wheel:Set("LibNamePlate", 60)
 if (not LibNamePlate) then	
 	return
 end
@@ -77,7 +77,6 @@ local WorldFrame = WorldFrame
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
-local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Plate Registries
 LibNamePlate.allPlates = LibNamePlate.allPlates or {}

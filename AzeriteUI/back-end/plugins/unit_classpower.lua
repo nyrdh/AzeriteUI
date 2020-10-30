@@ -25,6 +25,7 @@ local UnitHasVehiclePlayerFrameUI = UnitHasVehiclePlayerFrameUI
 local UnitInVehicle = UnitInVehicle
 local UnitIsFriend = UnitIsFriend
 local UnitIsPlayer = UnitIsPlayer
+local UnitLevel = UnitLevel
 local UnitPower = UnitPower
 local UnitPowerMax = UnitPowerMax
 local UnitPowerDisplayMod = UnitPowerDisplayMod
@@ -38,25 +39,40 @@ local IsRetail = LibClientBuild:IsRetail()
 -- WoW Constants
 -- Sourced from BlizzardInterfaceCode/Interface/FrameXML/Constants.lua
 local SHOW_SPEC_LEVEL = SHOW_SPEC_LEVEL or 10
-local SPEC_WARLOCK_AFFLICTION = SPEC_WARLOCK_AFFLICTION or 1 --These are spec indices
+local SPEC_WARLOCK_AFFLICTION = SPEC_WARLOCK_AFFLICTION or 1
 local SPEC_WARLOCK_DEMONOLOGY = SPEC_WARLOCK_DEMONOLOGY or 2
 local SPEC_WARLOCK_DESTRUCTION = SPEC_WARLOCK_DESTRUCTION or 3
 local SPEC_PRIEST_SHADOW = SPEC_PRIEST_SHADOW or 3
 local SPEC_MONK_MISTWEAVER = SPEC_MONK_MISTWEAVER or 2
 local SPEC_MONK_BREWMASTER = SPEC_MONK_BREWMASTER or 1
 local SPEC_MONK_WINDWALKER = SPEC_MONK_WINDWALKER or 3
+local SPEC_PALADIN_HOLY = SPEC_PALADIN_HOLY or 2 -- we made this up
 local SPEC_PALADIN_RETRIBUTION = SPEC_PALADIN_RETRIBUTION or 3
 local SPEC_MAGE_ARCANE = SPEC_MAGE_ARCANE or 1
 local SPEC_SHAMAN_RESTORATION = SPEC_SHAMAN_RESTORATION or 3
 
--- Sourced from BlizzardInterfaceResources/Resources/EnumerationTables.lua
-local SPELL_POWER_ARCANE_CHARGES = Enum.PowerType.ArcaneCharges or 16
-local SPELL_POWER_CHI = Enum.PowerType.Chi or 12
-local SPELL_POWER_COMBO_POINTS = Enum.PowerType.ComboPoints or 4 
-local SPELL_POWER_ENERGY = Enum.PowerType.Energy or 3 
-local SPELL_POWER_HOLY_POWER = Enum.PowerType.HolyPower or 9
+-- Sourced from BlizzardInterfaceCode/AddOns/Blizzard_APIDocumentation/UnitDocumentation.lua
+local SPELL_POWER_HEALTH_COST = Enum.PowerType.HealthCost or -2
+local SPELL_POWER_NONE= Enum.PowerType.None or -1
+local SPELL_POWER_MANA = Enum.PowerType.Mana or 0
+local SPELL_POWER_RAGE = Enum.PowerType.Rage or 1
+local SPELL_POWER_FOCUS = Enum.PowerType.Focus or 2
+local SPELL_POWER_ENERGY = Enum.PowerType.Energy or 3
+local SPELL_POWER_COMBO_POINTS = Enum.PowerType.ComboPoints or 4
 local SPELL_POWER_RUNES = Enum.PowerType.Runes or 5
+local SPELL_POWER_RUNIC_POWER = Enum.PowerType.RunicPower or 6
 local SPELL_POWER_SOUL_SHARDS = Enum.PowerType.SoulShards or 7
+local SPELL_POWER_LUNAR_POWER = Enum.PowerType.LunarPower or 8
+local SPELL_POWER_HOLY_POWER = Enum.PowerType.HolyPower or 9
+local SPELL_POWER_ = Enum.PowerType.Alternate or 10
+local SPELL_POWER_MAELSTROM_POWER = Enum.PowerType.Maelstrom or 11
+local SPELL_POWER_CHI = Enum.PowerType.Chi or 12
+local SPELL_POWER_INSANITY = Enum.PowerType.Insanity or 13
+local SPELL_POWER_OBSOLETE = Enum.PowerType.Obsolete or 14
+local SPELL_POWER_OBSOLETE2 = Enum.PowerType.Obsolete2 or 15
+local SPELL_POWER_ARCANE_CHARGES = Enum.PowerType.ArcaneCharges or 16
+local SPELL_POWER_FURY = Enum.PowerType.Fury or 17
+local SPELL_POWER_PAIN = Enum.PowerType.Pain or 18
 
 -- Sourced from BlizzardInterfaceCode/Interface/FrameXML/MonkStaggerBar.lua
 -- percentages at which bar should change color
@@ -167,19 +183,34 @@ local Generic = setmetatable({
 			r, g, b = color[1], color[2], color[3]
 		end 
 
-		-- Has the module chosen to only show this with an active target,
-		-- or has the module chosen to hide all when empty?
-		if (element.hideWhenEmpty and (min == 0))
-		or ((powerType ~= "SOUL_FRAGMENTS") 
-		and ((element.hideWhenNoTarget and (not UnitExists("target"))) or (element.hideWhenUnattackable and (not UnitCanAttack("player", "target")))))
-		then 
+		-- Decide on visibility
+		-- Has the module chosen to hide all when empty?
+		local hidden = element.hideWhenEmpty and (min == 0)
+		if (not hidden) then
+			-- Is the current power type one to keep visible?
+			local keepShown = (powerType == "SOUL_FRAGMENTS") or ((powerType == "HOLY_POWER") and (GetSpecialization() == SPEC_PALADIN_HOLY)) 
+			if (not keepShown) then
+				hidden = (
+					-- Has the module chosen to only show this with an active target?
+					(element.hideWhenNoTarget and (not UnitExists("target"))) or 
+	
+					-- Has the module chosen to only show this with a hostile target?
+					(element.hideWhenUnattackable and (not UnitCanAttack("player", "target")))
+				)
+			end
+		end
+
+		-- We decided to hide them all.
+		if (hidden) then
 			for i = 1, maxDisplayed do
 				local point = element[i]
-				if point then
+				if (point) then
 					point:SetAlpha(0)
 				end 
 			end 
-		else 
+		end
+
+		if (not hidden) then 
 			-- In case there are more points active 
 			-- then the currently allowed maximum. 
 			-- Meant to give an easy system to handle 
@@ -195,7 +226,7 @@ local Generic = setmetatable({
 				local r, g, b = r, g, b 
 
 				-- Handle overflow coloring
-				if overflow then
+				if (overflow) then
 					if (i > overflow) then
 						-- tone down "old" points
 						r, g, b = r*1/3, g*1/3, b*1/3 
@@ -208,7 +239,7 @@ local Generic = setmetatable({
 				end 
 
 				local point = element[i]
-				if element.alphaNoCombat then 
+				if (element.alphaNoCombat) then 
 					point:SetStatusBarColor(r, g, b)
 					if point.bg then 
 						point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
@@ -221,7 +252,7 @@ local Generic = setmetatable({
 					end 
 				else 
 					point:SetStatusBarColor(r, g, b, 1)
-					if element.alphaEmpty then 
+					if (element.alphaEmpty) then 
 						point:SetAlpha(min > i and element.alphaEmpty or 1)
 					else 
 						point:SetAlpha(1)
@@ -980,7 +1011,7 @@ if (IsRetail) then
 			newType = "Chi"
 		elseif (PLAYERCLASS == "MONK") and (spec == SPEC_MONK_BREWMASTER) and (not element.ignoreStagger) then 
 			newType = "Stagger"
-		elseif ((PLAYERCLASS == "PALADIN") and (level >= PALADINPOWERBAR_SHOW_LEVEL)) and (not element.ignoreHolyPower)then
+		elseif ((PLAYERCLASS == "PALADIN") and (level >= PALADINPOWERBAR_SHOW_LEVEL)) and (not element.ignoreHolyPower) then
 			newType = "HolyPower"
 		elseif (PLAYERCLASS == "ROGUE") and (not element.ignoreComboPoints) then 
 			newType = "ComboPoints"
@@ -1102,5 +1133,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 42)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 43)
 end 

@@ -1,4 +1,4 @@
-local LibBagButton = Wheel:Set("LibBagButton", 13)
+local LibBagButton = Wheel:Set("LibBagButton", 14)
 if (not LibBagButton) then	
 	return
 end
@@ -52,7 +52,6 @@ local IsLoggedIn = IsLoggedIn
 -- Constants
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
-local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Sourced from FrameXML/BankFrame.lua
 -- Bag containing the 7 (or 6 in classic) bank bag buttons. 

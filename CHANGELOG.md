@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2020-10-29
+### Added
+- Added gamepad support to our `/bind` mode, when the user has enabled it with `/console GamePadEnable 1`. 
+
+### Changed
+- Changed the text based abbreviations of keybinds to better support gamepads. I am working on gamepad icons and plan to implement icons in the style of xbox360 and ps4 controllers, so the current text based solution is temporary. I just figured `Rt` is a bit more readable than `GamePad Right Trigger` when displayed on a small action button.
+
 ## [3.0.422-RC] 2020-10-27
 ### Fixed
 - Role counts, role check and the world marker flag button have returned to our retail group leader tools!

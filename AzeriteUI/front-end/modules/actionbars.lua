@@ -59,7 +59,6 @@ local restedString = " (%s%% %s)"
 local shortLevelString = "%s %.0f"
 
 -- Cache of buttons
-local Cache = {} -- cache buttons to separate different ranks of same spell
 local Buttons = {} -- all action buttons
 local PetButtons = {} -- all pet buttons
 local HoverButtons = {} -- all action buttons that can fade out
@@ -116,40 +115,6 @@ local secureSnippets = {
 
 			end
 
-
-			if (false) then
-				-- Primary Bar
-				if (barID == 1) then 
-					button:ClearAllPoints(); 
-
-					if (buttonID > 10) then
-						button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((buttonID-2-1 + row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
-					else
-						button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((buttonID-1) * (buttonSize + buttonSpacing)), 42)
-					end 
-
-				-- Secondary Bar
-				elseif (barID == self:GetAttribute("BOTTOMLEFT_ACTIONBAR_PAGE")) then 
-					button:ClearAllPoints(); 
-
-					-- 3x2 complimentary buttons
-					if (extraButtonsCount <= 11) then 
-						if (buttonID < 4) then 
-							button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID+10)-1) * (buttonSize + buttonSpacing)), 42 )
-						else
-							button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID-3+10)-1 +row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
-						end
-
-					-- 6x2 complimentary buttons
-					else 
-						if (buttonID < 7) then 
-							button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID+10)-1) * (buttonSize + buttonSpacing)), 42 )
-						else
-							button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + (((buttonID-6+10)-1 +row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
-						end
-					end 
-				end
-			end
 		end 
 
 		-- lua callback to update the hover frame anchors to the current layout
@@ -380,105 +345,11 @@ ActionButton.UpdateMouseOver = function(self)
 end 
 ActionButton.PostEnter = ActionButton.UpdateMouseOver
 ActionButton.PostLeave = ActionButton.UpdateMouseOver
+ActionButton.PostUpdate = ActionButton.UpdateMouseOver
 
-ActionButton.SetRankVisibility = function(self, visible)
-	if (not IsClassic) then
-		return
-	end
-	local cache = Cache[self]
-
-	-- Show rank on self
-	if (visible) then 
-
-		-- Create rank text if needed
-		if (not self.Rank) then 
-			local count = self.Count
-			local rank = self:CreateFontString()
-			rank:SetParent(count:GetParent())
-			--rank:SetFontObject(count:GetFontObject()) -- nah, this one changes based on count!
-			rank:SetFontObject(Private.GetFont(14,true)) -- use the smaller font
-			rank:SetDrawLayer(count:GetDrawLayer())
-			rank:SetTextColor(Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3])
-			rank:SetPoint(count:GetPoint())
-			self.Rank = rank
-		end
-		self.Rank:SetText(cache.spellRank)
-
-	-- Hide rank on self, if it exists. 
-	elseif (not visible) and (self.Rank) then 
-		self.Rank:SetText("")
-	end 
-end
-
-ActionButton.PostUpdate = function(self)
-	self:UpdateMouseOver()
-
-	-- The following is only for classic
-	if (not IsClassic) then
-		return
-	end
-
-	local cache = Cache[self]
-	if (not cache) then 
-		Cache[self] = {}
-		cache = Cache[self]
-	end
-
-	-- Retrieve the previous info, if any.
-	local oldCount = cache.spellCount -- counter of the amount of multiples
-	local oldName = cache.spellName -- used as identifier for multiples
-	local oldRank = cache.spellRank -- rank of this instance of the multiple
-
-	-- Update cached info 
-	cache.spellRank = self:GetSpellRank()
-	cache.spellName = GetSpellInfo(self:GetSpellID())
-
-	-- Button spell changed?
-	if (cache.spellName ~= oldName) then 
-
-		-- We had a spell before, and there were more of it.
-		-- We need to find the old ones, update their counts,
-		-- and hide them if there's only a single one left. 
-		if (oldRank and (oldCount > 1)) then 
-			local newCount = oldCount - 1
-			for button,otherCache in pairs(Cache) do 
-				-- Ignore self, as we no longer have the same counter. 
-				if (button ~= self) and (otherCache.spellName == oldName) then 
-					otherCache.spellCount = newCount
-					button:SetRankVisibility((newCount > 1))
-				end
-			end
-		end 
-	end 
-
-	-- Counter for number of duplicates of the current spell
-	local howMany = 0
-	if (cache.spellRank) then 
-		for button,otherCache in pairs(Cache) do 
-			if (otherCache.spellName == cache.spellName) then 
-				howMany = howMany + 1
-			end 
-		end
-	end 
-
-	-- Update stored counter
-	cache.spellCount = howMany
-
-	-- Update all rank texts and counters
-	for button,otherCache in pairs(Cache) do 
-		if (otherCache.spellName == cache.spellName) then 
-			otherCache.spellCount = howMany
-			button:SetRankVisibility((howMany > 1))
-		end 
-	end
-end 
-
-ActionButton.PostCreate = function(self, ...)
-	-- Coding for troglodytes.
-	local layout = Module.layout
-	local forge = layout and layout.WidgetForge and layout.WidgetForge.ActionButton
-	if (forge) then
-		Module:Forge(self, forge)
+ActionButton.PostCreate = function(self)
+	if (Private.HasSchematic("Widget::ActionButton::Normal")) then
+		self:Forge(Private.GetSchematic("Widget::ActionButton::Normal")) 
 	end
 end 
 
@@ -486,12 +357,9 @@ end
 ----------------------------------------------------
 local PetButton = {}
 
-PetButton.PostCreate = function(self, ...)
-	-- Troglodytes will return!
-	local layout = Module.layout
-	local forge = layout and layout.WidgetForge and layout.WidgetForge.PetActionButton
-	if (forge) then
-		Module:Forge(self, forge)
+PetButton.PostCreate = function(self)
+	if (Private.HasSchematic("Widget::ActionButton::Small")) then
+		self:Forge(Private.GetSchematic("Widget::ActionButton::Small")) 
 	end
 end 
 
@@ -518,6 +386,31 @@ Module.SpawnActionBars = function(self)
 		buttonID = buttonID + 1
 		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, id, 1)
 		HoverButtons[Buttons[buttonID]] = buttonID > numPrimary
+
+		-- Experimental code to see if I could make an attribute
+		-- driver changing buttonID based on modifier keys.
+		-- Short answer? I could.
+		if (false) then
+			local button = Buttons[buttonID]
+			if (id >= 1 and id <= 3) then
+				RegisterAttributeDriver(button, "state-id", string.format("[mod:ctrl+shift]%d;[mod:shift]%d;[mod:ctrl]%d;%d", id+9, id+3, id+6, id))
+				button:SetAttribute("_onattributechanged", [=[
+					if (name == "state-id") then
+						self:SetID(tonumber(value));
+
+						local buttonPage = self:GetAttribute("actionpage"); 
+						local id = self:GetID(); 
+						local actionpage = tonumber(buttonPage); 
+						local slot = actionpage and (actionpage > 1) and ((actionpage - 1)*12 + id) or id; 
+				
+						self:SetAttribute("actionpage", actionpage or 0); 
+						self:SetAttribute("action", slot); 
+
+						self:CallMethod("UpdateAction"); 
+					end
+				]=])
+			end
+		end
 	end 
 
 	-- Secondary Action Bar (Bottom Left)
@@ -1096,21 +989,6 @@ Module.UpdateCastOnDown = function(self)
 	end 
 end 
 
-Module.UpdateConsolePortBindings = function(self)
-	local CP = _G.ConsolePort
-	if (not CP) then 
-		return 
-	end 
-end
-
-Module.UpdateBindings = function(self)
-	if (IsConsolePortEnabled) then 
-		self:UpdateConsolePortBindings()
-	else
-		self:UpdateActionButtonBindings()
-	end
-end
-
 Module.UpdateTooltipSettings = function(self)
 	local layout = self.layout
 	local tooltip = self:GetActionButtonTooltip()
@@ -1130,65 +1008,15 @@ Module.UpdateSettings = function(self, event, ...)
 	self:UpdateTooltipSettings()
 end 
 
--- MaxDps
-Module.UpdateMaxDps = function(self)
-	if (self.maxDPSHooked) or (not MaxDps) then
-		return
-	end
-	
-	MaxDps.FetchAzeriteUI = function(this)
-		for id,button in self:GetButtons() do
-			this:AddStandardButton(button)
-		end
-		for id,button in self:GetPetButtons() do
-			this:AddStandardButton(button)
-		end
-	end
-	self:AddDebugMessageFormatted("Replaced MaxDps.FetchAzeriteUI to work with our current button system.")
-	
-	-- This is called in their :Fetch() method, 
-	-- so it should be automatically updated for us too.
-	local UpdateButtonGlow = function()
-		if (not MaxDps.db) then
-			return
-		end
-		if (MaxDps.db.global.disableButtonGlow) then
-			self:DisableBlizzardButtonGlow()
-		else
-			self:EnableBlizzardButtonGlow()
-		end
-	end
-	hooksecurefunc(MaxDps, "UpdateButtonGlow", UpdateButtonGlow)
-	self:AddDebugMessageFormatted("Hooked MaxDps blizzard disable setting.")
-
-	--local Glow = MaxDps.Glow
-	--MaxDps.Glow = function(this, button, id, texture, type, color)
-	--	if (not ButtonLookup[button]) then
-	--		return Glow(this, button, id, texture, type, color)
-	--	end
-	--end
-	--self:AddDebugMessageFormatted("Replaced MaxDps.Glow to work with our current theme system.")
-
-	--local HideGlow = MaxDps.HideGlow
-	--MaxDps.HideGlow = function(this, button, id)
-	--	if (not ButtonLookup[button]) then
-	--		return HideGlow(this, button, id)
-	--	end
-	--end
-	--self:AddDebugMessageFormatted("Replaced MaxDps.HideGlow to work with our current theme system.")
-
-	self.maxDPSHooked = true
-end
-
 -- Initialization
 ----------------------------------------------------
 Module.OnEvent = function(self, event, ...)
 	if (event == "UPDATE_BINDINGS") then 
-		self:UpdateBindings()
+		self:UpdateActionButtonBindings()
 
 	elseif (event == "PLAYER_ENTERING_WORLD") then
 		IN_COMBAT = false
-		self:UpdateBindings()
+		self:UpdateActionButtonBindings()
 
 	elseif (event == "PLAYER_REGEN_DISABLED") then
 		IN_COMBAT = true 
@@ -1204,37 +1032,27 @@ Module.OnEvent = function(self, event, ...)
 
 	elseif (event == "PET_BAR_UPDATE") then
 		self:UpdateExplorerModeAnchors()
-
-	elseif (event == "ADDON_LOADED") then
-		local addon = ...
-		if (addon == "MaxDps") then
-			self:UpdateMaxDps()
-			self:UnregisterEvent("ADDON_LOADED", "OnEvent")
-		end
-	end 
+	end
 end 
 
 Module.OnInit = function(self)
-	self:PurgeSavedSettingFromAllProfiles(self:GetName(), 
-		"buttonsPrimary", 
-		"buttonsComplimentary", 
-		"editMode", 
-		"enableComplimentary", 
-		"enableStance", 
-		"enablePet", 
-		"showBinds", 
-		"showCooldown", 
-		"showCooldownCount",
-		"showNames",
-		"visibilityPrimary",
-		"visibilityComplimentary",
-		"visibilityStance", 
-		"visibilityPet"
-	)
-	self.db = GetConfig(self:GetName())
-	self.layout = GetLayout(self:GetName())
-	if (not self.layout) then
+	if (Private.GetLayoutID == "Legacy") then
 		return self:SetUserDisabled(true)
+	end
+	
+	-- Deprecated settings keep piling up in this one.
+	self:PurgeSavedSettingFromAllProfiles(self:GetName(), "editMode", "buttonsPrimary", "buttonsComplimentary", "enableComplimentary", "enableStance", "enablePet", "showBinds", "showCooldown", "showCooldownCount", "showNames", "visibilityPrimary", "visibilityComplimentary", "visibilityStance", "visibilityPet")
+
+	if (Private.HasSchematic("ActionBars::Player")) then
+		self.db = GetConfig(self:GetName())
+		self:Forge(Private.GetSchematic("ActionBars::Player")) 
+		return
+	else
+		self.db = GetConfig(self:GetName())
+		self.layout = GetLayout(self:GetName())
+		if (not self.layout) then
+			return self:SetUserDisabled(true)
+		end
 	end
 
 	local OptionsMenu = Core:GetModule("OptionsMenu", true)
@@ -1293,17 +1111,13 @@ Module.OnInit = function(self)
 	self:UpdateButtonLayout()
 
 	-- Update saved settings
-	self:UpdateBindings()
+	self:UpdateActionButtonBindings()
 	self:UpdateSettings()
 end 
 
 Module.OnEnable = function(self)
-	if (self:IsAddOnEnabled("MaxDps")) then
-		if (IsAddOnLoaded("MaxDps")) then
-			self:UpdateMaxDps()
-		else
-			self:RegisterEvent("ADDON_LOADED", "OnEvent")
-		end
+	if (Private.GetLayoutID == "Legacy") then
+		return self:SetUserDisabled(true)
 	end
 
 	self:RegisterEvent("PET_BAR_UPDATE", "OnEvent")

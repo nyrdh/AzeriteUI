@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 40)
+local LibFader = Wheel:Set("LibFader", 41)
 if (not LibFader) then	
 	return
 end
@@ -61,7 +61,6 @@ local UnregisterAttributeDriver = UnregisterAttributeDriver
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
-local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Sourced from FrameXML/BuffFrame.lua
 local DEBUFF_MAX_DISPLAY = DEBUFF_MAX_DISPLAY
@@ -745,13 +744,7 @@ LibFader:RegisterEvent("PLAYER_REGEN_DISABLED", "OnEvent")
 LibFader:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent") 
 LibFader:RegisterEvent("PLAYER_TARGET_CHANGED", "OnEvent") 
 LibFader:RegisterEvent("GROUP_ROSTER_UPDATE", "OnEvent") 
-
-if (IsRetailShadowlands) then
-	LibFader:RegisterUnitEvent("UNIT_HEALTH", "OnEvent", "player") 
-else
-	LibFader:RegisterUnitEvent("UNIT_HEALTH_FREQUENT", "OnEvent", "player") 
-end
-
+LibFader:RegisterUnitEvent("UNIT_HEALTH", "OnEvent", "player") 
 LibFader:RegisterUnitEvent("UNIT_POWER_FREQUENT", "OnEvent", "player") 
 LibFader:RegisterUnitEvent("UNIT_DISPLAYPOWER", "OnEvent", "player") 
 LibFader:RegisterMessage("GP_UNIT_AURA", "OnEvent")

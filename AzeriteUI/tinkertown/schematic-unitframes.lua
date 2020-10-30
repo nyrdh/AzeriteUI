@@ -123,6 +123,8 @@ local Aura_PostUpdate = function(element, button)
 	end
 end
 
+-- Schematics
+-----------------------------------------------------------
 -- Applied to the primary player frame
 Private.RegisterSchematic("UnitFrame::Player", "Legacy", {
 	-- Create layered scaffold frames
@@ -161,7 +163,7 @@ Private.RegisterSchematic("UnitFrame::Player", "Legacy", {
 				parent = nil, ownerKey = nil, 
 				chain = {
 					"SetSize", { 316, 86 }, "SetHitBox", { -4, -4, -4, -4 },
-					"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -210, 250 }
+					"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -180, 250 }
 				},
 				values = {
 					"colors", Colors,
@@ -657,7 +659,7 @@ Private.RegisterSchematic("UnitFrame::Target", "Legacy", {
 				parent = nil, ownerKey = nil, 
 				chain = {
 					"SetSize", { 316, 86 }, "SetHitBox", { -4, -4, -4, -4 },
-					"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 210, 250 }
+					"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 180, 250 }
 				},
 				values = {
 					"colors", Colors,

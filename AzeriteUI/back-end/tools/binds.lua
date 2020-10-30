@@ -1,4 +1,4 @@
-local LibBindTool = Wheel:Set("LibBindTool", 1)
+local LibBindTool = Wheel:Set("LibBindTool", 3)
 if (not LibBindTool) then
 	return
 end
@@ -76,7 +76,6 @@ local Colors = LibColorTool:GetColorTable()
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
-local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
 
 -- Library registries
 LibBindTool.embeds = LibBindTool.embeds or {}
@@ -333,9 +332,9 @@ LibBindTool.ProcessInput = function(self, key)
 	end
 
 	-- Ignore modifiers until an actual key or mousebutton is pressed
-	if (key == "LSHIFT") or (key == "RSHIFT")
-	or (key == "LCTRL") or (key == "RCTRL")
-	or (key == "LALT") or (key == "RALT")
+	if (key == "LSHIFT") or (key == "RSHIFT") or (key == "SHIFT")
+	or (key == "LCTRL") or (key == "RCTRL") or (key == "CTRL")
+	or (key == "LALT") or (key == "RALT") or (key == "ALT")
 	or (key == "UNKNOWN")
 	then
 		return 
@@ -665,7 +664,8 @@ LibBindTool.GetBindingFrame = function(self)
 		frame.ApplyButton:SetScript("OnClick", function() LibBindTool:ApplyBindings() end)
 
 		frame:SetScript("OnKeyUp", function(_, key) LibBindTool:ProcessInput(key) end)
-
+		frame:SetScript("OnGamePadButtonUp", function(_, key) LibBindTool:ProcessInput(key) end)
+		
 		LibBindTool.bindingFrame = frame
 	end 
 	return LibBindTool.bindingFrame	

@@ -1,4 +1,4 @@
-local LibForge = Wheel:Set("LibForge", 6)
+local LibForge = Wheel:Set("LibForge", 8)
 if (not LibForge) then
 	return
 end
@@ -254,189 +254,194 @@ LibForge.Forge = function(self, object, forgedata, ...)
 
 	-- Iterate workorders in the forgedata
 	for _,workorder in ipairs(forgedata) do
+		if (workorder) then
 
-		-- Workorder is to create widgets
-		if (workorder.type == "CreateWidgets") then
+			-- Workorder is to create widgets
+			if (workorder.type == "CreateWidgets") then
 
-			-- Iterate widgets to be created or modelled
-			for _,item in ipairs(workorder.widgets) do
+				-- Iterate widgets to be created or modelled
+				for _,item in ipairs(workorder.widgets) do
+					if (item) then
 
-				-- This will hold the widget
-				local widget
+						-- This will hold the widget
+						local widget
 
-				-- This will be the parent, if creation is needed.
-				local parent 
+						-- This will be the parent, if creation is needed.
+						local parent 
 
-				-- Figure out who the parent is
-				local owner = object -- this is always the owner
-				if (item.parent) and ((item.ownerKey) or (item.parentKey)) then
-					parent = trackParentKeys(owner, item.parent) -- the parent can differ
+						-- Figure out who the parent is
+						local owner = object -- this is always the owner
+						if (item.parent) and ((item.ownerKey) or (item.parentKey)) then
+							parent = trackParentKeys(owner, item.parent) -- the parent can differ
 
-					-- Check if the widget already exists, as we're only going to modify this time, not create.
-					local oldWidget = item.ownerKey and owner[item.ownerKey] or item.parentKey and parent[item.parentKey]
-					if (isObjectType(oldWidget, item.objectType)) then
-						widget = oldWidget
-					end
-				else
-					-- When parent and keys are omitted,
-					-- we assume we are modifying the object itself. 
-					widget = object
-				end
-				
-				-- Skip it if a dependency fails.
-				local dependencyFailed
-				if (item.ownerDependencyKey) then
-					local key = trackParentKeys(owner, item.ownerDependencyKey)
-					if (not key) then
-						widget = nil
-						dependencyFailed = true
-					end
-				end
-
-				-- Skip this if a dependency check failed.
-				if (not dependencyFailed) then
-
-					-- Create the widget if it doesn't exist, or exist of the wrong type.
-					if (not widget) then
-						if (item.objectType == "Texture") then
-							widget = parent:CreateTexture()
-
-						elseif (item.objectType == "FontString") then
-							widget = parent:CreateFontString()
-
-						elseif (item.objectType == "Frame") then
-							if (item.objectSubType == "StatusBar") and (parent.CreateStatusBar) then
-								widget = parent:CreateStatusBar()
-							else
-								widget = parent:CreateFrame(item.objectSubType, item.objectName, item.objectTemplate)
+							-- Check if the widget already exists, as we're only going to modify this time, not create.
+							local oldWidget = item.ownerKey and owner[item.ownerKey] or item.parentKey and parent[item.parentKey]
+							if (isObjectType(oldWidget, item.objectType)) then
+								widget = oldWidget
+							end
+						else
+							-- When parent and keys are omitted,
+							-- we assume we are modifying the object itself. 
+							widget = object
+						end
+						
+						-- Skip it if a dependency fails.
+						local dependencyFailed
+						if (item.ownerDependencyKey) then
+							local key = trackParentKeys(owner, item.ownerDependencyKey)
+							if (not key) then
+								widget = nil
+								dependencyFailed = true
 							end
 						end
-					else
-						-- Object may exist at the right key relative to its indended parent, 
-						-- but with the wrong parent. Fix it if that is the case.
-						if (item.parent) then
-							widget:SetParent(parent)
+
+						-- Skip this if a dependency check failed.
+						if (not dependencyFailed) then
+
+							-- Create the widget if it doesn't exist, or exist of the wrong type.
+							if (not widget) then
+								if (item.objectType == "Texture") then
+									widget = parent:CreateTexture()
+
+								elseif (item.objectType == "FontString") then
+									widget = parent:CreateFontString()
+
+								elseif (item.objectType == "Frame") then
+									if (item.objectSubType == "StatusBar") and (parent.CreateStatusBar) then
+										widget = parent:CreateStatusBar()
+									else
+										widget = parent:CreateFrame(item.objectSubType, item.objectName, item.objectTemplate)
+									end
+								end
+							else
+								-- Object may exist at the right key relative to its indended parent, 
+								-- but with the wrong parent. Fix it if that is the case.
+								if (item.parent) then
+									widget:SetParent(parent)
+								end
+							end
+
+							-- This may not exist, we could've had an invalid parent or key, 
+							-- or could be a failed dependency causing it not to be created,
+							-- or could even be a widget type not currently supported by the forge.
+							if (widget) then
+
+								-- Apply any methods
+								self:Chain(widget, item.chain) 
+
+								-- Assign values
+								self:Decorate(widget, item.values, ...) 
+							
+								-- Key the widget to its owner or parent.
+								-- This should only happen in widget creation, not modification.
+								if (item.ownerKey) then
+									owner[item.ownerKey] = widget
+								elseif (item.parentKey) then
+									parent[item.parentKey] = widget
+								end
+
+							end
 						end
 					end
+				end
+			
+			elseif (workorder.type == "ModifyWidgets") then
 
-					-- This may not exist, we could've had an invalid parent or key, 
-					-- or could be a failed dependency causing it not to be created,
-					-- or could even be a widget type not currently supported by the forge.
-					if (widget) then
+				-- Iterate widgets to be created or modelled
+				for _,item in ipairs(workorder.widgets) do
+					if (item) then
+
+						-- This will hold the widget
+						local widget  
+
+						-- Figure out where the widget is
+						local owner = object -- this is always the owner
+						if (item.parent) and (item.ownerKey or item.parentKey) then
+							local parent
+							if (item.parent and item.parentKey) then
+								parent = trackParentKeys(owner, item.parent) -- the parent can differ
+							end
+
+							-- Check if the widget already exists, as we're only going to modify this time, not create.
+							local oldWidget
+							if (item.ownerKey) then
+								oldWidget = trackParentKeys(owner, item.ownerKey)
+							elseif (parent) and (item.parentKey) then
+								oldWidget = trackParentKeys(parent, item.parentKey)
+							end
+							if (isObjectType(oldWidget, item.objectType)) then
+								widget = oldWidget
+							end
+
+						elseif (item.ownerKey) then
+
+							local oldWidget
+							if (item.ownerKey) then
+								oldWidget = trackParentKeys(owner, item.ownerKey)
+							end
+							if (isObjectType(oldWidget, item.objectType)) then
+								widget = oldWidget
+							end
+
+						else
+							-- When parent and keys are omitted,
+							-- we assume we are modifying the object itself. 
+							widget = object
+						end
+
+						-- Skip it if a dependency fails.
+						if (item.ownerDependencyKey) then
+							local key = trackParentKeys(owner, item.ownerDependencyKey)
+							if (not key) then
+								widget = nil
+							end
+						end
+
+						-- This may not exist, we could've had an invalid parent or key.
+						if (widget) then
+
+							-- Object may exist at the right key relative to its indended parent, 
+							-- but with the wrong parent. Fix it if that is the case.
+							if (item.parent) then
+								local parent = trackParentKeys(owner, item.parent)
+								if (parent) then
+									widget:SetParent(parent)
+								end
+							end
+
+							-- Apply any methods
+							self:Chain(widget, item.chain) 
+
+							-- Assign values
+							self:Decorate(widget, item.values, ...) 
+
+						end
+
+					end
+				end
+		
+			elseif (workorder.type == "ExecuteMethods") then
+
+				-- Iterate widgets to be created or modelled
+				for _,item in ipairs(workorder.methods) do
+					if (item) then
+						if (item.repeatAction) then
+							local method = item.repeatAction.method
+							for _,args in ipairs(item.repeatAction.arguments) do
+								object[method](object, parseArguments(args))
+							end
+						end
 
 						-- Apply any methods
-						self:Chain(widget, item.chain) 
+						self:Chain(object, item.chain) 
 
 						-- Assign values
-						self:Decorate(widget, item.values, ...) 
-					
-						-- Key the widget to its owner or parent.
-						-- This should only happen in widget creation, not modification.
-						if (item.ownerKey) then
-							owner[item.ownerKey] = widget
-						elseif (item.parentKey) then
-							parent[item.parentKey] = widget
-						end
-
+						self:Decorate(object, item.values, ...) 
 					end
 				end
 			end
-		
-		elseif (workorder.type == "ModifyWidgets") then
 
-			-- Iterate widgets to be created or modelled
-			for _,item in ipairs(workorder.widgets) do
-
-				-- This will hold the widget
-				local widget  
-
-				-- Figure out where the widget is
-				local owner = object -- this is always the owner
-				if (item.parent) and (item.ownerKey or item.parentKey) then
-					local parent
-					if (item.parent and item.parentKey) then
-						parent = trackParentKeys(owner, item.parent) -- the parent can differ
-					end
-
-					-- Check if the widget already exists, as we're only going to modify this time, not create.
-					local oldWidget
-					if (item.ownerKey) then
-						oldWidget = trackParentKeys(owner, item.ownerKey)
-					elseif (parent) and (item.parentKey) then
-						oldWidget = trackParentKeys(parent, item.parentKey)
-					end
-					if (isObjectType(oldWidget, item.objectType)) then
-						widget = oldWidget
-					end
-
-				elseif (item.ownerKey) then
-
-					local oldWidget
-					if (item.ownerKey) then
-						oldWidget = trackParentKeys(owner, item.ownerKey)
-					end
-					if (isObjectType(oldWidget, item.objectType)) then
-						widget = oldWidget
-					end
-
-				else
-					-- When parent and keys are omitted,
-					-- we assume we are modifying the object itself. 
-					widget = object
-				end
-
-				-- Skip it if a dependency fails.
-				if (item.ownerDependencyKey) then
-					local key = trackParentKeys(owner, item.ownerDependencyKey)
-					if (not key) then
-						widget = nil
-					end
-				end
-
-				-- This may not exist, we could've had an invalid parent or key.
-				if (widget) then
-
-					-- Object may exist at the right key relative to its indended parent, 
-					-- but with the wrong parent. Fix it if that is the case.
-					if (item.parent) then
-						local parent = trackParentKeys(owner, item.parent)
-						if (parent) then
-							widget:SetParent(parent)
-						end
-					end
-
-					-- Apply any methods
-					self:Chain(widget, item.chain) 
-
-					-- Assign values
-					self:Decorate(widget, item.values, ...) 
-
-				end
-
-			end
-	
-		elseif (workorder.type == "ExecuteMethods") then
-
-			-- Iterate widgets to be created or modelled
-			for _,item in ipairs(workorder.methods) do
-
-				if (item.repeatAction) then
-					local method = item.repeatAction.method
-					for _,args in ipairs(item.repeatAction.arguments) do
-						object[method](object, parseArguments(args))
-					end
-				end
-
-				-- Apply any methods
-				self:Chain(object, item.chain) 
-
-				-- Assign values
-				self:Decorate(object, item.values, ...) 
-
-			end
-	
 		end
-
 	end
 
 	-- Clear the current object.

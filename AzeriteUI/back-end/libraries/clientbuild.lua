@@ -1,4 +1,4 @@
-local LibClientBuild = Wheel:Set("LibClientBuild", 39)
+local LibClientBuild = Wheel:Set("LibClientBuild", 41)
 if (not LibClientBuild) then
 	return
 end
@@ -30,7 +30,7 @@ if (WOW_PROJECT_ID ~= nil) then
 	IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 else
 	IsClassic = tonumber(MAJOR) == 1
-	IsRetail = tonumber(MAJOR) >= 8
+	IsRetail = tonumber(MAJOR) >= 9
 end
 
 IsClassicTBC = tonumber(MAJOR) == 2
