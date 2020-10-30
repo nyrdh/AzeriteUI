@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 117)
+local LibSecureButton = Wheel:Set("LibSecureButton", 118)
 if (not LibSecureButton) then
 	return
 end
@@ -2192,10 +2192,14 @@ end
 
 -- Public API
 ----------------------------------------------------
+-- @input buttonTemplate <table,string,function,nil>
+-- 		table: all methods are copied to the new button
+--  	string: the spawning module calls module[buttonTemple](module, button, ...) on PostCreate
+-- 		function: the function is copied directly to the button's own PostCreate method
 LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTemplate, ...)
 	check(parent, 1, "string", "table")
 	check(buttonType, 2, "string")
-	check(buttonTemplate, 3, "table", "nil")
+	check(buttonTemplate, 3, "table", "string", "function", "nil")
 
 	-- Store the button
 	if (not Buttons[self]) then 
@@ -2581,9 +2585,21 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 	-- Add any methods from the optional template.
 	-- *we're now allowing modules to overwrite methods.
 	if (buttonTemplate) then
-		for methodName, func in pairs(buttonTemplate) do
-			if (type(func) == "function") then
-				button[methodName] = func
+		if (type(buttonTemplate) == "table") then
+			for methodName, func in pairs(buttonTemplate) do
+				if (type(func) == "function") then
+					button[methodName] = func
+				end
+			end
+		elseif (type(buttonTemplate) == "function") then
+			button.PostCreate = buttonTemplate
+		elseif (type(buttonTemplate) == "string") then
+			local module, method = self, buttonTemplate
+			button.PostCreate = function(button, ...)
+				local func = module[method]
+				if (func) then
+					func(module, button, ...)
+				end
 			end
 		end
 	end
