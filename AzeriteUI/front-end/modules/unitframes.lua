@@ -16,14 +16,21 @@ if (not Core) then
 end
 
 local LibClientBuild = Wheel("LibClientBuild")
-assert(LibClientBuild, "LibCast requires LibClientBuild to be loaded.")
+assert(LibClientBuild, "UnitFrames requires LibClientBuild to be loaded.")
+
+local LibTime = Wheel("LibTime")
+assert(LibTime, "UnitFrames requires LibTime to be loaded.")
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 
+-- Constants for calendar events
+local IsWinterVeil = LibTime:IsWinterVeil()
+local IsLoveFestival = LibTime:IsLoveFestival()
+
 -- Primary Units
-local UnitFramePlayer = Core:NewModule("UnitFramePlayer", "LibDB", "LibMessage", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge")
+local UnitFramePlayer = Core:NewModule("UnitFramePlayer", "LibDB", "LibMessage", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge", "LibTime")
 local UnitFramePlayerHUD = Core:NewModule("UnitFramePlayerHUD", "LibDB", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge")
 local UnitFrameTarget = Core:NewModule("UnitFrameTarget", "LibMessage", "LibEvent", "LibUnitFrame", "LibSound", "LibForge")
 
@@ -1331,9 +1338,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	powerVal:SetTextColor(unpack(layout.PowerValueColor))
 	self.Power.Value = powerVal
 
-	local day = tonumber(date("%d"))
-	local month = tonumber(date("%m"))
-	if ((month >= 12) and (day >= 15 )) or ((month <= 1) and (day <= 2)) then 
+	if (IsWinterVeil) then 
 		local winterVeilPower = power:CreateTexture()
 		winterVeilPower:SetSize(unpack(layout.WinterVeilPowerSize))
 		winterVeilPower:SetPoint(unpack(layout.WinterVeilPowerPlace))
@@ -1386,9 +1391,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	extraPowerVal:SetTextColor(unpack(layout.ManaValueColor))
 	self.ExtraPower.Value = extraPowerVal
 	
-	local day = tonumber(date("%d"))
-	local month = tonumber(date("%m"))
-	if ((month >= 12) and (day >=15 )) or ((month <= 1) and (day <= 2)) then 
+	if (IsWinterVeil) then 
 		local winterVeilMana = extraPower:CreateTexture()
 		winterVeilMana:SetSize(unpack(layout.WinterVeilManaSize))
 		winterVeilMana:SetPoint(unpack(layout.WinterVeilManaPlace))
@@ -1533,9 +1536,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	local combat = overlay:CreateTexture()
 
 	local prefix = "CombatIndicator"
-	local day = tonumber(date("%d"))
-	local month = tonumber(date("%m"))
-	if ((month == 2) and (day >= 11) and (day <= 16)) then 
+	if (IsLoveFestival) then 
 		prefix = "Love"..prefix
 	end
 	combat:SetSize(unpack(layout[prefix.."Size"]))
@@ -2128,9 +2129,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	self.Targeted = {}
 
 	local prefix = "TargetIndicator"
-	local day = tonumber(date("%d"))
-	local month = tonumber(date("%m"))
-	if ((month == 2) and (day >= 11) and (day <= 16)) then 
+	if (IsLoveFestival) then 
 		prefix = "Love"..prefix
 	end
 

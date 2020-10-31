@@ -4,12 +4,21 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-10-29
+## [Unreleased] 2020-10-31
 ### Added
 - Added gamepad support to our `/bind` mode, when the user has enabled it with `/console GamePadEnable 1`. 
 
 ### Changed
 - Changed the text based abbreviations of keybinds to better support gamepads. I am working on gamepad icons and plan to implement icons in the style of xbox360 and ps4 controllers, so the current text based solution is temporary. I just figured `Rt` is a bit more readable than `GamePad Right Trigger` when displayed on a small action button.
+- Moved classic spell rank display to the action button back-end. 
+- Moved our improved MaxDps support to the action button back-end. Will expand on this later.
+- Improved how our action button back-end reassigns keybinds to the petbattle system, in a manner that actually gets the right buttons no matter the order action buttons were spawned in. 
+- Holy Power should now remain visible regardless of current target, in the same manner as Soul Fragments and Runes.
+- Slightly shrunk and adjusted the height and vertical position of the objective's tracker in retail, to make sure it doesn't collide with target frame auras or temporary totem buttons above the minimap.
+- Completely violated the Narcissus minimap button's right to choose. 
+
+### Removed
+- Removed most code specific to BfA, and changed any Shadowlands code into just Retail code, since the 9.x API now is the current one.
 
 ## [3.0.422-RC] 2020-10-27
 ### Fixed

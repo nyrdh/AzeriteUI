@@ -1,4 +1,4 @@
-local LibTime = Wheel:Set("LibTime", 5)
+local LibTime = Wheel:Set("LibTime", 6)
 if (not LibTime) then	
 	return
 end
@@ -38,6 +38,15 @@ local check = function(value, num, ...)
 	local types = string_join(", ", ...)
 	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
 	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
+end
+
+local dateInRange = function(day1, month1, year1, day2, month2, year2)
+	local currentDay = tonumber(date("%d"))
+	local currentMonth = tonumber(date("%m"))
+	local currentYear = tonumber(date("%Y")) -- full 4 digit year
+	return (currentDay >= day1) 		and (currentDay <= day2)
+	   and (currentMonth >= month1) 	and (currentMonth <= month2)
+	   and (currentYear >= year1) 		and (currentYear <= year2)
 end
 
 -- Calculates standard hours from a give 24-hour time
@@ -87,12 +96,24 @@ LibTime.GetTime = function(self, useStandardTime, useServerTime)
 	return self[useServerTime and "GetServerTime" or "GetLocalTime"](self, useStandardTime)
 end
 
+-- 2020 Retail Winter Veil.
+LibTime.IsWinterVeil = function(self)
+	return dateInRange(16,12,2020,2,1,2021)
+end
+
+-- 2021 Retail Love is in the Air.
+LibTime.IsLoveFestival = function(self)
+	return dateInRange(8,2,2021,22,2,2021)
+end
+
 local embedMethods = {
+	ComputeMilitaryHours = true, 
+	ComputeStandardHours = true,
 	GetTime = true, 
 	GetLocalTime = true, 
 	GetServerTime = true, 
-	ComputeMilitaryHours = true, 
-	ComputeStandardHours = true
+	IsWinterVeil = true,
+	IsLoveFestival = true
 }
 
 LibTime.Embed = function(self, target)

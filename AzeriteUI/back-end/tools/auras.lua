@@ -1414,6 +1414,7 @@ elseif (IsRetail) then
 		AddUserFlags(285524, OnPlayer) 						-- Green Dragon Tail Costume
 		AddUserFlags(246242, OnPlayer) 						-- Horse Head Costume
 		AddUserFlags(246241, OnPlayer) 						-- Horse Tail Costume
+		AddUserFlags( 44212, OnPlayer) 						-- Jack-o'-Lanterned!
 		AddUserFlags(177656, OnPlayer) 						-- Kor'kron Foot Soldier Costume
 		AddUserFlags(177657, OnPlayer) 						-- Kor'kron Foot Soldier Costume
 		AddUserFlags( 24712, OnPlayer) 						-- Leper Gnome Costume
