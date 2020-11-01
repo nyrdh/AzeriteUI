@@ -1233,25 +1233,35 @@ Module.CreateMenuTable = function(self)
 			title = KEY_BINDINGS, type = nil, hasWindow = true, 
 			buttons = {
 				{
-					enabledTitle = L_ENABLED:format(L["GamePad First"]),
-					disabledTitle = L["GamePad First"],
-					type = "SET_VALUE", 
-					configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "gamepad" }, 
-					proxyModule = "ActionBarMain"
+					title = L["Display Priority"], type = nil, hasWindow = true, 
+					buttons = {
+						{
+							enabledTitle = L_ENABLED:format(L["GamePad First"]),
+							disabledTitle = L["GamePad First"],
+							type = "SET_VALUE", 
+							configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "gamepad" }, 
+							proxyModule = "ActionBarMain"
+						},
+						{
+							enabledTitle = L_ENABLED:format(L["Keyboard First"]),
+							disabledTitle = L["Keyboard First"],
+							type = "SET_VALUE", 
+							configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "keyboard" }, 
+							proxyModule = "ActionBarMain"
+						},
+						{
+							enabledTitle = L_ENABLED:format(DEFAULT),
+							disabledTitle = DEFAULT,
+							type = "SET_VALUE", 
+							configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "default" }, 
+							proxyModule = "ActionBarMain"
+						}
+					}
 				},
 				{
-					enabledTitle = L_ENABLED:format(L["Keyboard First"]),
-					disabledTitle = L["Keyboard First"],
-					type = "SET_VALUE", 
-					configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "keyboard" }, 
-					proxyModule = "ActionBarMain"
-				},
-				{
-					enabledTitle = L_ENABLED:format(DEFAULT),
-					disabledTitle = DEFAULT,
-					type = "SET_VALUE", 
-					configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "default" }, 
-					proxyModule = "ActionBarMain"
+					title = L["GamePad Type"],
+					type = nil, hasWindow = false,
+					isSlave = true, slaveDB = "ActionBarMain", slaveKey = "gamePadType",
 				}
 			} 
 		}

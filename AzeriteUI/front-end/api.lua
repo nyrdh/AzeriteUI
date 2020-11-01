@@ -2032,6 +2032,7 @@ Defaults.ActionBarMain = {
 	buttonLock = true,
 	castOnDown = true,
 	keybindDisplayPriority = "gamepad", -- can be "gamepad", "keyboard", "default"
+	--gamePadType = nil, -- will add this later, listing it for reference now. 
 
 	-- Azerite theme settings
 	-------------------------------------------------
