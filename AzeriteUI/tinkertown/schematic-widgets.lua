@@ -14,6 +14,40 @@ local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia
 local GetSchematic = Private.GetSchematic
 
+-- Utility Functions
+-----------------------------------------------------------
+-- Button mouseover highlight update
+-- Requires: Darken, Border, Glow
+local PostUpdateMouseOver = function(self)
+	if (self.isMouseOver) then 
+		self.Darken:SetAlpha(0)
+		self.Border:SetVertexColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], 1)
+		self.Glow:Show()
+	else 
+		self.Darken:SetAlpha(.15)
+		self.Border:SetVertexColor(Colors.ui[1], Colors.ui[2], Colors.ui[3], 1)
+		self.Glow:Hide()
+	end 
+end 
+
+-- Button stack/charge count font update
+-- Requires: Count
+-- Optional: Rank
+local PostUpdateStackCount = function(self, count)
+	count = tonumber(count) or 0
+	local font = GetFont((count < 10) and 18 or 14, true) 
+	if (self.Count:GetFontObject() ~= font) then 
+		self.Count:SetFontObject(font)
+	end
+	-- TO BACK-END!
+	-- Hide the rank text element if a count exists. 
+	-- I don't think this'll ever happen (?), 
+	-- but better safe than sorry. 
+	if (self.Rank) then 
+		self.Rank:SetShown((count == 0))
+	end 
+end
+
 -- Legacy Schematics
 -----------------------------------------------------------
 -- Applied to aura buttons.
@@ -97,13 +131,16 @@ Private.RegisterSchematic("Widget::ActionButton::Normal", "Azerite", {
 				values = {
 					"colors", Colors,
 					"maxDisplayCount", 99,
-					"PostUpdateCount", ActionButton_StackCount_PostUpdate,
+					"PostUpdateCount", PostUpdateStackCount,
 					"PostUpdateCooldown", function(self, cooldownObject) 
 						cooldownObject:SetSwipeColor(0, 0, 0, .75)
 					end,
 					"PostUpdateChargeCooldown", function(self, cooldownObject) 
 						cooldownObject:SetSwipeColor(0, 0, 0, .5)
-					end
+					end,
+					"PostEnter", PostUpdateMouseOver,
+					"PostLeave", PostUpdateMouseOver,
+					"PostUpdate", PostUpdateMouseOver
 				}
 			},
 			{
@@ -311,11 +348,7 @@ Private.RegisterSchematic("Widget::ActionButton::Normal", "Azerite", {
 					"SetAllPointsToParentKey", "Icon",
 					"SetMask", GetMedia("actionbutton-mask-circular"),
 					"SetTexture", [=[Interface\ChatFrame\ChatFrameBackground]=],
-					"SetVertexColor", { 0, 0, 0 }
-				},
-				values = {
-					"highlight", 0,
-					"normal", .15
+					"SetVertexColor", { 0, 0, 0, .15 }
 				}
 			},
 			{
@@ -370,13 +403,16 @@ Private.RegisterSchematic("Widget::ActionButton::Small", "Azerite", {
 				values = {
 					"colors", Colors,
 					"maxDisplayCount", 99,
-					"PostUpdateCount", ActionButton_StackCount_PostUpdate,
+					"PostUpdateCount", PostUpdateStackCount,
 					"PostUpdateCooldown", function(self, cooldownObject) 
 						cooldownObject:SetSwipeColor(0, 0, 0, .75)
 					end,
 					"PostUpdateChargeCooldown", function(self, cooldownObject) 
 						cooldownObject:SetSwipeColor(0, 0, 0, .5)
-					end
+					end,
+					"PostEnter", PostUpdateMouseOver,
+					"PostLeave", PostUpdateMouseOver,
+					"PostUpdate", PostUpdateMouseOver
 				}
 			},
 			{
@@ -576,11 +612,7 @@ Private.RegisterSchematic("Widget::ActionButton::Small", "Azerite", {
 					"SetAllPointsToParentKey", "Icon",
 					"SetMask", GetMedia("actionbutton-mask-circular"),
 					"SetTexture", [=[Interface\ChatFrame\ChatFrameBackground]=],
-					"SetVertexColor", { 0, 0, 0 }
-				},
-				values = {
-					"highlight", 0,
-					"normal", .15
+					"SetVertexColor", { 0, 0, 0, .15 }
 				}
 			},
 			{

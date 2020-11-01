@@ -1,4 +1,4 @@
-local LibForge = Wheel:Set("LibForge", 8)
+local LibForge = Wheel:Set("LibForge", 9)
 if (not LibForge) then
 	return
 end

@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 1)
+local LibChatTool = Wheel:Set("LibChatTool", 2)
 if (not LibChatTool) then
 	return
 end
@@ -263,6 +263,15 @@ table_insert(Replacements, 	{ "<"..DND..">", "|cffE7E716<"..DND..">|r " })
 local AddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
 	if (not msg) or (msg == "") then
 		return
+	end
+
+	-- This can be used for any addon using AceConsole for output spam.
+	if (FilterStatus.MaxDps) then
+		local addon = "MaxDps"
+		local filter = "|cff33ff99"..addon.."|r%:"
+		if (string_find(msg, filter)) then
+			return
+		end
 	end
 
 	-- Only do this if the option is enabled,
@@ -780,6 +789,15 @@ Filters.Monster = {
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_YELL", OnChatMessage)
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_EMOTE", OnChatMessage)
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_WHISPER", OnChatMessage)
+	end
+}
+
+-- Just a placeholder for the filter to exist at all.
+-- Since it's messages created by addons, we filter it in AddMessage.
+Filters.MaxDps = {
+	Enable = function(module)
+	end,
+	Disable = function(module)
 	end
 }
 

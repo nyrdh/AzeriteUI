@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 118)
+local LibSecureButton = Wheel:Set("LibSecureButton", 120)
 if (not LibSecureButton) then
 	return
 end
@@ -1969,6 +1969,43 @@ StanceButton.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", UpdateStanceButton)
 end
 
+-- ExitButton Template
+----------------------------------------------------
+local ExitButton = LibSecureButton:CreateFrame("CheckButton")
+local ExitButton_MT = { __index = ExitButton }
+
+ExitButton.OnEnter = function(self) 
+	self.isMouseOver = true
+
+	if (self.PostEnter) then 
+		self:PostEnter()
+	end 
+end
+
+ExitButton.OnLeave = function(self) 
+	self.isMouseOver = nil
+	self.UpdateTooltip = nil
+
+	local tooltip = self:GetTooltip()
+	tooltip:Hide()
+
+	if (self.PostLeave) then 
+		self:PostLeave()
+	end 
+end
+
+ExitButton.PreClick = function(self) end
+ExitButton.PostClick = function(self, button) 
+	if (UnitOnTaxi("player") and (not InCombatLockdown())) then
+		TaxiRequestEarlyLanding()
+	end
+end
+
+ExitButton.GetTooltip = ActionButton.GetTooltip
+ExitButton.OnEnable = function() end
+ExitButton.OnDisable = function() end
+ExitButton.Update = function() end
+
 -- Library API
 ----------------------------------------------------
 LibSecureButton.CreateButtonLayers = function(self, button)
@@ -2197,8 +2234,8 @@ end
 --  	string: the spawning module calls module[buttonTemple](module, button, ...) on PostCreate
 -- 		function: the function is copied directly to the button's own PostCreate method
 LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTemplate, ...)
-	check(parent, 1, "string", "table")
-	check(buttonType, 2, "string")
+	check(buttonType, 1, "string")
+	check(parent, 2, "string", "table")
 	check(buttonTemplate, 3, "table", "string", "function", "nil")
 
 	-- Store the button
@@ -2352,6 +2389,29 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 	elseif (buttonType == "petbattle") then
 
 	elseif (buttonType == "vehicle") then
+
+	elseif (buttonType == "exit") then
+
+		button = setmetatable(visibility:CreateFrame("CheckButton", nil, "SecureActionButtonTemplate"), ExitButton_MT)
+		button:SetAttribute("type", "macro")
+		button:SetFrameStrata("LOW")
+		button:SetScript("OnEnter", ExitButton.OnEnter)
+		button:SetScript("OnLeave", ExitButton.OnLeave)
+		button:SetScript("PreClick", ExitButton.PreClick)
+		button:SetScript("PostClick", ExitButton.PostClick)
+
+		local visibilityDriver, macroText
+		if (IsClassic) then
+			macroText = "/dismount [mounted]"
+			visibilityDriver = "[mounted]show;hide"
+		
+		elseif (IsRetail) then
+			macroText = "/leavevehicle [target=vehicle,exists,canexitvehicle]\n/dismount [mounted]"
+			visibilityDriver = "[target=vehicle,exists,canexitvehicle][mounted]show;hide"
+		end
+
+		button:SetAttribute("macrotext", macroText)
+		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
 
 	else
 		local buttonID, barID = ...

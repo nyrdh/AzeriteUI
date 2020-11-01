@@ -868,17 +868,14 @@ Core.OnInit = function(self)
 	end
 
 	-- Apply theme based edits.	
-	local layout = self.layout
-	if (layout and layout.Forge and layout.Forge.OnInit) then
-		self:Forge(self, layout.Forge.OnInit)
+	if (Private.HasSchematic("ModuleForge::Root")) then
+		self:Forge(Private.GetSchematic("ModuleForge::Root").OnInit) 
 	end
-
 end 
 
 Core.OnEnable = function(self)
-	local layout = self.layout
-	if (layout and layout.Forge and layout.Forge.OnEnable) then
-		self:Forge(self, layout.Forge.OnEnable)
+	if (Private.HasSchematic("ModuleForge::Root")) then
+		self:Forge(Private.GetSchematic("ModuleForge::Root").OnEnable) 
 	end
 
 	-- Experimental stuff we move to relevant modules once done

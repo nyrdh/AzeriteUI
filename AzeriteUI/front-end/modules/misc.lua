@@ -199,6 +199,9 @@ Core:NewModule("ChatFilters", "LibChatTool").OnInit = function(self)
 		self:SetChatFilterEnabled("Spam", self.db.enableSpamFilter)
 		self:SetChatFilterEnabled("Boss", self.db.enableBossFilter)
 		self:SetChatFilterEnabled("Monster", self.db.enableMonsterFilter)
+		if (self.db.enableSpamFilter) then
+			self:SetChatFilterEnabled("MaxDps", self:IsAddOnEnabled("MaxDps"))
+		end
 	end
 
 	self.OnEnable = function(self)

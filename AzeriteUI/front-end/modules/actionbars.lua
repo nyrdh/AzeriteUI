@@ -72,9 +72,6 @@ local FadeOutHZ, FadeOutDuration = 1/20, 1/5
 -- Time constants
 local DAY, HOUR, MINUTE = 86400, 3600, 60
 
--- Is ConsolePort enabled in the addon listing?
-local IsConsolePortEnabled = Module:IsAddOnEnabled("ConsolePort")
-
 -- Track combat status
 local IN_COMBAT
 
@@ -318,36 +315,7 @@ end
 
 -- ActionButton Template (Custom Methods)
 ----------------------------------------------------
-local ActionButton = {}
-
-ActionButton.UpdateMouseOver = function(self)
-	if (self.isMouseOver) then 
-		if (self.Darken) then 
-			self.Darken:SetAlpha(self.Darken.highlight)
-		end 
-		if (self.Border) then 
-			self.Border:SetVertexColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], 1)
-		end 
-		if (self.Glow) then 
-			self.Glow:Show()
-		end 
-	else 
-		if self.Darken then 
-			self.Darken:SetAlpha(self.Darken.normal)
-		end 
-		if self.Border then 
-			self.Border:SetVertexColor(Colors.ui[1], Colors.ui[2], Colors.ui[3], 1)
-		end 
-		if self.Glow then 
-			self.Glow:Hide()
-		end 
-	end 
-end 
-ActionButton.PostEnter = ActionButton.UpdateMouseOver
-ActionButton.PostLeave = ActionButton.UpdateMouseOver
-ActionButton.PostUpdate = ActionButton.UpdateMouseOver
-
-ActionButton.PostCreate = function(self)
+local ActionButtonPostCreate = function(self)
 	if (Private.HasSchematic("Widget::ActionButton::Normal")) then
 		self:Forge(Private.GetSchematic("Widget::ActionButton::Normal")) 
 	end
@@ -355,18 +323,11 @@ end
 
 -- PetButton Template (Custom Methods)
 ----------------------------------------------------
-local PetButton = {}
-
-PetButton.PostCreate = function(self)
+local PetButtonPostCreate = function(self)
 	if (Private.HasSchematic("Widget::ActionButton::Small")) then
 		self:Forge(Private.GetSchematic("Widget::ActionButton::Small")) 
 	end
 end 
-
-PetButton.UpdateMouseOver = ActionButton.UpdateMouseOver
-PetButton.PostUpdate = ActionButton.UpdateMouseOver
-PetButton.PostEnter = ActionButton.PostEnter
-PetButton.PostLeave = ActionButton.PostLeave
 
 -- Bar Creation
 ----------------------------------------------------
@@ -384,7 +345,7 @@ Module.SpawnActionBars = function(self)
 	-- Primary Action Bar
 	for id = 1,NUM_ACTIONBAR_BUTTONS do 
 		buttonID = buttonID + 1
-		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, id, 1)
+		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButtonPostCreate, id, 1)
 		HoverButtons[Buttons[buttonID]] = buttonID > numPrimary
 
 		-- Experimental code to see if I could make an attribute
@@ -416,7 +377,7 @@ Module.SpawnActionBars = function(self)
 	-- Secondary Action Bar (Bottom Left)
 	for id = 1,NUM_ACTIONBAR_BUTTONS do 
 		buttonID = buttonID + 1
-		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, id, BOTTOMLEFT_ACTIONBAR_PAGE)
+		Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButtonPostCreate, id, BOTTOMLEFT_ACTIONBAR_PAGE)
 		HoverButtons[Buttons[buttonID]] = true
 	end 
 
@@ -429,19 +390,19 @@ Module.SpawnActionBars = function(self)
 	if (false) then
 		for id = 1,NUM_ACTIONBAR_BUTTONS do 
 			buttonID = buttonID + 1
-			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, id, BOTTOMRIGHT_ACTIONBAR_PAGE)
+			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButtonPostCreate, id, BOTTOMRIGHT_ACTIONBAR_PAGE)
 		end
 
 		-- Second Side bar (Right)
 		for id = 1,NUM_ACTIONBAR_BUTTONS do 
 			buttonID = buttonID + 1
-			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, id, RIGHT_ACTIONBAR_PAGE)
+			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButtonPostCreate, id, RIGHT_ACTIONBAR_PAGE)
 		end
 
 		-- Third Side Bar (Left)
 		for id = 1,NUM_ACTIONBAR_BUTTONS do 
 			buttonID = buttonID + 1
-			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton, id, LEFT_ACTIONBAR_PAGE)
+			Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButtonPostCreate, id, LEFT_ACTIONBAR_PAGE)
 		end
 	end
 
@@ -477,7 +438,7 @@ Module.SpawnPetBar = function(self)
 	
 	-- Spawn the Pet Bar
 	for id = 1,NUM_PET_ACTION_SLOTS do
-		PetButtons[id] = self:SpawnActionButton("pet", self.frame, PetButton, id)
+		PetButtons[id] = self:SpawnActionButton("pet", self.frame, PetButtonPostCreate, id)
 	end
 
 	-- Apply common stuff to the pet buttons
@@ -624,31 +585,19 @@ end
 Module.SpawnExitButton = function(self)
 	local layout = self.layout
 
-	local button = self:CreateFrame("Button", nil, "UICenter", "SecureActionButtonTemplate")
-	button:SetFrameStrata("LOW") -- MEDIUM is too high, collides with Immersion
+	local button = self:SpawnActionButton("exit", self:GetFrame("UICenter"))
 	button:SetFrameLevel(100)
 	button:Place(unpack(layout.ExitButtonPlace))
 	button:SetSize(unpack(layout.ExitButtonSize))
-	button:SetAttribute("type", "macro")
-
-	if (IsClassic) then
-		button:SetAttribute("macrotext", "/dismount [mounted]")
-	elseif (IsRetail) then
-		button:SetAttribute("macrotext", "/leavevehicle [target=vehicle,exists,canexitvehicle]\n/dismount [mounted]")
-	end
-
-	-- Put our texture on the button
 	button.texture = button:CreateTexture()
 	button.texture:SetSize(unpack(layout.ExitButtonTextureSize))
 	button.texture:SetPoint(unpack(layout.ExitButtonTexturePlace))
 	button.texture:SetTexture(layout.ExitButtonTexturePath)
-
-	button:SetScript("OnEnter", function(button)
-		local tooltip = self:GetActionButtonTooltip()
+	button.PostEnter = function(self)
+		local tooltip = self:GetTooltip()
 		tooltip:Hide()
-		tooltip:SetDefaultAnchor(button)
-
-		if UnitOnTaxi("player") then 
+		tooltip:SetDefaultAnchor(self)
+		if (UnitOnTaxi("player")) then 
 			tooltip:AddLine(TAXI_CANCEL)
 			tooltip:AddLine(TAXI_CANCEL_DESCRIPTION, Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
 		elseif IsMounted() then 
@@ -658,27 +607,7 @@ Module.SpawnExitButton = function(self)
 			tooltip:AddLine(LEAVE_VEHICLE)
 			tooltip:AddLine(L["%s to leave the vehicle."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
 		end 
-
 		tooltip:Show()
-	end)
-
-	button:SetScript("OnLeave", function(button) 
-		local tooltip = self:GetActionButtonTooltip()
-		tooltip:Hide()
-	end)
-
-	-- Gotta do this the unsecure way, no macros exist for this yet. 
-	button:HookScript("OnClick", function(self, button) 
-		if (UnitOnTaxi("player") and (not InCombatLockdown())) then
-			TaxiRequestEarlyLanding()
-		end
-	end)
-
-	-- Register a visibility driver
-	if (IsClassic) then
-		RegisterAttributeDriver(button, "state-visibility", "[mounted]show;hide")
-	elseif (IsRetail) then
-		RegisterAttributeDriver(button, "state-visibility", "[target=vehicle,exists,canexitvehicle][mounted]show;hide")
 	end
 
 	self.VehicleExitButton = button
