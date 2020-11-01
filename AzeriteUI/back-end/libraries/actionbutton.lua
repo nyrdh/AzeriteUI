@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 123)
+local LibSecureButton = Wheel:Set("LibSecureButton", 124)
 if (not LibSecureButton) then
 	return
 end
@@ -1369,27 +1369,42 @@ end
 
 -- Called when the usable state of the button changes
 ActionButton.UpdateUsable = function(self) 
-	if UnitIsDeadOrGhost("player") then 
+	if (UnitIsDeadOrGhost("player")) then 
 		self.Icon:SetDesaturated(true)
 		self.Icon:SetVertexColor(.3, .3, .3)
-
-	elseif self.outOfRange then
+		if (self.PostUpdateUsable) then
+			self:PostUpdateUsable(true)
+		end
+	
+	elseif (self.outOfRange) then
 		self.Icon:SetDesaturated(true)
 		self.Icon:SetVertexColor(1, .15, .15)
+		if (self.PostUpdateUsable) then
+			self:PostUpdateUsable(true)
+		end
 
 	else
 		local isUsable, notEnoughMana = IsUsableAction(self.buttonAction)
-		if isUsable then
+		if (isUsable) then
 			self.Icon:SetDesaturated(false)
 			self.Icon:SetVertexColor(1, 1, 1)
+			if (self.PostUpdateUsable) then
+				self:PostUpdateUsable(false)
+			end
 
-		elseif notEnoughMana then
+		elseif (notEnoughMana) then
 			self.Icon:SetDesaturated(true)
 			self.Icon:SetVertexColor(.25, .25, 1)
-
+			if (self.PostUpdateUsable) then
+				self:PostUpdateUsable(true)
+			end
+	
 		else
 			self.Icon:SetDesaturated(true)
 			self.Icon:SetVertexColor(.3, .3, .3)
+			if (self.PostUpdateUsable) then
+				self:PostUpdateUsable(true)
+			end
 		end
 	end
 end

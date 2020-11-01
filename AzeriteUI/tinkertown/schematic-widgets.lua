@@ -142,6 +142,26 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Azerite", {
 					"PostLeave", PostUpdateMouseOver,
 					"PostUpdate", PostUpdateMouseOver,
 
+					-- Tone down and desaturate gamepad binds when not usable.
+					"PostUpdateUsable", function(self, shouldDesaturate)
+						if (shouldDesaturate) then
+							for i = 1,4 do
+								local slot = self["GamePadKeySlot"..i]
+								slot:SetDesaturated(true)
+								slot:SetVertexColor(.5,.5,.5)
+							end
+						else
+							for i = 1,4 do
+								local slot = self["GamePadKeySlot"..i]
+								slot:SetDesaturated(false)
+								slot:SetVertexColor(1,1,1)
+							end
+						end
+					end,
+
+					"OnKeyDown", function(self) end,
+					"OnKeyUp", function(self) end,
+
 					-- This will take presedence when true,
 					-- causing any existing gamepad binds 
 					-- to be shown instead of keyboard.
@@ -531,7 +551,7 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Azerite", {
 				parent = "self,Overlay", ownerKey = "Glow", objectType = "Texture",
 				chain = {
 					"SetHidden",
-					"SetDrawlayer", { "ARTWORK", 1 },
+					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetSize", { 44/(122/256),44/(122/256) },
 					"SetPoint", { "CENTER", 0, 0 },
 					"SetTexture", GetMedia("actionbutton-glow-white"),
@@ -799,7 +819,7 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Small", "Azerite", {
 				parent = "self,Overlay", ownerKey = "Glow", objectType = "Texture",
 				chain = {
 					"SetHidden",
-					"SetDrawlayer", { "ARTWORK", 1 },
+					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetSize", { 33/(122/256), 33/(122/256) },
 					"SetPoint", { "CENTER", 0, 0 },
 					"SetTexture", GetMedia("actionbutton-glow-white"),

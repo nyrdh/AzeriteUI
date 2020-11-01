@@ -681,29 +681,6 @@ Module.UpdateCastOnDown = function(self)
 	end 
 end
 
-Module.UpdateButtonBindpriority = function(self)
-	local db = self.db
-	for button in self:GetAllActionButtonsOrdered() do
-		if (db.keybindDisplayPriority == "gamepad") then
-			button.prioritizeGamePadBinds = true
-			button.prioritzeKeyboardBinds = nil
-
-		elseif (db.keybindDisplayPriority == "keyboard") then
-			button.prioritizeGamePadBinds = nil
-			button.prioritzeKeyboardBinds = true
-
-		else
-			button.prioritizeGamePadBinds = nil
-			button.prioritzeKeyboardBinds = nil
-		end
-		if (button.UpdateBinding) then
-			button:UpdateBinding()
-		else
-			print(button:GetName())
-		end
-	end 
-end
-
 Module.UpdateSettings = function(self, event, ...)
 	self:UpdateFading()
 	self:UpdateFadeAnchors()
@@ -797,3 +774,5 @@ Module.OnEnable = function(self)
 		self:Forge(Private.GetSchematic("ModuleForge::ActionBars").OnEnable) 
 	end
 end
+
+

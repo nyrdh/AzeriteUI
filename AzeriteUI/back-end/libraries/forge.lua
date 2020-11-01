@@ -1,4 +1,4 @@
-local LibForge = Wheel:Set("LibForge", 9)
+local LibForge = Wheel:Set("LibForge", 11)
 if (not LibForge) then
 	return
 end
@@ -215,7 +215,7 @@ LibForge.Decorate = function(self, widget, values, ...)
 	local currentValue, numValues = 1, #values
 	while (currentValue < numValues) do
 		key,value = values[currentValue], values[currentValue + 1]
-		
+
 		if (type(value) == "string") then
 			if (value == ":MODULE:") then 
 				value = self

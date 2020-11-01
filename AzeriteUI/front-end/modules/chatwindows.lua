@@ -53,7 +53,7 @@ local Blizz_AddMessage = Blizz_ChatFrame_MT.__index.AddMessage
 local HZ = 1/60
 local OnUpdate = function(frame, elapsed)
 	if (frame.clearSpam) or (frame.clearSpamDisableDelay) then
-		ChatFrame1:Clear()
+		--ChatFrame1:Clear()
 		if (frame.clearSpamDisableDelay) then
 			frame.clearSpamDisableDelay = frame.clearSpamDisableDelay - elapsed
 			if (frame.clearSpamDisableDelay < 0) then

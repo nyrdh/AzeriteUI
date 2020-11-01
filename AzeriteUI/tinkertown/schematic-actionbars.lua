@@ -193,7 +193,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 
 						-- Event handler
 						"OnEvent", function(self, event, ...)
-							if (event == "UPDATE_BINDINGS") then 
+							if (event == "UPDATE_BINDINGS") then
 								self:UpdateActionButtonBindings()
 						
 							elseif (event == "PLAYER_ENTERING_WORLD") then
@@ -215,22 +215,46 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							elseif (event == "PET_BAR_UPDATE") then
 								self:UpdateExplorerModeAnchors()
 							end
-						end 
+						end, 
+
+						"UpdateButtonBindpriority", function(self)
+							local db = self.db
+							for button in self:GetAllActionButtonsOrdered() do
+								if (db.keybindDisplayPriority == "gamepad") then
+									button.prioritizeGamePadBinds = true
+									button.prioritzeKeyboardBinds = nil
+						
+								elseif (db.keybindDisplayPriority == "keyboard") then
+									button.prioritizeGamePadBinds = nil
+									button.prioritzeKeyboardBinds = true
+						
+								else
+									button.prioritizeGamePadBinds = nil
+									button.prioritzeKeyboardBinds = nil
+								end
+								if (button.UpdateBinding) then
+									button:UpdateBinding()
+								end
+							end 
+						end
+						
 					}
 				}
 			}
 		}
 	},
 	OnEnable = {
-		type = "ExecuteMethods",
-		methods = {
-			{
-				chain = {
-					"RegisterEvent", {"PET_BAR_UPDATE", "OnEvent"},
-					"RegisterEvent", {"PLAYER_ENTERING_WORLD", "OnEvent"},
-					"RegisterEvent", {"PLAYER_REGEN_ENABLED", "OnEvent"},
-					"RegisterEvent", {"PLAYER_REGEN_DISABLED", "OnEvent"},
-					"RegisterEvent", {"UPDATE_BINDINGS", "OnEvent"}
+		{
+			type = "ExecuteMethods",
+			methods = {
+				{
+					chain = {
+						"RegisterEvent", { "PET_BAR_UPDATE", "OnEvent" },
+						"RegisterEvent", { "PLAYER_ENTERING_WORLD", "OnEvent" },
+						"RegisterEvent", { "PLAYER_REGEN_ENABLED", "OnEvent" },
+						"RegisterEvent", { "PLAYER_REGEN_DISABLED", "OnEvent" },
+						"RegisterEvent", { "UPDATE_BINDINGS", "OnEvent"}
+					}
 				}
 			}
 		}
