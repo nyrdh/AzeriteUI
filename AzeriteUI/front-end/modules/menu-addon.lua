@@ -1124,7 +1124,7 @@ Module.CreateMenuTable = function(self)
 	-- Actionbars
 	local ActionBarMain = Core:GetModule("ActionBarMain", true)
 	if (self:ShouldHaveMenu(ActionBarMain)) then 
-		local ActionBarMenu =  {
+		local ActionBarMenu = {
 			title = L["ActionBars"], type = nil, hasWindow = true, 
 			buttons = clean({
 				IsAzerite and {
@@ -1225,25 +1225,56 @@ Module.CreateMenuTable = function(self)
 							proxyModule = "ActionBarMain"
 						}
 					},
-				} or false,
-				{
-					enabledTitle = L_ENABLED:format(L["Cast on Down"]),
-					disabledTitle = L_DISABLED:format(L["Cast on Down"]),
-					type = "TOGGLE_VALUE", hasWindow = false, 
-					configDB = "ActionBarMain", configKey = "castOnDown", 
-					proxyModule = "ActionBarMain"
-				}
+				} or false
 			})
 		}
+
+		local bindMenu = { 
+			title = KEY_BINDINGS, type = nil, hasWindow = true, 
+			buttons = {
+				{
+					enabledTitle = L_ENABLED:format(L["GamePad First"]),
+					disabledTitle = L["GamePad First"],
+					type = "SET_VALUE", 
+					configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "gamepad" }, 
+					proxyModule = "ActionBarMain"
+				},
+				{
+					enabledTitle = L_ENABLED:format(L["Keyboard First"]),
+					disabledTitle = L["Keyboard First"],
+					type = "SET_VALUE", 
+					configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "keyboard" }, 
+					proxyModule = "ActionBarMain"
+				},
+				{
+					enabledTitle = L_ENABLED:format(DEFAULT),
+					disabledTitle = DEFAULT,
+					type = "SET_VALUE", 
+					configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "default" }, 
+					proxyModule = "ActionBarMain"
+				}
+			} 
+		}
+
 		local Bindings = Core:GetModule("Bindings", true)
 		if (self:ShouldHaveMenu(Bindings)) then 
-			table_insert(ActionBarMenu.buttons, {
+			table_insert(bindMenu.buttons, {
 				enabledTitle = L_ENABLED:format(L["Bind Mode"]),
 				disabledTitle = L_DISABLED:format(L["Bind Mode"]),
 				type = "TOGGLE_MODE", hasWindow = false, 
 				proxyModule = "Bindings", modeName = "bindMode"
 			})
 		end 
+		table_insert(ActionBarMenu.buttons, bindMenu)
+
+		table_insert(ActionBarMenu.buttons, {
+			enabledTitle = L_ENABLED:format(L["Cast on Down"]),
+			disabledTitle = L_DISABLED:format(L["Cast on Down"]),
+			type = "TOGGLE_VALUE", hasWindow = false, 
+			configDB = "ActionBarMain", configKey = "castOnDown", 
+			proxyModule = "ActionBarMain"
+		})
+
 		table_insert(ActionBarMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Button Lock"]),
 			disabledTitle = L_DISABLED:format(L["Button Lock"]),

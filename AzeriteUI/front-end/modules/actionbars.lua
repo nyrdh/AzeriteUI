@@ -21,18 +21,10 @@ local tonumber = tonumber
 local tostring = tostring
 
 -- WoW API
-local FindActiveAzeriteItem = C_AzeriteItem and C_AzeriteItem.FindActiveAzeriteItem
-local GetAzeriteItemXPInfo = C_AzeriteItem and C_AzeriteItem.GetAzeriteItemXPInfo
-local GetPowerLevel = C_AzeriteItem and C_AzeriteItem.GetPowerLevel
 local GetTotemTimeLeft = GetTotemTimeLeft
-local HasOverrideActionBar = HasOverrideActionBar
-local HasTempShapeshiftActionBar = HasTempShapeshiftActionBar
-local HasVehicleActionBar = HasVehicleActionBar
 local InCombatLockdown = InCombatLockdown
 local IsMounted = IsMounted
-local UnitLevel = UnitLevel
 local UnitOnTaxi = UnitOnTaxi
-local UnitRace = UnitRace
 
 -- Private API
 local Colors = Private.Colors
@@ -44,19 +36,6 @@ local GetMedia = Private.GetMedia
 -- Constants for client version
 local IsClassic = Module:IsClassic()
 local IsRetail = Module:IsRetail()
-
--- Player Class
-local _,playerClass = UnitClass("player")
-
--- Blizzard textures for generic styling
-local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
-
--- Various string formatting for our tooltips and bars
-local shortXPString = "%s%%"
-local longXPString = "%s / %s"
-local fullXPString = "%s / %s (%s)"
-local restedString = " (%s%% %s)"
-local shortLevelString = "%s %.0f"
 
 -- Cache of buttons
 local Buttons = {} -- all action buttons
@@ -71,225 +50,6 @@ local FadeOutHZ, FadeOutDuration = 1/20, 1/5
 
 -- Time constants
 local DAY, HOUR, MINUTE = 86400, 3600, 60
-
--- Track combat status
-local IN_COMBAT
-
--- Secure Code Snippets
--- TODO: Turn these into formatstrings,
--- and fill in layout options from the layout cache
--- instead of using hardcoded values directly. 
-local secureSnippets = {
-	-- Arrange the main and extra actionbar buttons
-	arrangeButtons = [=[
-
-		local UICenter = self:GetFrameRef("UICenter"); 
-		local extraButtonsCount = tonumber(self:GetAttribute("extraButtonsCount")) or 0;
-		local buttonSize, buttonSpacing, iconSize = 64, 8, 44;
-		local row2mod = 1-2/5; -- horizontal offset for upper row
-
-		for id,button in ipairs(Buttons) do 
-			local buttonID = button:GetID(); 
-			local barID = Pagers[id]:GetID(); 
-
-			-- Brave New World.
-			local layoutID = button:GetAttribute("layoutID");
-			if (layoutID <= 7) then
-				button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((layoutID-1) * (buttonSize + buttonSpacing)), 42)
-			else
-				local slot = floor((layoutID - 8)/2)
-
-				-- Bottom row
-				if (layoutID%2 == 0) then
-
-					button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((slot+7) * (buttonSize + buttonSpacing)), 42 )
-
-				-- Top row
-				else
-
-					button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOMLEFT", 60 + ((slot+7 + row2mod) * (buttonSize + buttonSpacing)), 42 + buttonSize + buttonSpacing)
-				end
-
-			end
-
-		end 
-
-		-- lua callback to update the hover frame anchors to the current layout
-		self:CallMethod("UpdateFadeAnchors"); 
-	
-	]=],
-
-	-- Arrange the pet action bar buttons
-	arrangePetButtons = [=[
-		local UICenter = self:GetFrameRef("UICenter");
-		local buttonSize, buttonSpacing = 64*3/4, 2;
-		local startX, startY = -(buttonSize*10 + buttonSpacing*9)/2, 200;
-
-		for id,button in ipairs(PetButtons) do
-			button:ClearAllPoints();
-			button:SetPoint("BOTTOMLEFT", UICenter, "BOTTOM", startX + ((id-1) * (buttonSize + buttonSpacing)), startY);
-		end
-
-		-- lua callback to update the explorer mode anchors to the current layout
-		self:CallMethod("UpdateExplorerModeAnchors"); 
-
-	]=],
-
-	-- Placeholder.
-	arrangeSideButtons = [=[
-		local UICenter = self:GetFrameRef("UICenter"); 
-		local sideBar1Enabled = self:GetAttribute("sideBar1Enabled");
-		local sideBar2Enabled = self:GetAttribute("sideBar2Enabled");
-		local sideBar3Enabled = self:GetAttribute("sideBar3Enabled");
-		local sideBarCount = (sideBar1Enabled and 1 or 0) + (sideBar2Enabled and 1 or 0) + (sideBar3Enabled and 1 or 0);
-		local buttonSize, buttonSpacing, iconSize = 64, 8, 44;
-
-		for id,button in ipairs(Buttons) do 
-			local buttonID = button:GetID(); 
-			local barID = Pagers[id]:GetID(); 
-
-			-- First Side Bar
-			if (barID == self:GetAttribute("RIGHT_ACTIONBAR_PAGE")) then
-
-				if (sideBar1Enabled) then
-					button:ClearAllPoints(); 
-
-					-- 12x1
-					if (sideBarCount > 1) then
-						-- This is always the first when it's enabled
-
-					-- 6x2
-					else
-
-					end
-				end
-
-			-- Second Side Bar
-			elseif (barID == self:GetAttribute("LEFT_ACTIONBAR_PAGE")) then
-
-				if (sideBar2Enabled) then
-					button:ClearAllPoints(); 
-
-					if (sideBarCount > 1) then
-
-						-- 12x1, 2nd
-						if (sideBar1Enabled) then
-
-						-- 12x1, 1st
-						else
-
-						end
-
-					-- 6x2, 1st
-					else
-
-					end
-				end
-
-			-- Third Side Bar
-			elseif (barID == self:GetAttribute("BOTTOMRIGHT_ACTIONBAR_PAGE")) then
-
-				if (sideBar3Enabled) then
-					button:ClearAllPoints(); 
-
-					-- 12x1, 3rd
-					if (sideBarCount > 2) then
-
-					-- 12x1, 2nd
-					elseif (sideBarCount > 1) then
-
-					-- 6x2, 1st
-					else
-
-					end
-				end
-			end 
-		end
-	]=],
-
-	-- Saved setting changed.
-	attributeChanged = [=[
-		-- 'name' appears to be turned to lowercase by the restricted environment(?), 
-		-- but we're doing it manually anyway, just to avoid problems. 
-		if name then 
-			name = string.lower(name); 
-		end 
-
-		if (name == "change-extrabuttonsvisibility") then 
-			self:SetAttribute("extraButtonsVisibility", value); 
-			self:CallMethod("UpdateFadeAnchors"); 
-			self:CallMethod("UpdateFading"); 
-		
-		elseif (name == "change-petbarvisibility") then 
-				self:SetAttribute("petBarVisibility", value); 
-				self:CallMethod("UpdateFadeAnchors"); 
-				self:CallMethod("UpdateFading"); 
-	
-		elseif (name == "change-extrabuttonscount") then 
-			local extraButtonsCount = tonumber(value) or 0; 
-			local visible = extraButtonsCount + 7; 
-	
-			-- Update button visibility counts
-			for i = 8,24 do 
-				local pager = Pagers[i]; 
-				if (i > visible) then 
-					if pager:IsShown() then 
-						pager:Hide(); 
-					end 
-				else 
-					if (not pager:IsShown()) then 
-						pager:Show(); 
-					end 
-				end 
-			end 
-
-			self:SetAttribute("extraButtonsCount", extraButtonsCount); 
-			self:RunAttribute("arrangeButtons"); 
-
-			-- tell lua about it
-			self:CallMethod("UpdateButtonCount"); 
-
-		elseif (name == "change-castondown") then 
-			self:SetAttribute("castOnDown", value and true or false); 
-			self:CallMethod("UpdateCastOnDown"); 
-
-		elseif (name == "change-petbarenabled") then 
-			self:SetAttribute("petBarEnabled", value and true or false); 
-
-			for i = 1,10 do
-				local pager = PetPagers[i]; 
-				if value then 
-					if (not pager:IsShown()) then 
-						pager:Show(); 
-					end 
-				else 
-					if pager:IsShown() then 
-						pager:Hide(); 
-					end 
-				end 
-			end
-
-			-- lua callback to update the explorer mode anchors to the current layout
-			self:CallMethod("UpdateExplorerModeAnchors"); 
-			self:CallMethod("UpdateFadeAnchors"); 
-			self:CallMethod("UpdateFading"); 
-			
-		elseif (name == "change-buttonlock") then 
-			self:SetAttribute("buttonLock", value and true or false); 
-
-			-- change all button attributes
-			for id, button in ipairs(Buttons) do 
-				button:SetAttribute("buttonLock", value);
-			end
-
-			-- change all pet button attributes
-			for id, button in ipairs(PetButtons) do 
-				button:SetAttribute("buttonLock", value);
-			end
-		end 
-
-	]=]
-}
 
 -- Aimed to be compact and displayed on buttons
 local formatCooldownTime = function(time)
@@ -316,16 +76,16 @@ end
 -- ActionButton Template (Custom Methods)
 ----------------------------------------------------
 local ActionButtonPostCreate = function(self)
-	if (Private.HasSchematic("Widget::ActionButton::Normal")) then
-		self:Forge(Private.GetSchematic("Widget::ActionButton::Normal")) 
+	if (Private.HasSchematic("WidgetForge::ActionButton::Normal")) then
+		self:Forge(Private.GetSchematic("WidgetForge::ActionButton::Normal")) 
 	end
 end 
 
 -- PetButton Template (Custom Methods)
 ----------------------------------------------------
 local PetButtonPostCreate = function(self)
-	if (Private.HasSchematic("Widget::ActionButton::Small")) then
-		self:Forge(Private.GetSchematic("Widget::ActionButton::Small")) 
+	if (Private.HasSchematic("WidgetForge::ActionButton::Small")) then
+		self:Forge(Private.GetSchematic("WidgetForge::ActionButton::Small")) 
 	end
 end 
 
@@ -651,7 +411,7 @@ Module.GetFadeFrame = function(self)
 			self.timeLeft = self.timeLeft - elapsed
 	
 			if (self.timeLeft <= 0) then
-				if FORCED or self.FORCED or self.always or (self.incombat and IN_COMBAT) or self.forced or self.flyout or self:IsMouseOver(0,0,0,0) then
+				if FORCED or self.FORCED or self.always or (self.incombat and Module.inCombat) or self.forced or self.flyout or self:IsMouseOver(0,0,0,0) then
 					if (not self.isMouseOver) then 
 						self.isMouseOver = true
 						self.alpha = 1
@@ -714,6 +474,9 @@ Module.GetFadeFrame = function(self)
 		ActionBarHoverFrame:RegisterEvent("ACTIONBAR_HIDEGRID")
 		ActionBarHoverFrame:RegisterEvent("ACTIONBAR_SHOWGRID")
 
+		-- We're showing the button slots while holding a pet action in retail,
+		-- since pet actions can be placed on regular action buttons here.
+		-- This is not the case in classic.
 		if (IsRetail) then
 			ActionBarHoverFrame:RegisterEvent("PET_BAR_HIDEGRID")
 			ActionBarHoverFrame:RegisterEvent("PET_BAR_SHOWGRID")
@@ -735,7 +498,7 @@ Module.GetFadeFramePet = function(self)
 			self.timeLeft = self.timeLeft - elapsed
 	
 			if (self.timeLeft <= 0) then
-				if FORCED or self.FORCED or self.always or (self.incombat and IN_COMBAT) or self.forced or self.flyout or self:IsMouseOver(0,0,0,0) then
+				if FORCED or self.FORCED or self.always or (self.incombat and Module.inCombat) or self.forced or self.flyout or self:IsMouseOver(0,0,0,0) then
 					if (not self.isMouseOver) then 
 						self.isMouseOver = true
 						self.alpha = 1
@@ -916,79 +679,64 @@ Module.UpdateCastOnDown = function(self)
 		button:RegisterForClicks(db.castOnDown and "AnyDown" or "AnyUp")
 		button:Update()
 	end 
-end 
+end
 
-Module.UpdateTooltipSettings = function(self)
-	local layout = self.layout
-	local tooltip = self:GetActionButtonTooltip()
-	tooltip.colorNameAsSpellWithUse = layout.TooltipColorNameAsSpellWithUse
-	tooltip.hideItemLevelWithUse = layout.TooltipHideItemLevelWithUse
-	tooltip.hideStatsWithUseEffect = layout.TooltipHideStatsWithUse
-	tooltip.hideBindsWithUseEffect = layout.TooltipHideBindsWithUse
-	tooltip.hideUniqueWithUseEffect = layout.TooltipHideUniqueWithUse
-	tooltip.hideEquipTypeWithUseEffect = layout.TooltipHideEquipTypeWithUse
-end 
+Module.UpdateButtonBindpriority = function(self)
+	local db = self.db
+	for button in self:GetAllActionButtonsOrdered() do
+		if (db.keybindDisplayPriority == "gamepad") then
+			button.prioritizeGamePadBinds = true
+			button.prioritzeKeyboardBinds = nil
+
+		elseif (db.keybindDisplayPriority == "keyboard") then
+			button.prioritizeGamePadBinds = nil
+			button.prioritzeKeyboardBinds = true
+
+		else
+			button.prioritizeGamePadBinds = nil
+			button.prioritzeKeyboardBinds = nil
+		end
+		if (button.UpdateBinding) then
+			button:UpdateBinding()
+		else
+			print(button:GetName())
+		end
+	end 
+end
 
 Module.UpdateSettings = function(self, event, ...)
 	self:UpdateFading()
 	self:UpdateFadeAnchors()
 	self:UpdateExplorerModeAnchors()
 	self:UpdateCastOnDown()
+	self:UpdateButtonBindpriority()
 	self:UpdateTooltipSettings()
 end 
 
 -- Initialization
 ----------------------------------------------------
-Module.OnEvent = function(self, event, ...)
-	if (event == "UPDATE_BINDINGS") then 
-		self:UpdateActionButtonBindings()
-
-	elseif (event == "PLAYER_ENTERING_WORLD") then
-		IN_COMBAT = false
-		self:UpdateActionButtonBindings()
-
-	elseif (event == "PLAYER_REGEN_DISABLED") then
-		IN_COMBAT = true 
-
-	elseif (event == "PLAYER_REGEN_ENABLED") then
-		IN_COMBAT = false
-
-	elseif (event == "GP_FORCED_ACTIONBAR_VISIBILITY_REQUESTED") then
-		self:SetForcedVisibility(true)
-
-	elseif (event == "GP_FORCED_ACTIONBAR_VISIBILITY_CANCELED") then
-		self:SetForcedVisibility(false)
-
-	elseif (event == "PET_BAR_UPDATE") then
-		self:UpdateExplorerModeAnchors()
-	end
-end 
-
 Module.OnInit = function(self)
+	if (Private.HasSchematic("ModuleForge::ActionBars")) then
+		self:Forge(Private.GetSchematic("ModuleForge::ActionBars").OnInit) 
+	end
 	if (Private.GetLayoutID == "Legacy") then
-		return self:SetUserDisabled(true)
+		return self:SetUserDisabled(true) -- to disable the menu while developing
 	end
 	
 	-- Deprecated settings keep piling up in this one.
 	self:PurgeSavedSettingFromAllProfiles(self:GetName(), "editMode", "buttonsPrimary", "buttonsComplimentary", "enableComplimentary", "enableStance", "enablePet", "showBinds", "showCooldown", "showCooldownCount", "showNames", "visibilityPrimary", "visibilityComplimentary", "visibilityStance", "visibilityPet")
 
-	if (Private.HasSchematic("ActionBars::Player")) then
-		self.db = GetConfig(self:GetName())
-		self:Forge(Private.GetSchematic("ActionBars::Player")) 
-		return
-	else
-		self.db = GetConfig(self:GetName())
-		self.layout = GetLayout(self:GetName())
-		if (not self.layout) then
-			return self:SetUserDisabled(true)
-		end
+	self.db = GetConfig(self:GetName())
+	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
 	end
 
 	local OptionsMenu = Core:GetModule("OptionsMenu", true)
 	if (OptionsMenu) then
 		local callbackFrame = OptionsMenu:CreateCallbackFrame(self)
 		callbackFrame:AssignSettings(self.db)
-		callbackFrame:AssignProxyMethods("UpdateCastOnDown", "UpdateFading", "UpdateFadeAnchors", "UpdateExplorerModeAnchors", "UpdateButtonCount")
+		callbackFrame:AssignProxyMethods("UpdateCastOnDown", "UpdateFading", "UpdateFadeAnchors", "UpdateExplorerModeAnchors", "UpdateButtonCount", "UpdateButtonBindpriority")
 
 		-- Create tables to hold the buttons
 		-- within the restricted environment.
@@ -1006,11 +754,11 @@ Module.OnInit = function(self)
 			"BOTTOMRIGHT_ACTIONBAR_PAGE", BOTTOMRIGHT_ACTIONBAR_PAGE,
 			"RIGHT_ACTIONBAR_PAGE", RIGHT_ACTIONBAR_PAGE,
 			"LEFT_ACTIONBAR_PAGE", LEFT_ACTIONBAR_PAGE,
-			"arrangeButtons", secureSnippets.arrangeButtons,
-			"arrangePetButtons", secureSnippets.arrangePetButtons
+			"arrangeButtons", self.secureSnippets.arrangeButtons,
+			"arrangePetButtons", self.secureSnippets.arrangePetButtons
 		)
 
-		callbackFrame:AssignCallback(secureSnippets.attributeChanged)
+		callbackFrame:AssignCallback(self.secureSnippets.attributeChanged)
 	end
 
 	-- Create master frame. This one becomes secure.
@@ -1045,13 +793,7 @@ Module.OnInit = function(self)
 end 
 
 Module.OnEnable = function(self)
-	if (Private.GetLayoutID == "Legacy") then
-		return self:SetUserDisabled(true)
+	if (Private.HasSchematic("ModuleForge::ActionBars")) then
+		self:Forge(Private.GetSchematic("ModuleForge::ActionBars").OnEnable) 
 	end
-
-	self:RegisterEvent("PET_BAR_UPDATE", "OnEvent")
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
-	self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
-	self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnEvent")
-	self:RegisterEvent("UPDATE_BINDINGS", "OnEvent")
 end

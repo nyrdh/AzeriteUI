@@ -52,7 +52,7 @@ end
 -----------------------------------------------------------
 -- Applied to aura buttons.
 -- Keep these in a manner that works without knowing the size.
-Private.RegisterSchematic("Widget::AuraButton::Large", "Legacy", {
+Private.RegisterSchematic("WidgetForge::AuraButton::Large", "Legacy", {
 	{
 		type = "ModifyWidgets",
 		widgets = {
@@ -99,21 +99,21 @@ Private.RegisterSchematic("Widget::AuraButton::Large", "Legacy", {
 })
 
 -- Applied to primary bar action buttons.
-Private.RegisterSchematic("Widget::ActionButton::Normal", "Legacy", {
+Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 })
 
 -- Applied to pet-, stance- and additional bars action buttons.
-Private.RegisterSchematic("Widget::ActionButton::Small", "Legacy", {
+Private.RegisterSchematic("WidgetForge::ActionButton::Small", "Legacy", {
 })
 
 -- Applied to huge floating buttons like zone abilities.
-Private.RegisterSchematic("Widget::ActionButton::Large", "Legacy", {
+Private.RegisterSchematic("WidgetForge::ActionButton::Large", "Legacy", {
 })
 
 -- Azerite Schematics
 -----------------------------------------------------------
 -- Applied to primary bar action buttons.
-Private.RegisterSchematic("Widget::ActionButton::Normal", "Azerite", {
+Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Azerite", {
 	{
 		-- Only set the parent in modifiable widgets if it is your intention to change it.
 		-- Otherwise the code will assume the owner is the parent, and leave it as is,
@@ -140,7 +140,134 @@ Private.RegisterSchematic("Widget::ActionButton::Normal", "Azerite", {
 					end,
 					"PostEnter", PostUpdateMouseOver,
 					"PostLeave", PostUpdateMouseOver,
-					"PostUpdate", PostUpdateMouseOver
+					"PostUpdate", PostUpdateMouseOver,
+
+					-- This will take presedence when true,
+					-- causing any existing gamepad binds 
+					-- to be shown instead of keyboard.
+					--"prioritizeGamePadBinds", true, 
+
+					-- This will make sure keyboard binds are shown
+					-- even if a gamepad bind is before it in the list.
+					--"prioritzeKeyboardBinds", true, 
+
+					"GetBindingTextAbbreviated", function(self)
+						local key = self:GetBindingText()
+						if (key) then
+							key = key:upper()
+
+							local keyboard = self:GetBindingText("key")
+							local gamepad = self:GetBindingText("pad")
+
+							if (keyboard and gamepad) then
+								if (self.prioritizeGamePadBinds) then
+									key = gamepad
+								elseif (self.prioritzeKeyboardBinds) then
+									key = keyboard
+								end
+							end
+
+							if (key:find("PAD"))  then
+
+								local mods = 0
+								local slot1, slot2, slot3, slot4
+
+								-- Get the main button pressed, without modifiers
+								local main = key:match("%-?([%a%d]-)$")
+								if (main) then
+
+									-- Figure out what modifiers are used
+									local alt = key:find("ALT%-")
+									local ctrl = key:find("CTRL%-")
+									local shift = key:find("SHIFT%-")
+
+									-- If modifiers are used, check if the pad has them assigned. 
+									local padAlt, padCtrl, padShift
+									if (alt or ctrl or shift) then
+										if (alt) then
+											padAlt = GetCVar("GamePadEmulateAlt")
+											if (padAlt == "" or padAlt == "none") then
+												padAlt = nil
+											end 
+											if (padAlt) then
+												mods = mods + 1
+											end
+										end
+										if (ctrl) then
+											padCtrl = GetCVar("GamePadEmulateCtrl")
+											if (padCtrl == "" or padCtrl == "none") then
+												padCtrl = nil
+											end 
+											if (padCtrl) then
+												mods = mods + 1
+											end
+										end
+										if (shift) then
+											padShift = GetCVar("GamePadEmulateShift")
+											if (padShift == "" or padShift == "none") then
+												padShift = nil
+											end 
+											if (padShift) then
+												mods = mods + 1
+											end
+										end
+									end
+
+									local padButton
+									if (key:find("PAD1")) then
+										padButton = GetMedia("controller-xbox-a")
+									elseif (key:find("PAD2")) then
+										padButton = GetMedia("controller-xbox-b")
+									elseif (key:find("PAD3")) then
+										padButton = GetMedia("controller-xbox-x")
+									elseif (key:find("PAD4")) then
+										padButton = GetMedia("controller-xbox-y")
+									end
+
+									if (mods == 0) then
+										slot2 = padButton
+									elseif (mods == 1) then
+										slot2 = padButton
+									elseif (mods == 2) then
+										slot2 = padButton
+										--slot1 = mod2
+										--slot3 = mod1
+									elseif (mods == 3) then
+										slot2 = padButton
+										--slot1 = mod3
+										--slot3 = mod1
+										--slot4 = mod2
+									end
+
+
+									-- Apply the slot textures
+									self.GamePadKeySlot1:SetTexture(slot1)
+
+									self.GamePadKeySlot2:SetTexture(slot2)
+									--self.GamePadKeySlot2:SetPoint("TOPLEFT", 0, 0)
+									--self.GamePadKeySlot2:SetSize(24,24)
+									self.GamePadKeySlot2:SetPoint("TOPLEFT", 0, -2)
+									self.GamePadKeySlot2:SetSize(22,22)
+
+									self.GamePadKeySlot3:SetTexture(slot3)
+									self.GamePadKeySlot4:SetTexture(slot4)
+
+									-- Return empty string to hide regular keybinds.
+									return ""
+								end
+							end
+
+							-- If no pad bind was used, clear out the textures
+							self.GamePadKeySlot1:SetTexture("")
+							self.GamePadKeySlot2:SetTexture("")
+							self.GamePadKeySlot3:SetTexture("")
+							self.GamePadKeySlot4:SetTexture("")
+
+							-- Return standard abbreviations if no pad bind was used.
+							return self:AbbreviateBindText(key)
+						end
+						return ""
+					end
 				}
 			},
 			{
@@ -369,6 +496,38 @@ Private.RegisterSchematic("Widget::ActionButton::Normal", "Azerite", {
 				}
 			},
 			{
+				parent = "self,BorderFrame", ownerKey = "GamePadKeySlot1", objectType = "Texture",
+				chain = {
+					"SetPoint",  { "TOPLEFT", 5-18, -5 },
+					"SetDrawLayer", { "BORDER", 2 },
+					"SetSize", { 18, 18 },
+				}
+			},
+			{
+				parent = "self,BorderFrame", ownerKey = "GamePadKeySlot2", objectType = "Texture",
+				chain = {
+					"SetPoint",  { "TOPLEFT", 5, -5 },
+					"SetDrawLayer", { "BORDER", 2 },
+					"SetSize", { 18, 18 },
+				}
+			},
+			{
+				parent = "self,BorderFrame", ownerKey = "GamePadKeySlot3", objectType = "Texture",
+				chain = {
+					"SetPoint",  { "TOPLEFT", 5-18, -5-18 },
+					"SetDrawLayer", { "BORDER", 2 },
+					"SetSize", { 18, 18 },
+				}
+			},
+			{
+				parent = "self,BorderFrame", ownerKey = "GamePadKeySlot4", objectType = "Texture",
+				chain = {
+					"SetPoint",  { "TOPLEFT", 5, -5-18 },
+					"SetDrawLayer", { "BORDER", 2 },
+					"SetSize", { 18, 18 },
+				}
+			},
+			{
 				parent = "self,Overlay", ownerKey = "Glow", objectType = "Texture",
 				chain = {
 					"SetHidden",
@@ -380,12 +539,13 @@ Private.RegisterSchematic("Widget::ActionButton::Normal", "Azerite", {
 					"SetBlendMode", "ADD"
 				}
 			}
+
 		}
 	}
 })
 
 -- Applied to pet-, stance- and additional bars action buttons.
-Private.RegisterSchematic("Widget::ActionButton::Small", "Azerite", {
+Private.RegisterSchematic("WidgetForge::ActionButton::Small", "Azerite", {
 	{
 		-- Only set the parent in modifiable widgets if it is your intention to change it.
 		-- Otherwise the code will assume the owner is the parent, and leave it as is,

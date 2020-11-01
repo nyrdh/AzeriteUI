@@ -53,7 +53,7 @@ end
 
 -- General aura button post creating forge
 local Aura_PostCreate = function(element, button)
-	if (element._owner:Forge(button, GetSchematic("Widget::AuraButton::Large"))) then
+	if (element._owner:Forge(button, GetSchematic("WidgetForge::AuraButton::Large"))) then
 		return 
 	end
 end
@@ -126,7 +126,7 @@ end
 -- Schematics
 -----------------------------------------------------------
 -- Applied to the primary player frame
-Private.RegisterSchematic("UnitFrame::Player", "Legacy", {
+Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 	-- Create layered scaffold frames
 	{
 		type = "CreateWidgets",
@@ -472,7 +472,7 @@ Private.RegisterSchematic("UnitFrame::Player", "Legacy", {
 
 -- Applied to the player HUD elements,
 -- like cast bar, combo points and alt power.
-Private.RegisterSchematic("UnitFrame::PlayerHUD", "Legacy", {
+Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 	-- Create layered scaffold frames
 	{
 		type = "CreateWidgets",
@@ -622,7 +622,7 @@ Private.RegisterSchematic("UnitFrame::PlayerHUD", "Legacy", {
 })
 
 -- Applied to the primary player frame
-Private.RegisterSchematic("UnitFrame::Target", "Legacy", {
+Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 	-- Create layered scaffold frames
 	{
 		type = "CreateWidgets",

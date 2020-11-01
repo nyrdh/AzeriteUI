@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 120)
+local LibSecureButton = Wheel:Set("LibSecureButton", 123)
 if (not LibSecureButton) then
 	return
 end
@@ -328,8 +328,8 @@ local PadKey = {
 }
 
 -- Hotkey abbreviations for better readability
-local getBindingKeyText = function(key)
-	if key then
+local AbbreviateBindText = function(self, key)
+	if (key) then
 		key = key:upper()
 
 		-- Let's try to hook into Blizzard's own abbreviation system.
@@ -1559,12 +1559,33 @@ ActionButton.GetActionTexture = function(self)
 	return GetActionTexture(self.buttonAction)
 end
 
-ActionButton.GetBindingText = function(self)
-	return self.bindingAction and GetBindingKey(self.bindingAction) or GetBindingKey("CLICK "..self:GetName()..":LeftButton")
+ActionButton.GetBindingText = function(self, bindingType)
+	if (self.bindingAction) then
+		if (self.prioritizeGamePadBinds) or (bindingType == "pad") then
+			local bindingAction
+			for keyNumber = 1, select("#", GetBindingKey(self.bindingAction)) do 
+				local key = select(keyNumber, GetBindingKey(self.bindingAction))
+				if (key:upper():find("PAD")) then
+					return key
+				end
+			end
+		elseif (self.prioritzeKeyboardBinds) or (bindingType == "key") then
+			local bindingAction
+			for keyNumber = 1, select("#", GetBindingKey(self.bindingAction)) do 
+				local key = select(keyNumber, GetBindingKey(self.bindingAction))
+				if (not key:upper():find("PAD")) then
+					return key
+				end
+			end
+		end
+		return GetBindingKey(self.bindingAction) or GetBindingKey("CLICK "..self:GetName()..":LeftButton")
+	end
+
 end 
 
+ActionButton.AbbreviateBindText = AbbreviateBindText
 ActionButton.GetBindingTextAbbreviated = function(self)
-	return getBindingKeyText(self:GetBindingText())
+	return self:AbbreviateBindText(self:GetBindingText())
 end
 
 ActionButton.GetCooldown = function(self) 
@@ -1844,6 +1865,7 @@ PetButton.GetSpellID = function(self)
 	return spellID
 end
 
+PetButton.AbbreviateBindText = ActionButton.AbbreviateBindText
 PetButton.GetBindingText = ActionButton.GetBindingText
 PetButton.GetBindingTextAbbreviated = ActionButton.GetBindingTextAbbreviated
 PetButton.GetTooltip = ActionButton.GetTooltip
@@ -2002,9 +2024,12 @@ ExitButton.PostClick = function(self, button)
 end
 
 ExitButton.GetTooltip = ActionButton.GetTooltip
+
+-- Add noops as needed. Will expand on this later.
 ExitButton.OnEnable = function() end
 ExitButton.OnDisable = function() end
 ExitButton.Update = function() end
+ExitButton.UpdateBinding = function() end
 
 -- Library API
 ----------------------------------------------------

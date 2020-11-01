@@ -1795,7 +1795,7 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 end
 
 UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
-	if (self:Forge(Private.GetSchematic("UnitFrame::Target"))) then
+	if (self:Forge(Private.GetSchematic("UnitForge::Target"))) then
 		return 
 	end
 
@@ -2264,10 +2264,10 @@ end
 -- Player
 -----------------------------------------------------------
 UnitFramePlayer.OnInit = function(self)
-	if (Private.HasSchematic("UnitFrame::Player")) then
+	if (Private.HasSchematic("UnitForge::Player")) then
 		self.db = GetConfig(self:GetName())
 		self.frame = self:SpawnUnitFrame("player", "UICenter", function(self, unit) 
-			self:Forge(Private.GetSchematic("UnitFrame::Player")) 
+			self:Forge(Private.GetSchematic("UnitForge::Player")) 
 		end) 
 		return
 	else
@@ -2317,7 +2317,7 @@ UnitFramePlayer.OnInit = function(self)
 end 
 
 UnitFramePlayer.OnEnable = function(self)
-	if (Private.HasSchematic("UnitFrame::Player")) then
+	if (Private.HasSchematic("UnitForge::Player")) then
 		self:RegisterMessage("GP_AURA_FILTER_MODE_CHANGED", "OnEvent")
 		return
 	end
@@ -2368,10 +2368,10 @@ UnitFramePlayer.OnEvent = function(self, event, ...)
 end
 
 UnitFramePlayerHUD.OnInit = function(self)
-	if (Private.HasSchematic("UnitFrame::PlayerHUD")) then
+	if (Private.HasSchematic("UnitForge::PlayerHUD")) then
 		self.db = GetConfig(self:GetName())
 		self.frame = self:SpawnUnitFrame("player", "UICenter", function(self, unit) 
-			self:Forge(Private.GetSchematic("UnitFrame::PlayerHUD")) 
+			self:Forge(Private.GetSchematic("UnitForge::PlayerHUD")) 
 		end) 
 		return
 	else
@@ -2461,10 +2461,10 @@ end
 -- Target
 -----------------------------------------------------------
 UnitFrameTarget.OnInit = function(self)
-	if (Private.HasSchematic("UnitFrame::Target")) then
+	if (Private.HasSchematic("UnitForge::Target")) then
 		self.db = GetConfig(self:GetName())
 		self.frame = self:SpawnUnitFrame("target", "UICenter", function(self, unit) 
-			self:Forge(Private.GetSchematic("UnitFrame::Target")) 
+			self:Forge(Private.GetSchematic("UnitForge::Target")) 
 		end) 
 		return
 	else
@@ -2489,7 +2489,7 @@ UnitFrameTarget.OnInit = function(self)
 end 
 
 UnitFrameTarget.OnEnable = function(self)
-	if (Private.HasSchematic("UnitFrame::Target")) then
+	if (Private.HasSchematic("UnitForge::Target")) then
 		self:RegisterMessage("GP_AURA_FILTER_MODE_CHANGED", "OnEvent")
 		return
 	end

@@ -2031,7 +2031,7 @@ Defaults.ActionBarMain = {
 	-- General settings
 	buttonLock = true,
 	castOnDown = true,
-
+	keybindDisplayPriority = "gamepad", -- can be "gamepad", "keyboard", "default"
 
 	-- Azerite theme settings
 	-------------------------------------------------
@@ -2471,26 +2471,11 @@ Legacy.BlizzardWorldMap = setmetatable({}, { __index = Azerite.BlizzardWorldMap 
 
 -- ActionBars
 Azerite.ActionBarMain = {
-
-	ChargeCooldownSwipeColor = { 0, 0, 0, .5 },
-	CooldownSwipeColor = { 0, 0, 0, .75 },
-
-	PetCooldownSwipeColor = { 0, 0, 0, .75 },
-	PetChargeCooldownSwipeColor = { 0, 0, 0, .5 },
-
 	ExitButtonPlace = { "CENTER", "Minimap", "CENTER", -math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
 	ExitButtonSize = { 32, 32 },
 	ExitButtonTexturePath = GetMedia("icon_exit_flight"),
 	ExitButtonTexturePlace = { "CENTER", 0, 0 }, 
-	ExitButtonTextureSize = { 80, 80 }, 
-
-	TooltipColorNameAsSpellWithUse = true, -- color item name as a spell (not by rarity) when it has a Use effect
-	TooltipHideBindsWithUse = true, -- hide item bind status when it has a Use effect
-	TooltipHideEquipTypeWithUse = false, -- hide item equip location and item type with Use effect
-	TooltipHideItemLevelWithUse = true, -- hide item level when it has a Use effect 
-	TooltipHideStatsWithUse = true, -- hide item stats when it has a Use effect
-	TooltipHideUniqueWithUse = true, -- hide item unique status when it has a Use effect
-
+	ExitButtonTextureSize = { 80, 80 }
 }
 
 -- Bind Mode
