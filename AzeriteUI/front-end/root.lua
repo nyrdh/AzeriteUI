@@ -747,6 +747,72 @@ Core.ApplyExperimentalFeatures = function(self)
 
 end
 
+Core.FixBlizzardContribution = function(self)
+	
+	-- Fix the mixin method
+	local UpdateTooltip = function(self)
+		local isEnabled = self:IsEnabled();
+		local shouldShowTooltip = isEnabled or (self.contributionResult == Enum.ContributionResult.IncorrectState) or (self.contributionResult == Enum.ContributionResult.FailedConditionCheck);
+
+		if shouldShowTooltip then
+			EmbeddedItemTooltip:SetOwner(self, "ANCHOR_RIGHT");
+
+			if isEnabled or (self.contributionResult == Enum.ContributionResult.FailedConditionCheck) then
+				EmbeddedItemTooltip:SetText(CONTRIBUTION_REWARD_TOOLTIP_TITLE, HIGHLIGHT_FONT_COLOR:GetRGBA());
+				GameTooltip_AddQuestRewardsToTooltip(EmbeddedItemTooltip, self.questID, TOOLTIP_QUEST_REWARDS_STYLE_CONTRIBUTION);
+
+				local rcName, rcAvailable, rcFormatString, rcAmount;
+				local currencyID, currencyAmount = C_ContributionCollector.GetRequiredContributionCurrency(self.contributionID);
+				local itemID, itemCount = C_ContributionCollector.GetRequiredContributionItem(self.contributionID);
+				if currencyID then
+					local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID);
+					rcName = currencyInfo.name;
+					--rcAvailable = currencyInfo.quantity > 0; -- blizz noobz!
+					rcAvailable = currencyInfo.quantity or 0;
+					rcAmount = currencyAmount;
+					rcFormatString = CONTRIBUTION_TOOLTIP_PLAYER_CURRENCY_AMOUNT;
+				elseif itemID then
+					rcName = GetItemInfo(itemID);
+					rcAmount = itemCount;
+					local INCLUDE_BANK = true;
+					local IGNORE_USABLE = true;
+					local INCLUDE_REAGENT_BANK = true;
+					rcAvailable = GetItemCount(itemID, INCLUDE_BANK, IGNORE_USABLE, INCLUDE_REAGENT_BANK);
+					rcFormatString = CONTRIBUTION_TOOLTIP_PLAYER_ITEM_AMOUNT;
+				end
+				if rcName then
+					local lineColor = (rcAvailable >= rcAmount) and NORMAL_FONT_COLOR or DISABLED_FONT_COLOR;
+					local text = rcFormatString:format(BreakUpLargeNumbers(rcAvailable), BreakUpLargeNumbers(rcAmount), rcName);
+					GameTooltip_SetBottomText(EmbeddedItemTooltip, text, lineColor);
+				end
+			elseif self.contributionResult == Enum.ContributionResult.IncorrectState then
+				EmbeddedItemTooltip:SetText(CONTRIBUTION_BUTTON_ONLY_WHEN_UNDER_CONSTRUCTION_TOOLTIP, RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b, 1, true);
+			end
+			EmbeddedItemTooltip:Show();
+		end
+	end
+	ContributeButtonMixin.UpdateTooltip = UpdateTooltip
+
+	-- Fix existing methods
+	for contribution in ContributionCollectionFrame.contributionPool:EnumerateActive() do
+		local button = contribution.ContributeButton
+		if (button) then
+			if (button.UpdateTooltip) then
+				button.UpdateTooltip = UpdateTooltip
+			end
+		end
+	end
+	for contribution in ContributionCollectionFrame.contributionPool:EnumerateInactive() do
+		local button = contribution.ContributeButton
+		if (button) then
+			if (button.UpdateTooltip) then
+				button.UpdateTooltip = UpdateTooltip
+			end
+		end
+	end
+
+end
+
 -- We could add this into the back-end, leaving it here for now, though. 
 Core.OnChatCommand = function(self, editBox, msg)
 	local db = GetConfig(ADDON, "global")
@@ -815,6 +881,18 @@ Core.OnInit = function(self)
 	for _,v in ipairs({ "Blizzard_CUFProfiles", "Blizzard_CompactRaidFrames", "Blizzard_ObjectiveTracker" }) do
 		EnableAddOn(v)
 		LoadAddOn(v)
+	end
+
+	if (IsAddOnLoaded("Blizzard_Contribution")) then
+		self:FixBlizzardContribution()
+	else
+		local listen = function(self, event, addon) 
+			if (addon == "Blizzard_Contribution") then
+				--self:UnregisterEvent("ADDON_LOADED", listen)
+				self:FixBlizzardContribution()
+			end
+		end
+		self:RegisterEvent("ADDON_LOADED", listen)
 	end
 
 	local OptionsMenu = Core:GetModule("OptionsMenu", true)

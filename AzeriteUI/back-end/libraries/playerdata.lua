@@ -1,4 +1,4 @@
-local LibPlayerData = Wheel:Set("LibPlayerData", 19)
+local LibPlayerData = Wheel:Set("LibPlayerData", 20)
 if (not LibPlayerData) then
 	return
 end
@@ -25,15 +25,13 @@ local type = type
 
 -- WoW API
 local FindActiveAzeriteItem = C_AzeriteItem and C_AzeriteItem.FindActiveAzeriteItem
-local GetAccountExpansionLevel = GetAccountExpansionLevel
-local GetExpansionLevel = GetExpansionLevel
+local GetMaxLevelForLatestExpansion = GetMaxLevelForLatestExpansion
+local GetMaxLevelForPlayerExpansion = GetMaxLevelForPlayerExpansion
 local GetSpecialization = GetSpecialization
 local GetSpecializationInfo = GetSpecializationInfo
 local GetWatchedFactionInfo = GetWatchedFactionInfo
 local IsAzeriteItemLocationBankBag = AzeriteUtil and AzeriteUtil.IsAzeriteItemLocationBankBag
 local IsXPUserDisabled = IsXPUserDisabled
-local UnitClass = UnitClass
-local UnitGUID = UnitGUID
 local UnitLevel = UnitLevel
 
 -- Constants for client version
@@ -43,74 +41,6 @@ local IsRetail = LibClientBuild:IsRetail()
 -- Library registries
 ---------------------------------------------------------------------	
 LibPlayerData.embeds = LibPlayerData.embeds or {}
-LibPlayerData.frame = LibPlayerData.frame or CreateFrame("Frame")
-
--- Local constants & tables
----------------------------------------------------------------------	
--- Constant to track current player role
-local CURRENT_ROLE
-
--- Player class and GUID constants
-local _,playerClass = UnitClass("player")
-local playerGUID = UnitGUID("player")
-
--- List of damage-only classes
-local classIsDamage = {}
-if (IsClassic) then
-	classIsDamage.HUNTER = true
-	classIsDamage.MAGE = true
-	classIsDamage.ROGUE = true
-	classIsDamage.WARLOCK = true
-elseif (IsRetail) then
-	classIsDamage.DEMONHUNTER = true
-	classIsDamage.HUNTER = true
-	classIsDamage.MAGE = true
-	classIsDamage.ROGUE = true
-	classIsDamage.WARLOCK = true
-end
-
--- List of classes that can tank
-local classCanTank = {}
-if (IsClassic) then
-	classCanTank.DRUID = true
-	classCanTank.PALADIN = true
-	classCanTank.WARRIOR = true
-elseif (IsRetail) then
-	classCanTank.DEATHKNIGHT = true
-	classCanTank.DRUID = true
-	classCanTank.MONK = true
-	classCanTank.PALADIN = true
-	classCanTank.WARRIOR = true
-end
-
-
--- Setup our frame for tracking role events
--- *NOT updated for Classic yet!
-if (classIsDamage[playerClass]) then
-	CURRENT_ROLE = "DAMAGER"
-	LibPlayerData.frame:SetScript("OnEvent", nil)
-	LibPlayerData.frame:UnregisterAllEvents()
-else
-	if (IsClassic) then
-		CURRENT_ROLE = classCanTank[playerClass] and "TANK" or "DAMAGER"
-	elseif (IsRetail) then
-		LibPlayerData.frame:SetScript("OnEvent", function(self, event, ...) 
-			if (event == "PLAYER_LOGIN") then
-				self:UnregisterEvent(event)
-				self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
-			end
-			-- Role name is 7th stat, wowpedia has it wrong. 
-			local _, _, _, _, _, _, role = GetSpecializationInfo(GetSpecialization() or 0)
-			CURRENT_ROLE = role or "DAMAGER"
-		end)
-		if IsLoggedIn() then 
-			LibPlayerData.frame:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
-			LibPlayerData.frame:GetScript("OnEvent")(LibPlayerData.frame)
-		else 
-			LibPlayerData.frame:RegisterEvent("PLAYER_LOGIN")
-		end 
-	end
-end 
 
 -- Utility Functions
 ---------------------------------------------------------------------	
@@ -127,29 +57,7 @@ local check = function(value, num, ...)
 	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
--- Level Functions 
----------------------------------------------------------------------	
 if (IsClassic) then
-	-- Most of these are identical, and a clean-up is needed. 
-	-- They are remnants from the transition from the retail API. 
-
-	-- Returns the maximum level the account has access to 
-	LibPlayerData.GetEffectivePlayerMaxLevel = function() return 60 end
-
-	-- Returns the maximum level in the current expansion 
-	LibPlayerData.GetEffectiveExpansionMaxLevel = function() return 60 end
-
-	-- Is the provided level at the account's maximum level?
-	LibPlayerData.IsUnitLevelAtEffectiveMaxLevel = function() return 60 end
-
-	-- Is the provided level at the expansions's maximum level?
-	LibPlayerData.IsUnitLevelAtEffectiveExpansionMaxLevel = function() return 60 end
-
-	-- Is the player at the account's maximum level?
-	LibPlayerData.IsPlayerAtEffectiveMaxLevel = function() return 60 end
-
-	-- Is the player at the expansions's maximum level?
-	LibPlayerData.IsPlayerAtEffectiveExpansionMaxLevel = function() return 60 end
 
 	-- Return whether the player currently can gain XP
 	LibPlayerData.PlayerHasXP = function() return (UnitLevel("player") < 60) end
@@ -159,46 +67,21 @@ if (IsClassic) then
 		return GetWatchedFactionInfo() and true or false 
 	end
 
+	-- Just in case I slip up and use the wrong API.
+	LibPlayerData.PlayerHasAP = function() end
+
 elseif (IsRetail) then
-	
-	-- Returns the maximum level the account has access to 
-	LibPlayerData.GetEffectivePlayerMaxLevel = function()
-		return GetMaxLevelForPlayerExpansion()
-	end
-
-	-- Returns the maximum level in the current expansion 
-	LibPlayerData.GetEffectiveExpansionMaxLevel = function()
-		return GetMaxLevelForPlayerExpansion() -- CHECK!!
-	end
-	-- Is the provided level at the account's maximum level?
-	LibPlayerData.IsUnitLevelAtEffectiveMaxLevel = function(level)
-		return (level >= LibPlayerData.GetEffectivePlayerMaxLevel())
-	end
-
-	-- Is the provided level at the expansions's maximum level?
-	LibPlayerData.IsUnitLevelAtEffectiveExpansionMaxLevel = function(level)
-		return (level >= LibPlayerData.GetEffectiveExpansionMaxLevel())
-	end 
-
-	-- Is the player at the account's maximum level?
-	LibPlayerData.IsPlayerAtEffectiveMaxLevel = function()
-		return LibPlayerData.IsUnitLevelAtEffectiveMaxLevel(UnitLevel("player"))
-	end
-
-	-- Is the player at the expansions's maximum level?
-	LibPlayerData.IsPlayerAtEffectiveExpansionMaxLevel = function()
-		return LibPlayerData.IsUnitLevelAtEffectiveExpansionMaxLevel(UnitLevel("player"))
-	end
 
 	-- Return whether the player currently can gain XP
 	LibPlayerData.PlayerHasXP = function(useExpansionMax)
-		if IsXPUserDisabled() then 
-			return false 
-		elseif useExpansionMax then 
-			return (not LibPlayerData.IsPlayerAtEffectiveExpansionMaxLevel())
-		else
-			return (not LibPlayerData.IsPlayerAtEffectiveMaxLevel())
-		end 
+		if (not IsXPUserDisabled()) then 
+			if (useExpansionMax) then 
+				return (UnitLevel("player") < GetMaxLevelForLatestExpansion())
+			else
+				return (UnitLevel("player") < GetMaxLevelForPlayerExpansion())
+			end 
+		end
+		return false
 	end
 
 	LibPlayerData.PlayerHasAP = function()
@@ -217,7 +100,7 @@ elseif (IsRetail) then
 				local factionName, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(i)
 				local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID)
 				if (factionName == name) then
-					if standingID then 
+					if (standingID) then 
 						return true
 					else 
 						return false
@@ -229,38 +112,11 @@ elseif (IsRetail) then
 
 end
 
--- Role Functions
----------------------------------------------------------------------	
-LibPlayerData.PlayerCanTank = function()
-	return classCanTank[playerClass]
-end
-
-LibPlayerData.PlayerIsDamageOnly = function()
-	return classIsDamage[playerClass]
-end
-
-LibPlayerData.GetPlayerRole = function()
-	return CURRENT_ROLE
-end
-
 local embedMethods = {
-	GetEffectiveExpansionMaxLevel = true,
-	GetEffectivePlayerMaxLevel = true,
-	GetPlayerRole = true,
-	IsPlayerAtEffectiveExpansionMaxLevel = true,
-	IsPlayerAtEffectiveMaxLevel = true,
-	IsUnitLevelAtEffectiveExpansionMaxLevel = true,
-	IsUnitLevelAtEffectiveMaxLevel = true,
-	PlayerCanTank = true,
 	PlayerHasRep = true,
 	PlayerHasXP = true,
-	PlayerIsDamageOnly = true,
-	UnitHealth = true,
-	UnitHealthMax = true
+	PlayerHasAP = true
 }
-if (IsRetail) then
-	embedMethods.PlayerHasAP = true
-end
 
 LibPlayerData.Embed = function(self, target)
 	for method in pairs(embedMethods) do

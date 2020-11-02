@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 124)
+local LibSecureButton = Wheel:Set("LibSecureButton", 125)
 if (not LibSecureButton) then
 	return
 end
@@ -90,6 +90,7 @@ local GetVehicleBarIndex = GetVehicleBarIndex
 local HasAction = HasAction
 local IsActionInRange = IsActionInRange
 local IsAutoCastPetAction = C_ActionBar.IsAutoCastPetAction
+local IsBindingForGamePad = IsBindingForGamePad
 local IsConsumableAction = IsConsumableAction
 local IsEnabledAutoCastPetAction = C_ActionBar.IsEnabledAutoCastPetAction
 local IsSpellOverlayed = IsSpellOverlayed
@@ -1576,20 +1577,22 @@ end
 
 ActionButton.GetBindingText = function(self, bindingType)
 	if (self.bindingAction) then
-		if (self.prioritizeGamePadBinds) or (bindingType == "pad") then
-			local bindingAction
-			for keyNumber = 1, select("#", GetBindingKey(self.bindingAction)) do 
-				local key = select(keyNumber, GetBindingKey(self.bindingAction))
-				if (key:upper():find("PAD")) then
-					return key
+		if (IsRetail) then
+			if (self.prioritizeGamePadBinds) or (bindingType == "pad") then
+				local bindingAction
+				for keyNumber = 1, select("#", GetBindingKey(self.bindingAction)) do 
+					local key = select(keyNumber, GetBindingKey(self.bindingAction))
+					if (IsBindingForGamePad(key)) then
+						return key
+					end
 				end
-			end
-		elseif (self.prioritzeKeyboardBinds) or (bindingType == "key") then
-			local bindingAction
-			for keyNumber = 1, select("#", GetBindingKey(self.bindingAction)) do 
-				local key = select(keyNumber, GetBindingKey(self.bindingAction))
-				if (not key:upper():find("PAD")) then
-					return key
+			elseif (self.prioritzeKeyboardBinds) or (bindingType == "key") then
+				local bindingAction
+				for keyNumber = 1, select("#", GetBindingKey(self.bindingAction)) do 
+					local key = select(keyNumber, GetBindingKey(self.bindingAction))
+					if (not IsBindingForGamePad(key)) then
+						return key
+					end
 				end
 			end
 		end

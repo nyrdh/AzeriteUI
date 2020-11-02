@@ -68,4 +68,4 @@ front-end\modules\unitframes-grouptools.lua
 front-end\modules\unitframes-nameplates.lua
 
 # All addon- and module incompatibilities in one place.
-front-end\incompatibilities.lua
+front-end\auto-disable.lua
