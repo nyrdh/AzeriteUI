@@ -248,7 +248,8 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
 					"SetSize", { 300, 52 },
-					"SetTexture", GetMedia("statusbar-normal-overlay")	
+					"SetTexture", GetMedia("statusbar-normal-overlay"),
+					"SetTexCoord", { 0, 1, 0, 1 }
 				}
 			},
 
@@ -343,7 +344,8 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
 					"SetSize", { 300, 18 },
-					"SetTexture", GetMedia("statusbar-normal-overlay")	
+					"SetTexture", GetMedia("statusbar-normal-overlay"),
+					"SetTexCoord", { 0, 1, 0, 1 }
 				}
 			},
 
@@ -744,7 +746,8 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
 					"SetSize", { 300, 52 },
-					"SetTexture", GetMedia("statusbar-normal-overlay")	
+					"SetTexture", GetMedia("statusbar-normal-overlay"),
+					"SetTexCoord", { 1, 0, 0, 1 }
 				}
 			},
 
@@ -839,7 +842,8 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
 					"SetSize", { 300, 18 },
-					"SetTexture", GetMedia("statusbar-normal-overlay")	
+					"SetTexture", GetMedia("statusbar-normal-overlay"),
+					"SetTexCoord", { 1, 0, 0, 1 }
 				}
 			},
 

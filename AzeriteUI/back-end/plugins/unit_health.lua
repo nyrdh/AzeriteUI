@@ -252,9 +252,9 @@ local UpdateColors = function(health, unit, min, max)
 		-- Dynamically tint the absorb bar towards the health color
 		local absorb = health.Absorb
 		if (absorb and health.colorAbsorb) then
-			local aR = r + (1 - r)*1/2
-			local aG = g + (1 - g)*1/3
-			local aB = b + (1 - b)*1/2
+			local aR = r + (1 - r)*4/5 -- 1/2
+			local aG = g + (1 - g)*3/4 -- 1/3
+			local aB = b + (1 - b)*4/5 -- 1/2
 			absorb:SetStatusBarColor(aR, aG, aB)
 		end
 	end 
@@ -690,5 +690,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 58)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 59)
 end 
