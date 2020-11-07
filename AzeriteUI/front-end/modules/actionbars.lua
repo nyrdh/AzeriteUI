@@ -9,7 +9,7 @@ end
 -- as bar layouts in our UIs are very non-typical,
 -- and more often than not iconic, integral elements of the design.
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-local Module = Core:NewModule("ActionBarMain", "LibEvent", "LibMessage", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibSecureButton", "LibWidgetContainer", "LibPlayerData", "LibClientBuild", "LibForge")
+local Module = Core:NewModule("ActionBarMain", "LibEvent", "LibMessage", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibSecureButton", "LibWidgetContainer", "LibPlayerData", "LibClientBuild", "LibForge", "LibInputMethod")
 
 -- Lua API
 local _G = _G

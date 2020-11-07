@@ -12,6 +12,7 @@
 <Script file='libraries\db.lua'/>
 <Script file='libraries\forge.lua'/>
 <Script file='libraries\hook.lua'/>
+<Script file='libraries\inputmethod.lua'/>
 <Script file='libraries\locale.lua'/>
 <Script file='libraries\module.lua'/>
 <Script file='libraries\playerdata.lua'/>

@@ -211,7 +211,15 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 						
 							elseif (event == "GP_FORCED_ACTIONBAR_VISIBILITY_CANCELED") then
 								self:SetForcedVisibility(false)
-						
+							
+							elseif (event == "GP_USING_GAMEPAD") then
+								self.db.lastKeybindDisplayType = "gamepad"
+								self:UpdateButtonBindpriority()
+
+							elseif (event == "GP_USING_KEYBOARD") then
+								self.db.lastKeybindDisplayType = "keyboard"
+								self:UpdateButtonBindpriority()
+
 							elseif (event == "PET_BAR_UPDATE") then
 								self:UpdateExplorerModeAnchors()
 							end
@@ -229,8 +237,9 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 									button.prioritzeKeyboardBinds = true
 						
 								else
-									button.prioritizeGamePadBinds = nil
-									button.prioritzeKeyboardBinds = nil
+									button.prioritizeGamePadBinds = (db.lastKeybindDisplayType == "gamepad") or self:IsUsingGamepad()
+									button.prioritzeKeyboardBinds = true
+									
 								end
 								if (button.UpdateBinding) then
 									button:UpdateBinding()
@@ -253,6 +262,10 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 						"RegisterEvent", { "PLAYER_ENTERING_WORLD", "OnEvent" },
 						"RegisterEvent", { "PLAYER_REGEN_ENABLED", "OnEvent" },
 						"RegisterEvent", { "PLAYER_REGEN_DISABLED", "OnEvent" },
+						"RegisterMessage", { "GP_USING_GAMEPAD", "OnEvent"},
+						"RegisterMessage", { "GP_USING_KEYBOARD", "OnEvent"},
+						"RegisterMessage", { "GP_FORCED_ACTIONBAR_VISIBILITY_REQUESTED", "OnEvent"},
+						"RegisterMessage", { "GP_FORCED_ACTIONBAR_VISIBILITY_CANCELED", "OnEvent"},
 						"RegisterEvent", { "UPDATE_BINDINGS", "OnEvent"}
 					}
 				}
