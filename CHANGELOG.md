@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-11-02
+## [Unreleased] 2020-11-07
 ### Added
 - Added gamepad support to our `/bind` mode, when the user has enabled it with `/console GamePadEnable 1`. 
 
@@ -19,7 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Completely violated the Narcissus minimap button's right to choose. 
 
 ### Fixed
-- Added a fix for a bug in Blizzard's `ContributeButtonMixin.UpdateTooltip` method in their `Blizzard_Contribution` addon. Shouldn't be any more bugs when hovering over buttons accepting multiple contributon currencies anymore
+- Added a fix for a bug in Blizzard's `ContributeButtonMixin.UpdateTooltip` method in their `Blizzard_Contribution` addon. Shouldn't be any more bugs when hovering over buttons accepting multiple contributon currencies anymore.
+- Libraries that automatically look for and call methods of modules they are embedded in will no longer attempt this with force disabled modules. This was causing some bugs when addons like Glass was used, or just any other time certain modules were auto-disabled from the presence of conflicting addons.
 
 ### Removed
 - Removed most code specific to BfA, and changed any Shadowlands code into just Retail code, since the 9.x API now is the current one.

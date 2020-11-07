@@ -1,4 +1,4 @@
-local LibChatWindow, version = Wheel:Set("LibChatWindow", 31)
+local LibChatWindow, version = Wheel:Set("LibChatWindow", 32)
 if (not LibChatWindow) then	
 	return
 end
@@ -536,12 +536,14 @@ local embedMethods = {
 LibChatWindow.ForAllEmbeds = function(self, method, ...)
 	for target in pairs(self.embeds) do 
 		if (target) then 
-			if (type(method) == "string") then
-				if target[method] then
-					target[method](target, ...)
+			if (not target.IsUserDisabled) or (not target:IsUserDisabled()) then
+				if (type(method) == "string") then
+					if target[method] then
+						target[method](target, ...)
+					end
+				else
+					method(target, ...)
 				end
-			else
-				method(target, ...)
 			end
 		end 
 	end 

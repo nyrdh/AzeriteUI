@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 60)
+local LibNamePlate = Wheel:Set("LibNamePlate", 61)
 if (not LibNamePlate) then	
 	return
 end
@@ -1327,12 +1327,14 @@ end
 LibNamePlate.ForAllEmbeds = function(self, method, ...)
 	for target in pairs(self.embeds) do 
 		if (target) then 
-			if (type(method) == "string") then
-				if target[method] then
-					target[method](target, ...)
+			if (not target.IsUserDisabled) or (not target:IsUserDisabled()) then
+				if (type(method) == "string") then
+					if target[method] then
+						target[method](target, ...)
+					end
+				else
+					method(target, ...)
 				end
-			else
-				method(target, ...)
 			end
 		end 
 	end 

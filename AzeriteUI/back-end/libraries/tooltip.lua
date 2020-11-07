@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 84)
+local LibTooltip = Wheel:Set("LibTooltip", 85)
 if (not LibTooltip) then
 	return
 end
@@ -2659,12 +2659,14 @@ local embedMethods = {
 LibTooltip.ForAllEmbeds = function(self, method, ...)
 	for target in pairs(self.embeds) do 
 		if (target) then 
-			if (type(method) == "string") then
-				if target[method] then
-					target[method](target, ...)
+			if (not target.IsUserDisabled) or (not target:IsUserDisabled()) then
+				if (type(method) == "string") then
+					if target[method] then
+						target[method](target, ...)
+					end
+				else
+					method(target, ...)
 				end
-			else
-				method(target, ...)
 			end
 		end 
 	end 
