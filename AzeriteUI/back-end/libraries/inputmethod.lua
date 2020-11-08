@@ -1,13 +1,10 @@
--- This library is for Retail only!
-local LibClientBuild = Wheel("LibClientBuild")
-if (not LibClientBuild) or (not LibClientBuild:IsRetail()) then
+local LibInputMethod = Wheel:Set("LibInputMethod", 4)
+if (not LibInputMethod) then
 	return
 end
 
-local LibInputMethod = Wheel:Set("LibInputMethod", 1)
-if (not LibInputMethod) then	
-	return
-end
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "LibInputMethod requires LibClientBuild to be loaded.")
 
 local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibInputMethod requires LibEvent to be loaded.")
@@ -33,10 +30,20 @@ local table_insert = table.insert
 local table_remove = table.remove
 local type = type
 
+-- WoW API
+local GetActiveDeviceID = C_GamePad and C_GamePad.GetActiveDeviceID
+local GetDeviceMappedState = C_GamePad and C_GamePad.GetDeviceMappedState
+
+-- WoW Client Constants
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
+
+-- Library registries
 LibInputMethod.embeds = LibInputMethod.embeds or {}
 LibInputMethod.frame = LibInputMethod.LibInputMethod or CreateFrame("Frame", nil, WorldFrame)
 LibInputMethod.isUsingGamepad = LibInputMethod.isUsingGamepad -- semantics. listing for reference only.
 
+-- Shortcuts!
 local Frame = LibInputMethod.frame
 
 ----------------------------------------------------------------
@@ -82,8 +89,12 @@ Frame.OnGamePadButtonDown = Frame.OnGamePadStick
 -- Setup the frame
 Frame:SetPropagateKeyboardInput(true)
 Frame:SetScript("OnKeyDown", Frame.OnKeyDown)
-Frame:SetScript("OnGamePadStick", Frame.OnGamePadStick)
-Frame:SetScript("OnGamePadButtonDown", Frame.OnGamePadButtonDown)
+
+-- Let's assume this is only added to the Retail API.
+if (IsRetail) then
+	Frame:SetScript("OnGamePadStick", Frame.OnGamePadStick)
+	Frame:SetScript("OnGamePadButtonDown", Frame.OnGamePadButtonDown)
+end
 
 ----------------------------------------------------------------
 -- Public API
@@ -96,8 +107,39 @@ LibInputMethod.IsUsingKeyboard = function(self)
 	return not LibInputMethod.isUsingGamepad
 end
 
+-- Primarily want this to return: "xbox[-reversed]", "playstation", "generic" or nil
+-- @return <string,nil>
+-- 		"xbox" 				A,B,X,Y
+-- 		"xbox-reversed" 	B,A,Y,X
+-- 		"playstation" 		cross, circle, square, triangle
+-- 		"generic" 			1,2,3,4,5,6
+LibInputMethod.GetGamepadType = function(self)
+	-- Bail out with no return for non-Retail clients.
+	-- We keep the function just to simplify front-end coding.
+	if (not IsRetail) then
+		return
+	end
+	local deviceID = GetActiveDeviceID()
+	if (deviceID) then
+		local mapped = GetDeviceMappedState(deviceID)
+		if (mapped) then
+			-- All except "Letters" is untested!
+			if (mapped.labelStyle == "Letters") then 
+				return "xbox"
+			elseif (mapped.labelStyle == "LettersReversed") then 
+				return "xbox-reversed"
+			elseif (mapped.labelStyle == "Shapes") then 
+				return "playstation"
+			elseif (mapped.labelStyle == "Generic") then 
+				return "generic"
+			end	
+		end
+	end
+end
+
 -- Module embedding
 local embedMethods = {
+	GetGamepadType = true,
 	IsUsingGamepad = true,
 	IsUsingKeyboard = true
 }

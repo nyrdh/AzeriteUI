@@ -174,7 +174,13 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 									end
 
 								elseif (name == "change-keybinddisplaypriority") then 
+									self:SetAttribute("keybindDisplayPriority", value);
 									self:CallMethod("UpdateButtonBindpriority"); 
+
+								elseif (name == "change-gamePadType") then
+									self:SetAttribute("gamePadType", value);
+									self:CallMethod("UpdateButtonBindpriority"); 
+
 								end 
 
 							]=]
@@ -225,22 +231,27 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							end
 						end, 
 
+						-- This method only sets button parameters, 
+						-- the actual keybind display and graphic choices
+						-- are done in the button widget in ./schematics-widgets.lua.
 						"UpdateButtonBindpriority", function(self)
 							local db = self.db
 							for button in self:GetAllActionButtonsOrdered() do
+								button.padType = self:GetGamepadType()
+								button.padStyle = db.gamePadType or "default"
+
 								if (db.keybindDisplayPriority == "gamepad") then
 									button.prioritizeGamePadBinds = true
 									button.prioritzeKeyboardBinds = nil
-						
+
 								elseif (db.keybindDisplayPriority == "keyboard") then
 									button.prioritizeGamePadBinds = nil
 									button.prioritzeKeyboardBinds = true
-						
 								else
 									button.prioritizeGamePadBinds = (db.lastKeybindDisplayType == "gamepad") or self:IsUsingGamepad()
 									button.prioritzeKeyboardBinds = true
-									
 								end
+
 								if (button.UpdateBinding) then
 									button:UpdateBinding()
 								end

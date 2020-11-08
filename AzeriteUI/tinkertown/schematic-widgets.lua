@@ -7,6 +7,19 @@
 --]]--
 local ADDON, Private = ...
 
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded.")
+
+-- Lua API
+local tonumber = tonumber
+
+-- WoW API
+local IsBindingForGamePad = IsBindingForGamePad
+
+-- WoW client version constants
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
+
 -- Private API
 local Colors = Private.Colors
 local GetAuraFilter = Private.GetAuraFilter
@@ -18,7 +31,7 @@ local GetSchematic = Private.GetSchematic
 -----------------------------------------------------------
 -- Button mouseover highlight update
 -- Requires: Darken, Border, Glow
-local PostUpdateMouseOver = function(self)
+local ActionButton_PostUpdateMouseOver = function(self)
 	if (self.isMouseOver) then 
 		self.Darken:SetAlpha(0)
 		self.Border:SetVertexColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], 1)
@@ -33,7 +46,7 @@ end
 -- Button stack/charge count font update
 -- Requires: Count
 -- Optional: Rank
-local PostUpdateStackCount = function(self, count)
+local ActionButton_PostUpdateStackCount = function(self, count)
 	count = tonumber(count) or 0
 	local font = GetFont((count < 10) and 18 or 14, true) 
 	if (self.Count:GetFontObject() ~= font) then 
@@ -46,6 +59,278 @@ local PostUpdateStackCount = function(self, count)
 	if (self.Rank) then 
 		self.Rank:SetShown((count == 0))
 	end 
+end
+
+-- Update the swipe color of button cooldowns
+local ActionButton_PostUpdateCooldown = function(self, cooldown) 
+	cooldown:SetSwipeColor(0, 0, 0, .75) 
+end
+
+-- Update the swipe color of button charge/stack cooldowns
+local ActionButton_PostUpdateChargeCooldown = function(self, cooldown) 
+	cooldown:SetSwipeColor(0, 0, 0, .5) 
+end
+
+-- Tone down and desaturate gamepad binds when not usable.
+local ActionButton_PostUpdateUsable = function(self, shouldDesaturate)
+	local i = 1
+	while (i) do
+		local slot = self["GamePadKeySlot"..i]
+		if (slot) then
+			if (shouldDesaturate) then
+				slot:SetDesaturated(true)
+				slot:SetVertexColor(.5, .5, .5)
+			else
+				slot:SetDesaturated(false)
+				slot:SetVertexColor(1, 1, 1)
+			end
+			i = i + 1
+		else
+			i = nil
+		end
+	end
+end
+
+-- Keybind graphic magic
+local ActionButton_GetBindingTextAbbreviated = (IsRetail) and function(self)
+	local key = self:GetBindingText()
+	if (key) then
+		key = key:upper()
+
+		local keyboard = self:GetBindingText("key")
+		local gamepad = self:GetBindingText("pad")
+
+		if (keyboard and gamepad) then
+			if (self.prioritizeGamePadBinds) then
+				key = gamepad
+			elseif (self.prioritzeKeyboardBinds) then
+				key = keyboard
+			end
+		end
+
+		-- (key:find("PAD"))
+		if (IsBindingForGamePad(key)) then
+
+			local mods = 0
+			local slot1, slot2, slot3, slot4
+
+			-- Get the main button pressed, without modifiers
+			local main = key:match("%-?([%a%d]-)$")
+			if (main) then
+
+				local padType = (self.padStyle == "default") and self.padType or self.padStyle
+				local padButton, padAlt, padCtrl, padShift
+
+				-- Figure out what modifiers are used
+				local alt = key:find("ALT%-")
+				local ctrl = key:find("CTRL%-")
+				local shift = key:find("SHIFT%-")
+
+				-- If modifiers are used, check if the pad has them assigned. 
+				if (alt or ctrl or shift) then
+					if (alt) then
+						padAlt = GetCVar("GamePadEmulateAlt")
+						if (padAlt == "" or padAlt == "none") then
+							padAlt = nil
+						end 
+						if (padAlt) then
+							mods = mods + 1
+						end
+					end
+					if (ctrl) then
+						padCtrl = GetCVar("GamePadEmulateCtrl")
+						if (padCtrl == "" or padCtrl == "none") then
+							padCtrl = nil
+						end 
+						if (padCtrl) then
+							mods = mods + 1
+						end
+					end
+					if (shift) then
+						padShift = GetCVar("GamePadEmulateShift")
+						if (padShift == "" or padShift == "none") then
+							padShift = nil
+						end 
+						if (padShift) then
+							mods = mods + 1
+						end
+					end
+				end
+
+				if (key:find("PAD1")) then
+					if (padType == "playstation") then
+						padButton = GetMedia("controller-ps4-cross")
+					elseif (padType == "xbox") then
+						padButton = GetMedia("controller-xbox-a")
+					elseif (padType == "xbox-reversed") then
+						padButton = GetMedia("controller-xbox-b")
+					else
+						padButton = GetMedia("controller-generic-button1")
+					end
+
+				elseif (key:find("PAD2")) then
+					if (padType == "playstation") then
+						padButton = GetMedia("controller-ps4-circle")
+					elseif (padType == "xbox") then
+						padButton = GetMedia("controller-xbox-b")
+					elseif (padType == "xbox-reversed") then
+						padButton = GetMedia("controller-xbox-a")
+					else
+						padButton = GetMedia("controller-generic-button2")
+					end
+
+				elseif (key:find("PAD3")) then
+					if (padType == "playstation") then
+						padButton = GetMedia("controller-ps4-square")
+					elseif (padType == "xbox") then
+						padButton = GetMedia("controller-xbox-x")
+					elseif (padType == "xbox-reversed") then
+						padButton = GetMedia("controller-xbox-y")
+					else
+						padButton = GetMedia("controller-generic-button3")
+					end
+
+				elseif (key:find("PAD4")) then
+					if (padType == "playstation") then
+						padButton = GetMedia("controller-ps4-triangle")
+					elseif (padType == "xbox") then
+						padButton = GetMedia("controller-xbox-y")
+					elseif (padType == "xbox-reversed") then
+						padButton = GetMedia("controller-xbox-x")
+					else
+						padButton = GetMedia("controller-generic-button4")
+					end
+
+				elseif (key:find("PAD5")) then
+					padButton = GetMedia("controller-generic-button5")
+
+				elseif (key:find("PAD6")) then
+					padButton = GetMedia("controller-generic-button6")
+
+				elseif (key:find("PADBACK")) then
+					if (padType == "playstation") then
+						padButton = GetMedia("controller-xbox-back")
+					elseif (padType == "xbox") then
+						padButton = GetMedia("controller-xbox-back")
+					elseif (padType == "xbox-reversed") then
+						padButton = GetMedia("controller-xbox-back")
+					else
+						padButton = GetMedia("controller-xbox-back")
+					end
+
+				elseif (key:find("PADFORWARD")) then
+					if (padType == "playstation") then
+						padButton = GetMedia("controller-xbox-start")
+					elseif (padType == "xbox") then
+						padButton = GetMedia("controller-xbox-start")
+					elseif (padType == "xbox-reversed") then
+						padButton = GetMedia("controller-xbox-start")
+					else
+						padButton = GetMedia("controller-xbox-start")
+					end
+
+				elseif (key:find("PADDUP")) then
+					if (padType == "playstation") then
+						padButton = GetMedia("controller-xbox-dpad-up")
+					elseif (padType == "xbox") then
+						padButton = GetMedia("controller-xbox-dpad-up")
+					elseif (padType == "xbox-reversed") then
+						padButton = GetMedia("controller-xbox-dpad-up")
+					else
+						padButton = GetMedia("controller-xbox-dpad-up")
+					end
+
+				elseif (key:find("PADDDOWN")) then
+					if (padType == "playstation") then
+						padButton = GetMedia("controller-xbox-dpad-down")
+					elseif (padType == "xbox") then
+						padButton = GetMedia("controller-xbox-dpad-down")
+					elseif (padType == "xbox-reversed") then
+						padButton = GetMedia("controller-xbox-dpad-down")
+					else
+						padButton = GetMedia("controller-xbox-dpad-down")
+					end
+
+				elseif (key:find("PADDLEFT")) then
+					if (padType == "playstation") then
+						padButton = GetMedia("controller-xbox-dpad-left")
+					elseif (padType == "xbox") then
+						padButton = GetMedia("controller-xbox-dpad-left")
+					elseif (padType == "xbox-reversed") then
+						padButton = GetMedia("controller-xbox-dpad-left")
+					else
+						padButton = GetMedia("controller-xbox-dpad-left")
+					end
+
+				elseif (key:find("PADDRIGHT")) then
+					if (padType == "playstation") then
+						padButton = GetMedia("controller-xbox-dpad-right")
+					elseif (padType == "xbox") then
+						padButton = GetMedia("controller-xbox-dpad-right")
+					elseif (padType == "xbox-reversed") then
+						padButton = GetMedia("controller-xbox-dpad-right")
+					else
+						padButton = GetMedia("controller-xbox-dpad-right")
+					end
+
+				end
+
+				if (mods == 0) then
+					slot2 = padButton
+				elseif (mods == 1) then
+					slot2 = padButton
+				elseif (mods == 2) then
+					slot2 = padButton
+					--slot1 = mod2
+					--slot3 = mod1
+				elseif (mods == 3) then
+					slot2 = padButton
+					--slot1 = mod3
+					--slot3 = mod1
+					--slot4 = mod2
+				end
+
+
+				-- Apply the slot textures
+				self.GamePadKeySlot1:SetTexture(slot1)
+
+				self.GamePadKeySlot2:SetTexture(slot2)
+				
+				--self.GamePadKeySlot2:SetPoint("TOPLEFT", -2, 4)
+				--self.GamePadKeySlot2:SetSize(28,28)
+
+				self.GamePadKeySlot2:SetPoint("TOPLEFT", 0, 0)
+				self.GamePadKeySlot2:SetSize(24,24)
+
+				--self.GamePadKeySlot2:SetPoint("TOPLEFT", 0, -2)
+				--self.GamePadKeySlot2:SetSize(22,22)
+
+				self.GamePadKeySlot3:SetTexture(slot3)
+				self.GamePadKeySlot4:SetTexture(slot4)
+
+				-- Return empty string to hide regular keybinds.
+				return ""
+			end
+		end
+
+		-- If no pad bind was used, clear out the textures
+		self.GamePadKeySlot1:SetTexture("")
+		self.GamePadKeySlot2:SetTexture("")
+		self.GamePadKeySlot3:SetTexture("")
+		self.GamePadKeySlot4:SetTexture("")
+		
+		-- Return standard abbreviations if no pad bind was used.
+		return self:AbbreviateBindText(key)
+	end
+	return ""
+end 
+
+-- Use the standard binding text function for Classic.
+-- This is a copy of the method used by the back-end.
+if (not IsRetail) then
+	ActionButton_GetBindingTextAbbreviated = function(self)
+		return self:AbbreviateBindText(self:GetBindingText())
+	end
 end
 
 -- Legacy Schematics
@@ -131,163 +416,20 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Azerite", {
 				values = {
 					"colors", Colors,
 					"maxDisplayCount", 99,
-					"PostUpdateCount", PostUpdateStackCount,
-					"PostUpdateCooldown", function(self, cooldownObject) 
-						cooldownObject:SetSwipeColor(0, 0, 0, .75)
-					end,
-					"PostUpdateChargeCooldown", function(self, cooldownObject) 
-						cooldownObject:SetSwipeColor(0, 0, 0, .5)
-					end,
-					"PostEnter", PostUpdateMouseOver,
-					"PostLeave", PostUpdateMouseOver,
-					"PostUpdate", PostUpdateMouseOver,
 
-					-- Tone down and desaturate gamepad binds when not usable.
-					"PostUpdateUsable", function(self, shouldDesaturate)
-						if (shouldDesaturate) then
-							for i = 1,4 do
-								local slot = self["GamePadKeySlot"..i]
-								slot:SetDesaturated(true)
-								slot:SetVertexColor(.5,.5,.5)
-							end
-						else
-							for i = 1,4 do
-								local slot = self["GamePadKeySlot"..i]
-								slot:SetDesaturated(false)
-								slot:SetVertexColor(1,1,1)
-							end
-						end
-					end,
+					-- Post updates
+					"PostUpdateCount", ActionButton_PostUpdateStackCount,
+					"PostUpdateCooldown", ActionButton_PostUpdateCooldown,
+					"PostUpdateChargeCooldown", ActionButton_PostUpdateChargeCooldown,
+					"PostEnter", ActionButton_PostUpdateMouseOver,
+					"PostLeave", ActionButton_PostUpdateMouseOver,
+					"PostUpdate", ActionButton_PostUpdateMouseOver,
+					"PostUpdateUsable", ActionButton_PostUpdateUsable,
 
 					"OnKeyDown", function(self) end,
 					"OnKeyUp", function(self) end,
 
-					-- This will take presedence when true,
-					-- causing any existing gamepad binds 
-					-- to be shown instead of keyboard.
-					--"prioritizeGamePadBinds", true, 
-
-					-- This will make sure keyboard binds are shown
-					-- even if a gamepad bind is before it in the list.
-					--"prioritzeKeyboardBinds", true, 
-
-					"GetBindingTextAbbreviated", function(self)
-						local key = self:GetBindingText()
-						if (key) then
-							key = key:upper()
-
-							local keyboard = self:GetBindingText("key")
-							local gamepad = self:GetBindingText("pad")
-
-							if (keyboard and gamepad) then
-								if (self.prioritizeGamePadBinds) then
-									key = gamepad
-								elseif (self.prioritzeKeyboardBinds) then
-									key = keyboard
-								end
-							end
-
-							if (key:find("PAD"))  then
-
-								local mods = 0
-								local slot1, slot2, slot3, slot4
-
-								-- Get the main button pressed, without modifiers
-								local main = key:match("%-?([%a%d]-)$")
-								if (main) then
-
-									-- Figure out what modifiers are used
-									local alt = key:find("ALT%-")
-									local ctrl = key:find("CTRL%-")
-									local shift = key:find("SHIFT%-")
-
-									-- If modifiers are used, check if the pad has them assigned. 
-									local padAlt, padCtrl, padShift
-									if (alt or ctrl or shift) then
-										if (alt) then
-											padAlt = GetCVar("GamePadEmulateAlt")
-											if (padAlt == "" or padAlt == "none") then
-												padAlt = nil
-											end 
-											if (padAlt) then
-												mods = mods + 1
-											end
-										end
-										if (ctrl) then
-											padCtrl = GetCVar("GamePadEmulateCtrl")
-											if (padCtrl == "" or padCtrl == "none") then
-												padCtrl = nil
-											end 
-											if (padCtrl) then
-												mods = mods + 1
-											end
-										end
-										if (shift) then
-											padShift = GetCVar("GamePadEmulateShift")
-											if (padShift == "" or padShift == "none") then
-												padShift = nil
-											end 
-											if (padShift) then
-												mods = mods + 1
-											end
-										end
-									end
-
-									local padButton
-									if (key:find("PAD1")) then
-										padButton = GetMedia("controller-xbox-a")
-									elseif (key:find("PAD2")) then
-										padButton = GetMedia("controller-xbox-b")
-									elseif (key:find("PAD3")) then
-										padButton = GetMedia("controller-xbox-x")
-									elseif (key:find("PAD4")) then
-										padButton = GetMedia("controller-xbox-y")
-									end
-
-									if (mods == 0) then
-										slot2 = padButton
-									elseif (mods == 1) then
-										slot2 = padButton
-									elseif (mods == 2) then
-										slot2 = padButton
-										--slot1 = mod2
-										--slot3 = mod1
-									elseif (mods == 3) then
-										slot2 = padButton
-										--slot1 = mod3
-										--slot3 = mod1
-										--slot4 = mod2
-									end
-
-
-									-- Apply the slot textures
-									self.GamePadKeySlot1:SetTexture(slot1)
-
-									self.GamePadKeySlot2:SetTexture(slot2)
-									--self.GamePadKeySlot2:SetPoint("TOPLEFT", 0, 0)
-									--self.GamePadKeySlot2:SetSize(24,24)
-									self.GamePadKeySlot2:SetPoint("TOPLEFT", 0, -2)
-									self.GamePadKeySlot2:SetSize(22,22)
-
-									self.GamePadKeySlot3:SetTexture(slot3)
-									self.GamePadKeySlot4:SetTexture(slot4)
-
-									-- Return empty string to hide regular keybinds.
-									return ""
-								end
-							end
-
-							-- If no pad bind was used, clear out the textures
-							self.GamePadKeySlot1:SetTexture("")
-							self.GamePadKeySlot2:SetTexture("")
-							self.GamePadKeySlot3:SetTexture("")
-							self.GamePadKeySlot4:SetTexture("")
-
-							-- Return standard abbreviations if no pad bind was used.
-							return self:AbbreviateBindText(key)
-						end
-						return ""
-					end
+					"GetBindingTextAbbreviated", ActionButton_GetBindingTextAbbreviated
 				}
 			},
 			{
@@ -583,16 +725,14 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Small", "Azerite", {
 				values = {
 					"colors", Colors,
 					"maxDisplayCount", 99,
-					"PostUpdateCount", PostUpdateStackCount,
-					"PostUpdateCooldown", function(self, cooldownObject) 
-						cooldownObject:SetSwipeColor(0, 0, 0, .75)
-					end,
-					"PostUpdateChargeCooldown", function(self, cooldownObject) 
-						cooldownObject:SetSwipeColor(0, 0, 0, .5)
-					end,
-					"PostEnter", PostUpdateMouseOver,
-					"PostLeave", PostUpdateMouseOver,
-					"PostUpdate", PostUpdateMouseOver
+
+					-- Post updates
+					"PostUpdateCount", ActionButton_PostUpdateStackCount,
+					"PostUpdateCooldown", ActionButton_PostUpdateCooldown,
+					"PostUpdateChargeCooldown", ActionButton_PostUpdateChargeCooldown,
+					"PostEnter", ActionButton_PostUpdateMouseOver,
+					"PostLeave", ActionButton_PostUpdateMouseOver,
+					"PostUpdate", ActionButton_PostUpdateMouseOver
 				}
 			},
 			{
