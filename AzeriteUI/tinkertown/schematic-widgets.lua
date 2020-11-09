@@ -27,6 +27,97 @@ local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia
 local GetSchematic = Private.GetSchematic
 
+-- Keybind Graphics
+-----------------------------------------------------------
+local BindArt = {
+	["PAD1"] = setmetatable({
+		["playstation"] = 		GetMedia("controller-ps4-cross"),
+		["xbox"] = 				GetMedia("controller-xbox-a"),
+		["xbox-reversed"] = 	GetMedia("controller-xbox-b"),
+		["generic"] = 			GetMedia("controller-generic-button1")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PAD2"] = setmetatable({ 
+		["playstation"] = 		GetMedia("controller-ps4-circle"),
+		["xbox"] = 				GetMedia("controller-xbox-b"),
+		["xbox-reversed"] = 	GetMedia("controller-xbox-a"),
+		["generic"] = 			GetMedia("controller-generic-button2")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PAD3"] = setmetatable({ 
+		["playstation"] = 		GetMedia("controller-ps4-square"),
+		["xbox"] = 				GetMedia("controller-xbox-x"),
+		["xbox-reversed"] = 	GetMedia("controller-xbox-y"),
+		["generic"] = 			GetMedia("controller-generic-button3")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PAD4"] = setmetatable({ 
+		["playstation"] = 		GetMedia("controller-ps4-triangle"),
+		["xbox"] = 				GetMedia("controller-xbox-y"),
+		["xbox-reversed"] = 	GetMedia("controller-xbox-x"),
+		["generic"] = 			GetMedia("controller-generic-button4")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PAD5"] = setmetatable({ 
+		["generic"] = 			GetMedia("controller-generic-button5")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PAD6"] = setmetatable({ 
+		["generic"] = 			GetMedia("controller-generic-button6")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PADBACK"] = setmetatable({ 
+		["generic"] = 			GetMedia("controller-xbox-back")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PADFORWARD"] = setmetatable({ 
+		["generic"] = 			GetMedia("controller-xbox-start")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PADDUP"] = setmetatable({ 
+		["generic"] = 			GetMedia("controller-xbox-dpad-up")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PADDDOWN"] = setmetatable({ 
+		["generic"] = 			GetMedia("controller-xbox-dpad-down")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PADDLEFT"] = setmetatable({ 
+		["generic"] = 			GetMedia("controller-xbox-dpad-left")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PADDRIGHT"] = setmetatable({ 
+		["generic"] = 			GetMedia("controller-xbox-dpad-right")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PADLTRIGGER"] = setmetatable({ 
+		["generic"] = 			GetMedia("controller-xbox-lt")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PADRTRIGGER"] = setmetatable({ 
+		["generic"] = 			GetMedia("controller-xbox-rt")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PADLSHOULDER"] = setmetatable({ 
+		["generic"] = 			GetMedia("controller-xbox-lb")
+	}, { __index = function(t,k) return t.generic end }),
+
+	["PADRSHOULDER"] = setmetatable({ 
+		["generic"] = 			GetMedia("controller-xbox-rb")
+	}, { __index = function(t,k) return t.generic end })
+}
+
+local GetBindArt = function(key, artType)
+	if (key) then
+		for id,art in pairs(BindArt) do
+			if (key:find(id)) then
+				return art[artType or "generic"]
+			end
+		end
+	end
+end
+
+
 -- Utility Functions
 -----------------------------------------------------------
 -- Button mouseover highlight update
@@ -79,10 +170,18 @@ local ActionButton_PostUpdateUsable = function(self, shouldDesaturate)
 		if (slot) then
 			if (shouldDesaturate) then
 				slot:SetDesaturated(true)
-				slot:SetVertexColor(.5, .5, .5)
+				if (i == 2) then
+					slot:SetVertexColor(.5, .5, .5)
+				else
+					slot:SetVertexColor(.25, .25, .25)
+				end
 			else
 				slot:SetDesaturated(false)
-				slot:SetVertexColor(1, 1, 1)
+				if (i == 2) then
+					slot:SetVertexColor(1, 1, 1)
+				else
+					slot:SetVertexColor(.35, .35, .35)
+				end
 			end
 			i = i + 1
 		else
@@ -119,7 +218,8 @@ local ActionButton_GetBindingTextAbbreviated = (IsRetail) and function(self)
 			if (main) then
 
 				local padType = (self.padStyle == "default") and self.padType or self.padStyle
-				local padButton, padAlt, padCtrl, padShift
+				local padAlt, padCtrl, padShift
+				local padAltKey, padCtrlKey, padShiftKey
 
 				-- Figure out what modifiers are used
 				local alt = key:find("ALT%-")
@@ -129,184 +229,116 @@ local ActionButton_GetBindingTextAbbreviated = (IsRetail) and function(self)
 				-- If modifiers are used, check if the pad has them assigned. 
 				if (alt or ctrl or shift) then
 					if (alt) then
-						padAlt = GetCVar("GamePadEmulateAlt")
-						if (padAlt == "" or padAlt == "none") then
-							padAlt = nil
+						padAltKey = GetCVar("GamePadEmulateAlt")
+						if (padAltKey == "" or padAltKey == "none") then
+							padAltKey = nil
 						end 
-						if (padAlt) then
+						if (padAltKey) then
+							padAlt = GetBindArt(padAltKey,padType)
 							mods = mods + 1
 						end
 					end
 					if (ctrl) then
-						padCtrl = GetCVar("GamePadEmulateCtrl")
-						if (padCtrl == "" or padCtrl == "none") then
-							padCtrl = nil
+						padCtrlKey = GetCVar("GamePadEmulateCtrl")
+						if (padCtrlKey == "" or padCtrlKey == "none") then
+							padCtrlKey = nil
 						end 
-						if (padCtrl) then
+						if (padCtrlKey) then
+							padCtrl = GetBindArt(padCtrlKey,padType)
 							mods = mods + 1
 						end
 					end
 					if (shift) then
-						padShift = GetCVar("GamePadEmulateShift")
-						if (padShift == "" or padShift == "none") then
-							padShift = nil
+						padShiftKey = GetCVar("GamePadEmulateShift")
+						if (padShiftKey == "" or padShiftKey == "none") then
+							padShiftKey = nil
 						end 
-						if (padShift) then
+						if (padShiftKey) then
+							padShift = GetBindArt(padShiftKey,padType)
 							mods = mods + 1
 						end
 					end
 				end
 
-				if (key:find("PAD1")) then
-					if (padType == "playstation") then
-						padButton = GetMedia("controller-ps4-cross")
-					elseif (padType == "xbox") then
-						padButton = GetMedia("controller-xbox-a")
-					elseif (padType == "xbox-reversed") then
-						padButton = GetMedia("controller-xbox-b")
-					else
-						padButton = GetMedia("controller-generic-button1")
-					end
+				-- Main button art
+				slot2 = GetBindArt(main,padType)
 
-				elseif (key:find("PAD2")) then
-					if (padType == "playstation") then
-						padButton = GetMedia("controller-ps4-circle")
-					elseif (padType == "xbox") then
-						padButton = GetMedia("controller-xbox-b")
-					elseif (padType == "xbox-reversed") then
-						padButton = GetMedia("controller-xbox-a")
-					else
-						padButton = GetMedia("controller-generic-button2")
-					end
+				-- Note that this is only mods that has been assigned to the gamepad, 
+				-- any keyboard buttons will not be shown here.
+				if (mods == 1) then
+					-- first available mod
+					slot1 = padAlt or padCtrl or padShift 
 
-				elseif (key:find("PAD3")) then
-					if (padType == "playstation") then
-						padButton = GetMedia("controller-ps4-square")
-					elseif (padType == "xbox") then
-						padButton = GetMedia("controller-xbox-x")
-					elseif (padType == "xbox-reversed") then
-						padButton = GetMedia("controller-xbox-y")
-					else
-						padButton = GetMedia("controller-generic-button3")
-					end
-
-				elseif (key:find("PAD4")) then
-					if (padType == "playstation") then
-						padButton = GetMedia("controller-ps4-triangle")
-					elseif (padType == "xbox") then
-						padButton = GetMedia("controller-xbox-y")
-					elseif (padType == "xbox-reversed") then
-						padButton = GetMedia("controller-xbox-x")
-					else
-						padButton = GetMedia("controller-generic-button4")
-					end
-
-				elseif (key:find("PAD5")) then
-					padButton = GetMedia("controller-generic-button5")
-
-				elseif (key:find("PAD6")) then
-					padButton = GetMedia("controller-generic-button6")
-
-				elseif (key:find("PADBACK")) then
-					if (padType == "playstation") then
-						padButton = GetMedia("controller-xbox-back")
-					elseif (padType == "xbox") then
-						padButton = GetMedia("controller-xbox-back")
-					elseif (padType == "xbox-reversed") then
-						padButton = GetMedia("controller-xbox-back")
-					else
-						padButton = GetMedia("controller-xbox-back")
-					end
-
-				elseif (key:find("PADFORWARD")) then
-					if (padType == "playstation") then
-						padButton = GetMedia("controller-xbox-start")
-					elseif (padType == "xbox") then
-						padButton = GetMedia("controller-xbox-start")
-					elseif (padType == "xbox-reversed") then
-						padButton = GetMedia("controller-xbox-start")
-					else
-						padButton = GetMedia("controller-xbox-start")
-					end
-
-				elseif (key:find("PADDUP")) then
-					if (padType == "playstation") then
-						padButton = GetMedia("controller-xbox-dpad-up")
-					elseif (padType == "xbox") then
-						padButton = GetMedia("controller-xbox-dpad-up")
-					elseif (padType == "xbox-reversed") then
-						padButton = GetMedia("controller-xbox-dpad-up")
-					else
-						padButton = GetMedia("controller-xbox-dpad-up")
-					end
-
-				elseif (key:find("PADDDOWN")) then
-					if (padType == "playstation") then
-						padButton = GetMedia("controller-xbox-dpad-down")
-					elseif (padType == "xbox") then
-						padButton = GetMedia("controller-xbox-dpad-down")
-					elseif (padType == "xbox-reversed") then
-						padButton = GetMedia("controller-xbox-dpad-down")
-					else
-						padButton = GetMedia("controller-xbox-dpad-down")
-					end
-
-				elseif (key:find("PADDLEFT")) then
-					if (padType == "playstation") then
-						padButton = GetMedia("controller-xbox-dpad-left")
-					elseif (padType == "xbox") then
-						padButton = GetMedia("controller-xbox-dpad-left")
-					elseif (padType == "xbox-reversed") then
-						padButton = GetMedia("controller-xbox-dpad-left")
-					else
-						padButton = GetMedia("controller-xbox-dpad-left")
-					end
-
-				elseif (key:find("PADDRIGHT")) then
-					if (padType == "playstation") then
-						padButton = GetMedia("controller-xbox-dpad-right")
-					elseif (padType == "xbox") then
-						padButton = GetMedia("controller-xbox-dpad-right")
-					elseif (padType == "xbox-reversed") then
-						padButton = GetMedia("controller-xbox-dpad-right")
-					else
-						padButton = GetMedia("controller-xbox-dpad-right")
-					end
-
-				end
-
-				if (mods == 0) then
-					slot2 = padButton
-				elseif (mods == 1) then
-					slot2 = padButton
 				elseif (mods == 2) then
-					slot2 = padButton
-					--slot1 = mod2
-					--slot3 = mod1
+					-- first available mod
+					slot3 = padAlt or padCtrl or padShift 
+
+					-- alt exists > show ctrl or shift
+					-- alt does not exist > (ctrl implicitly exists) > show shift
+					slot1 = padAlt and (padCtrl or padShift) or padShift 
+
+					local modKey = (slot1 == padAlt) and padAltKey or (slot1 == padCtrl) and padCtrlKey or padShiftKey
+					if (modKey:find("TRIGGER")) then
+						slot1,slot3 = slot3,slot1
+					end
+
 				elseif (mods == 3) then
-					slot2 = padButton
-					--slot1 = mod3
-					--slot3 = mod1
-					--slot4 = mod2
+
+					-- All of them exist
+					slot3 = padAlt
+					slot4 = padCtrl
+					slot1 = padShift
+
 				end
 
+				self.GamePadKeySlot1:SetPoint("TOPLEFT", -20, 6)
+				self.GamePadKeySlot1:SetSize(36,36)
+				self.GamePadKeySlot1:SetDrawLayer("BORDER", 3)
 
-				-- Apply the slot textures
-				self.GamePadKeySlot1:SetTexture(slot1)
+				self.GamePadKeySlot3:SetPoint("TOPLEFT", -14, -12)
+				self.GamePadKeySlot3:SetSize(32,32)
+				self.GamePadKeySlot3:SetDrawLayer("BORDER", 3)
 
-				self.GamePadKeySlot2:SetTexture(slot2)
+				self.GamePadKeySlot4:SetPoint("TOPLEFT", -18, -30)
+				self.GamePadKeySlot4:SetSize(32,32)
+				self.GamePadKeySlot4:SetDrawLayer("BORDER", 3)
+
+				if (mods == 1) then
+					local modKey = (slot1 == padAlt) and padAltKey or (slot1 == padCtrl) and padCtrlKey or padShiftKey
+					if (modKey:find("SHOULDER")) then
+						self.GamePadKeySlot1:SetSize(32,32)
+					end
+
+				elseif (mods == 2) then
+					local modKey1 = (slot1 == padAlt) and padAltKey or (slot1 == padCtrl) and padCtrlKey or padShiftKey
+					local modKey2 = (slot3 == padAlt) and padAltKey or (slot3 == padCtrl) and padCtrlKey or padShiftKey
+					if (modKey2:find("TRIGGER")) and (not modKey1:find("TRIGGER")) then
+						slot1,slot3 = slot3,slot1
+					end
+
+				elseif (mods == 3) then
+					local modKey1 = (slot1 == padAlt) and padAltKey or (slot1 == padCtrl) and padCtrlKey or padShiftKey
+					local modKey2 = (slot3 == padAlt) and padAltKey or (slot3 == padCtrl) and padCtrlKey or padShiftKey
+					local modKey3 = (slot4 == padAlt) and padAltKey or (slot4 == padCtrl) and padCtrlKey or padShiftKey
+
+				end
 				
-				--self.GamePadKeySlot2:SetPoint("TOPLEFT", -2, 4)
-				--self.GamePadKeySlot2:SetSize(28,28)
-
-				self.GamePadKeySlot2:SetPoint("TOPLEFT", 0, 0)
-				self.GamePadKeySlot2:SetSize(24,24)
-
-				--self.GamePadKeySlot2:SetPoint("TOPLEFT", 0, -2)
-				--self.GamePadKeySlot2:SetSize(22,22)
-
+				self.GamePadKeySlot1:SetTexture(slot1)
 				self.GamePadKeySlot3:SetTexture(slot3)
 				self.GamePadKeySlot4:SetTexture(slot4)
+
+				--self.GamePadKeySlot2:SetPoint("TOPLEFT", -2, 4)
+				--self.GamePadKeySlot2:SetSize(28,28)
+				self.GamePadKeySlot2:SetTexture(slot2)
+				if (mods > 0) then
+					self.GamePadKeySlot2:SetPoint("TOPLEFT", 6, 0)
+				else
+					self.GamePadKeySlot2:SetPoint("TOPLEFT", 0, 0)
+				end
+				self.GamePadKeySlot2:SetSize(24,24)
+				self.GamePadKeySlot2:SetDrawLayer("BORDER", 2)
+				--self.GamePadKeySlot2:SetPoint("TOPLEFT", 0, -2)
+				--self.GamePadKeySlot2:SetSize(22,22)
 
 				-- Return empty string to hide regular keybinds.
 				return ""

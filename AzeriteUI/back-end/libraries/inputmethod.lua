@@ -1,4 +1,4 @@
-local LibInputMethod = Wheel:Set("LibInputMethod", 4)
+local LibInputMethod = Wheel:Set("LibInputMethod", 5)
 if (not LibInputMethod) then
 	return
 end
@@ -66,7 +66,19 @@ end
 -- Listener Frame
 ----------------------------------------------------------------
 -- Fires when a key is pressed.
-Frame.OnKeyDown = function()
+Frame.OnKeyDown = function(self, button)
+
+	-- Since modifiers can be assigned to gamepad buttons,
+	-- it's better if we simply choose to ignore them.
+	if (IsRetail) then
+		if (button == "ALT") or (button == "RALT") or (button == "LALT")
+		or (button == "CTRL") or (button == "RCTRL") or (button == "LCTRL")
+		or (button == "SHIFT") or (button == "RSHIFT") or (button == "LSHIFT")
+		or (button == "ESCAPE") then
+			return
+		end
+	end
+
 	-- Compare to false to also have this event fire on first keypress.
 	if (LibInputMethod.isUsingGamepad ~= false) then
 		LibInputMethod.isUsingGamepad = false
@@ -75,7 +87,7 @@ Frame.OnKeyDown = function()
 end
 
 -- Fires when the gamepad sticks are moved.
-Frame.OnGamePadStick = function()
+Frame.OnGamePadStick = function(self, button)
 	if (not LibInputMethod.isUsingGamepad) then
 		LibInputMethod.isUsingGamepad = true
 		LibInputMethod:SendMessage("GP_USING_GAMEPAD")
