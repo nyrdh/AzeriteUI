@@ -2033,7 +2033,7 @@ Defaults.ActionBarMain = {
 	castOnDown = true,
 	keybindDisplayPriority = "default", -- can be "gamepad", "keyboard", "default"
 	lastKeybindDisplayType = "keyboard", -- not a user setting, just to save the state.
-	--gamePadType = nil, -- will add this later, listing it for reference now. 
+	gamePadType = "default", -- gamepad icons used. "xbox", "xbox-reversed", "playstation", "default"
 
 	-- Azerite theme settings
 	-------------------------------------------------

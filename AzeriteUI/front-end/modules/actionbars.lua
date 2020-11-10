@@ -686,7 +686,7 @@ Module.UpdateSettings = function(self, event, ...)
 	self:UpdateFadeAnchors()
 	self:UpdateExplorerModeAnchors()
 	self:UpdateCastOnDown()
-	self:UpdateButtonBindpriority()
+	self:UpdateKeybindDisplay()
 	self:UpdateTooltipSettings()
 end 
 
@@ -713,7 +713,7 @@ Module.OnInit = function(self)
 	if (OptionsMenu) then
 		local callbackFrame = OptionsMenu:CreateCallbackFrame(self)
 		callbackFrame:AssignSettings(self.db)
-		callbackFrame:AssignProxyMethods("UpdateCastOnDown", "UpdateFading", "UpdateFadeAnchors", "UpdateExplorerModeAnchors", "UpdateButtonCount", "UpdateButtonBindpriority")
+		callbackFrame:AssignProxyMethods("UpdateCastOnDown", "UpdateFading", "UpdateFadeAnchors", "UpdateExplorerModeAnchors", "UpdateButtonCount", "UpdateKeybindDisplay")
 
 		-- Create tables to hold the buttons
 		-- within the restricted environment.

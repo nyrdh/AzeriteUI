@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-11-07
+## [Unreleased] 2020-11-10
 ### Added
 - Added gamepad support to our `/bind` mode, when the user has enabled it with `/console GamePadEnable 1`. 
+	- Will by default automatically switch between displaying gamepad keybinds and keyboard keybinds depending on what you use.
+	- Will by default automatically try to figure out whether to show Xbox or Playstation keybind icons.
+	- Can be set to always prioritize gamepad bindings, always prioritize keyboard, or prioritize last used input method, which is default.
+	- Can be set to display xbox icons, playstation icons, or attempt to figure it out automatically, which is default.
 
 ### Changed
 - Changed the text based abbreviations of keybinds to better support gamepads. I am working on gamepad icons and plan to implement icons in the style of xbox360 and ps4 controllers, so the current text based solution is temporary. I just figured `Rt` is a bit more readable than `GamePad Right Trigger` when displayed on a small action button.

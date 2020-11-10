@@ -1259,9 +1259,38 @@ Module.CreateMenuTable = function(self)
 					}
 				},
 				{
-					title = L["GamePad Type"],
-					type = nil, hasWindow = false,
-					isSlave = true, slaveDB = "ActionBarMain", slaveKey = "gamePadType",
+					title = L["GamePad Type"], type = nil, hasWindow = true,
+					--isSlave = true, slaveDB = "ActionBarMain", slaveKey = "gamePadType",
+					buttons = {
+						{
+							enabledTitle = L_ENABLED:format(L["Xbox"]),
+							disabledTitle = L["Xbox"],
+							type = "SET_VALUE", 
+							configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "xbox" }, 
+							proxyModule = "ActionBarMain"
+						},
+						{
+							enabledTitle = L_ENABLED:format(L["Xbox (Reversed)"]),
+							disabledTitle = L["Xbox (Reversed)"],
+							type = "SET_VALUE", 
+							configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "xbox-reversed" }, 
+							proxyModule = "ActionBarMain"
+						},
+						{
+							enabledTitle = L_ENABLED:format(L["Playstation"]),
+							disabledTitle = L["Playstation"],
+							type = "SET_VALUE", 
+							configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "playstation" }, 
+							proxyModule = "ActionBarMain"
+						},
+						{
+							enabledTitle = L_ENABLED:format(DEFAULT),
+							disabledTitle = DEFAULT,
+							type = "SET_VALUE", 
+							configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "default" }, 
+							proxyModule = "ActionBarMain"
+						}
+					}
 				}
 			} 
 		}
