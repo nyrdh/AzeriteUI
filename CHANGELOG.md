@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-11-10
+## [3.0.423-RC] 2020-11-10
 ### Added
 - Added gamepad support to our `/bind` mode, when the user has enabled it with `/console GamePadEnable 1`. 
 	- Will by default automatically switch between displaying gamepad keybinds and keyboard keybinds depending on what you use.
