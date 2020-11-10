@@ -664,7 +664,10 @@ LibBindTool.GetBindingFrame = function(self)
 		frame.ApplyButton:SetScript("OnClick", function() LibBindTool:ApplyBindings() end)
 
 		frame:SetScript("OnKeyUp", function(_, key) LibBindTool:ProcessInput(key) end)
-		frame:SetScript("OnGamePadButtonUp", function(_, key) LibBindTool:ProcessInput(key) end)
+
+		if (IsRetail) then
+			frame:SetScript("OnGamePadButtonUp", function(_, key) LibBindTool:ProcessInput(key) end)
+		end
 		
 		LibBindTool.bindingFrame = frame
 	end 

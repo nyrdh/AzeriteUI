@@ -1229,82 +1229,96 @@ Module.CreateMenuTable = function(self)
 			})
 		}
 
-		local bindMenu = { 
-			title = KEY_BINDINGS, type = nil, hasWindow = true, 
-			buttons = {
-				{
-					title = L["Display Priority"], type = nil, hasWindow = true, 
-					buttons = {
-						{
-							enabledTitle = L_ENABLED:format(L["GamePad First"]),
-							disabledTitle = L["GamePad First"],
-							type = "SET_VALUE", 
-							configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "gamepad" }, 
-							proxyModule = "ActionBarMain"
-						},
-						{
-							enabledTitle = L_ENABLED:format(L["Keyboard First"]),
-							disabledTitle = L["Keyboard First"],
-							type = "SET_VALUE", 
-							configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "keyboard" }, 
-							proxyModule = "ActionBarMain"
-						},
-						{
-							enabledTitle = L_ENABLED:format(DEFAULT),
-							disabledTitle = DEFAULT,
-							type = "SET_VALUE", 
-							configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "default" }, 
-							proxyModule = "ActionBarMain"
+		if (IsRetail) then
+			-- All these options are for 9.0.1 gamepads.
+			local bindMenu = { 
+				title = KEY_BINDINGS, type = nil, hasWindow = true, 
+				buttons = {
+					{
+						title = L["Display Priority"], type = nil, hasWindow = true, 
+						buttons = {
+							{
+								enabledTitle = L_ENABLED:format(L["GamePad First"]),
+								disabledTitle = L["GamePad First"],
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "gamepad" }, 
+								proxyModule = "ActionBarMain"
+							},
+							{
+								enabledTitle = L_ENABLED:format(L["Keyboard First"]),
+								disabledTitle = L["Keyboard First"],
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "keyboard" }, 
+								proxyModule = "ActionBarMain"
+							},
+							{
+								enabledTitle = L_ENABLED:format(DEFAULT),
+								disabledTitle = DEFAULT,
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "default" }, 
+								proxyModule = "ActionBarMain"
+							}
+						}
+					},
+					{
+						title = L["GamePad Type"], type = nil, hasWindow = true,
+						--isSlave = true, slaveDB = "ActionBarMain", slaveKey = "gamePadType",
+						buttons = {
+							{
+								enabledTitle = L_ENABLED:format(L["Xbox"]),
+								disabledTitle = L["Xbox"],
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "xbox" }, 
+								proxyModule = "ActionBarMain"
+							},
+							{
+								enabledTitle = L_ENABLED:format(L["Xbox (Reversed)"]),
+								disabledTitle = L["Xbox (Reversed)"],
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "xbox-reversed" }, 
+								proxyModule = "ActionBarMain"
+							},
+							{
+								enabledTitle = L_ENABLED:format(L["Playstation"]),
+								disabledTitle = L["Playstation"],
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "playstation" }, 
+								proxyModule = "ActionBarMain"
+							},
+							{
+								enabledTitle = L_ENABLED:format(DEFAULT),
+								disabledTitle = DEFAULT,
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "default" }, 
+								proxyModule = "ActionBarMain"
+							}
 						}
 					}
-				},
-				{
-					title = L["GamePad Type"], type = nil, hasWindow = true,
-					--isSlave = true, slaveDB = "ActionBarMain", slaveKey = "gamePadType",
-					buttons = {
-						{
-							enabledTitle = L_ENABLED:format(L["Xbox"]),
-							disabledTitle = L["Xbox"],
-							type = "SET_VALUE", 
-							configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "xbox" }, 
-							proxyModule = "ActionBarMain"
-						},
-						{
-							enabledTitle = L_ENABLED:format(L["Xbox (Reversed)"]),
-							disabledTitle = L["Xbox (Reversed)"],
-							type = "SET_VALUE", 
-							configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "xbox-reversed" }, 
-							proxyModule = "ActionBarMain"
-						},
-						{
-							enabledTitle = L_ENABLED:format(L["Playstation"]),
-							disabledTitle = L["Playstation"],
-							type = "SET_VALUE", 
-							configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "playstation" }, 
-							proxyModule = "ActionBarMain"
-						},
-						{
-							enabledTitle = L_ENABLED:format(DEFAULT),
-							disabledTitle = DEFAULT,
-							type = "SET_VALUE", 
-							configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "default" }, 
-							proxyModule = "ActionBarMain"
-						}
-					}
-				}
-			} 
-		}
+				} 
+			}
 
-		local Bindings = Core:GetModule("Bindings", true)
-		if (self:ShouldHaveMenu(Bindings)) then 
-			table_insert(bindMenu.buttons, {
-				enabledTitle = L_ENABLED:format(L["Bind Mode"]),
-				disabledTitle = L_DISABLED:format(L["Bind Mode"]),
-				type = "TOGGLE_MODE", hasWindow = false, 
-				proxyModule = "Bindings", modeName = "bindMode"
-			})
-		end 
-		table_insert(ActionBarMenu.buttons, bindMenu)
+			local Bindings = Core:GetModule("Bindings", true)
+			if (self:ShouldHaveMenu(Bindings)) then 
+				table_insert(bindMenu.buttons, {
+					enabledTitle = L_ENABLED:format(L["Bind Mode"]),
+					disabledTitle = L_DISABLED:format(L["Bind Mode"]),
+					type = "TOGGLE_MODE", hasWindow = false, 
+					proxyModule = "Bindings", modeName = "bindMode"
+				})
+			end 
+			table_insert(ActionBarMenu.buttons, bindMenu)
+		else
+			-- Just add the bind mode option and nothing else for classic.
+			local Bindings = Core:GetModule("Bindings", true)
+			if (self:ShouldHaveMenu(Bindings)) then 
+				table_insert(ActionBarMenu.buttons, {
+					enabledTitle = L_ENABLED:format(L["Bind Mode"]),
+					disabledTitle = L_DISABLED:format(L["Bind Mode"]),
+					type = "TOGGLE_MODE", hasWindow = false, 
+					proxyModule = "Bindings", modeName = "bindMode"
+				})
+			end 
+		end
 
 		table_insert(ActionBarMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Cast on Down"]),
