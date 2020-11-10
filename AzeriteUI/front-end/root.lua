@@ -216,12 +216,18 @@ Core.ApplyExperimentalFeatures = function(self)
 	end
 
 	-- Add a command to clear the main chat frame
+	-- I mainly use this to remove clutter before taking screenshots.
+	-- You could theoretically put this in a macro and clear chat then screenshot.
 	self:RegisterChatCommand("clear", function() ChatFrame1:Clear() end)
 
-	-- Add a command to manually update macro icons
+	-- Add a command to manually update macro icons.
+	-- This was only needed when macro icons wouldn't load at logon, 
+	-- and I would generally consider this a hacky and risky fix, 
+	-- as it includes reading all macros into memory and saving them again
+	-- in order to force a cache and icon update.
 	self:RegisterChatCommand("fix", fixMacroIcons)
 	
-	-- Add back retail like stop watch commands
+	-- Add back retail like stop watch commands.
 	if (IsClassic) then
 		local commands = {
 			SLASH_STOPWATCH_PARAM_PLAY1 = "play",
@@ -293,6 +299,10 @@ Core.ApplyExperimentalFeatures = function(self)
 	end
 
 	-- Workaround for the completely random bg popup taints in Classic 1.13.x.
+	-- This hides the tainted and only randomly working bg popups,
+	-- and instead will show a red warning message on the top of the screen,
+	-- directing the player to either join the bg or leave the queue
+	-- using the bg finder eye located at the border of the minimap.
 	if (IsClassic) then
 		local battleground = self:CreateFrame("Frame", nil, "UICenter")
 		battleground:SetSize(574, 40)
@@ -333,7 +343,9 @@ Core.ApplyExperimentalFeatures = function(self)
 		end)
 	end
 
-	-- Attempt to hide the UI in the rune mini-game
+	-- Attempt to hide the UI in the untangling and bejeweled-like Nazjatar mini-games.
+	-- It hides the whole UI, adds an exit button from the game to a red cross in the upper corner.
+	-- This only works out of combat, but since you can only enter games out of combat, we're fine.
 	if (IsRetail) then
 
 		local updateTrackingEvent, onTrackingEvent, checkForActiveGame, findActiveBuffID, restoreUI
@@ -342,21 +354,23 @@ Core.ApplyExperimentalFeatures = function(self)
 		local playerGUID = UnitGUID("player")
 		local filter = "HELPFUL PLAYER CANCELABLE"
 
+		-- These are the player auraIDs of the known games.
+		-- No other methods to detect these games 
+		-- than their associated auras currently exist.
 		local games = {
-
 			-- Untangle
 			[298047] = true, -- Arcane Leylock
 			[298565] = true, -- Arcane Leylock
 			[298654] = true, -- Arcane Leylock
 			[298657] = true, -- Arcane Leylock
 			[298659] = true, -- Arcane Leylock
-			
 			-- Puzzle 
 			[298661] = true, -- Arcane Runelock
 			[298663] = true, -- Arcane Runelock
 			[298665] = true  -- Arcane Runelock
 		}
 
+		-- Create a clickable aura removal button to exit the games.
 		local exitButton = self:CreateFrame("Button", nil, "UIParent", "SecureActionButtonTemplate")
 		exitButton:Hide()
 		exitButton:SetFrameStrata("HIGH")
@@ -558,6 +572,7 @@ Core.ApplyExperimentalFeatures = function(self)
 	-- Little trick to show the layout and dimensions
 	-- of the Minimap blip icons on-screen in-game, 
 	-- whenever blizzard decide to update those. 
+	-- This works in both Retail and Classic
 	do
 		-- Change this rather than comment/uncomment
 		if (false) then
@@ -576,6 +591,7 @@ Core.ApplyExperimentalFeatures = function(self)
 	end
 	
 	-- Temporary Weapon Enchants!
+	-- These exist in both Retail and Classic
 	do
 		local tempEnchantButtons = {
 			self:CreateFrame("Button", nil, "UICenter", "SecureActionButtonTemplate"),
@@ -661,7 +677,17 @@ Core.ApplyExperimentalFeatures = function(self)
 
 end
 
-Core.FixBlizzardContribution = function(self)
+-- Fix or work around Blizzard bugs we have discovered.
+Core.FixBlizzardBugs = function(self, event, addon)
+	if (event == "ADDON_LOADED") then
+		if (addon == "Blizzard_Contribution") then
+			self:UnregisterEvent("ADDON_LOADED", "FixBlizzardBugs")
+		else
+			return
+		end
+	elseif (not IsAddOnLoaded("Blizzard_Contribution")) then
+		return self:RegisterEvent("ADDON_LOADED", "FixBlizzardBugs")
+	end
 	
 	-- Fix the mixin method
 	local UpdateTooltip = function(self)
@@ -741,29 +767,36 @@ Core.OnChatCommand = function(self, editBox, msg)
 	self:UpdateDebugConsole()
 end
 
--- Let's overdo this.
-local themes = {
-	az = "Azerite",
-	azui = "Azerite",
-	azerite = "Azerite",
-	azeriteui = "Azerite",
-	legacy = "Legacy",
-	gui = "Legacy",
-	goldpaw = "Legacy",
-	goldpawui = "Legacy",
-	blakmane = "Azerite",
-	blakmaneui = "Azerite"
-}
-
+-- Change the UI theme. 
+-- This does not actually change the theme,
+-- but rather changes the stored theme setting,
+-- and then forces a reload to load the new theme.
 Core.SetTheme = function(self, editBox, theme)
 	-- Do a minimum amount of control here, 
 	-- as this is connected to saved settings.
 	-- We don't want crazy results saved.
-	local new = theme and themes[theme] 
+	local new = theme and ({
+		-- Chat parameter to the left,
+		-- matching theme name to the right.
+		-- We allow a lot of diversity here.
+		az = "Azerite",
+		azui = "Azerite",
+		azerite = "Azerite",
+		azeriteui = "Azerite",
+		legacy = "Legacy",
+		gui = "Legacy",
+		goldpaw = "Legacy",
+		goldpawui = "Legacy",
+		blakmane = "Azerite",
+		blakmaneui = "Azerite"
+	})[theme] 
+	-- Only actually do something if a matching theme was found, 
+	-- and that theme is different from what we're currently using.	
 	if (new) and (new ~= self.db.theme) then
-		-- Only apply the setting and force a reload upon actual changes.
+		-- Only apply the changed setting and 
+		-- force a reload upon actual changes.
 		self.db.theme = new
-		ReloadUI()
+		ReloadUI() 
 	end
 end
 
@@ -797,17 +830,8 @@ Core.OnInit = function(self)
 		LoadAddOn(v)
 	end
 
-	if (IsAddOnLoaded("Blizzard_Contribution")) then
-		self:FixBlizzardContribution()
-	else
-		local listen = function(self, event, addon) 
-			if (addon == "Blizzard_Contribution") then
-				--self:UnregisterEvent("ADDON_LOADED", listen)
-				self:FixBlizzardContribution()
-			end
-		end
-		self:RegisterEvent("ADDON_LOADED", listen)
-	end
+	-- Fix Blizzard Bugs
+	self:FixBlizzardBugs()
 
 	local OptionsMenu = Core:GetModule("OptionsMenu", true)
 	if (OptionsMenu) then
