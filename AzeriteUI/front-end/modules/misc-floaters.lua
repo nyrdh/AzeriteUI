@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("BlizzardFloaterHUD", "LOW", "LibMessage", "LibEvent", "LibFrame", "LibTooltip", "LibDB", "LibBlizzard", "LibClientBuild")
+local Module = Core:NewModule("BlizzardFloaterHUD", "LOW", "LibMessage", "LibEvent", "LibFrame", "LibTooltip", "LibDB", "LibBlizzard", "LibClientBuild", "LibSound")
 
 -- Lua API
 local _G = _G
@@ -12,6 +12,7 @@ local ipairs = ipairs
 local table_remove = table.remove
 
 -- WoW API
+local GetGameMessageInfo = GetGameMessageInfo
 local InCombatLockdown = InCombatLockdown
 
 -- Private API
@@ -728,7 +729,12 @@ Module.OnEvent = function(self, event, ...)
 			return 
 		end 
 		self.UIErrorsFrame:AddMessage(msg, 1, 0, 0, 1)
-		
+
+		-- Play an error sound if the appropriate cvars allows it.
+		if (GetCVarBool("Sound_EnableDialog")) and (GetCVarBool("Sound_EnableErrorSpeech")) then
+			self:PlayVocalErrorByMessageType(messageType)
+		end
+
 	elseif (event == "UI_INFO_MESSAGE") then 
 		local messageType, msg = ...
 		if (not msg) then 

@@ -1,4 +1,4 @@
-local LibInputMethod = Wheel:Set("LibInputMethod", 5)
+local LibInputMethod = Wheel:Set("LibInputMethod", 7)
 if (not LibInputMethod) then
 	return
 end
@@ -66,8 +66,8 @@ end
 -- Listener Frame
 ----------------------------------------------------------------
 -- Fires when a key is pressed.
+-- *Does not fire on repeated usage, only when a gamepad previously was used.
 Frame.OnKeyDown = function(self, button)
-
 	-- Since modifiers can be assigned to gamepad buttons,
 	-- it's better if we simply choose to ignore them.
 	if (IsRetail) then
@@ -78,8 +78,8 @@ Frame.OnKeyDown = function(self, button)
 			return
 		end
 	end
-
 	-- Compare to false to also have this event fire on first keypress.
+	-- *as opposed to pure booleans which would also accept nil/unset
 	if (LibInputMethod.isUsingGamepad ~= false) then
 		LibInputMethod.isUsingGamepad = false
 		LibInputMethod:SendMessage("GP_USING_KEYBOARD")
@@ -87,6 +87,7 @@ Frame.OnKeyDown = function(self, button)
 end
 
 -- Fires when the gamepad sticks are moved.
+-- *Does not fire on repeated usage, only when keyboard previously was used.
 Frame.OnGamePadStick = function(self, button)
 	if (not LibInputMethod.isUsingGamepad) then
 		LibInputMethod.isUsingGamepad = true
@@ -111,26 +112,30 @@ end
 ----------------------------------------------------------------
 -- Public API
 ----------------------------------------------------------------
+-- @return <boolean> 'true' if a gamepad was the last used input method
 LibInputMethod.IsUsingGamepad = function(self)
 	return LibInputMethod.isUsingGamepad
 end
 
+-- @return <boolean> 'true' if the keyboard was the last used input method
 LibInputMethod.IsUsingKeyboard = function(self)
 	return not LibInputMethod.isUsingGamepad
 end
 
--- Primarily want this to return: "xbox[-reversed]", "playstation", "generic" or nil
+-- Returns the type of gamepad to decide icon type.
 -- @return <string,nil>
--- 		"xbox" 				A,B,X,Y
--- 		"xbox-reversed" 	B,A,Y,X
--- 		"playstation" 		cross, circle, square, triangle
--- 		"generic" 			1,2,3,4,5,6
+-- 	"xbox" 				A,B,X,Y
+-- 	"xbox-reversed" 	B,A,Y,X
+-- 	"playstation" 		cross, circle, square, triangle
+-- 	"generic" 			1,2,3,4,5,6
+-- 	nil 				no gamepad data available
 LibInputMethod.GetGamepadType = function(self)
 	-- Bail out with no return for non-Retail clients.
 	-- We keep the function just to simplify front-end coding.
 	if (not IsRetail) then
 		return
 	end
+	-- This section used functions only available after 9.0.1.
 	local deviceID = GetActiveDeviceID()
 	if (deviceID) then
 		local mapped = GetDeviceMappedState(deviceID)

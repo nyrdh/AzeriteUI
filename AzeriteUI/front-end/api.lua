@@ -4,7 +4,11 @@ The purpose of this file is to supply all the front-end modules
 with static layout data used during the setup phase, as well as
 with any custom colors, fonts and aura tables local to the addon only. 
 
-Some of the methods here are just proxies for tool our library methods.
+*The majority of the methods and templates here are primarily 
+ used for the default Azerite theme, while Legacy is for the most
+ part using the new schematics and forge system for its layouts.
+
+ *Some of the methods here are just proxies for tool our library methods.
 
 --]]--
 

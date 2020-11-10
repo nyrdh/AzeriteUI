@@ -1,4 +1,4 @@
-local LibSound = Wheel:Set("LibSound", 2)
+local LibSound = Wheel:Set("LibSound", 4)
 if (not LibSound) then	
 	return
 end
@@ -8,9 +8,11 @@ local _G = _G
 local pairs = pairs
 
 -- Blizzard API
-local PlaySoundFile = _G.PlaySoundFile
-local PlaySoundKitID = _G.PlaySound -- or _G.PlaySoundKitID
-local StopSound = _G.StopSound
+local GetGameMessageInfo = GetGameMessageInfo
+local PlaySoundFile = PlaySoundFile
+local PlaySoundKitID = PlaySound -- or PlaySoundKitID
+local PlayVocalErrorSoundID = PlayVocalErrorSoundID
+local StopSound = StopSound
 
 LibSound.embeds = LibSound.embeds or {}
 
@@ -328,6 +330,18 @@ LibSound.PlaySoundFile = function(self, path, channel)
 	return PlaySoundFile(path, channel)
 end
 
+LibSound.PlayVocalErrorByMessageType = function(self, messageType)
+	local errorStringId, soundKitID, voiceID = GetGameMessageInfo(messageType)
+	if (voiceID) then
+		-- No idea what channel this ends up in.
+		-- *Edit: Seems to be Dialog by default for this one.
+		PlayVocalErrorSoundID(voiceID)
+	elseif (soundKitID) then
+		-- Blizzard sends this to the Master channel. We won't.
+		PlaySoundKitID(soundKitID, "Dialog")
+	end
+end
+
 LibSound.StopSound = function(self, soundHandle)
 	return StopSound(soundHandle)
 end 
@@ -335,6 +349,7 @@ end
 local embedMethods = {
 	PlaySoundKitID = true, 
 	PlaySoundFile = true,
+	PlayVocalErrorByMessageType = true,
 	StopSound = true
 }
 
