@@ -984,7 +984,7 @@ local PlayerHUD_ClassPowerPostUpdate = function(element, unit, min, max, newMax,
 	elseif (powerType == "CHI") then
 		style = (UnitPowerMax("player", Enum.PowerType.Chi) == 6) and "Runes" or "Chi"
 
-	--5 points: 3 circles, 3 crystals, last crystal larger
+	--5 points: 2 circles, 3 crystals, last crystal larger
 	elseif (powerType == "ARCANE_CHARGES") or (powerType == "HOLY_POWER") or (powerType == "SOUL_SHARDS") or (powerType == "SOUL_FRAGMENTS") then 
 		style = "SoulShards"
 

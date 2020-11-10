@@ -810,18 +810,59 @@ UIWidgetsDisable["Tutorials"] = function(self)
 		end
 		MainMenuMicroButton_SetAlertsEnabled(false, "backpack")
 	end
-	
+
+	local KillPointerFrames, hooked2
+	KillPointerFrames = function()
+		local i = 1
+		local frame = _G["NPE_PointerFrame_"..i]
+		while (frame) do
+			i = i + 1
+			frame:SetScript("OnHide", nil)
+			frame:Hide()
+			frame = _G["NPE_PointerFrame_"..i]
+		end
+		if (NPE_TutorialPointerFrame) and (not hooked2) then
+			hooksecurefunc(NPE_TutorialPointerFrame, "_GetFrame", KillPointerFrames)
+			hooked2 = true
+		end
+	end
+
 	local DisableTutorials
 	DisableTutorials = function(self, event, ...)
 		if (event == "VARIABLES_LOADED") then
 			self:UnregisterEvent("VARIABLES_LOADED", DisableTutorials)
+		elseif (event == "ADDON_LOADED") then
+			local addon = ...
+			if (addon ~= "Blizzard_NewPlayerExperience") then
+				return
+			end
+			self:UnregisterEvent("ADDON_LOADED", DisableTutorials)
 		end
 		SetCVar("showTutorials", "0")
 		if (IsRetail) then
-			SetCVar("showNPETutorials", "0")
+			if (IsAddOnLoaded("Blizzard_NewPlayerExperience")) then
+				if (Dispatcher) then
+					Dispatcher.EventFrame:SetScript("OnEvent",nil)
+					Dispatcher.EventFrame:Hide()
+				end
+				--Class_Intro_CombatTactics:UnregisterAllEvents()
+				SetCVar("showNPETutorials", "0")
+				kill("NPE_TutorialMainFrame_Frame", false, true)
+				kill("TutorialPointerFrame", false, true)
+				kill("Tutorial_PointerUp", false, true)
+				kill("Tutorial_PointerDown", false, true)
+				kill("Tutorial_PointerLeft", false, true)
+				kill("Tutorial_PointerRight", false, true)
+				KillPointerFrames()
+			end
+			--if (NPE_TutorialPointerFrame) then
+			--	NPE_TutorialPointerFrame.Show = function() end
+			--end
 		end
 	end
 	self:RegisterEvent("VARIABLES_LOADED", DisableTutorials)
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", DisableTutorials)
+	self:RegisterEvent("ADDON_LOADED", DisableTutorials)
 	
 	DisableHelpTip()
 	DisableTutorials()
