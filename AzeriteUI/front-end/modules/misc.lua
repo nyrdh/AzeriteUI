@@ -388,18 +388,21 @@ Core:NewModule("Bindings", "PLUGIN", "LibBindTool").OnInit = function(self)
 	-- Register the actionbuttons with the keybind handler
 	local ActionBarMain = Core:GetModule("ActionBarMain", true)
 	if ActionBarMain then 
-		for id,button in ActionBarMain:GetButtons() do 
-			local bindFrame = self:RegisterButtonForBinding(button)
-			local width, height = button:GetSize()
-			bindFrame.bg:SetTexture(layout.BindButtonTexture)
-			bindFrame.bg:SetSize(width + layout.BindButtonOffset, height + layout.BindButtonOffset)
-	
+		if (ActionBarMain.GetButtons) then
+			for id,button in ActionBarMain:GetButtons() do 
+				local bindFrame = self:RegisterButtonForBinding(button)
+				local width, height = button:GetSize()
+				bindFrame.bg:SetTexture(layout.BindButtonTexture)
+				bindFrame.bg:SetSize(width + layout.BindButtonOffset, height + layout.BindButtonOffset)
+			end
 		end
-		for id,button in ActionBarMain:GetPetButtons() do 
-			local bindFrame = self:RegisterButtonForBinding(button)
-			local width, height = button:GetSize()
-			bindFrame.bg:SetTexture(layout.BindButtonTexture)
-			bindFrame.bg:SetSize(width + layout.BindButtonOffset, height + layout.BindButtonOffset)
+		if (ActionBarMain.GetPetButtons) then
+			for id,button in ActionBarMain:GetPetButtons() do 
+				local bindFrame = self:RegisterButtonForBinding(button)
+				local width, height = button:GetSize()
+				bindFrame.bg:SetTexture(layout.BindButtonTexture)
+				bindFrame.bg:SetSize(width + layout.BindButtonOffset, height + layout.BindButtonOffset)
+			end
 		end
 	end 
 end

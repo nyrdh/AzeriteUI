@@ -1,4 +1,4 @@
-local LibForge = Wheel:Set("LibForge", 11)
+local LibForge = Wheel:Set("LibForge", 13)
 if (not LibForge) then
 	return
 end
@@ -452,10 +452,36 @@ LibForge.Forge = function(self, object, forgedata, ...)
 	return true
 end
 
+-- Run a forge on an indexed sub table.
+-- Will silently fail if the forgedata 
+-- or indexed sub table does not exist.
+LibForge.SubForge = function(self, object, forgedata, subIndex, ...)
+	check(object, 1, "table", "nil")
+	check(forgedata, 2, "table", "string", "nil")
+	check(subIndex, 3, "string", "nil")
+
+	-- Assume this is embedded into something 
+	-- that wishes to do some self-forging.
+	if (type(object) == "table") and (type(forgedata) == "string") then
+		subIndex = forgedata
+		forgedata = object
+		object = self
+	end
+
+	-- Silently fail if not data is passed.
+	if (not forgedata) or (not forgedata[subIndex]) then
+		return
+	end
+
+	-- Run the standard forge method on the indexed sub table.
+	return self:Forge(object, forgedata[subIndex], ...)
+end
+
 local embedMethods = {
 	Chain = true, 
 	Decorate = true,
-	Forge = true
+	Forge = true,
+	SubForge = true
 }
 
 LibForge.Embed = function(self, target)

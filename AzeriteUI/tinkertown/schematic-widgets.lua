@@ -120,9 +120,9 @@ end
 
 -- Utility Functions
 -----------------------------------------------------------
--- Button mouseover highlight update
+-- Azerite theme Button mouseover highlight update
 -- Requires: Darken, Border, Glow
-local ActionButton_PostUpdateMouseOver = function(self)
+local Azerite_ActionButton_PostUpdateMouseOver = function(self)
 	if (self.isMouseOver) then 
 		self.Darken:SetAlpha(0)
 		self.Border:SetVertexColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], 1)
@@ -135,13 +135,15 @@ local ActionButton_PostUpdateMouseOver = function(self)
 end 
 
 -- Button stack/charge count font update
--- Requires: Count
--- Optional: Rank
-local ActionButton_PostUpdateStackCount = function(self, count)
+-- Optional: Count,Rank
+local Azerite_ActionButton_PostUpdateStackCount = function(self, count)
 	count = tonumber(count) or 0
-	local font = GetFont((count < 10) and 18 or 14, true) 
-	if (self.Count:GetFontObject() ~= font) then 
-		self.Count:SetFontObject(font)
+	if (self.Count) then
+		-- This is fairly theme specific.
+		local font = GetFont((count < 10) and 18 or 14, true) 
+		if (self.Count:GetFontObject() ~= font) then 
+			self.Count:SetFontObject(font)
+		end
 	end
 	-- TO BACK-END!
 	-- Hide the rank text element if a count exists. 
@@ -191,7 +193,7 @@ local ActionButton_PostUpdateUsable = function(self, shouldDesaturate)
 end
 
 -- Keybind graphic magic
-local ActionButton_GetBindingTextAbbreviated = (IsRetail) and function(self)
+local ActionButton_GetBindingTextAbbreviated = function(self)
 	local key = self:GetBindingText()
 	if (key) then
 		key = key:upper()
@@ -450,12 +452,12 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Azerite", {
 					"maxDisplayCount", 99,
 
 					-- Post updates
-					"PostUpdateCount", ActionButton_PostUpdateStackCount,
+					"PostUpdateCount", Azerite_ActionButton_PostUpdateStackCount,
 					"PostUpdateCooldown", ActionButton_PostUpdateCooldown,
 					"PostUpdateChargeCooldown", ActionButton_PostUpdateChargeCooldown,
-					"PostEnter", ActionButton_PostUpdateMouseOver,
-					"PostLeave", ActionButton_PostUpdateMouseOver,
-					"PostUpdate", ActionButton_PostUpdateMouseOver,
+					"PostEnter", Azerite_ActionButton_PostUpdateMouseOver,
+					"PostLeave", Azerite_ActionButton_PostUpdateMouseOver,
+					"PostUpdate", Azerite_ActionButton_PostUpdateMouseOver,
 					"PostUpdateUsable", ActionButton_PostUpdateUsable,
 
 					"OnKeyDown", function(self) end,
@@ -759,12 +761,12 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Small", "Azerite", {
 					"maxDisplayCount", 99,
 
 					-- Post updates
-					"PostUpdateCount", ActionButton_PostUpdateStackCount,
+					"PostUpdateCount", Azerite_ActionButton_PostUpdateStackCount,
 					"PostUpdateCooldown", ActionButton_PostUpdateCooldown,
 					"PostUpdateChargeCooldown", ActionButton_PostUpdateChargeCooldown,
-					"PostEnter", ActionButton_PostUpdateMouseOver,
-					"PostLeave", ActionButton_PostUpdateMouseOver,
-					"PostUpdate", ActionButton_PostUpdateMouseOver
+					"PostEnter", Azerite_ActionButton_PostUpdateMouseOver,
+					"PostLeave", Azerite_ActionButton_PostUpdateMouseOver,
+					"PostUpdate", Azerite_ActionButton_PostUpdateMouseOver
 				}
 			},
 			{
