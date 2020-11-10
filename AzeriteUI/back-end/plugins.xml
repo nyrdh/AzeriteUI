@@ -29,6 +29,7 @@
 <Script file='plugins\unit_level.lua'/>
 <Script file='plugins\unit_manatext.lua'/>
 <Script file='plugins\unit_name.lua'/>
+<Script file='plugins\unit_pethappiness.lua'/>
 <Script file='plugins\unit_portrait.lua'/>
 <Script file='plugins\unit_power.lua'/>
 <Script file='plugins\unit_range.lua'/>

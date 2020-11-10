@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 59)
+local LibBlizzard = Wheel:Set("LibBlizzard", 60)
 if (not LibBlizzard) then 
 	return
 end
@@ -791,9 +791,40 @@ UIWidgetsDisable["TotemFrame"] = function(self)
 end
 
 UIWidgetsDisable["Tutorials"] = function(self)
-	TutorialFrame:UnregisterAllEvents()
-	TutorialFrame:Hide()
-	TutorialFrame.Show = TutorialFrame.Hide
+	if (TutorialFrame) then
+		TutorialFrame:UnregisterAllEvents()
+		TutorialFrame:Hide()
+		TutorialFrame.Show = TutorialFrame.Hide
+	end
+
+	local DisableHelpTip, hooked
+	DisableHelpTip = function() 
+		if (HelpTip) then
+			if (HelpTip.info) then
+				HelpTip:ForceHideAll()
+			end 
+			if (not hooked) then
+				hooksecurefunc(HelpTip, "Show", DisableHelpTip)
+				hooked = true
+			end
+		end
+		MainMenuMicroButton_SetAlertsEnabled(false, "backpack")
+	end
+	
+	local DisableTutorials
+	DisableTutorials = function(self, event, ...)
+		if (event == "VARIABLES_LOADED") then
+			self:UnregisterEvent("VARIABLES_LOADED", DisableTutorials)
+		end
+		SetCVar("showTutorials", "0")
+		if (IsRetail) then
+			SetCVar("showNPETutorials", "0")
+		end
+	end
+	self:RegisterEvent("VARIABLES_LOADED", DisableTutorials)
+	
+	DisableHelpTip()
+	DisableTutorials()
 end
 
 UIWidgetsDisable["UnitFramePlayer"] = function(self)

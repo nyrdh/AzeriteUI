@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2020-11-10
+### Changed
+- Moved disabling of the HelpTip and additional Tutorial tips into the tutorial disabling section of the LibBlizzard back-end.
+- Moved the Classic pet happiness into its own plugin in the back-end.
+
 ## [3.0.423-RC] 2020-11-10
 ### Added
 - Added gamepad support to our `/bind` mode, when the user has enabled it with `/console GamePadEnable 1`. 

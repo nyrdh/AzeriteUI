@@ -1591,6 +1591,15 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	self.ManaText = manaText
 	self.ManaText.OverrideValue = layout.ManaTextOverride
 
+	-- Classic Pet Happiness (Hardcoded)
+	-----------------------------------------------------------
+	if (IsClassic) then
+		local happiness = overlay:CreateFontString()
+		happiness:SetFontObject(Private.GetFont(12,true))
+		happiness:Place("BOTTOM", "UICenter", "BOTTOM", 0, 10)
+		self.PetHappiness = happiness
+	end
+
 	-- Update textures according to player level
 	self.PostUpdateTextures = layout.PostUpdateTextures
 	self:PostUpdateTextures()
