@@ -88,7 +88,9 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 						"HoverButtons", {}, -- all action buttons that can fade out
 						"ButtonLookup", {}, -- quickly identify a frame as our button
 
-						-- Secure Code Snippets
+						-- Secure Code Snippets.
+						-- These are used by the menu system and the bars themselves
+						-- to update layout and other secure settings even while in combat.
 						"secureSnippets", {
 							-- Arrange the main and extra actionbar buttons
 							arrangeButtons = [=[
@@ -237,17 +239,6 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							]=]
 						},
 
-						-- Update tooltip settings
-						"UpdateTooltipSettings", function(self)
-							local tooltip = self:GetActionButtonTooltip()
-							tooltip.colorNameAsSpellWithUse = true -- color item name as a spell (not by rarity) when it has a Use effect
-							tooltip.hideItemLevelWithUse = true -- hide item level when it has a Use effect 
-							tooltip.hideStatsWithUseEffect = true -- hide item stats when it has a Use effect
-							tooltip.hideBindsWithUseEffect = true -- hide item bind status when it has a Use effect
-							tooltip.hideUniqueWithUseEffect = true -- hide item unique status when it has a Use effect
-							tooltip.hideEquipTypeWithUseEffect = false -- hide item equip location and item type with Use effect
-						end,
-
 						-- Event handler
 						"OnEvent", function(self, event, ...)
 							if (event == "UPDATE_BINDINGS") then
@@ -280,33 +271,6 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							elseif (event == "PET_BAR_UPDATE") then
 								self:UpdateExplorerModeAnchors()
 							end
-						end, 
-
-						-- This method only sets button parameters, 
-						-- the actual keybind display and graphic choices
-						-- are done in the button widget in ./schematics-widgets.lua.
-						"UpdateKeybindDisplay", function(self)
-							local db = self.db
-							for button in self:GetAllActionButtonsOrdered() do
-								button.padType = self:GetGamepadType()
-								button.padStyle = db.gamePadType or "default"
-
-								if (db.keybindDisplayPriority == "gamepad") then
-									button.prioritizeGamePadBinds = true
-									button.prioritzeKeyboardBinds = nil
-
-								elseif (db.keybindDisplayPriority == "keyboard") then
-									button.prioritizeGamePadBinds = nil
-									button.prioritzeKeyboardBinds = true
-								else
-									button.prioritizeGamePadBinds = (db.lastKeybindDisplayType == "gamepad") or self:IsUsingGamepad()
-									button.prioritzeKeyboardBinds = true
-								end
-
-								if (button.UpdateBinding) then
-									button:UpdateBinding()
-								end
-							end 
 						end, 
 
 						-- Method to create scaffolds and overlay frames.
@@ -855,6 +819,10 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 
 						-- Setters
 						----------------------------------------------------
+						-- Method that allows any module to request the actionbars
+						-- to temporarily be faded in and fully visible.
+						-- This does not apply to fully hidden buttons, 
+						-- but affects buttons hidden by fadeout or the explorer mode.
 						"SetForcedVisibility", function(self, force)
 							local actionBarHoverFrame = self:GetFadeFrame()
 							actionBarHoverFrame.FORCED = force and true
@@ -862,6 +830,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 
 						-- Updates
 						----------------------------------------------------
+						-- Updates when and if the additional actionbuttons should fade in and out. 
 						"UpdateFading", function(self)
 							local db = self.db
 
@@ -876,6 +845,8 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							petBarHoverFrame.always = db.petBarVisibility == "always"
 						end,
 
+						-- Updates the anchors used by the explorer mode
+						-- to decide when you are hovering above the actionbar section.
 						"UpdateExplorerModeAnchors", function(self)
 							local db = self.db
 							local frame = self:GetOverlayFramePet()
@@ -889,6 +860,9 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							end
 						end,
 
+						-- Updates the anchors for the frames controlling
+						-- the mouseover fade of the additional action buttons.
+						-- Usually called on startup and after button count changes.
 						"UpdateFadeAnchors", function(self)
 							local db = self.db
 
@@ -958,8 +932,11 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							end
 						end,
 
+						-- Post update that sends the message 
+						-- GP_UPDATE_ACTIONBUTTON_COUNT to registered modules
+						-- when the count of available buttons is updated.
+						-- Other modules can listen for this to adjust as needed.
 						"UpdateButtonCount", function(self)
-							-- Announce the updated button count to the world
 							self:SendMessage("GP_UPDATE_ACTIONBUTTON_COUNT")
 						end,
 
@@ -973,6 +950,10 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							end
 						end,
 
+						-- Updates whether spells are cast on button press or release.
+						-- This cannot be changed in combat, as it requires changing 
+						-- a cvar, and not even secure handlers can do that in combat.
+						-- It is however queued for combat end, so it still happens after.
 						"UpdateCastOnDown", function(self)
 							if InCombatLockdown() then 
 								return self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateSettings")
@@ -987,6 +968,45 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							end 
 						end,
 
+						-- Update actionbutton tooltip display settings.
+						"UpdateTooltipSettings", function(self)
+							local tooltip = self:GetActionButtonTooltip()
+							tooltip.colorNameAsSpellWithUse = true -- color item name as a spell (not by rarity) when it has a Use effect
+							tooltip.hideItemLevelWithUse = true -- hide item level when it has a Use effect 
+							tooltip.hideStatsWithUseEffect = true -- hide item stats when it has a Use effect
+							tooltip.hideBindsWithUseEffect = true -- hide item bind status when it has a Use effect
+							tooltip.hideUniqueWithUseEffect = true -- hide item unique status when it has a Use effect
+							tooltip.hideEquipTypeWithUseEffect = false -- hide item equip location and item type with Use effect
+						end,
+
+						-- This method only sets button parameters, 
+						-- the actual keybind display and graphic choices
+						-- are done in the button widget in ./schematics-widgets.lua.
+						"UpdateKeybindDisplay", function(self)
+							local db = self.db
+							for button in self:GetAllActionButtonsOrdered() do
+								button.padType = self:GetGamepadType()
+								button.padStyle = db.gamePadType or "default"
+
+								if (db.keybindDisplayPriority == "gamepad") then
+									button.prioritizeGamePadBinds = true
+									button.prioritzeKeyboardBinds = nil
+
+								elseif (db.keybindDisplayPriority == "keyboard") then
+									button.prioritizeGamePadBinds = nil
+									button.prioritzeKeyboardBinds = true
+								else
+									button.prioritizeGamePadBinds = (db.lastKeybindDisplayType == "gamepad") or self:IsUsingGamepad()
+									button.prioritzeKeyboardBinds = true
+								end
+
+								if (button.UpdateBinding) then
+									button:UpdateBinding()
+								end
+							end 
+						end, 
+
+						-- A general method to update all things at once.
 						"UpdateSettings", function(self, event, ...)
 							self:UpdateFading()
 							self:UpdateFadeAnchors()
@@ -995,7 +1015,6 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							self:UpdateKeybindDisplay()
 							self:UpdateTooltipSettings()
 						end
-
 						
 					}
 				},

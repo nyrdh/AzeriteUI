@@ -622,7 +622,6 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			
 		}
 	}
-
 })
 
 -- Applied to the primary player frame

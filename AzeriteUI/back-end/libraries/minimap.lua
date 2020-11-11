@@ -1,4 +1,4 @@
-local Version = 54
+local Version = 55
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -1007,33 +1007,43 @@ LibMinimap.UpdateCompass = function()
 		return
 	end
 
-	local radius = LibMinimap.compassRadius
-	if (not radius) then
-		local width = compassFrame:GetWidth()
-		if (not width) then
-			return
+	if (LibMinimap.rotateMinimap) then
+		local radius = LibMinimap.compassRadius
+		if (not radius) then
+			local width = compassFrame:GetWidth()
+			if (not width) then
+				return
+			end
+			radius = width/2
 		end
-		radius = width/2
-	end
+	
+		local inset = LibMinimap.compassRadiusInset
+		if inset then
+			radius = radius - inset
+		end
+	
+		local playerFacing = GetPlayerFacing()
+		if (not playerFacing or (compassFrame.supressCompass)) then
+			compassFrame:SetAlpha(0)
+		else
+			compassFrame:SetAlpha(1)
+		end
+	
+		local angle = (LibMinimap.rotateMinimap and playerFacing) and -playerFacing or 0
+	
+		compassFrame.east:SetPoint("CENTER", radius*math.cos(angle), radius*math.sin(angle))
+		compassFrame.north:SetPoint("CENTER", radius*math.cos(angle + math.pi/2), radius*math.sin(angle + math.pi/2))
+		compassFrame.west:SetPoint("CENTER", radius*math.cos(angle + math.pi), radius*math.sin(angle + math.pi))
+		compassFrame.south:SetPoint("CENTER", radius*math.cos(angle + math.pi*3/2), radius*math.sin(angle + math.pi*3/2))
 
-	local inset = LibMinimap.compassRadiusInset
-	if inset then
-		radius = radius - inset
-	end
-
-	local playerFacing = GetPlayerFacing()
-	if (not playerFacing or (compassFrame.supressCompass)) then
-		compassFrame:SetAlpha(0)
+		if (not compassFrame:IsShown()) then
+			compassFrame:Show()
+		end
 	else
-		compassFrame:SetAlpha(1)
+		if (compassFrame:IsShown()) then
+			compassFrame:Hide()
+		end
 	end
-
-	local angle = (LibMinimap.rotateMinimap and playerFacing) and -playerFacing or 0
-
-	compassFrame.east:SetPoint("CENTER", radius*math.cos(angle), radius*math.sin(angle))
-	compassFrame.north:SetPoint("CENTER", radius*math.cos(angle + math.pi/2), radius*math.sin(angle + math.pi/2))
-	compassFrame.west:SetPoint("CENTER", radius*math.cos(angle + math.pi), radius*math.sin(angle + math.pi))
-	compassFrame.south:SetPoint("CENTER", radius*math.cos(angle + math.pi*3/2), radius*math.sin(angle + math.pi*3/2))
 end
 
 LibMinimap.CreateCompassFrame = function(self)
@@ -1191,6 +1201,10 @@ end
 
 LibMinimap.OnEvent = function(self, event, ...)
 	if (event == "CVAR_UPDATE") then
+		local uvar = ...
+		if (uvar ~= "ROTATE_MINIMAP") then
+			return
+		end
 
 		-- Store the setting locally
 		self.rotateMinimap = GetCVar("rotateMinimap") == "1"
