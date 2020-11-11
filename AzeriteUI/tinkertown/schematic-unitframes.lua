@@ -127,7 +127,8 @@ end
 -----------------------------------------------------------
 -- Applied to the primary player frame
 Private.RegisterSchematic("UnitForge::Player", "Legacy", {
-	-- Create layered scaffold frames
+	-- Create layered scaffold frames.
+	-- These are used to house the other widgets and elements.
 	{
 		type = "CreateWidgets",
 		widgets = {
@@ -475,7 +476,8 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 -- Applied to the player HUD elements,
 -- like cast bar, combo points and alt power.
 Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
-	-- Create layered scaffold frames
+	-- Create layered scaffold frames.
+	-- These are used to house the other widgets and elements.
 	{
 		type = "CreateWidgets",
 		widgets = {
@@ -625,7 +627,8 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 
 -- Applied to the primary player frame
 Private.RegisterSchematic("UnitForge::Target", "Legacy", {
-	-- Create layered scaffold frames
+	-- Create layered scaffold frames.
+	-- These are used to house the other widgets and elements.
 	{
 		type = "CreateWidgets",
 		widgets = {

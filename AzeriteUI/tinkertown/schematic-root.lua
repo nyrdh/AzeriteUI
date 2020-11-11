@@ -22,12 +22,23 @@ local GetSchematic = Private.GetSchematic
 -- Schematics
 -----------------------------------------------------------
 Private.RegisterSchematic("ModuleForge::Root", "Generic", {
+	-- This is called by the module when the module is initialized.
+	-- This is typically where we first figure out if it should remain enabled,
+	-- then in turn start spawning frames and set up the local environment as needed.
+	-- Anything used later on or in the enable method should be defined here.
 	OnInit = {},
+	-- This is called by the module when the module is enabled.
+	-- This is typically where we register events, start timers, etc.
 	OnEnable = {
 		{
 			type = "ExecuteMethods",
 			methods = {
 				{
+					-- A 'repeatAction' is a special type of action
+					-- that performs the same method on the self object
+					-- multiple times in a row, but varies the parameter 
+					-- sent to that method by iterating through the 
+					-- 'arguments' list. 
 					repeatAction = {
 						method = "DisableUIWidget",
 						arguments = {
@@ -59,6 +70,11 @@ Private.RegisterSchematic("ModuleForge::Root", "Generic", {
 					}
 				},
 				{
+					-- A 'repeatAction' is a special type of action
+					-- that performs the same method on the self object
+					-- multiple times in a row, but varies the parameter 
+					-- sent to that method by iterating through the 
+					-- 'arguments' list. 
 					repeatAction = {
 						method = "DisableUIMenuPage",
 						arguments = {
@@ -69,6 +85,11 @@ Private.RegisterSchematic("ModuleForge::Root", "Generic", {
 					}
 				},
 				{
+					-- A 'repeatAction' is a special type of action
+					-- that performs the same method on the self object
+					-- multiple times in a row, but varies the parameter 
+					-- sent to that method by iterating through the 
+					-- 'arguments' list. 
 					repeatAction = {
 						method = "DisableUIMenuOption",
 						arguments = {
@@ -84,12 +105,23 @@ Private.RegisterSchematic("ModuleForge::Root", "Generic", {
 })
 
 Private.RegisterSchematic("ModuleForge::Root", "Azerite", {
+	-- This is called by the module when the module is initialized.
+	-- This is typically where we first figure out if it should remain enabled,
+	-- then in turn start spawning frames and set up the local environment as needed.
+	-- Anything used later on or in the enable method should be defined here.
 	OnInit = {},
+	-- This is called by the module when the module is enabled.
+	-- This is typically where we register events, start timers, etc.
 	OnEnable = {
 		{
 			type = "ExecuteMethods",
 			methods = {
 				{
+					-- A 'repeatAction' is a special type of action
+					-- that performs the same method on the self object
+					-- multiple times in a row, but varies the parameter 
+					-- sent to that method by iterating through the 
+					-- 'arguments' list. 
 					repeatAction = {
 						method = "DisableUIWidget",
 						arguments = {
@@ -122,6 +154,11 @@ Private.RegisterSchematic("ModuleForge::Root", "Azerite", {
 					}
 				},
 				{
+					-- A 'repeatAction' is a special type of action
+					-- that performs the same method on the self object
+					-- multiple times in a row, but varies the parameter 
+					-- sent to that method by iterating through the 
+					-- 'arguments' list. 
 					repeatAction = {
 						method = "DisableUIMenuPage",
 						arguments = {
@@ -132,6 +169,11 @@ Private.RegisterSchematic("ModuleForge::Root", "Azerite", {
 					}
 				},
 				{
+					-- A 'repeatAction' is a special type of action
+					-- that performs the same method on the self object
+					-- multiple times in a row, but varies the parameter 
+					-- sent to that method by iterating through the 
+					-- 'arguments' list. 
 					repeatAction = {
 						method = "DisableUIMenuOption",
 						arguments = {
@@ -147,6 +189,10 @@ Private.RegisterSchematic("ModuleForge::Root", "Azerite", {
 })
 
 Private.RegisterSchematic("ModuleForge::Root", "Legacy", {
+	-- This is called by the module when the module is initialized.
+	-- This is typically where we first figure out if it should remain enabled,
+	-- then in turn start spawning frames and set up the local environment as needed.
+	-- Anything used later on or in the enable method should be defined here.
 	OnInit = {
 		{
 			type = "ExecuteMethods",
@@ -160,11 +206,18 @@ Private.RegisterSchematic("ModuleForge::Root", "Legacy", {
 			}
 		}
 	},
+	-- This is called by the module when the module is enabled.
+	-- This is typically where we register events, start timers, etc.
 	OnEnable = {
 		{
 			type = "ExecuteMethods",
 			methods = {
 				{
+					-- A 'repeatAction' is a special type of action
+					-- that performs the same method on the self object
+					-- multiple times in a row, but varies the parameter 
+					-- sent to that method by iterating through the 
+					-- 'arguments' list. 
 					repeatAction = {
 						method = "DisableUIWidget",
 						arguments = {
@@ -207,6 +260,11 @@ Private.RegisterSchematic("ModuleForge::Root", "Legacy", {
 					}
 				},
 				{
+					-- A 'repeatAction' is a special type of action
+					-- that performs the same method on the self object
+					-- multiple times in a row, but varies the parameter 
+					-- sent to that method by iterating through the 
+					-- 'arguments' list. 
 					repeatAction = {
 						method = "DisableUIMenuOption",
 						arguments = {
