@@ -193,6 +193,8 @@ local ActionButton_PostUpdateUsable = function(self, shouldDesaturate)
 end
 
 -- Keybind graphic magic
+-- *Note that this method includes WoW API that only exists
+--  in 9.0.1 or later, so do NOT call it AT ALL in classic!
 local ActionButton_GetBindingTextAbbreviated = function(self)
 	local key = self:GetBindingText()
 	if (key) then
@@ -361,6 +363,8 @@ end
 
 -- Use the standard binding text function for Classic.
 -- This is a copy of the method used by the back-end.
+-- Might seem slightly redundant replacing something with itself,
+-- but it saves us from any further client version checks. 
 if (not IsRetail) then
 	ActionButton_GetBindingTextAbbreviated = function(self)
 		return self:AbbreviateBindText(self:GetBindingText())

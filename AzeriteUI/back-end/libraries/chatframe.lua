@@ -1,4 +1,4 @@
-local LibChatWindow, version = Wheel:Set("LibChatWindow", 32)
+local LibChatWindow, version = Wheel:Set("LibChatWindow", 33)
 if (not LibChatWindow) then	
 	return
 end
@@ -535,15 +535,13 @@ local embedMethods = {
 -- Silently fail if nothing exists. We don't want an error here. 
 LibChatWindow.ForAllEmbeds = function(self, method, ...)
 	for target in pairs(self.embeds) do 
-		if (target) then 
-			if (not target.IsUserDisabled) or (not target:IsUserDisabled()) then
-				if (type(method) == "string") then
-					if target[method] then
-						target[method](target, ...)
-					end
-				else
-					method(target, ...)
+		if (target) and not(target.IsUserDisabled and target:IsUserDisabled()) then 
+			if (type(method) == "string") then
+				if target[method] then
+					target[method](target, ...)
 				end
+			else
+				method(target, ...)
 			end
 		end 
 	end 

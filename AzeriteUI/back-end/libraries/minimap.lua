@@ -1,4 +1,4 @@
-local Version = 55
+local Version = 56
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -1164,6 +1164,7 @@ LibMinimap.SetMinimapCompassEnabled = function(self, enableCompass)
 
 		-- Watch out for changes to the rotation setting
 		LibMinimap:RegisterEvent("CVAR_UPDATE", "OnEvent")
+		LibMinimap:RegisterEvent("VARIABLES_LOADED", "OnEvent")
 	else
 
 		-- Hide our frame if it exists
@@ -1179,6 +1180,7 @@ LibMinimap.SetMinimapCompassEnabled = function(self, enableCompass)
 		-- Remove the event
 		if LibMinimap:IsEventRegistered("CVAR_UPDATE", "OnEvent") then
 			LibMinimap:UnregisterEvent("CVAR_UPDATE", "OnEvent")
+			LibMinimap:UnregisterEvent("VARIABLES_LOADED", "OnEvent")
 		end
 	end
 
@@ -1200,12 +1202,8 @@ LibMinimap.SetMinimapAllowAddonButtons = function(self, allow)
 end
 
 LibMinimap.OnEvent = function(self, event, ...)
-	if (event == "CVAR_UPDATE") then
-		local uvar = ...
-		if (uvar ~= "ROTATE_MINIMAP") then
-			return
-		end
-
+	local arg1, arg2 = ...
+	if ((event == "CVAR_UPDATE") and (arg1 == "ROTATE_MINIMAP")) or (event == "VARIABLES_LOADED") then
 		-- Store the setting locally
 		self.rotateMinimap = GetCVar("rotateMinimap") == "1"
 

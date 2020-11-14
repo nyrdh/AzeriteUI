@@ -40,8 +40,11 @@ locale\ruRU.lua
 locale\zhCN.lua
 locale\zhTW.lua  
 
-# Addon specific layout and design. 
-front-end\api.lua
+# Private addon API and tools. 
+# Also the old addon specific layouts and design,
+# though these will eventually all be moved tools
+# the new tinkertown schematics system. 
+front-end\private.lua
 
 # Where tinkerers should tinker. 
 tinkertown\tinkertown.xml

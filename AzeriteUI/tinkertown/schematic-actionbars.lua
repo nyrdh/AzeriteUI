@@ -57,10 +57,66 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 	-- This is typically where we first figure out if it should remain enabled,
 	-- then in turn start spawning frames and set up the local environment as needed.
 	-- Anything used later on or in the enable method should be defined here.
-	OnInit = {},
+	OnInit = {
+		{
+			type = "ExecuteMethods",
+			methods = {
+				{
+					-- The 'values' sections assigns values and methods
+					-- to the self object, which in this case is the module.
+					-- Nothing actually happens here, but this is where 
+					-- we define everything the module needs in advance.
+					values = {
+						-- Spawns the primary action bar, 
+						-- which holds the default 12 buttons.
+						-- This is the bar that page switches.
+						"SpawnPrimaryBar", function(self)
+						end,
+						-- Spawns the secondary bar, 
+						-- which in the default UI is known as 
+						-- "the bottom left multi actionbar".
+						-- It is normally placed above the default bar, 
+						-- which is why we have chosen this one as secondary.
+						"SpawnSecondaryBar", function(self)
+						end,
+						-- Spawns a custom vehicle action bar.
+						-- We'll be using a separate set of bars and 
+						-- unit frames for vehicles in the Legacy theme.
+						"SpawnVehicleBar", function(self)
+						end,
+					},
+					-- The 'chain' sections performs methods on the module,
+					-- and passes the unpacked arguments in the tables 
+					-- to those methods. An empty table means no arguments.
+					-- Here we can call methods created in previously defined
+					-- 'values' sections.
+					chain = {
+						"SpawnPrimaryBar", {},
+						"SpawnSecondaryBar", {}
+					}
+				}
+			}
+		}
+	},
 	-- This is called by the module when the module is enabled.
 	-- This is typically where we register events, start timers, etc.
-	OnEnable = {}
+	OnEnable = {
+		{
+			type = "ExecuteMethods",
+			methods = {
+				{
+					-- The 'chain' sections performs methods on the module,
+					-- and passes the unpacked arguments in the tables 
+					-- to those methods. An empty table means no arguments.
+					-- Here we can call methods created in previously defined
+					-- 'values' sections.
+					chain = {
+
+					}
+				}
+			}
+		}
+	}
 })
 
 -- Azerite Schematics
