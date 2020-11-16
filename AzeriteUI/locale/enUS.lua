@@ -181,6 +181,7 @@ L["Click to disable the Pet Action Bar."] = true
 --------------------------------------------
 L["%s to leave the vehicle."] = true
 L["%s to dismount."] = true
+L["%s to dismiss your controlled minion."] = true
 
 -- Abbreviations
 --------------------------------------------

@@ -243,15 +243,21 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 							local frame = self.frame
 							frame:SetFrameStrata("LOW")
 							frame:SetFrameLevel(1)
-							frame:SetSize(frameW + 21 + padSide*2, frameH + 21 + padTop*2)
-							frame:SetBackdrop({
+							frame:SetSize(2,2)
+							frame:Place("BOTTOM", "UICenter", "BOTTOM", padding, offsetY - 21/2 - padding)
+
+							local primaryBackdrop = frame:CreateFrame("Frame")
+							primaryBackdrop:SetFrameStrata("LOW")
+							primaryBackdrop:SetFrameLevel(1)
+							primaryBackdrop:SetSize(frameW + 21 + padSide*2, frameH + 21 + padTop*2)
+							primaryBackdrop:SetBackdrop({
 								bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false,
 								edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
 								insets = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
 							})
-							frame:SetBackdropColor(0, 0, 0, .75)
-							frame:SetBackdropBorderColor(Colors.ui[1], Colors.ui[2], Colors.ui[3])
-							frame:Place("BOTTOM", "UICenter", "BOTTOM", padding, offsetY - 21/2 - padding)
+							primaryBackdrop:SetBackdropColor(0, 0, 0, .75)
+							primaryBackdrop:SetBackdropBorderColor(Colors.ui[1], Colors.ui[2], Colors.ui[3])
+							primaryBackdrop:Place("BOTTOM", "UICenter", "BOTTOM", padding, offsetY - 21/2 - padding)
 
 							-- Primary Action Bar
 							for id = 1,NUM_ACTIONBAR_BUTTONS do 
@@ -261,8 +267,14 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 								--local postCreate = ActionButton_PostCreate_Small
 								local button = self:SpawnActionButton("action", self.frame, postCreate, id, 1)
 
+								if (id == 1) then
+									primaryBackdrop:SetParent(button)
+									primaryBackdrop:SetFrameStrata("LOW")
+									primaryBackdrop:SetFrameLevel(1)
+								end
+
 								--12x1
-								button:Place("BOTTOMLEFT", self.frame, "BOTTOMLEFT", -2 + padSide + 21/2 + (id-1)*(size+padding), -2 + padTop + 21/2)
+								button:Place("BOTTOMLEFT", self.frame, "BOTTOM", -frameW/2 + -2 + padSide + (id-1)*(size+padding), -2 + padTop + 21/2)
 								
 								-- 6x2
 								--local x = -frameW/2 + ((id > 6) and (id-7) or (id-1))*(size+padding)
@@ -289,7 +301,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 								-- Let's put on a special visibility driver 
 								-- that hides these buttons in vehicles, and on taxis.
 								UnregisterAttributeDriver(button._owner, "state-vis")
-								RegisterAttributeDriver(button._owner, "state-vis", "[canexitvehicle,novehicleui][vehicleui]hide;[@player,exists][overridebar][possessbar][shapeshift]show;hide")
+								RegisterAttributeDriver(button._owner, "state-vis", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;[@player,exists]show;hide")
 
 								-- Button cache
 								self.Buttons[self.buttonID] = button
@@ -318,6 +330,74 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 						-- directly get in the way of on-screen elements
 						-- in for example BfA vehicle based mini-games.
 						"SpawnVehicleBar", function(self)
+							local db = self.db
+							local proxy = self:GetSecureUpdater()
+
+							local size,padding,offsetY,padSide,padTop = 50,2,40,0,-2
+							local frameW,frameH = size*6 + padding*5, size
+
+							local primaryBackdrop = self.frame:CreateFrame("Frame")
+							primaryBackdrop:SetFrameStrata("LOW")
+							primaryBackdrop:SetFrameLevel(1)
+							primaryBackdrop:SetSize(frameW + 21 + padSide*2, frameH + 21 + padTop*2)
+							primaryBackdrop:SetBackdrop({
+								bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false,
+								edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
+								insets = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
+							})
+							primaryBackdrop:SetBackdropColor(0, 0, 0, .75)
+							primaryBackdrop:SetBackdropBorderColor(Colors.ui[1], Colors.ui[2], Colors.ui[3])
+							primaryBackdrop:Place("BOTTOM", "UICenter", "BOTTOM", padding, offsetY - 21/2 - padding)
+
+							-- Primary Action Bar
+							for id = 1,6 do 
+								self.buttonID = (self.buttonID or 0) + 1
+
+								local postCreate = ActionButton_PostCreate_Normal
+								--local postCreate = ActionButton_PostCreate_Small
+								local button = self:SpawnActionButton("action", self.frame, postCreate, id, 1)
+								button.overrideAlphaWhenEmpty = .9
+
+								if (id == 1) then
+									primaryBackdrop:SetParent(button)
+									primaryBackdrop:SetFrameStrata("LOW")
+									primaryBackdrop:SetFrameLevel(1)
+								end
+
+								--6x1
+								button:Place("BOTTOMLEFT", self.frame, "BOTTOM", -frameW/2 + -2 + padSide + (id-1)*(size+padding), -2 + padTop + 21/2)
+								
+								-- Layout helper
+								button:SetAttribute("layoutID", self.buttonID)
+
+								-- Always lock vehicle buttons
+								button:SetAttribute("buttonLock", true)
+
+								-- Link the buttons and their pagers 
+								--proxy:SetFrameRef("Button"..self.buttonID, button)
+								--proxy:SetFrameRef("Pager"..self.buttonID, button:GetPager())
+	
+								-- Reference all buttons in our menu callback frame
+								--proxy:Execute(([=[
+								--	table.insert(Buttons, self:GetFrameRef("Button"..%.0f)); 
+								--	table.insert(Pagers, self:GetFrameRef("Pager"..%.0f)); 
+								--]=]):format(self.buttonID, self.buttonID))
+								
+								-- Let's put on a special visibility driver 
+								-- that hides these buttons in vehicles, and on taxis.
+								UnregisterAttributeDriver(button._owner, "state-vis")
+								local visibilityDriver = "[canexitvehicle,novehicleui]hide;[overridebar][possessbar][shapeshift][vehicleui]show;hide"
+
+								--RegisterAttributeDriver(button._owner, "state-vis", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar]hide;[@player,exists][shapeshift]show;hide")
+								RegisterAttributeDriver(button._owner, "state-vis", visibilityDriver)
+
+								-- Button cache
+								--self.Buttons[self.buttonID] = button
+
+								-- Faster lookups
+								self.ButtonLookup[button] = true
+							end
+
 						end,
 
 						"SpawnStanceBar", function(self)
@@ -486,15 +566,19 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 								if (UnitOnTaxi("player")) then 
 									tooltip:AddLine(TAXI_CANCEL)
 									tooltip:AddLine(TAXI_CANCEL_DESCRIPTION, Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
-								elseif IsMounted() then 
+								elseif (IsMounted()) then 
 									tooltip:AddLine(BINDING_NAME_DISMOUNT)
 									tooltip:AddLine(L["%s to dismount."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+								elseif (IsPossessBarVisible() and PetCanBeDismissed()) then
+									tooltip:AddLine(PET_DISMISS)
+									tooltip:AddLine(L["%s to dismiss your controlled minion."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
 								else
 									tooltip:AddLine(LEAVE_VEHICLE)
 									tooltip:AddLine(L["%s to leave the vehicle."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
 								end 
 								tooltip:Show()
 							end
+					
 							self.VehicleExitButton = button
 						end,
 
@@ -637,6 +721,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 						"CreateSecureUpdater", {},
 						"SpawnPrimaryBar", {},
 						"SpawnSecondaryBar", {},
+						"SpawnVehicleBar", {},
 						"SpawnPetBar", {},
 						"SpawnStanceBar", {},
 						"SpawnExitButton", {},
@@ -1231,9 +1316,12 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 								if (UnitOnTaxi("player")) then 
 									tooltip:AddLine(TAXI_CANCEL)
 									tooltip:AddLine(TAXI_CANCEL_DESCRIPTION, Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
-								elseif IsMounted() then 
+								elseif (IsMounted()) then 
 									tooltip:AddLine(BINDING_NAME_DISMOUNT)
 									tooltip:AddLine(L["%s to dismount."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+								elseif (IsPossessBarVisible() and PetCanBeDismissed()) then
+									tooltip:AddLine(PET_DISMISS)
+									tooltip:AddLine(L["%s to dismiss your controlled minion."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
 								else
 									tooltip:AddLine(LEAVE_VEHICLE)
 									tooltip:AddLine(L["%s to leave the vehicle."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])

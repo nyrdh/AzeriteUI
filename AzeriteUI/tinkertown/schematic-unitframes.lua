@@ -180,7 +180,8 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"hideInVehicles", true, 
 
 					-- hides when the unit is in a vehicle, but lacks a vehicleui (tortollan minigames)
-					"visibilityPreDriver", "[canexitvehicle,novehicleui]hide;" 
+					--"visibilityPreDriver", "[canexitvehicle,novehicleui]hide;", 
+					"visibilityPreDriver", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;"
 				}
 			},
 			-- Setup backdrop and border
@@ -679,7 +680,8 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"hideInVehicles", true, 
 
 					-- hides when the unit is in a vehicle, but lacks a vehicleui (tortollan minigames)
-					"visibilityPreDriver", "[canexitvehicle,novehicleui]hide;" 
+					--"visibilityPreDriver", "[canexitvehicle,novehicleui]hide;", 
+					"visibilityPreDriver", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;"
 				}
 			},
 			-- Setup backdrop and border

@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 126)
+local LibSecureButton = Wheel:Set("LibSecureButton", 127)
 if (not LibSecureButton) then
 	return
 end
@@ -93,9 +93,11 @@ local IsAutoCastPetAction = C_ActionBar.IsAutoCastPetAction
 local IsBindingForGamePad = IsBindingForGamePad
 local IsConsumableAction = IsConsumableAction
 local IsEnabledAutoCastPetAction = C_ActionBar.IsEnabledAutoCastPetAction
+local IsPossessBarVisible = IsPossessBarVisible
 local IsSpellOverlayed = IsSpellOverlayed
 local IsStackableAction = IsStackableAction
 local IsUsableAction = IsUsableAction
+local PetCanBeDismissed = PetCanBeDismissed
 local RegisterAttributeDriver = RegisterAttributeDriver
 local SetClampedTextureRotation = SetClampedTextureRotation
 local SetOverrideBindingClick = SetOverrideBindingClick
@@ -2038,6 +2040,8 @@ ExitButton.PreClick = function(self) end
 ExitButton.PostClick = function(self, button) 
 	if (UnitOnTaxi("player") and (not InCombatLockdown())) then
 		TaxiRequestEarlyLanding()
+	elseif (IsPossessBarVisible() and PetCanBeDismissed()) then
+		PetDismiss()
 	end
 end
 
@@ -2442,6 +2446,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		button:SetScript("OnLeave", ExitButton.OnLeave)
 		button:SetScript("PreClick", ExitButton.PreClick)
 		button:SetScript("PostClick", ExitButton.PostClick)
+		button._owner = visibility
 
 		local visibilityDriver, macroText
 		if (IsClassic) then
@@ -2450,7 +2455,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		
 		elseif (IsRetail) then
 			macroText = "/leavevehicle [target=vehicle,exists,canexitvehicle]\n/dismount [mounted]"
-			visibilityDriver = "[target=vehicle,exists,canexitvehicle][mounted]show;hide"
+			visibilityDriver = "[target=vehicle,exists,canexitvehicle][possessbar][mounted]show;hide"
 		end
 
 		button:SetAttribute("macrotext", macroText)
@@ -2667,7 +2672,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 
 		-- enable the visibility driver
 		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
-		
+
 		-- reset the page before applying a new page driver
 		page:SetAttribute("state-page", "0") 
 
