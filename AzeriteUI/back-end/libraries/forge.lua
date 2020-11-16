@@ -1,4 +1,4 @@
-local LibForge = Wheel:Set("LibForge", 13)
+local LibForge = Wheel:Set("LibForge", 14)
 if (not LibForge) then
 	return
 end
@@ -326,12 +326,12 @@ LibForge.Forge = function(self, object, forgedata, ...)
 							-- or could even be a widget type not currently supported by the forge.
 							if (widget) then
 
-								-- Apply any methods
-								self:Chain(widget, item.chain) 
-
 								-- Assign values
 								self:Decorate(widget, item.values, ...) 
 							
+								-- Apply any methods
+								self:Chain(widget, item.chain) 
+
 								-- Key the widget to its owner or parent.
 								-- This should only happen in widget creation, not modification.
 								if (item.ownerKey) then
@@ -409,14 +409,12 @@ LibForge.Forge = function(self, object, forgedata, ...)
 								end
 							end
 
-							-- Apply any methods
-							self:Chain(widget, item.chain) 
-
 							-- Assign values
 							self:Decorate(widget, item.values, ...) 
 
+							-- Apply any methods
+							self:Chain(widget, item.chain) 
 						end
-
 					end
 				end
 		
@@ -425,6 +423,9 @@ LibForge.Forge = function(self, object, forgedata, ...)
 				-- Iterate widgets to be created or modelled
 				for _,item in ipairs(workorder.methods) do
 					if (item) then
+						-- Assign values
+						self:Decorate(object, item.values, ...) 
+
 						if (item.repeatAction) then
 							local method = item.repeatAction.method
 							for _,args in ipairs(item.repeatAction.arguments) do
@@ -434,9 +435,6 @@ LibForge.Forge = function(self, object, forgedata, ...)
 
 						-- Apply any methods
 						self:Chain(object, item.chain) 
-
-						-- Assign values
-						self:Decorate(object, item.values, ...) 
 					end
 				end
 			end

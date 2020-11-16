@@ -4805,13 +4805,15 @@ Private.GetLayoutID = function()
 	return CURRENT_LAYOUT
 end
 
+-- Private.RegisterSchematic(uniqueID[, layoutID], schematic)
 Private.RegisterSchematic = function(uniqueID, ...)
 	local schematic, layoutID
-	if (select("#", ...) == 2) then
-		layoutID, schematic = ...
-	else
+	local numArgs = select("#", ...)
+	if (numArgs == 1) then
 		schematic = ...
 		layoutID = Private.GetLayoutID()
+	elseif (numArgs == 2) then
+		layoutID, schematic = ...
 	end
 	Schematics[layoutID][uniqueID] = schematic
 end
