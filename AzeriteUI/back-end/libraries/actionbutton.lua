@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 125)
+local LibSecureButton = Wheel:Set("LibSecureButton", 126)
 if (not LibSecureButton) then
 	return
 end

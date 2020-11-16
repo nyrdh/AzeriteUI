@@ -6,6 +6,13 @@
 --]]--
 local ADDON, Private = ...
 
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded.")
+
+-- WoW client version constants
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
+
 -- Private API
 local Colors = Private.Colors
 local GetAuraFilter = Private.GetAuraFilter
@@ -15,8 +22,6 @@ local GetSchematic = Private.GetSchematic
 
 -- Utility Functions
 -----------------------------------------------------------
-
-
 
 
 -- Schematics

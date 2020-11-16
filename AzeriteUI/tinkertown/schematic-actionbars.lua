@@ -8,6 +8,9 @@
 --]]--
 local ADDON, Private = ...
 
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded.")
+
 -- Lua API
 local _G = _G
 local ipairs = ipairs
@@ -21,7 +24,12 @@ local tostring = tostring
 local GetTotemTimeLeft = GetTotemTimeLeft
 local InCombatLockdown = InCombatLockdown
 local IsMounted = IsMounted
+local UnitExists = UnitExists
 local UnitOnTaxi = UnitOnTaxi
+
+-- WoW client version constants
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
 
 -- Private API
 local Colors = Private.Colors
@@ -180,7 +188,13 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 						-- Method to create scaffolds and overlay frames.
 						"CreateScaffolds", function(self)
 							-- Create master frame. This one becomes secure.
-							self.frame = self:CreateFrame("Frame", nil, "UICenter")
+							self.frame = self:CreateFrame("Frame", nil, "UICenter", "BackdropTemplate")
+
+							-- Create overlay frames used for explorer mode.
+							self.frameOverlay = self:CreateFrame("Frame", nil, "UICenter")
+						
+							-- Apply overlay alpha to the master frame.
+							hooksecurefunc(self.frameOverlay, "SetAlpha", function(_,alpha) self.frame:SetAlpha(alpha) end)
 						end,
 
 						-- Method to create the secure callback frame for the menu system.
@@ -189,7 +203,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 							if (OptionsMenu) then
 								local callbackFrame = OptionsMenu:CreateCallbackFrame(self)
 								callbackFrame:AssignSettings(self.db)
-								callbackFrame:AssignProxyMethods("UpdateCastOnDown", "UpdateButtonCount", "UpdateKeybindDisplay")
+								callbackFrame:AssignProxyMethods("UpdateCastOnDown", "UpdateButtonCount", "UpdateKeybindDisplay", "UpdateExplorerModeAnchors")
 					
 								-- Create tables to hold the buttons
 								-- within the restricted environment.
@@ -219,44 +233,70 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 						-- which holds the default 12 buttons.
 						-- This is the bar that page switches.
 						"SpawnPrimaryBar", function(self)
-
 							local db = self.db
 							local proxy = self:GetSecureUpdater()
-						
-							local buttonID = 0 -- current buttonID when spawning
+
+							local size,padding,offsetY,padSide,padTop = 50,2,40,0,-2
+							--local frameW,frameH = size*6 + padding*5, size*2+padding
+							local frameW,frameH = size*12 + padding*11, size
+
+							local frame = self.frame
+							frame:SetFrameStrata("LOW")
+							frame:SetFrameLevel(1)
+							frame:SetSize(frameW + 21 + padSide*2, frameH + 21 + padTop*2)
+							frame:SetBackdrop({
+								bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false,
+								edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
+								insets = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
+							})
+							frame:SetBackdropColor(0, 0, 0, .75)
+							frame:SetBackdropBorderColor(Colors.ui[1], Colors.ui[2], Colors.ui[3])
+							frame:Place("BOTTOM", "UICenter", "BOTTOM", padding, offsetY - 21/2 - padding)
 
 							-- Primary Action Bar
 							for id = 1,NUM_ACTIONBAR_BUTTONS do 
-								buttonID = buttonID + 1
-								self.Buttons[buttonID] = self:SpawnActionButton("action", self.frame, ActionButton_PostCreate_Normal, id, 1)
-							end
-						
-							-- Layout helper
-							for buttonID,button in pairs(self.Buttons) do
-								button:SetAttribute("layoutID", buttonID)
-							end
+								self.buttonID = (self.buttonID or 0) + 1
 
-							-- Apply common settings to the action buttons.
-							for buttonID,button in ipairs(self.Buttons) do 
+								local postCreate = ActionButton_PostCreate_Normal
+								--local postCreate = ActionButton_PostCreate_Small
+								local button = self:SpawnActionButton("action", self.frame, postCreate, id, 1)
 
-								-- Identify it easily.
-								self.ButtonLookup[button] = true
-						
+								--12x1
+								button:Place("BOTTOMLEFT", self.frame, "BOTTOMLEFT", -2 + padSide + 21/2 + (id-1)*(size+padding), -2 + padTop + 21/2)
+								
+								-- 6x2
+								--local x = -frameW/2 + ((id > 6) and (id-7) or (id-1))*(size+padding)
+								--local y = offsetY + (id > 6 and (size + padding) or 0)
+								--button:Place("BOTTOMLEFT", "UICenter", "BOTTOM", x, y)
+								--button.BorderFrame:Hide()
+
+								-- Layout helper
+								button:SetAttribute("layoutID", self.buttonID)
+
 								-- Apply saved buttonLock setting
 								button:SetAttribute("buttonLock", db.buttonLock)
-						
+
 								-- Link the buttons and their pagers 
-								proxy:SetFrameRef("Button"..buttonID, self.Buttons[buttonID])
-								proxy:SetFrameRef("Pager"..buttonID, self.Buttons[buttonID]:GetPager())
-						
+								proxy:SetFrameRef("Button"..self.buttonID, button)
+								proxy:SetFrameRef("Pager"..self.buttonID, button:GetPager())
+	
 								-- Reference all buttons in our menu callback frame
 								proxy:Execute(([=[
 									table.insert(Buttons, self:GetFrameRef("Button"..%.0f)); 
 									table.insert(Pagers, self:GetFrameRef("Pager"..%.0f)); 
-								]=]):format(buttonID, buttonID))
-						
-							end 
-							
+								]=]):format(self.buttonID, self.buttonID))
+								
+								-- Let's put on a special visibility driver 
+								-- that hides these buttons in vehicles, and on taxis.
+								UnregisterAttributeDriver(button._owner, "state-vis")
+								RegisterAttributeDriver(button._owner, "state-vis", "[canexitvehicle,novehicleui][vehicleui]hide;[@player,exists][overridebar][possessbar][shapeshift]show;hide")
+
+								-- Button cache
+								self.Buttons[self.buttonID] = button
+
+								-- Faster lookups
+								self.ButtonLookup[button] = true
+							end
 
 						end,
 
@@ -470,6 +510,17 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 							return pairs(self.PetButtons)
 						end,
 
+						-- Return the frames for the explorer mode mouseover
+						"GetExplorerModeFrameAnchors", function(self)
+							return self:GetOverlayFrame()
+						end,
+
+						-- Return the actionbar frame for the explorer mode mouseover
+						"GetOverlayFrame", function(self)
+							return self.frameOverlay
+						end,
+						
+
 						-- Setters
 						----------------------------------------------------
 						-- Method that allows any module to request the actionbars
@@ -519,6 +570,16 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 							end 
 						end,
 
+						-- Updates the anchors used by the explorer mode
+						-- to decide when you are hovering above the actionbar section.
+						"UpdateExplorerModeAnchors", function(self)
+							local db = self.db
+							local frame = self:GetOverlayFrame()
+							frame:ClearAllPoints()
+							frame:SetPoint("TOPLEFT", self.Buttons[1], "TOPLEFT")
+							frame:SetPoint("BOTTOMRIGHT", self.Buttons[12], "BOTTOMRIGHT")
+						end,
+
 						-- Update actionbutton tooltip display settings.
 						"UpdateTooltipSettings", function(self)
 							local tooltip = self:GetActionButtonTooltip()
@@ -559,9 +620,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 
 						-- A general method to update all things at once.
 						"UpdateSettings", function(self, event, ...)
-							--self:UpdateFading()
-							--self:UpdateFadeAnchors()
-							--self:UpdateExplorerModeAnchors()
+							self:UpdateExplorerModeAnchors()
 							self:UpdateCastOnDown()
 							self:UpdateKeybindDisplay()
 							self:UpdateTooltipSettings()

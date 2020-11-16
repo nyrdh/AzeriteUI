@@ -6,11 +6,18 @@
 --]]--
 local ADDON, Private = ...
 
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded.")
+
 -- WoW API
 local UnitCanAttack = UnitCanAttack
 local UnitIsEnemy = UnitIsEnemy
 local UnitIsFriend = UnitIsFriend
 local UnitIsUnit = UnitIsUnit
+
+-- WoW client version constants
+local IsClassic = LibClientBuild:IsClassic()
+local IsRetail = LibClientBuild:IsRetail()
 
 -- Private API
 local Colors = Private.Colors
