@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-11-13
+## [3.0.425-RC] 2020-11-17
 ### Fixed
 - The minimap compass tag should once again be visible on the initial login after game start.
+- Totem Bar once more makes it appearance in retail.
 
 ## [3.0.424-RC] 2020-11-11
 ### Added
