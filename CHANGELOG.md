@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.426-RC] 2020-11-18
+- Bump toc to 9.0.2.
+
 ## [3.0.425-RC] 2020-11-17
+### Changed
+- The exit button appearing on the minimap while in vehicles, when mounted or when taking a taxi now also works for possessions. This includes toys like the crashin' trashin' series.
+
 ### Fixed
 - The minimap compass tag should once again be visible on the initial login after game start.
 - Totem Bar once more makes it appearance in retail.

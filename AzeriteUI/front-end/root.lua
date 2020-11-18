@@ -788,7 +788,12 @@ Core.SetTheme = function(self, editBox, theme)
 		goldpaw = "Legacy",
 		goldpawui = "Legacy",
 		blakmane = "Azerite",
-		blakmaneui = "Azerite"
+		blakmaneui = "Azerite",
+		dui = "Diabolic",
+		diablo = "Diabolic",
+		diabloui = "Diabolic",
+		diabolic = "Diabolic",
+		diabolicui = "Diabolic"
 	})[theme] 
 	-- Only actually do something if a matching theme was found, 
 	-- and that theme is different from what we're currently using.	
