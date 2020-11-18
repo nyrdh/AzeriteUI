@@ -436,32 +436,26 @@ Module.InitRetailTracker = function(self)
 	if (not ObjectiveTrackerFrame) then 
 		return self:RegisterEvent("ADDON_LOADED", "OnEvent")
 	end
-	local layout = self.layout
 
+	local layout = self.layout
 	local ObjectiveFrameHolder = self:CreateFrame("Frame", nil, "UICenter")
 	ObjectiveFrameHolder:SetWidth(layout.Width)
 	ObjectiveFrameHolder:SetHeight(22)
 	ObjectiveFrameHolder:Place(unpack(layout.Place))
-	
-	ObjectiveTrackerFrame:SetClampedToScreen(false)
-	ObjectiveTrackerFrame:SetAlpha(.9)
-	ObjectiveTrackerFrame:SetParent(self.frame)
-	ObjectiveTrackerFrame:SetIgnoreParentAlpha(false)
-	
+	self.ObjectiveFrameHolder = ObjectiveFrameHolder
+
 	-- Create a dummy frame to cover the tracker  
 	-- to block mouse input when it's faded out. 
 	local ObjectiveFrameCover = self:CreateFrame("Frame", nil, "UICenter")
-	ObjectiveFrameCover:SetParent(ObjectiveFrameHolder)
-	ObjectiveFrameCover:SetFrameLevel(ObjectiveTrackerFrame:GetFrameLevel() + 5)
+	ObjectiveFrameCover:SetParent(self.ObjectiveFrameHolder)
 	ObjectiveFrameCover:SetAllPoints()
 	ObjectiveFrameCover:EnableMouse(true)
 	ObjectiveFrameCover:Hide()
+	self.ObjectiveFrameCover = ObjectiveFrameCover
 
 	-- Minihack to fix mouseover fading
-	self.frame:ClearAllPoints()
-	self.frame:SetAllPoints(ObjectiveTrackerFrame)
-	self.frame.holder = ObjectiveFrameHolder
-	self.frame.cover = ObjectiveFrameCover
+	self.frame.holder = self.ObjectiveFrameHolder
+	self.frame.cover = self.ObjectiveFrameCover
 
 	-- GetScreenHeight() -- this is relative to uiscale: screenHeight * uiScale = 768
 	local top = ObjectiveTrackerFrame:GetTop() or 0
@@ -479,7 +473,6 @@ Module.InitRetailTracker = function(self)
 		ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight)
 	end	
 
-	self.ObjectiveFrameHolder = ObjectiveFrameHolder
 
 	hooksecurefunc(ObjectiveTrackerFrame,"SetPoint", function(_, ...) self:PositionRetailTracker() end)
 	hooksecurefunc(ObjectiveTrackerFrame,"SetAllPoints", function(_, ...) self:PositionRetailTracker() end)
@@ -501,13 +494,19 @@ Module.PositionRetailTracker = function(self, event, ...)
 	end
 	local _,anchor = ObjectiveTrackerFrame:GetPoint()
 	if (anchor ~= self.ObjectiveFrameHolder) then
-		if (not ObjectiveTrackerFrame:IsUserPlaced()) then
-			ObjectiveTrackerFrame:SetMovable(true)
-			ObjectiveTrackerFrame:SetUserPlaced(true)
-		end
+		ObjectiveTrackerFrame:SetMovable(true)
+		ObjectiveTrackerFrame:SetUserPlaced(true)
+		ObjectiveTrackerFrame:SetClampedToScreen(false)
 		ObjectiveTrackerFrame:SetIgnoreParentAlpha(false)
+		ObjectiveTrackerFrame:SetAlpha(.9)
+		ObjectiveTrackerFrame:SetParent(self.frame)
 		ObjectiveTrackerFrame:ClearAllPoints()
 		ObjectiveTrackerFrame:SetPoint("TOP", self.ObjectiveFrameHolder, "TOP")
+	
+		self.frame:ClearAllPoints()
+		self.frame:SetAllPoints(ObjectiveTrackerFrame)
+		self.ObjectiveFrameCover:SetFrameLevel(ObjectiveTrackerFrame:GetFrameLevel() + 5)
+		self.ObjectiveFrameHolder:Place(unpack(self.layout.Place))
 	end
 end
 
