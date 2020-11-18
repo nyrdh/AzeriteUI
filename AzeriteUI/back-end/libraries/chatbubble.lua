@@ -1,4 +1,4 @@
-local LibChatBubble = Wheel:Set("LibChatBubble", 22)
+local LibChatBubble = Wheel:Set("LibChatBubble", 23)
 if (not LibChatBubble) then	
 	return
 end
@@ -326,7 +326,13 @@ LibChatBubble.SetBubblePostUpdateFunc = function(self, func)
 	LibChatBubble.PostUpdateBubbleFunc = func
 end 
 
+-- Seems to be some taint when CinematicFrame is shown, in here?
 LibChatBubble.UpdateBubbleVisibility = function(self)
+	-- Add an extra layer of combat protection here, 
+	-- in case we got here abruptly by a started cinematic.
+	if (InCombatLockdown()) then 
+		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
+	end
 	local _, instanceType = IsInInstance()
 	if ((instanceType == "none") and (not MovieFrame:IsShown()) and (not CinematicFrame:IsShown()) and UIParent:IsShown()) then 
 
@@ -338,9 +344,7 @@ LibChatBubble.UpdateBubbleVisibility = function(self)
 		for bubble in pairs(customBubbles) do
 			self:DisableBlizzard(bubble)
 		end
-
 	else
-
 		-- Stop our updater
 		bubbleUpdater:SetScript("OnUpdate", nil)
 		bubbleBox:Hide()
@@ -400,7 +404,7 @@ LibChatBubble.OnEvent = function(self, event, ...)
 
 		-- Don't ever do any of this while in combat. 
 		-- This should never happen, we're just being overly safe here. 
-		if InCombatLockdown() then 
+		if (InCombatLockdown()) then 
 			return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 		end
 
