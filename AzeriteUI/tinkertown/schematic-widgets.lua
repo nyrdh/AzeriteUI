@@ -524,7 +524,7 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 					"SetSize", { 44, 44 },
 					"SetPosition", { "CENTER", 0, 0 }, 
 					"ClearTexture", 
-					"SetMask", GetMedia("actionbutton-mask-square")
+					"SetMask", GetMedia("actionbutton-mask-square-rounded")
 				}
 			},
 			{
@@ -534,7 +534,7 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 					"SetSize", { 44, 44 }, 
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "CENTER", 0, 0 },
-					"SetMask", GetMedia("actionbutton-mask-square"),
+					"SetMask", GetMedia("actionbutton-mask-square-rounded"),
 					"SetColorTexture", { 1, 1, 1, .15 }
 				}
 			},
@@ -555,7 +555,7 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 					"SetDrawLayer", { "ARTWORK", 2 },
 					"SetTexture", [[Interface\ChatFrame\ChatFrameBackground]],
 					"SetVertexColor", { 1, 0, 0, .25 },
-					"SetMask", GetMedia("actionbutton-mask-square")
+					"SetMask", GetMedia("actionbutton-mask-square-rounded")
 				}
 			},
 			{
@@ -563,7 +563,7 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 				chain = {
 					"SetSize", { 44, 44 },
 					"SetPosition", { "CENTER", 0, 0 }, 
-					"SetSwipeTexture", GetMedia("actionbutton-mask-square"),
+					"SetSwipeTexture", GetMedia("actionbutton-mask-square-rounded"),
 					"SetDrawSwipe", true,
 					"SetBlingTexture", { GetMedia("blank"), 0, 0, 0 , 0 },
 					"SetDrawBling", true
@@ -574,7 +574,7 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 				chain = {
 					"SetSize", { 44, 44 },
 					"SetPosition", { "CENTER", 0, 0 }, 
-					"SetSwipeTexture", { GetMedia("actionbutton-mask-square"), 0, 0, 0, .5 },
+					"SetSwipeTexture", { GetMedia("actionbutton-mask-square-rounded"), 0, 0, 0, .5 },
 					"SetSwipeColor", { 0, 0, 0, .5 },
 					"SetBlingTexture", { GetMedia("blank"), 0, 0, 0 , 0 },
 					"SetDrawSwipe", true,
@@ -639,7 +639,7 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 			{
 				parent = nil, ownerKey = "SpellHighlight,Texture", objectType = "Texture", 
 				chain = {
-					"SetTexture", GetMedia("actionbutton-spellhighlight-square"),
+					"SetTexture", GetMedia("actionbutton-spellhighlight-square-rounded"),
 					"SetVertexColor", { 255/255, 225/255, 125/255, .75 },
 				}
 			},
@@ -706,7 +706,7 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 					"SetDrawLayer", { "ARTWORK", 2 },
 					"SetSize", { 44, 44 },
 					"SetPosition", { "CENTER", 0, 0 },
-					"SetMask", GetMedia("actionbutton-mask-square"),
+					"SetMask", GetMedia("actionbutton-mask-square-rounded"),
 					"SetColorTexture", { .9, .8, .1, .3 }
 				}
 			},
@@ -725,7 +725,7 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 					"SetDrawLayer", { "BACKGROUND", 3 },
 					"SetSize", { 44, 44 },
 					"SetAllPointsToParentKey", "Icon",
-					"SetMask", GetMedia("actionbutton-mask-square"),
+					"SetMask", GetMedia("actionbutton-mask-square-rounded"),
 					"SetTexture", [=[Interface\ChatFrame\ChatFrameBackground]=],
 					"SetVertexColor", { 0, 0, 0, .15 }
 				}
@@ -787,7 +787,7 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetSize", { 44, 44 },
 					"SetPoint", { "CENTER", 0, 0 },
-					"SetTexture", GetMedia("actionbutton-mask-square"),
+					"SetTexture", GetMedia("actionbutton-mask-square-rounded"),
 					"SetVertexColor", { 1, 1, 1, .05 },
 					"SetBlendMode", "ADD"
 				}

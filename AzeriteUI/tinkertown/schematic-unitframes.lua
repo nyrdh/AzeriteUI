@@ -372,6 +372,18 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 				}
 			},
 			
+			-- Combat Status
+			{
+				parent = "self,OverlayScaffold", ownerKey = "Combat", objectType = "Texture", 
+				chain = {
+					"SetPosition", { "CENTER", 0, 9 },
+					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetSize", { 64, 64 }, 
+					"SetTexture", GetMedia("state-grid"),
+					"SetTexCoord", { .5, 1, 0, .5 }
+				}
+			},
+
 			-- Unit Name
 			{
 				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
