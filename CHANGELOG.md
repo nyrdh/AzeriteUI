@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2020-11-18
+### Changed
+- Our actionbutton now use their own spell highlight texture to display MaxDps glows. If you have enabled both MaxDps and Blizzard glows in the MaxDps settings, the MaxDps rotations and colorings will take priority. We recommend disabling the Blizzard glow.
+
 ## [3.0.426-RC] 2020-11-18
 - Bump toc to 9.0.2.
 

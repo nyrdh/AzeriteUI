@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 127)
+local LibSecureButton = Wheel:Set("LibSecureButton", 128)
 if (not LibSecureButton) then
 	return
 end
@@ -1526,6 +1526,12 @@ if (IsRetail) then
 		else 
 			model:Hide()
 		end 
+		if (self.maxDpsGlowColor) then
+			local r, g, b, a = unpack(self.maxDpsGlowColor)
+			self.SpellHighlight.Texture:SetVertexColor(r, g, b, a or .75)
+		else
+			self.SpellHighlight.Texture:SetVertexColor(255/255, 225/255, 125/255, .75)
+		end
 		self.SpellHighlight:Show()
 	end
 
@@ -1539,14 +1545,22 @@ if (IsRetail) then
 
 	-- This one should only apply to blizzard highlight glow updates.
 	ActionButton.UpdateSpellHighlight = function(self)
-		if (not self.SpellHighlight) or (LibSecureButton.disableBlizzardGlow) then
+		if (not self.SpellHighlight) then
 			return
 		end
-		local spellId = self:GetSpellID()
-		if (spellId and IsSpellOverlayed(spellId)) then
+		if (self.maxDpsGlowShown) then
 			self:ShowOverlayGlow()
 		else
-			self:HideOverlayGlow()
+			if (not LibSecureButton.disableBlizzardGlow) then
+				local spellId = self:GetSpellID()
+				if (spellId and IsSpellOverlayed(spellId)) then
+					self:ShowOverlayGlow()
+				else
+					self:HideOverlayGlow()
+				end
+			else
+				self:HideOverlayGlow()
+			end
 		end
 	end
 end
@@ -3120,19 +3134,43 @@ LibSecureButton.HookMaxDps = function(self, event, ...)
 	-- the general assumptions made by MaxDps and other addons.
 	-- Will probably need to make this optional through the API.
 
-	--local Glow = MaxDps.Glow
-	--MaxDps.Glow = function(this, button, id, texture, type, color)
-	--	if (not ButtonLookup[button]) then
-	--		return Glow(this, button, id, texture, type, color)
-	--	end
-	--end
+	--SpellHighlight.Texture:GetTexture()
 
-	--local HideGlow = MaxDps.HideGlow
-	--MaxDps.HideGlow = function(this, button, id)
-	--	if (not ButtonLookup[button]) then
-	--		return HideGlow(this, button, id)
-	--	end
-	--end
+	-- This will hide the MaxDps overlays for the most part.
+	local MaxDps_GetTexture = MaxDps.GetTexture
+	MaxDps.GetTexture = function() end
+
+	local Glow = MaxDps.Glow
+	MaxDps.Glow = function(this, button, id, texture, type, color)
+		if (not AllButtons[button]) then
+			return Glow(this, button, id, texture, type, color)
+		end
+
+		local col = color and { color.r, color.g, color.b, color.a } or nil
+		if (not color) and (type) then
+			if (type == "normal") then
+				local c = this.db.global.highlightColor
+				col = { c.r, c.g, c.b, c.a }
+
+			elseif (type == "cooldown") then
+				local c = this.db.global.cooldownColor
+				col = { c.r, c.g, c.b, c.a }
+			end
+		end
+		button.maxDpsGlowColor = col
+		button.maxDpsGlowShown = true
+		button:UpdateSpellHighlight()
+	end
+
+	local HideGlow = MaxDps.HideGlow
+	MaxDps.HideGlow = function(this, button, id)
+		if (not AllButtons[button]) then
+			return HideGlow(this, button, id)
+		end
+		button.maxDpsGlowColor = nil
+		button.maxDpsGlowShown = nil
+		button:UpdateSpellHighlight()
+	end
 
 	LibSecureButton.maxDPSHooked = true
 end
