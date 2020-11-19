@@ -134,6 +134,7 @@ end
 
 -- Module Schematics
 -----------------------------------------------------------
+-- Legacy unit frame spawning and post updates.
 Private.RegisterSchematic("ModuleForge::UnitFrames", "Legacy", {
 	-- This is called by the module when the module is initialized.
 	-- This is typically where we first figure out if it should remain enabled,
@@ -149,53 +150,32 @@ Private.RegisterSchematic("ModuleForge::UnitFrames", "Legacy", {
 					-- Nothing actually happens here, but this is where 
 					-- we define everything the module needs in advance.
 					values = {
-						"SpawnPlayerFrame", function(self)
-							if (not HasSchematic("UnitForge::Player")) then
-								return
+						"Frames", {},
+						"ExplorerModeFrameAnchors", {},
+						"SpawnQueue", {
+							{ "player", "Player" }, { "target", "Target" },
+							{ "pet", "Pet" }, { "targettarget", "ToT" },
+							{ "player", "PlayerHUD" }, { "vehicle", "Vehicle" }
+						}, 
+
+						"SpawnUnitFrames", function(self)
+							for _,queuedEntry in ipairs(self.SpawnQueue) do 
+								local unit,schematicID = unpack(queuedEntry)
+								if (HasSchematic("UnitForge::"..schematicID)) then
+									local frame = self:SpawnUnitFrame(unit, "UICenter", function(self, unit)
+										self:Forge(GetSchematic("UnitForge::"..schematicID))
+									end)
+									self.Frames[frame] = unit
+									if (not frame.ignoreExplorerMode) then
+										self.ExplorerModeFrameAnchors[#self.ExplorerModeFrameAnchors + 1] = frame
+									end
+								end
 							end
-							local playerFrame = self:SpawnUnitFrame("player", "UICenter", function(self, unit) 
-								self:Forge(GetSchematic("UnitForge::Player")) 
-							end) 
 						end, 
-						"SpawnTargetFrame", function(self)
-							if (not HasSchematic("UnitForge::Target")) then
-								return
-							end
-							local targetFrame = self:SpawnUnitFrame("target", "UICenter", function(self, unit) 
-								self:Forge(GetSchematic("UnitForge::Target")) 
-							end) 
-						end, 
-						"SpawnPetFrame", function(self)
-							if (not HasSchematic("UnitForge::Pet")) then
-								return
-							end
-							local petFrame = self:SpawnUnitFrame("pet", "UICenter", function(self, unit) 
-								self:Forge(GetSchematic("UnitForge::Pet")) 
-							end) 
-						end, 
-						"SpawnToTFrame", function(self)
-							if (not HasSchematic("UnitForge::ToT")) then
-								return
-							end
-							local totFrame = self:SpawnUnitFrame("targettarget", "UICenter", function(self, unit) 
-								self:Forge(GetSchematic("UnitForge::ToT")) 
-							end) 
-						end, 
-						"SpawnHUDFrame", function(self)
-							if (not HasSchematic("UnitForge::HUD")) then
-								return
-							end
-							local hudFrame = self:SpawnUnitFrame("player", "UICenter", function(self, unit) 
-								self:Forge(GetSchematic("UnitForge::HUD")) 
-							end) 
-						end, 
-						"SpawnVehicleFrame", function(self)
-							if (not HasSchematic("UnitForge::Vehicle")) then
-								return
-							end
-							local vehicleFrame = self:SpawnUnitFrame("player", "UICenter", function(self, unit) 
-								self:Forge(GetSchematic("UnitForge::Vehicle")) 
-							end) 
+
+						-- This one is used by the explorer mode module.
+						"GetExplorerModeFrameAnchors", function(self)
+							return unpack(self.ExplorerModeFrameAnchors)
 						end
 					},
 					-- The 'chain' sections performs methods on the module,
@@ -204,12 +184,7 @@ Private.RegisterSchematic("ModuleForge::UnitFrames", "Legacy", {
 					-- Here we can call methods created in previously defined
 					-- 'values' sections.
 					chain = {
-						"SpawnPlayerFrame", {},
-						"SpawnTargetFrame", {},
-						"SpawnPetFrame", {},
-						"SpawnToTFrame", {},
-						"SpawnHUDFrame", {},
-						"SpawnVehicleFrame", {}
+						"SpawnUnitFrames", {}
 					}
 				}
 			}
@@ -642,7 +617,8 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 				},
 				values = {
 					"colors", Colors,
-					"ignoreMouseOver", true
+					"ignoreMouseOver", true,
+					"ignoreExplorerMode", true
 				}
 			}
 		}
@@ -795,6 +771,10 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 
 					-- hides when the unit has a vehicleui
 					"hideInVehicles", true, 
+
+					-- don't need the explorer mode on this, 
+					-- as it's visibility is tied to the fade-in anyway.
+					"ignoreExplorerMode", true,
 
 					-- hides when the unit is in a vehicle, but lacks a vehicleui (tortollan minigames)
 					--"visibilityPreDriver", "[canexitvehicle,novehicleui]hide;", 

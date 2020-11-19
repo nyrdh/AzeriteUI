@@ -265,7 +265,10 @@ Core:NewModule("ExplorerMode", "PLUGIN", "LibMessage", "LibEvent", "LibDB", "Lib
 		self:SetAttachExplorerFrame("UnitFramePlayer", db.enableExplorer)
 		self:SetAttachExplorerFrame("UnitFramePet", db.enableExplorer)
 		self:SetAttachExplorerFrame("BlizzardObjectivesTracker", db.enableTrackerFading)
-	
+
+		-- Forge driven system
+		self:SetAttachExplorerFrame("ModuleForge::UnitFrames", db.enableExplorer) 
+
 		if (db.enableExplorer) and (not cache.enableExplorer) then
 			self:SendMessage("GP_EXPLORER_MODE_ENABLED")
 			cache.enableExplorer = true
