@@ -2118,6 +2118,15 @@ Defaults.UnitFrameRaid = {
 }
 
 ------------------------------------------------
+-- New Forge Driven Defaults
+------------------------------------------------
+Defaults["ModuleForge::UnitFrames"] = {
+	-- Legacy specific settings
+	["Legacy::EnableCastBar"] = true,
+	["Legacy::EnableClassPower"] = true
+}
+
+------------------------------------------------
 -- Module Layouts
 ------------------------------------------------
 -- The purpose of this is to supply all the front-end modules

@@ -11,6 +11,8 @@ local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded.")
 
 -- Lua API
+local pairs = pairs
+local setmetatable = setmetatable
 local tonumber = tonumber
 
 -- WoW API
@@ -29,7 +31,7 @@ local GetSchematic = Private.GetSchematic
 
 -- Keybind Graphics
 -----------------------------------------------------------
-local BindArt = {
+local BindingArt = {
 	["PAD1"] = setmetatable({
 		["playstation"] = 		GetMedia("controller-ps4-cross"),
 		["xbox"] = 				GetMedia("controller-xbox-a"),
@@ -107,16 +109,15 @@ local BindArt = {
 	}, { __index = function(t,k) return t.generic end })
 }
 
-local GetBindArt = function(key, artType)
+local GetBindingArt = function(key, artType)
 	if (key) then
-		for id,art in pairs(BindArt) do
+		for id,art in pairs(BindingArt) do
 			if (key:find(id)) then
 				return art[artType or "generic"]
 			end
 		end
 	end
 end
-
 
 -- Utility Functions
 -----------------------------------------------------------
@@ -275,7 +276,7 @@ local ActionButton_GetBindingTextAbbreviated = function(self)
 							padAltKey = nil
 						end 
 						if (padAltKey) then
-							padAlt = GetBindArt(padAltKey,padType)
+							padAlt = GetBindingArt(padAltKey,padType)
 							mods = mods + 1
 						end
 					end
@@ -285,7 +286,7 @@ local ActionButton_GetBindingTextAbbreviated = function(self)
 							padCtrlKey = nil
 						end 
 						if (padCtrlKey) then
-							padCtrl = GetBindArt(padCtrlKey,padType)
+							padCtrl = GetBindingArt(padCtrlKey,padType)
 							mods = mods + 1
 						end
 					end
@@ -295,14 +296,14 @@ local ActionButton_GetBindingTextAbbreviated = function(self)
 							padShiftKey = nil
 						end 
 						if (padShiftKey) then
-							padShift = GetBindArt(padShiftKey,padType)
+							padShift = GetBindingArt(padShiftKey,padType)
 							mods = mods + 1
 						end
 					end
 				end
 
 				-- Main button art
-				slot2 = GetBindArt(main,padType)
+				slot2 = GetBindingArt(main,padType)
 
 				-- Note that this is only mods that has been assigned to the gamepad, 
 				-- any keyboard buttons will not be shown here.

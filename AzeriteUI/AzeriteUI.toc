@@ -70,5 +70,8 @@ front-end\modules\unitframes.lua
 front-end\modules\unitframes-grouptools.lua
 front-end\modules\unitframes-nameplates.lua
 
+# These will be removed later.
+front-end\modules\deprecated\unitframes.lua
+
 # All addon- and module incompatibilities in one place.
 front-end\auto-disable.lua

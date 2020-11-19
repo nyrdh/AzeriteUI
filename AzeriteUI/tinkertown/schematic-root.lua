@@ -24,8 +24,9 @@ local GetSchematic = Private.GetSchematic
 -----------------------------------------------------------
 
 
--- Schematics
+-- Module Schematics
 -----------------------------------------------------------
+-- Generic
 Private.RegisterSchematic("ModuleForge::Root", "Generic", {
 	-- This is called by the module when the module is initialized.
 	-- This is typically where we first figure out if it should remain enabled,
@@ -109,6 +110,7 @@ Private.RegisterSchematic("ModuleForge::Root", "Generic", {
 	}
 })
 
+-- Azerite
 Private.RegisterSchematic("ModuleForge::Root", "Azerite", {
 	-- This is called by the module when the module is initialized.
 	-- This is typically where we first figure out if it should remain enabled,
@@ -193,6 +195,7 @@ Private.RegisterSchematic("ModuleForge::Root", "Azerite", {
 	}
 })
 
+-- Legacy
 Private.RegisterSchematic("ModuleForge::Root", "Legacy", {
 	-- This is called by the module when the module is initialized.
 	-- This is typically where we first figure out if it should remain enabled,

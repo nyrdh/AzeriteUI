@@ -9,15 +9,16 @@ local ADDON, Private = ...
 local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded.")
 
--- WoW API
-local UnitCanAttack = UnitCanAttack
-local UnitIsEnemy = UnitIsEnemy
-local UnitIsFriend = UnitIsFriend
-local UnitIsUnit = UnitIsUnit
+local LibTime = Wheel("LibTime")
+assert(LibTime, "UnitFrames requires LibTime to be loaded.")
 
 -- WoW client version constants
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
+
+-- Constants for calendar events
+local IsWinterVeil = LibTime:IsWinterVeil()
+local IsLoveFestival = LibTime:IsLoveFestival()
 
 -- Private API
 local Colors = Private.Colors
@@ -25,6 +26,7 @@ local GetAuraFilter = Private.GetAuraFilter
 local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia
 local GetSchematic = Private.GetSchematic
+local HasSchematic = Private.HasSchematic
 
 -- Utility Functions
 -----------------------------------------------------------
@@ -130,7 +132,110 @@ local Aura_PostUpdate = function(element, button)
 	end
 end
 
--- Schematics
+-- Module Schematics
+-----------------------------------------------------------
+Private.RegisterSchematic("ModuleForge::UnitFrames", "Legacy", {
+	-- This is called by the module when the module is initialized.
+	-- This is typically where we first figure out if it should remain enabled,
+	-- then in turn start spawning frames and set up the local environment as needed.
+	-- Anything used later on or in the enable method should be defined here.
+	OnInit = {
+		{
+			type = "ExecuteMethods",
+			methods = {
+				{
+					-- The 'values' sections assigns values and methods
+					-- to the self object, which in this case is the module.
+					-- Nothing actually happens here, but this is where 
+					-- we define everything the module needs in advance.
+					values = {
+						"SpawnPlayerFrame", function(self)
+							if (not HasSchematic("UnitForge::Player")) then
+								return
+							end
+							local playerFrame = self:SpawnUnitFrame("player", "UICenter", function(self, unit) 
+								self:Forge(GetSchematic("UnitForge::Player")) 
+							end) 
+						end, 
+						"SpawnTargetFrame", function(self)
+							if (not HasSchematic("UnitForge::Target")) then
+								return
+							end
+							local targetFrame = self:SpawnUnitFrame("target", "UICenter", function(self, unit) 
+								self:Forge(GetSchematic("UnitForge::Target")) 
+							end) 
+						end, 
+						"SpawnPetFrame", function(self)
+							if (not HasSchematic("UnitForge::Pet")) then
+								return
+							end
+							local petFrame = self:SpawnUnitFrame("pet", "UICenter", function(self, unit) 
+								self:Forge(GetSchematic("UnitForge::Pet")) 
+							end) 
+						end, 
+						"SpawnToTFrame", function(self)
+							if (not HasSchematic("UnitForge::ToT")) then
+								return
+							end
+							local totFrame = self:SpawnUnitFrame("targettarget", "UICenter", function(self, unit) 
+								self:Forge(GetSchematic("UnitForge::ToT")) 
+							end) 
+						end, 
+						"SpawnHUDFrame", function(self)
+							if (not HasSchematic("UnitForge::HUD")) then
+								return
+							end
+							local hudFrame = self:SpawnUnitFrame("player", "UICenter", function(self, unit) 
+								self:Forge(GetSchematic("UnitForge::HUD")) 
+							end) 
+						end, 
+						"SpawnVehicleFrame", function(self)
+							if (not HasSchematic("UnitForge::Vehicle")) then
+								return
+							end
+							local vehicleFrame = self:SpawnUnitFrame("player", "UICenter", function(self, unit) 
+								self:Forge(GetSchematic("UnitForge::Vehicle")) 
+							end) 
+						end
+					},
+					-- The 'chain' sections performs methods on the module,
+					-- and passes the unpacked arguments in the tables 
+					-- to those methods. An empty table means no arguments.
+					-- Here we can call methods created in previously defined
+					-- 'values' sections.
+					chain = {
+						"SpawnPlayerFrame", {},
+						"SpawnTargetFrame", {},
+						"SpawnPetFrame", {},
+						"SpawnToTFrame", {},
+						"SpawnHUDFrame", {},
+						"SpawnVehicleFrame", {}
+					}
+				}
+			}
+		}
+	},
+	-- This is called by the module when the module is enabled.
+	-- This is typically where we register events, start timers, etc.
+	OnEnable = {
+		{
+			type = "ExecuteMethods",
+			methods = {
+				{
+					-- The 'chain' sections performs methods on the module,
+					-- and passes the unpacked arguments in the tables 
+					-- to those methods. An empty table means no arguments.
+					-- Here we can call methods created in previously defined
+					-- 'values' sections.
+					chain = {
+					}
+				}
+			}
+		}
+	}
+})
+
+-- UnitFrame Schematics
 -----------------------------------------------------------
 -- Applied to the primary player frame
 Private.RegisterSchematic("UnitForge::Player", "Legacy", {
@@ -171,7 +276,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 				parent = nil, ownerKey = nil, 
 				chain = {
 					"SetSize", { 316, 86 }, "SetHitBox", { -4, -4, -4, -4 },
-					"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -180, 250 }
+					"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -210, 250 }
 				},
 				values = {
 					"colors", Colors,
@@ -683,7 +788,7 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 				parent = nil, ownerKey = nil, 
 				chain = {
 					"SetSize", { 316, 86 }, "SetHitBox", { -4, -4, -4, -4 },
-					"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 180, 250 }
+					"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 210, 250 }
 				},
 				values = {
 					"colors", Colors,
@@ -1031,3 +1136,4 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 		}
 	}
 })
+
