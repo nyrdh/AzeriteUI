@@ -304,7 +304,8 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 								local postCreate = ActionButton_PostCreate_Normal
 								--local postCreate = ActionButton_PostCreate_Small
 								local button = self:SpawnActionButton("action", self.frame, postCreate, id, 1)
-
+								button.overrideAlphaWhenEmpty = .9
+								
 								if (id == 1) then
 									primaryBackdrop:SetParent(button)
 									primaryBackdrop:SetFrameStrata("LOW")

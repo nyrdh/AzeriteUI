@@ -2875,7 +2875,7 @@ Legacy.Minimap = setmetatable({
 	OuterRingValuePercentFont = GetFont(12, true),
 
 	ToggleBackdropSize = { 85, 85 },
-	ToggleSize = { 56, 56 }, 
+	ToggleSize = { 48, 48 }, 
 
 } , { __index = Azerite.Minimap })
 
