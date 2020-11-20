@@ -2851,10 +2851,31 @@ Legacy.Minimap = setmetatable({
 	CompassRadiusInset = 2, -- move the text 2 points closer to the center of the map
 	MapBorderSize = { 256, 256 }, 
 	MapBorderTexture = GetMedia("minimap-border-legacy"),
-	UseBars = false,
 	PerformanceFramePlaceAdvancedFunc = false,
 
+	UseBars = true,
 
+	RingFrameBackdropSize = { 410, 410 }, 
+	RingFrameOuterRingSparkInset = { 15 * 205/256 }, 
+	RingFrameOuterRingSparkSize = { 6,20 * 205/256 }, 
+	RingFrameSingleRingSparkInset = { 22 * 205/256 }, 
+	RingFrameSingleRingSparkSize = { 6,34 * 205/256 }, 
+
+	InnerRingSize = { 205, 205 }, 
+	InnerRingSparkInset = 46 * 205/256,  
+	InnerRingSparkSize = { 6, 27 * 205/256 },
+	InnerRingValueFont = GetFont(14, true),
+	InnerRingValuePercentFont = GetFont(14, true), 
+
+	OuterRingSize = { 205, 205 }, 
+	OuterRingValuePlace = { "CENTER", 0, -9 },
+	OuterRingValueJustifyH = "CENTER",
+	OuterRingValueJustifyV = "MIDDLE",
+	OuterRingValueDescriptionFont = GetFont(12, true),
+	OuterRingValuePercentFont = GetFont(12, true),
+
+	ToggleBackdropSize = { 85, 85 },
+	ToggleSize = { 56, 56 }, 
 
 } , { __index = Azerite.Minimap })
 
