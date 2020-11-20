@@ -505,7 +505,7 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 
 	frame:SetAttribute("unit", unit)
 
-	local unitDriver = LibUnitFrame:GetUnitFrameUnitDriver(unit)
+	local unitDriver = frame.unitOverrideDriver or LibUnitFrame:GetUnitFrameUnitDriver(unit)
 	if (unitDriver) and (not frame.hideInVehicles) then 
 		local unitSwitcher = CreateFrame("Frame", nil, nil, "SecureHandlerAttributeTemplate")
 		unitSwitcher:SetFrameRef("UnitFrame", frame)

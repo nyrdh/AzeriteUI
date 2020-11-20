@@ -102,6 +102,26 @@ local UpdateValue = function(element, unit, min, max, powerType, powerID, discon
 			end
 		end
 	end
+	local valuePercent = element.ValuePercent
+	if (valuePercent) then 
+		if (min and max) then
+			if (valuePercent.Override) then 
+				valuePercent:Override(unit, min, max)
+			else
+				if (disconnected or dead) then 
+					valuePercent:SetText("")
+				else 
+					valuePercent:SetFormattedText("%.0f", min/max*100 - (min/max*100)%1)
+				end 
+				if (valuePercent.PostUpdate) then 
+					valuePercent:PostUpdate(unit, min, max)
+				end 
+			end 
+		else
+			valuePercent:SetText("")
+		end 
+	end
+
 end 
 
 local UpdateColor = function(element, unit, min, max, powerType, powerID, disconnected, dead, tapped)
@@ -253,5 +273,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Power", Enable, Disable, Proxy, 16)
+	Lib:RegisterElement("Power", Enable, Disable, Proxy, 17)
 end 

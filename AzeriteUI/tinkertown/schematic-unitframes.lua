@@ -573,159 +573,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 	}
 })
 
--- Applied to the player HUD elements,
--- like cast bar, combo points and alt power.
-Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
-	-- Create layered scaffold frames.
-	-- These are used to house the other widgets and elements.
-	{
-		type = "CreateWidgets",
-		widgets = {
-			{
-				parent = "self", ownerKey = "BackdropScaffold", objectType = "Frame", objectSubType = "Frame",
-				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 0 }
-			},
-			{
-				parent = "self", ownerKey = "ContentScaffold", objectType = "Frame", objectSubType = "Frame",
-				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 10 }
-			},
-			{
-				parent = "self", ownerKey = "BorderScaffold", objectType = "Frame", objectSubType = "Frame",
-				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 25 }
-			},
-			{
-				parent = "self", ownerKey = "OverlayScaffold", objectType = "Frame", objectSubType = "Frame",
-				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 30 }
-			}
-		}
-	},
-	-- Position and style the main frame
-	{
-		-- Only set the parent in modifiable widgets if it is your intention to change it.
-		-- Otherwise the code will assume the owner is the parent, and leave it as is,
-		-- which is what we want in the majority of cases.
-		type = "ModifyWidgets",
-		widgets = {
-			-- Setup main frame
-			{
-				-- Note that a missing ownerKey
-				-- will apply these changes to the original object instead.
-				parent = nil, ownerKey = nil, 
-				chain = {
-					"SetSize", { 224, 26 }, "SetHitBox", { -4, -4, -4, -4 },
-					"Place", { "BOTTOM", "UICenter", "BOTTOM", 0, 210 }
-				},
-				values = {
-					"colors", Colors,
-					"ignoreMouseOver", true,
-					"ignoreExplorerMode", true
-				}
-			}
-		}
-	},
-	-- Create child widgets
-	{
-		type = "CreateWidgets",
-		widgets = {
-			-- Cast Bar
-			{
-				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
-				chain = {
-					"SetOrientation", "RIGHT",
-					"SetFlippedHorizontally", false,
-					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
-					"SetPosition", { "TOPLEFT", 0, 0 }, -- relative to unit frame
-					"SetSize", { 224, 26 }, -- 18
-					"SetStatusBarTexture", GetMedia("statusbar-power"),
-					"SetStatusBarColor", { 70/255, 255/255, 131/255, .69 }
-				},
-				values = {
-					"maxNameChars", 24
-				}
-			},
-			-- Cast Bar Backdrop Frame
-			{
-				parent = "self,Cast", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
-				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
-			},
-			-- Cast Bar Backdrop Texture
-			{
-				parent = "self,Cast,Bg", parentKey = "Texture", objectType = "Texture", 
-				chain = {
-					"SetAllPointsToParent", "SetDrawLayer", { "BACKGROUND", 1 },
-					"SetTexture", GetMedia("statusbar-dark"), "SetVertexColor", { .1, .1, .1, 1 }
-				}
-			},
-			-- Cast Bar Overlay Frame
-			{
-				parent = "self,Cast", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
-				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
-			},
-			-- Cast Bar Overlay Texture
-			{
-				parent = "self,Cast,Fg", parentKey = "Texture", objectType = "Texture", 
-				chain = {
-					"SetAllPointsToParent", "SetDrawLayer", { "ARTWORK", 1 },
-					"SetTexture", GetMedia("statusbar-normal-overlay")	
-				}
-			},
-			-- Setup backdrop and border
-			{
-				parent = "self,Cast", parentKey = "Border", objectType = "Frame", objectSubType = "Frame", objectTemplate = "BackdropTemplate",
-				chain = {
-					"SetFrameLevelOffset", 3,
-					"SetSizeOffset", 46,
-					"SetPosition", { "CENTER", 0, 0 },
-					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 32 }},
-					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 }
-				}
-
-			},
-			-- Cast Bar Value
-			{
-				parent = "self,Cast", parentKey = "Value", objectType = "FontString", 
-				chain = {
-					"SetPosition", { "RIGHT", -16, 0 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
-					"SetJustifyV", "MIDDLE",
-					"SetFontObject", GetFont(14,true),
-					"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-					"SetParentToOwnerKey", "OverlayScaffold"
-				}
-			},
-			-- Cast Bar Name
-			{
-				parent = "self,Cast", parentKey = "Name", objectType = "FontString", 
-				chain = {
-					"SetPosition", { "LEFT", 16, 0 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "CENTER", 
-					"SetJustifyV", "MIDDLE",
-					"SetFontObject", GetFont(12,true),
-					"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-					"SetParentToOwnerKey", "OverlayScaffold"
-				}
-			},
-			-- Cast Bar Spell Queue
-			{
-				parent = "self,Cast", parentKey = "SpellQueue", objectType = "Frame", objectSubType = "StatusBar",
-				chain = {
-					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
-					"SetSizeOffset", 0,
-					"SetOrientation", "LEFT",
-					"SetStatusBarTexture", GetMedia("statusbar-power"),
-					"SetStatusBarColor", { 1, 1, 1, .5 },
-					"DisableSmoothing", true
-				}
-			}
-			
-		}
-	}
-})
-
--- Applied to the primary player frame
+-- Applied to the primary target frame
 Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 	-- Create layered scaffold frames.
 	-- These are used to house the other widgets and elements.
@@ -1117,3 +965,529 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 	}
 })
 
+-- Applied to the player HUD elements like cast bar, combo points and alt power.
+Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
+	-- Create layered scaffold frames.
+	-- These are used to house the other widgets and elements.
+	{
+		type = "CreateWidgets",
+		widgets = {
+			{
+				parent = "self", ownerKey = "BackdropScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 0 }
+			},
+			{
+				parent = "self", ownerKey = "ContentScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 10 }
+			},
+			{
+				parent = "self", ownerKey = "BorderScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 25 }
+			},
+			{
+				parent = "self", ownerKey = "OverlayScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 30 }
+			}
+		}
+	},
+	-- Position and style the main frame
+	{
+		-- Only set the parent in modifiable widgets if it is your intention to change it.
+		-- Otherwise the code will assume the owner is the parent, and leave it as is,
+		-- which is what we want in the majority of cases.
+		type = "ModifyWidgets",
+		widgets = {
+			-- Setup main frame
+			{
+				-- Note that a missing ownerKey
+				-- will apply these changes to the original object instead.
+				parent = nil, ownerKey = nil, 
+				chain = {
+					"SetSize", { 224, 26 }, "SetHitBox", { -4, -4, -4, -4 },
+					"Place", { "BOTTOM", "UICenter", "BOTTOM", 0, 210 }
+				},
+				values = {
+					"colors", Colors,
+					"ignoreMouseOver", true,
+					"ignoreExplorerMode", true
+				}
+			}
+		}
+	},
+	-- Create child widgets
+	{
+		type = "CreateWidgets",
+		widgets = {
+			-- Cast Bar
+			{
+				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetOrientation", "RIGHT",
+					"SetFlippedHorizontally", false,
+					"SetSmartSmoothing", true,
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetPosition", { "TOPLEFT", 0, 0 }, -- relative to unit frame
+					"SetSize", { 224, 26 }, -- 18
+					"SetStatusBarTexture", GetMedia("statusbar-power"),
+					"SetStatusBarColor", { 70/255, 255/255, 131/255, .69 }
+				},
+				values = {
+					"maxNameChars", 24
+				}
+			},
+			-- Cast Bar Backdrop Frame
+			{
+				parent = "self,Cast", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
+			},
+			-- Cast Bar Backdrop Texture
+			{
+				parent = "self,Cast,Bg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetAllPointsToParent", "SetDrawLayer", { "BACKGROUND", 1 },
+					"SetTexture", GetMedia("statusbar-dark"), "SetVertexColor", { .1, .1, .1, 1 }
+				}
+			},
+			-- Cast Bar Overlay Frame
+			{
+				parent = "self,Cast", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
+			},
+			-- Cast Bar Overlay Texture
+			{
+				parent = "self,Cast,Fg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetAllPointsToParent", "SetDrawLayer", { "ARTWORK", 1 },
+					"SetTexture", GetMedia("statusbar-normal-overlay")	
+				}
+			},
+			-- Setup backdrop and border
+			{
+				parent = "self,Cast", parentKey = "Border", objectType = "Frame", objectSubType = "Frame", objectTemplate = "BackdropTemplate",
+				chain = {
+					"SetFrameLevelOffset", 3,
+					"SetSizeOffset", 46,
+					"SetPosition", { "CENTER", 0, 0 },
+					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 32 }},
+					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 }
+				}
+
+			},
+			-- Cast Bar Value
+			{
+				parent = "self,Cast", parentKey = "Value", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "RIGHT", -16, 0 },
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "RIGHT", 
+					"SetJustifyV", "MIDDLE",
+					"SetFontObject", GetFont(14,true),
+					"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+					"SetParentToOwnerKey", "OverlayScaffold"
+				}
+			},
+			-- Cast Bar Name
+			{
+				parent = "self,Cast", parentKey = "Name", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "LEFT", 16, 0 },
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "CENTER", 
+					"SetJustifyV", "MIDDLE",
+					"SetFontObject", GetFont(12,true),
+					"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+					"SetParentToOwnerKey", "OverlayScaffold"
+				}
+			},
+			-- Cast Bar Spell Queue
+			{
+				parent = "self,Cast", parentKey = "SpellQueue", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
+					"SetSizeOffset", 0,
+					"SetOrientation", "LEFT",
+					"SetStatusBarTexture", GetMedia("statusbar-power"),
+					"SetStatusBarColor", { 1, 1, 1, .5 },
+					"DisableSmoothing", true
+				}
+			}
+			
+		}
+	}
+})
+
+-- Applied to the vehicle frame only visible while in a vehicle.
+Private.RegisterSchematic("UnitForge::Vehicle", "Legacy", {
+	-- Create layered scaffold frames.
+	-- These are used to house the other widgets and elements.
+	{
+		type = "CreateWidgets",
+		widgets = {
+			{
+				parent = "self", ownerKey = "BackdropScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 0 }
+			},
+			{
+				parent = "self", ownerKey = "ContentScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 10 }
+			},
+			{
+				parent = "self", ownerKey = "BorderScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 25 }
+			},
+			{
+				parent = "self", ownerKey = "PowerBorderScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 25 }
+			},
+			{
+				parent = "self", ownerKey = "OverlayScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 30 }
+			}
+		}
+	},
+	-- Position and style the main frame
+	{
+		-- Only set the parent in modifiable widgets if it is your intention to change it.
+		-- Otherwise the code will assume the owner is the parent, and leave it as is,
+		-- which is what we want in the majority of cases.
+		type = "ModifyWidgets",
+		widgets = {
+			-- Setup main frame
+			{
+				-- Note that a missing ownerKey
+				-- will apply these changes to the original object instead.
+				parent = nil, ownerKey = nil, 
+				chain = {
+					"SetSize", { 24+16, 64+16 }, "SetHitBox", { -4, -4, -4, -4 },
+					"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -162, 29 }
+				},
+				values = {
+					"colors", Colors,
+					"visibilityOverrideDriver", "[vehicleui][overridebar][possessbar][shapeshift]show;hide",
+					"unitOverrideDriver", "[nooverridebar,vehicleui]pet;[overridebar,@vehicle,exists]vehicle;player"
+				}
+			},
+			-- Setup backdrops and borders
+			{
+				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+				chain = {
+					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 24 }},
+					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
+					"ClearAllPoints", "SetPoint", { "TOPLEFT", -11, 11 }, "SetPoint", { "BOTTOMRIGHT", 11, -11 }
+				}
+
+			},
+			{
+				parent = nil, ownerKey = "PowerBorderScaffold", objectType = "Frame", 
+				chain = {
+					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 24 }},
+					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
+					"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 162-11 + 6, 29-11 },
+					"SetSize", { 24+16+11*2, 64+16+11*2 }
+				}
+
+			}
+		}
+	},
+	-- Create child widgets
+	{
+		type = "CreateWidgets",
+		widgets = {
+			-- Health Bar
+			{
+				parent = "self,ContentScaffold", ownerKey = "Health", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetOrientation", "UP",
+					"SetFlippedHorizontally", false,
+					"SetSmartSmoothing", true,
+					"SetFrameLevelOffset", 2, 
+					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
+					"SetSize", { 24, 64 }, 
+					"SetStatusBarTexCoord", { 1,0, 0,0, 1,1, 0,1 }, -- ULx,ULy,LLx,LLy,URx,URy,LRx,LRy
+					"SetStatusBarTexture", GetMedia("statusbar-power")
+				},
+				values = {
+					"colorAbsorb", true, -- tint absorb overlay
+					"colorClass", true, -- color players by class 
+					"colorDisconnected", false, -- color disconnected units
+					"colorHealth", true, -- color anything else in the default health color
+					"colorReaction", true, -- color NPCs by their reaction standing with us
+					"colorTapped", false, -- color tap denied units 
+					"colorThreat", false, -- color non-friendly by threat
+					"frequent", true, -- listen to frequent health events for more accurate updates
+					"predictThreshold", .01,
+					"absorbOverrideAlpha", .75
+				}
+			},
+			-- Health Bar Backdrop Frame
+			{
+				parent = "self,Health", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
+			},
+			-- Health Bar Backdrop Texture
+			{
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "BACKGROUND", 1 },
+					"SetPosition", { "TOPLEFT", 0, 0 },
+					"SetSize", { 24, 64 },
+					"SetTexture", GetMedia("statusbar-dark"),
+					"SetTexCoord", { 1,0, 0,0, 1,1, 0,1 }, -- ULx,ULy,LLx,LLy,URx,URy,LRx,LRy
+					"SetVertexColor", { .1, .1, .1, 1 }
+				}
+			},
+			-- Health Bar Overlay Frame
+			{
+				parent = "self,Health", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
+			},
+			-- Health Bar Overlay Texture
+			{
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetPosition", { "TOPLEFT", 0, 0 },
+					"SetSize", { 24, 64 },
+					"SetTexture", GetMedia("statusbar-normal-overlay"),
+					"SetTexCoord", { 0, 1, 0, 1 }
+				}
+			},
+
+			-- Health Bar Value
+			{
+				parent = "self,Health", parentKey = "ValuePercent", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "TOP", 0, 30 },
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "CENTER", 
+					"SetJustifyV", "MIDDLE",
+					"SetFontObject", GetFont(18,true),
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+					"SetParentToOwnerKey", "OverlayScaffold"
+				},
+				values = {
+					"PostUpdate", function(self, unit, min, max)
+						if (min == max) then
+							self:SetAlpha(.25)
+						else
+							self:SetAlpha(.75)
+						end
+					end
+				}
+			},
+			
+			-- Health Bar Overlay Cast Bar
+			{
+				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetOrientation", "UP",
+					"SetFlippedHorizontally", false,
+					"SetSmartSmoothing", true,
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
+					"SetSize", { 24, 64 }, -- 18
+					"SetStatusBarTexCoord", { 1,0, 0,0, 1,1, 0,1 }, -- ULx,ULy,LLx,LLy,URx,URy,LRx,LRy
+					"SetStatusBarTexture", GetMedia("statusbar-power"),
+					"SetStatusBarColor", { 1, 1, 1, .25 }
+				}
+			},
+
+			-- Power Bar
+			{
+				parent = "self,ContentScaffold", ownerKey = "Power", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetOrientation", "UP",
+					"SetFlippedHorizontally", false,
+					"SetSmartSmoothing", true,
+					"SetFrameLevelOffset", 2, 
+
+					"SetSize", { 24, 64 }, 
+					"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 162+8 + 6, 29+8 },
+
+					"SetStatusBarTexCoord", { 1,0, 0,0, 1,1, 0,1 }, -- ULx,ULy,LLx,LLy,URx,URy,LRx,LRy
+					"SetStatusBarTexture", GetMedia("statusbar-power")
+				},
+				values = {
+					"frequent", true -- listen to frequent health events for more accurate updates
+				}
+			},
+
+
+			-- Power Bar Backdrop Frame
+			{
+				parent = "self,Power", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
+			},
+			-- Power Bar Backdrop Texture
+			{
+				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "BACKGROUND", -2 },
+					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
+					"SetSize", { 32, 52 },
+					"SetTexture", GetMedia("statusbar-dark"),
+					"SetVertexColor", { .1, .1, .1, 1 }
+				}
+			},
+			-- Power Bar Overlay Frame
+			{
+				parent = "self,Power", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
+			},
+			-- Power Bar Overlay Texture
+			{
+				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
+					"SetSize", { 24, 64 },
+					"SetTexture", GetMedia("statusbar-normal-overlay"),
+					"SetTexCoord", { 0, 1, 0, 1 }
+				}
+			},
+
+			-- Power Bar Value
+			{
+				parent = "self,Power", parentKey = "ValuePercent", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "TOP", 0, 30 },
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "CENTER", 
+					"SetJustifyV", "MIDDLE",
+					"SetFontObject", GetFont(18,true),
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+					"SetParentToOwnerKey", "OverlayScaffold"
+				},
+				values = {
+					"PostUpdate", function(self, unit, min, max)
+						if (min == max) then
+							self:SetAlpha(.25)
+						else
+							self:SetAlpha(.75)
+						end
+					end
+				}
+			},
+			
+			-- Combat Status
+			{
+				parent = "self,OverlayScaffold", ownerKey = "Combat", objectType = "Texture", 
+				chain = {
+					"SetPosition", { "CENTER", 0, 9 },
+					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetSize", { 64, 64 }, 
+					"SetTexture", GetMedia("state-grid"),
+					"SetTexCoord", { .5, 1, 0, .5 }
+				}
+			},
+
+			--[=[-- 
+			-- Unit Name
+			{
+				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "LEFT", 24, 9 },
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "LEFT", 
+					"SetJustifyV", "MIDDLE",
+					"SetFontObject", GetFont(13,true),
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+					"SetSize", { 220, 14 }, 
+				},
+				values = {
+					"maxChars", 16,
+					"showLevel", true,
+					"showLevelLast", false,
+					"useSmartName", true
+				}
+
+			},
+
+			-- Auras
+			{
+				parent = "self,ContentScaffold", ownerKey = "Auras", objectType = "Frame", objectSubType = "Frame",
+				chain = {
+					"SetSize", { 304, 84 },
+					"SetPoint", { "TOPRIGHT", -7, 96 }
+				},
+				values = {
+					"auraSize", 40, 
+					"auraWidth", false, 
+					"auraHeight", false,
+					"customSort", Aura_SortPrimary,
+					"debuffsFirst", false, 
+					"disableMouse", false, 
+					"filter", false, 
+					"filterBuffs", false, 
+					"filterDebuffs", false, 
+					"func", GetAuraFilter("legacy"), 
+					"funcBuffs", false,
+					"funcDebuffs", false,
+					"growthX", "LEFT", 
+					"growthY", "UP", 
+					"maxBuffs", false, 
+					"maxDebuffs", false, 
+					"maxVisible", 21, 
+					"showDurations", true, 
+					"showSpirals", false, 
+					"showLongDurations", true,
+					"spacingH", 4, 
+					"spacingV", 4, 
+					"tooltipAnchor", false,
+					"tooltipDefaultPosition", false, 
+					"tooltipOffsetX", 8,
+					"tooltipOffsetY", 16,
+					"tooltipPoint", "BOTTOMRIGHT",
+					"tooltipRelPoint", "TOPRIGHT",
+					"PostCreateButton", Aura_PostCreate,
+					"PostUpdateButton", Aura_PostUpdate
+					
+				}
+			},
+
+			-- DeBuffs
+			{
+				parent = "self,ContentScaffold", ownerKey = "Debuffs", objectType = "Frame", objectSubType = "Frame",
+				chain = {
+					"SetSize", { 140, 104 },
+					"SetPoint", { "TOPRIGHT", -321, 1 }
+				},
+				values = {
+					"auraSize", 32, 
+					"auraWidth", false, 
+					"auraHeight", false,
+					"customSort", Aura_SortPrimary,
+					"debuffsFirst", false, 
+					"disableMouse", false, 
+					"filter", false, 
+					"filterBuffs", false, 
+					"filterDebuffs", false, 
+					"func", GetAuraFilter("legacy-secondary"), 
+					"funcBuffs", false,
+					"funcDebuffs", false,
+					"growthX", "LEFT", 
+					"growthY", "DOWN", 
+					"maxBuffs", false, 
+					"maxDebuffs", false, 
+					"maxVisible", 12, 
+					"showDurations", true, 
+					"showSpirals", false, 
+					"showLongDurations", true,
+					"spacingH", 4, 
+					"spacingV", 4, 
+					"tooltipAnchor", false,
+					"tooltipDefaultPosition", false, 
+					"tooltipOffsetX", 8,
+					"tooltipOffsetY", 16,
+					"tooltipPoint", "BOTTOMRIGHT",
+					"tooltipRelPoint", "TOPRIGHT",
+					"PostCreateButton", Aura_PostCreate,
+					"PostUpdateButton", Aura_PostUpdate
+				}
+			}
+			--]=]--
+
+
+		}
+	}
+})

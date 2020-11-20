@@ -217,6 +217,12 @@ local BACKDROPS = {
 		bgFile = nil, tile = false, 
 		edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
 		insets = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
+	}, 
+
+	GenericRoundedBorder = {
+		bgFile = nil, tile = false, 
+		edgeFile = GetMedia("tooltip_border_rounded"), edgeSize = 32, 
+		insets = { top = 15, bottom = 15, left = 15, right = 15 }
 	}
 
 }

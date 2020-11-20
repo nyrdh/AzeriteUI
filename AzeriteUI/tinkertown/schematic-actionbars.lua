@@ -282,12 +282,12 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 							frame:SetFrameStrata("LOW")
 							frame:SetFrameLevel(1)
 							frame:SetSize(2,2)
-							frame:Place("BOTTOM", "UICenter", "BOTTOM", padding, offsetY - 21/2 - padding)
+							frame:Place("BOTTOM", "UICenter", "BOTTOM", 2, 28)
 
 							local primaryBackdrop = frame:CreateFrame("Frame")
 							primaryBackdrop:SetFrameStrata("LOW")
 							primaryBackdrop:SetFrameLevel(1)
-							primaryBackdrop:SetSize(frameW + 21 + padSide*2, frameH + 21 + padTop*2)
+							primaryBackdrop:SetSize(frameW + 21 + padSide*2 + 2, frameH + 21 + padTop*2 + 1)
 							primaryBackdrop:SetBackdrop({
 								bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false,
 								edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
@@ -312,7 +312,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 								end
 
 								--12x1
-								button:Place("BOTTOMLEFT", self.frame, "BOTTOM", -frameW/2 + -2 + padSide + (id-1)*(size+padding), -2 + padTop + 21/2)
+								button:Place("BOTTOMLEFT", self.frame, "BOTTOM", -frameW/2 + -2 + padSide + (id-1)*(size+padding), 7)
 								
 								-- 6x2
 								--local x = -frameW/2 + ((id > 6) and (id-7) or (id-1))*(size+padding)
@@ -377,7 +377,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 							local primaryBackdrop = self.frame:CreateFrame("Frame")
 							primaryBackdrop:SetFrameStrata("LOW")
 							primaryBackdrop:SetFrameLevel(1)
-							primaryBackdrop:SetSize(frameW + 21 + padSide*2, frameH + 21 + padTop*2)
+							primaryBackdrop:SetSize(frameW + 21 + padSide*2 + 2, frameH + 21 + padTop*2 + 1)
 							primaryBackdrop:SetBackdrop({
 								bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false,
 								edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
@@ -403,7 +403,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 								end
 
 								--6x1
-								button:Place("BOTTOMLEFT", self.frame, "BOTTOM", -frameW/2 + -2 + padSide + (id-1)*(size+padding), -2 + padTop + 21/2)
+								button:Place("BOTTOMLEFT", self.frame, "BOTTOM", -frameW/2 + -2 + padSide + (id-1)*(size+padding), 7)
 								
 								-- Layout helper
 								button:SetAttribute("layoutID", self.buttonID)
