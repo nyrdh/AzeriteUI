@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 
 -- Wooh! 
-local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibAuraData", "LibAura", "LibClientBuild", "LibForge", "LibFader")
+local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibAuraData", "LibAura", "LibClientBuild", "LibForge", "LibFader", "LibHook")
 
 -- Tell the back-end what addon to look for before 
 -- initializing this module and all its submodules. 
@@ -679,16 +679,17 @@ end
 
 -- Fix or work around Blizzard bugs we have discovered.
 Core.FixBlizzardBugs = function(self, event, addon)
+	if (not IsAddOnLoaded("Blizzard_Contribution")) then
+		return self:RegisterEvent("ADDON_LOADED", "FixBlizzardBugs")
+	end
 	if (event == "ADDON_LOADED") then
 		if (addon == "Blizzard_Contribution") then
 			self:UnregisterEvent("ADDON_LOADED", "FixBlizzardBugs")
 		else
 			return
 		end
-	elseif (not IsAddOnLoaded("Blizzard_Contribution")) then
-		return self:RegisterEvent("ADDON_LOADED", "FixBlizzardBugs")
 	end
-	
+
 	-- Fix the mixin method
 	local UpdateTooltip = function(self)
 		local isEnabled = self:IsEnabled();
@@ -892,6 +893,7 @@ Core.OnInit = function(self)
 	if (Private.HasSchematic("ModuleForge::Root")) then
 		self:Forge(Private.GetSchematic("ModuleForge::Root").OnInit) 
 	end
+
 end 
 
 Core.OnEnable = function(self)
