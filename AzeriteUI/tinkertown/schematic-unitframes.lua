@@ -1262,7 +1262,7 @@ Private.RegisterSchematic("UnitForge::Vehicle", "Legacy", {
 					"SetJustifyH", "CENTER", 
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(18,true),
-					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
 					"SetParentToOwnerKey", "OverlayScaffold"
 				},
 				values = {
@@ -1270,7 +1270,7 @@ Private.RegisterSchematic("UnitForge::Vehicle", "Legacy", {
 						if (min == max) then
 							self:SetAlpha(.25)
 						else
-							self:SetAlpha(.75)
+							self:SetAlpha(.5)
 						end
 					end
 				}
@@ -1355,7 +1355,7 @@ Private.RegisterSchematic("UnitForge::Vehicle", "Legacy", {
 					"SetJustifyH", "CENTER", 
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(18,true),
-					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
 					"SetParentToOwnerKey", "OverlayScaffold"
 				},
 				values = {
@@ -1363,7 +1363,7 @@ Private.RegisterSchematic("UnitForge::Vehicle", "Legacy", {
 						if (min == max) then
 							self:SetAlpha(.25)
 						else
-							self:SetAlpha(.75)
+							self:SetAlpha(.5)
 						end
 					end
 				}
