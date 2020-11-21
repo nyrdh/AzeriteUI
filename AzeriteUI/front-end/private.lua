@@ -2407,6 +2407,7 @@ Azerite.BlizzardTimers = {
 	MirrorGrowth = -50, 
 	MirrorSize = { 111, 14 }
 }
+Legacy.BlizzardTimers = setmetatable({}, { __index = Azerite.BlizzardTimers })
 
 -- Blizzard Objectives Tracker
 Azerite.BlizzardObjectivesTracker = (IsClassic) and {
