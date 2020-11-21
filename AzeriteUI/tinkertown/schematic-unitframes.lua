@@ -153,9 +153,13 @@ Private.RegisterSchematic("ModuleForge::UnitFrames", "Legacy", {
 						"Frames", {},
 						"ExplorerModeFrameAnchors", {},
 						"SpawnQueue", {
-							{ "player", "Player" }, { "target", "Target" },
-							{ "pet", "Pet" }, { "targettarget", "ToT" },
-							{ "player", "PlayerHUD" }, { "vehicle", "Vehicle" }
+							-- "unit", [UnitForge::]"ID"
+							{ "player", "Player" }, 
+							{ "target", "Target" },
+							{ "pet", "Pet" }, 
+							{ "targettarget", "ToT" },
+							{ "player", "PlayerHUD" }, 
+							{ "vehicle", "PlayerVehicle" }
 						}, 
 
 						"SpawnUnitFrames", function(self)
@@ -353,6 +357,9 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"SetFontObject", GetFont(15,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 					"SetParentToOwnerKey", "OverlayScaffold"
+				},
+				values = {
+					"useSmartValue", true
 				}
 			},
 
@@ -568,7 +575,6 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 				}
 			}
 
-
 		}
 	}
 })
@@ -718,6 +724,9 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"SetFontObject", GetFont(15,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 					"SetParentToOwnerKey", "OverlayScaffold"
+				},
+				values = {
+					"useSmartValue", true
 				}
 			},
 
@@ -1117,7 +1126,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 })
 
 -- Applied to the vehicle frame only visible while in a vehicle.
-Private.RegisterSchematic("UnitForge::Vehicle", "Legacy", {
+Private.RegisterSchematic("UnitForge::PlayerVehicle", "Legacy", {
 	-- Create layered scaffold frames.
 	-- These are used to house the other widgets and elements.
 	{
@@ -1266,6 +1275,7 @@ Private.RegisterSchematic("UnitForge::Vehicle", "Legacy", {
 					"SetParentToOwnerKey", "OverlayScaffold"
 				},
 				values = {
+					"useSmartValue", true,
 					"PostUpdate", function(self, unit, min, max)
 						if (min == max) then
 							self:SetAlpha(.25)
@@ -1324,7 +1334,7 @@ Private.RegisterSchematic("UnitForge::Vehicle", "Legacy", {
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", -2 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
-					"SetSize", { 32, 52 },
+					"SetSize", { 24, 64 },
 					"SetTexture", GetMedia("statusbar-dark"),
 					"SetVertexColor", { .1, .1, .1, 1 }
 				}
@@ -1369,6 +1379,7 @@ Private.RegisterSchematic("UnitForge::Vehicle", "Legacy", {
 				}
 			},
 			
+			--[=[-- 
 			-- Combat Status
 			{
 				parent = "self,OverlayScaffold", ownerKey = "Combat", objectType = "Texture", 
@@ -1381,7 +1392,6 @@ Private.RegisterSchematic("UnitForge::Vehicle", "Legacy", {
 				}
 			},
 
-			--[=[-- 
 			-- Unit Name
 			{
 				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
@@ -1487,6 +1497,370 @@ Private.RegisterSchematic("UnitForge::Vehicle", "Legacy", {
 			}
 			--]=]--
 
+
+		}
+	}
+})
+
+-- TODO!
+-- Applied to the target frame only visible while in a vehicle, and with a target.
+Private.RegisterSchematic("UnitForge::TargetVehicle", "Legacy", {
+})
+
+-- Applied to the target of target frame.
+Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
+	-- Create layered scaffold frames.
+	-- These are used to house the other widgets and elements.
+	{
+		type = "CreateWidgets",
+		widgets = {
+			{
+				parent = "self", ownerKey = "BackdropScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 0 }
+			},
+			{
+				parent = "self", ownerKey = "ContentScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 10 }
+			},
+			{
+				parent = "self", ownerKey = "BorderScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 25 }
+			},
+			{
+				parent = "self", ownerKey = "OverlayScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 30 }
+			}
+		}
+	},
+	-- Position and style the main frame
+	{
+		-- Only set the parent in modifiable widgets if it is your intention to change it.
+		-- Otherwise the code will assume the owner is the parent, and leave it as is,
+		-- which is what we want in the majority of cases.
+		type = "ModifyWidgets",
+		widgets = {
+			-- Setup main frame
+			{
+				-- Note that a missing ownerKey
+				-- will apply these changes to the original object instead.
+				parent = nil, ownerKey = nil, 
+				chain = {
+					"SetSize", { 158, 43 }, "SetHitBox", { -4, -4, -4, -4 },
+					"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 210, 250 - 43 - 4 }
+				},
+				values = {
+					"colors", Colors,
+
+					-- Same predriver as most frames, to ensure they are hidden in vehicle situations.
+					"visibilityPreDriver", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;"
+				}
+			},
+			-- Setup backdrop and border
+			{
+				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+				chain = {
+					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 32 }},
+					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
+					"ClearAllPoints", "SetPoint", { "TOPLEFT", -15, 15 }, "SetPoint", { "BOTTOMRIGHT", 15, -15 }
+				}
+
+			}
+		}
+	},
+	-- Create child widgets
+	{
+		type = "CreateWidgets",
+		widgets = {
+			-- Health Bar
+			{
+				parent = "self,ContentScaffold", ownerKey = "Health", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetOrientation", "LEFT",
+					"SetFlippedHorizontally", true,
+					"SetSmartSmoothing", true,
+					"SetFrameLevelOffset", 2, 
+					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
+					"SetSize", { 142, 27 }, 
+					"SetStatusBarTexture", GetMedia("statusbar-power")
+				},
+				values = {
+					"colorAbsorb", true, -- tint absorb overlay
+					"colorClass", true, -- color players by class 
+					"colorDisconnected", false, -- color disconnected units
+					"colorHealth", true, -- color anything else in the default health color
+					"colorReaction", true, -- color NPCs by their reaction standing with us
+					"colorTapped", false, -- color tap denied units 
+					"colorThreat", false, -- color non-friendly by threat
+					"frequent", true, -- listen to frequent health events for more accurate updates
+					"predictThreshold", .01,
+					"absorbOverrideAlpha", .75
+				}
+			},
+			-- Health Bar Backdrop Frame
+			{
+				parent = "self,Health", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
+			},
+			-- Health Bar Backdrop Texture
+			{
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "BACKGROUND", 1 },
+					"SetPosition", { "TOPLEFT", 0, 0 },
+					"SetSize", { 142, 27 },
+					"SetTexture", GetMedia("statusbar-dark"),
+					"SetVertexColor", { .1, .1, .1, 1 }
+				}
+			},
+			-- Health Bar Overlay Frame
+			{
+				parent = "self,Health", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
+			},
+			-- Health Bar Overlay Texture
+			{
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetPosition", { "TOPLEFT", 0, 0 },
+					"SetSize", { 142, 27 },
+					"SetTexture", GetMedia("statusbar-normal-overlay"),
+					"SetTexCoord", { 0, 1, 0, 1 }
+				}
+			},
+
+			-- Health Bar Value
+			{
+				parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "LEFT", 8, 1 }, -- Relative to the health bar
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "LEFT", 
+					"SetJustifyV", "MIDDLE",
+					"SetFontObject", GetFont(12,true),
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+					"SetParentToOwnerKey", "OverlayScaffold"
+				},
+				values = {
+					"useSmartValue", true
+				}
+			},
+			
+			-- Health Bar Overlay Cast Bar
+			{
+				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetOrientation", "LEFT",
+					"SetFlippedHorizontally", true,
+					"SetSmartSmoothing", true,
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
+					"SetSize", { 142, 27 }, 
+					"SetStatusBarTexture", GetMedia("statusbar-power"),
+					"SetStatusBarColor", { 1, 1, 1, .25 }
+				}
+			},
+
+			-- Unit Name
+			{
+				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "RIGHT", -16, 1 }, -- relative to the whole frame (with border)
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "RIGHT", 
+					"SetJustifyV", "MIDDLE",
+					"SetFontObject", GetFont(11, true),
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+					"SetSize", { 80, 14 }, 
+				},
+				values = {
+					"maxChars", 8,
+					"showLevel", false,
+					"showLevelLast", false,
+					"useSmartName", true
+				}
+
+			}
+
+		}
+	}
+})
+
+-- Applied to the player's pet frame.
+Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
+	-- Create layered scaffold frames.
+	-- These are used to house the other widgets and elements.
+	{
+		type = "CreateWidgets",
+		widgets = {
+			{
+				parent = "self", ownerKey = "BackdropScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 0 }
+			},
+			{
+				parent = "self", ownerKey = "ContentScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 10 }
+			},
+			{
+				parent = "self", ownerKey = "BorderScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 25 }
+			},
+			{
+				parent = "self", ownerKey = "OverlayScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 30 }
+			}
+		}
+	},
+	-- Position and style the main frame
+	{
+		-- Only set the parent in modifiable widgets if it is your intention to change it.
+		-- Otherwise the code will assume the owner is the parent, and leave it as is,
+		-- which is what we want in the majority of cases.
+		type = "ModifyWidgets",
+		widgets = {
+			-- Setup main frame
+			{
+				-- Note that a missing ownerKey
+				-- will apply these changes to the original object instead.
+				parent = nil, ownerKey = nil, 
+				chain = {
+					"SetSize", { 158, 43 }, "SetHitBox", { -4, -4, -4, -4 },
+					"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -210, 250 - 43 - 4 }
+				},
+				values = {
+					"colors", Colors,
+
+					-- Same predriver as most frames, to ensure they are hidden in vehicle situations.
+					"visibilityPreDriver", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;"
+				}
+			},
+			-- Setup backdrop and border
+			{
+				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+				chain = {
+					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 32 }},
+					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
+					"ClearAllPoints", "SetPoint", { "TOPLEFT", -15, 15 }, "SetPoint", { "BOTTOMRIGHT", 15, -15 }
+				}
+
+			}
+		}
+	},
+	-- Create child widgets
+	{
+		type = "CreateWidgets",
+		widgets = {
+			-- Health Bar
+			{
+				parent = "self,ContentScaffold", ownerKey = "Health", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetOrientation", "RIGHT",
+					"SetFlippedHorizontally", false,
+					"SetSmartSmoothing", true,
+					"SetFrameLevelOffset", 2, 
+					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
+					"SetSize", { 142, 27 }, 
+					"SetStatusBarTexture", GetMedia("statusbar-power")
+				},
+				values = {
+					"colorAbsorb", true, -- tint absorb overlay
+					"colorClass", true, -- color players by class 
+					"colorPetAsPlayer", true, 
+					"colorDisconnected", false, -- color disconnected units
+					"colorHealth", true, -- color anything else in the default health color
+					"colorReaction", true, -- color NPCs by their reaction standing with us
+					"colorTapped", false, -- color tap denied units 
+					"colorThreat", false, -- color non-friendly by threat
+					"frequent", true, -- listen to frequent health events for more accurate updates
+					"predictThreshold", .01,
+					"absorbOverrideAlpha", .75
+				}
+			},
+			-- Health Bar Backdrop Frame
+			{
+				parent = "self,Health", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
+			},
+			-- Health Bar Backdrop Texture
+			{
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "BACKGROUND", 1 },
+					"SetPosition", { "TOPLEFT", 0, 0 },
+					"SetSize", { 142, 27 },
+					"SetTexture", GetMedia("statusbar-dark"),
+					"SetVertexColor", { .1, .1, .1, 1 }
+				}
+			},
+			-- Health Bar Overlay Frame
+			{
+				parent = "self,Health", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
+			},
+			-- Health Bar Overlay Texture
+			{
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetPosition", { "TOPLEFT", 0, 0 },
+					"SetSize", { 142, 27 },
+					"SetTexture", GetMedia("statusbar-normal-overlay"),
+					"SetTexCoord", { 0, 1, 0, 1 }
+				}
+			},
+
+			-- Health Bar Value
+			{
+				parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "RIGHT", -8, 1 }, -- Relative to the health bar
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "RIGHT", 
+					"SetJustifyV", "MIDDLE",
+					"SetFontObject", GetFont(12,true),
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+					"SetParentToOwnerKey", "OverlayScaffold"
+				},
+				values = {
+					"useSmartValue", true
+				}
+			},
+			
+			-- Health Bar Overlay Cast Bar
+			{
+				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetOrientation", "RIGHT",
+					"SetFlippedHorizontally", false,
+					"SetSmartSmoothing", true,
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
+					"SetSize", { 142, 27 }, 
+					"SetStatusBarTexture", GetMedia("statusbar-power"),
+					"SetStatusBarColor", { 1, 1, 1, .25 }
+				}
+			},
+
+			-- Unit Name
+			{
+				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "LEFT", 16, 1 }, -- relative to the whole frame (with border)
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "LEFT", 
+					"SetJustifyV", "MIDDLE",
+					"SetFontObject", GetFont(11, true),
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+					"SetSize", { 80, 14 }, 
+				},
+				values = {
+					"maxChars", 8,
+					"showLevel", false,
+					"showLevelLast", false,
+					"useSmartName", true
+				}
+
+			}
 
 		}
 	}

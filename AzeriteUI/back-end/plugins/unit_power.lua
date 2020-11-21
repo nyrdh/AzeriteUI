@@ -104,7 +104,7 @@ local UpdateValue = function(element, unit, min, max, powerType, powerID, discon
 	end
 	local valuePercent = element.ValuePercent
 	if (valuePercent) then 
-		if (min and max) then
+		if (min and max) and (max > 0) then
 			if (valuePercent.Override) then 
 				valuePercent:Override(unit, min, max)
 			else
@@ -273,5 +273,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Power", Enable, Disable, Proxy, 17)
+	Lib:RegisterElement("Power", Enable, Disable, Proxy, 18)
 end 

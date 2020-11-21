@@ -138,10 +138,18 @@ local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 				if (min == 0 or max == 0) and (not healthValue.showAtZero) then
 					healthValue:SetText("")
 				else
-					if (healthValue.showMaxValue) then
-						healthValue:SetFormattedText("%s / %s", large(min), large(max))
+					if (healthValue.useSmartValue) then 
+						if (min == max) then
+							healthValue:SetFormattedText("%s", large(min))
+						else
+							healthValue:SetFormattedText("%.0f%%", min/max*100 - (min/max*100)%1)
+						end
 					else
-						healthValue:SetFormattedText("%s", large(min))
+						if (healthValue.showMaxValue) then
+							healthValue:SetFormattedText("%s / %s", large(min), large(max))
+						else
+							healthValue:SetFormattedText("%s", large(min))
+						end
 					end
 				end
 			end
@@ -153,7 +161,7 @@ local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 	local healthPercent = health.ValuePercent
 	if (healthPercent) then 
 		local min, max = minPerc or min, maxPerc or max
-		if (min and max) then
+		if (min and max) and (max > 0) then
 			if (healthPercent.Override) then 
 				healthPercent:Override(unit, min, max)
 			else
@@ -166,6 +174,8 @@ local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 					healthPercent:PostUpdate(unit, min, max)
 				end 
 			end 
+		else
+			healthPercent:SetText("")
 		end 
 	end
 	local absorbValue = health.ValueAbsorb
@@ -690,5 +700,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 59)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 61)
 end 
