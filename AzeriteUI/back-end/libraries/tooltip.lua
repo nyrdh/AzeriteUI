@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 85)
+local LibTooltip = Wheel:Set("LibTooltip", 86)
 if (not LibTooltip) then
 	return
 end
@@ -1588,6 +1588,12 @@ Tooltip.SetUnit = function(self, unit)
 				end
 
 			end 
+
+			if (data.realm) then
+				-- FRIENDS_LIST_REALM -- "Realm: "
+				self:AddLine(" ")
+				self:AddLine(FRIENDS_LIST_REALM..data.realm, colors.quest.gray[1], colors.quest.gray[2], colors.quest.gray[3])
+			end
 
 			if (data.uiMapID) then 
 				local uiMapID = GetBestMapForUnit("player")

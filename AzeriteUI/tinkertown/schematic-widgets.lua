@@ -646,44 +646,48 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 			},
 
 			-- SpellAutoCast
-			--[=[--
 			{
 				parent = nil, ownerKey = "SpellAutoCast", objectType = "Frame", 
 				chain = {
 					"SetPosition", { "CENTER", 0, 0 },
-					"SetSize", { 50, 50 }
+					--"SetSize", { 50, 50 }, -- our upcoming custom rounded rectangle texture
+					"SetSize", { 40, 40 } -- blizzard texture
 				}
 			},
 			{
 				parent = nil, ownerKey = "SpellAutoCast,Ants", objectType = "Texture", 
 				chain = {
-					"SetTexture", GetMedia("actionbutton-ants-small-grid"),
-					"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
+					--"SetTexture", GetMedia("actionbutton-ants-small-grid"),
+					--"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
+					"SetTexture", [[Interface\SpellActivationOverlay\IconAlertAnts]], -- blizzard texture
+					"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], .5 }
 				}
 			},
 			{
 				parent = nil, ownerKey = "SpellAutoCast,Ants,Anim", objectType = "Animation", 
 				chain = {
 					"SetSpeed", 1/15,
-					"SetGrid", { 512, 512, 96, 96, 25 },
+					--"SetGrid", { 512, 512, 96, 96, 25 },
+					"SetGrid", { 256, 256, 48, 48, 23 } -- blizzard texture
 				}
 			},
 
 			{
 				parent = nil, ownerKey = "SpellAutoCast,Glow", objectType = "Texture", 
 				chain = {
-					"SetTexture", GetMedia("actionbutton-ants-small-glow-grid"),
-					"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], .25 },
+					--"SetTexture", GetMedia("actionbutton-ants-small-glow-grid"),
+					--"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], .25 },
+					"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], 0 },
 				}
 			},
 			{
 				parent = nil, ownerKey = "SpellAutoCast,Glow,Anim", objectType = "Animation", 
 				chain = {
 					"SetSpeed", 1/15,
-					"SetGrid", { 512, 512, 96, 96, 25 },
+					--"SetGrid", { 512, 512, 96, 96, 25 },
+					"SetGrid", { 256, 256, 48, 48, 23 } -- blizzard texture
 				}
-			},
-			--]=]--
+			}
 	
 		}
 	},

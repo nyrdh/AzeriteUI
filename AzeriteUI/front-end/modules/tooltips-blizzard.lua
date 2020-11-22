@@ -705,6 +705,12 @@ local OnTooltipSetUnit = function(tooltip)
 
 	end 
 
+	if (data.realm) then
+		-- FRIENDS_LIST_REALM -- "Realm: "
+		lineIndex = AddIndexedLine(tooltip, lineIndex, " ")
+		lineIndex = AddIndexedLine(tooltip, lineIndex, FRIENDS_LIST_REALM..data.realm, Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3])
+	end
+
 	-- Only for dev purposes
 	if (Questie) and (false) then
 		-- Only do this if the Questie
