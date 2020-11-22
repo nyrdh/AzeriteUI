@@ -663,7 +663,7 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 					"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], .5 }
 				}
 			},
-			{
+			{ 
 				parent = nil, ownerKey = "SpellAutoCast,Ants,Anim", objectType = "Animation", 
 				chain = {
 					"SetSpeed", 1/15,
@@ -800,11 +800,291 @@ Private.RegisterSchematic("WidgetForge::ActionButton::Normal", "Legacy", {
 
 		}
 	}
-
 })
 
 -- Applied to pet-, stance- and additional bars action buttons.
 Private.RegisterSchematic("WidgetForge::ActionButton::Small", "Legacy", {
+	{
+		-- Only set the parent in modifiable widgets if it is your intention to change it.
+		-- Otherwise the code will assume the owner is the parent, and leave it as is,
+		-- which is what we want in the majority of cases.
+		type = "ModifyWidgets",
+		widgets = {
+			{
+				-- Note that a missing ownerKey or parentKey
+				-- will apply these changes to the original object instead.
+				parent = nil, ownerKey = nil, 
+				chain = {
+					"SetSize", { 54, 54 }, 
+					"SetHitBox", { -4, -4, -4, -4 }
+				},
+				values = {
+					"colors", Colors,
+					"maxDisplayCount", 99,
+
+					-- Post updates
+					"PostUpdateCount", Legacy_ActionButton_PostUpdateStackCount,
+					"PostUpdateCooldown", ActionButton_PostUpdateCooldown,
+					"PostUpdateChargeCooldown", ActionButton_PostUpdateChargeCooldown,
+					"PostEnter", Legacy_ActionButton_PostUpdateMouseOver,
+					"PostLeave", Legacy_ActionButton_PostUpdateMouseOver,
+					"PostUpdate", Legacy_ActionButton_PostUpdateMouseOver,
+					"PostUpdateUsable", ActionButton_PostUpdateUsable,
+
+					"OnKeyDown", function(self) end,
+					"OnKeyUp", function(self) end,
+
+					"GetBindingTextAbbreviated", ActionButton_GetBindingTextAbbreviated
+				}
+			},
+			{
+				parent = nil, ownerKey = "Icon", objectType = "Texture",
+				chain = {
+					"SetSize", { 44, 44 },
+					"SetPosition", { "CENTER", 0, 0 }, 
+					"ClearTexture", 
+					"SetMask", GetMedia("actionbutton-mask-square-rounded")
+				}
+			},
+			{
+				-- If the owner does not have the ownerDependencyKey key, this item will be skipped.
+				parent = nil, ownerKey = "Pushed", ownerDependencyKey = "SetPushedTexture", objectType = "Texture",
+				chain = {
+					"SetSize", { 44, 44 }, 
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetPosition", { "CENTER", 0, 0 },
+					"SetMask", GetMedia("actionbutton-mask-square-rounded"),
+					"SetColorTexture", { 1, 1, 1, .15 }
+				}
+			},
+			{
+				-- If the owner does not have the ownerDependencyKey key, this item will be skipped.
+				parent = nil, ownerKey = nil, ownerDependencyKey = "SetPushedTexture",
+				chain = {
+					"SetPushedTextureKey", "Pushed",
+					"SetPushedTextureBlendMode", "ADD",
+					"SetPushedTextureDrawLayer", { "ARTWORK", 1 }
+				}
+			},
+			{
+				parent = nil, ownerKey = "Flash", objectType = "Texture",
+				chain = {
+					"SetSize", { 44, 44 },
+					"SetPosition", { "CENTER", 0, 0 }, 
+					"SetDrawLayer", { "ARTWORK", 2 },
+					"SetTexture", [[Interface\ChatFrame\ChatFrameBackground]],
+					"SetVertexColor", { 1, 0, 0, .25 },
+					"SetMask", GetMedia("actionbutton-mask-square-rounded")
+				}
+			},
+			{
+				parent = nil, ownerKey = "Cooldown", objectType = "Frame", objectSubType = "Cooldown",
+				chain = {
+					"SetSize", { 44, 44 },
+					"SetPosition", { "CENTER", 0, 0 }, 
+					"SetSwipeTexture", GetMedia("actionbutton-mask-square-rounded"),
+					"SetDrawSwipe", true,
+					"SetBlingTexture", { GetMedia("blank"), 0, 0, 0 , 0 },
+					"SetDrawBling", true
+				}
+			},
+			{
+				parent = nil, ownerKey = "ChargeCooldown", objectType = "Frame", objectSubType = "Cooldown",
+				chain = {
+					"SetSize", { 44, 44 },
+					"SetPosition", { "CENTER", 0, 0 }, 
+					"SetSwipeTexture", { GetMedia("actionbutton-mask-square-rounded"), 0, 0, 0, .5 },
+					"SetSwipeColor", { 0, 0, 0, .5 },
+					"SetBlingTexture", { GetMedia("blank"), 0, 0, 0 , 0 },
+					"SetDrawSwipe", true,
+					"SetDrawBling", false
+				}
+			},
+			{
+				parent = nil, ownerKey = "CooldownCount", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "CENTER", 1, 0 },
+					"SetFontObject", GetFont(14, true),
+					"SetJustifyH", "CENTER",
+					"SetJustifyV", "MIDDLE",
+					"SetShadowOffset", { 0, 0 },
+					"SetShadowColor", { 0, 0, 0, 1 },
+					"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .85 }
+				}
+			},
+			{
+				parent = nil, ownerKey = "Count", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "BOTTOMRIGHT", -6, 6 },
+					"SetFontObject", GetFont(14, true),
+					"SetJustifyH", "CENTER",
+					"SetJustifyV", "BOTTOM",
+					"SetShadowOffset", { 0, 0 },
+					"SetShadowColor", { 0, 0, 0, 1 },
+					"SetTextColor", { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 }
+				}
+			},
+			(IsClassic) and {
+				parent = nil, ownerKey = "Rank", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "BOTTOMRIGHT", -6, 6 },
+					"SetFontObject", GetFont(14, true),
+					"SetJustifyH", "CENTER",
+					"SetJustifyV", "BOTTOM",
+					"SetShadowOffset", { 0, 0 },
+					"SetShadowColor", { 0, 0, 0, 1 },
+					"SetTextColor", { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3] }
+				}
+			} or false,
+			{
+				parent = nil, ownerKey = "Keybind", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "TOPLEFT", 6, -6 },
+					"SetFontObject", GetFont(13, true),
+					"SetJustifyH", "CENTER",
+					"SetJustifyV", "BOTTOM",
+					"SetShadowOffset", { 0, 0 },
+					"SetShadowColor", { 0, 0, 0, 1 },
+					"SetTextColor", { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 }
+				}
+			},
+			{
+				parent = nil, ownerKey = "SpellHighlight", objectType = "Frame", 
+				chain = {
+					"SetPosition", { "CENTER", 0, 0 },
+					"SetSize", { 46/(122/256), 46/(122/256) }
+				}
+			},
+			{
+				parent = nil, ownerKey = "SpellHighlight,Texture", objectType = "Texture", 
+				chain = {
+					"SetTexture", GetMedia("actionbutton-spellhighlight-square-rounded"),
+					"SetVertexColor", { 255/255, 225/255, 125/255, .75 },
+				}
+			},
+
+			-- SpellAutoCast
+			{
+				parent = nil, ownerKey = "SpellAutoCast", objectType = "Frame", 
+				chain = {
+					"SetPosition", { "CENTER", 0, 0 },
+					--"SetSize", { 50, 50 }, -- our upcoming custom rounded rectangle texture
+					"SetSize", { 40, 40 } -- blizzard texture
+				}
+			},
+			{
+				parent = nil, ownerKey = "SpellAutoCast,Ants", objectType = "Texture", 
+				chain = {
+					--"SetTexture", GetMedia("actionbutton-ants-small-grid"),
+					--"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
+					"SetTexture", [[Interface\SpellActivationOverlay\IconAlertAnts]], -- blizzard texture
+					"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], .5 }
+				}
+			},
+			{ 
+				parent = nil, ownerKey = "SpellAutoCast,Ants,Anim", objectType = "Animation", 
+				chain = {
+					"SetSpeed", 1/15,
+					--"SetGrid", { 512, 512, 96, 96, 25 },
+					"SetGrid", { 256, 256, 48, 48, 23 } -- blizzard texture
+				}
+			},
+
+			{
+				parent = nil, ownerKey = "SpellAutoCast,Glow", objectType = "Texture", 
+				chain = {
+					--"SetTexture", GetMedia("actionbutton-ants-small-glow-grid"),
+					--"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], .25 },
+					"SetVertexColor", { Colors.cast[1], Colors.cast[2], Colors.cast[3], 0 },
+				}
+			},
+			{
+				parent = nil, ownerKey = "SpellAutoCast,Glow,Anim", objectType = "Animation", 
+				chain = {
+					"SetSpeed", 1/15,
+					--"SetGrid", { 512, 512, 96, 96, 25 },
+					"SetGrid", { 256, 256, 48, 48, 23 } -- blizzard texture
+				}
+			}
+	
+		}
+	},
+	{
+		type = "CreateWidgets",
+		widgets = {
+			{
+				parent = "self", ownerKey = "Backdrop", objectType = "Texture",
+				chain = {
+					"SetSize", { 44, 44 },
+					"SetPoint", { "CENTER", 0, 0 },
+					"SetDrawLayer", { "BACKGROUND", 1 },
+					"SetVertexColor", { 2/3, 2/3, 2/3, 1 },
+					"SetTexture", GetMedia("button-slot")
+				}
+			},
+			{
+				-- If the owner does not have the ownerDependencyKey key, this item will be skipped.
+				parent = "self", ownerKey = "Checked", ownerDependencyKey = "SetCheckedTexture", objectType = "Texture",
+				chain = {
+					"SetDrawLayer", { "ARTWORK", 2 },
+					"SetSize", { 44, 44 },
+					"SetPosition", { "CENTER", 0, 0 },
+					"SetMask", GetMedia("actionbutton-mask-square-rounded"),
+					"SetColorTexture", { .9, .8, .1, .3 }
+				}
+			},
+			{
+				-- If the owner does not have the ownerDependencyKey key, this item will be skipped.
+				ownerDependencyKey = "SetCheckedTexture",
+				chain = {
+					"SetCheckedTextureKey", "Checked",
+					"SetCheckedTextureBlendMode", "ADD",
+					"SetCheckedTextureDrawLayer", { "ARTWORK", 1 }
+				},
+			},
+			{
+				parent = "self", ownerKey = "Darken", objectType = "Texture",
+				chain = {
+					"SetDrawLayer", { "BACKGROUND", 3 },
+					"SetSize", { 44, 44 },
+					"SetAllPointsToParentKey", "Icon",
+					"SetMask", GetMedia("actionbutton-mask-square-rounded"),
+					"SetTexture", [=[Interface\ChatFrame\ChatFrameBackground]=],
+					"SetVertexColor", { 0, 0, 0, .15 }
+				}
+			},
+			{
+				parent = "self", ownerKey = "BorderFrame", objectType = "Frame", objectSubType = "Frame",
+				chain = {
+					"SetFrameLevelOffset", 5,
+					"SetAllPointsToParent"
+				}
+			},
+			{
+				parent = "self,BorderFrame", ownerKey = "Border", objectType = "Frame", objectSubType = "Frame",
+				chain = {
+					"SetFrameLevelOffset", 1, 
+					"SetPoint", { "TOPLEFT", -9, 9 }, -- 18
+					"SetPoint", { "BOTTOMRIGHT", 9, -9 },
+					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 24 }}, --32
+					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 }
+				}
+			},
+			{
+				parent = "self,BorderFrame", ownerKey = "Glow", objectType = "Texture",
+				chain = {
+					"SetHidden",
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetSize", { 44, 44 },
+					"SetPoint", { "CENTER", 0, 0 },
+					"SetTexture", GetMedia("actionbutton-mask-square-rounded"),
+					"SetVertexColor", { 1, 1, 1, .05 },
+					"SetBlendMode", "ADD"
+				}
+			}
+
+		}
+	}
 })
 
 -- Applied to huge floating buttons like zone abilities.

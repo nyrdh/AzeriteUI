@@ -1119,6 +1119,75 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"SetStatusBarColor", { 1, 1, 1, .5 },
 					"DisableSmoothing", true
 				}
+			},
+			
+			-- AltPower Bar
+			{
+				parent = "self,ContentScaffold", ownerKey = "AltPower", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetOrientation", "RIGHT",
+					"SetFlippedHorizontally", false,
+					"SetSmartSmoothing", true,
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetPosition", { "TOPLEFT", 0, -26-16-2 }, -- relative to unit frame
+					"SetSize", { 224, 18 }, 
+					"SetStatusBarTexture", GetMedia("statusbar-power"),
+					"SetStatusBarColor", { 70/255, 255/255, 131/255, .69 }
+				},
+				values = {
+					"maxNameChars", 24
+				}
+			},
+			-- AltPower Bar Backdrop Frame
+			{
+				parent = "self,AltPower", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
+			},
+			-- AltPower Bar Backdrop Texture
+			{
+				parent = "self,AltPower,Bg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetAllPointsToParent", "SetDrawLayer", { "BACKGROUND", 1 },
+					"SetTexture", GetMedia("statusbar-dark"), "SetVertexColor", { .1, .1, .1, 1 }
+				}
+			},
+			-- AltPower Bar Overlay Frame
+			{
+				parent = "self,AltPower", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
+			},
+			-- AltPower Bar Overlay Texture
+			{
+				parent = "self,AltPower,Fg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetAllPointsToParent", "SetDrawLayer", { "ARTWORK", 1 },
+					"SetTexture", GetMedia("statusbar-normal-overlay")	
+				}
+			},
+			-- Setup backdrop and border
+			{
+				parent = "self,AltPower", parentKey = "Border", objectType = "Frame", objectSubType = "Frame", objectTemplate = "BackdropTemplate",
+				chain = {
+					"SetFrameLevelOffset", 3,
+					"SetSizeOffset", 46,
+					"SetPosition", { "CENTER", 0, 0 },
+					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 32 }},
+					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 }
+				}
+
+			},
+			-- AltPower Bar Value
+			{
+				parent = "self,AltPower", parentKey = "Value", objectType = "FontString", 
+				chain = {
+					"SetPosition", { "RIGHT", -16, 0 },
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "RIGHT", 
+					"SetJustifyV", "MIDDLE",
+					"SetFontObject", GetFont(14,true),
+					"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+					"SetParentToOwnerKey", "OverlayScaffold"
+				}
 			}
 			
 		}

@@ -2126,6 +2126,38 @@ Defaults.UnitFrameRaid = {
 ------------------------------------------------
 -- New Forge Driven Defaults
 ------------------------------------------------
+-- New saved settings which included
+-- different entries for different themes.
+-- Note that during our transition period,
+-- not all of these will be implemented at first.
+Defaults["ModuleForge::ActionBars"] = {
+	-- General settings
+	["buttonLock"] = true,
+	["castOnDown"] = true,
+	["keybindDisplayPriority"] = "default", -- can be "gamepad", "keyboard", "default"
+	["lastKeybindDisplayType"] = "keyboard", -- not a user setting, just to save the state.
+	["gamePadType"] = "default", -- gamepad icons used. "xbox", "xbox-reversed", "playstation", "default"
+	
+	-- Legacy specific settings
+	["Legacy::enableSecondaryBar"] = false,
+
+	-- Azerite specific settings
+	-- Valid range is 0 to 17. 
+	-- Anything outside will be limited to this range.
+	-- default this to 5, to access a full standard bar.
+	["Azerite::extraButtonsCount"] = 5,
+
+	-- Valid values are 'always','hover','combat'
+	-- Defaulting this to combat, 
+	-- so new users can access their full default bar
+	["Azerite::extraButtonsVisibility"] = "combat", 
+	["Azerite::petBarVisibility"] = "hover",
+	["Azerite::petBarEnabled"] = true
+
+}
+
+-- New defaults for the new forge driven module.
+-- Themes will be added to this as we transition them.
 Defaults["ModuleForge::UnitFrames"] = {
 	-- Legacy specific settings
 	["Legacy::EnableCastBar"] = true,

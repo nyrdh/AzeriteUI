@@ -19,6 +19,7 @@ local GetDefaults = Private.GetDefaults
 local GetLayout = Private.GetLayout
 local GetLayoutID = Private.GetLayoutID
 local GetSchematic = Private.GetSchematic
+local HasSchematic = Private.HasSchematic
 
 UnitFrames.GetDB = function(self, key)
 	if (not self.layoutID) or (not self.db) then
@@ -35,7 +36,7 @@ UnitFrames.SetDB = function(self, key, value)
 end
 
 UnitFrames.OnInit = function(self)
-	if (not Private.HasSchematic("ModuleForge::UnitFrames")) then
+	if (not HasSchematic("ModuleForge::UnitFrames")) then
 		return self:SetUserDisabled(true)
 	end
 	self.db = GetConfig(self:GetName())
