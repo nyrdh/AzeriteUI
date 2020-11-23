@@ -1,4 +1,4 @@
-local LibChatBubble = Wheel:Set("LibChatBubble", 23)
+local LibChatBubble = Wheel:Set("LibChatBubble", 24)
 if (not LibChatBubble) then	
 	return
 end
@@ -134,7 +134,6 @@ local OnUpdate = function(self)
 		local customBubble = customBubbles[bubble]
 
 		if bubble:IsShown() then
-
 			-- continuing the fight against overlaps blending into each other! 
 			customBubbles[bubble]:SetFrameLevel(bubble:GetFrameLevel()) -- this works?
 			
@@ -249,7 +248,6 @@ end
 LibChatBubble.GetFontObject = function(self)
 	return LibChatBubble.fontObject or Game12Font_o1
 end
-
 
 LibChatBubble.InitBubble = function(self, bubble)
 	LibChatBubble.numBubbles = LibChatBubble.numBubbles + 1

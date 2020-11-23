@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 128)
+local LibSecureButton = Wheel:Set("LibSecureButton", 129)
 if (not LibSecureButton) then
 	return
 end
@@ -1638,6 +1638,10 @@ ActionButton.GetPager = function(self)
 	return self._pager
 end 
 
+ActionButton.GetVisibilityDriverFrame = function(self)
+	return self._owner
+end 
+
 ActionButton.GetSpellID = function(self)
 	local actionType, id, subType = GetActionInfo(self.buttonAction)
 	if (actionType == "spell") then
@@ -1890,10 +1894,6 @@ PetButton.UpdateBinding = ActionButton.UpdateBinding
 
 -- Getters
 ----------------------------------------------------
-PetButton.GetPager = function(self)
-	return self._pager
-end 
-
 PetButton.GetSpellID = function(self)
 	local name, texture, isToken, isActive, autoCastAllowed, autoCastEnabled, spellID = GetPetActionInfo(self.id)
 	return spellID
@@ -1902,6 +1902,8 @@ end
 PetButton.AbbreviateBindText = ActionButton.AbbreviateBindText
 PetButton.GetBindingText = ActionButton.GetBindingText
 PetButton.GetBindingTextAbbreviated = ActionButton.GetBindingTextAbbreviated
+PetButton.GetPager = ActionButton.GetPager
+PetButton.GetVisibilityDriverFrame = ActionButton.GetVisibilityDriverFrame
 PetButton.GetTooltip = ActionButton.GetTooltip
 
 -- PetButton Script Handlers
@@ -2341,9 +2343,6 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		button = setmetatable(LibSecureButton:PrepareButton(page:CreateFrame("CheckButton", name, "PetActionButtonTemplate")), PetButton_MT)
 		button:SetFrameStrata("LOW")
 
-		-- Link the button to the visibility layer
-		visibility:SetFrameRef("Button", button)
-
 		-- Create button layers
 		LibSecureButton:CreateButtonLayers(button)
 		LibSecureButton:CreateButtonOverlay(button)
@@ -2377,10 +2376,6 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		-- meaning there's no way to separate keys and mouse buttons. 
 		button:SetAttribute("alt-ctrl-shift-type*", "stop")
 		
-		page:SetFrameRef("Visibility", visibility)
-		page:SetFrameRef("Button", button)
-		visibility:SetFrameRef("Page", page)
-
 		button:SetAttribute("OnDragStart", [[
 			local id = self:GetID(); 
 			local buttonLock = self:GetAttribute("buttonLock"); 
@@ -2429,13 +2424,22 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 			--visibilityDriver = "[@pet,exists]show;hide"
 		end
 
-		-- enable the visibility driver
-		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
+		-- Cross reference everything
 
+		--button:SetFrameRef("Visibility", visibility)
+		--button:SetFrameRef("Page", page)
+
+		page:SetFrameRef("Button", button)
+		page:SetFrameRef("Visibility", visibility)
+		visibility:SetFrameRef("Button", button)
+		visibility:SetFrameRef("Page", page)
+		
 		-- not run by a page driver
 		page:SetAttribute("state-page", "0") 
 		button:SetAttribute("state", "0")
 		
+		-- enable the visibility driver
+		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
 
 	elseif (buttonType == "stance") then
 		button = setmetatable(visibility:CreateFrame("CheckButton", name, "StanceButtonTemplate"), StanceButton_MT)
@@ -2575,10 +2579,6 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 			end 
 		]]) 
 
-		page:SetFrameRef("Visibility", visibility)
-		page:SetFrameRef("Button", button)
-		visibility:SetFrameRef("Page", page)
-
 		button:SetAttribute("OnDragStart", [[
 			local actionpage = self:GetAttribute("actionpage"); 
 			if (not actionpage) then
@@ -2684,14 +2684,22 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 			end 
 		end
 
-		-- enable the visibility driver
-		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
+		-- Cross reference everything
+		button:SetFrameRef("Visibility", visibility)
+		button:SetFrameRef("Page", page)
+		page:SetFrameRef("Button", button)
+		page:SetFrameRef("Visibility", visibility)
+		visibility:SetFrameRef("Button", button)
+		visibility:SetFrameRef("Page", page)
 
 		-- reset the page before applying a new page driver
 		page:SetAttribute("state-page", "0") 
 
 		-- just in case we're not run by a header, default to state 0
 		button:SetAttribute("state", "0")
+
+		-- enable the visibility driver
+		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
 
 		-- enable the page driver
 		RegisterAttributeDriver(page, "state-page", driver) 

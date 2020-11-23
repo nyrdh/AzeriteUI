@@ -2132,27 +2132,25 @@ Defaults.UnitFrameRaid = {
 -- not all of these will be implemented at first.
 Defaults["ModuleForge::ActionBars"] = {
 	-- General settings
+	-- *Note: Not yet using these in all themes!
 	["buttonLock"] = true,
 	["castOnDown"] = true,
-	["keybindDisplayPriority"] = "default", -- can be "gamepad", "keyboard", "default"
+	["keybindDisplayPriority"] = "default", -- can be 'gamepad', 'keyboard', 'default'
 	["lastKeybindDisplayType"] = "keyboard", -- not a user setting, just to save the state.
-	["gamePadType"] = "default", -- gamepad icons used. "xbox", "xbox-reversed", "playstation", "default"
+	["gamePadType"] = "default", -- gamepad icons used. 'xbox', 'xbox-reversed', 'playstation', 'default'
 	
 	-- Legacy specific settings
-	["Legacy::enableSecondaryBar"] = false,
+	["Legacy::enableSecondaryBar"] = false, -- bottom left multibar
+	["Legacy::enableSideBarRight"] = false, -- right (first) side bar
+	["Legacy::enableSideBarLeft"] = false, -- left (second) side bar
+	["Legacy::enablePetBar"] = true,
 
 	-- Azerite specific settings
-	-- Valid range is 0 to 17. 
-	-- Anything outside will be limited to this range.
-	-- default this to 5, to access a full standard bar.
-	["Azerite::extraButtonsCount"] = 5,
-
-	-- Valid values are 'always','hover','combat'
-	-- Defaulting this to combat, 
-	-- so new users can access their full default bar
-	["Azerite::extraButtonsVisibility"] = "combat", 
-	["Azerite::petBarVisibility"] = "hover",
-	["Azerite::petBarEnabled"] = true
+	-- *Note: Not yet using these!
+	["Azerite::extraButtonsCount"] = 5, -- Valid range is 0 to 17, 5 means a single full bar.
+	["Azerite::extraButtonsVisibility"] = "combat", -- can be 'always','hover','combat'
+	["Azerite::petBarEnabled"] = true,
+	["Azerite::petBarVisibility"] = "hover"
 
 }
 
@@ -2374,6 +2372,8 @@ Azerite.BlizzardFonts = {
 	ChatBubbleFont = GetFont(12, true, false),
 	ChatFont = GetFont(15, true, true)
 }
+Legacy.BlizzardFonts = setmetatable({
+}, { __index = Azerite.BlizzardFonts })
 
 -- Blizzard Game Menu (Esc)
 Azerite.BlizzardGameMenu = {

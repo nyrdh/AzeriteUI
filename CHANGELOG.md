@@ -4,12 +4,12 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-11-22
-### Added
-- Players from other realms will now have their realm displayed at the bottom of unit tooltips.
-
-### Changed
+## [3.1.427-RC] 2020-11-23
+- New beta feature: Theme changes!
+	- Type `/go legacy` to try the beta version of the new GoldpawUI theme. 
+	- Type `/go azerite` to return to the default AzeriteUI theme.
 - Our actionbutton now use their own spell highlight texture to display MaxDps glows. If you have enabled both MaxDps and Blizzard glows in the MaxDps settings, the MaxDps rotations and colorings will take priority. We recommend disabling the Blizzard glow.
+- Players from other realms will now have their realm displayed at the bottom of unit tooltips.
 
 ## [3.0.426-RC] 2020-11-18
 - Bump toc to 9.0.2.

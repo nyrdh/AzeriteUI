@@ -1,8 +1,9 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 
 <Script file='schematic-root.lua'/>
-<Script file='schematic-actionbars.lua'/>
-<Script file='schematic-unitframes.lua'/>
+<Script file='schematic-actionbars-azerite.lua'/>
+<Script file='schematic-actionbars-legacy.lua'/>
+<Script file='schematic-unitframes-legacy.lua'/>
 <Script file='schematic-widgets.lua'/>
 
 </Ui>

@@ -264,7 +264,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"hideInVehicles", true, 
 
 					-- hides when the unit is in a vehicle, but lacks a vehicleui (tortollan minigames)
-					--"visibilityPreDriver", "[canexitvehicle,novehicleui]hide;", 
+					--"visibilityPreDriver", "[canexitvehicle,novehicleui,nooverridebar,nopossessbar,noshapeshift]hide;", 
 					"visibilityPreDriver", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;"
 				}
 			},
@@ -631,7 +631,7 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"ignoreExplorerMode", true,
 
 					-- hides when the unit is in a vehicle, but lacks a vehicleui (tortollan minigames)
-					--"visibilityPreDriver", "[canexitvehicle,novehicleui]hide;", 
+					--"visibilityPreDriver", "[canexitvehicle,novehicleui,nooverridebar,nopossessbar,noshapeshift]hide;", 
 					"visibilityPreDriver", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;"
 				}
 			},
@@ -1013,7 +1013,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 				parent = nil, ownerKey = nil, 
 				chain = {
 					"SetSize", { 224, 26 }, "SetHitBox", { -4, -4, -4, -4 },
-					"Place", { "BOTTOM", "UICenter", "BOTTOM", 0, 210 }
+					"Place", { "BOTTOM", "UICenter", "BOTTOM", 0, 210+20 }
 				},
 				values = {
 					"colors", Colors,
@@ -1237,7 +1237,7 @@ Private.RegisterSchematic("UnitForge::PlayerVehicle", "Legacy", {
 				parent = nil, ownerKey = nil, 
 				chain = {
 					"SetSize", { 24+16, 64+16 }, "SetHitBox", { -4, -4, -4, -4 },
-					"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -162, 29 }
+					"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -162 -12, 29-10 }
 				},
 				values = {
 					"colors", Colors,
@@ -1260,7 +1260,7 @@ Private.RegisterSchematic("UnitForge::PlayerVehicle", "Legacy", {
 				chain = {
 					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 24 }},
 					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
-					"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 162-11 + 6, 29-11 },
+					"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 162-11 + 4 +12, 29-11-10 },
 					"SetSize", { 24+16+11*2, 64+16+11*2 }
 				}
 
@@ -1379,10 +1379,8 @@ Private.RegisterSchematic("UnitForge::PlayerVehicle", "Legacy", {
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
 					"SetFrameLevelOffset", 2, 
-
 					"SetSize", { 24, 64 }, 
-					"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 162+8 + 6, 29+8 },
-
+					"SetPosition", { "TOPLEFT", 376 +24, -8 }, -- relative to unit frame
 					"SetStatusBarTexCoord", { 1,0, 0,0, 1,1, 0,1 }, -- ULx,ULy,LLx,LLy,URx,URy,LRx,LRy
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
@@ -1390,7 +1388,6 @@ Private.RegisterSchematic("UnitForge::PlayerVehicle", "Legacy", {
 					"frequent", true -- listen to frequent health events for more accurate updates
 				}
 			},
-
 
 			-- Power Bar Backdrop Frame
 			{

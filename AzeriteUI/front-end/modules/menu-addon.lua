@@ -1124,110 +1124,157 @@ Module.CreateMenuTable = function(self)
 	-- Actionbars
 	local ActionBarMain = Core:GetModule("ActionBarMain", true)
 	if (self:ShouldHaveMenu(ActionBarMain)) then 
+
 		local ActionBarMenu = {
 			title = L["ActionBars"], type = nil, hasWindow = true, 
-			buttons = clean({
-				IsAzerite and {
-					title = L["More Buttons"], type = nil, hasWindow = true, 
-					buttons = {
-						{
-							title = L["Extra Buttons Visibility"], type = nil, hasWindow = true, 
-							isSlave = true, slaveDB = "ActionBarMain", slaveKey = "extraButtonsCount", slaveEnableValues = "5,11,17",
-							buttons = {
-								{
-									enabledTitle = L_ENABLED:format(L["MouseOver"]),
-									disabledTitle = L["MouseOver"],
-									type = "SET_VALUE", 
-									configDB = "ActionBarMain", configKey = "extraButtonsVisibility", optionArgs = { "hover" }, 
-									proxyModule = "ActionBarMain"
-								},
-								{
-									enabledTitle = L_ENABLED:format(L["MouseOver + Combat"]),
-									disabledTitle = L["MouseOver + Combat"],
-									type = "SET_VALUE", 
-									configDB = "ActionBarMain", configKey = "extraButtonsVisibility", optionArgs = { "combat" }, 
-									proxyModule = "ActionBarMain"
-								},
-								{
-									enabledTitle = L_ENABLED:format(L["Always Visible"]),
-									disabledTitle = L["Always Visible"],
-									type = "SET_VALUE", 
-									configDB = "ActionBarMain", configKey = "extraButtonsVisibility", optionArgs = { "always" }, 
-									proxyModule = "ActionBarMain"
-								}
+			buttons = {}
+		}
+
+		if (IsAzerite) then
+			table_insert(ActionBarMenu.buttons, {
+				title = L["More Buttons"], type = nil, hasWindow = true, 
+				buttons = {
+					{
+						title = L["Extra Buttons Visibility"], type = nil, hasWindow = true, 
+						isSlave = true, slaveDB = "ActionBarMain", slaveKey = "extraButtonsCount", slaveEnableValues = "5,11,17",
+						buttons = {
+							{
+								enabledTitle = L_ENABLED:format(L["MouseOver"]),
+								disabledTitle = L["MouseOver"],
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "extraButtonsVisibility", optionArgs = { "hover" }, 
+								proxyModule = "ActionBarMain"
+							},
+							{
+								enabledTitle = L_ENABLED:format(L["MouseOver + Combat"]),
+								disabledTitle = L["MouseOver + Combat"],
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "extraButtonsVisibility", optionArgs = { "combat" }, 
+								proxyModule = "ActionBarMain"
+							},
+							{
+								enabledTitle = L_ENABLED:format(L["Always Visible"]),
+								disabledTitle = L["Always Visible"],
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "extraButtonsVisibility", optionArgs = { "always" }, 
+								proxyModule = "ActionBarMain"
 							}
-						},
-						{
-							enabledTitle = L_ENABLED:format( L["No Extra Buttons"]),
-							disabledTitle =  L["No Extra Buttons"],
-							type = "SET_VALUE", 
-							configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 0 }, 
-							proxyModule = "ActionBarMain"
-						},
-						{
-							enabledTitle = L_ENABLED:format(L["+%.0f Buttons"]:format(5)),
-							disabledTitle = L["+%.0f Buttons"]:format(5),
-							type = "SET_VALUE", 
-							configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 5 }, 
-							proxyModule = "ActionBarMain"
-						},
-						{
-							enabledTitle = L_ENABLED:format(L["+%.0f Buttons"]:format(11)),
-							disabledTitle = L["+%.0f Buttons"]:format(11),
-							type = "SET_VALUE", 
-							configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 11 }, 
-							proxyModule = "ActionBarMain"
-						},
-						{
-							enabledTitle = L_ENABLED:format(L["+%.0f Buttons"]:format(17)),
-							disabledTitle = L["+%.0f Buttons"]:format(17),
-							type = "SET_VALUE", 
-							configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 17 }, 
-							proxyModule = "ActionBarMain"
-						}
-					}
-				} or false, 
-				IsAzerite and {
-					title = L["Pet Bar"], type = nil, hasWindow = true, 
-					buttons = {
-						{
-							title = L["Pet Bar Visibility"], type = nil, hasWindow = true, 
-							isSlave = true, slaveDB = "ActionBarMain", slaveKey = "petBarEnabled",
-							buttons = {
-								{
-									enabledTitle = L_ENABLED:format(L["MouseOver"]),
-									disabledTitle = L["MouseOver"],
-									type = "SET_VALUE", 
-									configDB = "ActionBarMain", configKey = "petBarVisibility", optionArgs = { "hover" }, 
-									proxyModule = "ActionBarMain"
-								},
-								{
-									enabledTitle = L_ENABLED:format(L["MouseOver + Combat"]),
-									disabledTitle = L["MouseOver + Combat"],
-									type = "SET_VALUE", 
-									configDB = "ActionBarMain", configKey = "petBarVisibility", optionArgs = { "combat" }, 
-									proxyModule = "ActionBarMain"
-								},
-								{
-									enabledTitle = L_ENABLED:format(L["Always Visible"]),
-									disabledTitle = L["Always Visible"],
-									type = "SET_VALUE", 
-									configDB = "ActionBarMain", configKey = "petBarVisibility", optionArgs = { "always" }, 
-									proxyModule = "ActionBarMain"
-								}
-							}
-						},
-						{
-							enabledTitle = L["Enabled"],
-							disabledTitle = L["Disabled"],
-							type = "TOGGLE_VALUE", hasWindow = false, 
-							configDB = "ActionBarMain", configKey = "petBarEnabled", 
-							proxyModule = "ActionBarMain"
 						}
 					},
-				} or false
+					{
+						enabledTitle = L_ENABLED:format( L["No Extra Buttons"]),
+						disabledTitle =  L["No Extra Buttons"],
+						type = "SET_VALUE", 
+						configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 0 }, 
+						proxyModule = "ActionBarMain"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["+%.0f Buttons"]:format(5)),
+						disabledTitle = L["+%.0f Buttons"]:format(5),
+						type = "SET_VALUE", 
+						configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 5 }, 
+						proxyModule = "ActionBarMain"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["+%.0f Buttons"]:format(11)),
+						disabledTitle = L["+%.0f Buttons"]:format(11),
+						type = "SET_VALUE", 
+						configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 11 }, 
+						proxyModule = "ActionBarMain"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["+%.0f Buttons"]:format(17)),
+						disabledTitle = L["+%.0f Buttons"]:format(17),
+						type = "SET_VALUE", 
+						configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 17 }, 
+						proxyModule = "ActionBarMain"
+					}
+				}
 			})
-		}
+			
+			table_insert(ActionBarMenu.buttons, {
+				title = L["Pet Bar"], type = nil, hasWindow = true, 
+				buttons = {
+					{
+						title = L["Pet Bar Visibility"], type = nil, hasWindow = true, 
+						isSlave = true, slaveDB = "ActionBarMain", slaveKey = "petBarEnabled",
+						buttons = {
+							{
+								enabledTitle = L_ENABLED:format(L["MouseOver"]),
+								disabledTitle = L["MouseOver"],
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "petBarVisibility", optionArgs = { "hover" }, 
+								proxyModule = "ActionBarMain"
+							},
+							{
+								enabledTitle = L_ENABLED:format(L["MouseOver + Combat"]),
+								disabledTitle = L["MouseOver + Combat"],
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "petBarVisibility", optionArgs = { "combat" }, 
+								proxyModule = "ActionBarMain"
+							},
+							{
+								enabledTitle = L_ENABLED:format(L["Always Visible"]),
+								disabledTitle = L["Always Visible"],
+								type = "SET_VALUE", 
+								configDB = "ActionBarMain", configKey = "petBarVisibility", optionArgs = { "always" }, 
+								proxyModule = "ActionBarMain"
+							}
+						}
+					},
+					{
+						enabledTitle = L["Enabled"],
+						disabledTitle = L["Disabled"],
+						type = "TOGGLE_VALUE", hasWindow = false, 
+						configDB = "ActionBarMain", configKey = "petBarEnabled", 
+						proxyModule = "ActionBarMain"
+					}
+				},
+			})
+
+		elseif (IsLegacy) then
+
+			table_insert(ActionBarMenu.buttons, {
+				title = L["Extra Bars"], type = nil, hasWindow = true, 
+				buttons = {
+					{
+						enabledTitle = L_ENABLED:format(L["Secondary Bar"]),
+						disabledTitle = L_DISABLED:format(L["Secondary Bar"]),
+						type = "TOGGLE_VALUE", hasWindow = false, 
+						configDB = "ModuleForge::ActionBars", configKey = "Legacy::enableSecondaryBar", 
+						proxyModule = "ActionBarMain"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["Side Bar One"]),
+						disabledTitle = L_DISABLED:format(L["Side Bar One"]),
+						type = "TOGGLE_VALUE", hasWindow = false, 
+						configDB = "ModuleForge::ActionBars", configKey = "Legacy::enableSideBarRight", 
+						proxyModule = "ActionBarMain"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["Side Bar Two"]),
+						disabledTitle = L_DISABLED:format(L["Side Bar Two"]),
+						type = "TOGGLE_VALUE", hasWindow = false, 
+						configDB = "ModuleForge::ActionBars", configKey = "Legacy::enableSideBarLeft", 
+						proxyModule = "ActionBarMain"
+					}
+				},
+			})
+
+			table_insert(ActionBarMenu.buttons, {
+				title = L["Pet Bar"], type = nil, hasWindow = true, 
+				buttons = {
+					{
+						enabledTitle = L["Enabled"],
+						disabledTitle = L["Disabled"],
+						type = "TOGGLE_VALUE", hasWindow = false, 
+						configDB = "ModuleForge::ActionBars", configKey = "Legacy::enablePetBar", 
+						proxyModule = "ActionBarMain"
+					}
+				},
+			})
+
+		end
 
 		if (IsRetail) then
 			-- All these options are for 9.0.1 gamepads.
