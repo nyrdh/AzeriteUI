@@ -1,4 +1,4 @@
-local LibPlayerData = Wheel:Set("LibPlayerData", 20)
+local LibPlayerData = Wheel:Set("LibPlayerData", 22)
 if (not LibPlayerData) then
 	return
 end
@@ -25,6 +25,8 @@ local type = type
 
 -- WoW API
 local FindActiveAzeriteItem = C_AzeriteItem and C_AzeriteItem.FindActiveAzeriteItem
+local GetAccountExpansionLevel = GetAccountExpansionLevel
+local GetMaximumExpansionLevel = GetMaximumExpansionLevel
 local GetMaxLevelForLatestExpansion = GetMaxLevelForLatestExpansion
 local GetMaxLevelForPlayerExpansion = GetMaxLevelForPlayerExpansion
 local GetSpecialization = GetSpecialization
@@ -73,9 +75,9 @@ if (IsClassic) then
 elseif (IsRetail) then
 
 	-- Return whether the player currently can gain XP
-	LibPlayerData.PlayerHasXP = function(useExpansionMax)
+	LibPlayerData.PlayerHasXP = function()
 		if (not IsXPUserDisabled()) then 
-			if (useExpansionMax) then 
+			if (GetAccountExpansionLevel() == GetMaximumExpansionLevel()) then 
 				return (UnitLevel("player") < GetMaxLevelForLatestExpansion())
 			else
 				return (UnitLevel("player") < GetMaxLevelForPlayerExpansion())
