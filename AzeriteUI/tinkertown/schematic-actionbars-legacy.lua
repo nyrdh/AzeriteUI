@@ -458,9 +458,11 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 						----------------------------------------------------
 						-- Method to create scaffolds and overlay frames.
 						"CreateScaffolds", function(self)
-
+							local template = BackdropTemplateMixin and "SecureHandlerAttributeTemplate,BackdropTemplate" 
+																	or "SecureHandlerAttributeTemplate"
+																	
 							-- Create master frame. This one becomes secure.
-							local frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate,BackdropTemplate")
+							local frame = self:CreateFrame("Frame", nil, "UICenter", template)
 							frame:SetFrameStrata("LOW")
 							frame:SetFrameLevel(1)
 							frame:SetSize(2,2)
@@ -468,7 +470,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 							self.frame = frame
 
 							-- Create a master frame for the left side pull-out buttons.
-							local left = self.frame:CreateFrame("Frame", nil, "SecureHandlerAttributeTemplate,BackdropTemplate")
+							local left = self.frame:CreateFrame("Frame", nil, template)
 							left:SetFrameStrata("LOW")
 							left:SetFrameLevel(3)
 							left:Hide()
@@ -500,7 +502,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 							self.leftToggle = leftToggle
 
 							-- Create a master frame for the right side pull-out buttons.
-							local right = self.frame:CreateFrame("Frame", nil, "SecureHandlerAttributeTemplate,BackdropTemplate")
+							local right = self.frame:CreateFrame("Frame", nil, template)
 							right:SetFrameStrata("LOW")
 							right:SetFrameLevel(3)
 							right:Hide()
@@ -542,10 +544,10 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 						"CreateBackdrops", function(self)
 							local frame = self.frame
 							local backdrops = { 
-								primary = frame:CreateFrame("Frame", "BackdropTemplate"), 
-								vehicle = frame:CreateFrame("Frame", "BackdropTemplate"), 
-								left = frame:CreateFrame("Frame", "BackdropTemplate"), 
-								right = frame:CreateFrame("Frame", "BackdropTemplate") 
+								primary = frame:CreateFrame("Frame", BackdropTemplateMixin and "BackdropTemplate"), 
+								vehicle = frame:CreateFrame("Frame", BackdropTemplateMixin and "BackdropTemplate"), 
+								left = frame:CreateFrame("Frame", BackdropTemplateMixin and "BackdropTemplate"), 
+								right = frame:CreateFrame("Frame", BackdropTemplateMixin and "BackdropTemplate") 
 							}
 							for i,backdrop in pairs(backdrops) do
 								backdrop:SetFrameStrata("LOW")

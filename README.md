@@ -21,12 +21,12 @@ All feature requests and bug reports for all game versions are done on the main 
 Even though the most recent versions of AzeriteUI are available on GitHub, I recommend using the tagged, public versions on CurseForge and Twitch. Anything else is considered experimental or in the middle of development, and we'll simply ignore any questions or issue reports related to those untagged git versions. 
 
 ### **CurseForge:**
-* Azerite UI Suite for Classic: [https://www.curseforge.com/wow/addons/azeriteui-classic](https://www.curseforge.com/wow/addons/azeriteui-classic)  
-* Azerite UI Suite for Retail: [https://www.curseforge.com/wow/addons/azeriteui-retail](https://www.curseforge.com/wow/addons/azeriteui-retail)  
+* Azerite UI Collection for Classic: [https://www.curseforge.com/wow/addons/azeriteui-classic](https://www.curseforge.com/wow/addons/azeriteui-classic)  
+* Azerite UI Collection for Retail: [https://www.curseforge.com/wow/addons/azeriteui-retail](https://www.curseforge.com/wow/addons/azeriteui-retail)  
 
 ### **GitHub:**
-* Azerite UI Suite for Classic: [github.com/GoldpawsStuff/AzeriteUI](https://github.com/GoldpawsStuff/AzeriteUI)  
-* Azerite UI Suite for Retail: [github.com/GoldpawsStuff/AzeriteUI_Retail](https://github.com/GoldpawsStuff/AzeriteUI_Retail)  
+* Azerite UI Collection for Classic: [github.com/GoldpawsStuff/AzeriteUI](https://github.com/GoldpawsStuff/AzeriteUI)  
+* Azerite UI Collection for Retail: [github.com/GoldpawsStuff/AzeriteUI_Retail](https://github.com/GoldpawsStuff/AzeriteUI_Retail)  
 
 ## **Recommended addons:**  
 These are some addons I feel go very well together with our user interface. They are not required, but I recommend them as they further enhance the look and functionality in a non-intrusive manner.  
@@ -38,6 +38,7 @@ These are some addons I feel go very well together with our user interface. They
 ### **Retail:**
 * Immersion: [www.curseforge.com/wow/addons/immersion](https://www.curseforge.com/wow/addons/immersion)  
 * Narcissus: [www.curseforge.com/wow/addons/narcissus](https://www.curseforge.com/wow/addons/narcissus)  
+* MaxDps: [www.curseforge.com/wow/addons/maxdps-rotation-helper](https://www.curseforge.com/wow/addons/maxdps-rotation-helper)
 * Minimap Button Bag: [www.curseforge.com/wow/addons/mbb](https://www.curseforge.com/wow/addons/mbb)  
 
 ## **Frequently Asked Questions:**  
@@ -48,8 +49,8 @@ These are some addons I feel go very well together with our user interface. They
 * You can't. This is as much UX as UI, meaning the interface is designed around a concept, this isn't meant to be a pretty skin over your current interface, it's instead a full user experience system where how you interact with the game is affected. 
 
 ### **How can I get more action buttons, and where is the stance bar?**  
+* For more buttons, right-click the cogwheel icon in the bottom right corner of the screen. You can have a maximum of 2 full bars in the azerite theme, and a maximum of 4 full bars in the legacy theme.
 * The stance bar will be introduced as an optional feature in an upcoming update. If you need it right away, you can always use Bartender for it along with our [our Masque skin](https://www.curseforge.com/wow/addons/masque-azerite). 
-* For more buttons, right-click the cogwheel icon in the bottom right corner of the screen. You can have a maximum of 24 buttons, which in effect is the main actionbar and the bar known in the default interface as the "bottom left multi action bar". 
 
 ### **How can I disable the actionbars?**
 * This is not a feature I intend to implement. I do realize that some of you would like this feature for it to look better with ConsolePort, or just completely replace our bars with Bartender, but dismantling our user interface to make it fit a completely different project slightly better just isn't something we're going to do. 

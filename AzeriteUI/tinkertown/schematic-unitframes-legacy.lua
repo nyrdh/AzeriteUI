@@ -1072,7 +1072,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			},
 			-- Setup backdrop and border
 			{
-				parent = "self,Cast", parentKey = "Border", objectType = "Frame", objectSubType = "Frame", objectTemplate = "BackdropTemplate",
+				parent = "self,Cast", parentKey = "Border", objectType = "Frame", objectSubType = "Frame", objectTemplate = BackdropTemplateMixin and "BackdropTemplate",
 				chain = {
 					"SetFrameLevelOffset", 3,
 					"SetSizeOffset", 46,
@@ -1120,7 +1120,13 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"DisableSmoothing", true
 				}
 			},
-			
+		}
+	},
+
+	-- Retail only
+	IsRetail and {
+		type = "CreateWidgets",
+		widgets = {
 			-- AltPower Bar
 			{
 				parent = "self,ContentScaffold", ownerKey = "AltPower", objectType = "Frame", objectSubType = "StatusBar",
@@ -1166,7 +1172,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			},
 			-- Setup backdrop and border
 			{
-				parent = "self,AltPower", parentKey = "Border", objectType = "Frame", objectSubType = "Frame", objectTemplate = "BackdropTemplate",
+				parent = "self,AltPower", parentKey = "Border", objectType = "Frame", objectSubType = "Frame", objectTemplate = BackdropTemplateMixin and "BackdropTemplate",
 				chain = {
 					"SetFrameLevelOffset", 3,
 					"SetSizeOffset", 46,
@@ -1189,9 +1195,9 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"SetParentToOwnerKey", "OverlayScaffold"
 				}
 			}
-			
 		}
-	}
+	} or nil
+	
 })
 
 -- Applied to the vehicle frame only visible while in a vehicle.

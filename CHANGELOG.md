@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.429-RC] 2020-11-24
+### Fixed
+- Legacy theme fixed to work for WoW Classic!
+
 ## [3.1.428-RC] 2020-11-24
 ### Added
 - Added a new, better system for extra action- and zone ability buttons for the legacy theme. Azerite will follow shortly!
