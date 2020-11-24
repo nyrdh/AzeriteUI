@@ -8,8 +8,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Added a new, better system for extra action- and zone ability buttons for the legacy theme. Azerite will follow shortly!
 
-### Changed
-
 ### Fixed
 - The XP bar should appear at more appropriate times now, especially for players without the latest expansion.
 
