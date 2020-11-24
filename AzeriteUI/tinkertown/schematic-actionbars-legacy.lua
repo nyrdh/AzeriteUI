@@ -1231,6 +1231,10 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 					-- Here we can call methods created in previously defined
 					-- 'values' sections.
 					chain = {
+						-- Embed libraries on the fly.
+						-- Doing it this way allows the theme to
+						-- only request and load what is actually used.
+						"EmbedLibraries", { "LibEvent", "LibFrame", "LibInputMethod", "LibMessage", "LibSecureButton", "LibTooltip" },
 						-- Create scaffolds and root frames
 						"CreateScaffolds", {},
 						"CreateBackdrops", {},

@@ -4,10 +4,22 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.428-RC] 2020-11-24
+### Added
+- Added a new, better system for extra action- and zone ability buttons for the legacy theme. Azerite will follow shortly!
+
+### Changed
+
+### Fixed
+- The XP bar should appear at more appropriate times now, especially for players without the latest expansion.
+
 ## [3.1.427-RC] 2020-11-23
+### Added
 - New beta feature: Theme changes!
 	- Type `/go legacy` to try the beta version of the new GoldpawUI theme. 
 	- Type `/go azerite` to return to the default AzeriteUI theme.
+
+### Changed
 - Our actionbutton now use their own spell highlight texture to display MaxDps glows. If you have enabled both MaxDps and Blizzard glows in the MaxDps settings, the MaxDps rotations and colorings will take priority. We recommend disabling the Blizzard glow.
 - Players from other realms will now have their realm displayed at the bottom of unit tooltips.
 

@@ -434,92 +434,6 @@ Module.HandleErrorFrame = function(self)
 	self:RegisterEvent("UI_INFO_MESSAGE", "OnEvent")
 end 
 
-Module.HandleExtraActionButton = function(self)
-	local layout = self.layout
-
-	local frame = ExtraActionBarFrame
-	frame:SetParent(self:GetFrame("UICenter"))
-	frame:EnableMouse(false)
-	frame.ignoreFramePositionManager = true
-
-	GetHolder(frame, unpack(layout.ExtraActionButtonFramePlace))
-	CreatePointHook(frame)
-
-	-- Take over the mouseover scripts, use our own tooltip
-	local button = ExtraActionBarFrame.button
-	button:ClearAllPoints()
-	button:SetSize(unpack(layout.ExtraActionButtonSize))
-	button:SetPoint(unpack(layout.ExtraActionButtonPlace))
-	button:SetScript("OnEnter", ExtraActionButton_OnEnter)
-	button:SetScript("OnLeave", ExtraActionButton_OnLeave)
-
-	local layer, level = button.icon:GetDrawLayer()
-	button.icon:SetAlpha(0) -- don't hide or remove, it will taint!
-
-	-- This crazy stunt is needed to be able to set a mask 
-	-- I honestly have no idea why. Somebody tell me?
-	local newIcon = button:CreateTexture()
-	newIcon:SetDrawLayer(layer, level)
-	newIcon:ClearAllPoints()
-	newIcon:SetPoint(unpack(layout.ExtraActionButtonIconPlace))
-	newIcon:SetSize(unpack(layout.ExtraActionButtonIconSize))
-	newIcon:SetMask(layout.ExtraActionButtonIconMaskTexture)
-	hooksecurefunc(button.icon, "SetTexture", function(_,...) newIcon:SetTexture(...) end)
-
-	button.Flash:SetTexture(nil)
-
-	button.HotKey:ClearAllPoints()
-	button.HotKey:SetPoint(unpack(layout.ExtraActionButtonKeybindPlace))
-	button.HotKey:SetFontObject(layout.ExtraActionButtonKeybindFont)
-	button.HotKey:SetJustifyH(layout.ExtraActionButtonKeybindJustifyH)
-	button.HotKey:SetJustifyV(layout.ExtraActionButtonKeybindJustifyV)
-	button.HotKey:SetShadowOffset(unpack(layout.ExtraActionButtonKeybindShadowOffset))
-	button.HotKey:SetShadowColor(unpack(layout.ExtraActionButtonKeybindShadowColor))
-	button.HotKey:SetTextColor(unpack(layout.ExtraActionButtonKeybindColor))
-
-	button.Count:ClearAllPoints()
-	button.Count:SetPoint(unpack(layout.ExtraActionButtonCountPlace))
-	button.Count:SetFontObject(layout.ExtraActionButtonFont)
-	button.Count:SetJustifyH(layout.ExtraActionButtonCountJustifyH)
-	button.Count:SetJustifyV(layout.ExtraActionButtonCountJustifyV)
-
-	button.cooldown:SetSize(unpack(layout.ExtraActionButtonCooldownSize))
-	button.cooldown:ClearAllPoints()
-	button.cooldown:SetPoint(unpack(layout.ExtraActionButtonCooldownPlace))
-	button.cooldown:SetSwipeTexture(layout.ExtraActionButtonCooldownSwipeTexture)
-	button.cooldown:SetSwipeColor(unpack(layout.ExtraActionButtonCooldownSwipeColor))
-	button.cooldown:SetDrawSwipe(layout.ExtraActionButtonShowCooldownSwipe)
-	button.cooldown:SetBlingTexture(layout.ExtraActionButtonCooldownBlingTexture, unpack(layout.ExtraActionButtonCooldownBlingColor)) 
-	button.cooldown:SetDrawBling(layout.ExtraActionButtonShowCooldownBling)
-
-	-- Attempting to fix the issue with too opaque swipe textures
-	button.cooldown:HookScript("OnShow", function() 
-		button.cooldown:SetSwipeColor(unpack(layout.ExtraActionButtonCooldownSwipeColor))
-	end)
-
-	-- Kill Blizzard's style texture
-	button.style:SetTexture(nil)
-	hooksecurefunc(button.style, "SetTexture", DisableTexture)
-
-	button:GetNormalTexture():SetTexture(nil)
-	button:GetHighlightTexture():SetTexture(nil)
-	button:GetCheckedTexture():SetTexture(nil)
-
-	button.BorderFrame = CreateFrame("Frame", nil, button)
-	button.BorderFrame:SetFrameLevel(button:GetFrameLevel() + 5)
-	button.BorderFrame:SetAllPoints(button)
-
-	button.HotKey:SetParent(button.BorderFrame)
-	button.Count:SetParent(button.BorderFrame)
-
-	button.BorderTexture = button.BorderFrame:CreateTexture()
-	button.BorderTexture:SetPoint(unpack(layout.ExtraActionButtonBorderPlace))
-	button.BorderTexture:SetDrawLayer(unpack(layout.ExtraActionButtonBorderDrawLayer))
-	button.BorderTexture:SetSize(unpack(layout.ExtraActionButtonBorderSize))
-	button.BorderTexture:SetTexture(layout.ExtraActionButtonBorderTexture)
-	button.BorderTexture:SetVertexColor(unpack(layout.ExtraActionButtonBorderColor))
-end
-
 Module.HandleQuestTimerFrame = function(self)
 	GetHolder(QuestTimerFrame, unpack(self.layout.QuestTimerFramePlace))
 	CreatePointHook(QuestTimerFrame)
@@ -618,7 +532,100 @@ Module.HandleWarningFrames = function(self)
 	-- /run RaidNotice_AddMessage(RaidBossEmoteFrame, "Testing how texts will be displayed with my changes! Testing how texts will be displayed with my changes!", ChatTypeInfo["RAID_WARNING"])
 end
 
+Module.HandleExtraActionButton = function(self)
+	if (Private.GetLayoutID() ~= "Azerite") then
+		return
+	end
+
+	local layout = self.layout
+
+	local frame = ExtraActionBarFrame
+	frame:SetParent(self:GetFrame("UICenter"))
+	frame:EnableMouse(false)
+	frame.ignoreFramePositionManager = true
+
+	GetHolder(frame, unpack(layout.ExtraActionButtonFramePlace))
+	CreatePointHook(frame)
+
+	-- Take over the mouseover scripts, use our own tooltip
+	local button = ExtraActionBarFrame.button
+	button:ClearAllPoints()
+	button:SetSize(unpack(layout.ExtraActionButtonSize))
+	button:SetPoint(unpack(layout.ExtraActionButtonPlace))
+	button:SetScript("OnEnter", ExtraActionButton_OnEnter)
+	button:SetScript("OnLeave", ExtraActionButton_OnLeave)
+
+	local layer, level = button.icon:GetDrawLayer()
+	button.icon:SetAlpha(0) -- don't hide or remove, it will taint!
+
+	-- This crazy stunt is needed to be able to set a mask 
+	-- I honestly have no idea why. Somebody tell me?
+	local newIcon = button:CreateTexture()
+	newIcon:SetDrawLayer(layer, level)
+	newIcon:ClearAllPoints()
+	newIcon:SetPoint(unpack(layout.ExtraActionButtonIconPlace))
+	newIcon:SetSize(unpack(layout.ExtraActionButtonIconSize))
+	newIcon:SetMask(layout.ExtraActionButtonIconMaskTexture)
+	hooksecurefunc(button.icon, "SetTexture", function(_,...) newIcon:SetTexture(...) end)
+
+	button.Flash:SetTexture(nil)
+
+	button.HotKey:ClearAllPoints()
+	button.HotKey:SetPoint(unpack(layout.ExtraActionButtonKeybindPlace))
+	button.HotKey:SetFontObject(layout.ExtraActionButtonKeybindFont)
+	button.HotKey:SetJustifyH(layout.ExtraActionButtonKeybindJustifyH)
+	button.HotKey:SetJustifyV(layout.ExtraActionButtonKeybindJustifyV)
+	button.HotKey:SetShadowOffset(unpack(layout.ExtraActionButtonKeybindShadowOffset))
+	button.HotKey:SetShadowColor(unpack(layout.ExtraActionButtonKeybindShadowColor))
+	button.HotKey:SetTextColor(unpack(layout.ExtraActionButtonKeybindColor))
+
+	button.Count:ClearAllPoints()
+	button.Count:SetPoint(unpack(layout.ExtraActionButtonCountPlace))
+	button.Count:SetFontObject(layout.ExtraActionButtonFont)
+	button.Count:SetJustifyH(layout.ExtraActionButtonCountJustifyH)
+	button.Count:SetJustifyV(layout.ExtraActionButtonCountJustifyV)
+
+	button.cooldown:SetSize(unpack(layout.ExtraActionButtonCooldownSize))
+	button.cooldown:ClearAllPoints()
+	button.cooldown:SetPoint(unpack(layout.ExtraActionButtonCooldownPlace))
+	button.cooldown:SetSwipeTexture(layout.ExtraActionButtonCooldownSwipeTexture)
+	button.cooldown:SetSwipeColor(unpack(layout.ExtraActionButtonCooldownSwipeColor))
+	button.cooldown:SetDrawSwipe(layout.ExtraActionButtonShowCooldownSwipe)
+	button.cooldown:SetBlingTexture(layout.ExtraActionButtonCooldownBlingTexture, unpack(layout.ExtraActionButtonCooldownBlingColor)) 
+	button.cooldown:SetDrawBling(layout.ExtraActionButtonShowCooldownBling)
+
+	-- Attempting to fix the issue with too opaque swipe textures
+	button.cooldown:HookScript("OnShow", function() 
+		button.cooldown:SetSwipeColor(unpack(layout.ExtraActionButtonCooldownSwipeColor))
+	end)
+
+	-- Kill Blizzard's style texture
+	button.style:SetTexture(nil)
+	hooksecurefunc(button.style, "SetTexture", DisableTexture)
+
+	button:GetNormalTexture():SetTexture(nil)
+	button:GetHighlightTexture():SetTexture(nil)
+	button:GetCheckedTexture():SetTexture(nil)
+
+	button.BorderFrame = CreateFrame("Frame", nil, button)
+	button.BorderFrame:SetFrameLevel(button:GetFrameLevel() + 5)
+	button.BorderFrame:SetAllPoints(button)
+
+	button.HotKey:SetParent(button.BorderFrame)
+	button.Count:SetParent(button.BorderFrame)
+
+	button.BorderTexture = button.BorderFrame:CreateTexture()
+	button.BorderTexture:SetPoint(unpack(layout.ExtraActionButtonBorderPlace))
+	button.BorderTexture:SetDrawLayer(unpack(layout.ExtraActionButtonBorderDrawLayer))
+	button.BorderTexture:SetSize(unpack(layout.ExtraActionButtonBorderSize))
+	button.BorderTexture:SetTexture(layout.ExtraActionButtonBorderTexture)
+	button.BorderTexture:SetVertexColor(unpack(layout.ExtraActionButtonBorderColor))
+end
+
 Module.HandleZoneAbilityButton = function(self)
+	if (Private.GetLayoutID() ~= "Azerite") then
+		return
+	end
 	local layout = self.layout
 
 	local frame = ZoneAbilityFrame

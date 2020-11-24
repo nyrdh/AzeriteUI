@@ -1,9 +1,9 @@
 ## Interface: 11305
 ## Name: AzeriteUI
-## Title: |c00000002|r|cff7284abA|r|cff6a7a9ez|r|cff617092e|r|cff596785r|r|cff505d78i|r|cff48536bt|r|cff3f495fe|r|cffffffffUI|r |cfffff5693.0|r |cFF770000Alpha|r
+## Title: |c00000002|r|cff7284abA|r|cff6a7a9ez|r|cff617092e|r|cff596785r|r|cff505d78i|r|cff48536bt|r|cff3f495fe|r|cffffffffUI|r |cfffff5693.1|r |cFFFF7D00Beta|r
 ## Author: Daniel Troko, Lars Norberg
 ## Notes: Custom user graphical interface.|n|nDesign by Daniel Troko and Lars Norberg.|nCode by Lars Norberg.|n|n|cff4488ffPayPal|r|cffffffff:|r |n|cffffffffwww.paypal.me/GoldpawsStuff|r|n|n|cff4488ffPatreon|r|cffffffff:|r |n|cffffffffwww.patreon.com/GoldpawsStuff|r
-## Version: 3.0-Alpha
+## Version: 3.1-Beta
 ## DefaultState: Enabled
 ## SavedVariables: AzeriteUI_DB
 ## OptionalDeps: Clique
@@ -55,6 +55,7 @@ front-end\root.lua
 
 # Modules.
 front-end\modules\actionbars.lua
+front-end\modules\extrabars.lua
 front-end\modules\chatwindows.lua
 front-end\modules\menu-addon.lua
 front-end\modules\menu-game.lua

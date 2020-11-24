@@ -4,15 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("ActionBarMain", "LibEvent", "LibMessage", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibSecureButton", "LibWidgetContainer", "LibPlayerData", "LibClientBuild", "LibForge", "LibInputMethod")
-
--- Private API
-local Colors = Private.Colors
-local GetConfig = Private.GetConfig
-local GetDefaults = Private.GetDefaults
-local GetLayout = Private.GetLayout
-local GetLayoutID = Private.GetLayoutID
-local GetSchematic = Private.GetSchematic
+local Module = Core:NewModule("ActionBarMain", "LibDB", "LibForge")
 
 Module.GetDB = function(self, key)
 	if (not self.layoutID) or (not self.db) then
@@ -28,18 +20,18 @@ Module.SetDB = function(self, key, value)
 	self.db[self.layoutID.."::"..key] = value
 end
 
-
 Module.OnInit = function(self)
-	-- Deprecated settings keep piling up in this one.
+	if (not Private.HasSchematic("ModuleForge::ActionBars")) then
+		return self:SetUserDisabled(true)
+	end
+
 	self:PurgeSavedSettingFromAllProfiles(self:GetName(), "editMode", "buttonsPrimary", "buttonsComplimentary", "enableComplimentary", "enableStance", "enablePet", "showBinds", "showCooldown", "showCooldownCount", "showNames", "visibilityPrimary", "visibilityComplimentary", "visibilityStance", "visibilityPet")
 
-	self.db = (GetLayoutID() == "Azerite") and GetConfig(self:GetName()) or GetConfig("ModuleForge::ActionBars")
-	self.layoutID = GetLayoutID()
-	self:SubForge(GetSchematic("ModuleForge::ActionBars"), "OnInit")
+	self.db = (Private.GetLayoutID() == "Azerite") and Private.GetConfig(self:GetName()) or Private.GetConfig("ModuleForge::ActionBars")
+	self.layoutID = Private.GetLayoutID()
+	self:SubForge(Private.GetSchematic("ModuleForge::ActionBars"), "OnInit")
 end 
 
 Module.OnEnable = function(self)
-	self:SubForge(GetSchematic("ModuleForge::ActionBars"), "OnEnable")
+	self:SubForge(Private.GetSchematic("ModuleForge::ActionBars"), "OnEnable")
 end
-
-

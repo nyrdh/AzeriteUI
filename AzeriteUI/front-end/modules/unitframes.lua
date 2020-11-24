@@ -4,12 +4,6 @@ if (not Core) then
 	return 
 end
 
-local LibClientBuild = Wheel("LibClientBuild")
-assert(LibClientBuild, "UnitFrames requires LibClientBuild to be loaded.")
-
-local LibTime = Wheel("LibTime")
-assert(LibTime, "UnitFrames requires LibTime to be loaded.")
-
 local UnitFrames = Core:NewModule("ModuleForge::UnitFrames", "LibDB", "LibMessage", "LibEvent", "LibFrame", "LibUnitFrame", "LibTime", "LibForge")
 
 -- Private API

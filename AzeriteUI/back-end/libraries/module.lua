@@ -1,4 +1,4 @@
-local LibModule = Wheel:Set("LibModule", 39)
+local LibModule = Wheel:Set("LibModule", 40)
 if (not LibModule) then	
 	return
 end
@@ -627,8 +627,19 @@ local ModuleProtoType = {
 
 	GetDebugFrame = function(self)
 		return debugFrame
-	end
+	end,
 
+	-- Embed libraries
+	EmbedLibraries = function(self, ...)
+		for i = 1,select("#",...) do
+			local libraryName = select(i, ...)
+			local library = Wheel(libraryName)
+			if (library and library.Embed) then
+				library:Embed(self)
+				table_insert(self.libraries, libraryName)
+			end
+		end
+	end
 }
 
 -- Module metatable
@@ -675,16 +686,7 @@ LibModule.NewModule = function(self, name, ...)
 			libraryOffset = 1
 			loadPriority = DEFAULT_MODULE_PRIORITY
 		end
-
-		-- Embed libraries
-		for i = libraryOffset, numArgs do
-			local libraryName = select(i, ...)
-			local library = Wheel(libraryName)
-			if (library and library.Embed) then
-				library:Embed(module)
-				table_insert(module.libraries, libraryName)
-			end
-		end
+		module:EmbedLibraries(select(libraryOffset, ...))
 	else
 		loadPriority = DEFAULT_MODULE_PRIORITY
 	end

@@ -996,13 +996,20 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 					-- Here we can call methods created in previously defined
 					-- 'values' sections.
 					chain = {
+						-- Embed libraries on the fly.
+						-- Doing it this way allows the theme to
+						-- only request and load what is actually used.
+						"EmbedLibraries", { "LibEvent", "LibFrame", "LibInputMethod", "LibMessage", "LibSecureButton", "LibTooltip" },
+						-- Create scaffolds and root frames
 						"CreateScaffolds", {},
 						"CreateSecureUpdater", {},
+						-- Spawn the various buttons
 						"SpawnActionBars", {},
 						"SpawnPetBar", {},
 						"SpawnStanceBar", {},
 						"SpawnExitButton", {},
 						"SpawnTotemBar", {},
+						-- Initial updates of elements
 						"UpdateButtonLayout", {},
 						"UpdateActionButtonBindings", {},
 						"UpdateSettings", {}
