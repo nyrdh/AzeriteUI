@@ -4,10 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-11-25
+## [3.1.430-RC] 2020-11-25
 ### Fixed
+- Fixed spawning, layout, cooldowns, spell charges and keybind texts of extra action- and zone ability buttons for all themes. 
 - Fixed a legacy HUD issue that could cause texts on the player cast bar and player altpower bar to remain visible after the bars were hidden.
-- Fixed spawning and layout of extra action- and zone ability buttons for the azerite theme. 
 
 ## [3.1.429-RC] 2020-11-24
 ### Fixed
