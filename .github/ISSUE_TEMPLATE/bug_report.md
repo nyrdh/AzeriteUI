@@ -6,6 +6,9 @@ labels: bug
 assignees: goldpaw
 
 ---
+<!--
+Note that the use of this template is NOT optional, I ask these questions for a reason. So any future reports that just delete the template and thus do not supply a proper explanation of the problem, will be deleted and ignored. 
+-->
 
 ## The problem  
 <!--Briefly describe the issue you are experiencing below. Tell us what you were trying to do and what happened instead. Remember, this is _not_ a place to ask questions. For questions, go to [our Discord](https://discord.gg/MUSfWXd) server, just remember to read the rules and keep in mind nobody there are paid, we're all just gaming enthusiasts and volunteers.-->
@@ -13,7 +16,7 @@ assignees: goldpaw
 ### Make sure you can check all these boxes  
 <!--The game only finds new files on game startup, not on character relogs or interface reloads. So make sure you exit the game when updating addons to avoid this.-->
 - [ ] I have the latest addon version available from CurseForge/Overwolf/Twitch.
-- [ ] I restarted the entire game after updating the addon, not just relogged or reloaded. 
+- [ ] I restarted the entire game after updating the addon, not just relogged or reloaded. (Only needed in Classic.)
 
 ### What addon release version(s) does it happen in?  
 - If you have manually chosen a release type in the Twitch client, please tell me which one:
@@ -27,6 +30,12 @@ assignees: goldpaw
 - [ ] Classic (Public Test Realm) 
 - [ ] Battle for Azeroth 
 - [ ] Battle for Azeroth (Public Test Realm) 
+
+### What addon theme(s) does it happen in?  
+<!--The addon uses different code in different themes, so this matters a lot.-->
+- [ ] Azerite 
+- [ ] Legacy 
+- [ ] I don't know what this means. 
 
 ### Does this happen with NO other addons enabled?  
 <!--This is helpful because it tells us whether it's an addon bug or addon conflict.-->
