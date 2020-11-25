@@ -128,6 +128,7 @@ local StripNStyle = function(button)
 		keybind:SetShadowOffset(0, 0)
 		keybind:SetShadowColor(0, 0, 0, 1)
 		keybind:SetTextColor(Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75)
+		keybind:SetText(GetBindingKey(button:GetName()))
 	end
 
 	-- Only the ExtraButtons are checkbuttons, 
@@ -197,9 +198,6 @@ local StripNStyle = function(button)
 
 	button:SetScript("OnEnter", OnEnter)
 	button:SetScript("OnLeave", OnLeave)
-
-	--button.HotKey:SetText(GetBindingKey('ExtraActionButton'..i))
-
 end
 
 -- Module Schematics
@@ -315,6 +313,11 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 						end,
 
 						"UpdateBindings", function(self)
+							for id,button in ipairs(self.ExtraButtons) do
+								if (button.HotKey) then
+									button.HotKey:SetText(GetBindingKey(button:GetName()))
+								end
+							end
 						end
 						
 					},
@@ -344,7 +347,8 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 					chain = {
 						"EmbedLibraries", { "LibFrame", "LibSecureHook", "LibTooltip" },
 						"CreateScaffolds", {},
-						"HandleButtons", {}
+						"HandleButtons", {},
+						"RegisterEvent", { "UPDATE_BINDINGS", "UpdateBindings" }
 					}
 				}
 			}
