@@ -2242,10 +2242,6 @@ Azerite.OptionsMenu = {
 	MenuWindow_CreateBorder = function(self) return GetBorder(self) end
 }
 
-Legacy.OptionsMenu = setmetatable({
-
-}, { __index = Azerite.OptionsMenu })
-
 -- Blizzard Chat Frames
 Azerite.BlizzardChatFrames = {
 	AlternateChatFramePlace = { "TOPLEFT", 85, -64 },
@@ -2377,8 +2373,6 @@ Azerite.BlizzardFonts = {
 	ChatBubbleFont = GetFont(12, true, false),
 	ChatFont = GetFont(15, true, true)
 }
-Legacy.BlizzardFonts = setmetatable({
-}, { __index = Azerite.BlizzardFonts })
 
 -- Blizzard Game Menu (Esc)
 Azerite.BlizzardGameMenu = {
@@ -2388,7 +2382,6 @@ Azerite.BlizzardGameMenu = {
 	MenuButtonSizeMod = .75, 
 	MenuButtonSpacing = 8
 }
-Legacy.BlizzardGameMenu = setmetatable({}, { __index = Azerite.BlizzardGameMenu })
 
 -- Blizzard MicroMenu
 Azerite.BlizzardMicroMenu = {
@@ -2406,7 +2399,6 @@ Azerite.BlizzardMicroMenu = {
 	MenuButtonTitleColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
 	MenuWindow_CreateBorder = function(self) return GetBorder(self) end
 }
-Legacy.BlizzardMicroMenu = setmetatable({}, { __index = Azerite.BlizzardMicroMenu })
 
 -- Blizzard Timers (mirror, quest)
 Azerite.BlizzardTimers = {
@@ -2444,7 +2436,6 @@ Azerite.BlizzardTimers = {
 	MirrorGrowth = -50, 
 	MirrorSize = { 111, 14 }
 }
-Legacy.BlizzardTimers = setmetatable({}, { __index = Azerite.BlizzardTimers })
 
 -- Blizzard Objectives Tracker
 Azerite.BlizzardObjectivesTracker = (IsClassic) and {
@@ -2512,7 +2503,6 @@ Azerite.BlizzardPopupStyling = {
 	PopupButtonBackdropHoverBorderColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3] },
 	PopupVerticalOffset = 32
 }
-Legacy.BlizzardPopupStyling = setmetatable({}, { __index = Azerite.BlizzardPopupStyling })
 
 -- Blizzard Tooltips
 Azerite.BlizzardTooltips = {
@@ -2521,12 +2511,10 @@ Azerite.BlizzardTooltips = {
 	TooltipBackdropColor = { .05, .05, .05, .85 },
 	TooltipStatusBarTexture = GetMedia("statusbar-dark")
 }
-Legacy.BlizzardTooltips = setmetatable({}, { __index = Azerite.BlizzardTooltips })
 
 -- Blizzard World Map
 Generic.BlizzardWorldMap = {}
-Azerite.BlizzardWorldMap = setmetatable({}, { __index = Generic.BlizzardWorldMap })
-Legacy.BlizzardWorldMap = setmetatable({}, { __index = Azerite.BlizzardWorldMap })
+Azerite.BlizzardWorldMap = {}
 
 -- ActionBars
 Azerite.ActionBarMain = {
@@ -2549,10 +2537,6 @@ Azerite.Bindings = {
 	MenuButtonTextShadowOffset = { 0, -.85 },
 	MenuWindowGetBorder = function(self) return GetBorder(self) end
 }
-Legacy.Bindings = setmetatable({
-	BindButtonTexture = GetMedia("actionbutton-mask-square")
-}, { __index = Azerite.Bindings })
-
 
 -- Floaters. Durability only currently. 
 Azerite.FloaterHUD = {
@@ -3196,9 +3180,6 @@ Azerite.NamePlates = {
 
 }
 
-Legacy.NamePlates = setmetatable({
-}, { __index = Azerite.NamePlates })
-
 -- Custom Tooltips
 Azerite.Tooltips = {
 	PostCreateBar = Tooltip_Bar_PostCreate,
@@ -3210,9 +3191,6 @@ Azerite.Tooltips = {
 	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -319, 166 }, 
 	TooltipStatusBarTexture = GetMedia("statusbar-dark")
 }
-Legacy.Tooltips = setmetatable({
-	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -54, 66 }, 
-}, { __index = Azerite.Tooltips })
 
 ------------------------------------------------
 -- Unit Frame Layouts
@@ -4788,6 +4766,31 @@ Azerite.UnitFrameToT = setmetatable({
 	Place = { "RIGHT", "UICenter", "TOPRIGHT", -492, -96 + 6 }
 }, { __index = Template_SmallFrameReversed })
 
+
+
+------------------------------------------------
+-- Lease & Lend
+-- *Elements we copy between themes
+--  with none or very few changes.
+------------------------------------------------
+-- No changes
+Legacy.BlizzardFonts = Azerite.BlizzardFonts
+Legacy.BlizzardGameMenu = Azerite.BlizzardGameMenu
+Legacy.BlizzardMicroMenu = Azerite.BlizzardMicroMenu
+Legacy.BlizzardPopupStyling = Azerite.BlizzardPopupStyling
+Legacy.BlizzardTimers = Azerite.BlizzardTimers
+Legacy.BlizzardTooltips = Azerite.BlizzardTooltips
+Legacy.BlizzardWorldMap = Azerite.BlizzardWorldMap
+Legacy.GroupTools = Azerite.GroupTools
+Legacy.NamePlates = Azerite.NamePlates
+Legacy.OptionsMenu = Azerite.OptionsMenu
+
+-- Few changes
+Legacy.Bindings = setmetatable({ BindButtonTexture = GetMedia("actionbutton-mask-square") }, { __index = Azerite.Bindings })
+Legacy.Tooltips = setmetatable({ TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -54, 66 } }, { __index = Azerite.Tooltips })
+
+
+
 ------------------------------------------------
 -- Private Addon API
 ------------------------------------------------
@@ -4923,14 +4926,18 @@ local GetTooltip = function(name)
 	return LibTooltip:GetTooltip(name) or LibTooltip:CreateTooltip(name)
 end
 
--- Library tooltip proxies
+-- Library tooltip proxies.
+-- This way the modules can access all of them, 
+-- without having to embed or reference libraries.
 Private.GetActionButtonTooltip = function(self) return LibSecureButton:GetActionButtonTooltip() end
 Private.GetBindingsTooltip = function(self) return LibBindTool:GetBindingsTooltip() end
 Private.GetMinimapTooltip = function(self) return LibMinimap:GetMinimapTooltip() end
 Private.GetMoverTooltip = function(self) return LibMover:GetMoverTooltip() end
 Private.GetUnitFrameTooltip = function(self) return LibUnitFrame:GetUnitFrameTooltip() end
 
--- Commonly used module tooltips
+-- Commonly used module tooltips.
+-- These follow the same naming scheme as the library tooltips,
+-- but are created and used by our own front-end modules.
 Private.GetFloaterTooltip = function(self) return GetTooltip("GP_FloaterTooltip") end
 Private.GetOptionsMenuTooltip = function(self) return GetTooltip("GP_OptionsMenuTooltip") end
 
