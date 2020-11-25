@@ -211,7 +211,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Azerite", {
 						"CreateScaffolds", function(self)
 
 							local extraScaffold = self:CreateFrame("Frame", nil, "UICenter")
-							extraScaffold:Place("CENTER", "UICenter", "BOTTOMRIGHT", -482, 360)
+							extraScaffold:Place("CENTER", "UICenter", "BOTTOMRIGHT", -482, 360 + 52 + 4) -- do not collide!
 							extraScaffold:SetSize(64,64)
 							self.extraScaffold = extraScaffold
 						
