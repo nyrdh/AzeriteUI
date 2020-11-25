@@ -32,6 +32,176 @@ local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia
 local GetSchematic = Private.GetSchematic
 
+-- Callbacks
+-----------------------------------------------------------
+local OnUpdate = function(button)
+	local spellID = button.currentSpellID or button.spellID or button.baseSpellID
+	if (spellID) then 
+		local tooltip = Private:GetFloaterTooltip()
+		tooltip:SetDefaultAnchor(button)
+		tooltip:SetSpellByID(spellID)
+	else
+		if (button.action) and (HasAction(button.action)) then 
+			local tooltip = Private:GetFloaterTooltip()
+			tooltip:SetDefaultAnchor(button)
+			tooltip:SetAction(button.action)
+		end 
+	end 
+end
+
+local OnEnter = function(button)
+	button.UpdateTooltip = OnUpdate
+	button:UpdateTooltip()
+end
+
+local OnLeave = function(button)
+	button.UpdateTooltip = nil
+	Private:GetFloaterTooltip():Hide()
+end
+
+-- Write this in a manner so that it checks for exisiting elements, 
+-- and thus can be run multiple times without creating cloned elements.
+local StripNStyle = function(button)
+
+	button:SetSize(52,52)
+	button:GetNormalTexture():SetTexture(nil)
+
+	-- Extra Button styling.
+	if (button.style) then
+		button.style:SetAlpha(0) -- Extra
+	end
+
+	-- Original Extra and >one icons. 
+	if (button.icon or button.Icon) then
+		(button.icon or button.Icon):SetAlpha(0)
+	end
+
+	-- Zone Ability Border
+	if (button.NormalTexture) then
+		button.NormalTexture:SetAlpha(0) 
+	end
+
+	-- Different names, but both have it.
+	local cooldown = button.cooldown or button.Cooldown 
+	if (cooldown) then
+		cooldown:SetSize(40,40)
+		cooldown:ClearAllPoints()
+		cooldown:SetPoint("CENTER", 0, 0)
+		cooldown:SetSwipeTexture(GetMedia("actionbutton-mask-square-rounded"))
+		cooldown:SetSwipeColor(0, 0, 0, .75)
+		cooldown:SetDrawSwipe(true)
+		cooldown:SetBlingTexture(GetMedia("blank"), 0, 0, 0 , 0) 
+		cooldown:SetDrawBling(true)
+
+		-- Attempting to fix the issue with too opaque swipe textures
+		if (not cooldown.GPSwipe) then
+			cooldown:HookScript("OnShow", function() 
+				cooldown:SetSwipeColor(0, 0, 0, .75)
+			end)
+		end
+	end
+
+	-- Spell charges.
+	local count = button.Count 
+	if (count) then
+		count:ClearAllPoints()
+		count:SetPoint("BOTTOMRIGHT", -3, 3)
+		count:SetFontObject(GetFont(14, true))
+		count:SetJustifyH("CENTER")
+		count:SetJustifyV("BOTTOM")
+	end
+	
+	-- Only the ExtraButtons have this
+	local flash = button.Flash 
+	if (flash) then
+		flash:SetTexture(nil)
+	end
+
+	-- Only the first ExtraButton have this
+	local keybind = button.HotKey 
+	if (keybind) then
+		keybind:ClearAllPoints()
+		keybind:SetPoint("TOPLEFT", 5, -5)
+		keybind:SetFontObject(GetFont(14, true))
+		keybind:SetJustifyH("CENTER")
+		keybind:SetJustifyV("BOTTOM")
+		keybind:SetShadowOffset(0, 0)
+		keybind:SetShadowColor(0, 0, 0, 1)
+		keybind:SetTextColor(Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75)
+	end
+
+	-- Only the ExtraButtons are checkbuttons, 
+	if (button:GetObjectType() == "CheckButton") then
+		if (not button.GPChecked) then
+			button:GetCheckedTexture():SetTexture(nil)
+
+			local checkedTexture = button:CreateTexture()
+			checkedTexture:SetDrawLayer("BACKGROUND", 2)
+			checkedTexture:SetMask(GetMedia("actionbutton-mask-square-rounded"))
+			checkedTexture:SetColorTexture(.9, .8, .1, .3)
+			button.GPChecked = checkedTexture
+
+			button:SetCheckedTexture(checkedTexture)
+		end
+	end
+
+	-- This crazy stunt is needed to be able  
+	-- to set a mask at all on the Extra buttons. 
+	-- I honestly have no idea why. Somebody tell me?
+	if (not button.GPIcon) then
+		local icon = button:CreateTexture()
+		icon:SetPoint("TOPLEFT", button, 6, -6)
+		icon:SetPoint("BOTTOMRIGHT", button, -6, 6)
+		icon:SetMask(GetMedia("actionbutton-mask-square-rounded"))
+		button.GPIcon = icon
+
+		hooksecurefunc((button.icon or button.Icon), "SetTexture", function(_,...) button.GPIcon:SetTexture(...) end)
+	end
+
+	if (not button.GPHighlight) then 
+		button:GetHighlightTexture():SetTexture(nil)
+
+		local highlightTexture = button:CreateTexture()
+		highlightTexture:SetDrawLayer("BACKGROUND", 1)
+		highlightTexture:SetTexture(GetMedia("actionbutton-mask-square-rounded"))
+		highlightTexture:SetAllPoints(button.GPIcon)
+		highlightTexture:SetVertexColor(1, 1, 1, .1)
+		button.GPHighlight = highlightTexture
+
+		button:SetHighlightTexture(highlightTexture)
+	end
+
+	if (not button.GPBorder) then 
+		local border = button.scaffold:CreateFrame("Frame")
+		border:SetBackdrop({ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 24 })
+		border:SetBackdropBorderColor(Colors.ui[1], Colors.ui[2], Colors.ui[3], 1)
+		border:SetPoint("TOPLEFT", button.GPIcon, -15, 15)
+		border:SetPoint("BOTTOMRIGHT", button.GPIcon, 15, -15)
+		border:SetParent(button)
+		border:SetFrameLevel(1)
+		button.GPBorder = border
+	end
+
+	button.GPIcon:SetParent(button.GPBorder)
+	button.GPIcon:SetDrawLayer("BACKGROUND", -1)
+
+	if (count) then
+		count:SetParent(button.GPBorder)
+		count:SetDrawLayer("OVERLAY", 1)
+	end
+
+	if (keybind) then
+		keybind:SetParent(button.GPBorder)
+		keybind:SetDrawLayer("OVERLAY", 1)
+	end
+
+	button:SetScript("OnEnter", OnEnter)
+	button:SetScript("OnLeave", OnLeave)
+
+	--button.HotKey:SetText(GetBindingKey('ExtraActionButton'..i))
+
+end
+
 -- Module Schematics
 -----------------------------------------------------------
 -- Legacy
@@ -53,6 +223,8 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 						"ExtraButtons", {},
 						"StyleCache", {},
 
+						-- Scaffold creation
+						-- The spawn position of the buttons are defined here.
 						"CreateScaffolds", function(self)
 
 							local extraScaffold = self:CreateFrame("Frame", nil, "UICenter")
@@ -67,7 +239,9 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 						
 						end,
 
-						"StyleExtraButtons", function(self)
+						-- One-time method to take control of the buttons,
+						-- and hook the styling of any new ones.
+						"HandleButtons", function(self)
 							local ExtraAbilityContainer = ExtraAbilityContainer
 							local ExtraActionBarFrame = ExtraActionBarFrame
 							local ZoneAbilityFrame = ZoneAbilityFrame
@@ -85,10 +259,14 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 							ZoneAbilityFrame:SetParent(self.zoneScaffold)
 							ZoneAbilityFrame:ClearAllPoints()
 							ZoneAbilityFrame:SetAllPoints()
+							ZoneAbilityFrame:EnableMouse(false)
 							ZoneAbilityFrame.ignoreInLayout = true
+							ZoneAbilityFrame.ignoreFramePositionManager = true
 
+							-- Hook creation of new zone buttons
 							self:SetSecureHook(ZoneAbilityFrame, "UpdateDisplayedZoneAbilities", "UpdateZoneButtons")
 
+							-- Initial styling updates
 							self:UpdateExtraButtons()
 							self:UpdateZoneButtons()
 						end,
@@ -96,70 +274,21 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 						"UpdateExtraButtons", function(self)
 							local i = 1
 							local button = _G["ExtraActionButton"..i]
-							while (button) do
 
-								button:SetSize(52,52)
-								button.style:SetAlpha(0)
-								button.icon:SetAlpha(0) -- don't hide or remove, it will taint!
+							-- Iterate available buttons
+							while (button) and (not self.StyleCache[button]) do
 
-								-- This crazy stunt is needed to be able to set a mask 
-								-- I honestly have no idea why. Somebody tell me?
-								local newIcon = button:CreateTexture()
-								newIcon:SetPoint("TOPLEFT", button, 6, -6)
-								newIcon:SetPoint("BOTTOMRIGHT", button, -6, 6)
-								newIcon:SetMask(GetMedia("actionbutton-mask-square-rounded"))
-								hooksecurefunc(button.icon, "SetTexture", function(_,...) newIcon:SetTexture(...) end)
+								-- Give the button access to its scaffold
+								button.scaffold = self.extraScaffold
+								
+								-- Unified styling method for the buttons 
+								StripNStyle(button)
 
-								button:GetNormalTexture():SetTexture(nil)
-								button:GetHighlightTexture():SetTexture(nil)
-								button:GetCheckedTexture():SetTexture(nil)
-
-								local tex = button:CreateTexture()
-								tex:SetDrawLayer("BACKGROUND", 2)
-								tex:SetMask(GetMedia("actionbutton-mask-square-rounded"))
-								tex:SetColorTexture(.9, .8, .1, .3)
-								button:SetCheckedTexture(tex)
-
-								local tex = button:CreateTexture()
-								tex:SetDrawLayer("BACKGROUND", 1)
-								tex:SetTexture(GetMedia("actionbutton-mask-square-rounded"))
-								tex:SetAllPoints(newIcon)
-								tex:SetVertexColor(1, 1, 1, .15)
-								button:SetHighlightTexture(tex)
-
-								button.BorderFrame = self.extraScaffold:CreateFrame("Frame")
-								button.BorderFrame:SetBackdrop({ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 24 })
-								button.BorderFrame:SetBackdropBorderColor(Colors.ui[1], Colors.ui[2], Colors.ui[3], 1)
-								button.BorderFrame:SetPoint("TOPLEFT", newIcon, -15, 15)
-								button.BorderFrame:SetPoint("BOTTOMRIGHT", newIcon, 15, -15)
-								button.BorderFrame:SetParent(button)
-								button.BorderFrame:SetFrameLevel(1)
-
-								newIcon:SetParent(button.BorderFrame)
-								newIcon:SetDrawLayer("BACKGROUND", -1)
-
-								button.UpdateExtraActionButtonTooltip = function(button)
-									if button.action and HasAction(button.action) then 
-										local tooltip = Private:GetFloaterTooltip()
-										tooltip:SetDefaultAnchor(button)
-										tooltip:SetAction(button.action)
-									end 
-								end
-
-								button:SetScript("OnEnter", function(button)
-									button.UpdateTooltip = button.UpdateExtraActionButtonTooltip
-									button:UpdateTooltip()
-								end)
-
-								button:SetScript("OnLeave", function(button)
-									button.UpdateTooltip = nil
-									Private:GetFloaterTooltip():Hide()
-								end)
-							
-								--button.HotKey:SetText(GetBindingKey('ExtraActionButton'..i))
-
+								-- Cache it
+								self.StyleCache[button] = true
 								self.ExtraButtons[#self.ExtraButtons + 1] = button
-
+								
+								-- Keep looking for more buttons.
 								i = i + 1
 								button = _G["ExtraActionButton"..i]
 							end
@@ -167,73 +296,21 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 						end,
 
 						"UpdateZoneButtons", function(self)
-							self:UpdateZoneAlpha()
 							local frame = ZoneAbilityFrame
-							for button in frame.SpellButtonContainer:EnumerateActive() do
-								if (button) and (not self.StyleCache[button]) then
 
-									button:SetSize(52,52)
-									button:GetNormalTexture():SetTexture(nil)
-									button:GetHighlightTexture():SetTexture(nil)
-									--button:GetCheckedTexture():SetTexture(nil) -- don't exist, not a checkbutton
-	
-									button.NormalTexture:SetAlpha(0)
-
-									button.Icon:SetTexCoord(0, 1, 0, 1)
-									button.Icon:ClearAllPoints()
-									button.Icon:SetPoint("TOPLEFT", 6, -6)
-									button.Icon:SetPoint("BOTTOMRIGHT", -6, 6)
-									button.Icon:SetMask(GetMedia("actionbutton-mask-square-rounded"))
-
-									button.BorderFrame = self.zoneScaffold:CreateFrame("Frame")
-									button.BorderFrame:SetPoint("TOPLEFT", button.Icon, -15, 15)
-									button.BorderFrame:SetPoint("BOTTOMRIGHT", button.Icon, 15, -15)
-									button.BorderFrame:SetBackdrop({ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 24 })
-									button.BorderFrame:SetBackdropBorderColor(Colors.ui[1], Colors.ui[2], Colors.ui[3], 1)
-									button.BorderFrame:SetParent(button)
-									button.BorderFrame:SetFrameLevel(1)
-
-									button.Icon:SetParent(button.BorderFrame)
-									button.Icon:SetDrawLayer("BACKGROUND", -1)
-
-									local tex = button:CreateTexture()
-									tex:SetDrawLayer("BACKGROUND", 2)
-									tex:SetTexture(GetMedia("actionbutton-mask-square-rounded"))
-									tex:SetVertexColor(1, 1, 1, .15)
-									tex:SetAllPoints(button.Icon)
-									button:SetHighlightTexture(tex)
-
-									button.UpdateZoneAbilityButtonTooltip = function(button)
-										local spellID = button.currentSpellID or button.spellID or button.baseSpellID
-										if spellID then 
-											local tooltip = Private:GetFloaterTooltip()
-											tooltip:SetDefaultAnchor(button)
-											tooltip:SetSpellByID(spellID)
-										end 
-									end
-
-									button:SetScript("OnEnter", function(button)
-										button.UpdateTooltip = button.UpdateZoneAbilityButtonTooltip
-										button:UpdateTooltip()
-									end)
-
-									button:SetScript("OnLeave", function(button)
-										button.UpdateTooltip = nil
-										Private:GetFloaterTooltip():Hide()
-									end)
-								
-									self.StyleCache[button] = true
-								end
-							end
-						end,
-
-						"UpdateZoneAlpha", function(self)
-							local frame = ZoneAbilityFrame
+							-- Kill off the fugly styling texture
 							frame.Style:SetAlpha(0)
-							for spellButton in frame.SpellButtonContainer:EnumerateActive() do
-								--if (spellButton) then
-								--	spellButton:SetAlpha(0)
-								--end
+
+							-- Iterate the active buttons.
+							for button in frame.SpellButtonContainer:EnumerateActive() do
+								if (button) then
+
+									-- Give the button access to its scaffold
+									button.scaffold = self.zoneScaffold
+
+									-- Unified styling method for the buttons 
+									StripNStyle(button)
+								end
 							end
 						end,
 
@@ -267,7 +344,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 					chain = {
 						"EmbedLibraries", { "LibFrame", "LibSecureHook", "LibTooltip" },
 						"CreateScaffolds", {},
-						"StyleExtraButtons", {}
+						"HandleButtons", {}
 					}
 				}
 			}

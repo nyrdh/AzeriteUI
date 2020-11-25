@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased] 2020-11-25
 ### Fixed
 - Fixed a legacy HUD issue that could cause texts on the player cast bar and player altpower bar to remain visible after the bars were hidden.
-- Fixed spawning and layout of extra action- and zone ability buttons for the azerite theme. Note that keybinds, cooldowns and charges might randomly just not be there. Fix for this coming soon too, just working by a priority list of multiple urgent issues here!
+- Fixed spawning and layout of extra action- and zone ability buttons for the azerite theme. 
 
 ## [3.1.429-RC] 2020-11-24
 ### Fixed
