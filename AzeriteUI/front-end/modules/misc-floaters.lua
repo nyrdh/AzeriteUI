@@ -139,44 +139,6 @@ end
 
 -- Callbacks
 ----------------------------------------------------
-local ExtraActionButton_UpdateTooltip = function(self)
-	if self.action and HasAction(self.action) then 
-		local tooltip = Module:GetFloaterTooltip()
-		tooltip:SetDefaultAnchor(self)
-		tooltip:SetAction(self.action)
-	end 
-end
-
-local ExtraActionButton_OnEnter = function(self)
-	self.UpdateTooltip = ExtraActionButton_UpdateTooltip
-	self:UpdateTooltip()
-end
-
-local ExtraActionButton_OnLeave = function(self)
-	self.UpdateTooltip = nil
-	local tooltip = Module:GetFloaterTooltip()
-	tooltip:Hide()
-end
-
-local ZoneAbilityButton_UpdateTooltip = function(self)
-	local spellID = self.currentSpellID or self.spellID or self.baseSpellID
-	if spellID then 
-		local tooltip = Module:GetFloaterTooltip()
-		tooltip:SetDefaultAnchor(self)
-		tooltip:SetSpellByID(spellID)
-	end 
-end
-
-local ZoneAbilityButton_OnEnter = function(self)
-	self.UpdateTooltip = ZoneAbilityButton_UpdateTooltip
-	self:UpdateTooltip()
-end
-
-local ZoneAbilityButton_OnLeave = function(self)
-	self.UpdateTooltip = nil
-	local tooltip = Module:GetFloaterTooltip()
-	tooltip:Hide()
-end
 
 local GroupLootContainer_PostUpdate = function(self)
 	local lastIdx = nil
@@ -401,20 +363,30 @@ Module.HandleBelowMinimapWidgets = function(self)
 		end
 	end)
 
+	local layoutID = Private.GetLayoutID()
+
 	local bmHolder = self:CreateFrame("Frame", nil, "UICenter")
-	bmHolder:Place("BOTTOM", "Minimap", "TOP", 4, 60)
 	bmHolder:SetSize(128, 40)
+
+	-- Not sure where I can test this.
+	-- Hellfire Peninsula Capture Bars maybe?
+	if (layoutID == "Azerite") then
+		bmHolder:Place("BOTTOM", "Minimap", "TOP", 4, 60)
+	elseif (layoutID == "Legacy") then
+		bmHolder:Place("TOP", "Minimap", "BOTTOM", 4, -60)
+	end
 
 	-- Note: Hide quest tracker when this is visible!
 	local bmContainer = UIWidgetBelowMinimapContainerFrame
 	bmContainer:ClearAllPoints()
-	bmContainer:SetPoint("CENTER", bmHolder, "CENTER")
+	bmContainer:SetPoint("BOTTOM", bmHolder, "BOTTOM")
 
 	hooksecurefunc(bmContainer, "SetPoint", function(self, _, anchor)
 		if (anchor) and (anchor ~= bmHolder) then
-			self:ClearAllPoints()
-			self:SetPoint("BOTTOM", bmHolder, "BOTTOM")
+			local point = (layoutID == "Azerite") and "BOTTOM" or "TOP" 
 			self:SetParent(bmHolder)
+			self:ClearAllPoints()
+			self:SetPoint(point, bmHolder, point)
 		end
 	end)
 end
@@ -532,203 +504,8 @@ Module.HandleWarningFrames = function(self)
 	-- /run RaidNotice_AddMessage(RaidBossEmoteFrame, "Testing how texts will be displayed with my changes! Testing how texts will be displayed with my changes!", ChatTypeInfo["RAID_WARNING"])
 end
 
-Module.HandleExtraActionButton = function(self)
-	if (Private.GetLayoutID() ~= "Azerite") then
-		return
-	end
-
-	local layout = self.layout
-
-	local frame = ExtraActionBarFrame
-	frame:SetParent(self:GetFrame("UICenter"))
-	frame:EnableMouse(false)
-	frame.ignoreFramePositionManager = true
-
-	GetHolder(frame, unpack(layout.ExtraActionButtonFramePlace))
-	CreatePointHook(frame)
-
-	-- Take over the mouseover scripts, use our own tooltip
-	local button = ExtraActionBarFrame.button
-	button:ClearAllPoints()
-	button:SetSize(unpack(layout.ExtraActionButtonSize))
-	button:SetPoint(unpack(layout.ExtraActionButtonPlace))
-	button:SetScript("OnEnter", ExtraActionButton_OnEnter)
-	button:SetScript("OnLeave", ExtraActionButton_OnLeave)
-
-	local layer, level = button.icon:GetDrawLayer()
-	button.icon:SetAlpha(0) -- don't hide or remove, it will taint!
-
-	-- This crazy stunt is needed to be able to set a mask 
-	-- I honestly have no idea why. Somebody tell me?
-	local newIcon = button:CreateTexture()
-	newIcon:SetDrawLayer(layer, level)
-	newIcon:ClearAllPoints()
-	newIcon:SetPoint(unpack(layout.ExtraActionButtonIconPlace))
-	newIcon:SetSize(unpack(layout.ExtraActionButtonIconSize))
-	newIcon:SetMask(layout.ExtraActionButtonIconMaskTexture)
-	hooksecurefunc(button.icon, "SetTexture", function(_,...) newIcon:SetTexture(...) end)
-
-	button.Flash:SetTexture(nil)
-
-	button.HotKey:ClearAllPoints()
-	button.HotKey:SetPoint(unpack(layout.ExtraActionButtonKeybindPlace))
-	button.HotKey:SetFontObject(layout.ExtraActionButtonKeybindFont)
-	button.HotKey:SetJustifyH(layout.ExtraActionButtonKeybindJustifyH)
-	button.HotKey:SetJustifyV(layout.ExtraActionButtonKeybindJustifyV)
-	button.HotKey:SetShadowOffset(unpack(layout.ExtraActionButtonKeybindShadowOffset))
-	button.HotKey:SetShadowColor(unpack(layout.ExtraActionButtonKeybindShadowColor))
-	button.HotKey:SetTextColor(unpack(layout.ExtraActionButtonKeybindColor))
-
-	button.Count:ClearAllPoints()
-	button.Count:SetPoint(unpack(layout.ExtraActionButtonCountPlace))
-	button.Count:SetFontObject(layout.ExtraActionButtonFont)
-	button.Count:SetJustifyH(layout.ExtraActionButtonCountJustifyH)
-	button.Count:SetJustifyV(layout.ExtraActionButtonCountJustifyV)
-
-	button.cooldown:SetSize(unpack(layout.ExtraActionButtonCooldownSize))
-	button.cooldown:ClearAllPoints()
-	button.cooldown:SetPoint(unpack(layout.ExtraActionButtonCooldownPlace))
-	button.cooldown:SetSwipeTexture(layout.ExtraActionButtonCooldownSwipeTexture)
-	button.cooldown:SetSwipeColor(unpack(layout.ExtraActionButtonCooldownSwipeColor))
-	button.cooldown:SetDrawSwipe(layout.ExtraActionButtonShowCooldownSwipe)
-	button.cooldown:SetBlingTexture(layout.ExtraActionButtonCooldownBlingTexture, unpack(layout.ExtraActionButtonCooldownBlingColor)) 
-	button.cooldown:SetDrawBling(layout.ExtraActionButtonShowCooldownBling)
-
-	-- Attempting to fix the issue with too opaque swipe textures
-	button.cooldown:HookScript("OnShow", function() 
-		button.cooldown:SetSwipeColor(unpack(layout.ExtraActionButtonCooldownSwipeColor))
-	end)
-
-	-- Kill Blizzard's style texture
-	button.style:SetTexture(nil)
-	hooksecurefunc(button.style, "SetTexture", DisableTexture)
-
-	button:GetNormalTexture():SetTexture(nil)
-	button:GetHighlightTexture():SetTexture(nil)
-	button:GetCheckedTexture():SetTexture(nil)
-
-	button.BorderFrame = CreateFrame("Frame", nil, button)
-	button.BorderFrame:SetFrameLevel(button:GetFrameLevel() + 5)
-	button.BorderFrame:SetAllPoints(button)
-
-	button.HotKey:SetParent(button.BorderFrame)
-	button.Count:SetParent(button.BorderFrame)
-
-	button.BorderTexture = button.BorderFrame:CreateTexture()
-	button.BorderTexture:SetPoint(unpack(layout.ExtraActionButtonBorderPlace))
-	button.BorderTexture:SetDrawLayer(unpack(layout.ExtraActionButtonBorderDrawLayer))
-	button.BorderTexture:SetSize(unpack(layout.ExtraActionButtonBorderSize))
-	button.BorderTexture:SetTexture(layout.ExtraActionButtonBorderTexture)
-	button.BorderTexture:SetVertexColor(unpack(layout.ExtraActionButtonBorderColor))
-end
-
-Module.HandleZoneAbilityButton = function(self)
-	if (Private.GetLayoutID() ~= "Azerite") then
-		return
-	end
-	local layout = self.layout
-
-	local frame = ZoneAbilityFrame
-	frame:SetParent(self:GetFrame("UICenter"))
-	frame.ignoreFramePositionManager = true
-
-	GetHolder(frame, unpack(layout.ZoneAbilityButtonFramePlace))
-	CreatePointHook(frame)
-
-	-- Take over the mouseover scripts, use our own tooltip
-
-	local button = frame.SpellButton or frame.SpellButtonContainer -- 9.0.1
-	button:ClearAllPoints()
-	button:SetSize(unpack(layout.ZoneAbilityButtonSize))
-	button:SetPoint(unpack(layout.ZoneAbilityButtonPlace))
-	button:SetScript("OnEnter", ZoneAbilityButton_OnEnter)
-	button:SetScript("OnLeave", ZoneAbilityButton_OnLeave)
-
-	local handleCooldownHooking, handleStyleHooking
-	local handle = function()
-		local scaffold = button
-		if (not button.Icon) then
-			for i = 1, button:GetNumChildren() do
-				local child = select(i, button:GetChildren())
-				if (child.Icon) then
-					scaffold = child
-					break
-				end
-			end
-		end
-		if (not scaffold.Icon) then
-			return
-		end
-	
-		scaffold.Icon:ClearAllPoints()
-		scaffold.Icon:SetPoint(unpack(layout.ZoneAbilityButtonIconPlace))
-		scaffold.Icon:SetSize(unpack(layout.ZoneAbilityButtonIconSize))
-		scaffold.Icon:SetMask(layout.ZoneAbilityButtonIconMaskTexture)
-	
-		scaffold.Count:ClearAllPoints()
-		scaffold.Count:SetPoint(unpack(layout.ZoneAbilityButtonCountPlace))
-		scaffold.Count:SetFontObject(layout.ZoneAbilityButtonFont)
-		scaffold.Count:SetJustifyH(layout.ZoneAbilityButtonCountJustifyH)
-		scaffold.Count:SetJustifyV(layout.ZoneAbilityButtonCountJustifyV)
-	
-		scaffold.Cooldown:SetSize(unpack(layout.ZoneAbilityButtonCooldownSize))
-		scaffold.Cooldown:ClearAllPoints()
-		scaffold.Cooldown:SetPoint(unpack(layout.ZoneAbilityButtonCooldownPlace))
-		scaffold.Cooldown:SetSwipeTexture(layout.ZoneAbilityButtonCooldownSwipeTexture)
-		scaffold.Cooldown:SetSwipeColor(unpack(layout.ZoneAbilityButtonCooldownSwipeColor))
-		scaffold.Cooldown:SetDrawSwipe(layout.ZoneAbilityButtonShowCooldownSwipe)
-		scaffold.Cooldown:SetBlingTexture(layout.ZoneAbilityButtonCooldownBlingTexture, unpack(layout.ZoneAbilityButtonCooldownBlingColor)) 
-		scaffold.Cooldown:SetDrawBling(layout.ZoneAbilityButtonShowCooldownBling)
-	
-		-- Attempting to fix the issue with too opaque swipe textures
-		if (not handleCooldownHooking) then
-			handleCooldownHooking = true
-			scaffold.Cooldown:HookScript("OnShow", function() 
-				scaffold.Cooldown:SetSwipeColor(unpack(layout.ZoneAbilityButtonCooldownSwipeColor))
-			end)
-		end
-		
-		-- Kill off the surrounding style texture
-		local Style = button.Style or scaffold.Style or frame.Style
-		if (Style) then
-			Style:SetTexture(nil)
-			Style:SetAlpha(0)
-			if (not handleStyleHooking) then
-				handleStyleHooking = true
-				hooksecurefunc(Style, "SetTexture", DisableTexture)
-			end
-		end
-	
-		scaffold:GetNormalTexture():SetTexture(nil)
-		scaffold:GetHighlightTexture():SetTexture(nil)
-		--scaffold:GetCheckedTexture():SetTexture(nil)
-	
-		button.BorderFrame = button.BorderFrame or CreateFrame("Frame", nil, button)
-		button.BorderFrame:SetFrameLevel(button:GetFrameLevel() + 5)
-		button.BorderFrame:SetAllPoints(button)
-		
-		button.BorderTexture = button.BorderTexture or button.BorderFrame:CreateTexture()
-		button.BorderTexture:SetPoint(unpack(layout.ZoneAbilityButtonBorderPlace))
-		button.BorderTexture:SetDrawLayer(unpack(layout.ZoneAbilityButtonBorderDrawLayer))
-		button.BorderTexture:SetSize(unpack(layout.ZoneAbilityButtonBorderSize))
-		button.BorderTexture:SetTexture(layout.ZoneAbilityButtonBorderTexture)
-		button.BorderTexture:SetVertexColor(unpack(layout.ZoneAbilityButtonBorderColor))
-	end
-	handle()
-
-	button:HookScript("OnShow", handle)
-	button:HookScript("OnHide", handle)
-
-	-- Need this, or it won't be styled at initial login.
-	self:RegisterEvent("SPELLS_CHANGED", handle)
-end
-
 -- Startup & Init
 ----------------------------------------------------
-Module.GetFloaterTooltip = function(self)
-	return self:GetTooltip("GP_FloaterTooltip") or self:CreateTooltip("GP_FloaterTooltip")
-end
-
 Module.OnEvent = function(self, event, ...)
 	if (event == "UI_ERROR_MESSAGE") then 
 		local messageType, msg = ...
@@ -818,9 +595,7 @@ Module.OnEnable = function(self)
 			self:RegisterEvent("ADDON_LOADED", fix)
 		end
 		self:HandleBelowMinimapWidgets()
-		self:HandleExtraActionButton()
 		self:HandleVehicleSeatIndicator()
-		self:HandleZoneAbilityButton()
 		self:UpdateAlertFrames()
 		self:UpdateAnnouncements()
 		self:UpdateTalkingHead()

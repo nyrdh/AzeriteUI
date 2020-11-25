@@ -152,7 +152,7 @@ local AP_PostUpdate = function(element, min, max, level)
 end
 
 local Performance_UpdateTooltip = function(self)
-	local tooltip = Module:GetMinimapTooltip()
+	local tooltip = Private:GetMinimapTooltip()
 
 	local bandwidthIn, bandwidthOut, latencyHome, latencyWorld = GetNetStats()
 	local fps = GetFramerate()
@@ -181,7 +181,7 @@ local Performance_OnEnter = function(self)
 end 
 
 local Performance_OnLeave = function(self)
-	Module:GetMinimapTooltip():Hide()
+	Private:GetMinimapTooltip():Hide()
 	self.UpdateTooltip = nil
 end 
 
@@ -194,20 +194,20 @@ local Tracking_OnClick = function(self, button)
 end
 
 local Tracking_OnEnter = function(self)
-	local tooltip = Module:GetMinimapTooltip()
+	local tooltip = Private:GetMinimapTooltip()
 	tooltip:SetDefaultAnchor(self)
 	tooltip:SetMaximumWidth(360)
 	tooltip:SetTrackingSpell()
 end
 
 local Tracking_OnLeave = function(self)
-	Module:GetMinimapTooltip():Hide()
+	Private:GetMinimapTooltip():Hide()
 end
 
 -- This is the XP and AP tooltip (and rep/honor later on) 
 local Toggle_UpdateTooltip = function(toggle)
 
-	local tooltip = Module:GetMinimapTooltip()
+	local tooltip = Private:GetMinimapTooltip()
 	local hasXP = Module:PlayerHasXP()
 	local hasRep = Module:PlayerHasRep()
 	local hasAP = IsRetail and Module:PlayerHasAP()
@@ -568,7 +568,7 @@ local Toggle_OnLeave = function(toggle)
 	Toggle_UpdateFrame(toggle)
 	
 	if (not toggle.Frame.isMouseOver) then 
-		Module:GetMinimapTooltip():Hide()
+		Private:GetMinimapTooltip():Hide()
 	end 
 end
 
@@ -603,12 +603,12 @@ local RingFrame_OnLeave = function(frame)
 	Toggle_UpdateFrame(toggle)
 	
 	if (not toggle.isMouseOver) then 
-		Module:GetMinimapTooltip():Hide()
+		Private:GetMinimapTooltip():Hide()
 	end 
 end
 
 local Time_UpdateTooltip = function(self)
-	local tooltip = Module:GetMinimapTooltip()
+	local tooltip = Private:GetMinimapTooltip()
 
 	local colors = self._owner.colors 
 	local rt, gt, bt = unpack(colors.title)
@@ -662,7 +662,7 @@ local Time_OnEnter = function(self)
 end 
 
 local Time_OnLeave = function(self)
-	Module:GetMinimapTooltip():Hide()
+	Private:GetMinimapTooltip():Hide()
 	self.UpdateTooltip = nil
 end 
 
@@ -719,12 +719,12 @@ local Time_OnClick = function(self, mouseButton)
 end
 
 local Zone_OnEnter = function(self)
-	local tooltip = Module:GetMinimapTooltip()
+	local tooltip = Private:GetMinimapTooltip()
 
 end 
 
 local Zone_OnLeave = function(self)
-	Module:GetMinimapTooltip():Hide()
+	Private:GetMinimapTooltip():Hide()
 end 
 
 ----------------------------------------------------
@@ -1249,7 +1249,7 @@ Module.SetUpMBB = function(self)
 		over = true
 		_G.MBB_ShowTimeout = -1
 
-		local tooltip = Module:GetMinimapTooltip()
+		local tooltip = Private:GetMinimapTooltip()
 		tooltip:SetDefaultAnchor(self)
 		tooltip:SetMaximumWidth(320)
 		tooltip:AddLine("MinimapButtonBag v" .. MBB_Version)
@@ -1263,7 +1263,7 @@ Module.SetUpMBB = function(self)
 		over = false
 		_G.MBB_ShowTimeout = 0
 
-		local tooltip = Module:GetMinimapTooltip()
+		local tooltip = Private:GetMinimapTooltip()
 		tooltip:Hide()
 
 		setalpha()

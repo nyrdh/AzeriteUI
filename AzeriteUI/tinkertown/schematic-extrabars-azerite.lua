@@ -16,9 +16,20 @@ local pairs = pairs
 local table_remove = table.remove
 local tonumber = tonumber
 
+-- WoW API
+local GetBindingKey = GetBindingKey
+local hooksecurefunc = hooksecurefunc
+
+-- Private API
+local Colors = Private.Colors
+local GetAuraFilter = Private.GetAuraFilter
+local GetFont = Private.GetFont
+local GetMedia = Private.GetMedia
+local GetSchematic = Private.GetSchematic
+
 -- Module Schematics
 -----------------------------------------------------------
--- Legacy
+-- Azerite
 Private.RegisterSchematic("ModuleForge::ExtraBars", "Azerite", {
 	-- This is called by the module when the module is initialized.
 	-- This is typically where we first figure out if it should remain enabled,
@@ -34,6 +45,206 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Azerite", {
 					-- Nothing actually happens here, but this is where 
 					-- we define everything the module needs in advance.
 					values = {
+						"ExtraButtons", {},
+						"StyleCache", {},
+
+						"CreateScaffolds", function(self)
+
+							local extraScaffold = self:CreateFrame("Frame", nil, "UICenter")
+							extraScaffold:Place("CENTER", "UICenter", "BOTTOMRIGHT", -482, 360)
+							extraScaffold:SetSize(64,64)
+							self.extraScaffold = extraScaffold
+						
+							local zoneScaffold = self:CreateFrame("Frame", nil, "UICenter")
+							zoneScaffold:Place("CENTER", "UICenter", "BOTTOMRIGHT", -482, 360)
+							zoneScaffold:SetSize(64,64)
+							self.zoneScaffold = zoneScaffold
+						
+						end,
+
+						"StyleExtraButtons", function(self)
+							local ExtraAbilityContainer = ExtraAbilityContainer
+							local ExtraActionBarFrame = ExtraActionBarFrame
+							local ZoneAbilityFrame = ZoneAbilityFrame
+
+							UIPARENT_MANAGED_FRAME_POSITIONS.ExtraAbilityContainer = nil
+							ExtraAbilityContainer.SetSize = function() end
+							ExtraActionBarFrame:SetParent(self.extraScaffold)
+							ExtraActionBarFrame:ClearAllPoints()
+							ExtraActionBarFrame:SetAllPoints()
+							ExtraActionBarFrame:EnableMouse(false)
+							ExtraActionBarFrame.ignoreInLayout = true
+							ExtraActionBarFrame.ignoreFramePositionManager = true
+						
+							ZoneAbilityFrame.SpellButtonContainer.holder = self.zoneScaffold
+							ZoneAbilityFrame:SetParent(self.zoneScaffold)
+							ZoneAbilityFrame:ClearAllPoints()
+							ZoneAbilityFrame:SetAllPoints()
+							ZoneAbilityFrame.ignoreInLayout = true
+
+							self:SetSecureHook(ZoneAbilityFrame, "UpdateDisplayedZoneAbilities", "UpdateZoneButtons")
+
+							self:UpdateExtraButtons()
+							self:UpdateZoneButtons()
+						end,
+
+						"UpdateExtraButtons", function(self)
+							local i = 1
+							local button = _G["ExtraActionButton"..i]
+							while (button) do
+
+								button:SetSize(52,52)
+								button.style:SetAlpha(0)
+								button.icon:SetAlpha(0) -- don't hide or remove, it will taint!
+
+								-- This crazy stunt is needed to be able to set a mask 
+								-- I honestly have no idea why. Somebody tell me?
+								local newIcon = button:CreateTexture()
+								newIcon:SetPoint("TOPLEFT", button, 8, -8)
+								newIcon:SetPoint("BOTTOMRIGHT", button, -8, 8)
+								newIcon:SetMask(GetMedia("actionbutton-mask-circular"))
+								hooksecurefunc(button.icon, "SetTexture", function(_,...) newIcon:SetTexture(...) end)
+
+								button:GetNormalTexture():SetTexture(nil)
+								button:GetHighlightTexture():SetTexture(nil)
+								button:GetCheckedTexture():SetTexture(nil)
+
+								local tex = button:CreateTexture()
+								tex:SetDrawLayer("BACKGROUND", 2)
+								tex:SetMask(GetMedia("actionbutton-mask-circular"))
+								tex:SetColorTexture(.9, .8, .1, .15)
+								button:SetCheckedTexture(tex)
+
+								local tex = button:CreateTexture()
+								tex:SetDrawLayer("BACKGROUND", 1)
+								tex:SetTexture(GetMedia("actionbutton-mask-circular"))
+								tex:SetAllPoints(newIcon)
+								tex:SetVertexColor(1, 1, 1, .1)
+								button:SetHighlightTexture(tex)
+
+								button.BorderFrame = self.extraScaffold:CreateFrame("Frame")
+								button.BorderFrame:SetParent(button)
+								button.BorderFrame:SetPoint("CENTER", 0, 0)
+								button.BorderFrame:SetSize(2,2)
+								button.BorderFrame:SetFrameLevel(1)
+
+								button.BorderFrame.Texture = button.BorderFrame:CreateTexture()
+								button.BorderFrame.Texture:SetDrawLayer("OVERLAY", 2)
+								button.BorderFrame.Texture:SetSize(104,104)
+								button.BorderFrame.Texture:SetPoint("CENTER", 0, 0)
+								button.BorderFrame.Texture:SetTexture(GetMedia("actionbutton-border"))
+								button.BorderFrame.Texture:SetVertexColor(Colors.ui[1], Colors.ui[2], Colors.ui[3], 1)
+
+								newIcon:SetParent(button.BorderFrame)
+								newIcon:SetDrawLayer("BACKGROUND", -1)
+
+								button.UpdateExtraActionButtonTooltip = function(button)
+									if button.action and HasAction(button.action) then 
+										local tooltip = Private:GetFloaterTooltip()
+										tooltip:SetDefaultAnchor(button)
+										tooltip:SetAction(button.action)
+									end 
+								end
+
+								button:SetScript("OnEnter", function(button)
+									button.UpdateTooltip = button.UpdateExtraActionButtonTooltip
+									button:UpdateTooltip()
+								end)
+
+								button:SetScript("OnLeave", function(button)
+									button.UpdateTooltip = nil
+									Private:GetFloaterTooltip():Hide()
+								end)
+							
+								--button.HotKey:SetText(GetBindingKey('ExtraActionButton'..i))
+
+								self.ExtraButtons[#self.ExtraButtons + 1] = button
+
+								i = i + 1
+								button = _G["ExtraActionButton"..i]
+							end
+
+						end,
+
+						"UpdateZoneButtons", function(self)
+							self:UpdateZoneAlpha()
+							local frame = ZoneAbilityFrame
+							for button in frame.SpellButtonContainer:EnumerateActive() do
+								if (button) and (not self.StyleCache[button]) then
+
+									button:SetSize(52,52)
+									button:GetNormalTexture():SetTexture(nil)
+									button:GetHighlightTexture():SetTexture(nil)
+									--button:GetCheckedTexture():SetTexture(nil) -- don't exist, not a checkbutton
+	
+									button.NormalTexture:SetAlpha(0)
+
+									button.Icon:SetTexCoord(0, 1, 0, 1)
+									button.Icon:ClearAllPoints()
+									button.Icon:SetPoint("TOPLEFT", 8, -8)
+									button.Icon:SetPoint("BOTTOMRIGHT", -8, 8)
+									button.Icon:SetMask(GetMedia("actionbutton-mask-circular"))
+
+									button.BorderFrame = self.extraScaffold:CreateFrame("Frame")
+									button.BorderFrame:SetParent(button)
+									button.BorderFrame:SetPoint("CENTER", 0, 0)
+									button.BorderFrame:SetSize(2,2)
+									button.BorderFrame:SetFrameLevel(1)
+	
+									button.BorderFrame.Texture = button.BorderFrame:CreateTexture()
+									button.BorderFrame.Texture:SetDrawLayer("OVERLAY", 2)
+									button.BorderFrame.Texture:SetSize(108,108)
+									button.BorderFrame.Texture:SetPoint("CENTER", 0, 0)
+									button.BorderFrame.Texture:SetTexture(GetMedia("actionbutton-border"))
+									button.BorderFrame.Texture:SetVertexColor(Colors.ui[1], Colors.ui[2], Colors.ui[3], 1)
+
+									button.Icon:SetParent(button.BorderFrame)
+									button.Icon:SetDrawLayer("BACKGROUND", -1)
+
+									local tex = button:CreateTexture()
+									tex:SetDrawLayer("BACKGROUND", 2)
+									tex:SetTexture(GetMedia("actionbutton-mask-circular"))
+									tex:SetVertexColor(1, 1, 1, .1)
+									tex:SetAllPoints(button.Icon)
+									button:SetHighlightTexture(tex)
+
+									button.UpdateZoneAbilityButtonTooltip = function(button)
+										local spellID = button.currentSpellID or button.spellID or button.baseSpellID
+										if spellID then 
+											local tooltip = Private:GetFloaterTooltip()
+											tooltip:SetDefaultAnchor(button)
+											tooltip:SetSpellByID(spellID)
+										end 
+									end
+
+									button:SetScript("OnEnter", function(button)
+										button.UpdateTooltip = button.UpdateZoneAbilityButtonTooltip
+										button:UpdateTooltip()
+									end)
+
+									button:SetScript("OnLeave", function(button)
+										button.UpdateTooltip = nil
+										Private:GetFloaterTooltip():Hide()
+									end)
+								
+									self.StyleCache[button] = true
+								end
+							end
+						end,
+
+						"UpdateZoneAlpha", function(self)
+							local frame = ZoneAbilityFrame
+							frame.Style:SetAlpha(0)
+							for spellButton in frame.SpellButtonContainer:EnumerateActive() do
+								--if (spellButton) then
+								--	spellButton:SetAlpha(0)
+								--end
+							end
+						end,
+
+						"UpdateBindings", function(self)
+						end
+						
 					},
 					-- The 'chain' sections performs methods on the module,
 					-- and passes the unpacked arguments in the tables 
@@ -59,6 +270,9 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Azerite", {
 					-- Here we can call methods created in previously defined
 					-- 'values' sections.
 					chain = {
+						"EmbedLibraries", { "LibFrame", "LibSecureHook", "LibTooltip" },
+						"CreateScaffolds", {},
+						"StyleExtraButtons", {}
 					}
 				}
 			}

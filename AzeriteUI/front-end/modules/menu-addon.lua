@@ -330,7 +330,7 @@ local secureSnippets = {
 -- Local Functions
 --------------------------------------------------------------------------
 local ConfigWindow_OnShow = function(self) 
-	local tooltip = Module:GetOptionsMenuTooltip()
+	local tooltip = Private:GetOptionsMenuTooltip()
 	local button = Module:GetToggleButton()
 	if (tooltip:IsShown() and (tooltip:GetOwner() == button)) then 
 		tooltip:Hide()
@@ -338,7 +338,7 @@ local ConfigWindow_OnShow = function(self)
 end
 
 local ConfigWindow_OnHide = function(self) 
-	local tooltip = Module:GetOptionsMenuTooltip()
+	local tooltip = Private:GetOptionsMenuTooltip()
 	local toggle = Module:GetToggleButton()
 	if (toggle:IsMouseOver(0,0,0,0) and ((not tooltip:IsShown()) or (tooltip:GetOwner() ~= toggle))) then 
 		toggle:OnEnter()
@@ -524,7 +524,7 @@ Toggle.OnEnter = function(self)
 	if (not self.leftButtonTooltip) and (not self.rightButtonTooltip) and (not self.middleButtonTooltip) then 
 		return 
 	end
-	local tooltip = Module:GetOptionsMenuTooltip()
+	local tooltip = Private:GetOptionsMenuTooltip()
 	local window = Module:GetConfigWindow()
 	if window:IsShown() then 
 		if (tooltip:IsShown() and (tooltip:GetOwner() == self)) then 
@@ -549,7 +549,7 @@ Toggle.OnEnter = function(self)
 end
 
 Toggle.OnLeave = function(self)
-	local tooltip = Module:GetOptionsMenuTooltip()
+	local tooltip = Private:GetOptionsMenuTooltip()
 	tooltip:Hide() 
 end
 
@@ -784,10 +784,6 @@ Module.CreateConfigWindowLevel = function(self, level, parent)
 	end 
 
 	return window, name
-end
-
-Module.GetOptionsMenuTooltip = function(self)
-	return self:GetTooltip(ADDON.."_OptionsMenuTooltip") or self:CreateTooltip(ADDON.."_OptionsMenuTooltip")
 end
 
 Module.UpdateBindings = function(self)

@@ -1092,7 +1092,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(14,true),
 					"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-					"SetParentToOwnerKey", "OverlayScaffold"
+					"SetParentToOwnerKey", "Cast,Border"
 				}
 			},
 			-- Cast Bar Name
@@ -1105,7 +1105,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(12,true),
 					"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-					"SetParentToOwnerKey", "OverlayScaffold"
+					"SetParentToOwnerKey", "Cast,Border"
 				}
 			},
 			-- Cast Bar Spell Queue
@@ -1192,7 +1192,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(14,true),
 					"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-					"SetParentToOwnerKey", "OverlayScaffold"
+					"SetParentToOwnerKey", "AltPower,Border"
 				}
 			}
 		}

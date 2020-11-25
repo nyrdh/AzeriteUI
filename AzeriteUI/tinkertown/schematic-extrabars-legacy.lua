@@ -32,10 +32,6 @@ local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia
 local GetSchematic = Private.GetSchematic
 
--- Callbacks
-----------------------------------------------------
-
-
 -- Module Schematics
 -----------------------------------------------------------
 -- Legacy
@@ -144,7 +140,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 
 								button.UpdateExtraActionButtonTooltip = function(button)
 									if button.action and HasAction(button.action) then 
-										local tooltip = self:GetFloaterTooltip()
+										local tooltip = Private:GetFloaterTooltip()
 										tooltip:SetDefaultAnchor(button)
 										tooltip:SetAction(button.action)
 									end 
@@ -157,7 +153,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 
 								button:SetScript("OnLeave", function(button)
 									button.UpdateTooltip = nil
-									self:GetFloaterTooltip():Hide()
+									Private:GetFloaterTooltip():Hide()
 								end)
 							
 								--button.HotKey:SetText(GetBindingKey('ExtraActionButton'..i))
@@ -210,7 +206,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 									button.UpdateZoneAbilityButtonTooltip = function(button)
 										local spellID = button.currentSpellID or button.spellID or button.baseSpellID
 										if spellID then 
-											local tooltip = self:GetFloaterTooltip()
+											local tooltip = Private:GetFloaterTooltip()
 											tooltip:SetDefaultAnchor(button)
 											tooltip:SetSpellByID(spellID)
 										end 
@@ -223,7 +219,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 
 									button:SetScript("OnLeave", function(button)
 										button.UpdateTooltip = nil
-										self:GetFloaterTooltip():Hide()
+										Private:GetFloaterTooltip():Hide()
 									end)
 								
 									self.StyleCache[button] = true
@@ -242,10 +238,6 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 						end,
 
 						"UpdateBindings", function(self)
-						end,
-
-						"GetFloaterTooltip", function(self)
-							return self:GetTooltip("GP_FloaterTooltip") or self:CreateTooltip("GP_FloaterTooltip")
 						end
 						
 					},

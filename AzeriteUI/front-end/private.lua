@@ -20,8 +20,26 @@ assert(LibClientBuild, ADDON.." requires LibClientBuild to be loaded.")
 local LibDB = Wheel("LibDB")
 assert(LibDB, ADDON.." requires LibDB to be loaded.")
 
+local LibMinimap = Wheel("LibMinimap")
+assert(LibMinimap, ADDON.." requires LibMinimap to be loaded.")
+
+local LibMover = Wheel("LibMover")
+assert(LibMover, ADDON.." requires LibMover to be loaded.")
+
+local LibTooltip = Wheel("LibTooltip")
+assert(LibTooltip, ADDON.." requires LibTooltip to be loaded.")
+
+local LibSecureButton = Wheel("LibSecureButton")
+assert(LibSecureButton, ADDON.." requires LibSecureButton to be loaded.")
+
+local LibUnitFrame = Wheel("LibUnitFrame")
+assert(LibUnitFrame, ADDON.." requires LibUnitFrame to be loaded.")
+
 local LibAuraTool = Wheel("LibAuraTool")
 assert(LibAuraTool, ADDON.." requires LibAuraTool to be loaded.")
+
+local LibBindTool = Wheel("LibBindTool")
+assert(LibBindTool, ADDON.." requires LibBindTool to be loaded.")
 
 local LibColorTool = Wheel("LibColorTool")
 assert(LibColorTool, ADDON.." requires LibColorTool to be loaded.")
@@ -2270,7 +2288,6 @@ Legacy.BlizzardChatFrames = setmetatable({
 local FloaterSlots = {
 	-- Bottomright floaters
 	-- These used to be center right, but was ultimately in the way of gameplay.
-	ExtraButton = { "CENTER", "UICenter", "BOTTOMRIGHT", -482, 360 }, -- "CENTER", "UICenter", "CENTER", 237, -60
 	VehicleSeatSelector = { "CENTER", "UICenter", "BOTTOMRIGHT", -480, 210 }, -- "CENTER", "UICenter", "CENTER", 424, 0
 	Durability = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 }, -- "CENTER", "UICenter", "CENTER", 190, 0
 
@@ -2350,20 +2367,8 @@ Azerite.BlizzardFloaterHUD = {
 	ZoneAbilityButtonSize = { 64, 64 }
 }
 Legacy.BlizzardFloaterHUD = setmetatable({
-
-	ExtraActionButtonFramePlace = { "CENTER", "UICenter", "RIGHT", -390, 0 },
-	ZoneAbilityButtonFramePlace = { "CENTER", "UICenter", "RIGHT", -390, 0 },
 	VehicleSeatIndicatorPlace = { "CENTER", "UICenter", "BOTTOMRIGHT", -130, 80 }, 
-
-	-- Bottom center floaters
-	-- Below these you'll find 2 potentional rows of actionbuttons, and the petbar.
 	ArcheologyDigsiteProgressBarPlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 390 },
-	
-	--AltPower = { "BOTTOM", "UICenter", "BOTTOM", 0, 210 + 46 }, 
-	--CastBar = { "BOTTOM", "UICenter", "BOTTOM", 0, 210 }, -- 224, 26 + 8 
-	--ClassPower =  = { "BOTTOM", "UICenter", "BOTTOM", 0, 210 - 46 }
-
-
 }, { __index = Azerite.BlizzardFloaterHUD })
 
 -- Blizzard font replacements
@@ -4913,6 +4918,21 @@ Private.GetSchematic = function(uniqueID, layoutID)
 	end
 	return schematic
 end
+
+local GetTooltip = function(name)
+	return LibTooltip:GetTooltip(name) or LibTooltip:CreateTooltip(name)
+end
+
+-- Library tooltip proxies
+Private.GetActionButtonTooltip = function(self) return LibSecureButton:GetActionButtonTooltip() end
+Private.GetBindingsTooltip = function(self) return LibBindTool:GetBindingsTooltip() end
+Private.GetMinimapTooltip = function(self) return LibMinimap:GetMinimapTooltip() end
+Private.GetMoverTooltip = function(self) return LibMover:GetMoverTooltip() end
+Private.GetUnitFrameTooltip = function(self) return LibUnitFrame:GetUnitFrameTooltip() end
+
+-- Commonly used module tooltips
+Private.GetFloaterTooltip = function(self) return GetTooltip("GP_FloaterTooltip") end
+Private.GetOptionsMenuTooltip = function(self) return GetTooltip("GP_OptionsMenuTooltip") end
 
 -- Whether or not aura filters are in forced slack mode.
 -- This happens if aura data isn't available for the current class.

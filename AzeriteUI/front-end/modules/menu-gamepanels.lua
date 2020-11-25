@@ -124,7 +124,7 @@ if (IsClassic) then
 	microButtonScripts.CharacterMicroButton_OnEnter = function(self)
 		self.tooltipText = getMicroButtonTooltipText(CHARACTER_BUTTON, "TOGGLECHARACTER0")
 		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
-		local tooltip = Module:GetOptionsMenuTooltip()
+		local tooltip = Private:GetOptionsMenuTooltip()
 		tooltip:Hide()
 		tooltip:SetDefaultAnchor(self)
 		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
@@ -134,7 +134,7 @@ if (IsClassic) then
 	microButtonScripts.SpellbookMicroButton_OnEnter = function(self)
 		self.tooltipText = getMicroButtonTooltipText(SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK")
 		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
-		local tooltip = Module:GetOptionsMenuTooltip()
+		local tooltip = Private:GetOptionsMenuTooltip()
 		tooltip:Hide()
 		tooltip:SetDefaultAnchor(self)
 		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
@@ -143,7 +143,7 @@ if (IsClassic) then
 	end
 	microButtonScripts.MainMenuMicroButton_OnEnter = function(self)
 		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
-		local tooltip = Module:GetOptionsMenuTooltip()
+		local tooltip = Private:GetOptionsMenuTooltip()
 		tooltip:Hide()
 		tooltip:SetDefaultAnchor(self)
 		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
@@ -154,7 +154,7 @@ if (IsClassic) then
 		if (self:IsEnabled() or self.minLevel or self.disabledTooltip or self.factionGroup) then
 	
 			local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
-			local tooltip = Module:GetOptionsMenuTooltip()
+			local tooltip = Private:GetOptionsMenuTooltip()
 			tooltip:Hide()
 			tooltip:SetDefaultAnchor(self)
 
@@ -181,7 +181,7 @@ if (IsClassic) then
 		end
 	end
 	microButtonScripts.MicroButton_OnLeave = function(button)
-		local tooltip = Module:GetOptionsMenuTooltip()
+		local tooltip = Private:GetOptionsMenuTooltip()
 		tooltip:Hide() 
 	end
 end
@@ -189,7 +189,7 @@ if (IsRetail) then
 	microButtonScripts.CharacterMicroButton_OnEnter = function(self)
 		self.tooltipText = getMicroButtonTooltipText(CHARACTER_BUTTON, "TOGGLECHARACTER0")
 		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
-		local tooltip = Module:GetOptionsMenuTooltip()
+		local tooltip = Private:GetOptionsMenuTooltip()
 		tooltip:Hide()
 		tooltip:SetDefaultAnchor(self)
 		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
@@ -199,7 +199,7 @@ if (IsRetail) then
 	microButtonScripts.SpellbookMicroButton_OnEnter = function(self)
 		self.tooltipText = getMicroButtonTooltipText(SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK")
 		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
-		local tooltip = Module:GetOptionsMenuTooltip()
+		local tooltip = Private:GetOptionsMenuTooltip()
 		tooltip:Hide()
 		tooltip:SetDefaultAnchor(self)
 		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
@@ -209,7 +209,7 @@ if (IsRetail) then
 	microButtonScripts.CollectionsMicroButton_OnEnter = function(self)
 		self.tooltipText = getMicroButtonTooltipText(COLLECTIONS, "TOGGLECOLLECTIONS")
 		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
-		local tooltip = Module:GetOptionsMenuTooltip()
+		local tooltip = Private:GetOptionsMenuTooltip()
 		tooltip:Hide()
 		tooltip:SetDefaultAnchor(self)
 		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
@@ -218,7 +218,7 @@ if (IsRetail) then
 	end
 	microButtonScripts.MainMenuMicroButton_OnEnter = function(self)
 		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
-		local tooltip = Module:GetOptionsMenuTooltip()
+		local tooltip = Private:GetOptionsMenuTooltip()
 		tooltip:Hide()
 		tooltip:SetDefaultAnchor(self)
 		tooltip:AddLine(self.tooltipText, titleColor[1], titleColor[2], titleColor[3], true)
@@ -229,7 +229,7 @@ if (IsRetail) then
 		if (self:IsEnabled() or self.minLevel or self.disabledTooltip or self.factionGroup) then
 	
 			local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
-			local tooltip = Module:GetOptionsMenuTooltip()
+			local tooltip = Private:GetOptionsMenuTooltip()
 			tooltip:Hide()
 			tooltip:SetDefaultAnchor(self)
 
@@ -256,7 +256,7 @@ if (IsRetail) then
 		end
 	end
 	microButtonScripts.MicroButton_OnLeave = function(button)
-		local tooltip = Module:GetOptionsMenuTooltip()
+		local tooltip = Private:GetOptionsMenuTooltip()
 		tooltip:Hide()
 	end
 end
@@ -264,7 +264,7 @@ end
 local ConfigWindow_OnShow = function(self) 
 	local button = Module:GetToggleButton()
 	if (button) then
-		local tooltip = Module:GetOptionsMenuTooltip()
+		local tooltip = Private:GetOptionsMenuTooltip()
 		if (tooltip:IsShown() and (tooltip:GetOwner() == button)) then 
 			tooltip:Hide()
 		end 
@@ -274,16 +274,11 @@ end
 local ConfigWindow_OnHide = function(self) 
 	local button = Module:GetToggleButton()
 	if (button) then
-		local tooltip = Module:GetOptionsMenuTooltip()
+		local tooltip = Private:GetOptionsMenuTooltip()
 		if (button:IsMouseOver(0,0,0,0) and ((not tooltip:IsShown()) or (tooltip:GetOwner() ~= button))) then 
 			button:GetScript("OnEnter")(button)
 		end 
 	end
-end
-
--- Same tooltip as used by the options menu module. 
-Module.GetOptionsMenuTooltip = function(self)
-	return self:GetTooltip(ADDON.."_OptionsMenuTooltip") or self:CreateTooltip(ADDON.."_OptionsMenuTooltip")
 end
 
 -- Avoid direct usage of 'self' here since this 
