@@ -2473,11 +2473,11 @@ Legacy.BlizzardObjectivesTracker = (IsClassic) and {
 	SpaceTop = 260, 
 	Width = 255 -- 280 is classic default
 } or (IsRetail) and {
-	Place = { "TOPRIGHT", -60, -380 },
-	Width = 235, -- 235 default
+	Place = { "TOPRIGHT", -60, -420 },
+	Width = 220, -- 235 default
 	Scale = 1.1, 
-	SpaceTop = 260, 
-	SpaceBottom = 330, 
+	SpaceTop = 420, 
+	SpaceBottom = 220, 
 	MaxHeight = 1080 - (60 + 380),
 	HideInCombat = false, 
 	HideInBossFights = true, 
@@ -2820,7 +2820,8 @@ Azerite.Minimap = {
 }
 Legacy.Minimap = setmetatable({
 	Size = { 210, 210 }, 
-	Place = { "TOPRIGHT", "UICenter", "TOPRIGHT", -50, -56 }, 
+	--Place = { "TOPRIGHT", "UICenter", "TOPRIGHT", -50, -56 }, 
+	Place = { "TOPRIGHT", "UICenter", "TOPRIGHT", -60, -70 }, 
 
 	-- Border icon positions
 	BattleGroundEyePlace = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
@@ -2829,11 +2830,14 @@ Legacy.Minimap = setmetatable({
 	TrackingButtonPlaceAlternate = { "CENTER", math_cos(22.5*deg2rad) * (196/2 + 10), math_sin(22.5*deg2rad) * (196/2 + 10) }, 
 
 	-- Element positions
-	MBBPlace = { "TOPRIGHT", 24, 20 },
-	ClockPlace = { "BOTTOM", 0, 14 },
-	CoordinatePlace = { "TOP", 4, -16 },
+	--MBBPlace = { "TOPRIGHT", 24, 20 },
+	MBBPlace = { "BOTTOMLEFT", -24, -20 },
+	ClockPlace = { "BOTTOM", 1, 18 },
+	CoordinatePlace = { "TOP", 4, -22 },
 	GroupFinderQueueStatusPlace = { "TOPRIGHT", _G.QueueStatusMinimapButton, "BOTTOMLEFT", 0, 0 },
-	MailPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -62, 12 },
+
+	--MailPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -64, 12 },
+	MailPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -24, 12 },
 
 	-- Element position functions
 	ZonePlaceFunc = function(Handler) return "TOP", Handler, "BOTTOM", 0, -36 end,
@@ -4783,11 +4787,14 @@ Legacy.BlizzardTooltips = Azerite.BlizzardTooltips
 Legacy.BlizzardWorldMap = Azerite.BlizzardWorldMap
 Legacy.GroupTools = Azerite.GroupTools
 Legacy.NamePlates = Azerite.NamePlates
-Legacy.OptionsMenu = Azerite.OptionsMenu
 
 -- Few changes
 Legacy.Bindings = setmetatable({ BindButtonTexture = GetMedia("actionbutton-mask-square") }, { __index = Azerite.Bindings })
 Legacy.Tooltips = setmetatable({ TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -54, 66 } }, { __index = Azerite.Tooltips })
+Legacy.OptionsMenu = setmetatable({ 
+	MenuPlace = { "TOPRIGHT", -41, -32 },
+	MenuToggleButtonPlace = { "TOPRIGHT", -4, -4 }
+}, { __index = Azerite.OptionsMenu })
 
 
 

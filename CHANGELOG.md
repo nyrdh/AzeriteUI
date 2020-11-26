@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2020-11-26
+### Added
+- Added party frames to the legacy theme. Work in progress and untested.
+
+### Changed
+- Moved the config button up to the top right corner in legacy mode, and adjusted spawn order of all micro- and menu buttons to match.
+
+### Fixed
+- Explorer mode should work much better with legacy theme side action bars now.
+
 ## [3.1.430-RC] 2020-11-25
 ### Fixed
 - Fixed spawning, layout, cooldowns, spell charges and keybind texts of extra action- and zone ability buttons for all themes. 

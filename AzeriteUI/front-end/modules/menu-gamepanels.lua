@@ -302,7 +302,11 @@ Module.UpdateMicroButtons = function()
 			microButton:SetFrameLevel(level + 1)
 			microButton:SetSize(buttonWidth*sizeMod, buttonHeight*sizeMod)
 			microButton:ClearAllPoints()
-			microButton:SetPoint("BOTTOM", window, "BOTTOM", 0, buttonSpacing + buttonHeight*sizeMod*numVisible + buttonSpacing*numVisible)
+			if (Module:GetConfigWindow().reverseOrder) then
+				microButton:SetPoint("TOP", window, "TOP", 0, -(buttonSpacing + buttonHeight*sizeMod*numVisible + buttonSpacing*numVisible))
+			else
+				microButton:SetPoint("BOTTOM", window, "BOTTOM", 0, buttonSpacing + buttonHeight*sizeMod*numVisible + buttonSpacing*numVisible)
+			end
 			numVisible = numVisible + 1
 		end
 	end	
@@ -330,6 +334,7 @@ Module.GetConfigWindow = function(self)
 		configWindow:EnableMouse(true)
 		configWindow:SetScript("OnShow", ConfigWindow_OnShow)
 		configWindow:SetScript("OnHide", ConfigWindow_OnHide)
+		configWindow.reverseOrder = (configWindow:GetPoint()):find("TOP")
 
 		-- This can be called before OnInit
 		local layout = GetLayout(self:GetName())

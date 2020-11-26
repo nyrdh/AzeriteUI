@@ -534,6 +534,9 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 
 							-- Create overlay frames used for explorer mode.
 							self.frameOverlay = self:CreateFrame("Frame", nil, "UICenter")
+							self.frameOverlayPet = self:CreateFrame("Frame", nil, "UICenter")
+							self.frameOverlayLeft = self:CreateFrame("Frame", nil, "UICenter")
+							self.frameOverlayRight = self:CreateFrame("Frame", nil, "UICenter")
 						
 							-- Apply overlay alpha to the master frame.
 							hooksecurefunc(self.frameOverlay, "SetAlpha", function(_,alpha) self.frame:SetAlpha(alpha) end)
@@ -1109,12 +1112,30 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 
 						-- Return the frames for the explorer mode mouseover
 						"GetExplorerModeFrameAnchors", function(self)
-							return self:GetOverlayFrame()
+							return 	self:GetPrimaryOverlayFrame(), 
+									self:GetPetOverlayFrame(),
+									self:GetSideBarLeftOverlayFrame(),
+									self:GetSideBarRightOverlayFrame()
 						end,
 
-						-- Return the actionbar frame for the explorer mode mouseover
-						"GetOverlayFrame", function(self)
+						-- Return the actionbar overlay frame for the explorer mode mouseover
+						"GetPrimaryOverlayFrame", function(self)
 							return self.frameOverlay
+						end,
+
+						-- Return the pet actionbar overlay frame for the explorer mode mouseover
+						"GetPetOverlayFrame", function(self)
+							return self.frameOverlayPet
+						end,
+
+						-- Return the left actionbar overlay frame for the explorer mode mouseover
+						"GetSideBarLeftOverlayFrame", function(self)
+							return self.frameOverlayLeft
+						end,
+
+						-- Return the right actionbar overlay frame for the explorer mode mouseover
+						"GetSideBarRightOverlayFrame", function(self)
+							return self.frameOverlayRight
 						end,
 
 						-- Setters
@@ -1170,13 +1191,75 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 						-- to decide when you are hovering above the actionbar section.
 						"UpdateExplorerModeAnchors", function(self)
 							local db = self.db
-							local frame = self:GetOverlayFrame()
-							frame:ClearAllPoints()
-							frame:SetPoint("BOTTOMLEFT", self.PrimaryButtons[1], "BOTTOMLEFT")
-							if (self:GetDB("enableSecondaryBar")) then
-								frame:SetPoint("TOPRIGHT", self.SecondaryButtons[#self.SecondaryButtons], "TOPRIGHT")
+
+							local primary = self:GetPrimaryOverlayFrame()
+							local pet = self:GetPetOverlayFrame()
+							local left = self:GetSideBarLeftOverlayFrame()
+							local right = self:GetSideBarRightOverlayFrame()
+
+							local enableSecondaryBar = self:GetDB("enableSecondaryBar")
+							local enableSideBarLeft = self:GetDB("enableSideBarLeft")
+							local enableSideBarRight = self:GetDB("enableSideBarRight")
+							local enablePetBar = self:GetDB("enablePetBar")
+
+							local offsetX, offsetY = (enableSideBarLeft or enableSideBarRight) and 32 or 8,8
+
+							if (enableSecondaryBar) then
+								primary:Place("BOTTOMLEFT", self.PrimaryButtons[1], "BOTTOMLEFT", -offsetX, -offsetY)
+								primary:SetPoint("TOPRIGHT", self.SecondaryButtons[#self.SecondaryButtons], "TOPRIGHT", offsetX, offsetY)
 							else
-								frame:SetPoint("TOPRIGHT", self.PrimaryButtons[#self.SecondaryButtons], "TOPRIGHT")
+								primary:Place("BOTTOMLEFT", self.PrimaryButtons[1], "BOTTOMLEFT", -offsetX, -offsetY)
+								primary:SetPoint("TOPRIGHT", self.PrimaryButtons[#self.PrimaryButtons], "TOPRIGHT", offsetX, offsetY)
+							end
+
+							-- Dodgy. Need a callback for pets here instead.
+							local enablePetBarHover
+							if (enablePetBar) then
+								for id,button in pairs(self.PetButtons) do
+									if (button:IsShown()) then
+										enablePetBarHover = true
+										break
+									end
+								end
+							end
+							if (enablePetBarHover) then
+								pet:Place("TOPLEFT", self.PetButtons[1], "TOPLEFT", 0, 0)
+								pet:SetPoint("BOTTOMRIGHT", self.PetButtons[#self.PetButtons], "BOTTOMRIGHT", 0, 0)
+								pet:Show()
+							else
+								pet:Hide()
+							end
+
+							offsetX, offsetY = 8,8
+							if (enableSideBarLeft) and (enableSideBarRight) then
+
+								left:SetParent(self.SideBarLeftButtons[1])
+								left:Place("BOTTOMLEFT", self.SideBarLeftButtons[1], "BOTTOMLEFT", -offsetX, -offsetY)
+								left:SetPoint("TOPRIGHT", self.SideBarLeftButtons[12], "TOPRIGHT", offsetX, offsetY)
+								left:Show()
+
+								right:SetParent(self.SideBarRightButtons[1])
+								right:Place("BOTTOMLEFT", self.SideBarRightButtons[1], "BOTTOMLEFT", -offsetX, -offsetY)
+								right:SetPoint("TOPRIGHT", self.SideBarRightButtons[12], "TOPRIGHT", offsetX, offsetY)
+								right:Show()
+
+
+							elseif (enableSideBarLeft) or (enableSideBarRight) then
+								local buttons = enableSideBarRight and self.SideBarRightButtons or self.SideBarLeftButtons;
+
+								left:SetParent(buttons[1])
+								right:SetParent(buttons[7])
+
+								left:Place("BOTTOMLEFT", buttons[1], "BOTTOMLEFT", -offsetX, -offsetY)
+								left:SetPoint("TOPRIGHT", buttons[6], "TOPRIGHT", offsetX, offsetY)
+								left:Show()
+
+								right:Place("BOTTOMLEFT", buttons[7], "BOTTOMLEFT", -offsetX, -offsetY)
+								right:SetPoint("TOPRIGHT", buttons[12], "TOPRIGHT", offsetX, offsetY)
+								right:Show()
+							else
+								left:Hide()
+								right:Hide()
 							end
 						end,
 

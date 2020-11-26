@@ -479,8 +479,13 @@ Button.CreateWindow = function(self, level)
 
 	local window = Module:CreateConfigWindowLevel(level, self)
 	window:ClearAllPoints()
-	window:SetPoint("BOTTOM", self, "BOTTOM", 0, -layout.MenuButtonSpacing) 
-	window:SetPoint("RIGHT", self, "LEFT", -layout.MenuButtonSpacing*2, 0)
+	if (Module:GetConfigWindow().reverseOrder) then
+		window:SetPoint("TOP", self, "TOP", 0, layout.MenuButtonSpacing) 
+		window:SetPoint("RIGHT", self, "LEFT", -layout.MenuButtonSpacing*2, 0)
+	else
+		window:SetPoint("BOTTOM", self, "BOTTOM", 0, -layout.MenuButtonSpacing) 
+		window:SetPoint("RIGHT", self, "LEFT", -layout.MenuButtonSpacing*2, 0)
+	end
 
 	if layout.MenuWindow_CreateBorder then 
 		window.Border = layout.MenuWindow_CreateBorder(window)
@@ -563,7 +568,12 @@ Window.AddButton = function(self, text, updateType, optionDB, optionProfile, opt
 	local option = setmetatable(self:CreateFrame("CheckButton", ADDON.."_ConfigMenu_OptionsButton"..NUM_BUTTONS, "SecureHandlerClickTemplate"), Button_MT)
 	option:SetSize(layout.MenuButtonSize[1]*layout.MenuButtonSizeMod, layout.MenuButtonSize[2]*layout.MenuButtonSizeMod)
 	option:ClearAllPoints()
-	option:SetPoint("BOTTOMRIGHT", -layout.MenuButtonSpacing, layout.MenuButtonSpacing + (layout.MenuButtonSize[2]*layout.MenuButtonSizeMod + layout.MenuButtonSpacing)*(self.numButtons))
+
+	if (Module:GetConfigWindow().reverseOrder) then
+		option:SetPoint("TOPRIGHT", -layout.MenuButtonSpacing, -(layout.MenuButtonSpacing + (layout.MenuButtonSize[2]*layout.MenuButtonSizeMod + layout.MenuButtonSpacing)*(self.numButtons)))
+	else
+		option:SetPoint("BOTTOMRIGHT", -layout.MenuButtonSpacing, layout.MenuButtonSpacing + (layout.MenuButtonSize[2]*layout.MenuButtonSizeMod + layout.MenuButtonSpacing)*(self.numButtons))
+	end 
 
 	option:HookScript("OnEnable", Button.OnEnable)
 	option:HookScript("OnDisable", Button.OnDisable)
@@ -860,6 +870,7 @@ Module.GetConfigWindow = function(self)
 		window:SetScript("OnShow", ConfigWindow_OnShow)
 		window:SetScript("OnHide", ConfigWindow_OnHide)
 		window.layout = self.layout
+		window.reverseOrder = (window:GetPoint()):find("TOP")
 
 		if (layout.MenuWindow_CreateBorder) then 
 			window.Border = layout.MenuWindow_CreateBorder(window)

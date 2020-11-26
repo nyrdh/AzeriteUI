@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 41)
+local LibFader = Wheel:Set("LibFader", 43)
 if (not LibFader) then	
 	return
 end
@@ -283,7 +283,7 @@ LibFader.SetObjectAlpha = function(self, object, alpha)
 end 
 
 LibFader.CheckMouse = function(self)
-	if (SpellFlyout and SpellFlyout:IsShown()) then 
+	if (SpellFlyout and SpellFlyout:IsVisible()) then 
 		Data.mouseOver = true 
 		return true
 	end 
@@ -291,12 +291,12 @@ LibFader.CheckMouse = function(self)
 		if (object and not object.ignoreMouse) then
 			if (object.GetExplorerHitRects) then 
 				local top, bottom, left, right = object:GetExplorerHitRects()
-				if (object:IsMouseOver(top, bottom, left, right) and object:IsShown()) then 
+				if (object:IsMouseOver(top, bottom, left, right) and object:IsVisible()) then 
 					Data.mouseOver = true 
 					return true
 				end 
 			else 
-				if (object:IsMouseOver() and object:IsShown()) then 
+				if (object:IsMouseOver() and object:IsVisible()) then 
 					Data.mouseOver = true 
 					return true
 				end 
