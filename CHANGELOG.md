@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.1.431] 2020-11-29
+## [3.1.431-RC] 2020-11-29
 ### Added
 - Added the class power element to the legacy theme. Work in progress.
 - Added party frames to the legacy theme. Work in progress.
@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Explorer mode should work much better with legacy theme side action bars now.
+- A fuck-load of rewriting done to the aura section. Might be new and exiciting bugs now.
 
 ## [3.1.430-RC] 2020-11-25
 ### Fixed
