@@ -828,35 +828,6 @@ local Tooltip_PostCreate = function(tooltip)
 	tooltip.PostUpdateStatusBar = Tooltip_StatusBar_PostUpdate
 end
 
--- Custom aura sorting for the player frame.
-local PlayerFrame_AuraSortFunction = function(a,b)
-	if (a) and (b) and (a.id) and (b.id) then
-		if (a.expirationTime == b.expirationTime) then
-			if (a.name) and (b.name) then
-				return (a.name > b.name)
-			end
-		else
-			return (a.expirationTime > b.expirationTime)
-		end
-	end
-end
-
--- Custom aura sorting for the target frame.
-local TargetFrame_AuraSortFunction = function(a,b)
-	if (a) and (b) and (a.id) and (b.id) then
-		if (a.isCastByPlayer == b.isCastByPlayer) then
-			if (a.expirationTime == b.expirationTime) then
-				if (a.name) and (b.name) then
-					return (a.name > b.name)
-				end
-			else
-				return (a.expirationTime > b.expirationTime)
-			end
-		else
-			return a.isCastByPlayer
-		end 
-	end
-end
 
 local PlayerFrame_CastBarPostUpdate = function(element, unit)
 	local self = element._owner
@@ -1865,16 +1836,8 @@ local Template_SmallFrame_Auras = setmetatable({
 		auraWidth = nil, 
 		debuffsFirst = false, 
 		disableMouse = false, 
-		filter = nil, 
-		filterBuffs = "HELPFUL", 
-		filterDebuffs = "HARMFUL", 
-		func = nil, 
-		funcBuffs = nil, 
-		funcDebuffs = nil, 
 		growthX = "RIGHT", 
 		growthY = "UP", 
-		maxBuffs = nil, 
-		maxDebuffs = nil, 
 		maxVisible = 6, 
 		showDurations = true, 
 		showSpirals = false, 
@@ -1909,16 +1872,9 @@ local Template_SmallFrameReversed_Auras = setmetatable({
 		auraWidth = nil, 
 		debuffsFirst = false, 
 		disableMouse = false, 
-		filter = nil, 
-		filterBuffs = "HELPFUL", 
-		filterDebuffs = "HARMFUL", 
-		func = GetAuraFilterFunc(), 
-		funcBuffs = nil, 
-		funcDebuffs = nil, 
+		customFilter = GetAuraFilterFunc(), 
 		growthX = "LEFT", 
 		growthY = "DOWN", 
-		maxBuffs = nil, 
-		maxDebuffs = nil, 
 		maxVisible = 6, 
 		showDurations = true, 
 		showSpirals = false, 
@@ -2932,12 +2888,10 @@ Azerite.NamePlates = {
 		growthY = "UP", 
 		spacingH = 4, 
 		spacingV = 4, 
-		auraSize = 30, auraWidth = nil, auraHeight = nil,
-		maxVisible = 6, maxBuffs = nil, maxDebuffs = nil,
-		filter = nil, filterBuffs = "PLAYER HELPFUL", filterDebuffs = "PLAYER HARMFUL",
-		func = nil,
-		funcBuffs = GetAuraFilterFunc("nameplate"),
-		funcDebuffs = GetAuraFilterFunc("nameplate"),
+		auraSize = 30, 
+		maxVisible = 6, 
+		filter = "PLAYER", 
+		customFilter = GetAuraFilterFunc("nameplate"),
 		debuffsFirst = true, 
 		disableMouse = true, 
 		showSpirals = false, 
@@ -3220,15 +3174,10 @@ Azerite.UnitFramePlayer = {
 		auraHeight = nil, 
 		auraSize = 40, 
 		auraWidth = nil, 
-		customSort = PlayerFrame_AuraSortFunction,
+		customSort = false,
 		debuffsFirst = true, 
 		disableMouse = false, 
-		filter = nil, 
-		filterBuffs = "HELPFUL", 
-		filterDebuffs = "HARMFUL", 
-		func = nil, 
-		funcBuffs = GetAuraFilterFunc("player"),
-		funcDebuffs = GetAuraFilterFunc("player"),
+		customFilter = GetAuraFilterFunc("player"),
 		growthX = "RIGHT", 
 		growthY = "UP", 
 		maxBuffs = nil, 
@@ -3657,15 +3606,10 @@ Azerite.UnitFrameTarget = {
 		auraHeight = nil, 
 		auraSize = 40, 
 		auraWidth = nil, 
-		customSort = TargetFrame_AuraSortFunction,
+		customSort = false,
 		debuffsFirst = true, 
 		disableMouse = false, 
-		filter = nil, 
-		filterBuffs = "HELPFUL", 
-		filterDebuffs = "HARMFUL", 
-		func = nil, 
-		funcBuffs = GetAuraFilterFunc("target"),
-		funcDebuffs = GetAuraFilterFunc("target"),
+		customFilter = GetAuraFilterFunc("target"),
 		growthX = "LEFT", 
 		growthY = "DOWN", 
 		maxBuffs = nil, 
@@ -4185,12 +4129,10 @@ Azerite.UnitFrameParty = setmetatable({
 		growthY = "DOWN", 
 		spacingH = 4, 
 		spacingV = 4, 
-		auraSize = 30, auraWidth = nil, auraHeight = nil, 
-		maxVisible = 6, maxBuffs = nil, maxDebuffs = nil, 
-		filter = nil, filterBuffs = "PLAYER HELPFUL", filterDebuffs = "PLAYER HARMFUL", 
-		func = nil, 
-		funcBuffs = GetAuraFilterFunc("party"), 
-		funcDebuffs = GetAuraFilterFunc("party"), 
+		auraSize = 30,  
+		maxVisible = 6, 
+		filter = "PLAYER",
+		customFilter = GetAuraFilterFunc("party"), 
 		debuffsFirst = false, 
 		disableMouse = false, 
 		showSpirals = false, 
@@ -4447,12 +4389,8 @@ if (IsRetail) then
 			growthY = "UP", 
 			spacingH = 4, 
 			spacingV = 4, 
-			auraSize = Constant.SmallAuraSize, auraWidth = nil, auraHeight = nil, 
-			maxVisible = nil, maxBuffs = nil, maxDebuffs = nil, 
-			filter = nil, filterBuffs = "HELPFUL", filterDebuffs = "HARMFUL", 
-			func = nil, 
-			funcBuffs = GetAuraFilterFunc("focus"), 
-			funcDebuffs = GetAuraFilterFunc("focus"), 
+			auraSize = Constant.SmallAuraSize, 
+			customFilter = GetAuraFilterFunc("focus"), 
 			debuffsFirst = false, 
 			disableMouse = false, 
 			showSpirals = false, 

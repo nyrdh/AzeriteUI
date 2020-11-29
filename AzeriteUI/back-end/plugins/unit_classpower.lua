@@ -19,6 +19,7 @@ local HasTempShapeshiftActionBar = HasTempShapeshiftActionBar
 local IsPlayerSpell = IsPlayerSpell
 local IsPossessBarVisible = IsPossessBarVisible
 local UnitAffectingCombat = UnitAffectingCombat
+local UnitAura = UnitAura
 local UnitCanAttack = UnitCanAttack
 local UnitClass = UnitClass
 local UnitHasVehiclePlayerFrameUI = UnitHasVehiclePlayerFrameUI

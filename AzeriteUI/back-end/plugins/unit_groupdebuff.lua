@@ -400,7 +400,7 @@ local Enable = function(self)
 			element:SetScript("OnLeave", Aura_OnLeave)
 		end
 
-		self:RegisterMessage("GP_UNIT_AURA", Proxy)
+		self:RegisterUnitEvent("UNIT_AURA", Proxy)
 		self:RegisterEvent("PLAYER_LEVEL_UP", Proxy, true)
 
 		return true
@@ -410,7 +410,7 @@ end
 local Disable = function(self)
 	local element = self.GroupAura
 	if (element) then
-		self:UnregisterMessage("GP_UNIT_AURA", Proxy)
+		self:UnregisterEvent("UNIT_AURA", Proxy)
 		self:UnregisterEvent("PLAYER_LEVEL_UP", Proxy)
 		element:Hide()
 		element:SetScript("OnUpdate", nil)
@@ -419,5 +419,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 18)
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 19)
 end 

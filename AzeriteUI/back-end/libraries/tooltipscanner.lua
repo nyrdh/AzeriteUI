@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 63)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 64)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -47,10 +47,13 @@ local GetSpellInfo = GetSpellInfo
 local GetTrackingTexture = GetTrackingTexture
 local HasAction = HasAction
 local IsActionInRange = IsActionInRange
+local UnitAura = UnitAura
+local UnitBuff = UnitBuff
 local UnitClass = UnitClass 
 local UnitClassification = UnitClassification
 local UnitCreatureFamily = UnitCreatureFamily
 local UnitCreatureType = UnitCreatureType
+local UnitDebuff = UnitDebuff
 local UnitExists = UnitExists
 local UnitEffectiveLevel = UnitEffectiveLevel or UnitLevel -- yeah...
 local UnitFactionGroup = UnitFactionGroup

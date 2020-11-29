@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 43)
+local LibFader = Wheel:Set("LibFader", 44)
 if (not LibFader) then	
 	return
 end
@@ -545,11 +545,8 @@ LibFader.OnEvent = function(self, event, ...)
 	elseif (event == "UNIT_HEALTH_FREQUENT") or (event == "UNIT_HEALTH") then 
 		self:CheckHealth()
 
-	elseif (event == "GP_UNIT_AURA") then 
-		local unit = ...
-		if (unit == "player") then
-			self:CheckAuras()
-		end
+	elseif (event == "UNIT_AURA") then 
+		self:CheckAuras()
 
 	elseif (event == "ZONE_CHANGED_NEW_AREA") then 
 		self:CheckInstance()
@@ -747,7 +744,7 @@ LibFader:RegisterEvent("GROUP_ROSTER_UPDATE", "OnEvent")
 LibFader:RegisterUnitEvent("UNIT_HEALTH", "OnEvent", "player") 
 LibFader:RegisterUnitEvent("UNIT_POWER_FREQUENT", "OnEvent", "player") 
 LibFader:RegisterUnitEvent("UNIT_DISPLAYPOWER", "OnEvent", "player") 
-LibFader:RegisterMessage("GP_UNIT_AURA", "OnEvent")
+LibFader:RegisterUnitEvent("UNIT_AURA", "OnEvent", "player", "vehicle")
 
 if (IsRetail) then
 	LibFader:RegisterEvent("PLAYER_FOCUS_CHANGED", "OnEvent") 

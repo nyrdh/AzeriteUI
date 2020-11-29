@@ -453,7 +453,7 @@ Core.ApplyExperimentalFeatures = function(self)
 					isTracking = nil
 
 					-- Stop tracking
-					self:UnregisterMessage("GP_UNIT_AURA", onTrackingEvent, true)
+					self:UnregisterEvent("UNIT_AURA", onTrackingEvent)
 
 					-- Debug output the stop reason
 					if (inInstance) then
@@ -480,7 +480,7 @@ Core.ApplyExperimentalFeatures = function(self)
 					isTracking = true
 
 					-- Start tracking
-					self:RegisterMessage("GP_UNIT_AURA", onTrackingEvent)
+					self:RegisterUnitEvent("UNIT_AURA", onTrackingEvent, "player")
 
 					-- Debug output the stop reason
 					if (stopReason == "instance") then
@@ -513,10 +513,10 @@ Core.ApplyExperimentalFeatures = function(self)
 
 				-- Kill it all off in instances
 				if (inInstance) then
-					self:UnregisterEvent("GROUP_ROSTER_UPDATE", onTrackingEvent, true)
-					self:UnregisterEvent("PLAYER_REGEN_DISABLED", onTrackingEvent, true)
-					self:UnregisterEvent("PLAYER_REGEN_ENABLED", onTrackingEvent, true)
-					self:UnregisterMessage("GP_UNIT_AURA", onTrackingEvent, true)
+					self:UnregisterEvent("GROUP_ROSTER_UPDATE", onTrackingEvent)
+					self:UnregisterEvent("PLAYER_REGEN_DISABLED", onTrackingEvent)
+					self:UnregisterEvent("PLAYER_REGEN_ENABLED", onTrackingEvent)
+					self:UnregisterEvent("UNIT_AURA", onTrackingEvent)
 				else
 					-- Always want these on out in the world
 					self:RegisterEvent("GROUP_ROSTER_UPDATE", onTrackingEvent)
@@ -551,12 +551,7 @@ Core.ApplyExperimentalFeatures = function(self)
 				-- Start tracking auras?
 				updateTrackingEvent()
 
-			elseif (event == "GP_UNIT_AURA") then
-				local unit = ...
-				if (unit ~= "player") then
-					return
-				end
-
+			elseif (event == "UNIT_AURA") then
 				-- Check for active games.
 				-- This should never happen if we're grouped or in combat,
 				-- but better safe and sorry, so we check the flags here too.

@@ -220,7 +220,7 @@ local checkWarningConditionals = function(...)
 
 	if (UserFlags[spellID]) then
 		if (HasUserFlags(spellID, Warn)) then
-			if (checkTimeAndStackbasedConditionals(spellID, unit, count, duration, expirationTime, isBuff)) then
+			if (checkTimeAndStackbasedConditionals(...)) then
 				return true
 			end
 		end

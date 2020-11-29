@@ -37,36 +37,6 @@ local HasSchematic = Private.HasSchematic
 
 -- Utility Functions
 -----------------------------------------------------------
--- Sort method used to display auras
--- on the primary player- and target unitframes.
-local Aura_SortPrimary = function(a,b)
-	if (a) and (b) and (a.id) and (b.id) then
-		-- If one of the auras are static
-		if (a.duration == 0) or (b.duration == 0) then
-			-- If both are static, sort by name
-			if (a.duration == b.duration) then
-				if (a.name) and (b.name) then
-					return (a.name > b.name)
-				end
-			else
-				-- Put the static one last
-				return (b.duration == 0)
-			end
-		else
-			-- If both expire at the same time
-			if (a.expirationTime == b.expirationTime) then
-				-- Sort by name
-				if (a.name) and (b.name) then
-					return (a.name > b.name)
-				end
-			else
-				-- Sort by remaining time, first expiring first.
-				return (a.expirationTime < b.expirationTime) 
-			end
-		end
-	end
-end
-
 -- General aura button post creating forge
 local Aura_PostCreate = function(element, button)
 	if (element._owner:Forge(button, GetSchematic("WidgetForge::AuraButton::Large"))) then
@@ -203,6 +173,20 @@ Private.RegisterSchematic("ModuleForge::UnitFrames", "Legacy", {
 						-- should ever be included in this. 
 						"GetExplorerModeFrameAnchors", function(self)
 							return unpack(self.ExplorerModeFrameAnchors)
+						end,
+
+						"OnEvent", function(self, event, ...)
+							if (event == "GP_AURA_FILTER_MODE_CHANGED") then 
+								for frame,unit in pairs(self.Frames) do
+									local auras = frame.Auras
+									if (auras) then
+										local filterMode = ...
+										auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
+										auras.enableSpamMode = filterMode == "spam"
+										auras:ForceUpdate()
+									end
+								end
+							end
 						end
 					},
 					-- The 'chain' sections performs methods on the module,
@@ -230,6 +214,7 @@ Private.RegisterSchematic("ModuleForge::UnitFrames", "Legacy", {
 					-- Here we can call methods created in previously defined
 					-- 'values' sections.
 					chain = {
+						"RegisterMessage", { "GP_AURA_FILTER_MODE_CHANGED", "OnEvent" }
 					}
 				}
 			}
@@ -526,15 +511,10 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"auraSize", 40, 
 					"auraWidth", false, 
 					"auraHeight", false,
-					"customSort", Aura_SortPrimary,
+					"customSort", false,
 					"debuffsFirst", false, 
 					"disableMouse", false, 
-					"filter", false, 
-					"filterBuffs", false, 
-					"filterDebuffs", false, 
-					"func", GetAuraFilter("legacy"), 
-					"funcBuffs", false,
-					"funcDebuffs", false,
+					"customFilter", GetAuraFilter("legacy"), 
 					"growthX", "LEFT", 
 					"growthY", "UP", 
 					"maxBuffs", false, 
@@ -568,15 +548,11 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"auraSize", 32, 
 					"auraWidth", false, 
 					"auraHeight", false,
-					"customSort", Aura_SortPrimary,
+					"customSort", false,
 					"debuffsFirst", false, 
 					"disableMouse", false, 
 					"filter", false, 
-					"filterBuffs", false, 
-					"filterDebuffs", false, 
-					"func", GetAuraFilter("legacy-secondary"), 
-					"funcBuffs", false,
-					"funcDebuffs", false,
+					"customFilter", GetAuraFilter("legacy-secondary"), 
 					"growthX", "LEFT", 
 					"growthY", "DOWN", 
 					"maxBuffs", false, 
@@ -881,15 +857,11 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"auraSize", 40, 
 					"auraWidth", false, 
 					"auraHeight", false,
-					"customSort", Aura_SortPrimary,
+					"customSort", false,
 					"debuffsFirst", false, 
 					"disableMouse", false, 
 					"filter", false, 
-					"filterBuffs", false, 
-					"filterDebuffs", false, 
-					"func", GetAuraFilter("legacy"), 
-					"funcBuffs", false,
-					"funcDebuffs", false,
+					"customFilter", GetAuraFilter("legacy"), 
 					"growthX", "RIGHT", 
 					"growthY", "UP", 
 					"maxBuffs", false, 
@@ -922,15 +894,11 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"auraSize", 32, 
 					"auraWidth", false, 
 					"auraHeight", false,
-					"customSort", Aura_SortPrimary,
+					"customSort", false,
 					"debuffsFirst", false, 
 					"disableMouse", false, 
 					"filter", false, 
-					"filterBuffs", false, 
-					"filterDebuffs", false, 
-					"func", GetAuraFilter("legacy-secondary"), 
-					"funcBuffs", false,
-					"funcDebuffs", false,
+					"customFilter", GetAuraFilter("legacy-secondary"), 
 					"growthX", "RIGHT", 
 					"growthY", "DOWN", 
 					"maxBuffs", false, 
@@ -963,15 +931,11 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"auraSize", 32, 
 					"auraWidth", false, 
 					"auraHeight", false,
-					"customSort", Aura_SortPrimary,
+					"customSort", false,
 					"debuffsFirst", false, 
 					"disableMouse", false, 
 					"filter", false, 
-					"filterBuffs", false, 
-					"filterDebuffs", false, 
-					"func", GetAuraFilter("legacy-secondary"), 
-					"funcBuffs", false,
-					"funcDebuffs", false,
+					"customFilter", GetAuraFilter("legacy-secondary"), 
 					"growthX", "RIGHT", 
 					"growthY", "DOWN", 
 					"maxBuffs", false, 
@@ -2248,15 +2212,11 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 					"auraSize", 28, 
 					"auraWidth", false, 
 					"auraHeight", false,
-					"customSort", Aura_SortPrimary,
+					"customSort", false,
 					"debuffsFirst", false, 
 					"disableMouse", false, 
-					"filter", false, 
-					"filterBuffs", "PLAYER HELPFUL", 
-					"filterDebuffs", false, 
-					"func", false, 
-					"funcBuffs", false,
-					"funcDebuffs", false,
+					"filter", "PLAYER", 
+					"customFilter", false, 
 					"growthX", "RIGHT", 
 					"growthY", "DOWN", 
 					"maxBuffs", false, 

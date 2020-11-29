@@ -1,4 +1,4 @@
-local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 7)
+local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 8)
 if (not LibSpellHighlight) then
 	return
 end
@@ -293,9 +293,6 @@ local comboPointsAreMaxed
 -- Druid, Warlock
 LibSpellHighlight.UpdateAuras = function(self, event, ...)
 	local unit = ...
-	if (event == "GP_UNIT_AURA") and (unit ~= "player") then
-		return
-	end
 
 	-- This is a local temporary list of highlights,
 	-- which we need to reset on every iteration.
@@ -611,7 +608,7 @@ LibSpellHighlight.UpdateClassicEvents = function(self, event, ...)
 
 	if (playerClass == "DRUID") then
 		-- Track clear casting aura for expensive spell highlight.
-		self:RegisterMessage("GP_UNIT_AURA", "UpdateAuras")
+		self:RegisterUnitEvent("UNIT_AURA", "UpdateAuras", "player")
 
 		-- Track combo points for finisher highlight.
 		self:RegisterEvent("PLAYER_TARGET_CHANGED", "UpdateComboPoints")
@@ -666,7 +663,7 @@ LibSpellHighlight.UpdateClassicEvents = function(self, event, ...)
 	elseif (playerClass == "WARLOCK") then
 		if (PlayerSpellCache[L.Spell_Nightfall]) then
 			-- Track Shadow Trance for Shadow Bolt highlighting.
-			self:RegisterMessage("GP_UNIT_AURA", "UpdateAuras")
+			self:RegisterUnitEvent("UNIT_AURA", "UpdateAuras", "player")
 
 			-- Initial update of highlights.
 			self:UpdateAuras()
