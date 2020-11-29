@@ -262,13 +262,6 @@ local Update = function(self, event, unit, ...)
 	-- Once for each filter type, as UnitAura can't list HELPFUL and HARMFUL at the same time. 
 	for filterType,allowedSchools in pairs(classFilter) do
 
-		-- Forcefully register cache the auras for the relevant filters
-		-- This is to ensure force updates actually have the right filters and fully updated caches
-		if forced then 
-			LibAura:CacheUnitBuffsByFilter(unit, filterType)
-			LibAura:CacheUnitDebuffsByFilter(unit, filterType)
-		end 
-
 		-- Iterate auras until no more exists, 
 		-- don't rely on values that will be different in Classic and Live. 
 		local auraID = 0
@@ -419,5 +412,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 19)
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 20)
 end 

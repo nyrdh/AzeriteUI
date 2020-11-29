@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.432-RC] 2020-11-29
+### Fixed
+- Removed redundant function call in the group debuff element.
+
 ## [3.1.431-RC] 2020-11-29
 ### Added
 - Added the class power element to the legacy theme. Work in progress.
