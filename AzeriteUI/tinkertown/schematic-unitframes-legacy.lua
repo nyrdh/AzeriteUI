@@ -1122,6 +1122,8 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					-- We need to call this once on element creation, 
 					-- to force-trigger our pill spawning method before 
 					-- the back-end can start its own updates.
+					-- Will be chaos and unupdated points if not!
+					"PostCreate", {}
 					--"PostUpdate", {}
 				},
 				values = {
@@ -1137,8 +1139,48 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"runeSortOrder", "ASC",	-- Sort order of the runes.
 					"flipSide", false, -- Holds no meaning in current theme.
 
+					"PostCreate", function(element)
+						for i = 1,6 do
+							local pill = element:CreateStatusBar()
+							pill:SetMinMaxValues(0,1,true)
+							pill:SetValue(0,true)
+							pill:SetStatusBarTexture(GetMedia("statusbar-power"))
+							pill:SetStatusBarColor(70/255, 255/255, 131/255, 1) -- back-end overwrites this
+		
+							local bg = element:CreateFrame("Frame")
+							bg:SetAllPoints()
+							bg:SetFrameLevel(pill:GetFrameLevel()-2)
+
+							-- Empty slot texture
+							local bgTexture = bg:CreateTexture()
+							bgTexture:SetDrawLayer("BACKGROUND", 1)
+							bgTexture:SetTexture(GetMedia("statusbar-power")) -- dark
+							bgTexture:SetVertexColor( .1, .1, .1, 1)
+							bgTexture:SetAllPoints(pill)
+							pill.bg = bgTexture
+
+							--local fg = element:CreateFrame("Frame")
+							--fg:SetAllPoints()
+							--fg:SetFrameLevel(pill:GetFrameLevel()+2)
+
+							-- Overlay glow
+							--local fgTexture = fg:CreateTexture()
+							--fgTexture:SetDrawLayer("BACKGROUND", 1)
+							--fgTexture:SetTexture(GetMedia("statusbar-normal-overlay"))
+							--fgTexture:SetVertexColor(1, 1, 1, 1)
+							--fgTexture:SetAllPoints(pill)
+							--pill.Fg = fgTexture
+
+							element[i] = pill
+						end
+					end,
+
 					-- Called by the back-end on updates
 					"PostUpdate", function(element, unit, min, max, newMax, powerType)
+						if (not min) or (not max) or (not powerType) then
+							element:Hide()
+							return
+						end
 
 						-- Figure out the number of pills to divide the bar into.
 						-- Anything not having an exception here will default to 5.
@@ -1154,45 +1196,6 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 						-- Align and toggle pills on count changes.
 						-- This will also fire off the first time we call this method.
 						if (currentPillCount ~= element.currentPillCount) then 
-
-							-- Spawn and style missing pills on-the-fly
-							local numPills = #element
-							if (numPills < currentPillCount) then
-								for i = numPills + 1, currentPillCount do
-									local pill = element:CreateStatusBar()
-									pill:SetMinMaxValues(0,1,true)
-									pill:SetValue(0,true)
-									pill:SetStatusBarTexture(GetMedia("statusbar-power"))
-									pill:SetStatusBarColor(70/255, 255/255, 131/255, 1) -- back-end overwrites this
-				
-									local bg = element:CreateFrame("Frame")
-									bg:SetAllPoints()
-									bg:SetFrameLevel(pill:GetFrameLevel()-2)
-
-									-- Empty slot texture
-									local bgTexture = bg:CreateTexture()
-									bgTexture:SetDrawLayer("BACKGROUND", 1)
-									bgTexture:SetTexture(GetMedia("statusbar-power")) -- dark
-									bgTexture:SetVertexColor( .1, .1, .1, 1)
-									bgTexture:SetAllPoints(pill)
-									pill.bg = bgTexture
-
-									--local fg = element:CreateFrame("Frame")
-									--fg:SetAllPoints()
-									--fg:SetFrameLevel(pill:GetFrameLevel()+2)
-
-									-- Overlay glow
-									--local fgTexture = fg:CreateTexture()
-									--fgTexture:SetDrawLayer("BACKGROUND", 1)
-									--fgTexture:SetTexture(GetMedia("statusbar-normal-overlay"))
-									--fgTexture:SetVertexColor(1, 1, 1, 1)
-									--fgTexture:SetAllPoints(pill)
-									--pill.Fg = fgTexture
-			
-
-									element[i] = pill
-								end
-							end
 
 							-- Figure out pill sizes
 							local elementWidth,elementHeight = element:GetSize()
@@ -1215,12 +1218,6 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 
 								end
 							end
-
-							-- Hide superflous pills
-							-- *Doesn't the back-end do this?
-							--for i = currentPillCount + 1, #element do
-							--	element[i]:Hide()
-							--end
 
 							-- Store the currently displayed pill count
 							element.currentPillCount = currentPillCount
