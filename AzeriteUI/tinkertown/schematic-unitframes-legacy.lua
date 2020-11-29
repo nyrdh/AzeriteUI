@@ -12,6 +12,9 @@ assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded
 local LibTime = Wheel("LibTime")
 assert(LibTime, "UnitFrames requires LibTime to be loaded.")
 
+-- WoW API
+local UnitPowerMax = UnitPowerMax
+
 -- WoW client version constants
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
@@ -19,6 +22,10 @@ local IsRetail = LibClientBuild:IsRetail()
 -- Constants for calendar events
 local IsWinterVeil = LibTime:IsWinterVeil()
 local IsLoveFestival = LibTime:IsLoveFestival()
+
+-- Power type constants
+-- Sourced from BlizzardInterfaceCode/AddOns/Blizzard_APIDocumentation/UnitDocumentation.lua
+local SPELL_POWER_CHI = Enum.PowerType.Chi or 12
 
 -- Private API
 local Colors = Private.Colors
@@ -590,7 +597,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"PostUpdateButton", Aura_PostUpdate
 				}
 			}
-
+			
 		}
 	}
 })
@@ -1050,7 +1057,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetFrameLevelOffset", 4,
 					"SetPosition", { "TOPLEFT", 0, 0 }, -- relative to unit frame
 					"SetSize", { 224, 26 }, -- 18
 					"SetStatusBarTexture", GetMedia("statusbar-power"),
@@ -1135,7 +1142,149 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"SetStatusBarColor", { 1, 1, 1, .5 },
 					"DisableSmoothing", true
 				}
+			}
+
+			,
+
+			-- Class Power
+			{
+				parent = "self,ContentScaffold", ownerKey = "ClassPower", objectType = "Frame", objectSubType = "Frame",
+				chain = { 
+					"SetFrameLevelOffset", 4,
+					--"Place", { "BOTTOM", "UICenter", "BOTTOM", 0, 230 + 26+16+2 }, 
+					"Place", { "TOPLEFT", 0, 18+16+2 }, 
+					"SetSize", { 224, 18 }, 
+				
+					-- We need to call this once on element creation, 
+					-- to force-trigger our pill spawning method before 
+					-- the back-end can start its own updates.
+					--"PostUpdate", {}
+				},
+				values = {
+					"alphaEmpty", 1, -- Element alpha when no points are available.
+					"alphaNoCombat", 1, -- Element alpha multiplier when out of combat.
+					"alphaNoCombatRunes", 1, 
+					"alphaWhenHiddenRunes", 1, 
+					"hideWhenEmpty", true, -- Whether to fully hide an empty bar or not.
+					"hideWhenNoTarget", true, -- Whether to hide when no target exists.
+					"hideWhenUnattackable", true, -- Whether to hide when target can't be attacked.
+					"useAlternateColoring", true, -- Whether to use multiple point colorings when available.
+					"maxComboPoints", 5, -- Does not affect runes, they will always show 6.
+					"runeSortOrder", "ASC",	-- Sort order of the runes.
+					"flipSide", false, -- Holds no meaning in current theme.
+
+					-- Called by the back-end on updates
+					"PostUpdate", function(element, unit, min, max, newMax, powerType)
+
+						-- Figure out the number of pills to divide the bar into.
+						-- Anything not having an exception here will default to 5.
+						local currentPillCount
+						if (powerType == "RUNES") or ((powerType == "CHI") and (UnitPowerMax("player", SPELL_POWER_CHI) == 6)) then 
+							currentPillCount = 6
+						elseif (powerType == "STAGGER") then 
+							currentPillCount = 3
+						else
+							currentPillCount = 5
+						end 
+
+						-- Align and toggle pills on count changes.
+						-- This will also fire off the first time we call this method.
+						if (currentPillCount ~= element.currentPillCount) then 
+
+							-- Spawn and style missing pills on-the-fly
+							local numPills = #element
+							if (numPills < currentPillCount) then
+								for i = numPills + 1, currentPillCount do
+									local pill = element:CreateStatusBar()
+									pill:SetMinMaxValues(0,1,true)
+									pill:SetValue(0,true)
+									pill:SetStatusBarTexture(GetMedia("statusbar-power"))
+									pill:SetStatusBarColor(70/255, 255/255, 131/255, 1) -- back-end overwrites this
+				
+									local bg = element:CreateFrame("Frame")
+									bg:SetAllPoints()
+									bg:SetFrameLevel(pill:GetFrameLevel()-2)
+
+									-- Empty slot texture
+									local bgTexture = bg:CreateTexture()
+									bgTexture:SetDrawLayer("BACKGROUND", 1)
+									bgTexture:SetTexture(GetMedia("statusbar-power")) -- dark
+									bgTexture:SetVertexColor( .1, .1, .1, 1)
+									bgTexture:SetAllPoints(pill)
+									pill.bg = bgTexture
+
+									--local fg = element:CreateFrame("Frame")
+									--fg:SetAllPoints()
+									--fg:SetFrameLevel(pill:GetFrameLevel()+2)
+
+									-- Overlay glow
+									--local fgTexture = fg:CreateTexture()
+									--fgTexture:SetDrawLayer("BACKGROUND", 1)
+									--fgTexture:SetTexture(GetMedia("statusbar-normal-overlay"))
+									--fgTexture:SetVertexColor(1, 1, 1, 1)
+									--fgTexture:SetAllPoints(pill)
+									--pill.Fg = fgTexture
+			
+
+									element[i] = pill
+								end
+							end
+
+							-- Figure out pill sizes
+							local elementWidth,elementHeight = element:GetSize()
+							local width = math.floor(elementWidth/currentPillCount)
+							local widthLast = elementWidth - width*(currentPillCount - 1)
+
+							-- Style and position the pills
+							for i = 1,currentPillCount do
+								local pill = element[i]
+								if (pill) then
+									pill:SetSize(i == currentPillCount and widthLast or width, elementHeight)
+									pill:Place("TOPLEFT", (i-1)*width, 0)
+
+									if (powerType == "RUNES") then
+										pill:DisableSmoothing(false)
+										pill:SetSmartSmoothing(true)
+									else
+										pill:DisableSmoothing(true)
+									end
+
+								end
+							end
+
+							-- Hide superflous pills
+							-- *Doesn't the back-end do this?
+							--for i = currentPillCount + 1, #element do
+							--	element[i]:Hide()
+							--end
+
+							-- Store the currently displayed pill count
+							element.currentPillCount = currentPillCount
+						end
+
+						-- Update main element alpha and visibility. 
+						-- This will override the visibility set by the back-end.
+						if ((min >= max) and (not UnitAffectingCombat("player")) and (not UnitExists("target")))
+						or ((min == 0) and (powerType ~= "RUNES")) then
+							element:Hide()
+						end
+					
+					end
+				}
 			},
+
+			-- Class Power backdrop and border
+			{
+				parent = "self,ClassPower", parentKey = "Border", objectType = "Frame", objectSubType = "Frame", objectTemplate = BackdropTemplateMixin and "BackdropTemplate",
+				chain = {
+					"SetFrameLevelOffset", 3,
+					"SetSizeOffset", 46,
+					"SetPosition", { "CENTER", 0, 0 },
+					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 32 }},
+					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 }
+				}
+
+			}
 		}
 	},
 

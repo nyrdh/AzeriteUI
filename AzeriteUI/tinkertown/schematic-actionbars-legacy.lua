@@ -939,7 +939,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 							-- 	player altpower "BOTTOM", "UICenter", "BOTTOM", 0, 340 ("CENTER", "UICenter", "CENTER", 0, -189)
 							local totemHolderFrame = self:CreateFrame("Frame", nil, "UICenter")
 							totemHolderFrame:SetSize(2,2)
-							totemHolderFrame:Place("BOTTOM", self:GetFrame("Minimap"), "TOP", 0, 60)
+							totemHolderFrame:Place("BOTTOM", self:GetFrame("Minimap"), "TOP", 0, 36)
 							--totemHolderFrame:Place("BOTTOM", "UICenter", "BOTTOM", 0, 390)
 							
 							-- Scaling it up get a more fitting size,

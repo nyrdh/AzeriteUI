@@ -4,12 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-11-26
+## [3.1.431] 2020-11-29
 ### Added
-- Added party frames to the legacy theme. Work in progress and untested.
+- Added the class power element to the legacy theme. Work in progress.
+- Added party frames to the legacy theme. Work in progress.
 
 ### Changed
 - Moved the config button up to the top right corner in legacy mode, and adjusted spawn order of all micro- and menu buttons to match.
+- Moved the totem buttons slightly downwards in the legacy mode.
 
 ### Fixed
 - Explorer mode should work much better with legacy theme side action bars now.

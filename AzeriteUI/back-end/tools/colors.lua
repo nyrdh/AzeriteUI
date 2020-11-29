@@ -245,6 +245,17 @@ Colors.power.RUNES = createColor(100/255, 155/255, 225/255) -- Death Knight
 Colors.power.SOUL_FRAGMENTS = createColor(148/255, 130/255, 201/255) -- Demon Hunter
 Colors.power.SOUL_SHARDS = createColor(148/255, 130/255, 201/255) -- Warlock 
 
+-- Coloring when modules use a different color for each point.
+-- Weirdly enough we're only using to to produce an alternate color.
+-- This will be changed later, it was just the fastest way to a goal right now.
+Colors.power.COMBO_POINTS_MULTIPLE = {
+	createColor(225/255, 65/255, 30/255), 
+	createColor(225/255, 65/255, 30/255), 
+	createColor(225/255, 65/255, 30/255), 
+	createColor(225/255, 65/255, 30/255), 
+	createColor(225/255, 65/255, 30/255) 
+}
+
 -- Alternate Power
 Colors.power.ALTERNATE = createColor(70/255, 255/255, 131/255)
 

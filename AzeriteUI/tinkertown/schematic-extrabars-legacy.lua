@@ -95,9 +95,10 @@ local StripNStyle = function(button)
 
 		-- Attempting to fix the issue with too opaque swipe textures
 		if (not cooldown.GPSwipe) then
-			cooldown:HookScript("OnShow", function() 
+			cooldown.GPSwipe = function() 
 				cooldown:SetSwipeColor(0, 0, 0, .75)
-			end)
+			end
+			cooldown:HookScript("OnShow", cooldown.GPSwipe)
 		end
 	end
 

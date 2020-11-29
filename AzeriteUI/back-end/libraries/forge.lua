@@ -1,4 +1,4 @@
-local LibForge = Wheel:Set("LibForge", 15)
+local LibForge = Wheel:Set("LibForge", 16)
 if (not LibForge) then
 	return
 end
@@ -48,7 +48,7 @@ end
 local trackParentKeys = function(object, path)
 	local target = object
 	if (path) then 
-		if (string_find(path, ",")) then
+		if (type(path) == "string") and (string_find(path, ",")) then
 			local trail = { string_split(",", path) }
 			for _,nextPath in ipairs(trail) do
 				if (nextPath == "self") then

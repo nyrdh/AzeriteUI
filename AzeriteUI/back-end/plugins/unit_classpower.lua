@@ -155,10 +155,12 @@ local Generic = setmetatable({
 
 		for i = 1, maxDisplayed do 
 			local point = element[i]
-			if (not point:IsShown()) then 
-				point:Show()
-			end 
-			point:SetValue(min >= i and 1 or 0)
+			if (point) then
+				if (not point:IsShown()) then 
+					point:Show()
+				end 
+				point:SetValue(min >= i and 1 or 0)
+			end
 		end 
 
 		for i = maxDisplayed+1, #element do 
@@ -173,6 +175,7 @@ local Generic = setmetatable({
 	UpdateColor = function(element, unit, min, max, powerType)
 		local self = element._owner
 		local color = self.colors.power[powerType] 
+		local colorMultiple = element.useAlternateColoring and self.colors.power[powerType.."_MULTIPLE"]
 		local r, g, b = color[1], color[2], color[3]
 		local maxDisplayed = element.maxDisplayed or element.max or max
 
@@ -221,43 +224,52 @@ local Generic = setmetatable({
 				overflow = min % maxDisplayed
 			end 
 			for i = 1, maxDisplayed do
-
-				-- upvalue to preserve the original colors for the next point
-				local r, g, b = r, g, b 
-
-				-- Handle overflow coloring
-				if (overflow) then
-					if (i > overflow) then
-						-- tone down "old" points
-						r, g, b = r*1/3, g*1/3, b*1/3 
-					else 
-						-- brighten the overflow points
-						r = (1-r)*1/3 + r
-						g = (1-g)*1/4 + g -- always brighten the green slightly less
-						b = (1-b)*1/3 + b
-					end 
-				end 
-
 				local point = element[i]
-				if (element.alphaNoCombat) then 
-					point:SetStatusBarColor(r, g, b)
-					if point.bg then 
-						point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+				if (point) then
+
+					-- upvalue to preserve the original colors for the next point
+					local r, g, b = r, g, b 
+					local multi = colorMultiple and colorMultiple[i]
+					if (multi) then
+						r, g, b = multi[1], multi[2], multi[3]
+					end
+
+					-- Handle overflow coloring
+					if (overflow) then
+						if (i > overflow) then
+							-- tone down "old" points
+							r, g, b = r*1/3, g*1/3, b*1/3 
+						else 
+							-- brighten the overflow points
+							r = (1-r)*1/3 + r
+							g = (1-g)*1/4 + g -- always brighten the green slightly less
+							b = (1-b)*1/3 + b
+						end 
 					end 
-					local alpha = UnitAffectingCombat("player") and 1 or element.alphaNoCombat
-					if (i > min) and (element.alphaEmpty) then
-						point:SetAlpha(element.alphaEmpty * alpha)
+
+					if (element.alphaNoCombat) then 
+						point:SetStatusBarColor(r, g, b)
+						if (point.bg) then 
+							point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+						end 
+						local alpha = UnitAffectingCombat("player") and 1 or element.alphaNoCombat
+						if (i > min) and (element.alphaEmpty) then
+							point:SetAlpha(element.alphaEmpty * alpha)
+						else 
+							point:SetAlpha(alpha)
+						end 
 					else 
-						point:SetAlpha(alpha)
+						point:SetStatusBarColor(r, g, b, 1)
+						if (point.bg) then 
+							point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+						end 
+						if (element.alphaEmpty) then 
+							point:SetAlpha(min > i and element.alphaEmpty or 1)
+						else 
+							point:SetAlpha(1)
+						end 
 					end 
-				else 
-					point:SetStatusBarColor(r, g, b, 1)
-					if (element.alphaEmpty) then 
-						point:SetAlpha(min > i and element.alphaEmpty or 1)
-					else 
-						point:SetAlpha(1)
-					end 
-				end 
+				end
 			end
 		end 
 	end
@@ -337,17 +349,18 @@ ClassPower.ComboPoints = setmetatable({
 
 		for i = 1, maxDisplayed do 
 			local point = element[i]
-			if not point:IsShown() then 
-				point:Show()
-			end 
-
-			local value = min >= i and 1 or 0
-			point:SetValue(value)
+			if (point) then
+				if (not point:IsShown()) then 
+					point:Show()
+				end 
+				local value = min >= i and 1 or 0
+				point:SetValue(value)
+			end
 		end 
 
 		for i = maxDisplayed+1, #element do 
 			element[i]:SetValue(0)
-			if element[i]:IsShown() then 
+			if (element[i]:IsShown()) then 
 				element[i]:Hide()
 			end 
 		end 
@@ -535,18 +548,22 @@ if (IsRetail) then
 			-- Make sure the runes are shown
 			for i = 1, maxDisplayed do 
 				local rune = element[i]
-				if not rune:IsShown() then 
-					rune:Show()
-				end 
+				if (rune) then
+					if (not rune:IsShown()) then 
+						rune:Show()
+					end 
+				end
 			end 
 
 			-- Hide additional points in the classpower element, if any
 			for i = maxDisplayed + 1, #element do 
 				local rune = element[i]
-				rune:SetValue(0)
-				if rune:IsShown() then 
-					rune:Hide()
-				end 
+				if (rune) then
+					rune:SetValue(0)
+					if (rune:IsShown()) then 
+						rune:Hide()
+					end 
+				end
 			end 
 
 			return min, max, element.powerType
@@ -570,11 +587,13 @@ if (IsRetail) then
 				local fullAlpha = 1
 				for i = 1, maxDisplayed do
 					local point = element[i]
-					point:SetStatusBarColor(r, g, b)
-					point:SetAlpha(i > min and chargingAlpha or fullAlpha)
-					if point.bg then 
-						point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
-					end 
+					if (point) then
+						point:SetStatusBarColor(r, g, b)
+						point:SetAlpha(i > min and chargingAlpha or fullAlpha)
+						if (point.bg) then 
+							point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+						end 
+					end
 				end
 
 			-- All are toned down, charging/empty ones even more
@@ -583,10 +602,10 @@ if (IsRetail) then
 				local fullAlpha = element.alphaNoCombatRunes or element.alphaNoCombat or .5
 				for i = 1, maxDisplayed do
 					local point = element[i]
-					if point then 
+					if (point) then 
 						point:SetStatusBarColor(r, g, b)
 						point:SetAlpha(i > min and chargingAlpha or fullAlpha)
-						if point.bg then 
+						if (point.bg) then 
 							point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
 						end 
 					end
@@ -596,9 +615,12 @@ if (IsRetail) then
 			else
 				for i = 1, maxDisplayed do
 					local point = element[i]
-					if point then
+					if (point) then
 						point:SetStatusBarColor(r, g, b)
 						point:SetAlpha(element.alphaWhenHiddenRunes or 0)
+						if (point.bg) then 
+							point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+						end 
 					end 
 				end 
 			end
@@ -648,15 +670,17 @@ if (IsRetail) then
 			local maxDisplayed = element.maxDisplayed or element.max or max
 			for i = 1, maxDisplayed do 
 				local point = element[i]
-				if (not point:IsShown()) then 
-					point:Show()
-				end 
-				point:SetValue(min >= i and 1 or 0)
+				if (point) then
+					if (not point:IsShown()) then 
+						point:Show()
+					end 
+					point:SetValue(min >= i and 1 or 0)
+				end
 			end 
 
 			for i = maxDisplayed + 1, #element do 
 				element[i]:SetValue(0)
-				if element[i]:IsShown() then 
+				if (element[i]:IsShown()) then 
 					element[i]:Hide()
 				end 
 			end 
@@ -711,16 +735,18 @@ if (IsRetail) then
 			
 			for i = 1, maxDisplayed do 
 				local point = element[i]
-				if not point:IsShown() then 
-					point:Show()
-				end 
-				local value = (i > numActive) and 0 or (min - i + 1)
-				point:SetValue(value)
+				if (point) then
+					if (not point:IsShown()) then 
+						point:Show()
+					end 
+					local value = (i > numActive) and 0 or (min - i + 1)
+					point:SetValue(value)
+				end
 			end 
 
 			for i = maxDisplayed+1, #element do 
 				element[i]:SetValue(0)
-				if element[i]:IsShown() then 
+				if (element[i]:IsShown()) then 
 					element[i]:Hide()
 				end 
 			end 
@@ -775,15 +801,17 @@ if (IsRetail) then
 
 			for i = 1, maxDisplayed do 
 				local point = element[i]
-				if not point:IsShown() then 
-					point:Show()
-				end 
-				point:SetValue(numPoints >= i and 1 or 0)
+				if (point) then
+					if (not point:IsShown()) then 
+						point:Show()
+					end 
+					point:SetValue(numPoints >= i and 1 or 0)
+				end
 			end 
 
 			for i = maxDisplayed + 1, #element do 
 				element[i]:SetValue(0)
-				if element[i]:IsShown() then 
+				if (element[i]:IsShown()) then 
 					element[i]:Hide()
 				end 
 			end 		
@@ -820,7 +848,7 @@ if (IsRetail) then
 			or (element.hideWhenEmpty and (min == 0)) then 
 				for i = 1, maxDisplayed do
 					local point = element[i]
-					if point then
+					if (point) then
 						point:SetAlpha(0)
 					end 
 				end 
@@ -831,45 +859,47 @@ if (IsRetail) then
 				-- the Rogue Anticipation talent without 
 				-- the need for the module to write extra code. 
 				local overflow
-				if min > maxDisplayed then 
+				if (min > maxDisplayed) then 
 					overflow = min % maxDisplayed
 				end 
 				for i = 1, maxDisplayed do
-
-					-- upvalue to preserve the original colors for the next point
-					local r, g, b = r, g, b 
-
-					-- Handle overflow coloring
-					if overflow then
-						if (i > overflow) then
-							-- tone down "old" points
-							r, g, b = r*1/3, g*1/3, b*1/3 
-						else 
-							-- brighten the overflow points
-							r = (1-r)*1/3 + r
-							g = (1-g)*1/4 + g -- always brighten the green slightly less
-							b = (1-b)*1/3 + b
-						end 
-					end 
-
 					local point = element[i]
-					if element.alphaNoCombat then 
-						point:SetStatusBarColor(r, g, b)
-						if point.bg then 
-							point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+					if (point) then
+
+						-- upvalue to preserve the original colors for the next point
+						local r, g, b = r, g, b 
+
+						-- Handle overflow coloring
+						if (overflow) then
+							if (i > overflow) then
+								-- tone down "old" points
+								r, g, b = r*1/3, g*1/3, b*1/3 
+							else 
+								-- brighten the overflow points
+								r = (1-r)*1/3 + r
+								g = (1-g)*1/4 + g -- always brighten the green slightly less
+								b = (1-b)*1/3 + b
+							end 
 						end 
-						local alpha = UnitAffectingCombat(unit) and 1 or element.alphaNoCombat
-						if (i > min) and (element.alphaEmpty) then
-							point:SetAlpha(element.alphaEmpty * alpha)
+
+						if (element.alphaNoCombat) then 
+							point:SetStatusBarColor(r, g, b)
+							if (point.bg) then 
+								point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+							end 
+							local alpha = UnitAffectingCombat(unit) and 1 or element.alphaNoCombat
+							if (i > min) and (element.alphaEmpty) then
+								point:SetAlpha(element.alphaEmpty * alpha)
+							else 
+								point:SetAlpha(alpha)
+							end 
 						else 
-							point:SetAlpha(alpha)
-						end 
-					else 
-						point:SetStatusBarColor(r, g, b, 1)
-						if element.alphaEmpty then 
-							point:SetAlpha(min > i and element.alphaEmpty or 1)
-						else 
-							point:SetAlpha(1)
+							point:SetStatusBarColor(r, g, b, 1)
+							if (element.alphaEmpty) then 
+								point:SetAlpha(min > i and element.alphaEmpty or 1)
+							else 
+								point:SetAlpha(1)
+							end 
 						end 
 					end 
 				end
@@ -911,7 +941,7 @@ Update = function(self, event, unit, ...)
 	end 
 
 	-- Run the general postupdate
-	if element.PostUpdate then 
+	if (element.PostUpdate) then 
 		return element:PostUpdate(unit, min, max, oldMax ~= max, powerType)
 	end 
 end 
@@ -1133,5 +1163,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 43)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 47)
 end 
