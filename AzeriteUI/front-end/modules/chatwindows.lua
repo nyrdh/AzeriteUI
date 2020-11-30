@@ -469,9 +469,19 @@ Module.UpdateChatDockPosition = function(self)
 	end
 end
 
--- Setup
+-- Callbacks used by the back-end
+-------------------------------------------------------
+-- *Supposed to NOT be called for auto-disabled modules,
+--  but it sometimes happen anyway. 
+-- *Now checking for layout data before executing,
+--  as as temporary simple workaround until properly fixed.
 -------------------------------------------------------
 Module.PostCreateTemporaryChatWindow = function(self, frame, ...)
+	local layout = self.layout
+	if (not self.layout) then
+		return
+	end
+
 	local chatType, chatTarget, sourceChatFrame, selectWindow = ...
 
 	-- Some temporary frames have weird fonts (like the pet battle log)
@@ -483,6 +493,9 @@ end
 
 Module.PostCreateChatWindow = function(self, frame)
 	local layout = self.layout
+	if (not self.layout) then
+		return
+	end
 
 	frameCache[frame] = true
 
@@ -791,6 +804,8 @@ Module.PostCreateChatWindow = function(self, frame)
 
 end 
 
+-- Setup
+-------------------------------------------------------
 Module.SetUpAlphaScripts = function(self)
 	_G.CHAT_FRAME_BUTTON_FRAME_MIN_ALPHA = 0
 
