@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased] 2020-11-30
 ### Changed
 - Legacy class power points will no longer appear invisible after combat ends while targeting something, giving the faulty illusion that an empty bar is shown. The points will be visible at all times when the bar is visible, and visibility will instead be handled by the main bar, not by each separate point like in the Azerite theme. The Azerite theme does not display the points as a single bar, but rather like floating standalone points, so different visibility systems make sense in the different themes.
+- Helpful auras on hostile targets should no longer get a green border to indicate their friendliness, as this was too easy to confuse with the more puke green colored poison color, thus making it look like an allied cast poison debuff instead. Only harmful auras will now have their borders colored.
+
+### Fixed
+- Nameplate display of name and health values on the currently mouseovered nameplate should work properly when mousing in/out over the same frame multiple times now, and not require you to mouse over another plate first before it is shown on the original again.
+- Worked around a chat bug that would sometimes occur when entering pet battles while having the addons Prat or Glass installed and enabled.
 
 ## [3.1.433-RC] 2020-11-30
 ### Fixed
