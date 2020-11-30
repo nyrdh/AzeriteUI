@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2020-11-30
+### Changed
+- Legacy class power points will no longer appear invisible after combat ends while targeting something, giving the faulty illusion that an empty bar is shown. The points will be visible at all times when the bar is visible, and visibility will instead be handled by the main bar, not by each separate point like in the Azerite theme. The Azerite theme does not display the points as a single bar, but rather like floating standalone points, so different visibility systems make sense in the different themes.
+
 ## [3.1.433-RC] 2020-11-30
 ### Fixed
 - Changed how events are unregistered in the back-end, making the process a silent one by default. If modules want errors from attempting to unregister an event or message that wasn't registered to begin with, they'll have to explicitly ask for verbose output now. Otherwise, no bugs will occur and the world will go on turning as before. 

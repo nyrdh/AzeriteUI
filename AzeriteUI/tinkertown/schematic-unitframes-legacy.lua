@@ -1132,13 +1132,17 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					--"PostUpdate", {}
 				},
 				values = {
+					-- These apply to the main element frame.
+					"hideFullyWhenEmpty", true, 
+
+					-- These apply to points.
 					"alphaEmpty", 1, -- Element alpha when no points are available.
 					"alphaNoCombat", 1, -- Element alpha multiplier when out of combat.
 					"alphaNoCombatRunes", 1, 
 					"alphaWhenHiddenRunes", 1, 
-					"hideWhenEmpty", true, -- Whether to fully hide an empty bar or not.
-					"hideWhenNoTarget", true, -- Whether to hide when no target exists.
-					"hideWhenUnattackable", true, -- Whether to hide when target can't be attacked.
+					"hideWhenEmpty", false, -- Whether to fully hide an empty bar or not.
+					"hideWhenNoTarget", false, -- Whether to hide when no target exists.
+					"hideWhenUnattackable", false, -- Whether to hide when target can't be attacked.
 					"useAlternateColoring", true, -- Whether to use multiple point colorings when available.
 					"maxComboPoints", 5, -- Does not affect runes, they will always show 6.
 					"runeSortOrder", "ASC",	-- Sort order of the runes.
@@ -1221,6 +1225,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 
 						-- Update main element alpha and visibility. 
 						-- This will override the visibility set by the back-end.
+						-- *ComboPoints fail to get here sometimes? 
 						if ((min >= max) and (not UnitAffectingCombat("player")) and (not UnitExists("target")))
 						or ((min == 0) and (powerType ~= "RUNES")) then
 							element:Hide()

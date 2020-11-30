@@ -937,9 +937,15 @@ Update = function(self, event, unit, ...)
 		updateColor(element, unit, min, max, powerType)
 	end 
 
-	if (not element:IsShown()) then 
-		element:Show()
-	end 
+	if (element.hideFullyWhenEmpty) and (min == 0) then
+		if (element:IsShown()) then
+			element:Hide()
+		end
+	else
+		if (not element:IsShown()) then 
+			element:Show()
+		end 
+	end
 
 	-- Run the general postupdate
 	if (element.PostUpdate) then 
@@ -1085,7 +1091,7 @@ Proxy = function(self, ...)
 	return (self.ClassPower.Override or UpdatePowerType)(self, ...)
 end 
 
-local ForceUpdate = function(element)
+ForceUpdate = function(element)
 	return Proxy(element._owner, "Forced", element._owner.unit)
 end
 
@@ -1164,5 +1170,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 47)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 48)
 end 
