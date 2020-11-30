@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 62)
+local LibNamePlate = Wheel:Set("LibNamePlate", 63)
 if (not LibNamePlate) then	
 	return
 end
@@ -1153,7 +1153,9 @@ LibNamePlate.OnUpdate = function(self, elapsed)
 		local shouldClearCurrent
 		if (hasMouseOver) then 
 			-- Is the current mouseover the same as last time? 
-			local isMouseOver = UnitIsUnit("mouseover", currentHighlight.unit)
+			-- *The unit can have been cleared since last iteration,
+			--  so it makes sense to check for the unit before the API call.
+			local isMouseOver = (currentHighlight.unit) and UnitIsUnit("mouseover", currentHighlight.unit)
 			if (isMouseOver) then
 				-- This will prevent the alpha loop below
 				-- from wasting time on checking for mouseover units.
