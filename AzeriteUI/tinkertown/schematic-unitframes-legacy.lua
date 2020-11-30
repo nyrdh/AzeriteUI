@@ -12,6 +12,11 @@ assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded
 local LibTime = Wheel("LibTime")
 assert(LibTime, "UnitFrames requires LibTime to be loaded.")
 
+-- Lua API
+local ipairs = ipairs
+local math_floor = math.floor
+local pairs = pairs
+
 -- WoW API
 local UnitPowerMax = UnitPowerMax
 
@@ -72,7 +77,7 @@ local Aura_PostUpdate = function(element, button)
 				button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
 			end 
 		elseif (button.isBuff) then 
-			button.Border:SetBackdropBorderColor(Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
+			button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
 		else
 			local color = Colors.debuff.none
 			if (color) then 
@@ -1139,6 +1144,9 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"runeSortOrder", "ASC",	-- Sort order of the runes.
 					"flipSide", false, -- Holds no meaning in current theme.
 
+					-- Post creation method called once and only once. 
+					-- It is important that we call this prior to the back-end enabling the element, 
+					-- as the maximum displayed number of sub-frames is expected to be there for updates. 
 					"PostCreate", function(element)
 						for i = 1,6 do
 							local pill = element:CreateStatusBar()
@@ -1159,23 +1167,11 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 							bgTexture:SetAllPoints(pill)
 							pill.bg = bgTexture
 
-							--local fg = element:CreateFrame("Frame")
-							--fg:SetAllPoints()
-							--fg:SetFrameLevel(pill:GetFrameLevel()+2)
-
-							-- Overlay glow
-							--local fgTexture = fg:CreateTexture()
-							--fgTexture:SetDrawLayer("BACKGROUND", 1)
-							--fgTexture:SetTexture(GetMedia("statusbar-normal-overlay"))
-							--fgTexture:SetVertexColor(1, 1, 1, 1)
-							--fgTexture:SetAllPoints(pill)
-							--pill.Fg = fgTexture
-
 							element[i] = pill
 						end
 					end,
 
-					-- Called by the back-end on updates
+					-- Called by the back-end on updates.
 					"PostUpdate", function(element, unit, min, max, newMax, powerType)
 						if (not min) or (not max) or (not powerType) then
 							element:Hide()
@@ -1199,7 +1195,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 
 							-- Figure out pill sizes
 							local elementWidth,elementHeight = element:GetSize()
-							local width = math.floor(elementWidth/currentPillCount)
+							local width = math_floor(elementWidth/currentPillCount)
 							local widthLast = elementWidth - width*(currentPillCount - 1)
 
 							-- Style and position the pills

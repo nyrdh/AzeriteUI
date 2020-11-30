@@ -605,7 +605,7 @@ local NamePlates_Auras_PostUpdateButton = function(element, button)
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
 		elseif button.isBuff then 
-			local color = colors.quest.green or layout.AuraBorderBackdropBorderColor
+			local color = layout.AuraBorderBackdropBorderColor
 			if color then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			end 
