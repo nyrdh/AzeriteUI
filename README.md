@@ -14,17 +14,18 @@ During the 3.1 beta phase, theme switching has been enabled with the commands `/
 * Twitter: [@GoldpawsStuff](https://twitter.com/goldpawsstuff)  
 
 ## **Report a bug, suggest a feature:**
-All feature requests and bug reports for all game versions are done on the main project's github page. 
+All feature requests and bug reports for all game versions are done on the main project's github page. Please use _only_ our report system and the supplied template when reporting bugs.  
 * [github.com/GoldpawsStuff/AzeriteUI/issues](https://github.com/GoldpawsStuff/AzeriteUI/issues)
 
 ## **Recommended download locations:**  
-Even though the most recent versions of AzeriteUI are available on GitHub, I recommend using the tagged, public versions on CurseForge and Twitch. Anything else is considered experimental or in the middle of development, and we'll simply ignore any questions or issue reports related to those untagged git versions. 
+Even though the most recent versions of AzeriteUI are available on GitHub, I strongly recommend using the tagged, public versions on CurseForge. Anything else is considered experimental or in the middle of development, and we'll simply ignore any questions or issue reports related to those untagged git versions.  
 
 ### **CurseForge:**
 * Azerite UI Collection for Classic: [https://www.curseforge.com/wow/addons/azeriteui-classic](https://www.curseforge.com/wow/addons/azeriteui-classic)  
 * Azerite UI Collection for Retail: [https://www.curseforge.com/wow/addons/azeriteui-retail](https://www.curseforge.com/wow/addons/azeriteui-retail)  
 
 ### **GitHub:**
+This is mostly meant for tinkerers and the very interested, and unless stated otherwise in a specific version, NOT meant to be downloaded by regular users. Also note that I do _not_ accept any bug reports related to untagged or outdated versions.  
 * Azerite UI Collection for Classic: [github.com/GoldpawsStuff/AzeriteUI](https://github.com/GoldpawsStuff/AzeriteUI)  
 * Azerite UI Collection for Retail: [github.com/GoldpawsStuff/AzeriteUI_Retail](https://github.com/GoldpawsStuff/AzeriteUI_Retail)  
 
