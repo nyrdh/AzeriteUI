@@ -7,6 +7,9 @@ end
 -- No, we don't want this. 
 ADDON = ADDON:gsub("_Classic", "")
 
+-- 1.13.3 Battleground popup bugfix
+L["You can now enter a new battleground, right-click the green eye on the minimap to enter or leave!"] = "现在，你可以进入一个新的战场，右键单击小地图上的绿色眼睛即可进入或离开！"
+
 -- General Stuff
 --------------------------------------------
 -- Most of these are inserted into other strings, 
@@ -21,6 +24,7 @@ L["<Right-Click>"] = "<鼠标右键>"
 
 -- Clock & Time Settings
 --------------------------------------------
+-- These are shown in tooltips
 L["New Event!"] = "新事件！"
 L["New Mail!"] = "新邮件！"
 L["%s to toggle calendar."] = "按下 %s 打开或关闭日历。"
@@ -35,6 +39,7 @@ L["Now using military (24-hour) time."] = "现在使用24小时制。"
 
 -- Network & Performance Information
 --------------------------------------------
+-- These are shown in tooltips
 L["Network Stats"] = "网络状态"
 L["World latency:"] = "世界延迟:"
 L["This is the latency of the world server, and affects casting, crafting, interaction with other players and NPCs. This is the value that decides how delayed your combat actions are."] = "这是世界服务器的延迟，它影响施法，制造，与其他玩家或NPC的交互。这个数值决定战斗操作的延迟。" 
@@ -64,6 +69,7 @@ L["Sticky Minimap bars disabled."] = "粘性小地图条已禁用。"
 L["to level %s"] = "到 %s 级" 
 L["to %s"] = "到 %s"
 L["to next trait"] = "到下一个特质"
+L["to next level"] = "到下一个等级"
 
 -- Try to keep the following fairly short, as they should
 -- ideally be shown on a single line in the tooltip, 
@@ -79,6 +85,7 @@ L["%s to enable sticky bars."] = "按下 %s 启用粘性小地图条。"
 -- *Doing it this way to keep the localization file generic, 
 --  while making sure the end result still is personalized to the addon.
 L["Main Menu"] = ADDON
+L["Game Panels"] = "游戏面板"
 L["Click here to get access to game panels."] = "单击此处可访问各种游戏窗口，例如角色，法术书，天赋，或更改动作栏的各种设置。"
 
 -- These should be fairly short to fit in a single line without 
@@ -92,15 +99,27 @@ L["%s to toggle your Bags."] = "按下 %s 打开或关闭你的背包。"
 -- Remember that these shall fit on a button, 
 -- so they can't be that long. 
 -- You don't need a full description here. 
-L["Debug Mode"] = "调试模式" 
+L["Debug Mode"] = "调试工具" 
 L["Debug Console"] = "调试控制台" 
 L["Load Console"] = "加载控制台"
 L["Unload Console"] = "卸载控制台"
 L["Reload UI"] = "重新载入界面"
+L["Settings Profile"] = "设置配置文件"
+L["Global"] = true
+L["Faction"] = true
+L["Realm"] = true
+L["Character"] = true
 L["ActionBars"] = "动作栏"
-L["Bind Mode"] = "键位绑定模式"
-L["Cast on Down"] = "按下施法"
 L["Button Lock"] = "按钮锁定"
+L["Cast on Down"] = "按下施法"
+L["Bind Mode"] = "键位绑定模式"
+L["Display Priority"] = "显示优先级"
+L["GamePad First"] = "手柄优先"
+L["Keyboard First"] = "键盘优先"
+L["GamePad Type"] = "手柄类型"
+L["Xbox"] = "Xbox"
+L["Xbox (Reversed)"] = "Xbox (反向)"
+L["Playstation"] = "PS"
 L["More Buttons"] = "更多按钮"
 L["No Extra Buttons"] = "无额外按钮"
 L["+%.0f Buttons"] = "+%.0f 按钮"
@@ -109,20 +128,52 @@ L["MouseOver"] = "鼠标停留显示"
 L["MouseOver + Combat"] = "鼠标停留及战斗中显示"
 L["Always Visible"] = "一直显示"
 L["Stance Bar"] = "姿态栏"
+L["Extra Bars"] = "额外的动作条"
+L["Secondary Bar"] = "附加动作条"
+L["Side Bar One"] = "边栏动作条1"
+L["Side Bar Two"] = "边栏动作条2"
 L["Pet Bar"] = "宠物栏"
+L["Pet Bar Visibility"] = "宠物栏显示模式"
+L["Chat Windows"] = "聊天窗口"
+L["Chat Outline"] = "文字阴影"
+L["Chat Filters"] = "信息过滤"
+L["Chat Styling"] = "聊天样式"
+L["Hide Monster Messages"] = "隐藏怪物消息"
+L["Hide Boss Messages"] = "隐藏首领台词"
+L["Hide Spam"] = "隐藏垃圾信息"
+L["Battleground Filter"] = "战场过滤器"
 L["UnitFrames"] = "单位框体"
 L["Party Frames"] = "队伍框体"
 L["Raid Frames"] = "团队框体"
 L["PvP Frames"] = "PVP框体"
-L["HUD"] = "HUD"
-L["Alerts"] = "警报"
+L["Use Mana Orb"] = "使用魔法球"
+L["HUD"] = "界面显示"
+L["CastBar"] = "施法条"
+L["ClassPower"] = "连击点数"
+L["Alerts"] = "警示信息"
+L["Kills, Levels, Loot"] = "击杀，等级，战利品"
+L["Monster Emotes"] = "怪物表情"
+L["Raid Warnings"] = "团队警告"
 L["TalkingHead"] = "对话框"
+L["Objectives Tracker"] = "任务追踪器"
 L["NamePlates"] = "姓名板"
 L["Auras"] = "光环"
+L["Player"] = "玩家"
+L["Enemies"] = "敌方"
+L["Friends"] = "友方"
+L["Aspect Ratio"] = "长宽比"
+L["Widescreen (16:9)"] = "宽屏 |cff666666(16:9)|r"
+L["Ultrawide (21:9)"] = "带鱼屏 |cff666666(21:9)|r"
+L["Unlimited"] = "全屏"
+L["Aura Filters"] = "光环过滤器"
+L["Strict"] = "严格"
+L["Slack"] = "过滤永久光环"
+L["Spam"] = "不过滤"
 L["Explorer Mode"] = "探索者模式"
 L["Player Fading"] = "玩家渐隐"
-L["Tracker Fading"] = "跟踪器渐隐"
-L["Healer Mode"] = "治疗模式" 
+L["Tracker Fading"] = "任务追踪渐隐"
+L["Chat Positioning"] = "聊天框位移"
+L["Healer Mode"] = "治疗模式" -- it's a layout change, so let's reflect this!
 
 -- Menu button tooltips, not actually used at the moment. 
 L["Click to enable the Stance Bar."] = "点击以启用姿态栏。"
@@ -134,6 +185,7 @@ L["Click to disable the Pet Action Bar."] = "点击以禁用宠物动作栏。"
 --------------------------------------------
 L["%s to leave the vehicle."] = "按下 %s 离开载具。"
 L["%s to dismount."] = "按下 %s 解散坐骑。"
+L["%s to dismiss your controlled minion."] = "按下 %s来解散你被控制的仆从。"
 
 -- Abbreviations
 --------------------------------------------
