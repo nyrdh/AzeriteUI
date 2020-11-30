@@ -4,6 +4,10 @@ if (not Core) then
 	return 
 end
 
+local LibNumbers = Wheel("LibNumbers")
+assert(LibNumbers, ADDON..":BlizzardTooltips requires LibNumbers to be loaded.")
+
+
 local Module = Core:NewModule("BlizzardTooltips", "LibEvent", "LibDB", "LibFrame", "LibTooltip", "LibTooltipScanner", "LibPlayerData", "LibClientBuild")
 
 -- Lua API
@@ -39,6 +43,10 @@ local UnitPlayerControlled = UnitPlayerControlled
 local UnitQuestTrivialLevelRange = UnitQuestTrivialLevelRange or GetQuestGreenRange
 local UnitQuestTrivialLevelRangeScaling = UnitQuestTrivialLevelRangeScaling or GetScalingQuestGreenRange
 local UnitReaction = UnitReaction
+
+-- Number Abbreviation
+local short = LibNumbers:GetNumberAbbreviationShort()
+local large = LibNumbers:GetNumberAbbreviationLong()
 
 -- Private API
 local Colors = Private.Colors
@@ -301,17 +309,14 @@ end
 -- Show health values for tooltip health bars, and hide others.
 -- Will expand on this later to tailer all tooltips to our needs.  
 local StatusBar_UpdateValue = function(bar, value, max)
-
 	local isRealValue = (max ~= 100)
 	if (value) then 
 		if (isRealValue) then 
-			if (value >= 1e8) then 			bar.value:SetFormattedText("%.0fm", value/1e6) 		-- 100m, 1000m, 2300m, etc
-			elseif (value >= 1e6) then 		bar.value:SetFormattedText("%.1fm", value/1e6) 		-- 1.0m - 99.9m 
-			elseif (value >= 1e5) then 		bar.value:SetFormattedText("%.0fk", value/1e3) 		-- 100k - 999k
-			elseif (value >= 1e3) then 		bar.value:SetFormattedText("%.1fk", value/1e3) 		-- 1.0k - 99.9k
-			elseif (value > 0) then 		bar.value:SetText(tostring(math_floor(value))) 		-- 1 - 999
-			else 							bar.value:SetText(DEAD)
-			end 
+			if (value > 0) then 
+				bar.value:SetText(large(value))
+			else
+				bar.value:SetText(DEAD)
+			end
 		else 
 			if (value > 0) then 
 				bar.value:SetFormattedText("%.0f%%", value)
