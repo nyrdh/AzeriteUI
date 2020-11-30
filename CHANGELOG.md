@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.433-RC] 2020-11-30
+### Fixed
+- Changed how events are unregistered in the back-end, making the process a silent one by default. If modules want errors from attempting to unregister an event or message that wasn't registered to begin with, they'll have to explicitly ask for verbose output now. Otherwise, no bugs will occur and the world will go on turning as before. 
+
 ## [3.1.432-RC] 2020-11-29
 ### Fixed
 - Removed redundant function call in the group debuff element.

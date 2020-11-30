@@ -1,4 +1,4 @@
-local LibMessage = Wheel:Set("LibMessage", 16)
+local LibMessage = Wheel:Set("LibMessage", 17)
 if (not LibMessage) then	
 	return
 end
@@ -138,10 +138,10 @@ LibMessage.New = function(self, target, registerName, registerNameAlternate, unr
 		check(message, 1, "string")
 		check(func, 2, "string", "function", "nil")
 
-		local silent = ...
+		local verbose = ...
 		local messages = events[message] and events[message][self]
 		if (not messages) then
-			if (silent == true) then
+			if (not verbose) then
 				return
 			else
 				if (not events[message]) then
@@ -164,8 +164,8 @@ LibMessage.New = function(self, target, registerName, registerNameAlternate, unr
 			end
 		end
 
-		-- Obey the silent flag!
-		if (silent == true) then
+		-- Don't be so noisy!
+		if (not verbose) then
 			return
 		end
 
@@ -302,8 +302,8 @@ LibMessage.UnregisterMessage = function(self, message, func, ...)
 
 	local messages = events[message] and events[message][self]
 	if (not messages) then
-		local silent = ...
-		if (silent == true) then
+		local verbose = ...
+		if (not verbose) then
 			return
 		else
 			if (not events[message]) then
@@ -325,6 +325,11 @@ LibMessage.UnregisterMessage = function(self, message, func, ...)
 	end
 	if (found) then 
 		return 
+	end
+
+	-- Don't be so noisy!
+	if (not verbose) then
+		return
 	end
 
 	-- If we reach this point it means nothing to unregister was found

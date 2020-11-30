@@ -662,7 +662,7 @@ end
 local Disable = function(self)
 	local element = self.Cast
 	if element then
-		self:UnregisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
+		self:UnregisterEvent("PLAYER_TARGET_CHANGED", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_START", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_STOP", Proxy)
 		self:UnregisterMessage("GP_SPELL_CAST_FAILED", Proxy)
@@ -685,5 +685,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 50)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 51)
 end 
