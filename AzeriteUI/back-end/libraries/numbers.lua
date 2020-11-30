@@ -1,4 +1,4 @@
-local LibNumbers = Wheel:Set("LibNumbers", -1)
+local LibNumbers = Wheel:Set("LibNumbers", 1)
 if (not LibNumbers) then	
 	return
 end
@@ -9,6 +9,7 @@ local assert = assert
 local date = date
 local debugstack = debugstack
 local error = error
+local math_floor = math.floor
 local pairs = pairs
 local select = select
 local string_format = string.format
