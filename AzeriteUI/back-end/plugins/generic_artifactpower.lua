@@ -6,6 +6,9 @@ if (LibClientBuild:IsClassic()) then
 	return
 end
 
+local LibNumbers = Wheel("LibNumbers")
+assert(LibNumbers, "GenericAzeritePower requires LibNumbers to be loaded.")
+
 -- Lua API
 local _G = _G
 local math_floor = math.floor
@@ -20,35 +23,9 @@ local FindActiveAzeriteItem = C_AzeriteItem.FindActiveAzeriteItem
 local GetAzeriteItemXPInfo = C_AzeriteItem.GetAzeriteItemXPInfo
 local GetPowerLevel = C_AzeriteItem.GetPowerLevel
 
-local short = function(value)
-	value = tonumber(value)
-	if (not value) then return "" end
-	if (value >= 1e9) then
-		return ("%.1fb"):format(value / 1e9):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e6 then
-		return ("%.1fm"):format(value / 1e6):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e3 or value <= -1e3 then
-		return ("%.1fk"):format(value / 1e3):gsub("%.?0+([kmb])$", "%1")
-	else
-		return tostring(math_floor(value))
-	end	
-end
-
--- zhCN exceptions
-local gameLocale = GetLocale()
-if (gameLocale == "zhCN") then 
-	short = function(value)
-		value = tonumber(value)
-		if (not value) then return "" end
-		if (value >= 1e8) then
-			return ("%.1f亿"):format(value / 1e8):gsub("%.?0+([km])$", "%1")
-		elseif value >= 1e4 or value <= -1e3 then
-			return ("%.1f万"):format(value / 1e4):gsub("%.?0+([km])$", "%1")
-		else
-			return tostring(math_floor(value))
-		end 
-	end
-end 
+-- Number Abbreviation
+local short = LibNumbers:GetNumberAbbreviationShort()
+local large = LibNumbers:GetNumberAbbreviationLong()
 
 local UpdateValue = function(element, min, max, level)
 	if element.OverrideValue then
@@ -199,5 +176,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)), (Wheel("LibMinimap", true)) }) do 
-	Lib:RegisterElement("ArtifactPower", Enable, Disable, Proxy, 19)
+	Lib:RegisterElement("ArtifactPower", Enable, Disable, Proxy, 20)
 end 

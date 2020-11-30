@@ -7,6 +7,9 @@
 <!-- let's load this one first, others will need it -->
 <Script file='libraries\clientbuild.lua'/>
 
+<!-- -->
+<Script file='libraries\numbers.lua'/>
+
 <!-- core libs, require callbacks libs or none -->
 <Script file='libraries\auradata.lua'/>
 <Script file='libraries\db.lua'/>

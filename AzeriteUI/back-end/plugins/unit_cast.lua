@@ -4,6 +4,9 @@ assert(LibCast, "UnitCast requires LibCast to be loaded.")
 local LibClientBuild = Wheel("LibClientBuild")
 assert(LibCast, "UnitCast requires LibClientBuild to be loaded.")
 
+local LibNumbers = Wheel("LibNumbers")
+assert(LibNumbers, "UnitCast requires LibNumbers to be loaded.")
+
 -- Lua API
 local math_floor = math.floor
 local string_find = string.find
@@ -21,6 +24,10 @@ local UnitGUID = UnitGUID
 local UnitIsPlayer = UnitIsPlayer
 local UnitIsUnit = UnitIsUnit
 local UnitReaction = UnitReaction
+
+-- Number Abbreviation
+local short = LibNumbers:GetNumberAbbreviationShort()
+local large = LibNumbers:GetNumberAbbreviationLong()
 
 -- Localization
 local L_FAILED = FAILED
@@ -70,20 +77,6 @@ local utf8sub = function(str, i, dots)
 	end
 end
 
-local short = function(value)
-	value = tonumber(value)
-	if (not value) then return "" end
-	if (value >= 1e9) then
-		return ("%.1fb"):format(value / 1e9):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e6 then
-		return ("%.1fm"):format(value / 1e6):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e3 or value <= -1e3 then
-		return ("%.1fk"):format(value / 1e3):gsub("%.?0+([kmb])$", "%1")
-	else
-		return tostring(value - value%1)
-	end	
-end
-
 local formatTime = function(time)
 	if time > DAY then -- more than a day
 		return ("%.0f%s"):format((time / DAY) - (time / DAY)%1, "d")
@@ -100,21 +93,6 @@ local formatTime = function(time)
 	end	
 end
 
--- zhCN exceptions
-local gameLocale = GetLocale()
-if (gameLocale == "zhCN") then 
-	short = function(value)
-		value = tonumber(value)
-		if (not value) then return "" end
-		if (value >= 1e8) then
-			return ("%.1f亿"):format(value / 1e8):gsub("%.?0+([km])$", "%1")
-		elseif value >= 1e4 or value <= -1e3 then
-			return ("%.1f万"):format(value / 1e4):gsub("%.?0+([km])$", "%1")
-		else
-			return tostring((value) - (value)%1)
-		end 
-	end
-end 
 
 -- Spell Cast Updates
 -----------------------------------------------------------
@@ -685,5 +663,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 51)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 52)
 end 

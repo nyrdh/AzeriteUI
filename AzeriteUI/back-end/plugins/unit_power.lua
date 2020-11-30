@@ -1,3 +1,6 @@
+local LibNumbers = Wheel("LibNumbers")
+assert(LibNumbers, "UnitPower requires LibNumbers to be loaded.")
+
 -- Lua API
 local _G = _G
 local math_floor = math.floor
@@ -17,50 +20,12 @@ local UnitPower = UnitPower
 local UnitPowerMax = UnitPowerMax
 local UnitPowerType = UnitPowerType
 
+-- Number Abbreviation
+local short = LibNumbers:GetNumberAbbreviationShort()
+local large = LibNumbers:GetNumberAbbreviationLong()
+
 -- Sourced from BlizzardInterfaceResources/Resources/EnumerationTables.lua
 local ALTERNATE_POWER_INDEX = Enum and Enum.PowerType.Alternate or ALTERNATE_POWER_INDEX or 10
-
--- Number abbreviations
----------------------------------------------------------------------	
-local large = function(value)
-	if (value >= 1e8) then 		return string_format("%.0fm", value/1e6) 	-- 100m, 1000m, 2300m, etc
-	elseif (value >= 1e6) then 	return string_format("%.1fm", value/1e6) 	-- 1.0m - 99.9m 
-	elseif (value >= 1e5) then 	return string_format("%.0fk", value/1e3) 	-- 100k - 999k
-	elseif (value >= 1e3) then 	return string_format("%.1fk", value/1e3) 	-- 1.0k - 99.9k
-	elseif (value > 0) then 	return value 								-- 1 - 999
-	else 						return ""
-	end 
-end 
-
-local short = function(value)
-	value = tonumber(value)
-	if (not value) then return "" end
-	if (value >= 1e9) then
-		return ("%.1fb"):format(value / 1e9):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e6 then
-		return ("%.1fm"):format(value / 1e6):gsub("%.?0+([kmb])$", "%1")
-	elseif value >= 1e3 or value <= -1e3 then
-		return ("%.1fk"):format(value / 1e3):gsub("%.?0+([kmb])$", "%1")
-	else
-		return tostring(math_floor(value))
-	end	
-end
-
--- zhCN exceptions
-local gameLocale = GetLocale()
-if (gameLocale == "zhCN") then 
-	short = function(value)
-		value = tonumber(value)
-		if (not value) then return "" end
-		if (value >= 1e8) then
-			return ("%.1f亿"):format(value / 1e8):gsub("%.?0+([km])$", "%1")
-		elseif value >= 1e4 or value <= -1e3 then
-			return ("%.1f万"):format(value / 1e4):gsub("%.?0+([km])$", "%1")
-		else
-			return tostring(math_floor(value))
-		end 
-	end
-end 
 
 local UpdateValue = function(element, unit, min, max, powerType, powerID, disconnected, dead, tapped)
 	if element.OverrideValue then
@@ -273,5 +238,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Power", Enable, Disable, Proxy, 18)
+	Lib:RegisterElement("Power", Enable, Disable, Proxy, 19)
 end 
