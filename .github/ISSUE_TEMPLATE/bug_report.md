@@ -11,10 +11,11 @@ Note that the use of this template is NOT optional, I ask these questions for a 
 -->
 
 ## The problem  
-<!--Briefly describe the issue you are experiencing below. Tell us what you were trying to do and what happened instead. Remember, this is _not_ a place to ask questions. For questions, go to [our Discord](https://discord.gg/MUSfWXd) server, just remember to read the rules and keep in mind nobody there are paid, we're all just gaming enthusiasts and volunteers.-->
+<!--Briefly describe the issue you are experiencing BELOW, not inside this comment section. Tell us what you were trying to do and what happened instead. Remember, this is _not_ a place to ask questions. For questions, go to [our Discord](https://discord.gg/MUSfWXd) server, just remember to read the rules and keep in mind nobody there are paid, we're all just gaming enthusiasts and volunteers.-->
+
 
 ### Make sure you can check all these boxes  
-<!--The game only finds new files on game startup, not on character relogs or interface reloads. So make sure you exit the game when updating addons to avoid this.-->
+<!--The classic client still only finds new files on game startup, not on character relogs or interface reloads. So if this is in classic, make sure you exit the game when updating addons to avoid this. This doesn't matter in retail, as can add files when the game is running since patch 9.0.1. -->
 - [ ] I have the latest addon version available from CurseForge.
 - [ ] I restarted the entire game after updating the addon, not just relogged or reloaded. (Only needed in Classic.)
 
