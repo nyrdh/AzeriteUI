@@ -18,12 +18,15 @@ Note that the use of this template is NOT optional, I ask these questions for a 
 - [ ] I have the latest addon version available from CurseForge.
 - [ ] I restarted the entire game after updating the addon, not just relogged or reloaded. (Only needed in Classic.)
 
-### What game version(s) does it happen in?  
+### What game version(s) does it happen in? Choose your version and the highest expansion you own. 
 <!--The game uses different addon APIs in different versions, so this matters a lot.-->
 - [ ] Classic 
-- [ ] Classic (Public Test Realm) 
-- [ ] Battle for Azeroth 
-- [ ] Battle for Azeroth (Public Test Realm) 
+- [ ] Retail 
+	- [ ] Battle for Azeroth
+	- [ ] Shadowlands 
+- [ ] Public Test Realm 
+	- [ ] Classic 
+	- [ ] Retail 
 
 ### What addon theme(s) does it happen in?  
 <!--The addon uses different code in different themes, so this matters a lot.-->
