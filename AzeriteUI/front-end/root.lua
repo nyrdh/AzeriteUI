@@ -917,6 +917,7 @@ end
 Core.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then 
 		self:UpdateAspectRatio()
+		self:UpdateAuraFilters()
 
 	elseif (event == "GP_DEBUG_FRAME_CLOSED") then 
 		-- This fires from the module back-end when 

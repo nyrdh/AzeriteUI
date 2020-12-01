@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.435-RC] 2020-12-01
+### Fixed
+- Aura filters now properly update to your saved setting when logging in or reloading in all themes. 
+
 ## [3.1.434-RC] 2020-12-01
 ### Added
 - Added updated zhCN locales by Mengqyzh(GitHub).

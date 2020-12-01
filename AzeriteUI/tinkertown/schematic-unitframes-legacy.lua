@@ -89,29 +89,32 @@ local Aura_PostUpdate = function(element, button)
 	end
 
 	-- Icon
+	local desaturate
 	if (element.isYou) then
-		button.Icon:SetDesaturated(false)
+		-- Desature buffs on you cast by others
+		if (button.isBuff) and (not button.isCastByPlayer) then 
+			desaturate = true
+		end
 	elseif (element.isFriend) then
-		if (button.isBuff) then
-			if (button.isCastByPlayer) then 
-				button.Icon:SetDesaturated(false)
-			else
-				button.Icon:SetDesaturated(true)
-			end
-		else
-			button.Icon:SetDesaturated(false)
+		-- Desature buffs on friends not cast by you
+		if (button.isBuff) and (not button.isCastByPlayer) then 
+			desaturate = true
 		end
 	else
-		if (button.isBuff) then 
-			button.Icon:SetDesaturated(false)
-		else
-			if (button.isCastByPlayer) then 
-				button.Icon:SetDesaturated(false)
-			else
-				button.Icon:SetDesaturated(true)
-			end
+		-- Desature debuffs not cast by you on attackable units
+		if (not button.isBuff) and (not button.isCastByPlayer) then 
+			desaturate = true
 		end
 	end
+
+	if (desaturate) then
+		button.Icon:SetDesaturated(true)
+		button.Icon:SetVertexColor(.5, .5, .5)
+	else
+		button.Icon:SetDesaturated(false)
+		button.Icon:SetVertexColor(1, 1, 1)
+	end
+
 end
 
 -- Module Schematics
