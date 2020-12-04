@@ -106,9 +106,9 @@ local StripNStyle = function(button)
 	local count = button.Count 
 	if (count) then
 		count:ClearAllPoints()
-		count:SetPoint("BOTTOMRIGHT", -3, 3)
+		count:SetPoint("BOTTOMRIGHT", -6, 6)
 		count:SetFontObject(GetFont(14, true))
-		count:SetJustifyH("CENTER")
+		count:SetJustifyH("RIGHT")
 		count:SetJustifyV("BOTTOM")
 	end
 	

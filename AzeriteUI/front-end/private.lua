@@ -29,6 +29,9 @@ assert(LibMover, ADDON.." requires LibMover to be loaded.")
 local LibTooltip = Wheel("LibTooltip")
 assert(LibTooltip, ADDON.." requires LibTooltip to be loaded.")
 
+local LibBagButton = Wheel("LibBagButton")
+assert(LibBagButton, ADDON.." requires LibBagButton to be loaded.")
+
 local LibSecureButton = Wheel("LibSecureButton")
 assert(LibSecureButton, ADDON.." requires LibSecureButton to be loaded.")
 
@@ -68,13 +71,10 @@ local tostring = tostring
 local unpack = unpack
 
 -- WoW API
-local GetCVarDefault = GetCVarDefault
 local UnitCanAttack = UnitCanAttack
 local UnitClassification = UnitClassification
 local UnitCreatureType = UnitCreatureType
 local UnitExists = UnitExists
-local UnitCastingInfo = CastingInfo
-local UnitChannelInfo = ChannelInfo
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitIsEnemy = UnitIsEnemy
 local UnitIsPlayer = UnitIsPlayer
@@ -2135,25 +2135,9 @@ local Azerite = Layouts.Azerite
 local Diabolic = Layouts.Diabolic
 local Legacy = Layouts.Legacy
 
-local copyTable
-copyTable = function(source, copy)
-	check(source, 1, "table")
-	check(copy, 2, "table", "nil")
-	copy = copy or {}
-	for k,v in pairs(source) do
-		if (type(v) == "table") then
-			copy[k] = copyTable(v)
-		else
-			copy[k] = v
-		end
-	end
-	return copy
-end
-
 ------------------------------------------------
 -- Themes
 ------------------------------------------------
-
 
 Azerite.OptionsMenu = {
 	MenuBorderBackdropBorderColor = { 1, 1, 1, 1 },
@@ -4719,11 +4703,6 @@ Private.Colors = Colors
 Private.GetFont = GetFont
 Private.GetMedia = GetMedia
 
--- Proxy this one
-Private.GetAuraFilter = function(...) 
-	return LibAuraTool:GetAuraFilter(...) 
-end
-
 -- Use a hidden setting in the perChar database to store the settings profile
 local GetProfile = function()
 	local db = Private.GetConfig(ADDON, "character") -- crossing the beams!
@@ -4756,6 +4735,20 @@ Private.GetDefaults = function(name)
 	return Defaults[name] 
 end 
 
+-- Proxy this one
+Private.GetAuraFilter = function(...) 
+	return LibAuraTool:GetAuraFilter(...) 
+end
+
+-- Whether or not aura filters are in forced slack mode.
+-- This happens if aura data isn't available for the current class.
+Private.IsForcingSlackAuraFilterMode = function() 
+	return LibAuraTool:IsForcingSlackAuraFilterMode() 
+end
+
+------------------------------------------------
+-- Private Theme API
+------------------------------------------------
 -- What layout we're currently using, and the fallback for unknowns.
 local CURRENT_LAYOUT, FALLBACK_LAYOUT
 
@@ -4843,6 +4836,9 @@ Private.GetSchematic = function(uniqueID, layoutID)
 	return schematic
 end
 
+------------------------------------------------
+-- Private Tooltip API
+------------------------------------------------
 local GetTooltip = function(name)
 	return LibTooltip:GetTooltip(name) or LibTooltip:CreateTooltip(name)
 end
@@ -4850,7 +4846,8 @@ end
 -- Library tooltip proxies.
 -- This way the modules can access all of them, 
 -- without having to embed or reference libraries.
-Private.GetActionButtonTooltip = function(self) return LibSecureButton:GetActionButtonTooltip() end
+Private.GetActionButtonTooltip = function(self) return LibBagButton:GetActionButtonTooltip() end
+Private.GetBagButtonTooltip = function(self) return LibUnitFrame:GetBagButtonTooltip() end
 Private.GetBindingsTooltip = function(self) return LibBindTool:GetBindingsTooltip() end
 Private.GetMinimapTooltip = function(self) return LibMinimap:GetMinimapTooltip() end
 Private.GetMoverTooltip = function(self) return LibMover:GetMoverTooltip() end
@@ -4861,9 +4858,3 @@ Private.GetUnitFrameTooltip = function(self) return LibUnitFrame:GetUnitFrameToo
 -- but are created and used by our own front-end modules.
 Private.GetFloaterTooltip = function(self) return GetTooltip("GP_FloaterTooltip") end
 Private.GetOptionsMenuTooltip = function(self) return GetTooltip("GP_OptionsMenuTooltip") end
-
--- Whether or not aura filters are in forced slack mode.
--- This happens if aura data isn't available for the current class.
-Private.IsForcingSlackAuraFilterMode = function() 
-	return LibAuraTool:IsForcingSlackAuraFilterMode() 
-end

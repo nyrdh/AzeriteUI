@@ -1,4 +1,4 @@
-local LibBagButton = Wheel:Set("LibBagButton", 14)
+local LibBagButton = Wheel:Set("LibBagButton", 17)
 if (not LibBagButton) then	
 	return
 end
@@ -53,6 +53,30 @@ local IsLoggedIn = IsLoggedIn
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 
+-- Library registries
+LibBagButton.embeds = LibBagButton.embeds or {}
+LibBagButton.buttons = LibBagButton.buttons or {} -- cache of buttons spawned
+LibBagButton.buttons.Bag = LibBagButton.buttons.Bag or {}
+LibBagButton.buttons.BagSlot = LibBagButton.buttons.BagSlot or {}
+LibBagButton.buttons.Bank = LibBagButton.buttons.Bank or {}
+LibBagButton.buttons.BankSlot = LibBagButton.buttons.BankSlot or {}
+LibBagButton.buttons.ReagentBank = LibBagButton.buttons.ReagentBank or {}
+LibBagButton.buttonParents = LibBagButton.buttonParents or {} -- cache of hidden button parents spawned
+LibBagButton.buttonSlots = LibBagButton.buttonSlots or {} -- cache of actual usable button objects
+LibBagButton.containers = LibBagButton.containers or {} -- cache of virtual containers spawned
+LibBagButton.contents = LibBagButton.contents or {} -- cache of actual bank and bag contents
+LibBagButton.queuedContainerIDs = LibBagButton.queuedContainerIDs or {} -- Queue system for uncached items 
+LibBagButton.queuedItemIDs = LibBagButton.queuedItemIDs or {} -- Queue system for uncached items 
+
+-- Speed
+local Buttons = LibBagButton.buttons
+local ButtonParents = LibBagButton.buttonParents
+local ButtonSlots = LibBagButton.buttonSlots
+local Containers = LibBagButton.containers
+local Contents = LibBagButton.contents
+local QueuedContainerIDs = LibBagButton.queuedContainerIDs
+local QueuedItemIDs = LibBagButton.queuedItemIDs
+
 -- Sourced from FrameXML/BankFrame.lua
 -- Bag containing the 7 (or 6 in classic) bank bag buttons. 
 local BANK_SLOT_CONTAINER = -4
@@ -60,22 +84,14 @@ local BANK_SLOT_CONTAINER = -4
 -- This one does not exist. We made it up.
 local BAG_SLOT_CONTAINER = -100
 
-LibBagButton.embeds = LibBagButton.embeds or {}
-LibBagButton.buttons = LibBagButton.buttons or {} -- cache of buttons spawned
-LibBagButton.containers = LibBagButton.containers or {} -- cache of containers spawned
-LibBagButton.contents = LibBagButton.contents or {} -- cache of actual bank and bag contents
-
--- Speed
-local Buttons = LibBagButton.buttons
-local Containers = LibBagButton.containers
-local Contents = LibBagButton.contents
-
--- Queue system for items uncached items 
-local QueuedContainerIDs = {} 
-local QueuedItemIDs = {}
-
 -- Button templates
-local BUTTON_TYPE = IsClassic and "Button" or "ItemButton"
+-----------------------------------------------------------------
+-- Frame type of slot buttons
+local BUTTON_TYPE = IsClassic and "Button" or "ItemButton" 
+
+-- Frame template of itembuttons in each bagType.
+-- This table will have both the bagTypes and all bagIDs as keys, 
+-- making it a good tool to compare slot button compatibility on bagID changes.
 local ButtonTemplates = {
 	Bag = "ContainerFrameItemButtonTemplate", -- bag itembutton
 	Bank = "BankItemButtonGenericTemplate", -- bank itembutton
@@ -85,22 +101,41 @@ local ButtonTemplates = {
 	BankSlot = "BankItemButtonBagTemplate" -- equippable bank container slot
 }
 
--- Lists and lookup tables of all bagIDs
-local bagIDs = {}
+-- Localized names for the bags. 
+-- Note that some names can be generated on-the-fly, 
+-- so we're intentionally avoiding to list a few here.
 local BagNames = { [BACKPACK_CONTAINER] = BACKPACK_TOOLTIP, [BANK_CONTAINER] = BANK }
+
+-- Simple lookup table to get bagType from a provided bagID.
+local BagTypesFromID = { 
+	[BACKPACK_CONTAINER] = "Bag", 
+	[BANK_CONTAINER] = "Bank", 
+	[BAG_SLOT_CONTAINER] = "BagSlot", 
+	[BANK_SLOT_CONTAINER] = "BankSlot" 
+}
+
+-- Setup all bag tables.
+local bagIDs = {}
 local isBagID = { [BACKPACK_CONTAINER] = true }
 for id = BACKPACK_CONTAINER + 1, NUM_BAG_SLOTS do
 	isBagID[id] = true
 	bagIDs[#bagIDs + 1] = id
 	ButtonTemplates[id] = ButtonTemplates.Bag
+	BagTypesFromID[id] = "Bag"
 end
+
+-- Setup all bank tables.
 local bankIDs = {}
 local isBankID = { [BANK_CONTAINER] = true }
 for id = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
 	isBankID[id] = true
 	bankIDs[#bankIDs + 1] = id
 	ButtonTemplates[id] = ButtonTemplates.Bank
+	BagTypesFromID[id] = "Bank"
 end
+
+-- This only exists in classic, 
+-- but we leave the empty tables for a simpler API.
 local isKeyRingID = {}
 if (IsClassic) then
 	isBagID[KEYRING_CONTAINER] = true
@@ -108,7 +143,11 @@ if (IsClassic) then
 	bagIDs[#bagIDs + 1] = KEYRING_CONTAINER
 	ButtonTemplates[KEYRING_CONTAINER] = ButtonTemplates.KeyRing
 	BagNames[KEYRING_CONTAINER] = KEYRING
+	BagTypesFromID[KEYRING_CONTAINER] = "KeyRing"
 end
+
+-- This only exists in retail, 
+-- but we leave the empty tables for a simpler API.
 local isReagentBankID = {}
 if (IsRetail) then
 	isBankID[REAGENTBANK_CONTAINER] = true
@@ -116,16 +155,12 @@ if (IsRetail) then
 	bankIDs[#bankIDs + 1] = REAGENTBANK_CONTAINER
 	ButtonTemplates[REAGENTBANK_CONTAINER] = ButtonTemplates.ReagentBank
 	BagNames[REAGENTBANK_CONTAINER] = REAGENT_BANK
+	BagTypesFromID[REAGENTBANK_CONTAINER] = "ReagentBank"
 end
 
+-- Half-truths. We need numbers to index both. 
 ButtonTemplates[BAG_SLOT_CONTAINER] = ButtonTemplates.BagSlot
 ButtonTemplates[BANK_SLOT_CONTAINER] = ButtonTemplates.BankSlot
-
-Buttons.Bag = Buttons.Bag or {}
-Buttons.BagSlot = Buttons.BagSlot or {}
-Buttons.Bank = Buttons.Bank or {}
-Buttons.BankSlot = Buttons.BankSlot or {}
-Buttons.ReagentBank = Buttons.ReagentBank or {}
 
 -- Utility Functions
 -----------------------------------------------------------------
@@ -148,7 +183,7 @@ end
 -- You can use them to track quest items, food, whatever.
 -----------------------------------------------------------------
 local Button = LibBagButton:CreateFrame(BUTTON_TYPE)
-local Button_MT = { __index = BagButton }
+local Button_MT = { __index = Button }
 
 -- Set the bagID of the button.
 -- Only accept changes within the same bagType range,
@@ -157,17 +192,67 @@ local Button_MT = { __index = BagButton }
 -- Blizzard OnClick functionality needed for interaction,
 -- which can't be modified, added or changed after creation.
 Button.SetBagID = function(self, bagID)
-	if (ButtonTemplates[self.container:GetID()] == ButtonTemplates[bagID]) then
-		self.container:SetID(bagID)
+	-- First compare the old bagID to the new one.
+	local oldBagID = ButtonParents[self]:GetID()
+	if (oldBagID ~= bagID) then
+		-- If we requested a new ID, see if the old and new share button templates,
+		-- as this will tell us whether or not the bagIDs are interchangeable.
+		if (ButtonTemplates[oldBagID] == ButtonTemplates[bagID]) then
+			ButtonParents[self]:SetID(bagID)
+			self:Update()
+		end
 	end
 end
 
+-- Change the slotID of a button.
 Button.SetSlotID = function(self, slotID)
-	self.slot:SetID(slotID)
+	local oldSlotID = ButtonSlots[self]:GetID()
+	if (oldSlotID ~= slotID) then
+		ButtonSlots[self]:SetID(oldSlotID)
+		self:Update()
+	end
 end
 
-Button.SetPoint = function(self, ...)
-	self.slot:SetPoint(...)
+Button.SetBagAndSlotID = function(self, bagID, slotID)
+	-- See if any of the IDs are changed.
+	local oldBagID = ButtonParents[self]:GetID()
+	local oldSlotID = ButtonSlots[self]:GetID()
+	if (oldBagID ~= bagID) or (oldSlotID ~= slotID) then
+		-- If we had a change, make sure it's a valid one.
+		if (ButtonTemplates[oldBagID] == ButtonTemplates[bagID]) then
+			ButtonParents[self]:SetID(bagID)
+			ButtonSlots[self]:SetID(oldSlotID)
+			self:Update()
+		end
+	end
+end
+
+-- Updates the icon of a slot button.
+Button.UpdateIcon = function(self)
+end
+
+-- Updates the stack/charge count of a slot button.
+Button.UpdateCount = function(self)
+end
+
+-- Updates the rarity colorign of a slot button.
+Button.UpdateRarity = function(self)
+end
+
+-- Updates the quest icons of a slot button.
+Button.UpdateQuest = function(self)
+end
+
+-- Updates all the sub-elements of a slot button at once.
+Button.Update = function(self)
+	self:UpdateIcon()
+	self:UpdateCount()
+	self:UpdateRarity()
+	self:UpdateQuest()
+end
+
+Button.GetTooltip = function(self)
+	return LibBagButton:GetBagButtonTooltip()
 end
 
 -- Container Template
@@ -185,6 +270,9 @@ end
 Container.SetSorting = function(self, sortMethod)
 end
 
+Container.GetTooltip = function(self)
+	return LibBagButton:GetBagButtonTooltip()
+end
 
 -- Library API
 -----------------------------------------------------------------
@@ -196,8 +284,45 @@ end
 -- @input bagType <integer,string> bagID or bagType
 -- @return <frame> the button
 LibBagButton.SpawnItemButton = function(self, bagType)
-	local itemButton = self:CreateFrame("Frame")
-	itemButton.container = itemButton:CreateFrame("Frame")
+	check(bagType, 1, "string", "number")
+
+	-- A bagID was provided, translate it to backType and validate.
+	local bagID
+	if (type(bagType) == "number") then
+		bagID = bagType
+		bagType = BagTypesFromID[bagType]
+
+		-- An illegal bagType has been requested.
+		if (not bagType) then
+			return error(string_format("No bagType for the bagID '%d' exists!", bagID))
+		end
+	end
+
+	-- An unknown bagType was requested.
+	if (not Buttons[bagType]) then
+		return error(string_format("No bagType named '%d' exists!", bagID))
+	end
+
+	local button -- vertual button object returned to the user
+	local parent -- hidden button parent for bag items
+	local slot -- slot object that contains the "actual" button
+
+	button = setmetatable(self:CreateFrame(BUTTON_TYPE), Button_MT)
+
+	parent = button:CreateFrame("Frame")
+	parent:SetAllPoints()
+
+
+
+	slot = parent:CreateFrame(BUTTON_TYPE, nil, ButtonTemplates[bagID])
+	slot:SetAllPoints()
+
+	-- Cache up our elements 
+	ButtonParents[button] = parent
+	ButtonSlots[button] = slot
+
+	-- Insert the virtual button slot object into the correct cache.
+	table_insert(Buttons[bagType], button) 
 
 	--[[-- 
 
@@ -218,10 +343,12 @@ LibBagButton.SpawnItemButton = function(self, bagType)
 
 	--]]--
 
-	itemButton.slot = setmetatable(container:CreateFrame(BUTTON_TYPE, nil, self:GetFrame("UICenter"), ButtonTemplates[bagID]), Button_MT)
-	itemButton.slot:SetAllPoints()
+	-- Return the button slot object to the user
+	return button
+end
 
-	return itemButton
+LibBagButton.GetBagButtonTooltip = function(self)
+	return LibSecureButton:GetTooltip("GP_BagButtonTooltip") or LibSecureButton:CreateTooltip("GP_BagButtonTooltip")
 end
 
 --[[-- 
@@ -373,6 +500,81 @@ LibBagButton.IsAtBank = function(self)
 	return self.atBank
 end
 
+-- Shows your bag frames
+LibBagButton.ShowBags = function(self)
+end
+
+LibBagButton.HideBags = function(self)
+end
+
+-- Toggles your bag frames
+LibBagButton.ToggleBags = function(self)
+end
+
+-- Displays your bank frames.
+-- Will use stored information when available, 
+-- making it possible to track bank contents when not at the bank.
+-- TODO: Add API to assign a cache at container creation!
+LibBagButton.ShowBank = function(self)
+end
+
+LibBagButton.HideBank = function(self)
+end
+
+-- Toggles your bank frames.
+LibBagButton.ToggleBank = function(self)
+end
+
+LibBagButton.HookGameEvents = function(self)
+
+	-- backpack
+	local Blizzard_ToggleBackpack = ToggleBackpack
+	ToggleBackpack = function()
+		if (not LibBagButton:ToggleBags()) then
+			Blizzard_ToggleBackpack()
+		end
+	end
+
+	local Blizzard_OpenBackpack = OpenBackpack
+	OpenBackpack = function()
+		if (not LibBagButton:ShowBags()) then
+			Blizzard_OpenBackpack()
+		end
+	end
+
+	-- single bag
+	local Blizzard_ToggleBag = ToggleBag
+	ToggleBag = function(bag)
+		if (not LibBagButton:ToggleBags()) then
+			Blizzard_ToggleBag(bag)
+		end
+	end
+
+	local Blizzard_OpenBag = OpenBag
+	OpenBag = function(bag)
+		if (not LibBagButton:ShowBags()) then
+			Blizzard_OpenBag(bag)
+		end
+	end
+
+	-- all bags
+	local Blizzard_OpenAllBags = OpenAllBags
+	OpenAllBags = function(frame)
+		if (not LibBagButton:ShowBags()) then
+			Blizzard_OpenAllBags(frame)
+		end
+	end
+
+	if (ToggleAllBags) then
+		local Blizzard_ToggleAllBags = ToggleAllBags
+		ToggleAllBags = function()
+			if (not LibBagButton:ToggleBags()) then
+				Blizzard_ToggleAllBags()
+			end
+		end
+	end
+end
+
 LibBagButton.OnEvent = function(self, event, ...)
 	if (event == "BANKFRAME_OPENED") then
 		self.atBank = true
@@ -458,81 +660,6 @@ LibBagButton.OnEvent = function(self, event, ...)
 			self:SendMessage("GP_BAG_UPDATE", bagID)
 		end
 
-	end
-end
-
--- Shows your bag frames
-LibBagButton.ShowBags = function(self)
-end
-
-LibBagButton.HideBags = function(self)
-end
-
--- Toggles your bag frames
-LibBagButton.ToggleBags = function(self)
-end
-
--- Displays your bank frames.
--- Will use stored information when available, 
--- making it possible to track bank contents when not at the bank.
--- TODO: Add API to assign a cache at container creation!
-LibBagButton.ShowBank = function(self)
-end
-
-LibBagButton.HideBank = function(self)
-end
-
--- Toggles your bank frames.
-LibBagButton.ToggleBank = function(self)
-end
-
-LibBagButton.HookGameEvents = function(self)
-
-	-- backpack
-	local Blizzard_ToggleBackpack = ToggleBackpack
-	ToggleBackpack = function()
-		if (not LibBagButton:ToggleBags()) then
-			Blizzard_ToggleBackpack()
-		end
-	end
-
-	local Blizzard_OpenBackpack = OpenBackpack
-	OpenBackpack = function()
-		if (not LibBagButton:ShowBags()) then
-			Blizzard_OpenBackpack()
-		end
-	end
-
-	-- single bag
-	local Blizzard_ToggleBag = ToggleBag
-	ToggleBag = function(bag)
-		if (not LibBagButton:ToggleBags()) then
-			Blizzard_ToggleBag(bag)
-		end
-	end
-
-	local Blizzard_OpenBag = OpenBag
-	OpenBag = function(bag)
-		if (not LibBagButton:ShowBags()) then
-			Blizzard_OpenBag(bag)
-		end
-	end
-
-	-- all bags
-	local Blizzard_OpenAllBags = OpenAllBags
-	OpenAllBags = function(frame)
-		if (not LibBagButton:ShowBags()) then
-			Blizzard_OpenAllBags(frame)
-		end
-	end
-
-	if (ToggleAllBags) then
-		local Blizzard_ToggleAllBags = ToggleAllBags
-		ToggleAllBags = function()
-			if (not LibBagButton:ToggleBags()) then
-				Blizzard_ToggleAllBags()
-			end
-		end
 	end
 end
 

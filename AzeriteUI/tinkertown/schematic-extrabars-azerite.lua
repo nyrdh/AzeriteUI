@@ -9,6 +9,11 @@ local ADDON, Private = ...
 local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded.")
 
+-- Let's just assume this only exists in retail.
+if (not LibClientBuild:IsRetail()) then
+	return
+end
+
 -- Lua API
 local _G = _G
 local ipairs = ipairs

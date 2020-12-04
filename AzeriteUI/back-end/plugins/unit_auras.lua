@@ -908,7 +908,7 @@ local Update = function(self, event, unit, ...)
 		Buffs.numPoison = numPoison
 
 		-- Do some initial sorting
-		table_sort(cache, (Buffs.debuffsFirst) and auraSortDebuffsFirst or auraSortBuffsFirst)
+		table_sort(cache, auraSortBuffsFirst)
 
 		-- Reset counters
 		Buffs.visibleAuras = 0
@@ -933,7 +933,7 @@ local Update = function(self, event, unit, ...)
 
 		-- Cache everything.
 		clear(Debuffs.cache)
-		CacheBuffs(Debuffs)
+		CacheDebuffs(Debuffs)
 
 		local cache = Debuffs.cache
 		local numTotal, numBuffs, numDebuffs = #cache, 0, 0
@@ -977,7 +977,7 @@ local Update = function(self, event, unit, ...)
 		Debuffs.numPoison = numPoison
 
 		-- Do some initial sorting
-		table_sort(cache, (Debuffs.debuffsFirst) and auraSortDebuffsFirst or auraSortBuffsFirst)
+		table_sort(cache, auraSortDebuffsFirst)
 
 		-- Reset counters
 		Debuffs.visibleAuras = 0
@@ -1127,5 +1127,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 68)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 69)
 end 
