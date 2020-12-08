@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 63)
+local LibNamePlate = Wheel:Set("LibNamePlate", 64)
 if (not LibNamePlate) then	
 	return
 end
@@ -871,6 +871,12 @@ LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
 		local unitFrame = self.baseFrame.UnitFrame
 		if (unitFrame) then
 			unitFrame:Hide()
+			-- 9.0.1 widget container.
+			-- Will style it later, just need it visible now.
+			self.widgetContainer = unitFrame.WidgetContainer
+			if (self.widgetContainer) then
+				self.widgetContainer:SetParent(self)
+			end
 			if (not self.hasHideScripts) then
 				unitFrame:HookScript("OnShow", function() unitFrame:Hide() end) 
 				self.hasHideScripts = true
