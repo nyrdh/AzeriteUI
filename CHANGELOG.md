@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-12-08
+## [3.1.437-RC] 2020-12-08
 ### Added
-- The nameplate 9.0.1 widget containers should now be visible on our nameplates too. No styling as of yet, we simply made them visible.
+- The new (to me) in 9.0.1 nameplate widget containers should now be visible on our nameplates too. No styling as of yet, we simply made them visible.
 
 ### Changed
 - Changed chat bubble font for latin clients and increased its size for better readability.
