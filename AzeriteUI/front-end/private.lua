@@ -2285,8 +2285,8 @@ Legacy.BlizzardFloaterHUD = setmetatable({
 
 -- Blizzard font replacements
 Azerite.BlizzardFonts = {
-	BlizzChatBubbleFont = GetFont(12, true, false),
-	ChatBubbleFont = GetFont(15, true, true),
+	BlizzChatBubbleFont = GetFont(13, true, false),
+	ChatBubbleFont = GetFont(16, true, true),
 	ChatFont = GetFont(15, true, true)
 }
 
