@@ -256,6 +256,15 @@ Colors.power.COMBO_POINTS_MULTIPLE = {
 	createColor(225/255, 65/255, 30/255) 
 }
 
+-- GUI2 style
+--Colors.power.COMBO_POINTS_MULTIPLE = {
+--	createColor{ 0.89, 0.00, 0.00 },
+--	createColor{ 0.89, 0.35, 0.00 },
+--	createColor{ 0.89, 0.65, 0.00 },
+--	createColor{ 0.89, 0.89, 0.00 },
+--	createColor{ 0.00, 0.89, 0.00 }
+--}
+
 -- Alternate Power
 Colors.power.ALTERNATE = createColor(70/255, 255/255, 131/255)
 

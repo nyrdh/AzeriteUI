@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2020-12-08
+### Changed
+- Changed chat bubble font for latin clients and increased its size for better readability.
+- Greatly enhanced the contrast between filled and empty points in the legacy class power element.
+- Added some updates to the class power element to try to battle the issue of weirdly looking points after cinematics.
+
 ## [3.1.436-RC] 2020-12-05
 ### Fixed
 - Debuffs on the legacy theme player frame should once again be visible.

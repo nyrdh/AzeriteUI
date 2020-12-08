@@ -1151,6 +1151,8 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"runeSortOrder", "ASC",	-- Sort order of the runes.
 					"flipSide", false, -- Holds no meaning in current theme.
 
+					"backdropMultiplier", .1,
+
 					-- Post creation method called once and only once. 
 					-- It is important that we call this prior to the back-end enabling the element, 
 					-- as the maximum displayed number of sub-frames is expected to be there for updates. 

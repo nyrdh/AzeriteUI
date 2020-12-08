@@ -251,7 +251,8 @@ local Generic = setmetatable({
 					if (element.alphaNoCombat) then 
 						point:SetStatusBarColor(r, g, b)
 						if (point.bg) then 
-							point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+							local mult = element.backdropMultiplier or 1/3
+							point.bg:SetVertexColor(r*mult, g*mult, b*mult)
 						end 
 						local alpha = UnitAffectingCombat("player") and 1 or element.alphaNoCombat
 						if (i > min) and (element.alphaEmpty) then
@@ -262,7 +263,8 @@ local Generic = setmetatable({
 					else 
 						point:SetStatusBarColor(r, g, b, 1)
 						if (point.bg) then 
-							point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+							local mult = element.backdropMultiplier or 1/3
+							point.bg:SetVertexColor(r*mult, g*mult, b*mult)
 						end 
 						if (element.alphaEmpty) then 
 							point:SetAlpha(min > i and element.alphaEmpty or 1)
@@ -592,7 +594,8 @@ if (IsRetail) then
 						point:SetStatusBarColor(r, g, b)
 						point:SetAlpha(i > min and chargingAlpha or fullAlpha)
 						if (point.bg) then 
-							point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+							local mult = element.backdropMultiplier or 1/3
+							point.bg:SetVertexColor(r*mult, g*mult, b*mult)
 						end 
 					end
 				end
@@ -607,7 +610,8 @@ if (IsRetail) then
 						point:SetStatusBarColor(r, g, b)
 						point:SetAlpha(i > min and chargingAlpha or fullAlpha)
 						if (point.bg) then 
-							point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+							local mult = element.backdropMultiplier or 1/3
+							point.bg:SetVertexColor(r*mult, g*mult, b*mult)
 						end 
 					end
 				end
@@ -620,7 +624,8 @@ if (IsRetail) then
 						point:SetStatusBarColor(r, g, b)
 						point:SetAlpha(element.alphaWhenHiddenRunes or 0)
 						if (point.bg) then 
-							point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+							local mult = element.backdropMultiplier or 1/3
+							point.bg:SetVertexColor(r*mult, g*mult, b*mult)
 						end 
 					end 
 				end 
@@ -886,9 +891,10 @@ if (IsRetail) then
 						if (element.alphaNoCombat) then 
 							point:SetStatusBarColor(r, g, b)
 							if (point.bg) then 
-								point.bg:SetVertexColor(r*1/3, g*1/3, b*1/3)
+								local mult = element.backdropMultiplier or 1/3
+								point.bg:SetVertexColor(r*mult, g*mult, b*mult)
 							end 
-							local alpha = UnitAffectingCombat(unit) and 1 or element.alphaNoCombat
+								local alpha = UnitAffectingCombat(unit) and 1 or element.alphaNoCombat
 							if (i > min) and (element.alphaEmpty) then
 								point:SetAlpha(element.alphaEmpty * alpha)
 							else 
@@ -896,6 +902,10 @@ if (IsRetail) then
 							end 
 						else 
 							point:SetStatusBarColor(r, g, b, 1)
+							if (point.bg) then 
+								local mult = element.backdropMultiplier or 1/3
+								point.bg:SetVertexColor(r*mult, g*mult, b*mult)
+							end 
 							if (element.alphaEmpty) then 
 								point:SetAlpha(min > i and element.alphaEmpty or 1)
 							else 
@@ -1109,6 +1119,7 @@ local Enable = function(self)
 
 		self:RegisterEvent("UNIT_DISPLAYPOWER", Proxy)
 		self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
+		self:RegisterEvent("PLAYER_ENTERING_WORLD", Proxy, true)
 
 		if (IsRetail) then
 			local level = UnitLevel("player")
@@ -1154,6 +1165,7 @@ local Disable = function(self)
 		-- Remove generic events
 		self:UnregisterEvent("UNIT_DISPLAYPOWER", Proxy)
 		self:UnregisterEvent("PLAYER_TARGET_CHANGED", Proxy)
+		self:UnregisterEvent("PLAYER_ENTERING_WORLD", Proxy)
 
 		if (IsRetail) then
 			self:UnregisterEvent("PLAYER_LEVEL_UP", Proxy)
@@ -1170,5 +1182,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 48)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 50)
 end 
