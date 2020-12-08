@@ -613,6 +613,10 @@ local OnTooltipSetUnit = function(tooltip)
 		levelText = colorCode .. data.effectiveLevel .. "|r"
 	end 
 
+	if (data.isPlayer) and (not levelText) then
+		displayName = BOSS_TEXTURE .. " " .. displayName
+	end 
+
 	local r, g, b = GetUnitHealthColor(unit,data)
 	if (levelText) then 
 		lineIndex = AddIndexedLine(tooltip, lineIndex, levelText .. Colors.quest.gray.colorCode .. ": |r" .. displayName, r, g, b)

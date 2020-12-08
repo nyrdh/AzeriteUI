@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 86)
+local LibTooltip = Wheel:Set("LibTooltip", 87)
 if (not LibTooltip) then
 	return
 end
@@ -1482,6 +1482,10 @@ Tooltip.SetUnit = function(self, unit)
 			if (data.effectiveLevel and (data.effectiveLevel > 0)) then 
 				local r, g, b, colorCode = self:GetDifficultyColorByLevel(data.effectiveLevel)
 				levelText = colorCode .. data.effectiveLevel .. "|r"
+			end
+
+			if (data.isPlayer) and (not levelText) then
+				displayName = BOSS_TEXTURE .. " " .. displayName
 			end 
 
 			local r, g, b = self:GetUnitHealthColor(unit)
