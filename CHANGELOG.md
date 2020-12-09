@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.1.438-Beta] 2020-12-09
+## [3.1.438-RC] 2020-12-09
 ### Added
 - Added experimental legacy theme raid frames. Work in progress, more sub-elements and more testing will be done.
 - Added various icons like group leader and assistant, master looter, main tank, main assist and raid targets to relevant legacy unit frames.
