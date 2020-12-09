@@ -348,18 +348,19 @@ end
 Module.HandleBelowMinimapWidgets = function(self)
 
 	local tcHolder = self:CreateFrame("Frame", nil, "UICenter")
-	tcHolder:SetPoint("TOP", 0, -30)
+	tcHolder:SetPoint("TOP", 0, 0)
 	tcHolder:SetSize(10, 58)
 
 	local tcContainer = UIWidgetTopCenterContainerFrame
+	tcContainer:SetParent(tcHolder)
 	tcContainer:ClearAllPoints()
-	tcContainer:SetPoint("CENTER", tcHolder)
+	tcContainer:SetPoint("TOP", tcHolder)
 
 	hooksecurefunc(tcContainer, "SetPoint", function(self, _, anchor)
 		if (anchor) and (anchor ~= tcHolder) then
+			self:SetParent(tcHolder)
 			self:ClearAllPoints()
 			self:SetPoint("TOP", tcHolder)
-			self:SetParent(tcHolder)
 		end
 	end)
 

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Chat bubbles in instances should no longer look like modern art.
 - Fixed a bunch of long standing bugs with the group debuff display.
+- Took better control of the top center blizz widgets, like the Eye of the Annoying in the top whole part of the screen. Should for most people be slightly smaller now as it should no longer be linked to the blizz ui scale, but instead set to match ours.
 
 ## [3.1.437-RC] 2020-12-08
 ### Added
