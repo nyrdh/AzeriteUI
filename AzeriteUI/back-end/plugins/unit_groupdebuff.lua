@@ -425,5 +425,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 25)
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 26)
 end 

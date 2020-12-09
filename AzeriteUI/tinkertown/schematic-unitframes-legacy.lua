@@ -16,6 +16,7 @@ assert(LibTime, "UnitFrames requires LibTime to be loaded.")
 local ipairs = ipairs
 local math_floor = math.floor
 local pairs = pairs
+local string_format = string.format
 
 -- WoW API
 local UnitPowerMax = UnitPowerMax
@@ -142,12 +143,6 @@ Private.RegisterSchematic("ModuleForge::UnitFrames", "Legacy", {
 
 							{ "player", "Player" }, 
 							{ "player", "PlayerHUD" }, 
-							
-							{ "party1", "Party" },
-							{ "party2", "Party" },
-							{ "party3", "Party" }, 
-							{ "party4", "Party" },
-
 							{ "pet", "Pet" }, 
 							--{ "focus", "Focus" }, 
 
@@ -156,6 +151,20 @@ Private.RegisterSchematic("ModuleForge::UnitFrames", "Legacy", {
 
 							{ "vehicle", "PlayerInVehicle" }, 
 							-- { "target", "PlayerInVehicleTarget" },
+
+							{ "party1", "Party" },
+							{ "party2", "Party" },
+							{ "party3", "Party" }, 
+							{ "party4", "Party" },
+
+							{ "raid1",  "Raid" }, { "raid2",  "Raid" }, { "raid3",  "Raid" }, { "raid4",  "Raid" }, { "raid5",  "Raid" },
+							{ "raid6",  "Raid" }, { "raid7",  "Raid" }, { "raid8",  "Raid" }, { "raid9",  "Raid" }, { "raid10", "Raid" },
+							{ "raid11", "Raid" }, { "raid12", "Raid" }, { "raid13", "Raid" }, { "raid14", "Raid" }, { "raid15", "Raid" },
+							{ "raid16", "Raid" }, { "raid17", "Raid" }, { "raid18", "Raid" }, { "raid19", "Raid" }, { "raid20", "Raid" },
+							{ "raid21", "Raid" }, { "raid22", "Raid" }, { "raid23", "Raid" }, { "raid24", "Raid" }, { "raid25", "Raid" },
+							{ "raid26", "Raid" }, { "raid27", "Raid" }, { "raid28", "Raid" }, { "raid29", "Raid" }, { "raid30", "Raid" },
+							{ "raid31", "Raid" }, { "raid32", "Raid" }, { "raid33", "Raid" }, { "raid34", "Raid" }, { "raid35", "Raid" },
+							{ "raid36", "Raid" }, { "raid37", "Raid" }, { "raid38", "Raid" }, { "raid39", "Raid" }, { "raid40", "Raid" },
 
 
 						}, 
@@ -1273,7 +1282,6 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 32 }},
 					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 }
 				}
-
 			}
 		}
 	},
@@ -1414,7 +1422,6 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
 					"ClearAllPoints", "SetPoint", { "TOPLEFT", -11, 11 }, "SetPoint", { "BOTTOMRIGHT", 11, -11 }
 				}
-
 			},
 			{
 				parent = nil, ownerKey = "PowerBorderScaffold", objectType = "Frame", 
@@ -2520,8 +2527,434 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 
 })
 
+-- Raid frames.
+local RAID_SLOT_ID = 0
 Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
+	
+	-- Create layered scaffold frames.
+	-- These are used to house the other widgets and elements.
+	{
+		type = "CreateWidgets",
+		widgets = {
+			{
+				parent = "self", ownerKey = "BackdropScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 0 }
+			},
+			{
+				parent = "self", ownerKey = "ContentScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 10 }
+			},
+			{
+				parent = "self", ownerKey = "BorderScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 25 }
+			},
+			{
+				parent = "self", ownerKey = "OverlayScaffold", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 30 }
+			}
+		}
+	},
 
+	-- Position and style the main frame
+	{
+		-- Only set the parent in modifiable widgets if it is your intention to change it.
+		-- Otherwise the code will assume the owner is the parent, and leave it as is,
+		-- which is what we want in the majority of cases.
+		type = "ModifyWidgets",
+		widgets = {
+			-- Setup main frame
+			{
+				-- Note that a missing ownerKey
+				-- will apply these changes to the original object instead.
+				parent = nil, ownerKey = nil, 
+				chain = { -- 198, 55
+					"SetSize", { 60+16, 30+16 }, "SetHitBox", { -4, -4, -4, -4 },
+					"Position", {}
+				},
+				-- Note that values are added before the chain is executed, 
+				-- so the above chain can call methods defined in the values here.
+				values = {
+					"colors", Colors,
+
+					-- Fade out frames out of range
+					"Range", { outsideAlpha = .6 },
+
+					-- Exclude these frames from explorer mode
+					"ignoreExplorerMode", true,
+
+					-- Driver to only show this in non-raid parties, but never solo.
+					--"visibilityPreDriver", "[group:party,nogroup:raid]show;hide;",
+
+					-- Incremental positioning function.
+					-- Will move a slot down each time it's called.
+					"Position", function(self)
+						local unit = self.unit
+						if (not unit) then 
+							return 
+						end
+
+						-- grid positions
+						local one,two = RAID_SLOT_ID%5, math_floor(RAID_SLOT_ID/5)
+
+						-- regular sized raids
+						-- 5x5, groups grow horizontally, units within groups vertically
+						local w,h = 80+16, 38+16
+						local x = 56 + two * (w + 10)
+						local y = -64 - one * (h + 10)
+
+						-- big classic mess
+						-- 5x8, groups grow vertically, units within groups horizontally
+						local wChaos,hChaos = 80+16, 28+16
+						local xChaos = 56 + one * (wChaos + 10)
+						local yChaos = -64 - two * (hChaos + 10)
+
+						RAID_SLOT_ID = RAID_SLOT_ID + 1
+						
+						local layoutDriver = "[@raid26,exists]chaos;cool"
+						if (unit == "player") then
+							layoutDriver = "[@target,exists]chaos;cool" -- just for testing
+						end
+					
+						local layoutSwitcher = CreateFrame("Frame", nil, nil, "SecureHandlerAttributeTemplate")
+						layoutSwitcher:SetFrameRef("UnitFrame", self)
+						layoutSwitcher:SetFrameRef("UICenter", self:GetFrame("UICenter"))
+						layoutSwitcher:SetAttribute("_onattributechanged", string_format([=[
+							if (name == "state-layout") then
+								local frame = self:GetFrameRef("UnitFrame"); 
+								local anchor = self:GetFrameRef("UICenter");
+								local oldlayout = self:GetAttribute("oldlayout");
+								if (not oldlayout) or (oldlayout ~= value) then
+									frame:ClearAllPoints();
+									if (value == "cool") then
+										frame:SetWidth(%d);
+										frame:SetHeight(%d);
+										frame:SetPoint("TOPLEFT", anchor, "TOPLEFT", %d, %d);
+									elseif (value == "chaos") then
+										frame:SetWidth(%d);
+										frame:SetHeight(%d);
+										frame:SetPoint("TOPLEFT", anchor, "TOPLEFT", %d, %d);
+									end
+									self:SetAttribute("oldlayout", value);
+								end
+							end	
+
+						]=], w,h,x,y, wChaos,hChaos,xChaos,yChaos))
+						RegisterAttributeDriver(layoutSwitcher, "state-layout", layoutDriver)
+
+						layoutSwitcher:SetAttribute("layout", SecureCmdOptionParse(layoutDriver))
+				
+
+					end
+				}
+			},
+			{
+				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", objectSubType = "Frame", objectTemplate = BackdropTemplateMixin and "BackdropTemplate",
+				chain = {
+					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 24 }},
+					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
+					"ClearAllPoints", "SetPoint", { "TOPLEFT", -11, 11 }, "SetPoint", { "BOTTOMRIGHT", 11, -11 }
+				}
+			}
+
+		}
+	},
+
+	-- Create child widgets
+	{
+		type = "CreateWidgets",
+		widgets = {
+			-- Health Bar
+			{
+				parent = "self,ContentScaffold", ownerKey = "Health", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetOrientation", "RIGHT",
+					"SetFlippedHorizontally", false,
+					"SetSmartSmoothing", true,
+					"SetFrameLevelOffset", 2, 
+					"SetPoint", { "TOPLEFT", 8, -8 }, -- relative to unit frame
+					"SetPoint", { "BOTTOMRIGHT", -8, 8 + 4 },
+					"SetStatusBarTexture", GetMedia("statusbar-power")
+				},
+				values = {
+					"colorAbsorb", true, -- tint absorb overlay
+					"colorClass", true, -- color players by class 
+					"colorDisconnected", true, -- color disconnected units
+					"colorHealth", true, -- color anything else in the default health color
+					"colorReaction", true, -- color NPCs by their reaction standing with us
+					"colorTapped", false, -- color tap denied units 
+					"colorThreat", false, -- color non-friendly by threat
+					"frequent", true, -- listen to frequent health events for more accurate updates
+					"predictThreshold", .01,
+					"absorbOverrideAlpha", .75
+				}
+			},
+			-- Health Bar Backdrop Frame
+			{
+				parent = "self,Health", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
+			},
+			-- Health Bar Backdrop Texture
+			{
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetAllPointsToParent", 
+					"SetDrawLayer", { "BACKGROUND", 1 },
+					"SetTexture", GetMedia("statusbar-dark"),
+					"SetVertexColor", { .1, .1, .1, 1 }
+				}
+			},
+			-- Health Bar Overlay Frame
+			{
+				parent = "self,Health", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
+			},
+			-- Health Bar Overlay Texture
+			{
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetAllPointsToParent", 
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetTexture", GetMedia("statusbar-normal-overlay"),
+					"SetTexCoord", { 0, 1, 0, 1 }
+				}
+			},
+
+			-- Health Bar Value
+			--{
+			--	parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+			--	chain = {
+			--		"SetPosition", { "BOTTOMRIGHT", -2, 3 }, -- Relative to the health bar
+			--		"SetDrawLayer", { "OVERLAY", 1 }, 
+			--		"SetJustifyH", "RIGHT", 
+			--		"SetJustifyV", "BOTTOM",
+			--		"SetFontObject", GetFont(12,true),
+			--		"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+			--		"SetParentToOwnerKey", "OverlayScaffold"
+			--	},
+			--	values = {
+			--		"useSmartValue", true
+			--	}
+			--},
+			
+			-- Power Bar
+			{
+				parent = "self,ContentScaffold", ownerKey = "Power", objectType = "Frame", objectSubType = "StatusBar",
+				chain = {
+					"SetOrientation", "RIGHT",
+					"SetFlippedHorizontally", false,
+					"SetSmartSmoothing", true,
+					"SetFrameLevelOffset", 2, 
+					"SetPoint", { "BOTTOMLEFT", 8, 8 }, 
+					"SetPoint", { "BOTTOMRIGHT", -8, 8 },
+					"SetHeight", 4,
+					"SetStatusBarTexture", GetMedia("statusbar-power")
+				},
+				values = {
+					"frequent", true -- listen to frequent health events for more accurate updates
+				}
+			},
+			-- Power Bar Backdrop Frame
+			{
+				parent = "self,Power", parentKey = "Bg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", -2 }
+			},
+			-- Power Bar Backdrop Texture
+			{
+				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetAllPointsToParent", 
+					"SetDrawLayer", { "BACKGROUND", -2 },
+					"SetTexture", GetMedia("statusbar-dark"),
+					"SetVertexColor", { .1, .1, .1, 1 }
+				}
+			},
+			-- Power Bar Overlay Frame
+			{
+				parent = "self,Power", parentKey = "Fg", objectType = "Frame", objectSubType = "Frame",
+				chain = { "SetAllPointsToParent", "SetFrameLevelOffset", 2 }
+			},
+			-- Power Bar Overlay Texture
+			{
+				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+				chain = {
+					"SetAllPointsToParent", 
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetTexture", GetMedia("statusbar-normal-overlay"),
+					"SetTexCoord", { 0, 1, 0, 1 }
+				}
+			},
+
+			-- Unit Name
+			{
+				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+				chain = {
+					--"SetPosition", { "TOPLEFT", 10, -11 }, -- relative to the whole frame (with border)
+					"SetPosition", { "TOPLEFT", 12, -12 }, -- relative to the whole frame (with border)
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "LEFT", 
+					"SetJustifyV", "TOP",
+					"SetFontObject", GetFont(12, true),
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+				},
+				values = {
+					"maxChars", 4,
+					"showLevel", false,
+					"showLevelLast", false,
+					"useSmartName", false
+				}
+
+			},
+
+			-- Group Aura
+			{
+				parent = "self,OverlayScaffold", ownerKey = "GroupAura", objectType = "Frame", objectSubType = "Frame",
+				chain = {
+					"SetSize", { 32, 32 },
+					"SetPoint", { "CENTER", 0, 2 },
+					"SetFrameLevelOffset", 10 -- high above the frame
+				},
+				values = {
+					"disableMouse", true, -- disable mouse input, as it will prevent the frame from being clickable.
+					"tooltipDefaultPosition", true -- just use the UIs regular tooltip position, don't want it covering frames.
+				}
+			},
+
+			-- Group Aura backdrop and border
+			{
+				parent = "self,GroupAura", parentKey = "Border", objectType = "Frame", objectSubType = "Frame",
+				chain = {
+					"SetFrameLevelOffset", 2,
+					"SetBackdrop", {{ edgeFile = Private.GetMedia("aura_border"), edgeSize = 16 }},
+					"SetBackdropBorderColor", { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3, 1 },
+					"ClearAllPoints", "SetPoint", { "TOPLEFT", -7, 7 }, "SetPoint", { "BOTTOMRIGHT", 7, -7 }
+				}
+
+			},
+
+			-- Group Aura Icon
+			{
+				parent = "self,GroupAura", parentKey = "Icon", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetPosition", { "CENTER", 0, 0 },
+					"SetTexCoord", { 5/64, 59/64, 5/64, 59/64 },
+					"SetSizeOffset", -10
+				}
+			},
+
+			-- Group Aura Stack Count
+			{
+				parent = "self,GroupAura", parentKey = "Count", objectType = "FontString", 
+				chain = {
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "RIGHT", 
+					"SetJustifyV", "BOTTOM",
+					"SetPosition", { "BOTTOMRIGHT", -2, 2 },
+					"SetFontObject", Private.GetFont(14, true),
+					"SetTextColor", { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+					"SetParentToOwnerKey", "self,GroupAura,Border"
+				}
+			},
+
+			-- Group Aura Time
+			{
+				parent = "self,GroupAura", parentKey = "Time", objectType = "FontString", 
+				chain = {
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "LEFT", 
+					"SetJustifyV", "TOP",
+					"SetPosition", { "TOPLEFT", 0, 0 },
+					"SetFontObject", Private.GetFont(12, true),
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .85 },
+					"SetParentToOwnerKey", "self,GroupAura,Border"
+				}
+			},
+
+			-- Group Number
+			{
+				parent = "self,OverlayScaffold", ownerKey = "GroupNumber", objectType = "FontString", 
+				chain = {
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "LEFT", 
+					"SetJustifyV", "BOTTOM",
+					"SetPosition", { "BOTTOMLEFT", -4, -1 },
+					"SetFontObject", Private.GetFont(12, true),
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 }
+				}
+			},
+
+			-- Raid Target 
+			{
+				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture", 
+				chain = {
+					"SetPosition", { "BOTTOM", 0, -10 },
+					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetSize", { 28, 28 },
+					"SetTexture", GetMedia("raid_target_icons_small")
+				}
+			},
+
+			-- Raid Role (Leader, Assistant, Master Looter, Main Tank, Main Assist)
+			{
+				parent = "self,OverlayScaffold", ownerKey = "RaidRole", objectType = "Texture", 
+				chain = {
+					"SetPosition", { "TOPLEFT", 10, 6 },
+					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetSize", { 16, 12 }
+				},
+				values = {
+					"ignoreRaidTargets", true
+				}
+			},
+			
+		}
+	},
+
+	-- Create child widgets (Retail only)
+	-- Contains: Group Role
+	IsRetail and {
+		type = "CreateWidgets",
+		widgets = {
+			-- Group Role
+			{
+				parent = "self,OverlayScaffold", ownerKey = "GroupRole", objectType = "Frame", objectSubType = "Frame",
+				chain = {
+					"SetPosition", { "TOP", 0, 12 }, -- relative to unit frame
+					"SetSize", { 32, 32 }
+				}
+			},
+
+			{
+				parent = "self,GroupRole", parentKey = "Healer", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetPosition", { "CENTER", 0, 0 },
+					"SetSize", { 32, 32 },
+					"SetTexture", GetMedia("grouprole-icons-heal")
+				}
+			},
+
+			{
+				parent = "self,GroupRole", parentKey = "Tank", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetPosition", { "CENTER", 0, 0 },
+					"SetSize", { 32, 32 },
+					"SetTexture", GetMedia("grouprole-icons-tank"),
+				}
+			},
+
+			{
+				parent = "self,GroupRole", parentKey = "Damager", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetPosition", { "CENTER", 0, 0 },
+					"SetSize", { 32, 32 },
+					"SetTexture", GetMedia("grouprole-icons-dps")
+				}
+			}
+		}
+	} or nil
 
 })
 

@@ -1,4 +1,4 @@
-local LibFrame = Wheel:Set("LibFrame", 66)
+local LibFrame = Wheel:Set("LibFrame", 67)
 if (not LibFrame) then	
 	return
 end
@@ -228,6 +228,10 @@ end
 -- Frame Template
 -----------------------------------------------------------------
 local frameWidgetPrototype = {
+
+	GetFrame = function(self, anchor)
+		return anchor and parseAnchor(anchor) or self
+	end,
 
 	-- Position a widget, and accept keywords as anchors
 	Place = function(self, ...)
