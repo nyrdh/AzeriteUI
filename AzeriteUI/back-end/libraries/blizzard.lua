@@ -254,7 +254,6 @@ UIWidgetsDisable["ActionBars"] = IsClassic and function(self)
 	MainMenuBar.slideOut:GetAnimations():SetOffset(0,0)
 
 	-- Gets rid of the loot anims
-	MainMenuBarBackpackButton:SetParent(UIHider)
 	MainMenuBarBackpackButton:UnregisterEvent("ITEM_PUSH") 
 	for slot = 0,3 do
 		_G["CharacterBag"..slot.."Slot"]:UnregisterEvent("ITEM_PUSH") 
@@ -382,7 +381,6 @@ or IsRetail and function(self)
 	OverrideActionBar.slideOut:GetAnimations():SetOffset(0,0)
 
 	-- Gets rid of the loot anims
-	MainMenuBarBackpackButton:SetParent(UIHider)
 	MainMenuBarBackpackButton:UnregisterEvent("ITEM_PUSH") 
 	for slot = 0,3 do
 		_G["CharacterBag"..slot.."Slot"]:UnregisterEvent("ITEM_PUSH") 

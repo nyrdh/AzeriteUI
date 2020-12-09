@@ -15,6 +15,9 @@ for moduleName,list in pairs({
 		["SpartanUI"] = true,
 		["TukUI"] = true
 	},
+	BlizzardBagButtons = {
+		["Bagnon"] = true
+	},
 	BlizzardChatFrames = {
 		["Glass"] = true,
 		["Prat-3.0"] = true

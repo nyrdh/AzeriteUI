@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Chat bubbles in instances should no longer look like modern art.
 - Fixed a bunch of long standing bugs with the group debuff display.
+- Fixed a strange incompatibility when AzeriteUI, Bartender and Bagnon was enabled at the same time that would cause an error when handing in anima in Shadowlands. 
 
 ## [3.1.437-RC] 2020-12-08
 ### Added

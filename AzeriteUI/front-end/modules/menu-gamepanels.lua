@@ -506,6 +506,7 @@ Module.HandleBartenderMicroBar = function(self)
 end
 
 Module.HandleBartender = function(self)
+	--MainMenuBarBackpackButton
 	self:AddDebugMessageFormatted("[Bartender4] loaded, handling incompatible elements.")
 	local Bartender4 = Bartender4
 	local MicroMenuMod = Bartender4:GetModule("MicroMenu", true)
@@ -524,7 +525,6 @@ Module.HandleBartender = function(self)
 			end)
 		end 
 	end
-
 end
 
 Module.ListenForBartender = function(self, event, addon)
