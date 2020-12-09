@@ -1,4 +1,4 @@
-local LibChatBubble = Wheel:Set("LibChatBubble", 24)
+local LibChatBubble = Wheel:Set("LibChatBubble", 26)
 if (not LibChatBubble) then	
 	return
 end
@@ -211,9 +211,12 @@ LibChatBubble.DisableBlizzard = function(self, bubble)
 
 	-- Remove all the default textures
 	for region, texture in pairs(customBubbles[bubble].blizzardRegions) do
-		region:SetTexture(nil)
+		--region:SetTexture(nil)
 		region:SetAlpha(0)
 	end
+	--if (customBubble.blizzardBackdropFrame) then
+	--	customBubble.blizzardBackdropFrame:SetBackdrop(nil)
+	--end
 end
 
 LibChatBubble.EnableBlizzard = function(self, bubble)
@@ -224,9 +227,12 @@ LibChatBubble.EnableBlizzard = function(self, bubble)
 
 	-- Restore all the original textures
 	for region, texture in pairs(customBubbles[bubble].blizzardRegions) do
-		region:SetTexture(texture)
+		--region:SetTexture(texture)
 		region:SetAlpha(1)
 	end
+	--if (customBubble.blizzardBackdropFrame) then
+	--	customBubble.blizzardBackdropFrame:SetBackdrop(customBubble.blizzardBackdrop)
+	--end
 end
 
 LibChatBubble.SetBlizzardBubbleFontObject = function(self, fontObject)
@@ -262,6 +268,11 @@ LibChatBubble.InitBubble = function(self, bubble)
 	customBubble.blizzardRegions = {}
 	customBubble.blizzardColor = { 1, 1, 1, 1 }
 	customBubble.color = { 1, 1, 1, 1 }
+
+	if (customBubble.SetBackdrop) then
+		customBubble.blizzardBackdropFrame = customBubble
+		customBubble.blizzardBackdrop = customBubble:GetBackdrop()
+	end
 	
 	customBubble.text = customBubble:CreateFontString()
 	customBubble.text:SetPoint("BOTTOMLEFT", 12, 12)
@@ -284,6 +295,10 @@ LibChatBubble.InitBubble = function(self, bubble)
 		for i = 1, bubble:GetNumChildren() do
 			local child = select(i, select(i, bubble:GetChildren()))
 			if (child:GetObjectType() == "Frame") and (child.String) and (child.Center) then
+				if (child.SetBackdrop) and (not customBubble.blizzardBackdrop) then
+					customBubble.blizzardBackdropFrame = child
+					customBubble.blizzardBackdrop = child:GetBackdrop()
+				end
 				for i = 1, child:GetNumRegions() do
 					local region = select(i, child:GetRegions())
 					if (region:GetObjectType() == "Texture") then

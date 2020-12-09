@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 44)
+local LibFader = Wheel:Set("LibFader", 45)
 if (not LibFader) then	
 	return
 end
@@ -127,6 +127,7 @@ elseif (IsRetail) then
 		[ 99413] = true, -- Deserter (no idea what type)
 		[158263] = true, -- Craven "You left an Arena without entering combat and must wait before entering another one." -- added 6.0.1
 		[194958] = true, -- Ashran Deserter
+		[178394] = true, -- Honorless Target
 	
 		-- heal cooldowns
 		[178857] = true, -- Contender (Gladiator's Sanctum buff)
