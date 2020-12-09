@@ -348,6 +348,8 @@ end
 Module.HandleBelowMinimapWidgets = function(self)
 
 	local tcHolder = self:CreateFrame("Frame", nil, "UICenter")
+	tcHolder:SetFrameStrata("BACKGROUND")
+	tcHolder:SetFrameLevel(10)
 	tcHolder:SetPoint("TOP", 0, 0)
 	tcHolder:SetSize(10, 58)
 
@@ -367,6 +369,8 @@ Module.HandleBelowMinimapWidgets = function(self)
 	local layoutID = Private.GetLayoutID()
 
 	local bmHolder = self:CreateFrame("Frame", nil, "UICenter")
+	bmHolder:SetFrameStrata("BACKGROUND")
+	bmHolder:SetFrameLevel(10)
 	bmHolder:SetSize(128, 40)
 
 	-- Not sure where I can test this.
