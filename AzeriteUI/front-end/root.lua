@@ -69,9 +69,13 @@ local SECURE = {
 			-- *Note that we're not actually listing is as a mode in the menu. 
 			self:CallMethod("OnModeToggle", "healerMode"); 
 
-		elseif (name == "change-aurafilter") then 
-			self:SetAttribute("auraFilter", value); 
+		elseif (name == "change-aurafilterlevel") then 
+			self:SetAttribute("auraFilterLevel", value); 
 			self:CallMethod("UpdateAuraFilters"); 
+
+		--elseif (name == "change-aurafilter") then 
+		--	self:SetAttribute("auraFilter", value); 
+		--	self:CallMethod("UpdateAuraFilters"); 
 
 		elseif (name == "change-aspectratio") then 
 			self:SetAttribute("aspectRatio", value); 
@@ -163,15 +167,24 @@ end
 
 Core.UpdateAuraFilters = function(self)
 	local db = self.db
-	if (db.auraFilter == "spam") then
-		self:SendMessage("GP_AURA_FILTER_MODE_CHANGED", "spam")
-	
-	elseif (db.auraFilter == "slack") then
+	if (db.auraFilterLevel == 0) then
+		if (Private.IsForcingSlackAuraFilterMode()) then
+			self:SendMessage("GP_AURA_FILTER_MODE_CHANGED", "slack")
+		else
+			self:SendMessage("GP_AURA_FILTER_MODE_CHANGED", "strict")
+		end
+	elseif (db.auraFilterLevel == 1) then
 		self:SendMessage("GP_AURA_FILTER_MODE_CHANGED", "slack")
-	else
-		-- strict filter is the fallback
-		self:SendMessage("GP_AURA_FILTER_MODE_CHANGED", "strict")
+	elseif (db.auraFilterLevel == 2) then
+		self:SendMessage("GP_AURA_FILTER_MODE_CHANGED", "spam")
 	end
+	--if (db.auraFilter == "spam") then
+	--	self:SendMessage("GP_AURA_FILTER_MODE_CHANGED", "spam")
+	--elseif (db.auraFilter == "slack") then
+	--	self:SendMessage("GP_AURA_FILTER_MODE_CHANGED", "slack")
+	--else
+	--	self:SendMessage("GP_AURA_FILTER_MODE_CHANGED", "strict")
+	--end
 end
 
 Core.UpdateAspectRatio = function(self)

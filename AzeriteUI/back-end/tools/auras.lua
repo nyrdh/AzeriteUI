@@ -6,7 +6,7 @@ on a widgetcontainer aura plugin element.
 
 --]]--
 
-local LibAuraTool = Wheel:Set("LibAuraTool", 7)
+local LibAuraTool = Wheel:Set("LibAuraTool", 11)
 if (not LibAuraTool) then
 	return
 end

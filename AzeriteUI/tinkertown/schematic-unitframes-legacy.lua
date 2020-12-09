@@ -142,7 +142,8 @@ Private.RegisterSchematic("ModuleForge::UnitFrames", "Legacy", {
 
 							{ "player", "Player" }, 
 							{ "player", "PlayerHUD" }, 
-							--{ "player", "PlayerInParty" },
+							
+							--{ "player", "Party" }, -- dummy test
 
 							{ "party1", "Party" },
 							{ "party2", "Party" },
@@ -2017,11 +2018,11 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 							return 
 						end
 						local slot
-						if (unit:find("party")) then
-							slot = self.id or PARTY_SLOT_ID
-						else
+						--if (unit:find("party")) then
+						--	slot = (self.id and self.id - 1) or PARTY_SLOT_ID
+						--else
 							slot = PARTY_SLOT_ID
-						end
+						--end
 						PARTY_SLOT_ID = PARTY_SLOT_ID + 1
 						self:Place("TOPLEFT", "UICenter", "TOPLEFT", 48 + 8, -(64 + (55 + 4+30+4+20)*slot))
 					end
@@ -2240,12 +2241,79 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 					"PostUpdateButton", Aura_PostUpdate
 					
 				}
-			}
+			},
+
+			-- Group Aura
+			{
+				parent = "self,OverlayScaffold", ownerKey = "GroupAura", objectType = "Frame", objectSubType = "Frame",
+				chain = {
+					"SetSize", { 32, 32 },
+					"SetPoint", { "RIGHT", 32 + 10, 0 },
+					"SetFrameLevelOffset", 10 -- high above the frame
+				},
+				values = {
+					"disableMouse", true, -- disable mouse input, as it will prevent the frame from being clickable.
+					"tooltipDefaultPosition", true -- just use the UIs regular tooltip position, don't want it covering frames.
+				}
+			},
+
+			-- Group Aura backdrop and border
+			{
+				parent = "self,GroupAura", parentKey = "Border", objectType = "Frame", objectSubType = "Frame",
+				chain = {
+					"SetFrameLevelOffset", 2,
+					"SetBackdrop", {{ edgeFile = Private.GetMedia("aura_border"), edgeSize = 16 }},
+					"SetBackdropBorderColor", { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3, 1 },
+					"ClearAllPoints", "SetPoint", { "TOPLEFT", -7, 7 }, "SetPoint", { "BOTTOMRIGHT", 7, -7 }
+				}
+
+			},
+
+			-- Group Aura Icon
+			{
+				parent = "self,GroupAura", parentKey = "Icon", objectType = "Texture", 
+				chain = {
+					"SetDrawLayer", { "ARTWORK", 1 },
+					"SetPosition", { "CENTER", 0, 0 },
+					"SetTexCoord", { 5/64, 59/64, 5/64, 59/64 },
+					"SetSizeOffset", -10
+				}
+			},
+
+			-- Group Aura Stack Count
+			{
+				parent = "self,GroupAura", parentKey = "Count", objectType = "FontString", 
+				chain = {
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "RIGHT", 
+					"SetJustifyV", "BOTTOM",
+					"SetPosition", { "BOTTOMRIGHT", 4, -4 },
+					"SetFontObject", Private.GetFont(16, true),
+					"SetTextColor", { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+					"SetParentToOwnerKey", "self,GroupAura,Border"
+				}
+			},
+
+			-- Group Aura Time
+			{
+				parent = "self,GroupAura", parentKey = "Time", objectType = "FontString", 
+				chain = {
+					"SetDrawLayer", { "OVERLAY", 1 }, 
+					"SetJustifyH", "LEFT", 
+					"SetJustifyV", "TOP",
+					"SetPosition", { "TOPLEFT", -4, 4 },
+					"SetFontObject", Private.GetFont(16, true),
+					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .85 },
+					"SetParentToOwnerKey", "self,GroupAura,Border"
+				}
+			},
+
 
 		}
 	},
 
-	-- Create child widgets
+	-- Create child widgets (Retail only)
+	-- Contains: Group Role
 	IsRetail and {
 		type = "CreateWidgets",
 		widgets = {

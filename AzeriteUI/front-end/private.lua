@@ -1953,7 +1953,8 @@ Defaults[ADDON] = {
 	aspectRatio = "wide", -- wide/ultrawide/full
 
 	-- Sets the aura filter level 
-	auraFilter = "strict", -- strict/slack
+	--auraFilter = "strict", -- strict/slack
+	auraFilterLevel = 2, -- 0 = strict, 1 = slack, 2 = spam
 
 	-- yay!
 	theme = "Azerite", -- Current variations are Azerite and Legacy. Diabolic IS coming too!

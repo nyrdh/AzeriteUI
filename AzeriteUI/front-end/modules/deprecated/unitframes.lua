@@ -2300,9 +2300,12 @@ UnitFramePlayer.OnInit = function(self)
 		-- Apply the aura filter
 		local auras = self.frame.Auras
 		if (auras) then
-			local filterMode = Core.db.auraFilter
-			auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
-			auras.enableSpamMode = filterMode == "spam"
+			--local filterMode = Core.db.auraFilter
+			--auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
+			--auras.enableSpamMode = filterMode == "spam"
+			local auraFilterLevel = Core.db.auraFilterLevel
+			auras.enableSlackMode = Private.IsForcingSlackAuraFilterMode() or (auraFilterLevel == 1) or (auraFilterLevel == 2) 
+			auras.enableSpamMode = (auraFilterLevel == 2)
 			auras:ForceUpdate()
 		end
 
@@ -2511,9 +2514,12 @@ UnitFrameTarget.OnInit = function(self)
 	-- Apply the aura filter
 	local auras = self.frame.Auras
 	if (auras) then
-		local filterMode = Core.db.auraFilter
-		auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
-		auras.enableSpamMode = filterMode == "spam"
+		--local filterMode = Core.db.auraFilter
+		--auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
+		--auras.enableSpamMode = filterMode == "spam"
+		local auraFilterLevel = Core.db.auraFilterLevel
+		auras.enableSlackMode = Private.IsForcingSlackAuraFilterMode() or (auraFilterLevel == 1) or (auraFilterLevel == 2) 
+		auras.enableSpamMode = (auraFilterLevel == 2)
 		auras:ForceUpdate()
 	end
 end 

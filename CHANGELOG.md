@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased] 2020-12-09
 ### Changed
 - Having the Honorless Target debuff from recently resurrecting should no longer prevent Explorer Mode fades.
+- Reset the saved aura filter setting for all existing characters to "spam", and set that as the default for all new ones as well.
 
 ### Fixed
 - Chat bubbles in instances should no longer look like modern art.
+- Fixed a bunch of long standing bugs with the group debuff display.
 
 ## [3.1.437-RC] 2020-12-08
 ### Added

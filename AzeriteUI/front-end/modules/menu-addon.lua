@@ -1108,21 +1108,21 @@ Module.CreateMenuTable = function(self)
 				enabledTitle = L_ENABLED:format(L["Strict"]),
 				disabledTitle = L["Strict"],
 				type = "SET_VALUE", 
-				configDB = ADDON, configKey = "auraFilter", optionArgs = { "strict" }, 
+				configDB = ADDON, configKey = "auraFilterLevel", optionArgs = { 0 }, 
 				proxyModule = nil, useCore = true
 			} or false,
 			{
 				enabledTitle = L_ENABLED:format(L["Slack"]),
 				disabledTitle = L["Slack"],
 				type = "SET_VALUE", 
-				configDB = ADDON, configKey = "auraFilter", optionArgs = { "slack" }, 
+				configDB = ADDON, configKey = "auraFilterLevel", optionArgs = { 1 }, 
 				proxyModule = nil, useCore = true
 			},
 			{
 				enabledTitle = L_ENABLED:format(L["Spam"]),
 				disabledTitle = L["Spam"],
 				type = "SET_VALUE", 
-				configDB = ADDON, configKey = "auraFilter", optionArgs = { "spam" }, 
+				configDB = ADDON, configKey = "auraFilterLevel", optionArgs = { 2 }, 
 				proxyModule = nil, useCore = true
 			}
 		})

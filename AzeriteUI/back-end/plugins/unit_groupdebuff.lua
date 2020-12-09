@@ -26,7 +26,7 @@ local levelFilter = ({
 	WARLOCK 	= { HARMFUL = { Boss = 1, Magic = 30 } } -- requires felhunter.
 })[playerClass] or { HARMFUL = { Boss = 1 } }
 
-local classFilter = { HARMFUL = {}, HELPFUL = {} }
+local classFilter = { HARMFUL = { Custom = 1 }, HELPFUL = { Custom = 1 } }
 local UpdateClassFilter = function(level)
 	if (not levelFilter) then
 		return
@@ -43,12 +43,12 @@ UpdateClassFilter(playerLevel)
 -- to allow for specific auras to be tracked through our system. 
 local spellTypeOverride = {
 	-- Tests (Require Custom to be enabled for Druids to try out)
-	--[  8936] = "Custom"  -- Regrowth 
+	--[  8936] = "Custom"  -- Regrowth
 }
 
 -- Priority of aura types. 
 -- Higher means higher.
-local PRIORITY_NONE = -1
+local PRIORITY_NONE = -9999 -- Start at something outlandishly low.
 local priorities = {
 	Magic   = 4,
 	Curse   = 3,
@@ -139,9 +139,11 @@ local Aura_OnLeave = function(element)
 end
 
 local Aura_SetCooldownTimer = function(element, start, duration)
-	if element.showCooldownSpiral then
-
-		local cooldown = element.Cooldown
+	local cooldown = element.Cooldown
+	if (not cooldown) then
+		return
+	end 
+	if (element.showCooldownSpiral) then
 		cooldown:SetSwipeColor(0, 0, 0, .75)
 		cooldown:SetDrawEdge(false)
 		cooldown:SetDrawBling(false)
@@ -154,7 +156,7 @@ local Aura_SetCooldownTimer = function(element, start, duration)
 			element:Hide()
 		end
 	else 
-		element.Cooldown:Hide()
+		cooldown:Hide()
 	end 
 end 
 
@@ -162,26 +164,26 @@ local HZ = 1/20
 local Aura_UpdateTimer = function(element, elapsed)
 	if element.timeLeft then
 		element.elapsed = (element.elapsed or 0) + elapsed
-
 		if (element.elapsed >= HZ) then
 			element.timeLeft = element.expirationTime - GetTime()
-
 			if (element.timeLeft > 0) then
-				if (element.timeLeft < LONG_THRESHOLD) or (element.showLongCooldownValues) then 
-					element.Time:SetFormattedText(formatTime(element.timeLeft))
-				else
-					element.Time:SetText("")
-				end 
+				if (element.Time) then
+					if (element.timeLeft < LONG_THRESHOLD) or (element.showLongCooldownValues) then 
+						element.Time:SetFormattedText(formatTime(element.timeLeft))
+					else
+						element.Time:SetText("")
+					end 
+				end
 				if element.PostUpdateTimer then
 					element:PostUpdateTimer()
 				end
 			else
 				element:SetScript("OnUpdate", nil)
 				Aura_SetCooldownTimer(element, 0,0)
-				
-				element.Time:SetText("")
+				if (element.Time) then
+					element.Time:SetText("")
+				end
 				element:ForceUpdate()
-
 				if (element:IsShown() and element.PostUpdateTimer) then
 					element:PostUpdateTimer()
 				end
@@ -193,7 +195,7 @@ end
 
 -- Use this to initiate the timer bars and spirals on the auras
 local Aura_SetTimer = function(element, fullDuration, expirationTime)
-	if fullDuration and (fullDuration > 0) then
+	if (fullDuration) and (fullDuration > 0) then
 
 		element.fullDuration = fullDuration
 		element.timeStarted = expirationTime - fullDuration
@@ -207,14 +209,16 @@ local Aura_SetTimer = function(element, fullDuration, expirationTime)
 
 		Aura_SetCooldownTimer(element, 0,0)
 
-		element.Time:SetText("")
+		if (element.Time) then
+			element.Time:SetText("")
+		end
 		element.fullDuration = 0
 		element.timeStarted = 0
 		element.timeLeft = 0
 	end
 
 	-- Run module post update
-	if (element:IsShown() and element.PostUpdateTimer) then
+	if (element:IsShown()) and (element.PostUpdateTimer) then
 		element:PostUpdateTimer()
 	end
 end
@@ -241,7 +245,7 @@ local Update = function(self, event, unit, ...)
 	local forced = event == "Forced"
 
 	local element = self.GroupAura
-	if element.PreUpdate then
+	if (element.PreUpdate) then
 		element:PreUpdate(unit)
 	end
 
@@ -268,7 +272,7 @@ local Update = function(self, event, unit, ...)
 		while true do
 			auraID = auraID + 1
 
-			local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = LibAura:GetUnitAura(unit, auraID, filterType)
+			local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = LibAura:GetUnitAura(unit, auraID, filterType)
 
 			if (not name) then 
 				break 
@@ -306,6 +310,7 @@ local Update = function(self, event, unit, ...)
 
 		-- Too much?
 		--element:Hide()
+		--print(newSpellID, newID)
 
 		-- Values have to be set before it's shown,
 		-- to avoid the update timer bugging out. 
@@ -319,10 +324,14 @@ local Update = function(self, event, unit, ...)
 		element.expirationTime = newExpirationTime
 
 		-- Update element icon
-		element.Icon:SetTexture(newIcon)
+		if (element.Icon) then
+			element.Icon:SetTexture(newIcon)
+		end
 
 		-- Update stack counts
-		element.Count:SetText((newCount > 1) and newCount or "")
+		if (element.Count) then
+			element.Count:SetText((newCount > 1) and newCount or "")
+		end
 
 		-- Update timers
 		Aura_SetTimer(element, newDuration, newExpirationTime)
@@ -335,10 +344,14 @@ local Update = function(self, event, unit, ...)
 		element:Hide()
 
 		-- Clear the icon 
-		element.Icon:SetTexture("")
+		if (element.Icon) then
+			element.Icon:SetTexture("")
+		end
 
 		-- Clear the stack count
-		element.Count:SetText("")
+		if (element.Count) then
+			element.Count:SetText("")
+		end
 
 		-- Clear the timer
 		Aura_SetTimer(element)
@@ -393,7 +406,7 @@ local Enable = function(self)
 			element:SetScript("OnLeave", Aura_OnLeave)
 		end
 
-		self:RegisterUnitEvent("UNIT_AURA", Proxy)
+		self:RegisterEvent("UNIT_AURA", Proxy)
 		self:RegisterEvent("PLAYER_LEVEL_UP", Proxy, true)
 
 		return true
@@ -412,5 +425,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 20)
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 25)
 end 
