@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] 2020-12-09
+### Added
+- Added various icons like group leader and assistant, master looter, main tank, main assist and raid targets to relevant legacy unit frames.
+- Added boss- and dispellable debuffs to the legacy party frames.
+
 ### Changed
 - The eye of the jailer should be less annoying now.
 - Having the Honorless Target debuff from recently resurrecting should no longer prevent Explorer Mode fades.

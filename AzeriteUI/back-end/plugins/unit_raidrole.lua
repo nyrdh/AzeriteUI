@@ -23,9 +23,9 @@ local Update = function(self, event, unit)
 
 	local role
 	local index = GetRaidTargetIndex(unit)
-	if index then 
+	if (index) and (not element.ignoreRaidTargets) then 
 		role = "RAIDTARGET"
-	elseif (UnitInParty(unit) or UnitInRaid(unit)) then 
+	elseif (element.fakeLeader) or (UnitInParty(unit) or UnitInRaid(unit)) then 
 		if (UnitIsGroupLeader(unit)) then 
 			role = "LEADER"
 		elseif (UnitIsGroupAssistant(unit)) then 
@@ -121,5 +121,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("RaidRole", Enable, Disable, Proxy, 11)
+	Lib:RegisterElement("RaidRole", Enable, Disable, Proxy, 13)
 end 
