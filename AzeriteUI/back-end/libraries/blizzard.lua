@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 67)
+local LibBlizzard = Wheel:Set("LibBlizzard", 68)
 if (not LibBlizzard) then 
 	return
 end
@@ -1358,7 +1358,6 @@ or IsRetail and function(self, ...)
 	PlayerCoordinates:SetFontObject(Game13Font_o1)
 	PlayerCoordinates:SetTextColor(255/255, 234/255, 137/255)
 	PlayerCoordinates:SetAlpha(.85)
-	PlayerCoordinates:SetPoint("BOTTOMLEFT", WorldMapFrame.ScrollContainer, "BOTTOMLEFT", 10, 7)
 	PlayerCoordinates:SetDrawLayer("OVERLAY")
 	PlayerCoordinates:SetJustifyH("LEFT")
 	PlayerCoordinates:SetJustifyV("BOTTOM")
@@ -1368,10 +1367,21 @@ or IsRetail and function(self, ...)
 	CursorCoordinates:SetFontObject(Game13Font_o1)
 	CursorCoordinates:SetTextColor(255/255, 234/255, 137/255)
 	CursorCoordinates:SetAlpha(.85)
-	CursorCoordinates:SetPoint("BOTTOMLEFT", PlayerCoordinates, "TOPLEFT", 0, 2)
 	CursorCoordinates:SetDrawLayer("OVERLAY")
 	CursorCoordinates:SetJustifyH("RIGHT")
 	CursorCoordinates:SetJustifyV("BOTTOM")
+
+	-- This is fine in Shadowlands, not in BfA
+	--PlayerCoordinates:SetPoint("BOTTOMLEFT", WorldMapFrame.ScrollContainer, "BOTTOMLEFT", 10, 7)
+	--CursorCoordinates:SetPoint("BOTTOMLEFT", PlayerCoordinates, "TOPLEFT", 0, 2)
+
+	-- This clashes with decorations all over the place
+	--CursorCoordinates:SetPoint("TOPLEFT", WorldMapFrame.ScrollContainer, "TOPLEFT", 10, -7)
+	--PlayerCoordinates:SetPoint("TOPLEFT", CursorCoordinates, "BOTTOMLEFT", 0, -2)
+
+	-- This sucks, but is visible.
+	PlayerCoordinates:SetPoint("BOTTOM", WorldMapFrame.ScrollContainer, "BOTTOM", 10, 7)
+	CursorCoordinates:SetPoint("BOTTOM", PlayerCoordinates, "TOP", 0, 2)
 
 	Coordinates:SetScript("OnUpdate", function(self, elapsed)
 		self.elapsed = self.elapsed + elapsed
