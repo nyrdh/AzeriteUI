@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 68)
+local LibBlizzard = Wheel:Set("LibBlizzard", 69)
 if (not LibBlizzard) then 
 	return
 end
@@ -1385,7 +1385,7 @@ or IsRetail and function(self, ...)
 
 	Coordinates:SetScript("OnUpdate", function(self, elapsed)
 		self.elapsed = self.elapsed + elapsed
-		if (self.elapsed < .05) then 
+		if (self.elapsed < .1) then 
 			return 
 		end 
 
