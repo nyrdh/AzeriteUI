@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 71)
+local LibBlizzard = Wheel:Set("LibBlizzard", 73)
 if (not LibBlizzard) then 
 	return
 end
@@ -1371,8 +1371,46 @@ or IsRetail and function(self, ...)
 	CursorCoordinates:SetJustifyH("RIGHT")
 	CursorCoordinates:SetJustifyV("BOTTOM")
 
-	-- https://wow.gamepedia.com/UiMapID
+	-- /dump WorldMapFrame.mapID
+	-- Other candidates for corner alignment:
+	-- Azeroth: Eastern Kingdoms (minus N'Zoth zones)
+	-- Azeroth: Kalimdor (minus N'Zoth zones)
 	local IsShadowlandsMap = {
+
+		-- Overview Maps
+		[ 947] = true, -- Azeroth
+		[ 619] = true, -- Broken Isles
+		[ 572] = true, -- Draenor
+		[  12] = true, -- Kalimdor
+		[  13] = true, -- Eastern Kingdoms
+		[1550] = true, -- Kalimdor
+		[ 113] = true, -- Northrend
+		[1550] = true, -- Shadowlands
+
+		-- Northrend Zones
+		[ 114] = true, -- Borean Tundra
+		[ 127] = true, -- Crystalsong Forest
+		[ 115] = true, -- Dragonblight
+		[ 116] = true, -- Grizzly Hills
+		[ 118] = true, -- Icecrown
+		[ 117] = true, -- Howling Fjord
+		[ 119] = true, -- Sholazar Basin
+		[ 120] = true, -- The Storm Peaks
+		[ 123] = true, -- Wintergrasp
+		[ 121] = true, -- Zul'Drak
+
+		-- Draenor Zones
+		[ 588] = true, -- Ashran
+		[ 525] = true, -- Frostfire Ridge
+		[ 543] = true, -- Gorgrond
+		[ 550] = true, -- Nagrand
+		[ 539] = true, -- Shadowmoon Valley
+		[ 542] = true, -- Spires of Arak
+		[ 535] = true, -- Talador
+		[ 543] = true, -- Tanaan Jungle
+
+		-- Shadowlands Zones
+		-- https://wow.gamepedia.com/UiMapID
 		[1643] = true, 
 		[1645] = true, 
 		[1647] = true, 
