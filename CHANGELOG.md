@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The retail world map has player- and cursor coordinates now.
 
 ### Fixed
+- Trying to fix the issue of layering after the extra action or zone ability buttons have been visible for a while, causing the cooldown spiral, keybind and charge count to be hidden beneath the border.
 - Fixed an issue where the health predict element of health bars would be immediately shown after having been reset and hidden, causing the texture coordinates to be wrong, and the bar to overflow.
 
 ## [3.1.438-RC] 2020-12-09

@@ -180,22 +180,56 @@ local StripNStyle = function(button)
 		border:SetPoint("TOPLEFT", button.GPIcon, -15, 15)
 		border:SetPoint("BOTTOMRIGHT", button.GPIcon, 15, -15)
 		border:SetParent(button)
-		border:SetFrameLevel(1)
+		border:SetFrameStrata(button:GetFrameStrata())
+		border:SetFrameLevel(button:GetFrameLevel() + 10)
 		button.GPBorder = border
+
+		button.UpdateLayers = function(button)
+			local border = button.GPBorder
+			border:SetFrameStrata(button:GetFrameStrata())
+			border:SetFrameLevel(button:GetFrameLevel() + 10)
+
+			local icon = button.GPIcon
+			if (icon) then
+				icon:SetParent(button)
+				icon:SetDrawLayer("BACKGROUND", -1)
+			end
+
+			local cooldown = button.cooldown or button.Cooldown  
+			if (cooldown) then
+				cooldown:SetFrameStrata(button:GetFrameStrata())
+				cooldown:SetFrameLevel(button:GetFrameLevel() + 5)
+			end
+
+			local keybind = button.HotKey 
+			if (keybind) then
+				keybind:SetParent(border)
+				keybind:SetDrawLayer("OVERLAY", 3)
+			end
+
+			local count = button.Count 
+			if (count) then
+				count:SetParent(border)
+				count:SetDrawLayer("OVERLAY", 4)
+			end
+		end
+
+		button:HookScript("OnShow", button.UpdateLayers)
+		button:UpdateLayers()
 	end
 
-	button.GPIcon:SetParent(button.GPBorder)
-	button.GPIcon:SetDrawLayer("BACKGROUND", -1)
+	--button.GPIcon:SetParent(button.GPBorder)
+	--button.GPIcon:SetDrawLayer("BACKGROUND", -1)
 
-	if (count) then
-		count:SetParent(button.GPBorder)
-		count:SetDrawLayer("OVERLAY", 1)
-	end
+	--if (count) then
+	--	count:SetParent(button.GPBorder)
+	--	count:SetDrawLayer("OVERLAY", 1)
+	--end
 
-	if (keybind) then
-		keybind:SetParent(button.GPBorder)
-		keybind:SetDrawLayer("OVERLAY", 1)
-	end
+	--if (keybind) then
+	--	keybind:SetParent(button.GPBorder)
+	--	keybind:SetDrawLayer("OVERLAY", 1)
+	--end
 
 	button:SetScript("OnEnter", OnEnter)
 	button:SetScript("OnLeave", OnLeave)

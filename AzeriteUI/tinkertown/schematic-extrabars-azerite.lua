@@ -168,9 +168,10 @@ local StripNStyle = function(button)
 	if (not button.GPBorder) then 
 		local border = button.scaffold:CreateFrame("Frame")
 		border:SetParent(button)
+		border:SetFrameStrata(button:GetFrameStrata())
+		border:SetFrameLevel(button:GetFrameLevel() + 10)
 		border:SetPoint("CENTER", 0, 0)
 		border:SetSize(2,2)
-		border:SetFrameLevel(1)
 		border.Texture = border:CreateTexture()
 		border.Texture:SetDrawLayer("OVERLAY", 2)
 		border.Texture:SetSize(104,104)
@@ -178,10 +179,43 @@ local StripNStyle = function(button)
 		border.Texture:SetTexture(GetMedia("actionbutton-border"))
 		border.Texture:SetVertexColor(Colors.ui[1], Colors.ui[2], Colors.ui[3], 1)
 		button.GPBorder = border
+
+		button.UpdateLayers = function(button)
+			local border = button.GPBorder
+			border:SetFrameStrata(button:GetFrameStrata())
+			border:SetFrameLevel(button:GetFrameLevel() + 10)
+
+			local icon = button.GPIcon
+			if (icon) then
+				icon:SetParent(button)
+				icon:SetDrawLayer("BACKGROUND", -1)
+			end
+
+			local cooldown = button.cooldown or button.Cooldown  
+			if (cooldown) then
+				cooldown:SetFrameStrata(button:GetFrameStrata())
+				cooldown:SetFrameLevel(button:GetFrameLevel() + 5)
+			end
+
+			local keybind = button.HotKey 
+			if (keybind) then
+				keybind:SetParent(border)
+				keybind:SetDrawLayer("OVERLAY", 3)
+			end
+
+			local count = button.Count 
+			if (count) then
+				count:SetParent(border)
+				count:SetDrawLayer("OVERLAY", 4)
+			end
+		end
+
+		button:HookScript("OnShow", button.UpdateLayers)
+		button:UpdateLayers()
 	end
 
-	button.GPIcon:SetParent(button.GPBorder)
-	button.GPIcon:SetDrawLayer("BACKGROUND", -1)
+	--button.GPIcon:SetParent(button.GPBorder)
+	--button.GPIcon:SetDrawLayer("BACKGROUND", -1)
 
 	button:SetScript("OnEnter", OnEnter)
 	button:SetScript("OnLeave", OnLeave)
