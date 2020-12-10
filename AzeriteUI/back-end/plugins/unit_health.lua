@@ -55,16 +55,6 @@ local _,CLASS = UnitClass("player")
 local minAbsorbDisplaySize = .1
 local maxAbsorbDisplaySize = .6
 
--- Setup the classic heal predict environment
-local HealComm, HealComm_OVERTIME_HEALS
-if (IsClassic) then
-	-- Add in support for LibHealComm-4.0
---	HealComm = LibStub("LibHealComm-4.0")
---	HealComm_OVERTIME_HEALS = bit.bor(HealComm.HOT_HEALS, HealComm.CHANNEL_HEALS)
-
-	
-end
-
 -- Utility Functions
 ---------------------------------------------------------------------	
 -- Calculate a RGB gradient from a minimum of 2 sets of RGB values
@@ -406,7 +396,7 @@ local Update = function(self, event, unit)
 
 	if (predict) then
 		local showPrediction, change
-		if ((allIncomingHeal > 0) or (allNegativeHeals > 0)) then 
+		if ((allIncomingHeal > 0) or (allNegativeHeals > 0)) and (maxHealth > 0) then 
 			local startPoint = curHealth/maxHealth
 
 			-- Dev switch to test absorbs with normal healing
@@ -459,16 +449,22 @@ local Update = function(self, event, unit)
 					predict:SetSize(change*previewWidth, previewHeight)
 					predict:SetTexCoord(texValue, texValue + texChange, top, bottom)
 					predict:SetVertexColor(0, .7, 0, .25)
-					predict:Show()
+					if (not predict:IsShown()) then 
+						predict:Show()
+					end 
 				elseif (change < 0) then 
 					predict:ClearAllPoints()
 					predict:SetPoint("BOTTOMRIGHT", previewTexture, "BOTTOMRIGHT", 0, 0)
 					predict:SetSize((-change)*previewWidth, previewHeight)
 					predict:SetTexCoord(texValue + texChange, texValue, top, bottom)
 					predict:SetVertexColor(.5, 0, 0, .75)
-					predict:Show()
+					if (not predict:IsShown()) then 
+						predict:Show()
+					end 
 				else 
-					predict:Hide()
+					if (predict:IsShown()) then 
+						predict:Hide()
+					end 
 				end 
 		
 			elseif (orientation == "LEFT") then 
@@ -485,22 +481,25 @@ local Update = function(self, event, unit)
 					predict:SetSize(change*previewWidth, previewHeight)
 					predict:SetTexCoord(texValue + texChange, texValue, top, bottom)
 					predict:SetVertexColor(0, .7, 0, .25)
-					predict:Show()
+					if (not predict:IsShown()) then 
+						predict:Show()
+					end 
 				elseif (change < 0) then
 					predict:ClearAllPoints()
 					predict:SetPoint("BOTTOMLEFT", previewTexture, "BOTTOMLEFT", 0, 0)
 					predict:SetSize((-change)*previewWidth, previewHeight)
 					predict:SetTexCoord(texValue, texValue + texChange, top, bottom)
 					predict:SetVertexColor(.5, 0, 0, .75)
-					predict:Show()
+					if (not predict:IsShown()) then 
+						predict:Show()
+					end 
 				else 
-					predict:Hide()
+					if (predict:IsShown()) then 
+						predict:Hide()
+					end 
 				end 
 			end 
 
-			if (not predict:IsShown()) then 
-				predict:Show()
-			end 
 		else
 			if (predict:IsShown()) then 
 				predict:Hide()
@@ -666,5 +665,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 62)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 64)
 end 
