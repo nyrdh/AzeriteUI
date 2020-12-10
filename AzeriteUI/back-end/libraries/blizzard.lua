@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 66)
+local LibBlizzard = Wheel:Set("LibBlizzard", 67)
 if (not LibBlizzard) then 
 	return
 end
@@ -1355,7 +1355,7 @@ or IsRetail and function(self, ...)
 	Coordinates.elapsed = 0
 
 	local PlayerCoordinates = Coordinates:CreateFontString()
-	PlayerCoordinates:SetFontObject(NumberFontNormal)
+	PlayerCoordinates:SetFontObject(Game13Font_o1)
 	PlayerCoordinates:SetTextColor(255/255, 234/255, 137/255)
 	PlayerCoordinates:SetAlpha(.85)
 	PlayerCoordinates:SetPoint("BOTTOMLEFT", WorldMapFrame.ScrollContainer, "BOTTOMLEFT", 10, 7)
@@ -1365,7 +1365,7 @@ or IsRetail and function(self, ...)
 
 
 	local CursorCoordinates = Coordinates:CreateFontString()
-	CursorCoordinates:SetFontObject(NumberFontNormal)
+	CursorCoordinates:SetFontObject(Game13Font_o1)
 	CursorCoordinates:SetTextColor(255/255, 234/255, 137/255)
 	CursorCoordinates:SetAlpha(.85)
 	CursorCoordinates:SetPoint("BOTTOMLEFT", PlayerCoordinates, "TOPLEFT", 0, 2)
