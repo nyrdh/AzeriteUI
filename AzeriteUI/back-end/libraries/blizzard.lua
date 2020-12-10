@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 64)
+local LibBlizzard = Wheel:Set("LibBlizzard", 66)
 if (not LibBlizzard) then 
 	return
 end
@@ -27,6 +27,7 @@ local error = error
 local pairs = pairs
 local select = select
 local string_format = string.format
+local string_gsub = string.gsub
 local string_join = string.join
 local string_match = string.match
 local type = type
@@ -1337,12 +1338,79 @@ or IsRetail and function(self, ...)
 	local WorldMapOnShow
 
 	local smallerMapScale, mapSized = .8
+	local colorCode = string_format("|cff%02x%02x%02x", 255, 234, 137)
+	local L_PLAYER, L_MOUSE = PLAYER, MOUSE_LABEL
+
+	local GetBestMapForUnit = C_Map.GetBestMapForUnit
+	local GetPlayerMapPosition = C_Map.GetPlayerMapPosition
+	local GetFormattedCoordinates = function(x, y)
+		-- Since 9.0.1, this color code usage works.
+		return 	string_gsub(string_format("|cfff0f0f0%.2f|r", x*100), "%.(.+)", "|cffa0a0a0.%1|r"),
+				string_gsub(string_format("|cfff0f0f0%.2f|r", y*100), "%.(.+)", "|cffa0a0a0.%1|r")
+	end 
+
+	local Coordinates = CreateFrame("Frame", nil, WorldMapFrame)
+	Coordinates:SetFrameStrata(WorldMapFrame.BorderFrame:GetFrameStrata())
+	Coordinates:SetFrameLevel(WorldMapFrame.BorderFrame:GetFrameLevel() + 10)
+	Coordinates.elapsed = 0
+
+	local PlayerCoordinates = Coordinates:CreateFontString()
+	PlayerCoordinates:SetFontObject(NumberFontNormal)
+	PlayerCoordinates:SetTextColor(255/255, 234/255, 137/255)
+	PlayerCoordinates:SetAlpha(.85)
+	PlayerCoordinates:SetPoint("BOTTOMLEFT", WorldMapFrame.ScrollContainer, "BOTTOMLEFT", 10, 7)
+	PlayerCoordinates:SetDrawLayer("OVERLAY")
+	PlayerCoordinates:SetJustifyH("LEFT")
+	PlayerCoordinates:SetJustifyV("BOTTOM")
+
+
+	local CursorCoordinates = Coordinates:CreateFontString()
+	CursorCoordinates:SetFontObject(NumberFontNormal)
+	CursorCoordinates:SetTextColor(255/255, 234/255, 137/255)
+	CursorCoordinates:SetAlpha(.85)
+	CursorCoordinates:SetPoint("BOTTOMLEFT", PlayerCoordinates, "TOPLEFT", 0, 2)
+	CursorCoordinates:SetDrawLayer("OVERLAY")
+	CursorCoordinates:SetJustifyH("RIGHT")
+	CursorCoordinates:SetJustifyV("BOTTOM")
+
+	Coordinates:SetScript("OnUpdate", function(self, elapsed)
+		self.elapsed = self.elapsed + elapsed
+		if (self.elapsed < .05) then 
+			return 
+		end 
+
+		local pX, pY, cX, cY
+		local mapID = GetBestMapForUnit("player")
+		if (mapID) then 
+			local mapPosObject = GetPlayerMapPosition(mapID, "player")
+			if (mapPosObject) then 
+				pX, pY = mapPosObject:GetXY()
+			end 
+		end 
+
+		if (WorldMapFrame.ScrollContainer:IsMouseOver(0, 0, 0, 0)) then 
+			cX, cY = WorldMapFrame.ScrollContainer:GetNormalizedCursorPosition()
+		end
+
+		if (pX and pY) then 
+			PlayerCoordinates:SetFormattedText("%s:|r   %s, %s", L_PLAYER, GetFormattedCoordinates(pX, pY))
+		else 
+			PlayerCoordinates:SetFormattedText("%s:|r   |cfff0f0f0%s|r", L_PLAYER, NOT_APPLICABLE)
+		end 
+
+		if (cX and cY) then 
+			CursorCoordinates:SetFormattedText("%s:|r   %s, %s", L_MOUSE, GetFormattedCoordinates(cX, cY))
+		else
+			CursorCoordinates:SetFormattedText("%s:|r   |cfff0f0f0%s|r", L_MOUSE, NOT_APPLICABLE)
+		end 
+
+	end)
 
 	SetLargeWorldMap = function(self)
 		WorldMapFrame:SetParent(UIParent)
 		WorldMapFrame:SetScale(1)
 		WorldMapFrame.ScrollContainer.Child:SetScale(smallerMapScale)
-	
+
 		if (WorldMapFrame:GetAttribute("UIPanelLayout-area") ~= "center") then
 			SetUIPanelAttribute(WorldMapFrame, "area", "center");
 		end
@@ -1378,6 +1446,10 @@ or IsRetail and function(self, ...)
 	end
 	
 	WorldMapOnShow = function(self, event, ...)
+		-- They don't seem to stick. Weird.
+		Coordinates:SetFrameStrata(WorldMapFrame.BorderFrame:GetFrameStrata())
+		Coordinates:SetFrameLevel(WorldMapFrame.BorderFrame:GetFrameLevel() + 10)
+
 		if (mapSized) then
 			return
 		end
@@ -1402,7 +1474,7 @@ or IsRetail and function(self, ...)
 		-- Never again!
 		mapSized = true
 	end
-	
+
 	WorldMapFrame.BlackoutFrame.Blackout:SetTexture(nil)
 	WorldMapFrame.BlackoutFrame:EnableMouse(false)
 

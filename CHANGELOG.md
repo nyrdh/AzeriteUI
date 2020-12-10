@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2020-12-10
+### Added
+- The retail world map has player- and cursor coordinates now.
+
+### Fixed
+- Fixed an issue where the health predict element of health bars would be immediately shown after having been reset and hidden, causing the texture coordinates to be wrong, and the bar to overflow.
+
 ## [3.1.438-RC] 2020-12-09
 ### Added
 - Added experimental legacy theme raid frames. Work in progress, more sub-elements and more testing will be done.
