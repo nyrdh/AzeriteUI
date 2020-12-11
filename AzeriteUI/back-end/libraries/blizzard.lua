@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 73)
+local LibBlizzard = Wheel:Set("LibBlizzard", 75)
 if (not LibBlizzard) then 
 	return
 end
@@ -1344,7 +1344,7 @@ or IsRetail and function(self, ...)
 	local GetBestMapForUnit = C_Map.GetBestMapForUnit
 	local GetPlayerMapPosition = C_Map.GetPlayerMapPosition
 	local GetFormattedCoordinates = function(x, y)
-		-- Since 9.0.1, this color code usage works.
+		-- Since 9.0.1, color codes can be nested, so this works.
 		return 	string_gsub(string_format("|cfff0f0f0%.2f|r", x*100), "%.(.+)", "|cffa0a0a0.%1|r"),
 				string_gsub(string_format("|cfff0f0f0%.2f|r", y*100), "%.(.+)", "|cffa0a0a0.%1|r")
 	end 
@@ -1362,7 +1362,6 @@ or IsRetail and function(self, ...)
 	PlayerCoordinates:SetJustifyH("LEFT")
 	PlayerCoordinates:SetJustifyV("BOTTOM")
 
-
 	local CursorCoordinates = Coordinates:CreateFontString()
 	CursorCoordinates:SetFontObject(Game13Font_o1)
 	CursorCoordinates:SetTextColor(255/255, 234/255, 137/255)
@@ -1371,11 +1370,13 @@ or IsRetail and function(self, ...)
 	CursorCoordinates:SetJustifyH("RIGHT")
 	CursorCoordinates:SetJustifyV("BOTTOM")
 
+	-- Please note that this is NOT supposed to be a list of all zones, 
+	-- so don't dig into this code and assume anything is missing.
+	-- This is a list for the custom styling element, 
+	-- telling which zone maps have a free bottom left corner.
+	-- 
 	-- /dump WorldMapFrame.mapID
-	-- Other candidates for corner alignment:
-	-- Azeroth: Eastern Kingdoms (minus N'Zoth zones)
-	-- Azeroth: Kalimdor (minus N'Zoth zones)
-	local IsShadowlandsMap = {
+	local BottomLeft = {
 
 		-- Overview Maps
 		[ 947] = true, -- Azeroth
@@ -1386,6 +1387,53 @@ or IsRetail and function(self, ...)
 		[1550] = true, -- Kalimdor
 		[ 113] = true, -- Northrend
 		[1550] = true, -- Shadowlands
+		[ 948] = true, -- The Maelstrom
+
+		-- Cities
+		[ 103] = true, -- Exodar
+		[  87] = true, -- Ironforge
+		[  85] = true, -- Orgrimmar
+		[ 110] = true, -- Silvermoon City
+		[ 218] = true, -- Ruins of Gilneas City
+		[  84] = true, -- Stormwind
+		[  88] = true, -- Thunder Bluff
+
+		-- Eastern Kingdoms
+		[  15] = true, -- Badlands
+		[  17] = true, -- Blasted Lands
+		[  36] = true, -- Burning Steppes
+		[  42] = true, -- Deadwind Pass
+		[  27] = true, -- Dun Morogh
+		[  47] = true, -- Duskwood
+		[  23] = true, -- Eastern Plaguelands
+		[  37] = true, -- Elwynn Forest
+		[  94] = true, -- Eversong Woods
+		[  95] = true, -- Ghostlands
+		[  25] = true, -- Hillsbrad Foothills
+		[  26] = true, -- Hinterlands
+		[ 122] = true, -- Isle of Quel'Danas
+		[  48] = true, -- Loch Modan
+		[  49] = true, -- Redridge Mountains
+		[ 217] = true, -- Ruins of Gilneas
+		[  32] = true, -- Searing Gorge
+		[  21] = true, -- Silverpine Forest
+		[ 224] = true, -- Stranglethorn Vale
+		[  51] = true, -- Swamp of Sorrows
+		[  18] = true, -- Tirisfal Glades
+		[ 244] = true, -- Tol Barad
+		[ 245] = true, -- Tol Barad Peninsula
+		[ 241] = true, -- Twilight Highlands
+		[ 203] = true, -- Vashj'ir
+		[  22] = true, -- Western Plaguelands
+		[  52] = true, -- Westfall
+		[  56] = true, -- Wetlands
+
+		-- Kalimdor
+
+		-- The Maelstrom
+		[ 207] = true, -- Deepholm
+		[ 194] = true, -- Kezan
+		[ 174] = true, -- The Lost Isles
 
 		-- Northrend Zones
 		[ 114] = true, -- Borean Tundra
@@ -1687,16 +1735,20 @@ or IsRetail and function(self, ...)
 			CursorCoordinates:ClearAllPoints()
 
 			local mapID = WorldMapFrame.mapID
-			if (mapID) and (IsShadowlandsMap[mapID]) then
+			if (mapID) and (BottomLeft[mapID]) then
 
 				-- This is fine in Shadowlands, but fully fails in BfA of Legion. 
 				PlayerCoordinates:SetPoint("BOTTOMLEFT", WorldMapFrame.ScrollContainer, "BOTTOMLEFT", 16, 12)
 				CursorCoordinates:SetPoint("BOTTOMLEFT", PlayerCoordinates, "TOPLEFT", 0, 1)
 
 			else
-				-- This sucks, but works for other zones.
-				PlayerCoordinates:SetPoint("BOTTOM", WorldMapFrame.ScrollContainer, "BOTTOM", 10, 9)
-				CursorCoordinates:SetPoint("BOTTOM", PlayerCoordinates, "TOP", 0, 1)
+				-- Two lines
+				--PlayerCoordinates:SetPoint("BOTTOM", WorldMapFrame.ScrollContainer, "BOTTOM", 10, 9)
+				--CursorCoordinates:SetPoint("BOTTOM", PlayerCoordinates, "TOP", 0, 1)
+
+				-- One line
+				PlayerCoordinates:SetPoint("BOTTOMRIGHT", WorldMapFrame.ScrollContainer, "BOTTOM", -10, 9)
+				CursorCoordinates:SetPoint("BOTTOMLEFT", WorldMapFrame.ScrollContainer, "BOTTOM", 10, 9)
 			end
 			self.mapID = mapID
 		end
