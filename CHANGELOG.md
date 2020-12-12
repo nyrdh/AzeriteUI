@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2020-12-12
+### Added
+- Added first draft of the focus frame. Work in progress, not all elements added yet. 
+- Added dispellable- and boss auras to your pet frame as well.
+
+### Changed
+- Legacy Warlock SoulShards should now be hidden if you're not in combat, and don't currently target something.
+- Explorer Mode will no longer fade in when you have a focus target. You can have a focus, and keep exploring.
+
 ## [3.1.439-RC] 2020-12-12
 ### Added
 - The retail world map has player- and cursor coordinates now.

@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 45)
+local LibFader = Wheel:Set("LibFader", 46)
 if (not LibFader) then	
 	return
 end
@@ -633,7 +633,7 @@ LibFader.OnUpdate = function(self, elapsed)
 	if self.FORCED
 	or Data.inCombat 
 	or Data.hasTarget 
-	or Data.hasFocus 
+	--or Data.hasFocus 
 	or (Data.inGroup and Data.disableGroupFade)
 	or Data.hasOverride 
 	or Data.hasPossess 

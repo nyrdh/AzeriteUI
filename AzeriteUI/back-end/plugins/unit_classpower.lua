@@ -181,9 +181,9 @@ local Generic = setmetatable({
 		local maxDisplayed = element.maxDisplayed or element.max or max
 
 		-- Class Color Overrides
+		local _,unitClass = UnitClass(unit)
 		if (element.colorClass and UnitIsPlayer(unit)) then
-			local _, class = UnitClass(unit)
-			color = class and self.colors.class[class]
+			color = unitClass and self.colors.class[unitClass]
 			r, g, b = color[1], color[2], color[3]
 		end 
 
@@ -197,7 +197,7 @@ local Generic = setmetatable({
 				hidden = (
 					-- Has the module chosen to only show this with an active target?
 					(element.hideWhenNoTarget and (not UnitExists("target"))) or 
-	
+
 					-- Has the module chosen to only show this with a hostile target?
 					(element.hideWhenUnattackable and (not UnitCanAttack("player", "target")))
 				)
@@ -1182,5 +1182,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 50)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 52)
 end 
