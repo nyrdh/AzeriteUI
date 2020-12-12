@@ -25,9 +25,9 @@ Module.OnInit = function(self)
 		return self:SetUserDisabled(true)
 	end
 
-	self:PurgeSavedSettingFromAllProfiles(self:GetName(), "editMode", "buttonsPrimary", "buttonsComplimentary", "enableComplimentary", "enableStance", "enablePet", "showBinds", "showCooldown", "showCooldownCount", "showNames", "visibilityPrimary", "visibilityComplimentary", "visibilityStance", "visibilityPet")
+	--self:PurgeSavedSettingFromAllProfiles(self:GetName(), "editMode", "buttonsPrimary", "buttonsComplimentary", "enableComplimentary", "enableStance", "enablePet", "showBinds", "showCooldown", "showCooldownCount", "showNames", "visibilityPrimary", "visibilityComplimentary", "visibilityStance", "visibilityPet")
 
-	self.db = (Private.GetLayoutID() == "Azerite") and Private.GetConfig(self:GetName()) or Private.GetConfig("ModuleForge::ActionBars")
+	self.db = Private.GetConfig("ModuleForge::ActionBars")
 	self.layoutID = Private.GetLayoutID()
 	self:SubForge(Private.GetSchematic("ModuleForge::ActionBars"), "OnInit")
 end 

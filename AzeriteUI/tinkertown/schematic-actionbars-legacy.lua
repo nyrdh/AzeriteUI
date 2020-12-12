@@ -84,6 +84,9 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 
 							-- Arrange the main and extra actionbar buttons
 							arrangeButtons = [=[
+								-- Current theme prefix. Use caps.
+								local prefix = "Legacy::"; 
+
 								local offsetX, offsetY;
 								local primaryWidth = 0;
 								local anchor = self:GetFrameRef("AnchorFrame");
@@ -148,9 +151,9 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 									primaryWidth = width > primaryWidth and width or primaryWidth;
 								end
 
-								local enableSecondaryBar = self:GetAttribute("Legacy::enableSecondaryBar");
-								local enableSideBarLeft = self:GetAttribute("Legacy::enableSideBarLeft");
-								local enableSideBarRight = self:GetAttribute("Legacy::enableSideBarRight");
+								local enableSecondaryBar = self:GetAttribute(prefix.."enableSecondaryBar");
+								local enableSideBarLeft = self:GetAttribute(prefix.."enableSideBarLeft");
+								local enableSideBarRight = self:GetAttribute(prefix.."enableSideBarRight");
 								local rowWidth = 4; -- width of sidebar blocks in buttons
 								
 								-- Visibility parents for pull-out bars.
@@ -277,13 +280,16 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 
 							-- Arrange the pet action bar buttons.
 							arrangePetButtons = [=[
+								-- Current theme prefix. Use caps.
+								local prefix = "Legacy::"; 
+
 								local w = PetButtons[1] and PetButtons[1]:GetWidth();
 								local h = Buttons[1] and Buttons[1]:GetHeight();
 								if (not h) or (not w) then
 									return
 								end
 								local anchor = self:GetFrameRef("AnchorFrame");
-								local offsetY = h and (11+6 + (h-2)*((self:GetAttribute("Legacy::enableSecondaryBar")) and 2 or 1));
+								local offsetY = h and (11+6 + (h-2)*((self:GetAttribute(prefix.."enableSecondaryBar")) and 2 or 1));
 								for id,button in ipairs(PetButtons) do
 									button:ClearAllPoints();
 									button:SetPoint("BOTTOMLEFT", anchor, "BOTTOM", (id-1)*(w-3)-((w-3)*(5)+1), offsetY);
@@ -293,11 +299,14 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 							-- Saved settings changed.
 							-- This is called by the options menu after changes and on startup.
 							attributeChanged = [=[
+								-- Current theme prefix. Use caps.
+								local prefix = "Legacy::"; 
+
 								-- 'name' appears to be turned to lowercase by the restricted environment(?), 
 								-- but we're doing it manually anyway, just to avoid problems. 
-								if name then 
+								if (name) then 
 									name = string.lower(name); 
-									name = name:gsub("legacy::",""); -- kill off theme prefix
+									name = name:gsub(string.lower(prefix),""); -- kill off theme prefix
 								end 
 
 								if (name == "change-castondown") then 
@@ -326,7 +335,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 									self:CallMethod("UpdateKeybindDisplay"); 
 
 								elseif (name == "change-enablesecondarybar") then
-									self:SetAttribute("Legacy::enableSecondaryBar", value);
+									self:SetAttribute(prefix.."enableSecondaryBar", value);
 
 									for i in ipairs(SecondaryButtons) do
 										local pager = SecondaryButtons[i]:GetFrameRef("Page"); 
@@ -349,7 +358,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 									self:CallMethod("UpdateButtonCount"); 
 
 								elseif (name == "change-enablesidebarright") then
-									self:SetAttribute("Legacy::enableSideBarRight", value);
+									self:SetAttribute(prefix.."enableSideBarRight", value);
 
 									for i in ipairs(SideBarRightButtons) do
 										local pager = SideBarRightButtons[i]:GetFrameRef("Page"); 
@@ -371,7 +380,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 									self:CallMethod("UpdateButtonCount"); 
 
 								elseif (name == "change-enablesidebarleft") then
-									self:SetAttribute("Legacy::enableSideBarLeft", value);
+									self:SetAttribute(prefix.."enableSideBarLeft", value);
 
 									for i in ipairs(SideBarLeftButtons) do
 										local pager = SideBarLeftButtons[i]:GetFrameRef("Page"); 
@@ -393,7 +402,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 									self:CallMethod("UpdateButtonCount"); 
 
 								elseif (name == "change-enablepetbar") then
-									self:SetAttribute("Legacy::enablePetBar", value);
+									self:SetAttribute(prefix.."enablePetBar", value);
 									
 									for i = 1,10 do
 										local pager = PetPagers[i]; 

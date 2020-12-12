@@ -1987,48 +1987,6 @@ Defaults.BlizzardFloaterHUD = (IsClassic) and {
 	enableTalkingHead = true -- immersive and nice
 }
 
-Defaults.ActionBarMain = {
-
-	-- General settings
-	buttonLock = true,
-	castOnDown = true,
-	keybindDisplayPriority = "default", -- can be "gamepad", "keyboard", "default"
-	lastKeybindDisplayType = "keyboard", -- not a user setting, just to save the state.
-	gamePadType = "default", -- gamepad icons used. "xbox", "xbox-reversed", "playstation", "default"
-
-	-- Azerite theme settings
-	-------------------------------------------------
-	-- Valid range is 0 to 17. 
-	-- Anything outside will be limited to this range.
-	-- default this to 5, to access a full standard bar.
-	extraButtonsCount = 5, 
-
-	-- Valid values are 'always','hover','combat'
-	-- Defaulting this to combat, 
-	-- so new users can access their full default bar
-	extraButtonsVisibility = "combat", 
-	petBarVisibility = "hover",
-	petBarEnabled = true,
-
-	-- Legacy theme settings
-	-------------------------------------------------
-
-
-
-	-- *Options below are not yet implemented!
-	stanceBarEnabled = true,
-	stanceBarVisibility = "hover",
-	sideBar1Enabled = false,
-	sideBar1Page = RIGHT_ACTIONBAR_PAGE,
-	sideBar2Enabled = false,
-	sideBar2Page = LEFT_ACTIONBAR_PAGE,
-	sideBar3Enabled = false,
-	sideBar3Page = BOTTOMRIGHT_ACTIONBAR_PAGE,
-	dragRequireAlt = true,
-	dragRequireCtrl = true,
-	dragRequireShift = true
-}
-
 Defaults.ChatFilters = {
 	--enableAllChatFilters = true, -- enable chat filters to pretty things up!
 	enableChatStyling = true,
@@ -2079,11 +2037,8 @@ Defaults.UnitFrameRaid = {
 ------------------------------------------------
 -- New saved settings which included
 -- different entries for different themes.
--- Note that during our transition period,
--- not all of these will be implemented at first.
 Defaults["ModuleForge::ActionBars"] = {
-	-- General settings
-	-- *Note: Not yet using these in all themes!
+	-- General settings. No prefix on them.
 	["buttonLock"] = true,
 	["castOnDown"] = true,
 	["keybindDisplayPriority"] = "default", -- can be 'gamepad', 'keyboard', 'default'

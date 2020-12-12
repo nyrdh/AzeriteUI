@@ -1143,27 +1143,27 @@ Module.CreateMenuTable = function(self)
 				buttons = {
 					{
 						title = L["Extra Buttons Visibility"], type = nil, hasWindow = true, 
-						isSlave = true, slaveDB = "ActionBarMain", slaveKey = "extraButtonsCount", slaveEnableValues = "5,11,17",
+						isSlave = true, slaveDB = "ModuleForge::ActionBars", slaveKey = "Azerite::extraButtonsCount", slaveEnableValues = "5,11,17",
 						buttons = {
 							{
 								enabledTitle = L_ENABLED:format(L["MouseOver"]),
 								disabledTitle = L["MouseOver"],
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "extraButtonsVisibility", optionArgs = { "hover" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "Azerite::extraButtonsVisibility", optionArgs = { "hover" }, 
 								proxyModule = "ActionBarMain"
 							},
 							{
 								enabledTitle = L_ENABLED:format(L["MouseOver + Combat"]),
 								disabledTitle = L["MouseOver + Combat"],
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "extraButtonsVisibility", optionArgs = { "combat" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "Azerite::extraButtonsVisibility", optionArgs = { "combat" }, 
 								proxyModule = "ActionBarMain"
 							},
 							{
 								enabledTitle = L_ENABLED:format(L["Always Visible"]),
 								disabledTitle = L["Always Visible"],
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "extraButtonsVisibility", optionArgs = { "always" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "Azerite::extraButtonsVisibility", optionArgs = { "always" }, 
 								proxyModule = "ActionBarMain"
 							}
 						}
@@ -1172,28 +1172,28 @@ Module.CreateMenuTable = function(self)
 						enabledTitle = L_ENABLED:format( L["No Extra Buttons"]),
 						disabledTitle =  L["No Extra Buttons"],
 						type = "SET_VALUE", 
-						configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 0 }, 
+						configDB = "ModuleForge::ActionBars", configKey = "Azerite::extraButtonsCount", optionArgs = { 0 }, 
 						proxyModule = "ActionBarMain"
 					},
 					{
 						enabledTitle = L_ENABLED:format(L["+%.0f Buttons"]:format(5)),
 						disabledTitle = L["+%.0f Buttons"]:format(5),
 						type = "SET_VALUE", 
-						configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 5 }, 
+						configDB = "ModuleForge::ActionBars", configKey = "Azerite::extraButtonsCount", optionArgs = { 5 }, 
 						proxyModule = "ActionBarMain"
 					},
 					{
 						enabledTitle = L_ENABLED:format(L["+%.0f Buttons"]:format(11)),
 						disabledTitle = L["+%.0f Buttons"]:format(11),
 						type = "SET_VALUE", 
-						configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 11 }, 
+						configDB = "ModuleForge::ActionBars", configKey = "Azerite::extraButtonsCount", optionArgs = { 11 }, 
 						proxyModule = "ActionBarMain"
 					},
 					{
 						enabledTitle = L_ENABLED:format(L["+%.0f Buttons"]:format(17)),
 						disabledTitle = L["+%.0f Buttons"]:format(17),
 						type = "SET_VALUE", 
-						configDB = "ActionBarMain", configKey = "extraButtonsCount", optionArgs = { 17 }, 
+						configDB = "ModuleForge::ActionBars", configKey = "Azerite::extraButtonsCount", optionArgs = { 17 }, 
 						proxyModule = "ActionBarMain"
 					}
 				}
@@ -1204,27 +1204,27 @@ Module.CreateMenuTable = function(self)
 				buttons = {
 					{
 						title = L["Pet Bar Visibility"], type = nil, hasWindow = true, 
-						isSlave = true, slaveDB = "ActionBarMain", slaveKey = "petBarEnabled",
+						isSlave = true, slaveDB = "ModuleForge::ActionBars", slaveKey = "Azerite::petBarEnabled",
 						buttons = {
 							{
 								enabledTitle = L_ENABLED:format(L["MouseOver"]),
 								disabledTitle = L["MouseOver"],
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "petBarVisibility", optionArgs = { "hover" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "Azerite::petBarVisibility", optionArgs = { "hover" }, 
 								proxyModule = "ActionBarMain"
 							},
 							{
 								enabledTitle = L_ENABLED:format(L["MouseOver + Combat"]),
 								disabledTitle = L["MouseOver + Combat"],
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "petBarVisibility", optionArgs = { "combat" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "Azerite::petBarVisibility", optionArgs = { "combat" }, 
 								proxyModule = "ActionBarMain"
 							},
 							{
 								enabledTitle = L_ENABLED:format(L["Always Visible"]),
 								disabledTitle = L["Always Visible"],
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "petBarVisibility", optionArgs = { "always" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "Azerite::petBarVisibility", optionArgs = { "always" }, 
 								proxyModule = "ActionBarMain"
 							}
 						}
@@ -1233,7 +1233,7 @@ Module.CreateMenuTable = function(self)
 						enabledTitle = L["Enabled"],
 						disabledTitle = L["Disabled"],
 						type = "TOGGLE_VALUE", hasWindow = false, 
-						configDB = "ActionBarMain", configKey = "petBarEnabled", 
+						configDB = "ModuleForge::ActionBars", configKey = "Azerite::petBarEnabled", 
 						proxyModule = "ActionBarMain"
 					}
 				},
@@ -1295,55 +1295,55 @@ Module.CreateMenuTable = function(self)
 								enabledTitle = L_ENABLED:format(L["GamePad First"]),
 								disabledTitle = L["GamePad First"],
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "gamepad" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "keybindDisplayPriority", optionArgs = { "gamepad" }, 
 								proxyModule = "ActionBarMain"
 							},
 							{
 								enabledTitle = L_ENABLED:format(L["Keyboard First"]),
 								disabledTitle = L["Keyboard First"],
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "keyboard" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "keybindDisplayPriority", optionArgs = { "keyboard" }, 
 								proxyModule = "ActionBarMain"
 							},
 							{
 								enabledTitle = L_ENABLED:format(DEFAULT),
 								disabledTitle = DEFAULT,
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "keybindDisplayPriority", optionArgs = { "default" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "keybindDisplayPriority", optionArgs = { "default" }, 
 								proxyModule = "ActionBarMain"
 							}
 						}
 					},
 					{
 						title = L["GamePad Type"], type = nil, hasWindow = true,
-						--isSlave = true, slaveDB = "ActionBarMain", slaveKey = "gamePadType",
+						--isSlave = true, slaveDB = "ModuleForge::ActionBars", slaveKey = "gamePadType",
 						buttons = {
 							{
 								enabledTitle = L_ENABLED:format(L["Xbox"]),
 								disabledTitle = L["Xbox"],
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "xbox" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "gamePadType", optionArgs = { "xbox" }, 
 								proxyModule = "ActionBarMain"
 							},
 							{
 								enabledTitle = L_ENABLED:format(L["Xbox (Reversed)"]),
 								disabledTitle = L["Xbox (Reversed)"],
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "xbox-reversed" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "gamePadType", optionArgs = { "xbox-reversed" }, 
 								proxyModule = "ActionBarMain"
 							},
 							{
 								enabledTitle = L_ENABLED:format(L["Playstation"]),
 								disabledTitle = L["Playstation"],
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "playstation" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "gamePadType", optionArgs = { "playstation" }, 
 								proxyModule = "ActionBarMain"
 							},
 							{
 								enabledTitle = L_ENABLED:format(DEFAULT),
 								disabledTitle = DEFAULT,
 								type = "SET_VALUE", 
-								configDB = "ActionBarMain", configKey = "gamePadType", optionArgs = { "default" }, 
+								configDB = "ModuleForge::ActionBars", configKey = "gamePadType", optionArgs = { "default" }, 
 								proxyModule = "ActionBarMain"
 							}
 						}
@@ -1378,7 +1378,7 @@ Module.CreateMenuTable = function(self)
 			enabledTitle = L_ENABLED:format(L["Cast on Down"]),
 			disabledTitle = L_DISABLED:format(L["Cast on Down"]),
 			type = "TOGGLE_VALUE", hasWindow = false, 
-			configDB = "ActionBarMain", configKey = "castOnDown", 
+			configDB = "ModuleForge::ActionBars", configKey = "castOnDown", 
 			proxyModule = "ActionBarMain"
 		})
 
@@ -1386,7 +1386,7 @@ Module.CreateMenuTable = function(self)
 			enabledTitle = L_ENABLED:format(L["Button Lock"]),
 			disabledTitle = L_DISABLED:format(L["Button Lock"]),
 			type = "TOGGLE_VALUE", hasWindow = false, 
-			configDB = "ActionBarMain", configKey = "buttonLock", 
+			configDB = "ModuleForge::ActionBars", configKey = "buttonLock", 
 			proxyModule = "ActionBarMain"
 		})
 		table_insert(MenuTable, ActionBarMenu)

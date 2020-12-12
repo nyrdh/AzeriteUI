@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The retail world map has player- and cursor coordinates now.
 
 ### Fixed
+- Fixed an issue related to the transition to a new settings system for the actionbars, which caused certain settings such as cast on down and button lock to not save or have any effect at all in the legacy theme. The transition is complete, and it will cause a one time settings reset for the azerite theme actionbar settings. 
 - Trying to fix the issue of layering after the extra action or zone ability buttons have been visible for a while, causing the cooldown spiral, keybind and charge count to be hidden beneath the border.
 - Fixed an issue where the health predict element of health bars would be immediately shown after having been reset and hidden, causing the texture coordinates to be wrong, and the bar to overflow.
 

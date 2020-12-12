@@ -75,8 +75,11 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 						"secureSnippets", {
 							-- Arrange the main and extra actionbar buttons
 							arrangeButtons = [=[
+								-- Current theme prefix. Use caps.
+								local prefix = "Azerite::"; 
+								
 								local UICenter = self:GetFrameRef("UICenter"); 
-								local extraButtonsCount = tonumber(self:GetAttribute("extraButtonsCount")) or 0;
+								local extraButtonsCount = tonumber(self:GetAttribute(prefix.."extraButtonsCount")) or 0;
 								local buttonSize, buttonSpacing, iconSize = 64, 8, 44;
 								local row2mod = 1-2/5; -- horizontal offset for upper row
 
@@ -130,19 +133,23 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							-- Saved setting changed.
 							-- This is called by the options menu after changes and on startup.
 							attributeChanged = [=[
+								-- Current theme prefix. Use caps.
+								local prefix = "Azerite::"; 
+
 								-- 'name' appears to be turned to lowercase by the restricted environment(?), 
 								-- but we're doing it manually anyway, just to avoid problems. 
-								if name then 
+								if (name) then 
 									name = string.lower(name); 
+									name = name:gsub(string.lower(prefix),""); -- kill off theme prefix
 								end 
 
 								if (name == "change-extrabuttonsvisibility") then 
-									self:SetAttribute("extraButtonsVisibility", value); 
+									self:SetAttribute(prefix.."extraButtonsVisibility", value); 
 									self:CallMethod("UpdateFadeAnchors"); 
 									self:CallMethod("UpdateFading"); 
 								
 								elseif (name == "change-petbarvisibility") then 
-										self:SetAttribute("petBarVisibility", value); 
+										self:SetAttribute(prefix.."petBarVisibility", value); 
 										self:CallMethod("UpdateFadeAnchors"); 
 										self:CallMethod("UpdateFading"); 
 							
@@ -164,7 +171,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 										end 
 									end 
 
-									self:SetAttribute("extraButtonsCount", extraButtonsCount); 
+									self:SetAttribute(prefix.."extraButtonsCount", extraButtonsCount); 
 									self:RunAttribute("arrangeButtons"); 
 
 									-- tell lua about it
@@ -175,7 +182,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 									self:CallMethod("UpdateCastOnDown"); 
 
 								elseif (name == "change-petbarenabled") then 
-									self:SetAttribute("petBarEnabled", value and true or false); 
+									self:SetAttribute(prefix.."petBarEnabled", value and true or false); 
 
 									for i = 1,10 do
 										local pager = PetPagers[i]; 
@@ -311,7 +318,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 						
 							local buttonID = 0 -- current buttonID when spawning
 							local numPrimary = 7 -- Number of primary buttons always visible
-							local firstHiddenID = db.extraButtonsCount + numPrimary -- first buttonID to be hidden
+							local firstHiddenID = self:GetDB("extraButtonsCount") + numPrimary -- first buttonID to be hidden
 							
 							-- Primary Action Bar
 							for id = 1,NUM_ACTIONBAR_BUTTONS do 
@@ -425,7 +432,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 								proxy:SetFrameRef("PetButton"..id, self.PetButtons[id])
 								proxy:SetFrameRef("PetPager"..id, self.PetButtons[id]:GetPager())
 						
-								if (not db.petBarEnabled) then
+								if (not self:GetDB("petBarEnabled")) then
 									self.PetButtons[id]:GetPager():Hide()
 								end
 								
@@ -803,25 +810,22 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 						----------------------------------------------------
 						-- Updates when and if the additional actionbuttons should fade in and out. 
 						"UpdateFading", function(self)
-							local db = self.db
-
 							-- Set action bar hover settings
 							local actionBarHoverFrame = self:GetFadeFrame()
-							actionBarHoverFrame.incombat = db.extraButtonsVisibility == "combat"
-							actionBarHoverFrame.always = db.extraButtonsVisibility == "always"
+							actionBarHoverFrame.incombat = self:GetDB("extraButtonsVisibility") == "combat"
+							actionBarHoverFrame.always = self:GetDB("extraButtonsVisibility") == "always"
 
 							-- We're hardcoding these until options can be added
 							local petBarHoverFrame = self:GetFadeFramePet()
-							petBarHoverFrame.incombat = db.petBarVisibility == "combat"
-							petBarHoverFrame.always = db.petBarVisibility == "always"
+							petBarHoverFrame.incombat = self:GetDB("petBarVisibility") == "combat"
+							petBarHoverFrame.always = self:GetDB("petBarVisibility") == "always"
 						end,
 
 						-- Updates the anchors used by the explorer mode
 						-- to decide when you are hovering above the actionbar section.
 						"UpdateExplorerModeAnchors", function(self)
-							local db = self.db
 							local frame = self:GetOverlayFramePet()
-							if (self.db.petBarEnabled) and (UnitExists("pet")) then
+							if (self:GetDB("petBarEnabled")) and (UnitExists("pet")) then
 								frame:ClearAllPoints()
 								frame:SetPoint("TOPLEFT", self.PetButtons[1], "TOPLEFT")
 								frame:SetPoint("BOTTOMRIGHT", self.PetButtons[10], "BOTTOMRIGHT")
@@ -841,7 +845,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							local first, last, left, right, top, bottom, mLeft, mRight, mTop, mBottom
 							for id,button in ipairs(self.Buttons) do 
 								-- If we pass number of visible hoverbuttons, just bail out
-								if (id > db.extraButtonsCount + 7) then 
+								if (id > self:GetDB("extraButtonsCount") + 7) then 
 									break 
 								end 
 
@@ -893,7 +897,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							end
 
 							local petBarHoverFrame = self:GetFadeFramePet()
-							if (self.db.petBarEnabled) then
+							if (self:GetDB("petBarEnabled")) then
 								petBarHoverFrame:ClearAllPoints()
 								petBarHoverFrame:SetPoint("TOPLEFT", self.PetButtons[1], "TOPLEFT")
 								petBarHoverFrame:SetPoint("BOTTOMRIGHT", self.PetButtons[10], "BOTTOMRIGHT")
