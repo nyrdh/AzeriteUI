@@ -11,8 +11,9 @@ Note that the use of this template is NOT optional, I ask these questions for a 
 -->
 
 ## The problem  
-<!--Briefly describe the issue you are experiencing BELOW, not inside this comment section. Tell us what you were trying to do and what happened instead. Remember, this is _not_ a place to ask questions. For questions, go to [our Discord](https://discord.gg/MUSfWXd) server, just remember to read the rules and keep in mind nobody there are paid, we're all just gaming enthusiasts and volunteers.-->
-
+<!--Briefly describe the issue you are experiencing BELOW, not inside this comment section. Tell us what you were trying to do and what happened instead. If there are multiple issues or bugs, create multiple reports. If you put multiple problems in a single report, that report will be prioritized below nearly all others or possibly deleted, as we can't really use it to track progress since tags such as "solved" might only apply to one of the isses.
+  
+And remember, this is _not_ a place to ask questions. For questions, go to [our Discord](https://discord.gg/MUSfWXd) server, just remember to read the rules and keep in mind nobody there are paid, we're all just gaming enthusiasts and volunteers.-->
 
 ### Make sure you can check all these boxes  
 <!--The classic client still only finds new files on game startup, not on character relogs or interface reloads. So if this is in classic, make sure you exit the game when updating addons to avoid this. This doesn't matter in retail, as can add files when the game is running since patch 9.0.1. -->
