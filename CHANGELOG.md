@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-12-12
+## [3.1.440-RC] 2020-12-12
 ### Added
 - Added first draft of the focus frame. Work in progress, not all elements added yet. 
 - Added dispellable- and boss auras to your pet frame as well.
