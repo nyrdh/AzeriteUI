@@ -2,7 +2,7 @@ local LibCast = Wheel("LibCast")
 assert(LibCast, "UnitCast requires LibCast to be loaded.")
 
 local LibClientBuild = Wheel("LibClientBuild")
-assert(LibCast, "UnitCast requires LibClientBuild to be loaded.")
+assert(LibClientBuild, "UnitCast requires LibClientBuild to be loaded.")
 
 local LibNumbers = Wheel("LibNumbers")
 assert(LibNumbers, "UnitCast requires LibNumbers to be loaded.")
@@ -663,5 +663,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 52)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 53)
 end 

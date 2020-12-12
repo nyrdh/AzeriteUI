@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Legacy Warlock SoulShards should now be hidden if you're not in combat, and don't currently target something.
 - Explorer Mode will no longer fade in when you have a focus target. You can have a focus, and keep exploring.
 
+### Fixed
+- Redid the group debuff filter to follow [wowpedia](https://wow.gamepedia.com/Dispel).
+
 ## [3.1.439-RC] 2020-12-12
 ### Added
 - The retail world map has player- and cursor coordinates now.
