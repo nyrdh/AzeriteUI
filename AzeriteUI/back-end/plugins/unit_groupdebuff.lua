@@ -16,24 +16,30 @@ local UnitIsCharmed = UnitIsCharmed
 local _,playerClass = UnitClass("player")
 local playerLevel = UnitLevel("player")
 
--- Default aura types to parse for dispel classes.
-local levelFilter = ({
-	DRUID 		= { HARMFUL = { Boss = 1, Curse = 24, Poison = 14 } },
-	MAGE 		= { HARMFUL = { Boss = 1, Curse = 18 } },
-	PALADIN 	= { HARMFUL = { Boss = 1, Magic = 42, Poison = 8, Disease = 8 } },
-	PRIEST 		= { HARMFUL = { Boss = 1, Magic = 18, Disease = 14 } },
-	SHAMAN 		= { HARMFUL = { Boss = 1, Poison = 16, Disease = 22 } },
-	WARLOCK 	= { HARMFUL = { Boss = 1, Magic = 30 } } -- requires felhunter.
-})[playerClass] or { HARMFUL = { Boss = 1 } }
+-- Base filter for everybody
+local baseFilter = { 
+	HARMFUL = { Boss = true, Custom = true }, 
+	HELPFUL = { Boss = true, Custom = true } 
+}
 
-local classFilter = { HARMFUL = { Custom = 1 }, HELPFUL = { Custom = 1 } }
+-- Class specific aura filter based on learning level of the dispel.
+-- The above is todo, all levels changed in Shadowlands. Blergh.
+local classFilter = ({
+	DRUID 		= { HARMFUL = { Curse = 1, Poison = 1 } },
+	MAGE 		= { HARMFUL = { Curse = 1 } },
+	PALADIN 	= { HARMFUL = { Magic = 1, Poison = 1, Disease = 1 } },
+	PRIEST 		= { HARMFUL = { Magic = 1, Disease = 1 } },
+	SHAMAN 		= { HARMFUL = { Poison = 1, Disease = 1 } },
+	WARLOCK 	= { HARMFUL = { Magic = 1 } } 
+})[playerClass]
+
 local UpdateClassFilter = function(level)
-	if (not levelFilter) then
+	if (not classFilter) then
 		return
 	end
-	for filterType,allowedSchools in pairs(levelFilter) do
-		for school,thresholdLevel in pairs(allowedSchools) do
-			classFilter[filterType][school] = (thresholdLevel <= level)
+	for filterType,schoolList in pairs(classFilter) do
+		for auraType,thresholdLevel in pairs(schoolList) do
+			baseFilter[filterType][auraType] = (thresholdLevel <= level)
 		end
 	end
 end
@@ -264,7 +270,7 @@ local Update = function(self, event, unit, ...)
 	local currentPrio = PRIORITY_NONE
 
 	-- Once for each filter type, as UnitAura can't list HELPFUL and HARMFUL at the same time. 
-	for filterType,allowedSchools in pairs(classFilter) do
+	for filterType,schoolList in pairs(baseFilter) do
 
 		-- Iterate auras until no more exists, 
 		-- don't rely on values that will be different in Classic and Live. 
@@ -285,7 +291,7 @@ local Update = function(self, event, unit, ...)
 			if (auraType and (not isCharmed) and (not canAttack)) then
 
 				-- Do we have a priority for the current aura?
-				local prio = allowedSchools[auraType] and priorities[auraType]
+				local prio = schoolList[auraType] and priorities[auraType]
 				if (prio and (prio > currentPrio)) then
 					newID = auraID
 					newPriority = prio
@@ -425,5 +431,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 26)
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 27)
 end 
