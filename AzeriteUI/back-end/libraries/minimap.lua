@@ -1,4 +1,4 @@
-local Version = 57
+local Version = 58
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -55,6 +55,7 @@ local GetCursorPosition = GetCursorPosition
 local GetCVar = GetCVar
 local GetPlayerFacing = GetPlayerFacing
 local GetRealZoneText = GetRealZoneText
+local IsResting = IsResting
 local ToggleDropDownMenu = ToggleDropDownMenu
 
 -- WoW Objects
@@ -66,7 +67,7 @@ local IsRetail = LibClientBuild:IsRetail()
 
 -- Localized Torghast instance name
 local L_TORGHAST = GetRealZoneText(2162)
-local IN_TORGHAST = GetRealZoneText() == L_TORGHAST
+local IN_TORGHAST = (not IsResting()) and (GetRealZoneText() == L_TORGHAST)
 
 -- Library registries
 LibMinimap.embeds = LibMinimap.embeds or {} -- modules embedding this library
@@ -1220,8 +1221,12 @@ LibMinimap.OnEvent = function(self, event, ...)
 
 		-- Update the compass
 		self:UpdateCompass()
+
 	elseif (event == "PLAYER_ENTERING_WORLD") then
-		IN_TORGHAST = GetRealZoneText() == L_TORGHAST
+		-- In Torghast, map is always locked. Weird.
+		-- *Note that this is only in the tower, not the antechamber.
+		-- *We're resting in the antechamber, and it's a sanctuary. Good indicators.
+		IN_TORGHAST = (not IsResting()) and (GetRealZoneText() == L_TORGHAST)
 	end
 end
 
