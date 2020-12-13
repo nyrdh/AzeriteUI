@@ -62,7 +62,7 @@ end
 -- Only list dispels that require a specific spec. 
 -- *Basically this is all healer classes except priest.
 -- *Note that this ONLY applies to Retail, not Classic!
-local specFilter = ({
+local specFilter = (IsRetail) and ({
 	-- CLASS 	= { FILTER_TYPE = { School = SpecID } }
 	DRUID 		= { HARMFUL = { Magic = 4 } },
 	MONK 		= { HARMFUL = { Magic = 2 } },
@@ -71,24 +71,22 @@ local specFilter = ({
 })[playerClass]
 
 local UpdateClassFilter = function(level)
-	if (not classFilter) then
-		return
-	end
-	for filterType,schoolList in pairs(classFilter) do
-		for auraType,thresholdLevel in pairs(schoolList) do
-			--baseFilter[filterType][auraType] = (thresholdLevel <= level)
-			baseFilter[filterType][auraType] = true
+	if (classFilter) then
+		for filterType,schoolList in pairs(classFilter) do
+			for auraType,thresholdLevel in pairs(schoolList) do
+				--baseFilter[filterType][auraType] = (thresholdLevel <= level)
+				baseFilter[filterType][auraType] = true
+			end
 		end
 	end
-	if (IsRetail) then
+	if (specFilter) then
 		local activeGroup = GetActiveSpecGroup()
 		local currentSpecID = activeGroup and GetSpecialization(false, false, activeGroup)
-		if (not currentSpecID) then
-			return
-		end
-		for filterType,schoolList in pairs(specFilter) do
-			for auraType,specID in pairs(schoolList) do
-				baseFilter[filterType][auraType] = (specID == currentSpecID)
+		if (currentSpecID) then
+			for filterType,schoolList in pairs(specFilter) do
+				for auraType,specID in pairs(schoolList) do
+					baseFilter[filterType][auraType] = (specID == currentSpecID)
+				end
 			end
 		end
 	end
@@ -494,5 +492,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 29)
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 31)
 end 

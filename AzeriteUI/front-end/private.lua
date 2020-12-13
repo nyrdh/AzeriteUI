@@ -1622,70 +1622,70 @@ local UnitFrame_Aura_PostCreateButton = function(element, button)
 end
 
 local UnitFrame_Aura_PostUpdateButton = function(element, button)
-	local colors = element._owner.colors
-	local layout = element._owner.layout
-
-	local isEnemy = UnitIsEnemy(button.unit, "player")
-	local isFriend = UnitIsFriend("player", button.unit)
-	local isYou = UnitIsUnit("player", button.unit)
+	local unit = button.unit
+	if (not unit) then
+		return
+	end
 
 	-- Border
-	if (isFriend) then
-		if button.isBuff then 
-			local color = layout.AuraBorderBackdropBorderColor
-			if color then 
-				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
-			end 
+	if (element.isFriend) then
+		if (button.isBuff) then 
+			button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
 		else
-			local color = colors.debuff[button.debuffType or "none"] or layout.AuraBorderBackdropBorderColor
+			local color = Colors.debuff[button.debuffType or "none"]
 			if color then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			else
+				button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
 			end 
 		end
 	else 
 		if (button.isStealable) then 
-			local color = colors.power.ARCANE_CHARGES or layout.AuraBorderBackdropBorderColor
-			if color then 
+			local color = Colors.power.ARCANE_CHARGES
+			if (color) then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			else
+				button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
 			end 
 		elseif (button.isBuff) then 
-			local color = layout.AuraBorderBackdropBorderColor -- colors.quest.green
-			if color then 
-				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
-			end 
+			button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
 		else
-			--local color = colors.debuff[button.debuffType or "none"] or layout.AuraBorderBackdropBorderColor
-			local color = colors.debuff.none or layout.AuraBorderBackdropBorderColor
-			if color then 
+			local color = Colors.debuff.none
+			if (color) then 
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
+			else
+				button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
 			end 
 		end
 	end
 
 	-- Icon
-	if (isYou) then
-		button.Icon:SetDesaturated(false)
-	elseif (isFriend) then
-		if (button.isBuff) then
-			if button.isCastByPlayer then 
-				button.Icon:SetDesaturated(false)
-			else
-				button.Icon:SetDesaturated(true)
-			end
-		else
-			button.Icon:SetDesaturated(false)
+	local desaturate
+	if (element.isYou) then
+		-- Desature buffs on you cast by others
+		if (button.isBuff) and (not button.isCastByPlayer) then 
+			desaturate = true
+		end
+	elseif (element.isFriend) then
+		-- Desature buffs on friends not cast by you
+		if (button.isBuff) and (not button.isCastByPlayer) then 
+			desaturate = true
 		end
 	else
-		if (button.isBuff) then 
-			button.Icon:SetDesaturated(false)
-		else
-			if button.isCastByPlayer then 
-				button.Icon:SetDesaturated(false)
-			else
-				button.Icon:SetDesaturated(true)
-			end
+		-- Desature debuffs not cast by you on attackable units
+		if (not button.isBuff) and (not button.isCastByPlayer) then 
+			desaturate = true
 		end
 	end
+
+	if (desaturate) then
+		button.Icon:SetDesaturated(true)
+		button.Icon:SetVertexColor(.5, .5, .5)
+	else
+		button.Icon:SetDesaturated(false)
+		button.Icon:SetVertexColor(1, 1, 1)
+	end
+
 end
 
 ------------------------------------------------------------------

@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.441-RC] 2020-12-13
+### Changed
+- Desaturated and toned down Azerite theme auras not cast by the player on other units.
+- Added a few debuffs to the Explorer Mode's safe list, so they won't prevent the UI from fading out.
+
+### Fixed
+- Fixed an error for non-healer classes related to dispellable debuffs. 
+
 ## [3.1.440-RC] 2020-12-12
 ### Added
 - Added first draft of the focus frame. Work in progress, not all elements added yet. 
