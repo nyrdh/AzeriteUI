@@ -1,4 +1,4 @@
-local Version = 56
+local Version = 57
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -54,6 +54,7 @@ local CreateFrame = CreateFrame
 local GetCursorPosition = GetCursorPosition
 local GetCVar = GetCVar
 local GetPlayerFacing = GetPlayerFacing
+local GetRealZoneText = GetRealZoneText
 local ToggleDropDownMenu = ToggleDropDownMenu
 
 -- WoW Objects
@@ -62,6 +63,10 @@ local WorldFrame = WorldFrame
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
+
+-- Localized Torghast instance name
+local L_TORGHAST = GetRealZoneText(2162)
+local IN_TORGHAST = GetRealZoneText() == L_TORGHAST
 
 -- Library registries
 LibMinimap.embeds = LibMinimap.embeds or {} -- modules embedding this library
@@ -1023,13 +1028,14 @@ LibMinimap.UpdateCompass = function()
 		end
 	
 		local playerFacing = GetPlayerFacing()
-		if (not playerFacing or (compassFrame.supressCompass)) then
+		if (not playerFacing) or (compassFrame.supressCompass) then
 			compassFrame:SetAlpha(0)
 		else
 			compassFrame:SetAlpha(1)
 		end
 	
-		local angle = (LibMinimap.rotateMinimap and playerFacing) and -playerFacing or 0
+		-- In Torghast, map is always locked. Weird.
+		local angle = (IN_TORGHAST) and 0 or (LibMinimap.rotateMinimap and playerFacing) and -playerFacing or 0
 	
 		compassFrame.east:SetPoint("CENTER", radius*math.cos(angle), radius*math.sin(angle))
 		compassFrame.north:SetPoint("CENTER", radius*math.cos(angle + math.pi/2), radius*math.sin(angle + math.pi/2))
@@ -1165,6 +1171,7 @@ LibMinimap.SetMinimapCompassEnabled = function(self, enableCompass)
 		-- Watch out for changes to the rotation setting
 		LibMinimap:RegisterEvent("CVAR_UPDATE", "OnEvent")
 		LibMinimap:RegisterEvent("VARIABLES_LOADED", "OnEvent")
+		LibMinimap:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	else
 
 		-- Hide our frame if it exists
@@ -1177,10 +1184,11 @@ LibMinimap.SetMinimapCompassEnabled = function(self, enableCompass)
 		MinimapCompassTexture:SetAlpha(1)
 		MinimapNorthTag:SetAlpha(1)
 
-		-- Remove the event
+		-- Remove the events
 		if LibMinimap:IsEventRegistered("CVAR_UPDATE", "OnEvent") then
 			LibMinimap:UnregisterEvent("CVAR_UPDATE", "OnEvent")
 			LibMinimap:UnregisterEvent("VARIABLES_LOADED", "OnEvent")
+			LibMinimap:UnregisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 		end
 	end
 
@@ -1212,6 +1220,8 @@ LibMinimap.OnEvent = function(self, event, ...)
 
 		-- Update the compass
 		self:UpdateCompass()
+	elseif (event == "PLAYER_ENTERING_WORLD") then
+		IN_TORGHAST = GetRealZoneText() == L_TORGHAST
 	end
 end
 

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2020-12-13
+### Changed
+- When you're inside Torghast, the minimap compass will now always point north to reflect that minimap rotation simply does not work inside this place.
+
 ## [3.1.441-RC] 2020-12-13
 ### Changed
 - Desaturated and toned down Azerite theme auras not cast by the player on other units.
