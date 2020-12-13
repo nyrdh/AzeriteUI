@@ -1,4 +1,4 @@
-local LibDB = Wheel:Set("LibDB", 19)
+local LibDB = Wheel:Set("LibDB", 21)
 if (not LibDB) then	
 	return
 end
@@ -165,6 +165,23 @@ LibDB.NewConfig = function(self, name, config, returnProfile)
 	return self:GetConfig(name, returnProfile)
 end
 
+-- Wipe away an entire module's stored settings.
+LibDB.RemoveConfig = function(self, name)
+	check(name, 1, "string")
+	local ownerName = tostring(self:GetOwner())
+	local globalName = globals[ownerName]
+	if (globalName) then 
+		globalDB = _G[globalName]
+		if (globalDB[name]) then
+			globalDB[name] = nil
+		end
+	end
+	local configDB = configs[ownerName]
+	if (configDB[name]) then
+		configDB[name] = nil
+	end	
+end
+
 -- Wipe away a set of settings from all profiles.
 -- Using this quite a lot in front-end modules,
 -- might as well make it a back-end feature.
@@ -308,6 +325,7 @@ local embedMethods = {
 	ParseSavedVariables = true, 
 	PurgeSavedSettingFromAllProfiles = true,
 	NewConfig = true,
+	RemoveConfig = true, 
 	GetConfig = true,
 	GetConfigDefaults = true,
 	NewDatabase = true,
