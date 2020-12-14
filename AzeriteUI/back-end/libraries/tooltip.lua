@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 87)
+local LibTooltip = Wheel:Set("LibTooltip", 88)
 if (not LibTooltip) then
 	return
 end
@@ -1572,22 +1572,41 @@ Tooltip.SetUnit = function(self, unit)
 
 				if (data.objectives) then
 					for objectiveID, objectiveData in ipairs(data.objectives) do
-						self:AddLine(" ")
-						self:AddLine(objectiveData.questTitle, colors.title[1], colors.title[2], colors.title[3])
-
-						for objectiveID, questObjectiveData in ipairs(objectiveData.questObjectives) do
+	
+						-- Do a first iteration to figure out if we have completes.
+						local notComplete
+						for questObjectiveID, questObjectiveData in ipairs(objectiveData.questObjectives) do
 							local objectiveType = questObjectiveData.objectiveType
-							if (objectiveType == "incomplete") then
-								self:AddLine(questObjectiveData.objectiveText, colors.quest.gray[1], colors.quest.gray[2], colors.quest.gray[3])
-							elseif (objectiveType == "complete") then
-								self:AddLine(questObjectiveData.objectiveText, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
-							elseif (objectiveType == "failed") then
-								self:AddLine(questObjectiveData.objectiveText, colors.quest.red[1], colors.quest.red[2], colors.quest.red[3])
-							else
-								-- Fallback for unknowns.
-								self:AddLine(questObjectiveData.objectiveText, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+							if (objectiveType == "incomplete") or (objectiveType == "failed") then
+								notComplete = true
+								break
 							end
 						end
+
+						-- Only show incompletes.
+						if (notComplete) then 
+
+							self:AddLine(" ")
+							self:AddLine(objectiveData.questTitle, colors.title[1], colors.title[2], colors.title[3])
+		
+							for questObjectiveID, questObjectiveData in ipairs(objectiveData.questObjectives) do
+								local objectiveType = questObjectiveData.objectiveType
+	
+	
+								-- Use coloring for unfinished quests.
+								if (objectiveType == "incomplete") then
+									self:AddLine(questObjectiveData.objectiveText, colors.quest.gray[1], colors.quest.gray[2], colors.quest.gray[3])
+								elseif (objectiveType == "complete") then
+									self:AddLine(questObjectiveData.objectiveText, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+								elseif (objectiveType == "failed") then
+									self:AddLine(questObjectiveData.objectiveText, colors.quest.red[1], colors.quest.red[2], colors.quest.red[3])
+								else
+									-- Fallback for unknowns.
+									self:AddLine(questObjectiveData.objectiveText, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
+								end
+							end
+						end
+						
 					end
 				end
 

@@ -693,22 +693,39 @@ local OnTooltipSetUnit = function(tooltip)
 		-- Add quest objectives
 		if (data.objectives) then
 			for objectiveID, objectiveData in ipairs(data.objectives) do
-				lineIndex = AddIndexedLine(tooltip, lineIndex, BLANK) -- this ends up at the end(..?)
-				lineIndex = AddIndexedLine(tooltip, lineIndex, objectiveData.questTitle, Colors.title[1], Colors.title[2], Colors.title[3])
 
-				for objectiveID, questObjectiveData in ipairs(objectiveData.questObjectives) do
+				-- Do a first iteration to figure out if we have completes.
+				local notComplete
+				for questObjectiveID, questObjectiveData in ipairs(objectiveData.questObjectives) do
 					local objectiveType = questObjectiveData.objectiveType
-					if (objectiveType == "incomplete") then
-						lineIndex = AddIndexedLine(tooltip, lineIndex, questObjectiveData.objectiveText, Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3])
-					elseif (objectiveType == "complete") then
-						lineIndex = AddIndexedLine(tooltip, lineIndex, questObjectiveData.objectiveText, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
-					elseif (objectiveType == "failed") then
-						lineIndex = AddIndexedLine(tooltip, lineIndex, questObjectiveData.objectiveText, Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
-					else
-						-- Fallback for unknowns.
-						lineIndex = AddIndexedLine(tooltip, lineIndex, questObjectiveData.objectiveText, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+					if (objectiveType == "incomplete") or (objectiveType == "failed") then
+						notComplete = true
+						break
 					end
 				end
+
+				-- Only show incompletes.
+				if (notComplete) then 
+
+					lineIndex = AddIndexedLine(tooltip, lineIndex, BLANK) -- this ends up at the end(..?)
+					lineIndex = AddIndexedLine(tooltip, lineIndex, objectiveData.questTitle, Colors.title[1], Colors.title[2], Colors.title[3])
+
+					for objectiveID, questObjectiveData in ipairs(objectiveData.questObjectives) do
+						local objectiveType = questObjectiveData.objectiveType
+						if (objectiveType == "incomplete") then
+							lineIndex = AddIndexedLine(tooltip, lineIndex, questObjectiveData.objectiveText, Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3])
+						elseif (objectiveType == "complete") then
+							lineIndex = AddIndexedLine(tooltip, lineIndex, questObjectiveData.objectiveText, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+						elseif (objectiveType == "failed") then
+							lineIndex = AddIndexedLine(tooltip, lineIndex, questObjectiveData.objectiveText, Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
+						else
+							-- Fallback for unknowns.
+							lineIndex = AddIndexedLine(tooltip, lineIndex, questObjectiveData.objectiveText, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+						end
+					end
+
+				end
+
 			end
 		end
 
@@ -740,6 +757,22 @@ local OnTooltipSetUnit = function(tooltip)
 						end
 					end
 				end
+			end
+		end
+	end
+
+	-- Re-align vertical to keep empty lines from taking up space.
+	if (lineIndex < numLines) then
+		for i = numLines,lineIndex+1,-1 do 
+			local left = _G[tooltipName.."TextLeft"..i]
+			local right = _G[tooltipName.."TextRight"..i]
+			if (left) then
+				left:SetText("")
+				left:Hide()
+			end
+			if (right) then
+				right:SetText("")
+				right:Hide()
 			end
 		end
 	end

@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 47)
+local LibFader = Wheel:Set("LibFader", 48)
 if (not LibFader) then	
 	return
 end
@@ -174,9 +174,8 @@ elseif (IsRetail) then
 		[271571] = true, -- Ready! (when doing the "Shell Game" world quests) -- added 8.0.1
 
 		-- Shadowlands
-		-- Night Fae Covenant
-		[320227] = true, -- Depleted Shell 
-		[329492] = true, -- Slumberwood Band 
+		[320227] = true, -- Depleted Shell (Night Fae Covenant)
+		[329492] = true, -- Slumberwood Band (Item Effect)
 	}
 end
 
