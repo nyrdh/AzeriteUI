@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-12-13
+## [3.1.442-RC] 2020-12-15
 ### Changed
 - NPC tooltips will no longer show quest information for quests where you have completed all the objectives. 
 - When you're inside Torghast, the minimap compass will now always point north to reflect that minimap rotation simply does not work inside this place.

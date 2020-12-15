@@ -1,4 +1,4 @@
-local Version = 58
+local Version = 59
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -190,8 +190,10 @@ local OnElementEvent = function(proxy, event, ...)
 	if (Callbacks[proxy] and Callbacks[proxy][event]) then
 		local events = Callbacks[proxy][event]
 		for i = 1, #events do
-			-- Note: this has created a nil error once!
-			events[i](proxy, event, ...)
+			local event = events[i]
+			if (event) and (type(event) == "function") then
+				events[i](proxy, event, ...)
+			end
 		end
 	end
 end
@@ -284,19 +286,18 @@ end
 
 ElementHandler.UnregisterEvent = function(proxy, event, func)
 	-- silently fail if the event isn't even registered
-	if not Callbacks[proxy] or not Callbacks[proxy][event] then
+	if (not Callbacks[proxy]) or (not Callbacks[proxy][event]) then
 		return
 	end
 
 	local events = Callbacks[proxy][event]
 
-	if #events > 0 then
+	if (#events > 0) then
 		-- find the function's id
 		for i = #events, 1, -1 do
-			if events[i] == func then
+			if (events[i] == func) then
 				table_remove(events, i)
-				--events[i] = nil -- remove the function from the event's registry
-				if #events == 0 then
+				if (#events == 0) then
 					UnregisterEvent(proxy, event)
 				end
 			end
@@ -306,7 +307,7 @@ end
 
 ElementHandler.UnregisterMessage = function(proxy, event, func)
 	-- silently fail if the event isn't even registered
-	if not Callbacks[proxy] or not Callbacks[proxy][event] then
+	if (not Callbacks[proxy]) or (not Callbacks[proxy][event]) then
 		return
 	end
 
@@ -317,8 +318,7 @@ ElementHandler.UnregisterMessage = function(proxy, event, func)
 		for i = #events, 1, -1 do
 			if events[i] == func then
 				table_remove(events, i)
-				--events[i] = nil -- remove the function from the event's registry
-				if #events == 0 then
+				if (#events == 0) then
 					UnregisterMessage(proxy, event)
 				end
 			end
@@ -327,7 +327,7 @@ ElementHandler.UnregisterMessage = function(proxy, event, func)
 end
 
 ElementHandler.UnregisterAllEvents = function(proxy)
-	if not Callbacks[proxy] then
+	if (not Callbacks[proxy]) then
 		return
 	end
 	for event, funcs in pairs(Callbacks[proxy]) do
@@ -433,25 +433,32 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 	-- Careful not to use 'self' here,
 	-- as the minimap key only exists in the library,
 	-- not in the modules that embed it.
-	if LibMinimap.minimap then
+	if (LibMinimap.minimap) then
 
 		-- Only return it if it's made by a compatible library version,
 		-- otherwise reset it to our current standard.
 		local minimapHolder, mapVersion = unpack(LibMinimap.minimap)
-		if (mapVersion >= Version) then
-			return minimapHolder
+		if (mapVersion < Version) then
+			-- A false return value should indicate something went wrong.
+			return false
+		end
+
+		-- If this flag isn't set or the map hasn't been initialized, 
+		-- all of the below will always be redone.
+		if (onlyQuery) then
+			return true
 		end
 	end
 
 	-- Error if this is a query, and the mapversion is too old or not initialized yet
-	if (onlyQuery) then
-		local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-		if (not LibMinimap.minimap) then
-			error(("LibMinimap: '%s' failed, map not initialized. Did you forget to call 'SyncMinimap()' first?"):format(name),3)
-		else
-			error(("LibMinimap: '%s' failed, map version too old. Did you forget to call 'SyncMinimap()' first?"):format(name),3)
-		end
-	end
+	---if (onlyQuery) then
+	---	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
+	---	if (not LibMinimap.minimap) then
+	---		error(("LibMinimap: '%s' failed, map not initialized. Did you forget to call 'SyncMinimap()' first?"):format(name),3)
+	---	else
+	---		error(("LibMinimap: '%s' failed, map version too old. Did you forget to call 'SyncMinimap()' first?"):format(name),3)
+	---	end
+	---end
 
 	-- We need to do this, or moving the Minimap will
 	-- cause a SetPoint family anchor bullshit bug.
@@ -534,12 +541,12 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 	-- and let the user decide minimap visibility
 	-- by hooking our own regions' visibility to it.
 	-- This way minimap visibility keybinds will still function.
-	Library.OldMinimap:SetParent(Library.MapParent)
-	Library.OldMinimap:ClearAllPoints()
-	Library.OldMinimap:SetPoint("CENTER", Library.MapHolder, "CENTER", 0, 0)
-	Library.OldMinimap:SetFrameStrata("LOW")
-	Library.OldMinimap:SetFrameLevel(2)
-	Library.OldMinimap:SetScale(1)
+	getMetaMethod("SetParent")(Library.OldMinimap, Library.MapParent)
+	getMetaMethod("ClearAllPoints")(Library.OldMinimap)
+	getMetaMethod("SetPoint")(Library.OldMinimap, "CENTER", Library.MapHolder, "CENTER", 0, 0)
+	getMetaMethod("SetFrameStrata")(Library.OldMinimap, "LOW")
+	getMetaMethod("SetFrameLevel")(Library.OldMinimap, 2)
+	getMetaMethod("SetScale")(Library.OldMinimap, 1)
 
 	-- Hook minimap visibility changes
 	-- Use a unique hook identifier to prevent multiple library instances
@@ -549,23 +556,27 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 
 	-- keep these two disabled
 	-- or the map will change position
-	Library.OldMinimap:SetResizable(true)
-	Library.OldMinimap:SetMovable(false)
-	Library.OldMinimap:SetUserPlaced(false)
+	getMetaMethod("SetResizable")(Library.OldMinimap, true)
+	getMetaMethod("SetMovable")(Library.OldMinimap, false)
+	getMetaMethod("SetUserPlaced")(Library.OldMinimap, false)
 
 	-- Just remove most of the old map functionality for now
 	-- Will re-route or re-add stuff later if incompatibilities arise.
-	Library.OldMinimap.SetParent = noop
-	Library.OldMinimap.SetFrameLevel = noop
-	Library.OldMinimap.ClearAllPoints = noop
-	Library.OldMinimap.SetAllPoints = noop
-	Library.OldMinimap.SetPoint = noop
-	Library.OldMinimap.SetFrameStrata = noop
-	Library.OldMinimap.SetResizable = noop
-	Library.OldMinimap.SetMovable = noop
-	Library.OldMinimap.SetUserPlaced = noop
-	Library.OldMinimap.SetSize = noop
-	Library.OldMinimap.SetScale = noop
+	for methodName in pairs({
+		SetParent = true,
+		SetFrameLevel = true,
+		ClearAllPoints = true,
+		SetAllPoints = true,
+		SetPoint = true,
+		SetFrameStrata = true,
+		SetResizable = true,
+		SetMovable = true,
+		SetUserPlaced = true,
+		SetSize = true,
+		SetScale = true
+	}) do
+		Library.OldMinimap[methodName] = noop	
+	end
 
 	-- Proxy methods on the actual minimap
 	-- that returns information about the custom map holder
@@ -1234,6 +1245,10 @@ end
 ---------------------------------------------------------
 LibMinimap.GetMinimapHandler = function(self)
 	if (not ElementProxy[self]) then
+		-- Auto-sync it here, so we can avoid this call
+		-- from within any modules. Keep it simple!
+		self:SyncMinimap(true)
+
 		-- create a new instance of the element
 		-- note that we're using the same template for all elements
 		local proxy = setmetatable(LibMinimap:CreateFrame("Frame"), ElementHandler_MT)

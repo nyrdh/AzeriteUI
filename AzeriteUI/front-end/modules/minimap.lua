@@ -713,12 +713,8 @@ Module.SetUpMinimap = function(self)
 
 	-- Frame
 	----------------------------------------------------
-	-- This is needed to initialize the map to 
-	-- the most recent version of the library.
-	-- All other calls will fail without it.
-	self:SyncMinimap() 
-
 	-- Retrieve an unique element handler for our module
+	-- This also syncs the minimap and sets it up for us.
 	local Handler = self:GetMinimapHandler()
 	Handler.colors = Colors
 	
