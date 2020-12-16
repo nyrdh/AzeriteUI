@@ -53,11 +53,14 @@ tinkertown\tinkertown.xml
 # all others are children of this one. 
 front-end\root.lua
 
+# Menu Module. 
+# This one is required, even by the root.
+front-end\modules\menu-addon.lua
+
 # Modules.
 front-end\modules\actionbars.lua
 front-end\modules\extrabars.lua
 front-end\modules\chatwindows.lua
-front-end\modules\menu-addon.lua
 front-end\modules\menu-game.lua
 front-end\modules\menu-gamepanels.lua
 front-end\modules\minimap.lua

@@ -13,6 +13,7 @@ local table_sort = table.sort
 local table_wipe = table.wipe
 local unpack = unpack
 
+-- WoW API
 local GetAlternatePowerInfoByID = GetAlternatePowerInfoByID
 local GetTime = GetTime
 local GetUnitPowerBarInfo = GetUnitPowerBarInfo
@@ -197,6 +198,27 @@ Module.StyleBuffTimer = function(self, timer, auraID)
 
 	-- Return the timer object, report it's a new one
 	return timer, true
+end
+
+Module.KillWidgetPowerBarFrame = function(self, event, addon)
+	if (not IsRetail) then
+		return
+	end
+	if (event == "ADDON_LOADED") then
+		if (addon ~= "Blizzard_UIWidgets") then
+			return
+		end
+		self:UnregisterEvent("ADDON_LOADED", "KillWidgetPowerBarFrame")
+	end
+	local bar = UIWidgetPowerBarContainerFrame
+	if (not bar) then
+		return self:RegisterEvent("ADDON_LOADED", "KillWidgetPowerBarFrame")
+	end
+	-- Only way that works. 
+	-- Any messing with the bar, or the widget system's API == TAINT!
+	local Hider = CreateFrame("Frame")
+	Hider:Hide()
+	bar:SetParent(Hider)
 end
 
 Module.GetBuffTimer = function(self, auraID)
@@ -430,6 +452,9 @@ Module.OnInit = function(self)
 
 		-- Update anchors to keep the parenting correct
 		self:SetSecureHook("FreeTimerTrackerTimer", "UpdateAnchors")
+
+		-- Damn this.
+		self:KillWidgetPowerBarFrame()
 	end
 
 	-- Update all on world entering

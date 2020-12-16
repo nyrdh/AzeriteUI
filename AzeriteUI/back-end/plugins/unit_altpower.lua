@@ -101,7 +101,28 @@ local UpdateValue = function(element, unit, current, min, max)
 	end
 end 
 
-local Update = function(self, event, unit, powerType)
+local UpdateWidgetBar = function()
+	local prioritizeWidgetBar, widgetBarMin, widgetBarMax, widgetBarCurrent
+	local powerBarWidget = UIWidgetPowerBarContainerFrame
+	if (powerBarWidget) then
+		local numWidgets = powerBarWidget:GetNumWidgetsShowing()
+		if (numWidgets == 1) then
+			for widgetID,widgetFrame in pairs(powerBarWidget.widgetFrames) do
+				if (widgetFrame.widgetSetID == C_UIWidgetManager.GetPowerBarWidgetSetID()) then
+					local powerBar = widgetFrame.Bar
+					if (powerBar) then
+						widgetBarMin, widgetBarMax = powerBar:GetMinMaxValues()
+						widgetBarCurrent = powerBar:GetValue()
+						prioritizeWidgetBar = true
+					end
+				end
+			end
+		end
+	end
+	return prioritizeWidgetBar, widgetBarMin, widgetBarMax, widgetBarCurrent
+end
+
+local Update = function(self, event, unit, ...)
 	if (not unit) or ((unit ~= self.unit) and (unit ~= self.realUnit)) then
 		return
 	end
@@ -109,42 +130,82 @@ local Update = function(self, event, unit, powerType)
 	-- Could be the player in a vehicle
 	unit = self.realUnit or unit
 
-	-- We're only interested in alternate power here
-	if ((event == "UNIT_POWER_UPDATE" or event == "UNIT_MAXPOWER") and (powerType ~= "ALTERNATE")) then 
-		return 
-	end 
+	local prioritizeWidgetBar, widgetBarMin, widgetBarMax, widgetBarCurrent
+	
+	if (event == "PLAYER_ENTERING_WORLD") then
+		prioritizeWidgetBar, widgetBarMin, widgetBarMax, widgetBarCurrent = UpdateWidgetBar()
+	end
 
-	local element = self.AltPower
-	if (element.visibilityFilter) then 
-		if (not element:visibilityFilter(unit)) then 
-			return element:Hide()
+	-- https://wow.gamepedia.com/UPDATE_UI_WIDGET
+	if (event == "UPDATE_UI_WIDGET") or (event == "UPDATE_ALL_UI_WIDGETS") then
+		local widgetInfo = ...
+		if (widgetInfo) then 
+			if (widgetInfo.widgetSetID == C_UIWidgetManager.GetPowerBarWidgetSetID()) then
+				prioritizeWidgetBar, widgetBarMin, widgetBarMax, widgetBarCurrent = UpdateWidgetBar()
+			end
+		else
+			prioritizeWidgetBar, widgetBarMin, widgetBarMax, widgetBarCurrent = UpdateWidgetBar()
+		end
+		if (not prioritizeWidgetBar) then
+			--return
 		end
 	end
 
-	if (element.PreUpdate) then
-		element:PreUpdate(unit)
+	if (prioritizeWidgetBar) then
+		local element = self.AltPower
+
+		if (element.PreUpdate) then
+			element:PreUpdate(unit)
+		end
+
+		element:SetMinMaxValues(widgetBarMin, widgetBarMax) 
+		element:SetValue(widgetBarCurrent, (event == "Forced")) 
+		element:UpdateValue(unit, widgetBarCurrent, widgetBarMin, widgetBarMax)
+
+		if (not element:IsShown()) then 
+			element:Show()
+		end 
+
+	else
+		-- We're only interested in alternate power here
+		local powerType = ...
+		if ((event == "UNIT_POWER_UPDATE" or event == "UNIT_MAXPOWER") and (powerType ~= "ALTERNATE")) then 
+			return 
+		end 
+
+		local element = self.AltPower
+		if (element.visibilityFilter) then 
+			if (not element:visibilityFilter(unit)) then 
+				return element:Hide()
+			end
+		end
+
+		if (element.PreUpdate) then
+			element:PreUpdate(unit)
+		end
+
+		local barType, minPower, startInset, endInset, smooth, hideFromOthers, showOnRaid, opaqueSpark, opaqueFlash, anchorTop, powerName, powerTooltip = UnitAlternatePowerInfo(unit)
+
+		if (not barType) or (event == "UNIT_POWER_BAR_HIDE") then 
+			return element:Hide()
+		end 
+
+		local currentPower = UnitPower(unit, ALTERNATE_POWER_INDEX)
+		local maxPower = UnitPowerMax(unit, ALTERNATE_POWER_INDEX)
+
+		element:SetMinMaxValues(minPower, maxPower) 
+		element:SetValue(currentPower, (event == "Forced")) 
+		element:UpdateValue(unit, currentPower, minPower, maxPower)
+
+		if (not element:IsShown()) then 
+			element:Show()
+		end 
+
+		if (element.PostUpdate) then
+			element:PostUpdate(unit)
+		end
 	end
 
-	local barType, minPower, startInset, endInset, smooth, hideFromOthers, showOnRaid, opaqueSpark, opaqueFlash, anchorTop, powerName, powerTooltip = UnitAlternatePowerInfo(unit)
-
-	if (not barType) or (event == "UNIT_POWER_BAR_HIDE") then 
-		return element:Hide()
-	end 
-
-	local currentPower = UnitPower(unit, ALTERNATE_POWER_INDEX)
-	local maxPower = UnitPowerMax(unit, ALTERNATE_POWER_INDEX)
-
-	element:SetMinMaxValues(minPower, maxPower) 
-	element:SetValue(currentPower, (event == "Forced")) 
-	element:UpdateValue(unit, currentPower, minPower, maxPower)
-
-	if (not element:IsShown()) then 
-		element:Show()
-	end 
-
-	if (element.PostUpdate) then
-		element:PostUpdate(unit, specIndex)
-	end
 end
 
 local Proxy = function(self, ...)
@@ -175,6 +236,8 @@ local Enable = function(self)
 		self:RegisterEvent("UNIT_MAXPOWER", Proxy) 
 		self:RegisterEvent("UNIT_POWER_BAR_SHOW", Proxy)
 		self:RegisterEvent("UNIT_POWER_BAR_HIDE", Proxy)
+		self:RegisterEvent("UPDATE_UI_WIDGET", Proxy, true)
+		self:RegisterEvent("UPDATE_ALL_UI_WIDGETS", Proxy, true)
 
 		return true
 	end
@@ -187,11 +250,13 @@ local Disable = function(self)
 		self:UnregisterEvent("UNIT_MAXPOWER", Proxy)
 		self:UnregisterEvent("UNIT_POWER_BAR_SHOW", Proxy)
 		self:UnregisterEvent("UNIT_POWER_BAR_HIDE", Proxy)
+		self:UnregisterEvent("UPDATE_UI_WIDGET", Proxy)
+		self:UnregisterEvent("UPDATE_ALL_UI_WIDGETS", Proxy)
 		element:Hide()
 	end
 end 
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do
-	Lib:RegisterElement("AltPower", Enable, Disable, Proxy, 16)
+	Lib:RegisterElement("AltPower", Enable, Disable, Proxy, 19)
 end 
