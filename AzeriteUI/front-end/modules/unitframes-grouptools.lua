@@ -269,7 +269,7 @@ Module.UpdateCounts = (IsRetail) and function(self)
 	end
 
 	for role,msg in pairs(self.RoleCount) do 
-		count = counts[role]
+		local count = counts[role]
 		if (count.dead > 0) then 
 			msg:SetFormattedText("%.0f/%.0f", count.alive, count.alive + count.dead)
 		else
