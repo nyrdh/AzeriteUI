@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.443-RC] 2020-12-16
+### Changed
+- We hate the fucking Blizzard UI widget system. And their bottom centered powerbar basically does the exact same as the player altpower. Only it's not the player altpower, it's the bottom center fucking UI widget. So we hid that thing and show the value within the player altpower bar instead. Experimental change.
+
+### Fixed
+- Fixed an issue in the time library that had devastating consequences.
+- Fixed the long standing taint that would prevent the worldmap or quest log from being opened in combat after clicking a quest objective title after a few times. Not all hooks were created equal, it turns out.
+- Fixed an issue related to a wrongly created global value `count` in the group tools module, which should have been and now is just a regular local. This would sometimes cause strange taints in unrelated modules, as also blizz unintentionally has made a variable with this name global. My bug is fixed, how about you, Blizz?
+
 ## [3.1.442-RC] 2020-12-15
 ### Changed
 - NPC tooltips will no longer show quest information for quests where you have completed all the objectives. 

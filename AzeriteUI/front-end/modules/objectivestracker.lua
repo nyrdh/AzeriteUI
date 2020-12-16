@@ -420,8 +420,9 @@ Module.StyleRetailTracker = function(self)
 						local background = modules.Header.Background
 						background:SetAtlas(nil)
 
-						local text = modules.Header.Text
-						text:SetParent(header)
+						-- This will shrink the header texts
+						--local text = modules.Header.Text
+						--text:SetParent(header)
 					end
 				end
 			end
@@ -492,12 +493,14 @@ Module.PositionRetailTracker = function(self, event, ...)
 	if (not self.ObjectiveFrameHolder) then
 		return self:InitRetailTracker()
 	end
+
+	-- Possible taints: SetWidth, SetParent
 	local _,anchor = ObjectiveTrackerFrame:GetPoint()
 	if (anchor ~= self.ObjectiveFrameHolder) then
+		ObjectiveTrackerFrame:SetIgnoreParentAlpha(false)
+		ObjectiveTrackerFrame:SetClampedToScreen(false)
 		ObjectiveTrackerFrame:SetMovable(true)
 		ObjectiveTrackerFrame:SetUserPlaced(true)
-		ObjectiveTrackerFrame:SetClampedToScreen(false)
-		ObjectiveTrackerFrame:SetIgnoreParentAlpha(false)
 		ObjectiveTrackerFrame:SetAlpha(.9)
 		ObjectiveTrackerFrame:SetParent(self.frame)
 		ObjectiveTrackerFrame:ClearAllPoints()

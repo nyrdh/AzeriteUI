@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 75)
+local LibBlizzard = Wheel:Set("LibBlizzard", 78)
 if (not LibBlizzard) then 
 	return
 end
@@ -1330,45 +1330,54 @@ end
 
 or IsRetail and function(self, ...)
 
+	-- WoW API
+	local GetBestMapForUnit = C_Map.GetBestMapForUnit
+	local GetFallbackWorldMapID = C_Map.GetFallbackWorldMapID
+	local GetMapInfo = C_Map.GetMapInfo
+	local GetPlayerMapPosition = C_Map.GetPlayerMapPosition
+
+	-- Frames
+	local UICenter = Wheel("LibFrame"):GetFrame()
 	local WorldMapFrame = WorldMapFrame
 
-	local SetLargeWorldMap, SetSmallWorldMap
-	local SynchronizeDisplayState
-	local UpdateMaximizedSize, UpdateMaximizedSize
-	local WorldMapOnShow
+	-- WorldMap Coordinates
+	-----------------------------------------------------------------
+	-- Localization
+	local L_PLAYER = PLAYER
+	local L_MOUSE = MOUSE_LABEL
+	local L_NA = NOT_APPLICABLE
 
-	local smallerMapScale, mapSized = .8
-	local colorCode = string_format("|cff%02x%02x%02x", 255, 234, 137)
-	local L_PLAYER, L_MOUSE = PLAYER, MOUSE_LABEL
-
-	local GetBestMapForUnit = C_Map.GetBestMapForUnit
-	local GetPlayerMapPosition = C_Map.GetPlayerMapPosition
+	-- Utility
 	local GetFormattedCoordinates = function(x, y)
-		-- Since 9.0.1, color codes can be nested, so this works.
 		return 	string_gsub(string_format("|cfff0f0f0%.2f|r", x*100), "%.(.+)", "|cffa0a0a0.%1|r"),
 				string_gsub(string_format("|cfff0f0f0%.2f|r", y*100), "%.(.+)", "|cffa0a0a0.%1|r")
 	end 
+	
+	-- Coordinate frame
+	local coords = CreateFrame("Frame", nil, WorldMapFrame)
+	coords:SetFrameStrata(WorldMapFrame.BorderFrame:GetFrameStrata())
+	coords:SetFrameLevel(WorldMapFrame.BorderFrame:GetFrameLevel() + 10)
+	coords.elapsed = 0
 
-	local Coordinates = CreateFrame("Frame", nil, WorldMapFrame)
-	Coordinates:SetFrameStrata(WorldMapFrame.BorderFrame:GetFrameStrata())
-	Coordinates:SetFrameLevel(WorldMapFrame.BorderFrame:GetFrameLevel() + 10)
-	Coordinates.elapsed = 0
+	-- Player coordinates
+	local player = coords:CreateFontString()
+	player:SetFontObject(Game13Font_o1)
+	player:SetTextColor(255/255, 234/255, 137/255)
+	player:SetAlpha(.85)
+	player:SetDrawLayer("OVERLAY")
+	player:SetJustifyH("LEFT")
+	player:SetJustifyV("BOTTOM")
+	coords.player = player
 
-	local PlayerCoordinates = Coordinates:CreateFontString()
-	PlayerCoordinates:SetFontObject(Game13Font_o1)
-	PlayerCoordinates:SetTextColor(255/255, 234/255, 137/255)
-	PlayerCoordinates:SetAlpha(.85)
-	PlayerCoordinates:SetDrawLayer("OVERLAY")
-	PlayerCoordinates:SetJustifyH("LEFT")
-	PlayerCoordinates:SetJustifyV("BOTTOM")
-
-	local CursorCoordinates = Coordinates:CreateFontString()
-	CursorCoordinates:SetFontObject(Game13Font_o1)
-	CursorCoordinates:SetTextColor(255/255, 234/255, 137/255)
-	CursorCoordinates:SetAlpha(.85)
-	CursorCoordinates:SetDrawLayer("OVERLAY")
-	CursorCoordinates:SetJustifyH("RIGHT")
-	CursorCoordinates:SetJustifyV("BOTTOM")
+	-- Cursor coordinates
+	local cursor = coords:CreateFontString()
+	cursor:SetFontObject(Game13Font_o1)
+	cursor:SetTextColor(255/255, 234/255, 137/255)
+	cursor:SetAlpha(.85)
+	cursor:SetDrawLayer("OVERLAY")
+	cursor:SetJustifyH("RIGHT")
+	cursor:SetJustifyV("BOTTOM")
+	coords.cursor = cursor
 
 	-- Please note that this is NOT supposed to be a list of all zones, 
 	-- so don't dig into this code and assume anything is missing.
@@ -1376,7 +1385,7 @@ or IsRetail and function(self, ...)
 	-- telling which zone maps have a free bottom left corner.
 	-- 
 	-- /dump WorldMapFrame.mapID
-	local BottomLeft = {
+	coords.bottomLeft = {
 
 		-- Overview Maps
 		[ 947] = true, -- Azeroth
@@ -1724,37 +1733,37 @@ or IsRetail and function(self, ...)
 		[1917] = true 
 	}
 
-	Coordinates:SetScript("OnUpdate", function(self, elapsed)
+	coords:SetScript("OnUpdate", function(self, elapsed)
 		self.elapsed = self.elapsed + elapsed
 		if (self.elapsed < .1) then 
 			return 
 		end 
 
 		if (not self.mapID) or (self.mapID ~= WorldMapFrame.mapID) then
-			PlayerCoordinates:ClearAllPoints()
-			CursorCoordinates:ClearAllPoints()
+			self.player:ClearAllPoints()
+			self.cursor:ClearAllPoints()
 
 			local mapID = WorldMapFrame.mapID
-			if (mapID) and (BottomLeft[mapID]) then
+			if (mapID) and (self.bottomLeft[mapID]) then
 
 				-- This is fine in Shadowlands, but fully fails in BfA of Legion. 
-				PlayerCoordinates:SetPoint("BOTTOMLEFT", WorldMapFrame.ScrollContainer, "BOTTOMLEFT", 16, 12)
-				CursorCoordinates:SetPoint("BOTTOMLEFT", PlayerCoordinates, "TOPLEFT", 0, 1)
+				self.player:SetPoint("BOTTOMLEFT", WorldMapFrame.ScrollContainer, "BOTTOMLEFT", 16, 12)
+				self.cursor:SetPoint("BOTTOMLEFT", self.player, "TOPLEFT", 0, 1)
 
 			else
 				-- Two lines
-				--PlayerCoordinates:SetPoint("BOTTOM", WorldMapFrame.ScrollContainer, "BOTTOM", 10, 9)
-				--CursorCoordinates:SetPoint("BOTTOM", PlayerCoordinates, "TOP", 0, 1)
+				--self.player:SetPoint("BOTTOM", WorldMapFrame.ScrollContainer, "BOTTOM", 10, 9)
+				--self.cursor:SetPoint("BOTTOM", self.player, "TOP", 0, 1)
 
 				-- One line
-				PlayerCoordinates:SetPoint("BOTTOMRIGHT", WorldMapFrame.ScrollContainer, "BOTTOM", -10, 9)
-				CursorCoordinates:SetPoint("BOTTOMLEFT", WorldMapFrame.ScrollContainer, "BOTTOM", 10, 9)
+				self.player:SetPoint("BOTTOMRIGHT", WorldMapFrame.ScrollContainer, "BOTTOM", -10, 9)
+				self.cursor:SetPoint("BOTTOMLEFT", WorldMapFrame.ScrollContainer, "BOTTOM", 10, 9)
 			end
 			self.mapID = mapID
 		end
 
-		local uiMapID = C_Map.GetFallbackWorldMapID()
-		local info = uiMapID and C_Map.GetMapInfo(uiMapID)
+		local uiMapID = GetFallbackWorldMapID()
+		local info = uiMapID and GetMapInfo(uiMapID)
 		if (info) then
 			local mapID = info.mapID
 		end
@@ -1773,97 +1782,86 @@ or IsRetail and function(self, ...)
 		end
 
 		if (pX and pY) then 
-			PlayerCoordinates:SetFormattedText("%s:|r   %s, %s", L_PLAYER, GetFormattedCoordinates(pX, pY))
+			self.player:SetFormattedText("%s:|r   %s, %s", L_PLAYER, GetFormattedCoordinates(pX, pY))
 		else 
-			PlayerCoordinates:SetFormattedText("%s:|r   |cfff0f0f0%s|r", L_PLAYER, NOT_APPLICABLE)
+			self.player:SetFormattedText("%s:|r   |cfff0f0f0%s|r", L_PLAYER, L_NA)
 		end 
 
 		if (cX and cY) then 
-			CursorCoordinates:SetFormattedText("%s:|r   %s, %s", L_MOUSE, GetFormattedCoordinates(cX, cY))
+			self.cursor:SetFormattedText("%s:|r   %s, %s", L_MOUSE, GetFormattedCoordinates(cX, cY))
 		else
-			CursorCoordinates:SetFormattedText("%s:|r   |cfff0f0f0%s|r", L_MOUSE, NOT_APPLICABLE)
+			self.cursor:SetFormattedText("%s:|r   |cfff0f0f0%s|r", L_MOUSE, L_NA)
 		end 
 
 	end)
 
-	SetLargeWorldMap = function(self)
-		WorldMapFrame:SetParent(UIParent)
+	-- WorldMap Size
+	-----------------------------------------------------------------
+	local Maximize = function(self)
+		local WorldMapFrame = _G.WorldMapFrame
+		WorldMapFrame:SetParent(UICenter)
 		WorldMapFrame:SetScale(1)
-		WorldMapFrame.ScrollContainer.Child:SetScale(smallerMapScale)
-
+		WorldMapFrame.ScrollContainer.Child:SetScale(.8)
 		if (WorldMapFrame:GetAttribute("UIPanelLayout-area") ~= "center") then
-			SetUIPanelAttribute(WorldMapFrame, "area", "center");
+			SetUIPanelAttribute(WorldMapFrame, "area", "center")
 		end
-	
 		if (WorldMapFrame:GetAttribute("UIPanelLayout-allowOtherPanels") ~= true) then
 			SetUIPanelAttribute(WorldMapFrame, "allowOtherPanels", true)
 		end
-	
 		WorldMapFrame:OnFrameSizeChanged()
 		if (WorldMapFrame:GetMapID()) then
 			WorldMapFrame.NavBar:Refresh()
 		end
 	end
-	
-	UpdateMaximizedSize = function(self)
-		local width, height = WorldMapFrame:GetSize()
-		local magicNumber = (1 - smallerMapScale) * 100
-		WorldMapFrame:SetSize((width * smallerMapScale) - (magicNumber + 2), (height * smallerMapScale) - 2)
-	end
-	
-	SynchronizeDisplayState = function(self)
-		if (WorldMapFrame:IsMaximized()) then
-			WorldMapFrame:ClearAllPoints()
-			WorldMapFrame:SetPoint("CENTER", UIParent)
-		end
-	end
-	
-	SetSmallWorldMap = function(self)
+
+	local Minimize = function(self)
+		local WorldMapFrame = _G.WorldMapFrame
 		if (not WorldMapFrame:IsMaximized()) then
 			WorldMapFrame:ClearAllPoints()
-			WorldMapFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 16, -94)
+			WorldMapFrame:SetPoint("TOPLEFT", UICenter, "TOPLEFT", 16, -94)
 		end
 	end
-	
-	WorldMapOnShow = function(self, event, ...)
-		-- They don't seem to stick. Weird.
-		Coordinates:SetFrameStrata(WorldMapFrame.BorderFrame:GetFrameStrata())
-		Coordinates:SetFrameLevel(WorldMapFrame.BorderFrame:GetFrameLevel() + 10)
 
-		if (mapSized) then
-			return
-		end
-	
-		-- Don't do this in combat, there are secure elements here.
-		if (InCombatLockdown()) then
-			self:RegisterEvent("PLAYER_REGEN_ENABLED", WorldMapOnShow)
-			return
-	
-		-- Only ever need this event once.
-		elseif (event == "PLAYER_REGEN_ENABLED") then
-			self:UnregisterEvent(event, WorldMapOnShow)
-		end
-	
+	local SyncState = function(self)
+		local WorldMapFrame = _G.WorldMapFrame
 		if (WorldMapFrame:IsMaximized()) then
-			WorldMapFrame:UpdateMaximizedSize()
-			SetLargeWorldMap()
-		else
-			SetSmallWorldMap()
+			WorldMapFrame:ClearAllPoints()
+			WorldMapFrame:SetPoint("CENTER", UICenter)
 		end
-	
-		-- Never again!
-		mapSized = true
 	end
 
+	local UpdateSize = function(self)
+		local WorldMapFrame = _G.WorldMapFrame
+		local width, height = WorldMapFrame:GetSize()
+		WorldMapFrame:SetSize((width*.8) - 22, (height*.8) - 2)
+	end
+	
+	-- Old fashioned way.
+	hooksecurefunc(WorldMapFrame, "Maximize", Maximize)
+	hooksecurefunc(WorldMapFrame, "Minimize", Minimize)
+	hooksecurefunc(WorldMapFrame, "SynchronizeDisplayState", SyncState)
+	hooksecurefunc(WorldMapFrame, "UpdateMaximizedSize", UpdateSize)
+
+	-- Be gone, pest!
 	WorldMapFrame.BlackoutFrame.Blackout:SetTexture(nil)
 	WorldMapFrame.BlackoutFrame:EnableMouse(false)
 
-	self:SetSecureHook(WorldMapFrame, "Maximize", SetLargeWorldMap, "GP_SET_LARGE_WORLDMAP")
-	self:SetSecureHook(WorldMapFrame, "Minimize", SetSmallWorldMap, "GP_SET_SMALL_WORLDMAP")
-	self:SetSecureHook(WorldMapFrame, "SynchronizeDisplayState", SynchronizeDisplayState, "GP_SYNC_DISPLAYSTATE_WORLDMAP")
-	self:SetSecureHook(WorldMapFrame, "UpdateMaximizedSize", UpdateMaximizedSize, "GP_UPDATE_MAXIMIZED_WORLDMAP")
-
-	WorldMapFrame:HookScript("OnShow", function() WorldMapOnShow(self) end)
+	-- Do NOT use HookScript on the WorldMapFrame, 
+	-- as it WILL taint it after the 3rd opening in combat.
+	-- Super weird, but super important. Do it this way instead.
+	local OnShow
+	OnShow = function(_, event, ...)
+		local WorldMapFrame = _G.WorldMapFrame
+		if (WorldMapFrame:IsMaximized()) then
+			WorldMapFrame:UpdateMaximizedSize()
+			Maximize()
+		else
+			Minimize()
+		end
+		-- Noop it after the first run
+		OnShow = function() end
+	end
+	hooksecurefunc(WorldMapFrame, "Show", OnShow)
 end
 
 -- Library Event Handling

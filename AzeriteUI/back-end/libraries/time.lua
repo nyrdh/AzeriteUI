@@ -1,4 +1,4 @@
-local LibTime = Wheel:Set("LibTime", 6)
+local LibTime = Wheel:Set("LibTime", 7)
 if (not LibTime) then	
 	return
 end
@@ -44,9 +44,41 @@ local dateInRange = function(day1, month1, year1, day2, month2, year2)
 	local currentDay = tonumber(date("%d"))
 	local currentMonth = tonumber(date("%m"))
 	local currentYear = tonumber(date("%Y")) -- full 4 digit year
-	return (currentDay >= day1) 		and (currentDay <= day2)
-	   and (currentMonth >= month1) 	and (currentMonth <= month2)
-	   and (currentYear >= year1) 		and (currentYear <= year2)
+
+	-- First check the year range
+	if (currentYear >= year1) and (currentYear <= year2) then
+
+		-- If the current year is between the two requested, 
+		-- we are most definitely within the range.
+		if (currentYear > year1) and (currentYear < year2) then
+			return true
+		else
+			-- If the current year is the first requested, 
+			-- we have to check if it has passed the date.
+			if (currentYear == year1) then
+				-- We've passed the requested month, definitely within range.
+				if (currentMonth > month1) then
+					return true
+				-- We're within the same month, let's check the day!
+				elseif (currentMonth == month1) and (currentDay >= day1) then
+					return true
+				end
+
+			-- The current year is the last one requested, 
+			-- we have to make sure we haven't moved outside the range.
+			elseif (currentYear == year2) then
+				-- We haven't reached the requested month, definitely within range.
+				if (currentMonth < month2) then
+					return true
+				-- We're within the same month, let's check the day!
+				elseif (currentMonth == month2) and (currentDay <= day2) then
+					return true
+				end
+			end
+		end
+	end
+
+	return false
 end
 
 -- Calculates standard hours from a give 24-hour time

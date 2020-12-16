@@ -195,6 +195,10 @@ local StripNStyle = function(button)
 			if (cooldown) then
 				cooldown:SetFrameStrata(button:GetFrameStrata())
 				cooldown:SetFrameLevel(button:GetFrameLevel() + 5)
+				cooldown:SetSwipeColor(0, 0, 0, .75)
+				cooldown:SetDrawSwipe(true)
+				cooldown:SetBlingTexture(GetMedia("blank"), 0, 0, 0 , 0) 
+				cooldown:SetDrawBling(true)
 			end
 
 			local keybind = button.HotKey 
