@@ -1,4 +1,4 @@
-local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 25)
+local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 26)
 if (not LibWidgetContainer) then	
 	return
 end
@@ -142,7 +142,7 @@ local UpdateAllElements = function(self, ...)
 end 
 
 WidgetFrame.OnUnitChanged = function(self, unit)
-	if (self.unit ~= unit) then
+	if (unit) and (self.unit ~= unit) then
 		self.unit = unit
 		self.id = tonumber(string_match(unit, "^.-(%d+)"))
 		self.unitGUID = nil -- really?
@@ -162,8 +162,10 @@ end
 
 -- Allow modules or other libraries to insert their own handlers by proxy
 WidgetFrame.OnAttributeChanged = function(self, attribute, value)
-	if (attribute == "unit") then
-
+	-- I have no idea why this happens, but it does for some users.
+	-- So we're adding an extra check just to avoid nil bugs below.
+	if (value) and (attribute == "unit") then
+	
 		-- replace playerpet with pet
 		value = value:gsub("playerpet", "pet")
 

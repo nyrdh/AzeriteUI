@@ -1,4 +1,7 @@
 local ADDON, Private = ...
+if (Private.EngineFailure) then
+	return print(Private.EngineFailure)
+end
 
 -- Wooh! 
 local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibAuraData", "LibAura", "LibClientBuild", "LibForge", "LibFader", "LibHook")
