@@ -105,6 +105,7 @@ local Update = function(self, event, unit, ...)
 	if (event == "IMMUNE") then
 		fontType ="small"
 		text = FeedbackText[event]
+		color = self.colors.feedback.IMMUNE
 
 	elseif (event == "WOUND") then
 		if (amount ~= 0) then
@@ -179,6 +180,10 @@ local Update = function(self, event, unit, ...)
 		color = self.colors.feedback.STANDARD
 	end
 
+	if (not color) then
+		color = self.colors.feedback.STANDARD
+	end
+
 	element.feedbackStartTime = GetTime()
 
 	if (text) then
@@ -239,5 +244,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("CombatFeedback", Enable, Disable, Proxy, 1)
+	Lib:RegisterElement("CombatFeedback", Enable, Disable, Proxy, 2)
 end 
