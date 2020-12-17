@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 78)
+local LibBlizzard = Wheel:Set("LibBlizzard", 79)
 if (not LibBlizzard) then 
 	return
 end
@@ -1849,6 +1849,9 @@ or IsRetail and function(self, ...)
 	-- Do NOT use HookScript on the WorldMapFrame, 
 	-- as it WILL taint it after the 3rd opening in combat.
 	-- Super weird, but super important. Do it this way instead.
+	-- *Note that this even though seemingly identical, 
+	--  is in fact NOT the same taint as that occurring when
+	--  a new quest item button is spawned in the tracker in combat.
 	local OnShow
 	OnShow = function(_, event, ...)
 		local WorldMapFrame = _G.WorldMapFrame
@@ -1862,6 +1865,10 @@ or IsRetail and function(self, ...)
 		OnShow = function() end
 	end
 	hooksecurefunc(WorldMapFrame, "Show", OnShow)
+
+	-- Fix map toggle taint(?)
+	QuestMapFrame:SetScript("OnHide", nil) 
+
 end
 
 -- Library Event Handling

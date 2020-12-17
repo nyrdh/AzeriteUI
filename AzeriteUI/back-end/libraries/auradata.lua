@@ -1,4 +1,4 @@
-local LibAuraData = Wheel:Set("LibAuraData", 13)
+local LibAuraData = Wheel:Set("LibAuraData", 14)
 if (not LibAuraData) then
 	return
 end
@@ -1798,6 +1798,11 @@ local PopulateRetailNPCDatabase = function()
 	AddFlags(314889, IsBoss) 	-- Probe Mind
 	AddFlags(318976, IsBoss) 	-- Stupefying Glare
 
+
+	-- Castle Nathria
+	------------------------------------------------------------------------
+	-- Hecutis
+	AddFlags(334860, IsBoss) 	-- Crushing Stone
 
 end
 

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2020-12-17
+### Added
+- Whitelisted the aura Crushing Stone from Hecutis in Castle Nathria in all aura filters. 
+
 ## [3.1.443-RC] 2020-12-16
 ### Changed
 - We hate the fucking Blizzard UI widget system. And their bottom centered powerbar basically does the exact same as the player altpower. Only it's not the player altpower, it's the bottom center fucking UI widget. So we hid that thing and show the value within the player altpower bar instead. Experimental change.
