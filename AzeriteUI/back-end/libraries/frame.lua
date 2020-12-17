@@ -1,4 +1,4 @@
-local LibFrame = Wheel:Set("LibFrame", 67)
+local LibFrame = Wheel:Set("LibFrame", 68)
 if (not LibFrame) then	
 	return
 end
@@ -30,6 +30,7 @@ local assert = assert
 local debugstack = debugstack
 local error = error
 local getmetatable = getmetatable
+local math_abs = math.abs
 local math_floor = math.floor
 local math_max = math.max
 local math_min = math.min
@@ -98,8 +99,8 @@ local SetDisplaySize = function(ratio, altRatio, useSmallestRatio)
 
 	-- Set up default fullwidth values. Somewhat supportive of EyeFinity.
 	local scale = height/1080
-	local displayWidth = (((width/height) >= (16/10)*3) and width/3 or width)/scale
-	local displayHeight = height/scale
+	local displayWidth = math_round((((width/height) >= (16/10)*3) and width/3 or width)/scale)
+	local displayHeight = math_round(height/scale)
 	local displayRatio = displayWidth/displayHeight
 
 	-- If first arg is missing, use stored values if available.
@@ -119,15 +120,15 @@ local SetDisplaySize = function(ratio, altRatio, useSmallestRatio)
 
 		displayWidth = useSmallestRatio and smallestWidth or largestWidth
 	end
-	
+
 	-- If this is in combat, the world will implode. Take care!
 	LibFrame.frame:SetIgnoreParentScale(true)
 	LibFrame.frame:SetFrameStrata(UIParent:GetFrameStrata())
 	LibFrame.frame:SetFrameLevel(UIParent:GetFrameLevel())
-	LibFrame.frame:ClearAllPoints()
-	LibFrame.frame:SetPoint("BOTTOM", UIParent, "BOTTOM")
 	LibFrame.frame:SetScale(scale)
 	LibFrame.frame:SetSize(math_round(displayWidth), math_round(displayHeight))
+	LibFrame.frame:ClearAllPoints()
+	LibFrame.frame:SetPoint("BOTTOM", UIParent, "BOTTOM", 0, 0)
 end
 SetDisplaySize()
 

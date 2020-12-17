@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 79)
+local LibBlizzard = Wheel:Set("LibBlizzard", 80)
 if (not LibBlizzard) then 
 	return
 end
@@ -1337,7 +1337,8 @@ or IsRetail and function(self, ...)
 	local GetPlayerMapPosition = C_Map.GetPlayerMapPosition
 
 	-- Frames
-	local UICenter = Wheel("LibFrame"):GetFrame()
+	-- ScrollContainer:GetCursorPosition() assumes UIParent is the parent, always.
+	local UICenter = UIParent -- Wheel("LibFrame"):GetFrame()
 	local WorldMapFrame = WorldMapFrame
 
 	-- WorldMap Coordinates
@@ -1361,7 +1362,7 @@ or IsRetail and function(self, ...)
 
 	-- Player coordinates
 	local player = coords:CreateFontString()
-	player:SetFontObject(Game13Font_o1)
+	player:SetFontObject(Game13Font_o1) 
 	player:SetTextColor(255/255, 234/255, 137/255)
 	player:SetAlpha(.85)
 	player:SetDrawLayer("OVERLAY")
@@ -1777,7 +1778,7 @@ or IsRetail and function(self, ...)
 			end 
 		end 
 
-		if (WorldMapFrame.ScrollContainer:IsMouseOver(0, 0, 0, 0)) then 
+		if (WorldMapFrame.ScrollContainer:IsMouseOver()) then 
 			cX, cY = WorldMapFrame.ScrollContainer:GetNormalizedCursorPosition()
 		end
 
@@ -1795,20 +1796,52 @@ or IsRetail and function(self, ...)
 
 	end)
 
+	-- Be gone, pest!
+	WorldMapFrame.BlackoutFrame.Blackout:SetTexture(nil)
+	WorldMapFrame.BlackoutFrame:EnableMouse(false)
+
+	-- The map code assumes the map parent
+	-- has the exact same scale, size and position as UIParent.
+	-- I don't know if this change will taint it.
+	-- Edit: It taints. Fuck.
+	--WorldMapFrame.ScrollContainer.GetCursorPosition = function()
+	--	local currentX, currentY = GetCursorPosition()
+	--	local effectiveScale = UICenter:GetEffectiveScale() -- default is UIParent
+	--	return currentX / effectiveScale, currentY / effectiveScale
+	--end
+
 	-- WorldMap Size
 	-----------------------------------------------------------------
+	local getScale = function() 
+		local min, max = 0.65, 0.95 -- our own scale limits
+		local uiMin, uiMax = 0.65, 1.15 -- blizzard uiScale slider limits
+		local uiScale = UIParent:GetEffectiveScale() -- current blizzard uiScale
+		-- Calculate and return a relative scale
+		-- that is user adjustable through graphics settings,
+		-- but still keeps itself within our intended limits.
+		if (uiScale < uiMin) then
+			return min
+		elseif (uiScale > uiMax) then
+			return max
+		else
+			return ((uiScale - uiMin) / (uiMax - uiMin)) * (max - min) + min
+		end
+	end
+
 	local Maximize = function(self)
 		local WorldMapFrame = _G.WorldMapFrame
 		WorldMapFrame:SetParent(UICenter)
 		WorldMapFrame:SetScale(1)
-		WorldMapFrame.ScrollContainer.Child:SetScale(.8)
+
 		if (WorldMapFrame:GetAttribute("UIPanelLayout-area") ~= "center") then
 			SetUIPanelAttribute(WorldMapFrame, "area", "center")
 		end
 		if (WorldMapFrame:GetAttribute("UIPanelLayout-allowOtherPanels") ~= true) then
 			SetUIPanelAttribute(WorldMapFrame, "allowOtherPanels", true)
 		end
+
 		WorldMapFrame:OnFrameSizeChanged()
+
 		if (WorldMapFrame:GetMapID()) then
 			WorldMapFrame.NavBar:Refresh()
 		end
@@ -1833,7 +1866,10 @@ or IsRetail and function(self, ...)
 	local UpdateSize = function(self)
 		local WorldMapFrame = _G.WorldMapFrame
 		local width, height = WorldMapFrame:GetSize()
-		WorldMapFrame:SetSize((width*.8) - 22, (height*.8) - 2)
+		local scale = getScale()
+		local magicNumber = (1 - scale) * 100
+		WorldMapFrame:SetSize((width * scale) - (magicNumber + 2), (height * scale) - 2)
+		WorldMapFrame:OnCanvasSizeChanged()
 	end
 	
 	-- Old fashioned way.
@@ -1841,10 +1877,6 @@ or IsRetail and function(self, ...)
 	hooksecurefunc(WorldMapFrame, "Minimize", Minimize)
 	hooksecurefunc(WorldMapFrame, "SynchronizeDisplayState", SyncState)
 	hooksecurefunc(WorldMapFrame, "UpdateMaximizedSize", UpdateSize)
-
-	-- Be gone, pest!
-	WorldMapFrame.BlackoutFrame.Blackout:SetTexture(nil)
-	WorldMapFrame.BlackoutFrame:EnableMouse(false)
 
 	-- Do NOT use HookScript on the WorldMapFrame, 
 	-- as it WILL taint it after the 3rd opening in combat.
