@@ -1297,6 +1297,25 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 		self.Health.ValueAbsorb = absorbVal 
 	end
 
+	-- Combat Feedback
+	-----------------------------------------------------------
+	local feedback = overlay:CreateFrame("Frame")
+	feedback:SetAllPoints(health)
+	feedback:Hide()
+
+	local feedbackText = feedback:CreateFontString()
+	feedbackText:SetJustifyH(layout.CombatFeedbackJustifyH)
+	feedbackText:SetJustifyV(layout.CombatFeedbackJustifyV)
+	feedbackText:SetPoint(unpack(layout.CombatFeedbackPlace))
+	feedbackText:SetFontObject(layout.CombatFeedbackFont)
+	feedbackText.feedbackFont = layout.CombatFeedbackFont
+	feedbackText.feedbackFontLarge = layout.CombatFeedbackFontLarge
+	feedbackText.feedbackFontSmall = layout.CombatFeedbackFontSmall
+
+	self.CombatFeedback = feedback
+	self.CombatFeedback.feedbackText = feedbackText
+	
+
 	-- Power 
 	-----------------------------------------------------------
 	local power = backdrop:CreateStatusBar()
@@ -2208,6 +2227,22 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	healthPerc:SetFontObject(layout.HealthPercentFont)
 	healthPerc:SetTextColor(unpack(layout.HealthPercentColor))
 	self.Health.ValuePercent = healthPerc
+
+	local feedback = overlay:CreateFrame("Frame")
+	feedback:SetAllPoints(health)
+	feedback:Hide()
+
+	local feedbackText = feedback:CreateFontString()
+	feedbackText:SetJustifyH(layout.CombatFeedbackJustifyH)
+	feedbackText:SetJustifyV(layout.CombatFeedbackJustifyV)
+	feedbackText:SetPoint(unpack(layout.CombatFeedbackPlace))
+	feedbackText:SetFontObject(layout.CombatFeedbackFont)
+	feedbackText.feedbackFont = layout.CombatFeedbackFont
+	feedbackText.feedbackFontLarge = layout.CombatFeedbackFontLarge
+	feedbackText.feedbackFontSmall = layout.CombatFeedbackFontSmall
+
+	self.CombatFeedback = feedback
+	self.CombatFeedback.feedbackText = feedbackText
 
 	-- Update textures according to player level
 	self.PostUpdateTextures = layout.PostUpdateTextures

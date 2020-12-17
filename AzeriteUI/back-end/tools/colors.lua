@@ -5,7 +5,7 @@ which the requesting module can edit or add to later.
 
 --]]--
 
-local LibColorTool = Wheel:Set("LibColorTool", 3)
+local LibColorTool = Wheel:Set("LibColorTool", 5)
 if (not LibColorTool) then
 	return
 end
@@ -224,6 +224,23 @@ Colors.faction = {}
 Colors.faction.Alliance = createColor(74/255, 84/255, 232/255)
 Colors.faction.Horde = createColor(229/255, 13/255, 18/255)
 Colors.faction.Neutral = createColor(249/255, 158/255, 35/255) 
+
+-- damage feedback
+Colors.feedback = {}
+Colors.feedback.DAMAGE = createColor(176/255, 79/255, 79/255)
+Colors.feedback.CRUSHING = createColor(176/255, 79/255, 79/255)
+Colors.feedback.CRITICAL = createColor(176/255, 79/255, 79/255)
+Colors.feedback.GLANCING = createColor(176/255, 79/255, 79/255)
+Colors.feedback.STANDARD = createColor(214/255, 191/255, 165/255)
+Colors.feedback.IMMUNE = createColor(214/255, 191/255, 165/255)
+Colors.feedback.ABSORB = createColor(214/255, 191/255, 165/255)
+Colors.feedback.BLOCK = createColor(214/255, 191/255, 165/255)
+Colors.feedback.RESIST = createColor(214/255, 191/255, 165/255)
+Colors.feedback.MISS = createColor(214/255, 191/255, 165/255)
+Colors.feedback.HEAL = createColor(84/255, 150/255, 84/255)
+Colors.feedback.CRITHEAL = createColor(84/255, 150/255, 84/255)
+Colors.feedback.ENERGIZE = createColor(79/255, 114/255, 160/255)
+Colors.feedback.CRITENERGIZE = createColor(79/255, 114/255, 160/255)
 
 -- power
 Colors.power = {}

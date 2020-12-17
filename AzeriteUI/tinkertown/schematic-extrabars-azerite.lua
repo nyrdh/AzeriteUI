@@ -92,6 +92,17 @@ local StripNStyle = function(button)
 		cooldown:SetDrawSwipe(true)
 		cooldown:SetBlingTexture(GetMedia("blank"), 0, 0, 0 , 0) 
 		cooldown:SetDrawBling(true)
+		
+		-- Attempting to fix the issue with too opaque swipe textures
+		if (not cooldown.GPSwipe) then
+			cooldown.GPSwipe = function() 
+				cooldown:SetSwipeColor(0, 0, 0, .75)
+				cooldown:SetDrawSwipe(true)
+				cooldown:SetBlingTexture(GetMedia("blank"), 0, 0, 0 , 0) 
+				cooldown:SetDrawBling(true)
+			end
+			cooldown:HookScript("OnShow", cooldown.GPSwipe)
+		end
 	end
 
 	-- Spell charges.
@@ -218,13 +229,8 @@ local StripNStyle = function(button)
 		button:UpdateLayers()
 	end
 
-	--button.GPIcon:SetParent(button.GPBorder)
-	--button.GPIcon:SetDrawLayer("BACKGROUND", -1)
-
 	button:SetScript("OnEnter", OnEnter)
 	button:SetScript("OnLeave", OnLeave)
-
-	--button.HotKey:SetText(GetBindingKey('ExtraActionButton'..i))
 
 end
 

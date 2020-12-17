@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 82)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 84)
 if (not LibUnitFrame) then	
 	return
 end
@@ -125,6 +125,22 @@ local Colors = {
 	dead = prepare( 153/255, 153/255, 153/255 ),
 	debuff = prepareGroup(DebuffTypeColor),
 	disconnected = prepare( 153/255, 153/255, 153/255 ),
+	feedback = {
+		DAMAGE 			= prepare( 176/255,  79/255,  79/255 ),
+		CRUSHING 		= prepare( 176/255,  79/255,  79/255 ),
+		CRITICAL 		= prepare( 176/255,  79/255,  79/255 ),
+		GLANCING 		= prepare( 176/255,  79/255,  79/255 ),
+		STANDARD 		= prepare( 214/255, 191/255, 165/255 ),
+		IMMUNE 			= prepare( 214/255, 191/255, 165/255 ),
+		ABSORB 			= prepare( 214/255, 191/255, 165/255 ),
+		BLOCK 			= prepare( 214/255, 191/255, 165/255 ),
+		RESIST 			= prepare( 214/255, 191/255, 165/255 ),
+		MISS 			= prepare( 214/255, 191/255, 165/255 ),
+		HEAL 			= prepare(  84/255, 150/255,  84/255 ),
+		CRITHEAL 		= prepare(  84/255, 150/255,  84/255 ),
+		ENERGIZE 		= prepare(  79/255, 114/255, 160/255 ),
+		CRITENERGIZE 	= prepare(  79/255, 114/255, 160/255 )
+	},
 	health = prepare( 25/255, 178/255, 25/255 ),
 	power = { ALTERNATE = prepare(70/255, 255/255, 131/255) },
 	quest = {

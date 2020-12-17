@@ -20,6 +20,7 @@
 <Script file='plugins\unit_classification.lua'/>
 <Script file='plugins\unit_classpower.lua'/>
 <Script file='plugins\unit_combat.lua'/>
+<Script file='plugins\unit_combatfeedback.lua'/>
 <Script file='plugins\unit_crowdcontrol.lua'/>
 <Script file='plugins\unit_extrapower.lua'/>
 <Script file='plugins\unit_groupdebuff.lua'/>

@@ -97,6 +97,9 @@ local StripNStyle = function(button)
 		if (not cooldown.GPSwipe) then
 			cooldown.GPSwipe = function() 
 				cooldown:SetSwipeColor(0, 0, 0, .75)
+				cooldown:SetDrawSwipe(true)
+				cooldown:SetBlingTexture(GetMedia("blank"), 0, 0, 0 , 0) 
+				cooldown:SetDrawBling(true)
 			end
 			cooldown:HookScript("OnShow", cooldown.GPSwipe)
 		end
@@ -199,6 +202,10 @@ local StripNStyle = function(button)
 			if (cooldown) then
 				cooldown:SetFrameStrata(button:GetFrameStrata())
 				cooldown:SetFrameLevel(button:GetFrameLevel() + 5)
+				cooldown:SetSwipeColor(0, 0, 0, .75)
+				cooldown:SetDrawSwipe(true)
+				cooldown:SetBlingTexture(GetMedia("blank"), 0, 0, 0 , 0) 
+				cooldown:SetDrawBling(true)
 			end
 
 			local keybind = button.HotKey 
@@ -217,19 +224,6 @@ local StripNStyle = function(button)
 		button:HookScript("OnShow", button.UpdateLayers)
 		button:UpdateLayers()
 	end
-
-	--button.GPIcon:SetParent(button.GPBorder)
-	--button.GPIcon:SetDrawLayer("BACKGROUND", -1)
-
-	--if (count) then
-	--	count:SetParent(button.GPBorder)
-	--	count:SetDrawLayer("OVERLAY", 1)
-	--end
-
-	--if (keybind) then
-	--	keybind:SetParent(button.GPBorder)
-	--	keybind:SetDrawLayer("OVERLAY", 1)
-	--end
 
 	button:SetScript("OnEnter", OnEnter)
 	button:SetScript("OnLeave", OnLeave)

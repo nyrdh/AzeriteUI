@@ -3152,6 +3152,14 @@ Azerite.UnitFramePlayer = {
 	CombatIndicatorPlace = { "BOTTOMLEFT", -(41 + 80/2), (22 - 80/2) },
 	CombatIndicatorSize = { 80,80 },
 	CombatIndicatorTexture = GetMedia("icon-combat"),
+
+	CombatFeedbackFont = GetFont(20, true),
+	CombatFeedbackFontSmall = GetFont(18, true),
+	CombatFeedbackFontLarge = GetFont(24, true),
+	CombatFeedbackJustifyH = "CENTER", 
+	CombatFeedbackJustifyV = "MIDDLE", 
+	CombatFeedbackPlace = { "CENTER", 0, 5 },
+
 	ExplorerHitRects = { 60, 0, -140, 0 },
 	HardenedCastSize = { 385, 37 },
 	HardenedCastTexture = GetMedia("hp_lowmid_bar"),
@@ -3626,6 +3634,14 @@ Azerite.UnitFrameTarget = {
 	CastBarValueJustifyH = "CENTER",
 	CastBarValueJustifyV = "MIDDLE",
 	CastBarValuePlace = { "LEFT", 27, 4 },
+
+	CombatFeedbackFont = GetFont(20, true),
+	CombatFeedbackFontSmall = GetFont(18, true),
+	CombatFeedbackFontLarge = GetFont(24, true),
+	CombatFeedbackJustifyH = "CENTER", 
+	CombatFeedbackJustifyV = "MIDDLE", 
+	CombatFeedbackPlace = { "CENTER", 0, 3 },
+
 	ClassificationColor = { 1, 1, 1 },
 	ClassificationIndicatorAllianceTexture = GetMedia("icon_badges_alliance"),
 	ClassificationIndicatorBossTexture = GetMedia("icon_badges_boss"),
