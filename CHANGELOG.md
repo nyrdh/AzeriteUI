@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-12-17
+## [3.1.444-RC] 2020-12-17
 ### Added
+- Added experimental combat feedback on the azerite theme player- and target unitframes. This is a work in progress. 
 - Whitelisted the aura Crushing Stone from Hecutis in Castle Nathria in all aura filters. 
+
+### Fixed
+- Fixed mouseover alignment on the worldmap.
+- Fixed problems related to a silly addon we just don't like.
 
 ## [3.1.443-RC] 2020-12-16
 ### Changed
