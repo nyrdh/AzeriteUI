@@ -889,7 +889,14 @@ Core.OnInit = function(self)
 
 		-- Add in a chat command to quickly unload the console
 		self:RegisterChatCommand("disableconsole", "UnloadDebugConsole")
-
+		self:RegisterChatCommand("ecode", function(_,msg)
+			local new = {}
+			for i = 1,string.len(msg) do 
+				table.insert(new, string.byte(msg,i,i))
+			end
+			self:AddDebugMessage(table.concat(new,"::"))
+		end)
+	
 	else
 		-- Set the flag to tell the back-end we're in normal mode. 
 		-- This isn't actually needed, since the back-end don't store settings. 

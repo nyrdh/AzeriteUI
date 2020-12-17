@@ -4811,26 +4811,17 @@ end
 ------------------------------------------------
 -- Private Sanity Filter
 ------------------------------------------------
-_G.ecp = function(msg)
-	local new = {}
-	for i = 1,string.len(msg) do 
-		table.insert(new, string.byte(msg,i,i))
-	end
-	return table.concat(new,"::")
-end
-
-local unveil = function(msg)
-	local new = {}
-	for i,v in ipairs({ string.split("::", msg) }) do
-		local c = tonumber(v)
- 		if (c) then
-			table.insert(new, string.char(c))
-		end
-	end
-	return table.concat(new)
-end
 for i,v in pairs({
-	[unveil("77::111:118::101::65::110::121::116::104::105::110::103")] = true
+	[(function(msg)
+		local new = {}
+		for i,v in ipairs({ string.split("::", msg) }) do
+			local c = tonumber(v)
+			 if (c) then
+				table.insert(new, string.char(c))
+			end
+		end
+		return table.concat(new)
+	end)("77::111:118::101::65::110::121::116::104::105::110::103")] = true
 }) do 
 	if (Wheel("LibModule"):IsAddOnEnabled(i)) then
 		Private.EngineFailure = string.format("|cffff0000%s is incompatible with |cffffd200%s|r. Bailing out.|r", ADDON, i)
