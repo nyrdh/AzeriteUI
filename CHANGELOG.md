@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.445-RC] 2020-12-18
+### Fixed
+- Possibly fixed the legacy theme growth direction of the `UIWidgetBelowMinimapContainerFrame` used by various raid encounters.
+
 ## [3.1.444-RC] 2020-12-17
 ### Added
 - Added experimental combat feedback on the azerite theme player- and target unitframes. This is a work in progress. 

@@ -384,7 +384,11 @@ Module.HandleBelowMinimapWidgets = function(self)
 	-- Note: Hide quest tracker when this is visible!
 	local bmContainer = UIWidgetBelowMinimapContainerFrame
 	bmContainer:ClearAllPoints()
-	bmContainer:SetPoint("BOTTOM", bmHolder, "BOTTOM")
+	if (layoutID == "Azerite") then
+		bmContainer:SetPoint("BOTTOM", bmHolder, "BOTTOM")
+	elseif (layoutID == "Legacy") then
+		bmContainer:SetPoint("TOP", bmHolder, "TOP")
+	end
 
 	hooksecurefunc(bmContainer, "SetPoint", function(self, _, anchor)
 		if (anchor) and (anchor ~= bmHolder) then
