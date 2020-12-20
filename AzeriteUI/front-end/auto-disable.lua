@@ -45,6 +45,7 @@ for moduleName,list in pairs({
 	},
 	NamePlates = {
 		["Kui_Nameplates"] = true,
+		["NamePlateKAI"] = true,
 		["NeatPlates"] = true,
 		["Plater"] = true,
 		["SimplePlates"] = true,
