@@ -2558,8 +2558,9 @@ Azerite.Minimap = {
 		(IsRetail) and 
 			setmetatable({
 				["8.3.0"] = GetMedia("Blip-Nandini-New-830"),
-				["8.3.7"] = GetMedia("Blip-Nandini-New-830"), -- no changes.
+				["8.3.7"] = GetMedia("Blip-Nandini-New-830"), -- no changes from main 8.3.0 patch.
 				["9.0.1"] = GetMedia("Blip-Nandini-New-901"),
+				["9.0.2"] = GetMedia("Blip-Nandini-New-902"),
 			}, { __index = function(t,k) return [[Interface\Minimap\ObjectIconsAtlas.blp]] end }),
 	BlobAlpha = { 0, 96, 0, 0 }, -- blobInside, blobOutside, ringOutside, ringInside
 	Clock_OverrideValue = Minimap_Clock_OverrideValue,

@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.1.446-RC] 2020-12-20
+## [Unreleased] 2020-12-20
+### Added
+- Added minimap blip icons for WoW client patch 9.0.2.
+
 ### Changed
 - Our nameplate module should now properly go and hide in a corner if the nameplate addon NamePlateKAI is currently enabled.
 
