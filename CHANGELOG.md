@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2020-12-27
+### Added
+- Added some attempted workarounds for bugs sometimes occurring when opening the (retail) anima channel map.
+
 ## [3.1.446-RC] 2020-12-20
 ### Added
 - Added minimap blip icons for WoW client patch 9.0.2.

@@ -689,78 +689,126 @@ Core.ApplyExperimentalFeatures = function(self)
 end
 
 -- Fix or work around Blizzard bugs we have discovered.
-Core.FixBlizzardBugs = function(self, event, addon)
-	if (not IsAddOnLoaded("Blizzard_Contribution")) then
-		return self:RegisterEvent("ADDON_LOADED", "FixBlizzardBugs")
+Core.FixBlizzardBugs = function(self)
+	if (not self.FixedBlizzardBugs) then
+		self.FixedBlizzardBugs = {}
 	end
-	if (event == "ADDON_LOADED") then
-		if (addon == "Blizzard_Contribution") then
-			self:UnregisterEvent("ADDON_LOADED", "FixBlizzardBugs")
-		else
-			return
-		end
+	if (not self.FixedBlizzardBugsQueue) then
+		self.FixedBlizzardBugsQueue = {}
 	end
 
-	-- Fix the mixin method
-	local UpdateTooltip = function(self)
-		local isEnabled = self:IsEnabled();
-		local shouldShowTooltip = isEnabled or (self.contributionResult == Enum.ContributionResult.IncorrectState) or (self.contributionResult == Enum.ContributionResult.FailedConditionCheck);
+	-- These things only exist in retail, no point checking in Classic.
+	if (IsRetail) then 
 
-		if shouldShowTooltip then
-			EmbeddedItemTooltip:SetOwner(self, "ANCHOR_RIGHT");
+		-- Fix a blizzard bug with contribution tables.
+		local fixing = "Blizzard_Contribution"
+		if (not self.FixedBlizzardBugs[fixing]) then 
+			if (IsAddOnLoaded(fixing)) then
 
-			if isEnabled or (self.contributionResult == Enum.ContributionResult.FailedConditionCheck) then
-				EmbeddedItemTooltip:SetText(CONTRIBUTION_REWARD_TOOLTIP_TITLE, HIGHLIGHT_FONT_COLOR:GetRGBA());
-				GameTooltip_AddQuestRewardsToTooltip(EmbeddedItemTooltip, self.questID, TOOLTIP_QUEST_REWARDS_STYLE_CONTRIBUTION);
+				-- Fix the mixin method
+				local UpdateTooltip = function(self)
+					local isEnabled = self:IsEnabled();
+					local shouldShowTooltip = isEnabled or (self.contributionResult == Enum.ContributionResult.IncorrectState) or (self.contributionResult == Enum.ContributionResult.FailedConditionCheck);
 
-				local rcName, rcAvailable, rcFormatString, rcAmount;
-				local currencyID, currencyAmount = C_ContributionCollector.GetRequiredContributionCurrency(self.contributionID);
-				local itemID, itemCount = C_ContributionCollector.GetRequiredContributionItem(self.contributionID);
-				if currencyID then
-					local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID);
-					rcName = currencyInfo.name;
-					--rcAvailable = currencyInfo.quantity > 0; -- blizz noobz!
-					rcAvailable = currencyInfo.quantity or 0;
-					rcAmount = currencyAmount;
-					rcFormatString = CONTRIBUTION_TOOLTIP_PLAYER_CURRENCY_AMOUNT;
-				elseif itemID then
-					rcName = GetItemInfo(itemID);
-					rcAmount = itemCount;
-					local INCLUDE_BANK = true;
-					local IGNORE_USABLE = true;
-					local INCLUDE_REAGENT_BANK = true;
-					rcAvailable = GetItemCount(itemID, INCLUDE_BANK, IGNORE_USABLE, INCLUDE_REAGENT_BANK);
-					rcFormatString = CONTRIBUTION_TOOLTIP_PLAYER_ITEM_AMOUNT;
+					if shouldShowTooltip then
+						EmbeddedItemTooltip:SetOwner(self, "ANCHOR_RIGHT");
+
+						if isEnabled or (self.contributionResult == Enum.ContributionResult.FailedConditionCheck) then
+							EmbeddedItemTooltip:SetText(CONTRIBUTION_REWARD_TOOLTIP_TITLE, HIGHLIGHT_FONT_COLOR:GetRGBA());
+							GameTooltip_AddQuestRewardsToTooltip(EmbeddedItemTooltip, self.questID, TOOLTIP_QUEST_REWARDS_STYLE_CONTRIBUTION);
+
+							local rcName, rcAvailable, rcFormatString, rcAmount;
+							local currencyID, currencyAmount = C_ContributionCollector.GetRequiredContributionCurrency(self.contributionID);
+							local itemID, itemCount = C_ContributionCollector.GetRequiredContributionItem(self.contributionID);
+							if currencyID then
+								local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID);
+								rcName = currencyInfo.name;
+								--rcAvailable = currencyInfo.quantity > 0; -- blizz noobz!
+								rcAvailable = currencyInfo.quantity or 0;
+								rcAmount = currencyAmount;
+								rcFormatString = CONTRIBUTION_TOOLTIP_PLAYER_CURRENCY_AMOUNT;
+							elseif itemID then
+								rcName = GetItemInfo(itemID);
+								rcAmount = itemCount;
+								local INCLUDE_BANK = true;
+								local IGNORE_USABLE = true;
+								local INCLUDE_REAGENT_BANK = true;
+								rcAvailable = GetItemCount(itemID, INCLUDE_BANK, IGNORE_USABLE, INCLUDE_REAGENT_BANK);
+								rcFormatString = CONTRIBUTION_TOOLTIP_PLAYER_ITEM_AMOUNT;
+							end
+							if rcName then
+								local lineColor = (rcAvailable >= rcAmount) and NORMAL_FONT_COLOR or DISABLED_FONT_COLOR;
+								local text = rcFormatString:format(BreakUpLargeNumbers(rcAvailable), BreakUpLargeNumbers(rcAmount), rcName);
+								GameTooltip_SetBottomText(EmbeddedItemTooltip, text, lineColor);
+							end
+						elseif self.contributionResult == Enum.ContributionResult.IncorrectState then
+							EmbeddedItemTooltip:SetText(CONTRIBUTION_BUTTON_ONLY_WHEN_UNDER_CONSTRUCTION_TOOLTIP, RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b, 1, true);
+						end
+						EmbeddedItemTooltip:Show();
+					end
 				end
-				if rcName then
-					local lineColor = (rcAvailable >= rcAmount) and NORMAL_FONT_COLOR or DISABLED_FONT_COLOR;
-					local text = rcFormatString:format(BreakUpLargeNumbers(rcAvailable), BreakUpLargeNumbers(rcAmount), rcName);
-					GameTooltip_SetBottomText(EmbeddedItemTooltip, text, lineColor);
-				end
-			elseif self.contributionResult == Enum.ContributionResult.IncorrectState then
-				EmbeddedItemTooltip:SetText(CONTRIBUTION_BUTTON_ONLY_WHEN_UNDER_CONSTRUCTION_TOOLTIP, RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b, 1, true);
-			end
-			EmbeddedItemTooltip:Show();
-		end
-	end
-	ContributeButtonMixin.UpdateTooltip = UpdateTooltip
+				ContributeButtonMixin.UpdateTooltip = UpdateTooltip
 
-	-- Fix existing methods
-	for contribution in ContributionCollectionFrame.contributionPool:EnumerateActive() do
-		local button = contribution.ContributeButton
-		if (button) then
-			if (button.UpdateTooltip) then
-				button.UpdateTooltip = UpdateTooltip
+				-- Fix existing methods
+				for contribution in ContributionCollectionFrame.contributionPool:EnumerateActive() do
+					local button = contribution.ContributeButton
+					if (button) then
+						if (button.UpdateTooltip) then
+							button.UpdateTooltip = UpdateTooltip
+						end
+					end
+				end
+				for contribution in ContributionCollectionFrame.contributionPool:EnumerateInactive() do
+					local button = contribution.ContributeButton
+					if (button) then
+						if (button.UpdateTooltip) then
+							button.UpdateTooltip = UpdateTooltip
+						end
+					end
+				end
+
+				self.FixedBlizzardBugs[fixing] = true
+				self.FixedBlizzardBugsQueue[fixing] = nil
+			else
+				self.FixedBlizzardBugsQueue[fixing] = true
 			end
+		end
+
+		-- Attempt to fix a bug that sometimes occur with the anima channeling map.
+		local fixing, fixingMore = "Blizzard_AnimaDiversionUI", "Blizzard_MapCanvas"
+		if (not self.FixedBlizzardBugs[fixing]) then 
+			if (IsAddOnLoaded(fixing)) and (IsAddOnLoaded(fixingMore)) then
+
+				local OnUpdate = function(self, ...)
+					if (self) and (self.GetMap) then
+						return MapCanvasMixin.OnUpdate(self, ...)
+					end
+				end
+				AnimaDiversionFrame.OnUpdate = OnUpdate
+
+				self.FixedBlizzardBugs[fixing] = true
+				self.FixedBlizzardBugsQueue[fixing] = nil
+				self.FixedBlizzardBugsQueue[fixingMore] = nil
+			else
+				self.FixedBlizzardBugsQueue[fixing] = true
+				self.FixedBlizzardBugsQueue[fixingMore] = true
+			end
+		end
+
+	end
+
+	-- Figure out if we should register or unregister the event.
+	local moreFixesNeeded
+	for addon,fixNeeded in pairs(self.FixedBlizzardBugsQueue) do
+		if (fixNeeded) then
+			moreFixesNeeded = true
+			break
 		end
 	end
-	for contribution in ContributionCollectionFrame.contributionPool:EnumerateInactive() do
-		local button = contribution.ContributeButton
-		if (button) then
-			if (button.UpdateTooltip) then
-				button.UpdateTooltip = UpdateTooltip
-			end
-		end
+	if (moreFixesNeeded) then
+		self:RegisterEvent("ADDON_LOADED", "FixBlizzardBugs")
+	else
+		self:UnregisterEvent("ADDON_LOADED", "FixBlizzardBugs")
 	end
 
 end
