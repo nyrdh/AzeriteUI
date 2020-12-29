@@ -4,14 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2020-12-29
-### Added
-- Added some attempted workarounds for bugs sometimes occurring when opening the (retail) anima channel map.
-
-### Changed
-- Reduced the point count for Mage's arcane charges down from 5 to 4. Wonder why I ever set it as 5?
-
+## [3.1.447-RC] 2020-12-29
 ### Fixed
+- Reduced the point count for Mage's arcane charges down from 5 to 4. Wonder why I ever set it as 5?
+- Added some attempted workarounds for bugs sometimes occurring when opening the (retail) anima channel map.
 - The castbar won't appear when toggled off and on if the personal resource display is enabled anymore. That was never an intended workaround, as we intentionally hide the castbar to avoid it colliding with the personal resource display which have its own castbar and appears at the same place.
 
 ## [3.1.446-RC] 2020-12-20
