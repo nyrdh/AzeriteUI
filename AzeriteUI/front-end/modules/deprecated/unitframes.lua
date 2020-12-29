@@ -123,12 +123,8 @@ local SECURE = {
 		if (name == "change-enablecast") then 
 			local owner = self:GetFrameRef("Owner"); 
 			self:SetAttribute("enableCast", value); 
-			if (value) then 
-				owner:CallMethod("EnableElement", "Cast"); 
-				owner:CallMethod("UpdateAllElements"); 
-			else 
-				owner:CallMethod("DisableElement", "Cast"); 
-			end 
+			self:CallMethod("UpdateCastBar"); 
+			
 		elseif (name == "change-enableclasspower") then 
 			local owner = self:GetFrameRef("Owner"); 
 			self:SetAttribute("enableClassPower", value); 
@@ -2449,6 +2445,7 @@ UnitFramePlayerHUD.OnInit = function(self)
 
 	-- Create a secure proxy updater for the menu system
 	local callbackFrame = CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.HUD_SecureCallback)
+	callbackFrame.UpdateCastBar = function() self:UpdateCastBarVisibility(self:GetCastBarVisibility()) end
 	callbackFrame:SetAttribute("forceDisableClassPower", self:IsAddOnEnabled("SimpleClassPower"))
 end 
 
