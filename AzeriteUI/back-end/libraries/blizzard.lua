@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 80)
+local LibBlizzard = Wheel:Set("LibBlizzard", 85)
 if (not LibBlizzard) then 
 	return
 end
@@ -15,9 +15,13 @@ assert(LibHook, "LibBlizzard requires LibHook to be loaded.")
 local LibSecureHook = Wheel("LibSecureHook")
 assert(LibSecureHook, "LibBlizzard requires LibSecureHook to be loaded.")
 
+local LibChatWindow = Wheel("LibChatWindow")
+assert(LibChatWindow, "LibBlizzard requires LibChatWindow to be loaded.")
+
 LibEvent:Embed(LibBlizzard)
 LibHook:Embed(LibBlizzard)
 LibSecureHook:Embed(LibBlizzard)
+LibChatWindow:Embed(LibBlizzard)
 
 -- Lua API
 local _G = _G
@@ -460,6 +464,9 @@ UIWidgetsDisable["CaptureBar"] = function(self)
 	UIWidgetBelowMinimapContainerFrame:UnregisterAllEvents()
 end
 
+-- This isn't the actual chat, just the toast button.
+-- To make backwards compatibility easier, 
+-- I'm keeping this old name on this widget.
 UIWidgetsDisable["Chat"] = function(self)
 	if (not QuickJoinToastButton) then
 		return
@@ -478,6 +485,65 @@ UIWidgetsDisable["Chat"] = function(self)
 	-- This pops back up on zoning sometimes, so keep removing it
 	LibBlizzard:RegisterEvent("PLAYER_ENTERING_WORLD", killQuickToast)
 end 
+
+-- This will kill off the chat system. Dangerous! 
+UIWidgetsDisable["ChatWindows"] = function(self)
+
+	local nuke = function(method, frame)
+		if (LibBlizzard[method]) then
+			local element = LibBlizzard[method](LibBlizzard, frame)
+			if (element) then
+				element:SetParent(UIHider)
+			end
+		end
+	end
+
+	local antisocial = function()
+		for _,frameName in LibBlizzard:GetAllChatWindows() do 
+			local frame = _G[frameName]
+			if (frame) then 
+				frame:SetParent(UIHider)
+				for i,method in ipairs({
+					"GetChatWindowButtonFrame",
+					"GetChatWindowMinimizeButton",
+					--"GetChatWindowEditBox",
+					--"GetChatWindowCurrentEditBox",
+					"GetChatWindowScrollUpButton",
+					"GetChatWindowScrollDownButton",
+					"GetChatWindowScrollToBottomButton",
+					"GetChatWindowScrollBar",
+					"GetChatWindowScrollBarThumbTexture"
+				}) do
+					nuke(method, frame)
+				end
+				
+				print("hiding",frameName)
+			end
+		end
+	end
+
+	for i,method in ipairs({
+		"GetChatWindowMenuButton",
+		"GetChatWindowChannelButton",
+		"GetChatWindowVoiceDeafenButton",
+		"GetChatWindowVoiceMuteButton",
+		"GetChatWindowFriendsButton"
+	}) do
+		nuke(method)
+	end
+
+	GeneralDockManager:SetParent(UIHider)
+
+	antisocial()
+
+	LibBlizzard.PostCreateChatWindow = antisocial
+	LibBlizzard.PostCreateTemporaryChatWindow = antisocial
+	LibBlizzard.PostUpdateChatWindowPosition = antisocial
+	LibBlizzard.PostUpdateChatWindowSize = antisocial
+	LibBlizzard.PostUpdateChatWindowColors = antisocial
+	LibBlizzard:RegisterEvent("PLAYER_ENTERING_WORLD", antisocial)
+	LibBlizzard:HandleAllChatWindows()
+end
 
 UIWidgetsDisable["Durability"] = function(self)
 	DurabilityFrame:UnregisterAllEvents()
@@ -667,6 +733,9 @@ UIWidgetsDisable["ObjectiveTracker"] = function(self)
 		ScenarioBlocksFrame:SetScript("OnSizeChanged", nil)
 		ScenarioBlocksFrame:SetParent(UIHider)
 	end
+
+	-- Needed to avoid fullscreen map bugs.
+	ObjectiveTracker_Initialize(ObjectiveTrackerFrame)
 end
 
 UIWidgetDependency["OrderHall"] = "Blizzard_OrderHallUI"
