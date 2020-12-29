@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 48)
+local LibFader = Wheel:Set("LibFader", 50)
 if (not LibFader) then	
 	return
 end
@@ -171,11 +171,14 @@ elseif (IsRetail) then
 		[173661] = true, -- Vivianne 
 	
 		-- BfA
-		[271571] = true, -- Ready! (when doing the "Shell Game" world quests) -- added 8.0.1
+		[271571] = true, -- Ready! (Shell Game World Quests) 
 
 		-- Shadowlands
-		[320227] = true, -- Depleted Shell (Night Fae Covenant)
+		[320227] = true, -- Depleted Shell (Conduit)
+		[304510] = true, -- Endmire (Revendreth Area Debuff)
 		[329492] = true, -- Slumberwood Band (Item Effect)
+		[304511] = true, -- Weakened Soul (Revendreth Area Debuff, comes along with Endmire)
+		[340556] = true, -- Well-Honed Instincts (Conduit)
 	}
 end
 

@@ -1242,6 +1242,8 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 							currentPillCount = 6
 						elseif (powerType == "STAGGER") then 
 							currentPillCount = 3
+						elseif (powerType == "ARCANE_CHARGES") then 
+							currentPillCount = 4
 						else
 							currentPillCount = 5
 						end 

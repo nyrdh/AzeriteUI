@@ -785,6 +785,13 @@ Core.FixBlizzardBugs = function(self)
 					end
 				end
 				AnimaDiversionFrame.OnUpdate = OnUpdate
+				AnimaDiversionFrame:SetScript("OnUpdate", OnUpdate)
+
+				-- Might be needed.
+				hooksecurefunc(AnimaDiversionFrame, "Show", function() 
+					AnimaDiversionFrame.OnUpdate = OnUpdate
+					AnimaDiversionFrame:SetScript("OnUpdate", OnUpdate)
+				end)
 
 				self.FixedBlizzardBugs[fixing] = true
 				self.FixedBlizzardBugsQueue[fixing] = nil

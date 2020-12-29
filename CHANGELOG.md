@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Added some attempted workarounds for bugs sometimes occurring when opening the (retail) anima channel map.
 
+### Changed
+- Reduced the point count for Mage's arcane charges down from 5 to 4. Wonder why I ever set it as 5?
+
 ## [3.1.446-RC] 2020-12-20
 ### Added
 - Added minimap blip icons for WoW client patch 9.0.2.

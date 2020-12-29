@@ -381,7 +381,7 @@ if (IsRetail) then
 			element.powerID = SPELL_POWER_ARCANE_CHARGES
 			element.powerType = "ARCANE_CHARGES"
 			element.isEnabled = true
-			element.maxDisplayed = element.maxComboPoints or 5
+			element.maxDisplayed = 4
 
 			self:RegisterEvent("UNIT_POWER_FREQUENT", Proxy)
 			self:RegisterEvent("UNIT_MAXPOWER", Proxy)
@@ -1182,5 +1182,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 52)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 53)
 end 
