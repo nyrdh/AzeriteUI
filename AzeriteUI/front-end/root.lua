@@ -600,6 +600,10 @@ Core.ApplyExperimentalFeatures = function(self)
 			g:SetAllPoints(f)
 		end
 	end
+
+	hooksecurefunc("SetCVar", function(cvar,value) 
+		self:SendMessage("GP_CVAR_CHANGED", cvar, value)
+	end)
 	
 	-- Temporary Weapon Enchants!
 	-- These exist in both Retail and Classic

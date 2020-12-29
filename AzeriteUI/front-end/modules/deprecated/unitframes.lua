@@ -31,7 +31,7 @@ local IsLoveFestival = LibTime:IsLoveFestival()
 
 -- Primary Units
 local UnitFramePlayer = Core:NewModule("UnitFramePlayer", "LibDB", "LibMessage", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge", "LibTime")
-local UnitFramePlayerHUD = Core:NewModule("UnitFramePlayerHUD", "LibDB", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge")
+local UnitFramePlayerHUD = Core:NewModule("UnitFramePlayerHUD", "LibDB", "LibMessage", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge")
 local UnitFrameTarget = Core:NewModule("UnitFrameTarget", "LibMessage", "LibEvent", "LibUnitFrame", "LibSound", "LibForge")
 
 -- Secondary Units
@@ -55,6 +55,7 @@ local math_pi = math.pi
 local select = select
 local string_format = string.format
 local string_gsub = string.gsub
+local string_lower = string.lower
 local string_match = string.match
 local string_split = string.split
 local tonumber = tonumber
@@ -124,7 +125,7 @@ local SECURE = {
 			local owner = self:GetFrameRef("Owner"); 
 			self:SetAttribute("enableCast", value); 
 			self:CallMethod("UpdateCastBar"); 
-			
+
 		elseif (name == "change-enableclasspower") then 
 			local owner = self:GetFrameRef("Owner"); 
 			self:SetAttribute("enableClassPower", value); 
@@ -2458,6 +2459,7 @@ UnitFramePlayerHUD.OnEnable = function(self)
 	self:RegisterEvent("CVAR_UPDATE", "OnEvent")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("VARIABLES_LOADED", "OnEvent")
+	self:RegisterMessage("GP_CVAR_CHANGED", "OnEvent")
 	self:UpdateCastBarVisibility(self:GetCastBarVisibility())
 
 	-- Handle classpower visibility
@@ -2474,7 +2476,14 @@ UnitFramePlayerHUD.OnEvent = function(self, event, ...)
 	end
 
 	local shouldEnable
-	if (event == "CVAR_UPDATE") then 
+	if (event == "GP_CVAR_CHANGED") then
+		local arg1, arg2 = ...
+		if (not arg) or (string_lower(arg1) ~= string_lower("nameplateShowSelf")) then
+			return
+		end
+		shouldEnable = ((self.db.enableCast) and ((arg2 == "0") or (arg2 == 0) or (not arg2)))
+
+	elseif (event == "CVAR_UPDATE") then 
 		local arg1, arg2 = ...
 
 		-- Bail out for irrelevant cvar changes.
@@ -2483,9 +2492,7 @@ UnitFramePlayerHUD.OnEvent = function(self, event, ...)
 		end	
 
 		-- Check for event args, as the real CVar isn't updated yet.
-		if (arg2 == "0") and (self.db.enableCast) then 
-			shouldEnable = true
-		end
+		shouldEnable = ((arg2 == "0") and (self.db.enableCast))
 	else 
 		-- Use the standard check for other events.
 		shouldEnable = self:GetCastBarVisibility()
@@ -2496,7 +2503,9 @@ UnitFramePlayerHUD.OnEvent = function(self, event, ...)
 end
 
 UnitFramePlayerHUD.GetCastBarVisibility = function(self)
-	if (not GetCVarBool("nameplateShowSelf")) and (self.db.enableCast) then
+	if (not self.db.enableCast) then
+		return false
+	elseif (not GetCVarBool("nameplateShowSelf")) and (self.db.enableCast) then
 		return true
 	end
 end
@@ -2505,12 +2514,11 @@ UnitFramePlayerHUD.UpdateCastBarVisibility = function(self, shouldEnable)
 	if (not self.frame) or (not self.frame.Cast) then
 		return
 	end
-	local isEnabled = self.frame:IsElementEnabled("Cast")
-	if (shouldEnable) and (not isEnabled) then
+	-- Only react to explicit booleans, not nil.
+	if (shouldEnable == true) then
 		self.frame:EnableElement("Cast")
 		self.frame.Cast:ForceUpdate()
-
-	elseif (not shouldEnable) and (isEnabled) then
+	elseif (shouldEnable == false) then
 		self.frame:DisableElement("Cast")
 	end
 end
