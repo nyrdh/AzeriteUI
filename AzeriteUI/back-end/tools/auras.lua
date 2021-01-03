@@ -355,7 +355,7 @@ local auraFilter = function(...)
 
 	-- Show all boss or encounter debuffs
 	if (isBossDebuff) then
-		return true
+		return true, nil, hideUnfilteredSpellID
 	end
 
 	-- Show Eat/Drink on player(?)
@@ -422,6 +422,37 @@ local auraFilter = function(...)
 	return false, nil, hideUnfilteredSpellID
 end
 
+local auraFilterFocus = function(...)
+	local element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = ...
+
+	-- Show all boss or encounter debuffs
+	if (isBossDebuff) then
+		return true, nil, hideUnfilteredSpellID
+	end
+
+	-- Show anything explicitly whitelisted
+	if (checkWhitelistConditionals(...)) then
+		return true, nil, hideFilteredSpellID
+	end	
+
+	-- Show time based debuffs from environment or NPCs
+	if (not isBuff) and (element.isYou) and (not unitCaster or not UnitIsPlayer(unitCaster)) then
+		if (checkTimeAndStackbasedConditionals(...)) then
+			return true, nil, hideUnfilteredSpellID
+		end
+	end
+
+	-- Show time based auras from any sources.
+	if (SLACKMODE) or (element.enableSlackMode) then
+		if (checkTimeAndStackbasedConditionals(...)) then
+			return true, nil, hideUnfilteredSpellID
+		end
+	end
+	
+	-- Hide everything else
+	return false, nil, hideUnfilteredSpellID
+end
+
 -- Back-end expects these return values from any filter:
 -- @return displayAura <boolean>, displayPriority <number,nil>, isFiltered <boolean>
 local auraFilterLegacy = function(...)
@@ -459,6 +490,8 @@ LibAuraTool.GetAuraFilter = function(self, ...)
 		return auraFilterLegacy
 	elseif (filterType == "legacy-secondary") then
 		return auraFilterLegacySecondary
+	elseif (filterType == "focus") then
+		return auraFilterFocus
 	else
 		return auraFilter
 	end

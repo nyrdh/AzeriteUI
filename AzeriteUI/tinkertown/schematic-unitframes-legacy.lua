@@ -2413,6 +2413,42 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 
 			},
 
+			-- Auras
+			{
+				parent = "self,ContentScaffold", ownerKey = "Auras", objectType = "Frame", objectSubType = "Frame",
+				chain = { -- 158, 51
+					"SetSize", { 140, 68 },
+					"SetPoint", { "TOPRIGHT", -10, -51 -6 }
+				},
+				values = {
+					"auraSize", 32, 
+					"auraWidth", false, 
+					"auraHeight", false,
+					"customSort", false,
+					"debuffsFirst", false, 
+					"disableMouse", false, 
+					"filter", "PLAYER", 
+					"customFilter", GetAuraFilter("focus"), 
+					"growthX", "LEFT", 
+					"growthY", "DOWN", 
+					"maxBuffs", false, 
+					"maxDebuffs", false, 
+					"maxVisible", 12, 
+					"showDurations", true, 
+					"showSpirals", false, 
+					"showLongDurations", true,
+					"spacingH", 4, 
+					"spacingV", 4, 
+					"tooltipAnchor", false,
+					"tooltipDefaultPosition", false, 
+					"tooltipOffsetX", 8,
+					"tooltipOffsetY", 16,
+					"tooltipPoint", "BOTTOMRIGHT",
+					"tooltipRelPoint", "TOPRIGHT",
+					"PostCreateButton", Aura_PostCreate,
+					"PostUpdateButton", Aura_PostUpdate
+				}
+			},
 
 			-- Group Aura
 			{

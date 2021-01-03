@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.448-RC] 2021-01-03
+### Added
+- Added some auras to the legacy theme focus frame.
+- Added many shadowlands auras to the whitelists.
+
 ## [3.1.447-RC] 2020-12-29
 ### Fixed
 - Reduced the point count for Mage's arcane charges down from 5 to 4. Wonder why I ever set it as 5?

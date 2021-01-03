@@ -1,4 +1,4 @@
-local LibAura = Wheel:Set("LibAura", 37)
+local LibAura = Wheel:Set("LibAura", 38)
 if (not LibAura) then
 	return
 end
@@ -178,21 +178,17 @@ LibAura.GetUnitAura = function(self, unit, auraID, filter)
 		end
 		
 		-- Add boss flags. Applies to both classic and retail.
-		if (AuraInfoFlags[spellId]) then
-			if (not isBossDebuff) and (LibAura:HasAuraInfoFlags(spellId, BitFilters.IsBoss)) then
-				isBossDebuff = true
-			end
+		if (AuraInfoFlags[spellId]) and (not isBossDebuff) and (LibAura:HasAuraInfoFlags(spellId, BitFilters.IsBoss)) then
+			isBossDebuff = true
 		end
 		
 		-- This just makes more sense, and it works.
 		-- The blizzard flag just shows if the player CAN cast it, 
 		-- while we're interested if in the player ACTUALLY did it.
 		isCastByPlayer = unitCaster == "player"
-
 	end
 
 	return name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3
-	
 end
 
 LibAura.GetUnitBuff = function(self, unit, auraID, filter)
@@ -215,21 +211,17 @@ LibAura.GetUnitBuff = function(self, unit, auraID, filter)
 		end
 		
 		-- Add boss flags. Applies to both classic and retail.
-		if (AuraInfoFlags[spellId]) then
-			if (not isBossDebuff) and (LibAura:HasAuraInfoFlags(spellId, BitFilters.IsBoss)) then
-				isBossDebuff = true
-			end
+		if (AuraInfoFlags[spellId]) and (not isBossDebuff) and (LibAura:HasAuraInfoFlags(spellId, BitFilters.IsBoss)) then
+			isBossDebuff = true
 		end
 		
 		-- This just makes more sense, and it works.
 		-- The blizzard flag just shows if the player CAN cast it, 
 		-- while we're interested if in the player ACTUALLY did it.
 		isCastByPlayer = unitCaster == "player"
-
 	end
 
 	return name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3
-
 end
 
 LibAura.GetUnitDebuff = function(self, unit, auraID, filter)
@@ -252,21 +244,17 @@ LibAura.GetUnitDebuff = function(self, unit, auraID, filter)
 		end
 		
 		-- Add boss flags. Applies to both classic and retail.
-		if (AuraInfoFlags[spellId]) then
-			if (not isBossDebuff) and (LibAura:HasAuraInfoFlags(spellId, BitFilters.IsBoss)) then
-				isBossDebuff = true
-			end
+		if (AuraInfoFlags[spellId]) and (not isBossDebuff) and (LibAura:HasAuraInfoFlags(spellId, BitFilters.IsBoss)) then
+			isBossDebuff = true
 		end
 		
 		-- This just makes more sense, and it works.
 		-- The blizzard flag just shows if the player CAN cast it, 
 		-- while we're interested if in the player ACTUALLY did it.
 		isCastByPlayer = unitCaster == "player"
-
 	end
 
 	return name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3
-
 end
 
 local embedMethods = {

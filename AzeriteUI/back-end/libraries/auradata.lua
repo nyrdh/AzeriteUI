@@ -1,4 +1,4 @@
-local LibAuraData = Wheel:Set("LibAuraData", 14)
+local LibAuraData = Wheel:Set("LibAuraData", 17)
 if (not LibAuraData) then
 	return
 end
@@ -34,7 +34,7 @@ LibAuraData.userFlags = LibAuraData.userFlags or {} -- static user/module flag c
 
 -- Quality of Life
 ---------------------------------------------------------------------
-local InfoFlags = LibAuraData.infoFlags
+local BitFilters = LibAuraData.infoFlags
 local AuraFlags = LibAuraData.auraFlags
 local UserFlags = LibAuraData.userFlags
 
@@ -73,7 +73,7 @@ end
 -- to allow easy usage of keywords in the modules.
 -- We will have make sure the keywords remain consistent.
 LibAuraData.GetAllAuraInfoBitFilters = function()
-	return InfoFlags
+	return BitFilters
 end
 
 -- Check if the provided info flags are set for the aura
@@ -208,7 +208,7 @@ end
 -- Databases
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
--- InfoFlags
+-- BitFilters
 -- The flags in this DB should only describe factual properties
 -- of the auras like type of spell, what class it belongs to, etc.
 --------------------------------------------------------------------------
@@ -248,38 +248,38 @@ local Disarm 			= 2^28
 local Food 				= 2^29
 local Flask 			= 2^30
 
-InfoFlags.IsPlayerSpell = PlayerSpell
-InfoFlags.IsRacialSpell = RacialSpell
+BitFilters.IsPlayerSpell = PlayerSpell
+BitFilters.IsRacialSpell = RacialSpell
 
-InfoFlags.DEATHKNIGHT = DEATHKNIGHT
-InfoFlags.DEMONHUNTER = DEMONHUNTER
-InfoFlags.DRUID = DRUID
-InfoFlags.HUNTER = HUNTER
-InfoFlags.MAGE = MAGE
-InfoFlags.MONK = MONK
-InfoFlags.PALADIN = PALADIN
-InfoFlags.PRIEST = PRIEST
-InfoFlags.ROGUE = ROGUE
-InfoFlags.SHAMAN = SHAMAN
-InfoFlags.WARLOCK = WARLOCK
-InfoFlags.WARRIOR = WARRIOR
+BitFilters.DEATHKNIGHT = DEATHKNIGHT
+BitFilters.DEMONHUNTER = DEMONHUNTER
+BitFilters.DRUID = DRUID
+BitFilters.HUNTER = HUNTER
+BitFilters.MAGE = MAGE
+BitFilters.MONK = MONK
+BitFilters.PALADIN = PALADIN
+BitFilters.PRIEST = PRIEST
+BitFilters.ROGUE = ROGUE
+BitFilters.SHAMAN = SHAMAN
+BitFilters.WARLOCK = WARLOCK
+BitFilters.WARRIOR = WARRIOR
 
-InfoFlags.IsBoss = Boss
-InfoFlags.IsDungeon = Dungeon
+BitFilters.IsBoss = Boss
+BitFilters.IsDungeon = Dungeon
 
-InfoFlags.IsCrowdControl = CrowdControl
-InfoFlags.IsIncapacitate = Incapacitate
-InfoFlags.IsRoot = Root
-InfoFlags.IsSnare = Snare
-InfoFlags.IsSilence = Silence
-InfoFlags.IsStun = Stun
-InfoFlags.IsImmune = Immune
-InfoFlags.IsImmuneCC = ImmuneCC
-InfoFlags.IsImmuneSpell = ImmuneSpell
-InfoFlags.IsImmunePhysical = ImmunePhysical
-InfoFlags.IsDisarm = Disarm
-InfoFlags.IsFood = Food
-InfoFlags.IsFlask = Flask
+BitFilters.IsCrowdControl = CrowdControl
+BitFilters.IsIncapacitate = Incapacitate
+BitFilters.IsRoot = Root
+BitFilters.IsSnare = Snare
+BitFilters.IsSilence = Silence
+BitFilters.IsStun = Stun
+BitFilters.IsImmune = Immune
+BitFilters.IsImmuneCC = ImmuneCC
+BitFilters.IsImmuneSpell = ImmuneSpell
+BitFilters.IsImmunePhysical = ImmunePhysical
+BitFilters.IsDisarm = Disarm
+BitFilters.IsFood = Food
+BitFilters.IsFlask = Flask
 
 -- For convenience farther down the list here
 local IsDeathKnight = PlayerSpell + DEATHKNIGHT
@@ -322,7 +322,7 @@ local AddFlags = function(spellID, flags)
 	AuraFlags[spellID] = bit_bor(AuraFlags[spellID], flags)
 end
 
-local PopulateClassicClassDatabase = function()
+local Populate_Classic_ClassDatabase = function()
 
 	-- Druid
 	-----------------------------------------------------------------
@@ -785,7 +785,7 @@ local PopulateClassicClassDatabase = function()
 
 end
 
-local PopulateClassicNPCDatabase = function()
+local Populate_Classic_NpcDatabase = function()
 
 	-- Blackwing Lair
 	------------------------------------------------------------------------
@@ -794,7 +794,7 @@ local PopulateClassicNPCDatabase = function()
 
 end
 
-local PopulateRetailClassDatabase = function()
+local Populate_BFA_ClassDatabase = function()
 
 	-- Death Knight
 	------------------------------------------------------------------------
@@ -1096,7 +1096,7 @@ local PopulateRetailClassDatabase = function()
 
 end
 
-local PopulateRetailNPCDatabase = function()
+local Populate_BFA_NpcDatabase = function()
 
 	-- Mythic+ Dungeons
 	------------------------------------------------------------------------
@@ -1798,18 +1798,249 @@ local PopulateRetailNPCDatabase = function()
 	AddFlags(314889, IsBoss) 	-- Probe Mind
 	AddFlags(318976, IsBoss) 	-- Stupefying Glare
 
+end
+
+local Populate_SL_ClassDatabase = function()
+
+
+
+end
+
+local Populate_SL_NpcDatabase = function()
+
+	-- Mythic+ Dungeons
+	------------------------------------------------------------------------
+	-- General Affix
+	AddFlags(240443, IsBoss)	-- Bursting
+	AddFlags(240559, IsBoss)	-- Grievous
+	AddFlags(209858, IsBoss)	-- Necrotic
+	AddFlags(226512, IsBoss)	-- Sanguine
+
+	-- Shadowlands Affix
+	AddFlags(342494, IsBoss)	-- Belligerent Boast (Prideful)
+
+	-- Shadowlands Dungeons
+	------------------------------------------------------------------------
+	-- Halls of Atonement
+	AddFlags(326891, IsBoss)	-- Anguish
+	AddFlags(326874, IsBoss)	-- Ankle Bites
+	AddFlags(325876, IsBoss)	-- Curse of Obliteration
+	AddFlags(319603, IsBoss)	-- Curse of Stone
+	AddFlags(323650, IsBoss)	-- Haunting Fixation
+	AddFlags(329321, IsBoss)	-- Jagged Swipe 1
+	AddFlags(344993, IsBoss)	-- Jagged Swipe 2
+	AddFlags(340446, IsBoss)	-- Mark of Envy
+	AddFlags(335338, IsBoss)	-- Ritual of Woe
+	AddFlags(326632, IsBoss)	-- Stony Veins
+	AddFlags(319611, IsBoss)	-- Turned to Stone
+
+	-- Mists of Tirna Scithe
+	AddFlags(325224, IsBoss)	-- Anima Injection
+	AddFlags(323043, IsBoss)	-- Bloodletting
+	AddFlags(325027, IsBoss)	-- Bramble Burst
+	AddFlags(326092, IsBoss)	-- Debilitating Poison
+	AddFlags(321891, IsBoss)	-- Freeze Tag Fixation
+	AddFlags(322563, IsBoss)	-- Marked Prey
+	AddFlags(331172, IsBoss)	-- Mind Link
+	AddFlags(325021, IsBoss)	-- Mistveil Tear
+	AddFlags(322487, IsBoss)	-- Overgrowth 1
+	AddFlags(322486, IsBoss)	-- Overgrowth 2
+	AddFlags(328756, IsBoss)	-- Repulsive Visage
+	AddFlags(322557, IsBoss)	-- Soul Split
+	AddFlags(325418, IsBoss)	-- Volatile Acid
+
+	-- Plaguefall
+	AddFlags(333406, IsBoss)	-- Assassinate
+	AddFlags(322358, IsBoss)	-- Burning Strain
+	AddFlags(330069, IsBoss)	-- Concentrated Plague
+	AddFlags(320512, IsBoss)	-- Corroded Claws
+	AddFlags(325552, IsBoss)	-- Cytotoxic Slash
+	AddFlags(328180, IsBoss)	-- Gripping Infection
+	AddFlags(340355, IsBoss)	-- Rapid Infection
+	AddFlags(331818, IsBoss)	-- Shadow Ambush
+	AddFlags(332397, IsBoss)	-- Shroudweb
+	AddFlags(329110, IsBoss)	-- Slime Injection
+	AddFlags(336258, IsBoss)	-- Solitary Prey
+	AddFlags(328395, IsBoss)	-- Venompiercer
+	AddFlags(320542, IsBoss)	-- Wasting Blight
+	AddFlags(336301, IsBoss)	-- Web Wrap
+	AddFlags(322410, IsBoss)	-- Withering Filth
+
+	-- The Necrotic Wake
+	AddFlags(320717, IsBoss)	-- Blood Hunger
+	AddFlags(324381, IsBoss)	-- Chill Scythe
+	AddFlags(323365, IsBoss)	-- Clinging Darkness
+	AddFlags(323198, IsBoss)	-- Dark Exile
+	AddFlags(343504, IsBoss)	-- Dark Grasp
+	AddFlags(323464, IsBoss)	-- Dark Ichor
+	AddFlags(321821, IsBoss)	-- Disgusting Guts
+	AddFlags(333485, IsBoss)	-- Disease Cloud
+	AddFlags(334748, IsBoss)	-- Drain FLuids
+	AddFlags(328181, IsBoss)	-- Frigid Cold
+	AddFlags(338353, IsBoss)	-- Goresplatter
+	AddFlags(343556, IsBoss)	-- Morbid Fixation 1
+	AddFlags(338606, IsBoss)	-- Morbid Fixation 2
+	AddFlags(320170, IsBoss)	-- Necrotic Bolt
+	AddFlags(333489, IsBoss)	-- Necrotic Breath
+	AddFlags(333492, IsBoss)	-- Necrotic Ichor
+	AddFlags(320573, IsBoss)	-- Shadow Well
+	AddFlags(338357, IsBoss)	-- Tenderize
+
+	-- Theater of Pain
+	AddFlags(342675, IsBoss)	-- Bone Spear
+	AddFlags(333299, IsBoss)	-- Curse of Desolation 1
+	AddFlags(333301, IsBoss)	-- Curse of Desolation 2
+	AddFlags(323831, IsBoss)	-- Death Grasp
+	AddFlags(330700, IsBoss)	-- Decaying Blight
+	AddFlags(326892, IsBoss)	-- Fixate
+	AddFlags(323825, IsBoss)	-- Grasping Rift
+	AddFlags(323406, IsBoss)	-- Jagged Gash
+	AddFlags(324449, IsBoss)	-- Manifest Death
+	AddFlags(330868, IsBoss)	-- Necrotic Bolt Volley
+	AddFlags(321768, IsBoss)	-- On the Hook
+	AddFlags(319626, IsBoss)	-- Phantasmal Parasite
+	AddFlags(319539, IsBoss)	-- Soulless
+	AddFlags(330608, IsBoss)	-- Vile Eruption
+	AddFlags(323750, IsBoss)	-- Vile Gas
+	AddFlags(341949, IsBoss)	-- Withering Blight
+
+	-- Sanguine Depths
+	AddFlags(328593, IsBoss)	-- Agonize
+	AddFlags(335306, IsBoss)	-- Barbed Shackles
+	AddFlags(321038, IsBoss)	-- Burden Soul
+	AddFlags(322554, IsBoss)	-- Castigate
+	AddFlags(326836, IsBoss)	-- Curse of Suppression
+	AddFlags(326827, IsBoss)	-- Dread Bindings
+	AddFlags(334653, IsBoss)	-- Engorge
+	AddFlags(325254, IsBoss)	-- Iron Spikes
+	AddFlags(322429, IsBoss)	-- Severing Slice
+
+	-- Spires of Ascension
+	AddFlags(323792, IsBoss)	-- Anima Field
+	AddFlags(324205, IsBoss)	-- Blinding Flash
+	AddFlags(338729, IsBoss)	-- Charged Stomp
+	AddFlags(327481, IsBoss)	-- Dark Lance
+	AddFlags(331251, IsBoss)	-- Deep Connection
+	AddFlags(328331, IsBoss)	-- Forced Confession
+	AddFlags(317661, IsBoss)	-- Insidious Venom
+	AddFlags(328434, IsBoss)	-- Intimidated
+	AddFlags(322817, IsBoss)	-- Lingering Doubt
+	AddFlags(322818, IsBoss)	-- Lost Confidence
+	AddFlags(338747, IsBoss)	-- Purifying Blast
+	AddFlags(330683, IsBoss)	-- Raw Anima
+	AddFlags(341215, IsBoss)	-- Volatile Anima
+
+	-- De Other Side
+	AddFlags(323687, IsBoss)	-- Arcane Lightning
+	AddFlags(323692, IsBoss)	-- Arcane Vulnerability
+	AddFlags(334535, IsBoss)	-- Beak Slice
+	AddFlags(330434, IsBoss)	-- Buzz-Saw 1
+	AddFlags(320144, IsBoss)	-- Buzz-Saw 2
+	AddFlags(322746, IsBoss)	-- Corrupted Blood
+	AddFlags(325725, IsBoss)	-- Cosmic Artifice
+	AddFlags(327649, IsBoss)	-- Crushed Soul
+	AddFlags(323877, IsBoss)	-- Echo Finger Laser X-treme
+	AddFlags(332678, IsBoss)	-- Gushing Wound
+	AddFlags(331379, IsBoss)	-- Lubricate
+	AddFlags(334913, IsBoss)	-- Master of Death
+	AddFlags(339978, IsBoss)	-- Pacifying Mists
+	AddFlags(320786, IsBoss)	-- Power Overwhelming
+	AddFlags(333250, IsBoss)	-- Reaver
+	AddFlags(334496, IsBoss)	-- Soporific Shimmerdust
+	AddFlags(331847, IsBoss)	-- W-00F
+	AddFlags(328987, IsBoss)	-- Zealous
 
 	-- Castle Nathria
 	------------------------------------------------------------------------
-	-- Hecutis
-	AddFlags(334860, IsBoss) 	-- Crushing Stone
+	-- Shriekwing
+	AddFlags(329370, IsBoss)	-- Deadly Descent
+	AddFlags(336494, IsBoss)	-- Echo Screech
+	AddFlags(328897, IsBoss)	-- Exsanguinated
+	AddFlags(330713, IsBoss)	-- Reverberating Pain
+
+	-- Huntsman Altimor
+	AddFlags(334945, IsBoss)	-- Bloody Thrash
+	AddFlags(334860, IsBoss)	-- Crushing Stone (Hecutis)
+	AddFlags(335111, IsBoss)	-- Huntsman's Mark 1
+	AddFlags(335112, IsBoss)	-- Huntsman's Mark 2
+	AddFlags(335113, IsBoss)	-- Huntsman's Mark 3
+	AddFlags(334971, IsBoss)	-- Jagged Claws
+	AddFlags(335304, IsBoss)	-- Sinseeker
+
+	-- Hungering Destroyer
+	AddFlags(329298, IsBoss)	-- Gluttonous Miasma
+	AddFlags(334228, IsBoss)	-- Volatile Ejection
+
+	-- Lady Inerva Darkvein
+	AddFlags(332664, IsBoss)	-- Concentrate Anima
+	AddFlags(335396, IsBoss)	-- Hidden Desire
+	AddFlags(325936, IsBoss)	-- Shared Cognition
+	AddFlags(324983, IsBoss)	-- Shared Suffering
+	AddFlags(324982, IsBoss)	-- Shared Suffering (Partner)
+	AddFlags(325382, IsBoss)	-- Warped Desires
+
+	-- Sun King's Salvation
+	AddFlags(326078, IsBoss)	-- Infuser's Boon
+	AddFlags(325251, IsBoss)	-- Sin of Pride
+	AddFlags(333002, IsBoss)	-- Vulgar Brand
+
+	-- Artificer Xy'mox
+	AddFlags(327902, IsBoss)	-- Fixate
+	AddFlags(325236, IsBoss)	-- Glyph of Destruction
+	AddFlags(327414, IsBoss)	-- Possession
+	AddFlags(326302, IsBoss)	-- Stasis Trap
+
+	-- The Council of Blood
+	AddFlags(331636, IsBoss)	-- Dark Recital 1
+	AddFlags(331637, IsBoss)	-- Dark Recital 2
+	AddFlags(327052, IsBoss)	-- Drain Essence 1
+	AddFlags(327773, IsBoss)	-- Drain Essence 2
+	AddFlags(346651, IsBoss)	-- Drain Essence Mythic
+	AddFlags(331706, IsBoss)	-- Scarlet Letter
+	AddFlags(328334, IsBoss)	-- Tactical Advance
+	AddFlags(330848, IsBoss)	-- Wrong Moves
+
+	-- Sludgefist
+	AddFlags(335293, IsBoss)	-- Chain Link
+	AddFlags(335270, IsBoss)	-- Chain This One!
+	AddFlags(335470, IsBoss)	-- Chain Slam
+	AddFlags(339181, IsBoss)	-- Chain Slam (Root)
+	AddFlags(331209, IsBoss)	-- Hateful Gaze
+	AddFlags(335295, IsBoss)	-- Shattering Chain
+
+	-- Stone Legion Generals
+	AddFlags(339690, IsBoss)	-- Crystalize
+	AddFlags(334541, IsBoss)	-- Curse of Petrification
+	AddFlags(334765, IsBoss)	-- Heart Rend
+	AddFlags(334616, IsBoss)	-- Petrified
+	AddFlags(334498, IsBoss)	-- Seismic Upheaval
+	AddFlags(337643, IsBoss)	-- Unstable Footing
+	AddFlags(342655, IsBoss)	-- Volatile Anima Infusion
+	AddFlags(342698, IsBoss)	-- Volatile Anima Infection
+	AddFlags(333377, IsBoss)	-- Wicked Mark
+
+	-- Sire Denathrius
+	AddFlags(326851, IsBoss)	-- Blood Price
+	AddFlags(326699, IsBoss)	-- Burden of Sin
+	AddFlags(327992, IsBoss)	-- Desolation
+	AddFlags(329951, IsBoss)	-- Impale
+	AddFlags(328276, IsBoss)	-- March of the Penitent
+	AddFlags(327796, IsBoss)	-- Night Hunter
+	AddFlags(335873, IsBoss)	-- Rancor
+	AddFlags(329181, IsBoss)	-- Wracking Pain
 
 end
 
 if (IsClassic) then
-	PopulateClassicClassDatabase()
-	PopulateClassicNPCDatabase()
+	
+	Populate_Classic_ClassDatabase()
+	Populate_Classic_NpcDatabase()
+
 elseif (IsRetail) then
-	PopulateRetailClassDatabase()
-	PopulateRetailNPCDatabase()
+	
+	Populate_BFA_ClassDatabase()
+	Populate_BFA_NpcDatabase()
+	Populate_SL_ClassDatabase()
+	Populate_SL_NpcDatabase()
+
 end
