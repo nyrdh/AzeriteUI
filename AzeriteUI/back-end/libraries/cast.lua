@@ -1,4 +1,4 @@
-local LibCast = Wheel:Set("LibCast", 10)
+local LibCast = Wheel:Set("LibCast", 11)
 if (not LibCast) then
 	return
 end
@@ -405,10 +405,10 @@ if (IsClassic) then
 			local _, spellName, _, extraSpellId, extraSpellName, extraSchool = ...
 	
 			-- Delete the cast
-			self:DeleteCast(sourceGUID)
+			self:DeleteCast(destGUID) -- was sourceGUID. that's wrong. 
 			
 			-- Tell listeners about the event
-			self:SendMessage("GP_SPELL_CAST_INTERRUPTED", sourceGUID)
+			self:SendMessage("GP_SPELL_CAST_INTERRUPTED", destGUID) -- was sourceGUID. that's wrong. 
 			return
 			
 		elseif (eventType == "PARTY_KILL") or (eventType == "UNIT_DIED") then 

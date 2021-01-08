@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 129)
+local LibSecureButton = Wheel:Set("LibSecureButton", 130)
 if (not LibSecureButton) then
 	return
 end
@@ -2056,7 +2056,9 @@ ExitButton.PreClick = function(self) end
 ExitButton.PostClick = function(self, button) 
 	if (UnitOnTaxi("player") and (not InCombatLockdown())) then
 		TaxiRequestEarlyLanding()
-	elseif (IsPossessBarVisible() and PetCanBeDismissed()) then
+
+	-- No possess bar in classic. Don't check for it!
+	elseif (IsRetail) and (IsPossessBarVisible() and PetCanBeDismissed()) then
 		PetDismiss()
 	end
 end

@@ -1094,7 +1094,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 								elseif (IsMounted()) then 
 									tooltip:AddLine(BINDING_NAME_DISMOUNT)
 									tooltip:AddLine(L["%s to dismount."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
-								elseif (IsPossessBarVisible() and PetCanBeDismissed()) then
+								elseif (IsRetail) and (IsPossessBarVisible() and PetCanBeDismissed()) then
 									tooltip:AddLine(PET_DISMISS)
 									tooltip:AddLine(L["%s to dismiss your controlled minion."]:format(L["<Left-Click>"]), Colors.quest.green[1], Colors.quest.green[2], Colors.quest.green[3])
 								else

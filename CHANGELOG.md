@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2021-01-08
+### Fixed
+- The exit button used to exit mounts, cancel flight paths, leave vehicles and so on will no longer bug out in WoW Classic.
+- Interrupted casts should display properly in WoW Classic now, thanks to NoraHub @ GitHub seeing what I was blind to!
+
 ## [3.1.448-RC] 2021-01-03
 ### Added
 - Added some auras to the legacy theme focus frame.
