@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 84)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 85)
 if (not LibUnitFrame) then	
 	return
 end
@@ -478,7 +478,9 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 		frame:RegisterEvent("PLAYER_TARGET_CHANGED", OverrideAllElements, true)
 
 	elseif (unit == "focus") then
-		frame:RegisterEvent("PLAYER_FOCUS_CHANGED", OverrideAllElements, true)
+		if (IsRetail) then
+			frame:RegisterEvent("PLAYER_FOCUS_CHANGED", OverrideAllElements, true)
+		end
 
 	elseif (unit == "mouseover") then
 		frame:RegisterEvent("UPDATE_MOUSEOVER_UNIT", OverrideAllElements, true)
