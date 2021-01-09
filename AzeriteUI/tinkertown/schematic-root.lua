@@ -186,6 +186,10 @@ Private.RegisterSchematic("ModuleForge::Root", "Azerite", {
 						arguments = {
 							-- shrinkOption, globalName
 							{ true, "InterfaceOptionsCombatPanelTargetOfTarget" },
+
+							-- Personal Resource Display settings. 
+							-- We're doing this from our own menu now, and provide more settings than Blizzard.
+							IsRetail and { "Vertical", "InterfaceOptionsNamesPanelUnitNameplatesPersonalResource"} or nil, 
 							IsRetail and { "Vertical", "InterfaceOptionsNamesPanelUnitNameplatesPersonalResourceOnEnemy" } or nil
 						}
 					}
@@ -278,6 +282,10 @@ Private.RegisterSchematic("ModuleForge::Root", "Legacy", {
 						arguments = {
 							-- shrinkOption, globalName
 							{ true, "InterfaceOptionsCombatPanelTargetOfTarget" },
+
+							-- Personal Resource Display settings. 
+							-- We're doing this from our own menu now, and provide more settings than Blizzard.
+							IsRetail and { "Vertical", "InterfaceOptionsNamesPanelUnitNameplatesPersonalResource"} or nil, 
 							IsRetail and { "Vertical", "InterfaceOptionsNamesPanelUnitNameplatesPersonalResourceOnEnemy" } or nil
 						}
 					}

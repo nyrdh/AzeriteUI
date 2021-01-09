@@ -149,13 +149,13 @@ local auraSortBuffsFirst = function(a,b)
 						return (a.expirationTime < b.expirationTime) 
 					end
 				end
+			else
+				return a.isCastByPlayer
 			end
 
 		else
 			return a.isBuff
 		end
-	else
-		return a.isCastByPlayer
 	end
 end
 
@@ -195,13 +195,13 @@ local auraSortDebuffsFirst = function(a,b)
 						return (a.expirationTime < b.expirationTime) 
 					end
 				end
+			else
+				return a.isCastByPlayer
 			end
 
 		else
 			return (not a.isBuff)
 		end
-	else
-		return a.isCastByPlayer
 	end
 end
 
@@ -1127,5 +1127,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 69)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 70)
 end 

@@ -1,10 +1,6 @@
-
--- Lua API
-local _G = _G
-
 -- WoW API
-local GetRaidTargetIndex = _G.GetRaidTargetIndex
-local SetRaidTargetIconTexture = _G.SetRaidTargetIconTexture
+local GetRaidTargetIndex = GetRaidTargetIndex
+local SetRaidTargetIconTexture = SetRaidTargetIconTexture
 
 local Update = function(self, event, unit)
 	if (not unit) or (unit ~= self.unit) then 
@@ -17,7 +13,7 @@ local Update = function(self, event, unit)
 	end
 
 	local index = GetRaidTargetIndex(unit)
-	if (index) then
+	if (index) and not((self.isYou) and (element.hideOnPlayer)) then
 		SetRaidTargetIconTexture(element, index)
 		element:Show()
 	else
@@ -62,5 +58,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("RaidTarget", Enable, Disable, Proxy, 3)
+	Lib:RegisterElement("RaidTarget", Enable, Disable, Proxy, 4)
 end 

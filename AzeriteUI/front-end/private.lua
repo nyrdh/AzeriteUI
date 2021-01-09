@@ -2062,7 +2062,11 @@ Defaults.NamePlates = {
 	enableAuras = true,
 	clickThroughEnemies = false, 
 	clickThroughFriends = false, 
-	clickThroughSelf = false
+	clickThroughSelf = false,
+	nameplateShowSelf = false, 
+	NameplatePersonalShowAlways = false,
+	NameplatePersonalShowInCombat = true,
+	NameplatePersonalShowWithTarget = true
 }
 
 Defaults.UnitFramePlayer = {

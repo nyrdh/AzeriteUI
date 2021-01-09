@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2021-01-09
+### Changed
+- Personal Resource Display options have been removed from the Blizzard Interface menu, and put into ours instead, with a few extra options added! This causes a first-time override of whatever setting you previously had, as these options will be stored and handled by our UI from now on. More nameplate options to follow at a later date.
+- Raid marks should no longer be shown on the personal resource display, as you have the same mark right above your character's head already.
+
+### Fixed
+- Auras cast by the player should now be shown before those cast by others, as intended. The check was there in the filter, but at the completely wrong place. Late night coding. Fail.
+
 ## [3.1.449-RC] 2021-01-08
 ### Fixed
 - The exit button used to exit mounts, cancel flight paths, leave vehicles and so on will no longer bug out in WoW Classic.

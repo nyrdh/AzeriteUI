@@ -251,6 +251,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	plate.Classification.Rare = rare
 
 	local raidTarget = baseFrame:CreateTexture()
+	raidTarget.hideOnPlayer = true -- don't show on personal resource display.
 	raidTarget.point = layout.RaidTargetPoint
 	raidTarget.anchor = plate[layout.RaidTargetAnchor] or plate
 	raidTarget.relPoint = layout.RaidTargetRelPoint
@@ -347,9 +348,24 @@ Module.PostUpdateCVars = function(self, event, ...)
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "PostUpdateCVars")
 	end 
 	local db = self.db
+
+	-- Click-through settings.
 	SetNamePlateEnemyClickThrough(db.clickThroughEnemies)
 	SetNamePlateFriendlyClickThrough(db.clickThroughFriends)
 	SetNamePlateSelfClickThrough(db.clickThroughSelf)
+	
+	-- Show the Personal Resource Display
+	SetCVar("nameplateShowSelf", db.nameplateShowSelf and "1" or "0") 
+
+	-- Determines if the the personal nameplate is always shown. 
+	SetCVar("NameplatePersonalShowAlways", db.NameplatePersonalShowAlways and "1" or "0") 
+
+	-- Determines if the the personal nameplate is shown when you enter combat. 
+	SetCVar("NameplatePersonalShowInCombat", db.NameplatePersonalShowInCombat and "1" or "0") 
+
+	-- 0 = targeting has no effect, 1 = show on hostile target, 2 = show on any target 
+	SetCVar("NameplatePersonalShowWithTarget", db.NameplatePersonalShowWithTarget and "2" or "0") 
+
 end
 
 Module.OnEvent = function(self, event, ...)
@@ -388,6 +404,22 @@ Module.OnInit = function(self)
 
 			elseif (name == "change-clickthroughself") then 
 				self:SetAttribute("clickThroughSelf", value); 
+				self:CallMethod("PostUpdateCVars"); 
+
+			elseif (name == "change-nameplateshowself") then 
+				self:SetAttribute("nameplateShowSelf", value); 
+				self:CallMethod("PostUpdateCVars"); 
+
+			elseif (name == "change-nameplatepersonalshowalways") then 
+				self:SetAttribute("NameplatePersonalShowAlways", value); 
+				self:CallMethod("PostUpdateCVars"); 
+
+			elseif (name == "change-nameplatepersonalshowincombat") then 
+				self:SetAttribute("NameplatePersonalShowInCombat", value); 
+				self:CallMethod("PostUpdateCVars"); 
+
+			elseif (name == "change-nameplatepersonalshowWithtarget") then 
+				self:SetAttribute("NameplatePersonalShowWithTarget", value); 
 				self:CallMethod("PostUpdateCVars"); 
 
 			end 

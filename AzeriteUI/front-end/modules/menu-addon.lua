@@ -1027,6 +1027,7 @@ Module.ShouldHaveMenu = function(self, module)
 	return module and not(module:IsUserDisabled() or module:IsIncompatible() or module:DependencyFailed())
 end
 
+-- Menu options are here! Here! Here!!!
 Module.CreateMenuTable = function(self)
 	local theme = Private.GetLayoutID()
 	local IsLegacy = theme == "Legacy"
@@ -1448,40 +1449,80 @@ Module.CreateMenuTable = function(self)
 	-- Nameplates
 	local NamePlates = Core:GetModule("NamePlates", true)
 	if (self:ShouldHaveMenu(NamePlates)) then 
-		
-		table_insert(MenuTable, {
-			title = L["NamePlates"], type = nil, hasWindow = true, 
-			buttons = clean({
-				-- Disable player auras
-				IsAzerite and {
-					enabledTitle = L_ENABLED:format(L["Auras"]),
-					disabledTitle = L_DISABLED:format(L["Auras"]),
-					type = "TOGGLE_VALUE", 
-					configDB = "NamePlates", configKey = "enableAuras", 
-					proxyModule = "NamePlates"
-				} or false,
-				-- Click-through settings
-				{
-					title = MAKE_UNINTERACTABLE, type = nil, hasWindow = true, 
-					buttons = {
-						{
-							enabledTitle = L_ENABLED:format(L["Enemies"]),
-							disabledTitle = L_DISABLED:format(L["Enemies"]),
-							type = "TOGGLE_VALUE", 
-							configDB = "NamePlates", configKey = "clickThroughEnemies", 
-							proxyModule = "NamePlates"
-						},
-						{
-							enabledTitle = L_ENABLED:format(L["Friends"]),
-							disabledTitle = L_DISABLED:format(L["Friends"]),
-							type = "TOGGLE_VALUE", 
-							configDB = "NamePlates", configKey = "clickThroughFriends", 
-							proxyModule = "NamePlates"
-						}
+
+		local NamePlateMenu = { title = L["NamePlates"], type = nil, hasWindow = true, buttons = {} }
+
+		-- Personal Resource Display settings.
+		if (IsRetail) then
+			table_insert(NamePlateMenu.buttons, {
+				title = L["PRD"], type = nil, hasWindow = true, 
+				buttons = {
+					{
+						enabledTitle = L["Enabled"],
+						disabledTitle = L["Disabled"],
+						type = "TOGGLE_VALUE", 
+						configDB = "NamePlates", configKey = "nameplateShowSelf", 
+						proxyModule = "NamePlates"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["Show Always"]),
+						disabledTitle = L["Show Always"],
+						type = "TOGGLE_VALUE", 
+						configDB = "NamePlates", configKey = "NameplatePersonalShowAlways", 
+						isSlave = true, slaveDB = "NamePlates", slaveKey = "nameplateShowSelf",
+						proxyModule = "NamePlates"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["Show In Combat"]),
+						disabledTitle = L["Show In Combat"],
+						type = "TOGGLE_VALUE", 
+						configDB = "NamePlates", configKey = "NameplatePersonalShowInCombat", 
+						isSlave = true, slaveDB = "NamePlates", slaveKey = "nameplateShowSelf",
+						proxyModule = "NamePlates"
+					},
+					{
+						enabledTitle = L_ENABLED:format(L["Show With Target"]),
+						disabledTitle = L["Show With Target"],
+						type = "TOGGLE_VALUE", 
+						configDB = "NamePlates", configKey = "NameplatePersonalShowWithTarget", 
+						isSlave = true, slaveDB = "NamePlates", slaveKey = "nameplateShowSelf",
+						proxyModule = "NamePlates"
 					}
 				}
 			})
+		end
+		
+		-- Click-through settings
+		table_insert(NamePlateMenu.buttons, {
+			title = MAKE_UNINTERACTABLE, type = nil, hasWindow = true, 
+			buttons = {
+				{
+					enabledTitle = L_ENABLED:format(L["Enemies"]),
+					disabledTitle = L_DISABLED:format(L["Enemies"]),
+					type = "TOGGLE_VALUE", 
+					configDB = "NamePlates", configKey = "clickThroughEnemies", 
+					proxyModule = "NamePlates"
+				},
+				{
+					enabledTitle = L_ENABLED:format(L["Friends"]),
+					disabledTitle = L_DISABLED:format(L["Friends"]),
+					type = "TOGGLE_VALUE", 
+					configDB = "NamePlates", configKey = "clickThroughFriends", 
+					proxyModule = "NamePlates"
+				}
+			}
 		})
+
+		-- Toggle nameplate auras
+		table_insert(NamePlateMenu.buttons, {
+			enabledTitle = L_ENABLED:format(L["Auras"]),
+			disabledTitle = L_DISABLED:format(L["Auras"]),
+			type = "TOGGLE_VALUE", 
+			configDB = "NamePlates", configKey = "enableAuras", 
+			proxyModule = "NamePlates"
+		})
+		
+		table_insert(MenuTable, NamePlateMenu)
 
 	end 
 
