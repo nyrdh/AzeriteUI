@@ -1731,7 +1731,7 @@ local UnitFrame_Aura_PostUpdateButton = function(element, button)
 
 	if (desaturate) then
 		button.Icon:SetDesaturated(true)
-		button.Icon:SetVertexColor(.5, .5, .5)
+		button.Icon:SetVertexColor(.4, .4, .4)
 	else
 		button.Icon:SetDesaturated(false)
 		button.Icon:SetVertexColor(1, 1, 1)

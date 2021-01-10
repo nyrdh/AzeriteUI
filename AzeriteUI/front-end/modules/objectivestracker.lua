@@ -522,18 +522,15 @@ Module.CreateDriver = function(self)
 	if (layout.HideInCombat or layout.HideInBossFights or layout.HideInVehicles or layout.HideInArena) then 
 		local driverFrame = self:CreateFrame("Frame", nil, _G.UIParent, "SecureHandlerAttributeTemplate")
 
-		driverFrame:HookScript("OnShow", function()
-			local tracker = QuestWatchFrame or ObjectiveTrackerFrame
-			if (tracker) then
-				tracker:SetAlpha(.9)
-			end
+		driverFrame.OnShow = function()
+			self.frame:SetAlpha(.9)
 			self.frame.cover:Hide()
-		end)
+		end
 
-		driverFrame:HookScript("OnHide", function() 
+		driverFrame.OnHide = function() 
 			local tracker = QuestWatchFrame or ObjectiveTrackerFrame
 			if (tracker) then
-				tracker:SetAlpha(0)
+				self.frame:SetAlpha(0)
 				self.frame.cover:SetFrameStrata(tracker:GetFrameStrata())
 				self.frame.cover:SetFrameLevel(tracker:GetFrameLevel() + 5)
 				self.frame.cover:ClearAllPoints()
@@ -543,8 +540,10 @@ Module.CreateDriver = function(self)
 			else
 				self.frame.cover:Hide()
 			end
-		end)
+		end
 
+		driverFrame:HookScript("OnShow", driverFrame.OnShow)
+		driverFrame:HookScript("OnHide", driverFrame.OnHide)
 		driverFrame:SetAttribute("_onattributechanged", [=[
 			if (name == "state-vis") then
 				if (value == "show") then 
@@ -574,6 +573,8 @@ Module.CreateDriver = function(self)
 		if (layout.HideInCombat) then
 			driver = "[combat]" .. driver
 		end 
+		local result, target = SecureCmdOptionParse(driver)
+		--driverFrame:SetShown(result == "show" and true or false)
 		RegisterAttributeDriver(driverFrame, "state-vis", driver)
 	end
 end
