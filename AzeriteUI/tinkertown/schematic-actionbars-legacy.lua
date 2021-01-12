@@ -854,7 +854,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Legacy", {
 								-- Let's put on a special visibility driver 
 								-- that hides these buttons in vehicles, and in taxis.
 								UnregisterAttributeDriver(button:GetVisibilityDriverFrame(), "state-vis")
-								RegisterAttributeDriver(button:GetVisibilityDriverFrame(), "state-vis", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;[@pet,exists]show;hide")
+								RegisterAttributeDriver(button:GetVisibilityDriverFrame(), "state-vis", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;[@player,noexists]hide;[@pet,exists]show;hide")
 
 								-- Button cache
 								self.Buttons[self.buttonID] = button

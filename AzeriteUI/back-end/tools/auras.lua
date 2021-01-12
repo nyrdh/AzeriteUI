@@ -6,7 +6,7 @@ on a widgetcontainer aura plugin element.
 
 --]]--
 
-local LibAuraTool = Wheel:Set("LibAuraTool", 11)
+local LibAuraTool = Wheel:Set("LibAuraTool", 12)
 if (not LibAuraTool) then
 	return
 end
@@ -435,15 +435,39 @@ local auraFilterFocus = function(...)
 		return true, nil, hideFilteredSpellID
 	end	
 
-	-- Show time based debuffs from environment or NPCs
-	if (not isBuff) and (element.isYou) and (not unitCaster or not UnitIsPlayer(unitCaster)) then
+	-- Show time based debuffs from environment or NPCs, or from you.
+	if (isCastByPlayer) or ((not isBuff) and (not unitCaster or not UnitIsPlayer(unitCaster))) then
 		if (checkTimeAndStackbasedConditionals(...)) then
 			return true, nil, hideUnfilteredSpellID
 		end
 	end
 
 	-- Show time based auras from any sources.
-	if (SLACKMODE) or (element.enableSlackMode) then
+	--if (SLACKMODE) or (element.enableSlackMode) then
+	--	if (checkTimeAndStackbasedConditionals(...)) then
+	--		return true, nil, hideUnfilteredSpellID
+	--	end
+	--end
+	
+	-- Hide everything else
+	return false, nil, hideUnfilteredSpellID
+end
+
+local auraFilterBoss = function(...)
+	local element, isBuff, unit, isOwnedByPlayer, name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = ...
+
+	-- Show all boss or encounter debuffs
+	if (isBossDebuff) then
+		return true, nil, hideUnfilteredSpellID
+	end
+
+	-- Show anything explicitly whitelisted
+	if (checkWhitelistConditionals(...)) then
+		return true, nil, hideFilteredSpellID
+	end	
+
+	-- Show time based debuffs from environment or NPCs, or from you.
+	if (isCastByPlayer) or ((not isBuff) and (not unitCaster or not UnitIsPlayer(unitCaster))) then
 		if (checkTimeAndStackbasedConditionals(...)) then
 			return true, nil, hideUnfilteredSpellID
 		end
@@ -492,6 +516,8 @@ LibAuraTool.GetAuraFilter = function(self, ...)
 		return auraFilterLegacySecondary
 	elseif (filterType == "focus") then
 		return auraFilterFocus
+	elseif (filterType == "boss") then
+		return auraFilterBoss
 	else
 		return auraFilter
 	end

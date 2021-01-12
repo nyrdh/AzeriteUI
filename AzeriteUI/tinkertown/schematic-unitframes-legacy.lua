@@ -678,7 +678,9 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 
 					-- hides when the unit is in a vehicle, but lacks a vehicleui (tortollan minigames)
 					--"visibilityPreDriver", "[canexitvehicle,novehicleui,nooverridebar,nopossessbar,noshapeshift]hide;", 
-					"visibilityPreDriver", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;"
+					--"visibilityPreDriver", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;"
+					"visibilityPreDriver", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;[@player,noexists]hide;"
+					
 				}
 			},
 			-- Setup backdrop and border
@@ -2430,7 +2432,7 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 					"customSort", false,
 					"debuffsFirst", false, 
 					"disableMouse", false, 
-					"filter", "PLAYER", 
+					"filter", false, 
 					"customFilter", GetAuraFilter("focus"), 
 					"growthX", "LEFT", 
 					"growthY", "DOWN", 
@@ -3655,8 +3657,8 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 					"customSort", false,
 					"debuffsFirst", false, 
 					"disableMouse", false, 
-					"filter", "PLAYER", 
-					"customFilter", false, 
+					"filter", false, 
+					"customFilter", GetAuraFilter("boss"), 
 					"growthX", "LEFT", 
 					"growthY", "DOWN", 
 					"maxBuffs", false, 
