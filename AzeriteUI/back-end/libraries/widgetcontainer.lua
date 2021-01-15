@@ -1,4 +1,4 @@
-local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 26)
+local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 27)
 if (not LibWidgetContainer) then	
 	return
 end
@@ -211,6 +211,12 @@ WidgetFrame.RegisterEvent = function(self, event, func, unitless)
 	if (frequentUpdateFrames[self] and event ~= "UNIT_PORTRAIT_UPDATE" and event ~= "UNIT_MODEL_CHANGED") then 
 		return 
 	end
+
+	-- Bail out if the event is already registered for all elements by the back-end.
+	if (self.ignoredEvents) and (self.ignoredEvents[event]) then
+		return
+	end
+
 	if (not callbacks[self]) then
 		callbacks[self] = {}
 	end

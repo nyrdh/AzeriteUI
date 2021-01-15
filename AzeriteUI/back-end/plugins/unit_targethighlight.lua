@@ -1,6 +1,9 @@
 local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, "UnitThreat requires LibClientBuild to be loaded.")
 
+-- Lua API
+local string_match = string.match
+
 -- WoW API
 local UnitIsUnit = UnitIsUnit
 
@@ -57,8 +60,11 @@ local Enable = function(self)
 		element._owner = self
 		element.ForceUpdate = ForceUpdate
 
-		self:RegisterEvent("GROUP_ROSTER_UPDATE", Proxy, true)
 		self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
+
+		if (string_match(self.unit, "^party(%d+)")) or (string_match(self.unit, "^raid(%d+)")) then
+			self:RegisterEvent("GROUP_ROSTER_UPDATE", Proxy, true)
+		end
 
 		if (IsRetail) then
 			self:RegisterEvent("PLAYER_FOCUS_CHANGED", Proxy, true)
@@ -74,10 +80,7 @@ local Disable = function(self)
 
 		self:UnregisterEvent("GROUP_ROSTER_UPDATE")
 		self:UnregisterEvent("PLAYER_TARGET_CHANGED")
-
-		if (IsRetail) then
-			self:UnregisterEvent("PLAYER_FOCUS_CHANGED")
-		end
+		self:UnregisterEvent("PLAYER_FOCUS_CHANGED")
 
 		element:Hide()
 	end
@@ -85,5 +88,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("TargetHighlight", Enable, Disable, Proxy, 9)
+	Lib:RegisterElement("TargetHighlight", Enable, Disable, Proxy, 12)
 end 

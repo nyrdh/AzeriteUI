@@ -71,5 +71,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupNumber", Enable, Disable, Proxy, 1)
+	Lib:RegisterElement("GroupNumber", Enable, Disable, Proxy, 3)
 end 
