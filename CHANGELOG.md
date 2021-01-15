@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2021-01-09
+## [Unreleased] 2021-01-15
 ### Added
 - Experimental legacy theme boss frames.
+- Experimental target- and focus highlight on the nameplates.
 
 ### Changed
 - Personal Resource Display options have been removed from the Blizzard Interface menu, and put into ours instead, with a few extra options added! This causes a first-time override of whatever setting you previously had, as these options will be stored and handled by our UI from now on. More nameplate options to follow at a later date.

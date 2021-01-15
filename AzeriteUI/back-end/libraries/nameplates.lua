@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 64)
+local LibNamePlate = Wheel:Set("LibNamePlate", 65)
 if (not LibNamePlate) then	
 	return
 end
@@ -82,6 +82,7 @@ local IsRetail = LibClientBuild:IsRetail()
 LibNamePlate.allPlates = LibNamePlate.allPlates or {}
 LibNamePlate.visiblePlates = LibNamePlate.visiblePlates or {}
 LibNamePlate.castData = LibNamePlate.castData or {}
+LibNamePlate.metaData = LibNamePlate.metaData or {}
 LibNamePlate.alphaLevels = nil -- remove deprecated library data
 
 LibNamePlate.elements = LibNamePlate.elements or {} -- global element registry
@@ -126,9 +127,16 @@ if (not LibNamePlate.uiHider) then
 	LibNamePlate.uiHider = uiHider
 end
 
+-- Set metadata fallbacks before updates begin
+LibNamePlate.metaData.visiblePlates = 0
+LibNamePlate.metaData.visiblePlatesHostile = 0
+LibNamePlate.metaData.visiblePlatesFriendly = 0
+LibNamePlate.metaData.visiblePlatesHighAlpha = 0
+
 -- Speed shortcuts
 local allPlates = LibNamePlate.allPlates
 local visiblePlates = LibNamePlate.visiblePlates
+local metaData = LibNamePlate.metaData
 
 local elements = LibNamePlate.elements
 local callbacks = LibNamePlate.callbacks
@@ -503,6 +511,13 @@ NamePlate.OnShow = function(self, event, unit)
 	self.unitClassificiation = UnitClassification(unit)
 	self.unitCanAttack = UnitCanAttack("player", unit)
 
+	if (self.isEnemy) then
+		self.metaData.visiblePlatesHostile = self.metaData.visiblePlatesHostile + 1
+	elseif (self.isFriend) then
+		self.metaData.visiblePlatesFriendly = self.metaData.visiblePlatesFriendly + 1
+	end
+	self.metaData.visiblePlates = self.metaData.visiblePlates + 1
+
 	-- Enabling of situational elements should be done here.
 	-- Flags are available to the front-end at this point.
 	if (self.PreUpdate) then 
@@ -532,6 +547,13 @@ end
 
 NamePlate.OnHide = function(self, event, unit)
 	visiblePlates[self] = false -- this will trigger the fadeout and hiding
+
+	if (self.isEnemy) then
+		self.metaData.visiblePlatesHostile = self.metaData.visiblePlatesHostile - 1
+	elseif (self.isFriend) then
+		self.metaData.visiblePlatesFriendly = self.metaData.visiblePlatesFriendly - 1
+	end
+	self.metaData.visiblePlates = self.metaData.visiblePlates - 1
 
 	self.isVisible = nil
 	self.isYou = nil
@@ -855,6 +877,7 @@ LibNamePlate.CreateNamePlate = function(self, baseFrame, name)
 	plate.achievedAlpha = 0
 	plate.colors = Colors
 	plate.baseFrame = baseFrame
+	plate.metaData = metaData
 	plate:Hide()
 	plate:SetPoint("CENTER", baseFrame, "CENTER", 0, 0)
 	plate:SetFrameStrata("BACKGROUND")
@@ -1186,6 +1209,7 @@ LibNamePlate.OnUpdate = function(self, elapsed)
 	end
 	
 	-- Iterate!
+	local visible, highAlpha, lowAlpha = 0, 0, 0
 	for plate, baseFrame in pairs(visiblePlates) do
 
 		if (hasMouseOver) and (not currentHighlight) then
@@ -1224,8 +1248,12 @@ LibNamePlate.OnUpdate = function(self, elapsed)
 				end
 			end
 
-			if plate.currentAlpha == plate.targetAlpha then 
+			if (plate.currentAlpha == plate.targetAlpha) then 
 				plate.achievedAlpha = plate.targetAlpha -- store this for the next fade
+			end
+
+			if (plate.currentAlpha >= .5) then
+				highAlpha = highAlpha + 1
 			end
 
 			-- Still appears to be some weird stutter when reaching target alpha downwards here. 
@@ -1246,6 +1274,9 @@ LibNamePlate.OnUpdate = function(self, elapsed)
 			end 
 		end
 	end	
+
+	-- Store the metadata about visible plates and their alpha
+	metaData.visiblePlatesHighAlpha = highAlpha
 
 	self.currentHighlight = currentHighlight
 	self.elapsed = 0

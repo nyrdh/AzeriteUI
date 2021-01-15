@@ -287,6 +287,31 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 		plate:DisableElement("Auras")
 	end 
 
+	-- Target Highlighting
+	-----------------------------------------------------------
+	if (layout.UseTargetHighlight) then
+
+		-- Add an extra frame to break away from alpha changes
+		local owner = (layout.TargetHighlightParent and plate[layout.TargetHighlightParent] or plate)
+		local targetHighlightFrame = CreateFrame("Frame", nil, owner)
+		targetHighlightFrame:SetFrameLevel(owner:GetFrameLevel())
+		targetHighlightFrame:SetAllPoints()
+		--targetHighlightFrame:SetIgnoreParentAlpha(true)
+	
+		local targetHighlight = targetHighlightFrame:CreateTexture()
+		targetHighlight:SetDrawLayer(unpack(layout.TargetHighlightDrawLayer))
+		targetHighlight:SetSize(unpack(layout.TargetHighlightSize))
+		targetHighlight:SetPoint(unpack(layout.TargetHighlightPlace))
+		targetHighlight:SetTexture(layout.TargetHighlightTexture)
+		targetHighlight.showFocus = layout.TargetHighlightShowFocus
+		targetHighlight.colorFocus = layout.TargetHighlightFocusColor
+		targetHighlight.showTarget = layout.TargetHighlightShowTarget
+		targetHighlight.colorTarget = layout.TargetHighlightTargetColor
+		targetHighlight.ignoreAlpha = true
+
+		plate.TargetHighlight = targetHighlight
+	end
+
 	-- Add in Personal Resource Display for Retail
 	if (IsRetail) then
 

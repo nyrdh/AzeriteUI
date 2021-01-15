@@ -3101,6 +3101,17 @@ Azerite.NamePlates = {
 		nameplateTargetBehindMaxDistance = 15 -- default 15
 	},
 	Size = { 80, 32 },
+
+	UseTargetHighlight = true,
+	TargetHighlightDrawLayer = { "OVERLAY", 0 },
+	TargetHighlightParent = "Health", 
+	TargetHighlightPlace = { "CENTER", 0, 0 },
+	--TargetHighlightSize = { 84, 14 },
+	TargetHighlightSize = { 84 * 256/(256-(14*2)) *1.05, 1.2* 64/(64-(14*2)) * 14 }, -- math. sux.
+	TargetHighlightShowFocus = true, TargetHighlightFocusColor = { 144/255, 195/255, 255/255, 1 }, 
+	TargetHighlightShowTarget = true, TargetHighlightTargetColor = { 255/255, 239/255, 169/255, 1 }, 
+	TargetHighlightTexture = GetMedia("nameplate_outline"),
+
 	ThreatColor = { 1, 1, 1, 1 },
 	ThreatDrawLayer = { "BACKGROUND", -3 },
 	ThreatHideSolo = false, 
