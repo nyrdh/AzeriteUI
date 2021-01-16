@@ -6,7 +6,7 @@ on a widgetcontainer aura plugin element.
 
 --]]--
 
-local LibAuraTool = Wheel:Set("LibAuraTool", 12)
+local LibAuraTool = Wheel:Set("LibAuraTool", 13)
 if (not LibAuraTool) then
 	return
 end
@@ -1403,6 +1403,7 @@ elseif (IsRetail) then
 		AddUserFlags(298665, OnPlayer) 						-- Arcane Runelock (Puzzle World Quest Nazjatar)
 		AddUserFlags(272004, OnPlayer) 						-- Choking Fog (outdoors debuff Stormsong Valley)
 		AddUserFlags(304037, OnPlayer) 						-- Fermented Deviate Fish (transform)
+		AddUserFlags(309806, OnPlayer) 						-- Gormlings Lured (Ardenweald World Quest)
 		AddUserFlags(188030, ByPlayer) 						-- Leytorrent Potion (channeled) (Legion Consumables)
 		AddUserFlags(295858, OnPlayer) 						-- Molted Shell (constantly moving mount Nazjatar)
 		AddUserFlags(188027, ByPlayer) 						-- Potion of Deadly Grace (Legion Consumables)

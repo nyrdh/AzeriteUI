@@ -1,4 +1,4 @@
-local LibAuraData = Wheel:Set("LibAuraData", 17)
+local LibAuraData = Wheel:Set("LibAuraData", 18)
 if (not LibAuraData) then
 	return
 end
