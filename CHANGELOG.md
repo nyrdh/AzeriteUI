@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2021-01-15
+## [3.1.450-RC] 2021-01-16
 ### Added
 - Experimental legacy theme boss frames.
 - Experimental target- and focus highlight on the nameplates.
