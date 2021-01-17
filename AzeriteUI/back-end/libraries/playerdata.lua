@@ -1,4 +1,4 @@
-local LibPlayerData = Wheel:Set("LibPlayerData", 22)
+local LibPlayerData = Wheel:Set("LibPlayerData", 23)
 if (not LibPlayerData) then
 	return
 end
@@ -32,7 +32,9 @@ local GetMaxLevelForPlayerExpansion = GetMaxLevelForPlayerExpansion
 local GetSpecialization = GetSpecialization
 local GetSpecializationInfo = GetSpecializationInfo
 local GetWatchedFactionInfo = GetWatchedFactionInfo
-local IsAzeriteItemLocationBankBag = AzeriteUtil and AzeriteUtil.IsAzeriteItemLocationBankBag
+local IsAzeriteItemAtMaxLevel = C_AzeriteItem and C_AzeriteItem.IsAzeriteItemAtMaxLevel
+local IsAzeriteItemEnabled = C_AzeriteItem and C_AzeriteItem.IsAzeriteItemEnabled
+--local IsAzeriteItemLocationBankBag = AzeriteUtil and AzeriteUtil.IsAzeriteItemLocationBankBag
 local IsXPUserDisabled = IsXPUserDisabled
 local UnitLevel = UnitLevel
 
@@ -87,10 +89,15 @@ elseif (IsRetail) then
 	end
 
 	LibPlayerData.PlayerHasAP = function()
-		local azeriteItemLocation = FindActiveAzeriteItem()
-		if (azeriteItemLocation) and (not IsAzeriteItemLocationBankBag(azeriteItemLocation)) then
-			return azeriteItemLocation
+		--local azeriteItemLocation = FindActiveAzeriteItem()
+		--if (azeriteItemLocation) and (not IsAzeriteItemLocationBankBag(azeriteItemLocation)) then
+		--	return azeriteItemLocation
+		--end
+		local isMaxLevel = IsAzeriteItemAtMaxLevel()
+		if (isMaxLevel) then
+			return false
 		end
+		return azeriteItem and azeriteItem:IsEquipmentSlot() and IsAzeriteItemEnabled(azeriteItem)
 	end
 
 	-- Returns whether the player is  tracking a reputation
