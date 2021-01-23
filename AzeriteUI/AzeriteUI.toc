@@ -12,6 +12,9 @@
 ## X-Website: https://www.patreon.com/goldpawsstuff
 ## X-License: Custom
 
+# Townlong-Yak TaintLess
+TaintLess.xml
+
 # Global Fonts
 FontStyles.xml
 
