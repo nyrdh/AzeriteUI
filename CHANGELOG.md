@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2021-01-23
+## [3.1.451-RC] 2021-01-23
 ### Added
 - Updated the zhCN localization. 
 - The durability widget should now properly appear in the legacy theme as well. 
