@@ -379,18 +379,19 @@ Module.PostUpdateCVars = function(self, event, ...)
 	SetNamePlateFriendlyClickThrough(db.clickThroughFriends)
 	SetNamePlateSelfClickThrough(db.clickThroughSelf)
 	
-	-- Show the Personal Resource Display
-	SetCVar("nameplateShowSelf", db.nameplateShowSelf and "1" or "0") 
+	if (IsRetail) then
+		-- Show the Personal Resource Display
+		SetCVar("nameplateShowSelf", db.nameplateShowSelf and "1" or "0") 
 
-	-- Determines if the the personal nameplate is always shown. 
-	SetCVar("NameplatePersonalShowAlways", db.NameplatePersonalShowAlways and "1" or "0") 
+		-- Determines if the the personal nameplate is always shown. 
+		SetCVar("NameplatePersonalShowAlways", db.NameplatePersonalShowAlways and "1" or "0") 
 
-	-- Determines if the the personal nameplate is shown when you enter combat. 
-	SetCVar("NameplatePersonalShowInCombat", db.NameplatePersonalShowInCombat and "1" or "0") 
+		-- Determines if the the personal nameplate is shown when you enter combat. 
+		SetCVar("NameplatePersonalShowInCombat", db.NameplatePersonalShowInCombat and "1" or "0") 
 
-	-- 0 = targeting has no effect, 1 = show on hostile target, 2 = show on any target 
-	SetCVar("NameplatePersonalShowWithTarget", db.NameplatePersonalShowWithTarget and "2" or "0") 
-
+		-- 0 = targeting has no effect, 1 = show on hostile target, 2 = show on any target 
+		SetCVar("NameplatePersonalShowWithTarget", db.NameplatePersonalShowWithTarget and "2" or "0") 
+	end
 end
 
 Module.OnEvent = function(self, event, ...)
