@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2021-01-23
+### Added
+- Updated the zhCN localization. 
+- The durability widget should now properly appear in the legacy theme as well. 
+
+### Changed
+- Changed to Blizzard's Shadowlands logic for toggling the visibility of the Azerite Power bar. You shouldn't see it when leveling new characters in Shadowlands anymore. Lame.
+
 ## [3.1.450-RC] 2021-01-16
 ### Added
 - Experimental legacy theme boss frames.

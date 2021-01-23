@@ -188,6 +188,8 @@ Core:NewModule("FloaterHUD", "LibDurability").OnInit = function(self)
 		return self:SetUserDisabled(true)
 	end
 	self:GetDurabilityWidget():Place(unpack(layout.Place))
+	--_G.DURABILITYWIDGET = self:GetDurabilityWidget()
+	-- /run DURABILITYWIDGET:Update(true)
 end
 
 -- Chat Filters

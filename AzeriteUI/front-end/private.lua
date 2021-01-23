@@ -4727,6 +4727,7 @@ Legacy.NamePlates = Azerite.NamePlates
 
 -- Few changes
 Legacy.Bindings = setmetatable({ BindButtonTexture = GetMedia("actionbutton-mask-square") }, { __index = Azerite.Bindings })
+Legacy.FloaterHUD = setmetatable({ 	Place = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 } }, { __index = Azerite.FloaterHUD })
 Legacy.Tooltips = setmetatable({ TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -54, 66 } }, { __index = Azerite.Tooltips })
 Legacy.OptionsMenu = setmetatable({ 
 	MenuPlace = { "TOPRIGHT", -41, -32 },
