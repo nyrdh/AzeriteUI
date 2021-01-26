@@ -375,10 +375,20 @@ Module.HandleBelowMinimapWidgets = function(self)
 
 	-- Not sure where I can test this.
 	-- Hellfire Peninsula Capture Bars maybe?
+	-- 
+	-- 2021-01-26: 
+	-- In some Shadowlands raid fights, 
+	-- this will be visible at the same time as the boss frames. 
+	-- So we can't have it appear at the same spot AS the boss frames. 
+	-- 
 	if (layoutID == "Azerite") then
 		bmHolder:Place("BOTTOM", "Minimap", "TOP", 4, 60)
 	elseif (layoutID == "Legacy") then
-		bmHolder:Place("TOP", "Minimap", "BOTTOM", 4, -60)
+		--bmHolder:Place("TOP", "Minimap", "BOTTOM", 4, -60)
+		
+		-- This hardcoded position should make the bottom center of this widget, 
+		-- be placed roughly at a position matching the horizontal center of the legacy Minimap.
+		bmHolder:Place("BOTTOM", "UICenter", "BOTTOMRIGHT", -(210/2 + 60 + 4), 60)
 	end
 
 	-- Note: Hide quest tracker when this is visible!
@@ -387,7 +397,8 @@ Module.HandleBelowMinimapWidgets = function(self)
 	if (layoutID == "Azerite") then
 		bmContainer:SetPoint("BOTTOM", bmHolder, "BOTTOM")
 	elseif (layoutID == "Legacy") then
-		bmContainer:SetPoint("TOP", bmHolder, "TOP")
+		--bmContainer:SetPoint("TOP", bmHolder, "TOP")
+		bmContainer:SetPoint("BOTTOM", bmHolder, "BOTTOM")
 	end
 
 	hooksecurefunc(bmContainer, "SetPoint", function(self, _, anchor)
