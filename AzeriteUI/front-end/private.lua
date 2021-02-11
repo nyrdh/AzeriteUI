@@ -478,7 +478,7 @@ local NamePlates_PreUpdate = function(plate, event, unit)
 	if (plate.isYou) then
 		plate.Health.Value:Hide()
 	end
-	if (plate.isYou) and (not plate.enabledAsPlayer) then
+	if (plate.isYou) and (not plate.plateIsPRD) then
 		local layout = plate.layout
 		local cast = plate.Cast
 		local spellQueue = cast.SpellQueue
@@ -496,9 +496,9 @@ local NamePlates_PreUpdate = function(plate, event, unit)
 		end
 
 		plate:EnableElement("Power")
-		plate.enabledAsPlayer = true
+		plate.plateIsPRD = true
 
-	elseif (not plate.isYou) and (plate.enabledAsPlayer) then
+	elseif (not plate.isYou) and (plate.plateIsPRD) then
 		local layout = plate.layout
 		local cast = plate.Cast
 		local spellQueue = cast.SpellQueue
@@ -513,7 +513,7 @@ local NamePlates_PreUpdate = function(plate, event, unit)
 		end
 
 		plate:DisableElement("Power")
-		plate.enabledAsPlayer = nil
+		plate.plateIsPRD = nil
 	end
 end
 

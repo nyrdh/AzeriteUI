@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 65)
+local LibNamePlate = Wheel:Set("LibNamePlate", 67)
 if (not LibNamePlate) then	
 	return
 end
@@ -107,6 +107,12 @@ LibNamePlate.frame = LibNamePlate.frame or CreateFrame("Frame", nil, WorldFrame)
 -- will cause its updates to run close to last in the update cycle. 
 LibNamePlate.frame:SetFrameStrata("TOOLTIP") 
 
+-- The first rule of this frame, is that we do not talk about this frame.
+-- The second rule of this frame, is that we do NOT talk about this frame!
+LibNamePlate.robertPaulson = LibNamePlate.robertPaulson or CreateFrame("Frame", "RobertPaulson")
+LibNamePlate.robertPaulson:SetFrameStrata("BACKGROUND")
+LibNamePlate.robertPaulson.IsForbidden = function(self) return true end
+
 -- internal switch to track enabled state
 -- Looks weird. But I want it referenced up here.
 LibNamePlate.isEnabled = LibNamePlate.isEnabled or false 
@@ -149,6 +155,7 @@ local frameElementsDisabled = LibNamePlate.frameElementsDisabled
 local scriptHandlers = LibNamePlate.scriptHandlers
 local scriptFrame = LibNamePlate.scriptFrame
 local uiHider = LibNamePlate.uiHider
+local RobertPaulson = LibNamePlate.robertPaulson
 
 -- This will be true if forced updates are needed on all plates
 -- All plates will be updated in the next frame cycle 
@@ -1209,6 +1216,7 @@ LibNamePlate.OnUpdate = function(self, elapsed)
 	end
 	
 	-- Iterate!
+	local you
 	local visible, highAlpha, lowAlpha = 0, 0, 0
 	for plate, baseFrame in pairs(visiblePlates) do
 
@@ -1273,7 +1281,21 @@ LibNamePlate.OnUpdate = function(self, elapsed)
 				plate.Cast:SetValue(0, true)
 			end 
 		end
+
+		if (plate.isYou) then
+			you = plate
+		end
 	end	
+
+	if (you) and (RobertPaulson.owner ~= you) then
+		RobertPaulson:ClearAllPoints()
+		RobertPaulson:SetAllPoints(you.baseFrame)
+		RobertPaulson.owner = you
+	elseif (not you) and (RobertPaulson.owner) then
+		RobertPaulson.owner = nil
+		RobertPaulson:ClearAllPoints()
+		RobertPaulson:SetPoint("TOP", UIParent, "BOTTOM", 0, 400)
+	end
 
 	-- Store the metadata about visible plates and their alpha
 	metaData.visiblePlatesHighAlpha = highAlpha
