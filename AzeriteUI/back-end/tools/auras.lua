@@ -6,7 +6,7 @@ on a widgetcontainer aura plugin element.
 
 --]]--
 
-local LibAuraTool = Wheel:Set("LibAuraTool", 13)
+local LibAuraTool = Wheel:Set("LibAuraTool", 14)
 if (not LibAuraTool) then
 	return
 end
@@ -1419,7 +1419,9 @@ elseif (IsRetail) then
 		AddUserFlags(  2825, OnPlayer + PrioHigh) 			-- Bloodlust
 		AddUserFlags( 32182, OnPlayer + PrioHigh) 			-- Heroism
 		AddUserFlags(160452, OnPlayer + PrioHigh) 			-- Netherwinds
+		AddUserFlags(264667, OnPlayer + PrioHigh) 			-- Primal Rage (Hunter Pet Ferocity Ability)
 		AddUserFlags( 80353, OnPlayer + PrioHigh) 			-- Time Warp
+
 		AddUserFlags( 57723, OnPlayer) 						-- Exhaustion "Cannot benefit from Heroism or other similar effects." (Alliance version)
 		AddUserFlags(160455, OnPlayer) 						-- Fatigued "Cannot benefit from Netherwinds or other similar effects." (Pet version)
 		AddUserFlags( 95809, OnPlayer) 						-- Insanity "Cannot benefit from Ancient Hysteria or other similar effects." (Pet version)

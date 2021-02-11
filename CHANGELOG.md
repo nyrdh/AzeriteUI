@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.452-RC] 2021-02-11
+### Added
+- Added Hunter's Primal Rage to the aura whitelists, in the same manner as other boosts similar to Bloodlust and Heroism.
+
 ## [3.1.451-RC] 2021-01-23
 ### Added
 - Updated the zhCN localization. 
