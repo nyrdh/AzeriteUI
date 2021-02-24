@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 88)
+local LibTooltip = Wheel:Set("LibTooltip", 93)
 if (not LibTooltip) then
 	return
 end
@@ -1171,6 +1171,191 @@ Tooltip.SetAction = function(self, slot)
 	end 
 end 
 
+-- General method to add item info based on data table.
+-- As items can be part of multiple tooltip types, we use this for all of them.
+local SetItemInfo = function(self, data, useSimplified)
+
+	-- Because a millionth of a second matters.
+	local colors = self.colors
+	local offwhiteR, offwhiteG, offwhiteB = colors.offwhite[1], colors.offwhite[2], colors.offwhite[3]
+
+	-- User settings
+	local colorNameAsSpell = self.colorNameAsSpellWithUse and data.itemHasUseEffect 
+	local skipItemLevel = self.hideItemLevelWithUse and data.itemHasUseEffect
+	local skipStats = self.hideStatsWithUseEffect and data.itemHasUseEffect
+	local skipBinds = self.hideBindsWithUseEffect and data.itemHasUseEffect
+	local skipUnique = self.hideUniqueWithUseEffect and data.itemHasUseEffect
+	local skipEquipAndType = self.hideEquipTypeWithUseEffect and data.itemHasUseEffect
+
+	-- Shouldn't be any bars here, but if for some reason 
+	-- the tooltip wasn't properly hidden before this, 
+	-- we make sure the bars are reset!
+	self:ClearStatusBars(true) -- suppress layout updates
+
+	-- item name and item level on top
+	if (data.itemLevel) and (not skipItemLevel) then 
+		self:AddDoubleLine(data.itemName, data.itemLevel, colors.quality[data.itemRarity][1], colors.quality[data.itemRarity][2], colors.quality[data.itemRarity][3], colors.normal[1], colors.normal[2], colors.normal[3], true)
+	elseif colorNameAsSpell then 
+		self:AddLine(data.itemName, colors.title[1], colors.title[2], colors.title[3], true)
+	else 
+		self:AddLine(data.itemName, colors.quality[data.itemRarity][1], colors.quality[data.itemRarity][2], colors.quality[data.itemRarity][3], true)
+	end 
+
+	-- item bind status
+	if (not skipBinds) then
+		if (data.itemIsBound) then 
+			self:AddLine(data.itemBind, offwhiteR, offwhiteG, offwhiteB)
+		elseif (data.itemCanBind) then
+			self:AddLine(data.itemBind, offwhiteR, offwhiteG, offwhiteB)
+		end 
+	end
+
+	-- item unique status
+	if (data.itemIsUnique) and (not skipUnique) then 
+		self:AddLine(data.itemUnique, offwhiteR, offwhiteG, offwhiteB)
+	end 
+
+	-- item equip location and type
+	if (not skipEquipAndType) then 
+		if (data.itemEquipLoc and (data.itemEquipLoc ~= "")) then 
+			local itemType
+			if data.itemType then 
+				if data.itemEquipLoc ~= "INVTYPE_TRINKET" and data.itemEquipLoc ~= "INVTYPE_FINGER" and data.itemEquipLoc ~= "INVTYPE_NECK" then 
+					itemType = data.itemSubType or data.itemType
+				end 
+			end 
+			if (itemType) then
+				self:AddDoubleLine(_G[data.itemEquipLoc], itemType, offwhiteR, offwhiteG, offwhiteB, offwhiteR, offwhiteG, offwhiteB)
+			else 
+				self:AddLine(_G[data.itemEquipLoc], offwhiteR, offwhiteG, offwhiteB)
+			end 
+		
+		elseif (data.itemType or data.itemSubType) then 
+			if (data.itemClassID == LE_ITEM_CLASS_MISCELLANEOUS) then 
+				-- This includes hearthstones, flight master's whistle and similar
+
+			elseif (data.itemClassID == LE_ITEM_CLASS_CONSUMABLE) then 
+				-- Food, drink, flasks, etc
+				self:AddLine(data.itemSubType or data.itemType, offwhiteR, offwhiteG, offwhiteB)
+
+			else 
+				self:AddLine(data.itemSubType or data.itemType, offwhiteR, offwhiteG, offwhiteB)
+			end 
+		end 
+	end 
+
+	if (not skipStats) then 
+
+		-- damage and speed
+		if (data.itemDamageMin and data.itemDamageMax) then 
+			if data.itemSpeed then 
+				self:AddDoubleLine(string_format(DAMAGE_TEMPLATE, math_floor(data.itemDamageMin), math_floor(data.itemDamageMax)), string_format("%s %s", ITEM_MOD_CR_SPEED_SHORT, data.itemSpeed), colors.highlight[1], colors.highlight[2], colors.highlight[3], offwhiteR, offwhiteG, offwhiteB)
+				
+			else 
+				self:AddLine(string_format(DAMAGE_TEMPLATE, math_floor(data.itemDamageMin), math_floor(data.itemDamageMax)), colors.highlight[1], colors.highlight[2], colors.highlight[3])
+			end 
+		end 
+
+		-- damage pr second
+		if data.itemDPS then 
+			self:AddLine(string_format(DPS_TEMPLATE, string_format("%.1f", data.itemDPS+.05)), colors.highlight[1], colors.highlight[2], colors.highlight[3])
+		end 
+
+		local statR, statG, statB = colors.quest.green[1], colors.quest.green[2], colors.quest.green[3] 
+		
+		-- armor 
+		if (data.itemArmor and (data.itemArmor ~= 0)) then 
+			self:AddLine(string_format("%s %s", (data.itemArmor > 0) and ("+"..tostring(data.itemArmor)) or tostring(data.itemArmor), RESISTANCE0_NAME), offwhiteR, offwhiteG, offwhiteB)
+		end 
+		
+		-- block 
+		if data.itemBlock and (data.itemBlock ~= 0) then 
+			self:AddLine(string_format("%s %s", (data.itemBlock > 0) and ("+"..tostring(data.itemBlock)) or tostring(data.itemBlock), ITEM_MOD_BLOCK_RATING_SHORT), offwhiteR, offwhiteG, offwhiteB)
+		end 
+
+		-- parry?
+
+		-- primary stats
+		if data.primaryStatValue and (data.primaryStatValue ~= 0) then 
+			self:AddLine(string_format("%s %s", (data.primaryStatValue > 0) and ("+"..tostring(data.primaryStatValue)) or tostring(data.primaryStatValue), data.primaryStat), statR, statG, statB)
+
+		end 
+		if data.primaryStats then 
+			for key,value in pairs(data.primaryStats) do 
+				self:AddLine(string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key]), statR, statG, statB)
+			end 
+		end 
+
+		-- stamina
+		if data.itemStamina and (data.itemStamina ~= 0) then 
+			self:AddLine(string_format("%s %s", (data.itemStamina > 0) and ("+"..tostring(data.itemStamina)) or tostring(data.itemStamina), ITEM_MOD_STAMINA_SHORT), statR, statG, statB)
+
+		end 
+
+		-- secondary stats
+		if data.sorted2ndStats then 
+			for _,stat in ipairs(data.sorted2ndStats) do 
+				self:AddLine(stat, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3])
+			end 
+		end 
+
+		-- no benefit stats
+		if data.uselessStats then 
+			for key,value in pairs(data.uselessStats) do 
+				self:AddLine(string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key]), colors.quest.gray[1], colors.quest.gray[2], colors.quest.gray[3])
+			end 
+		end 
+
+	end
+
+	-- description
+	local hasDescription
+	if data.itemDescription then
+		local hasDescription
+		for _,msg in ipairs(data.itemDescription) do 
+			hasDescription = true
+			break
+		end
+	end
+	
+	-- use effect
+	if data.itemHasUseEffect then 
+		if (not useSimplified) and ((data.itemHasEquipEffect or hasDescription) or (self:GetNumLines() > 3)) then
+			self:AddLine(" ")
+		end
+		self:AddLine(data.itemUseEffect, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3], true)
+	end 
+
+	-- equip effect(s)
+	if data.itemHasEquipEffect then 
+		if (not useSimplified) and (hasDescription or (self:GetNumLines() > 3)) then
+			self:AddLine(" ")
+		end
+		for _,stat in ipairs(data.itemEquipEffects) do 
+			self:AddLine(stat, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3], true)
+		end 
+	end 
+
+	-- description
+	if (hasDescription) then
+		if (not useSimplified) and (self:GetNumLines() > 3) then
+			self:AddLine(" ")
+		end
+		for _,msg in ipairs(data.itemDescription) do 
+			--self:AddLine(msg, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3], true)
+			self:AddLine(msg, colors.quest.yellow[1], colors.quest.yellow[2], colors.quest.yellow[3], true)
+		end 
+	end
+
+	-- durability
+	if data.itemDurability then 
+		self:AddLine(string_format(DURABILITY_TEMPLATE, data.itemDurability, data.itemDurabilityMax), offwhiteR, offwhiteG, offwhiteB)
+	end 
+
+	-- sell value
+
+end
+
 Tooltip.SetActionItem = function(self, slot)
 	if (not self.owner) then
 		self:Hide()
@@ -1179,161 +1364,7 @@ Tooltip.SetActionItem = function(self, slot)
 	local data = self:GetTooltipDataForActionItem(slot, self.data)
 	if data then 
 
-		-- Because a millionth of a second matters.
-		local colors = self.colors
-		local offwhiteR, offwhiteG, offwhiteB = colors.offwhite[1], colors.offwhite[2], colors.offwhite[3]
-
-		-- User settings
-		local colorNameAsSpell = self.colorNameAsSpellWithUse and data.itemHasUseEffect 
-		local skipItemLevel = self.hideItemLevelWithUse and data.itemHasUseEffect
-		local skipStats = self.hideStatsWithUseEffect and data.itemHasUseEffect
-		local skipBinds = self.hideBindsWithUseEffect and data.itemHasUseEffect
-		local skipUnique = self.hideUniqueWithUseEffect and data.itemHasUseEffect
-		local skipEquipAndType = self.hideEquipTypeWithUseEffect and data.itemHasUseEffect
-
-		-- Shouldn't be any bars here, but if for some reason 
-		-- the tooltip wasn't properly hidden before this, 
-		-- we make sure the bars are reset!
-		self:ClearStatusBars(true) -- suppress layout updates
-
-		-- item name and item level on top
-		if data.itemLevel and (not skipItemLevel) then 
-			self:AddDoubleLine(data.itemName, data.itemLevel, colors.quality[data.itemRarity][1], colors.quality[data.itemRarity][2], colors.quality[data.itemRarity][3], colors.normal[1], colors.normal[2], colors.normal[3], true)
-		elseif colorNameAsSpell then 
-			self:AddLine(data.itemName, colors.title[1], colors.title[2], colors.title[3], true)
-		else 
-			self:AddLine(data.itemName, colors.quality[data.itemRarity][1], colors.quality[data.itemRarity][2], colors.quality[data.itemRarity][3], true)
-		end 
-
-		-- item bind status
-		if data.itemIsBound and (not skipBinds) then 
-			self:AddLine(data.itemBind, offwhiteR, offwhiteG, offwhiteB)
-		end 
-
-		-- item unique status
-		if data.itemIsUnique and (not skipUnique) then 
-			self:AddLine(data.itemUnique, offwhiteR, offwhiteG, offwhiteB)
-		end 
-
-		-- item equip location and type
-		if (not skipEquipAndType) then 
-			if (data.itemEquipLoc and (data.itemEquipLoc ~= "")) then 
-				local itemType
-				if data.itemType then 
-					if data.itemEquipLoc ~= "INVTYPE_TRINKET" and data.itemEquipLoc ~= "INVTYPE_FINGER" and data.itemEquipLoc ~= "INVTYPE_NECK" then 
-						itemType = data.itemSubType or data.itemType
-					end 
-				end 
-				if (itemType) then
-					self:AddDoubleLine(_G[data.itemEquipLoc], itemType, offwhiteR, offwhiteG, offwhiteB, offwhiteR, offwhiteG, offwhiteB)
-				else 
-					self:AddLine(_G[data.itemEquipLoc], offwhiteR, offwhiteG, offwhiteB)
-				end 
-			
-			elseif (data.itemType or data.itemSubType) then 
-				if (data.itemClassID == LE_ITEM_CLASS_MISCELLANEOUS) then 
-					-- This includes hearthstones, flight master's whistle and similar
-
-				elseif (data.itemClassID == LE_ITEM_CLASS_CONSUMABLE) then 
-					-- Food, drink, flasks, etc
-					self:AddLine(data.itemSubType or data.itemType, offwhiteR, offwhiteG, offwhiteB)
-
-				else 
-					self:AddLine(data.itemSubType or data.itemType, offwhiteR, offwhiteG, offwhiteB)
-				end 
-			end 
-		end 
-
-		if (not skipStats) then 
-
-			-- damage and speed
-			if (data.itemDamageMin and data.itemDamageMax) then 
-				if data.itemSpeed then 
-					self:AddDoubleLine(string_format(DAMAGE_TEMPLATE, math_floor(data.itemDamageMin), math_floor(data.itemDamageMax)), string_format("%s %s", ITEM_MOD_CR_SPEED_SHORT, data.itemSpeed), colors.highlight[1], colors.highlight[2], colors.highlight[3], offwhiteR, offwhiteG, offwhiteB)
-					
-				else 
-					self:AddLine(string_format(DAMAGE_TEMPLATE, math_floor(data.itemDamageMin), math_floor(data.itemDamageMax)), colors.highlight[1], colors.highlight[2], colors.highlight[3])
-				end 
-			end 
-
-			-- damage pr second
-			if data.itemDPS then 
-				self:AddLine(string_format(DPS_TEMPLATE, string_format("%.1f", data.itemDPS+.05)), colors.highlight[1], colors.highlight[2], colors.highlight[3])
-			end 
-
-			local statR, statG, statB = colors.quest.green[1], colors.quest.green[2], colors.quest.green[3] 
-			
-			-- armor 
-			if (data.itemArmor and (data.itemArmor ~= 0)) then 
-				self:AddLine(string_format("%s %s", (data.itemArmor > 0) and ("+"..tostring(data.itemArmor)) or tostring(data.itemArmor), RESISTANCE0_NAME), offwhiteR, offwhiteG, offwhiteB)
-			end 
-			
-			-- block 
-			if data.itemBlock and (data.itemBlock ~= 0) then 
-				self:AddLine(string_format("%s %s", (data.itemBlock > 0) and ("+"..tostring(data.itemBlock)) or tostring(data.itemBlock), ITEM_MOD_BLOCK_RATING_SHORT), offwhiteR, offwhiteG, offwhiteB)
-			end 
-
-			-- parry?
-
-			-- primary stats
-			if data.primaryStatValue and (data.primaryStatValue ~= 0) then 
-				self:AddLine(string_format("%s %s", (data.primaryStatValue > 0) and ("+"..tostring(data.primaryStatValue)) or tostring(data.primaryStatValue), data.primaryStat), statR, statG, statB)
-
-			end 
-			if data.primaryStats then 
-				for key,value in pairs(data.primaryStats) do 
-					self:AddLine(string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key]), statR, statG, statB)
-				end 
-			end 
-
-			-- stamina
-			if data.itemStamina and (data.itemStamina ~= 0) then 
-				self:AddLine(string_format("%s %s", (data.itemStamina > 0) and ("+"..tostring(data.itemStamina)) or tostring(data.itemStamina), ITEM_MOD_STAMINA_SHORT), statR, statG, statB)
-
-			end 
-
-			-- secondary stats
-			if data.sorted2ndStats then 
-				for _,stat in ipairs(data.sorted2ndStats) do 
-					self:AddLine(stat, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3])
-				end 
-			end 
-
-			-- no benefit stats
-			if data.uselessStats then 
-				for key,value in pairs(data.uselessStats) do 
-					self:AddLine(string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key]), colors.quest.gray[1], colors.quest.gray[2], colors.quest.gray[3])
-				end 
-			end 
-
-		end
-
-		-- use effect
-		if data.itemHasUseEffect then 
-			self:AddLine(data.itemUseEffect, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3], true)
-		end 
-
-		-- equip effect(s)
-		if data.itemHasEquipEffect then 
-			for _,stat in ipairs(data.itemEquipEffects) do 
-				self:AddLine(stat, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3], true)
-			end 
-		end 
-
-		-- description
-		if data.itemDescription then
-			for _,msg in ipairs(data.itemDescription) do 
-				self:AddLine(msg, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3], true)
-			end 
-		end
-
-		-- durability
-		if data.itemDurability then 
-			self:AddLine(string_format(DURABILITY_TEMPLATE, data.itemDurability, data.itemDurabilityMax), offwhiteR, offwhiteG, offwhiteB)
-		end 
-
-		-- sell value
-
+		SetItemInfo(self, data, true) -- simplify the display on actionbuttons.
 
 		self:Show()
 	end 
@@ -1408,6 +1439,32 @@ Tooltip.SetPetAction = function(self, slot)
 
 		self:Show()
 	end 
+end
+
+Tooltip.SetBagItem = function(self, bagID, slotID)
+	if (not self.owner) then
+		self:Hide()
+		return
+	end
+	local data = self:GetTooltipDataForContainerSlot(bagID, slotID, self.data)
+	if (data) then
+
+		SetItemInfo(self, data, false) -- don't simplify in bags, we want more info here.
+		
+		self:Show()
+
+		-- Mimic the blizz return values here.
+		return 	data.hasCooldown, 
+				data.repairCost, 
+				data.speciesID, 
+				data.level, 
+				data.breedQuality, 
+				data.maxHealth, 
+				data.power, 
+				data.speed, 
+				data.name
+
+	end
 end
 
 Tooltip.SetItem = function(self, item)

@@ -5,7 +5,7 @@ if (not Core) then
 end
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-local Module = Core:NewModule("BlizzardObjectivesTracker", "LibEvent", "LibFrame", "LibClientBuild", "LibBlizzard")
+local Module = Core:NewModule("BlizzardObjectivesTracker", "LibMessage", "LibEvent", "LibFrame", "LibClientBuild", "LibBlizzard")
 
 -- Lua API
 local _G = _G
@@ -517,66 +517,67 @@ end
 -- Startup
 -----------------------------------------------------------------
 Module.CreateDriver = function(self)
-	local layout = self.layout
+	if (self.driverFrame) then
+		return
+	end
 
-	if (layout.HideInCombat or layout.HideInBossFights or layout.HideInVehicles or layout.HideInArena) then 
-		local driverFrame = self:CreateFrame("Frame", nil, _G.UIParent, "SecureHandlerAttributeTemplate")
+	local driverFrame = self:CreateFrame("Frame", nil, _G.UIParent, "SecureHandlerAttributeTemplate")
+	self.driverFrame = driverFrame
 
-		driverFrame.OnShow = function()
+	driverFrame.Update = function(this)
+		local tracker = QuestWatchFrame or ObjectiveTrackerFrame
+		local hiddenBydriver = tracker and (not this:IsShown())
+
+		local shouldHide = self.bagsVisible or (hiddenBydriver and tracker)
+		if (shouldHide) then
+			self.frame:SetAlpha(0)
+			self.frame.cover:SetFrameStrata(tracker:GetFrameStrata())
+			self.frame.cover:SetFrameLevel(tracker:GetFrameLevel() + 5)
+			self.frame.cover:ClearAllPoints()
+			self.frame.cover:SetAllPoints(tracker)
+			self.frame.cover:SetHitRectInsets(-40, -80, -40, 40)
+			self.frame.cover:Show()
+		else
 			self.frame:SetAlpha(.9)
 			self.frame.cover:Hide()
 		end
-
-		driverFrame.OnHide = function() 
-			local tracker = QuestWatchFrame or ObjectiveTrackerFrame
-			if (tracker) then
-				self.frame:SetAlpha(0)
-				self.frame.cover:SetFrameStrata(tracker:GetFrameStrata())
-				self.frame.cover:SetFrameLevel(tracker:GetFrameLevel() + 5)
-				self.frame.cover:ClearAllPoints()
-				self.frame.cover:SetAllPoints(tracker)
-				self.frame.cover:SetHitRectInsets(-40, -80, -40, 40)
-				self.frame.cover:Show()
-			else
-				self.frame.cover:Hide()
-			end
-		end
-
-		driverFrame:HookScript("OnShow", driverFrame.OnShow)
-		driverFrame:HookScript("OnHide", driverFrame.OnHide)
-		driverFrame:SetAttribute("_onattributechanged", [=[
-			if (name == "state-vis") then
-				if (value == "show") then 
-					if (not self:IsShown()) then 
-						self:Show(); 
-					end 
-				elseif (value == "hide") then 
-					if (self:IsShown()) then 
-						self:Hide(); 
-					end 
-				end 
-			end
-		]=])
-
-		local driver = "hide;show"
-		if (IsRetail) then 
-			if (layout.HideInVehicles) then
-				driver = "[overridebar][possessbar][shapeshift][vehicleui]"  .. driver
-			end 
-			if (layout.HideInArena) then 
-				driver = "[@arena1,exists][@arena2,exists][@arena3,exists][@arena4,exists][@arena5,exists]" .. driver
-			end
-		end
-		if (layout.HideInBossFights) then
-			driver = "[@boss1,exists][@boss2,exists][@boss3,exists][@boss4,exists]" .. driver
-		end 
-		if (layout.HideInCombat) then
-			driver = "[combat]" .. driver
-		end 
-		local result, target = SecureCmdOptionParse(driver)
-		--driverFrame:SetShown(result == "show" and true or false)
-		RegisterAttributeDriver(driverFrame, "state-vis", driver)
 	end
+
+	driverFrame:HookScript("OnShow", driverFrame.Update)
+	driverFrame:HookScript("OnHide", driverFrame.Update)
+	driverFrame:SetAttribute("_onattributechanged", [=[
+		if (name == "state-vis") then
+			if (value == "show") then 
+				if (not self:IsShown()) then 
+					self:Show(); 
+				end 
+			elseif (value == "hide") then 
+				if (self:IsShown()) then 
+					self:Hide(); 
+				end 
+			end 
+		end
+	]=])
+
+	local layout = self.layout
+	local driver = "hide;show"
+	if (IsRetail) then 
+		if (layout.HideInVehicles) then
+			driver = "[overridebar][possessbar][shapeshift][vehicleui]"  .. driver
+		end 
+		if (layout.HideInArena) then 
+			driver = "[@arena1,exists][@arena2,exists][@arena3,exists][@arena4,exists][@arena5,exists]" .. driver
+		end
+	end
+	if (layout.HideInBossFights) then
+		driver = "[@boss1,exists][@boss2,exists][@boss3,exists][@boss4,exists]" .. driver
+	end 
+	if (layout.HideInCombat) then
+		driver = "[combat]" .. driver
+	end 
+
+	RegisterAttributeDriver(driverFrame, "state-vis", driver)
+
 end
 
 Module.OnEvent = function(self, event, ...)
@@ -593,6 +594,19 @@ Module.OnEvent = function(self, event, ...)
 	elseif (event == "PLAYER_REGEN_ENABLED") then
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 		self:PositionRetailTracker()
+
+	elseif (event == "GP_BAGS_HIDDEN") then
+		self.bagsVisible = nil
+		if (self.driverFrame) then
+			self.driverFrame:Update()
+		end
+
+	elseif (event == "GP_BAGS_SHOWN") then
+		self.bagsVisible = true
+		if (self.driverFrame) then
+			self.driverFrame:Update()
+		end
+
 	end 
 end
 
@@ -614,6 +628,8 @@ Module.OnInit = function(self)
 	end
 
 	self:RegisterEvent("VARIABLES_LOADED", "OnEvent")
+	self:RegisterMessage("GP_BAGS_HIDDEN", "OnEvent")
+	self:RegisterMessage("GP_BAGS_SHOWN", "OnEvent")
 end 
 
 Module.OnEnable = function(self)

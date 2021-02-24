@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 66)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 72)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -122,9 +122,22 @@ local Constants = {
 	RechargeTimeRemaining2 = SPELL_RECHARGE_TIME_MIN,
 	RechargeTimeRemaining3 = SPELL_RECHARGE_TIME_SEC,
 
+	-- Bound
 	ItemBoundAccount = ITEM_ACCOUNTBOUND,
 	ItemBoundBnet = ITEM_BNETACCOUNTBOUND,
 	ItemBoundSoul = ITEM_SOULBOUND,
+
+	-- Binds
+	ItemBindBoE = ITEM_BIND_ON_EQUIP, -- "Binds when equipped"
+	ItemBindBoP = ITEM_BIND_ON_PICKUP, -- "Binds when picked up"
+	ItemBindUse = ITEM_BIND_ON_USE, -- "Binds when used"
+	ItemBindQuest = ITEM_BIND_QUEST, -- "Quest Item"
+	ItemBindAccount = ITEM_BIND_TO_ACCOUNT, -- "Binds to account"
+	ItemBindBnet = ITEM_BIND_TO_BNETACCOUNT, -- "Binds to Blizzard account"
+	
+	-- Adding this mostly to filter it out
+	ItemStartsQuest = ITEM_STARTS_QUEST, -- "This Item Begins a Quest"
+	
 	ItemBlock = SHIELD_BLOCK_TEMPLATE,
 	ItemDamage = DAMAGE_TEMPLATE,
 	ItemDurability = DURABILITY_TEMPLATE,
@@ -219,10 +232,18 @@ local Patterns = {
 	CooldownTimeRemaining2 = 		   numberPattern(Constants.CooldownTimeRemaining2), 
 	CooldownTimeRemaining3 = 		   numberPattern(Constants.CooldownTimeRemaining3), 
 
+	-- Item bound to
+	ItemBound1 = 				"^" .. Constants.ItemBoundSoul, 
+	ItemBound2 = 				"^" .. Constants.ItemBoundAccount, 
+	ItemBound3 = 				"^" .. Constants.ItemBoundBnet, 
+	
 	-- Item binds 
-	ItemBind1 = 				"^" .. Constants.ItemBoundSoul, 
-	ItemBind2 = 				"^" .. Constants.ItemBoundAccount, 
-	ItemBind3 = 				"^" .. Constants.ItemBoundBnet, 
+	ItemBind1 = 				"^" .. Constants.ItemBindBoE, 
+	ItemBind2 = 				"^" .. Constants.ItemBindBoP, 
+	ItemBind3 = 				"^" .. Constants.ItemBindUse, 
+	ItemBind4 = 				"^" .. Constants.ItemBindQuest, 
+	ItemBind5 = 				"^" .. Constants.ItemBindAccount, 
+	ItemBind6 = 				"^" .. Constants.ItemBindBnet, 
 
 	-- Item required level 
 	ItemReqLevel = 				"^" .. Constants.ItemReqLevel, 
@@ -382,8 +403,8 @@ LibTooltipScanner.IsActionItem = function(self, actionSlot, tbl)
 
 					-- item binds
 					local id = 1
-					while Patterns["ItemBind"..id] do 
-						if (string_find(msg, Patterns["ItemBind"..id])) then 
+					while Patterns["ItemBound"..id] do 
+						if (string_find(msg, Patterns["ItemBound"..id])) then 
 							return true
 						end 
 						id = id + 1
@@ -798,6 +819,324 @@ LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
 
 end
 
+-- General method to populate the item info data table.
+-- As items can be part of multiple tooltip types, we use this for all of them.
+-- Todo: avoid calling GetItemInfo() so many times through the proxies. 
+local SetItemData = function(itemLink, tbl)
+
+	-- Get some blizzard info about the current item
+	local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
+
+	local effectiveLevel, previewLevel, origLevel = GetDetailedItemLevelInfo(itemLink)
+
+	local itemStats = GetItemStats(itemLink)
+	local primaryStat
+
+	tbl.itemName = itemName -- localized
+	tbl.itemID = tonumber(string_match(itemLink, "item:(%d+)"))
+	tbl.itemString = string_match(itemLink, "item[%-?%d:]+")
+
+	tbl.itemRarity = itemRarity
+	tbl.itemMinLevel = itemMinLevel
+	tbl.itemType = itemType -- localized
+	tbl.itemSubType = itemSubType -- localized
+	tbl.itemStackCount = itemStackCount
+	tbl.itemEquipLoc = itemEquipLoc
+	tbl.itemClassID = itemClassID
+	tbl.itemSubClassID = itemSubClassID
+	tbl.itemBindType = bindType 
+	tbl.itemSetID = itemSetID
+	tbl.isCraftingReagent = isCraftingReagent
+	tbl.itemArmor = itemStats and tonumber(itemStats.RESISTANCE0_NAME)
+	tbl.itemStamina = itemStats and tonumber(itemStats.ITEM_MOD_STAMINA_SHORT)
+	tbl.itemDPS = itemStats and tonumber(itemStats.ITEM_MOD_DAMAGE_PER_SECOND_SHORT)
+	tbl.primaryStats = {}
+	tbl.secondaryStats = {}
+
+	local primaryKey
+	if (primaryStat == LE_UNIT_STAT_STRENGTH) then 
+		primaryKey = "ITEM_MOD_STRENGTH_SHORT"
+		tbl.primaryStat = ITEM_MOD_STRENGTH_SHORT
+		tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_STRENGTH_SHORT)
+	elseif (primaryStat == LE_UNIT_STAT_AGILITY) then 
+		primaryKey = "ITEM_MOD_AGILITY_SHORT"
+		tbl.primaryStat = ITEM_MOD_AGILITY_SHORT
+		tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_AGILITY_SHORT)
+	elseif (primaryStat == LE_UNIT_STAT_INTELLECT) then 
+		primaryKey = "ITEM_MOD_INTELLECT_SHORT"
+		tbl.primaryStat = ITEM_MOD_INTELLECT_SHORT
+		tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_INTELLECT_SHORT)
+	end 
+
+	local has2ndStats
+	if itemStats then
+		for key,value in pairs(itemStats) do 
+			if (isPrimaryStat[key] and (key ~= primaryKey)) then 
+				tbl.primaryStats[key] = value
+			end 
+			if (isSecondaryStat[key]) then 
+				tbl.secondaryStats[key] = value
+				has2ndStats = true
+			end 
+		end 
+	end 
+
+	-- make a sort table of secondary stats
+	if has2ndStats then 
+		tbl.sorted2ndStats = {}
+		for i,key in pairs(sorted2ndStats) do 
+			local value = tbl.secondaryStats[key]
+			if value then 
+				tbl.sorted2ndStats[#tbl.sorted2ndStats + 1] = string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key])
+			end 
+		end 
+	end 
+
+	-- Get the item level
+	local line = _G[ScannerName.."TextLeft2"]
+	if line then
+		local msg = line:GetText()
+		if msg and string_find(msg, Patterns.ItemLevel) then
+			local itemLevel = tonumber(string_match(msg, Patterns.ItemLevel))
+			if (itemLevel and (itemLevel > 0)) then
+				tbl.itemLevel = itemLevel
+			end
+		else
+			-- Check line 3, some artifacts have the ilevel there
+			line = _G[ScannerName.."TextLeft3"]
+			if line then
+				local msg = line:GetText()
+				if msg and string_find(msg, Patterns.ItemLevel) then
+					local itemLevel = tonumber(string_match(msg, Patterns.ItemLevel))
+					if (itemLevel and (itemLevel > 0)) then
+						tbl.itemLevel = itemLevel
+					end
+				end
+			end
+		end
+	end
+
+	local foundItemBlock, foundItemBind, foundItemBound, foundItemUnique, foundItemDurability, foundItemDamage, foundItemSpeed, foundItemSellPrice, foundItemReqLevel, foundUseEffect, foundEquipEffect
+				
+	local numLines = Scanner:NumLines()
+	local firstLine, lastLine = 2, numLines
+
+	for lineIndex = 2,numLines do 
+		local line = _G[ScannerName.."TextLeft"..lineIndex]
+		if line then 
+			local msg = line:GetText()
+			if msg then 
+
+				-- item damage 
+				if ((not foundItemDamage) and (string_find(msg, Patterns.ItemDamage))) then 
+					local min,max = string_match(msg, Patterns.ItemDamage)
+					if (max) then 
+						foundItemDamage = lineIndex
+						tbl.itemDamageMin = tonumber(min)
+						tbl.itemDamageMax = tonumber(max)
+						if (not foundItemSpeed) then 
+							local line = _G[ScannerName.."TextRight"..lineIndex]
+							if line then 
+								local msg = line:GetText()
+								if msg then 
+									local int,float = string_match(msg, "(%d+)%.(%d+)")
+									if (int or float) then 
+										if (lineIndex >= firstLine) then 
+											firstLine = lineIndex + 1
+										end 
+										foundItemSpeed = lineIndex
+										tbl.itemSpeed = int .. "." .. (float or 00)
+									end 
+								end 
+							end 
+						end 
+					end 
+				end 
+
+				-- item durability
+				if ((not foundItemDurability) and (string_find(msg, Patterns.ItemDurability))) then 
+					local min,max = string_match(msg, Patterns.ItemDurability)
+					if (max) then 
+						if (lineIndex <= lastLine) then 
+							lastLine = lineIndex - 1
+						end 
+						foundItemDurability = lineIndex
+						tbl.itemDurability = tonumber(min)
+						tbl.itemDurabilityMax = tonumber(max)
+					end 
+				end 
+
+				-- shield block isn't included in the itemstats table for some reason
+				if ((not foundItemBlock) and (string_find(msg, Patterns.ItemBlock))) then 
+					local itemBlock = tonumber(string_match(msg, Patterns.ItemBlock))
+					if (itemBlock and (itemBlock ~= 0)) then 
+						if (lineIndex >= firstLine) then 
+							firstLine = lineIndex + 1
+						end 
+						foundItemBlock = lineIndex
+						tbl.itemBlock = itemBlock
+					end 
+				end 
+
+				-- item bound to
+				if (not foundItemBound) then 
+					local id = 1
+					while Patterns["ItemBound"..id] do 
+						if (string_find(msg, Patterns["ItemBound"..id])) then 
+							if (lineIndex >= firstLine) then 
+								firstLine = lineIndex + 1
+							end 
+
+							-- found the bind line
+							foundItemBound = lineIndex
+							tbl.itemBind = msg
+							tbl.itemIsBound = true
+
+							break
+						end 
+						id = id + 1
+					end 
+				end 
+
+				-- item binds when
+				if (not foundItemBound) and (not foundItemBind) and ((bindType == 1) or (bindType == 2) or (bindType == 3)) then
+					local id = 1
+					while Patterns["ItemBind"..id] do 
+						if (string_find(msg, Patterns["ItemBind"..id])) then 
+							if (lineIndex >= firstLine) then 
+								firstLine = lineIndex + 1
+							end 
+
+							-- found the bind line
+							foundItemBind = lineIndex
+							tbl.itemBind = msg
+							tbl.itemCanBind = true
+
+							break
+						end 
+						id = id + 1
+					end 
+				end 
+
+				-- item unique stats
+				if (not foundItemUnique) then 
+					local id = 1
+					while Patterns["ItemUnique"..id] do 
+						if (string_find(msg, Patterns["ItemUnique"..id])) then 
+							if (lineIndex >= firstLine) then 
+								firstLine = lineIndex + 1 
+							end 
+							
+							-- found the unique line
+							foundItemUnique = lineIndex
+							tbl.itemUnique = msg
+							tbl.itemIsUnique = true
+
+							break
+						end 
+						id = id + 1
+					end 
+				end 
+
+				-- item Use effect. Can only be one. I think. 
+				if ((not foundUseEffect) and (string_find(msg, Patterns.ItemUseEffect))) then 
+					foundUseEffect = lineIndex
+					tbl.itemUseEffect = msg
+					tbl.itemHasUseEffect = true
+				end 
+
+				-- Items can have multiple Equip effects
+				--if ((not foundEquipEffect) and (string_find(msg, Patterns.ItemEquipEffect))) then 
+				if (string_find(msg, Patterns.ItemEquipEffect)) then 
+					if (not tbl.itemEquipEffects) then 
+						tbl.itemEquipEffects = {}
+					end 
+					if (not foundEquipEffect) then
+						foundEquipEffect = {}
+					end  
+					foundEquipEffect[#foundEquipEffect + 1] = lineIndex
+					tbl.itemEquipEffects[#tbl.itemEquipEffects + 1] = msg
+					tbl.itemHasEquipEffect = true
+				end 
+
+				-- item sell price
+				-- *we don't retrieve this from here, but need to know the line number
+				if ((not foundItemSellPrice) and (string_find(msg, Patterns.ItemSellPrice))) then 
+					if (lineIndex <= lastLine) then 
+						lastLine = lineIndex - 1
+					end 
+					foundItemSellPrice = lineIndex
+				end 
+
+				-- item required level
+				-- *we don't retrieve this from here, but need to know the line number
+				if ((not foundItemReqLevel) and (string_find(msg, Patterns.ItemReqLevel))) then 
+					if (lineIndex <= lastLine) then 
+						lastLine = lineIndex - 1
+					end 
+					foundItemReqLevel = lineIndex
+				end 
+
+			end 
+		end 
+	end 
+
+	-- Figure out a description for select items
+	if (itemClassID == LE_ITEM_CLASS_MISCELLANEOUS) 
+	or (itemClassID == LE_ITEM_CLASS_CONSUMABLE) 
+	or (itemClassID == LE_ITEM_CLASS_QUESTITEM)
+	then 
+		for lineIndex = firstLine, lastLine do 
+			if (lineIndex ~= foundItemBlock)
+				and (lineIndex ~= foundItemBind)
+				and (lineIndex ~= foundItemBound)
+				and (lineIndex ~= foundItemUnique)
+				and (lineIndex ~= foundItemDamage)
+				and (lineIndex ~= foundItemDurability)
+				and (lineIndex ~= foundItemSpeed)
+				and (lineIndex ~= foundItemSellPrice)
+				and (lineIndex ~= foundItemReqLevel)
+				and (lineIndex ~= foundUseEffect)
+			then 
+				local skip
+				if foundEquipEffect then 
+					for lineID in pairs(foundEquipEffect) do 
+						if (lineID == lineIndex) then 
+							skip = true 
+							break 
+						end
+					end
+				end 
+				if (not skip) then 
+					local line = _G[ScannerName.."TextLeft"..lineIndex]
+					if line then 
+						local msg = line:GetText()
+						if (msg and (msg ~= "") and (msg ~= " ")) then 
+
+							local ignore
+							for i,v in pairs(Constants) do
+								if (msg == v) then
+									ignore = true
+									break
+								end
+							end
+							if (not ignore) then
+								if (not tbl.itemDescription) then 
+									tbl.itemDescription = {}
+								end 
+								tbl.itemDescription[#tbl.itemDescription + 1] = msg
+							end
+						end 
+					end 
+				end 
+			end
+		end 
+	end 
+
+	return tbl
+
+end
+
 -- Special combo variant that returns item info from an action slot
 -- We'll truncate the info a bit here to make it feel more like a spell
 -- and less like an item. Full item details will be included in pure item methods.
@@ -831,280 +1170,7 @@ LibTooltipScanner.GetTooltipDataForActionItem = function(self, actionSlot, tbl)
 			return 
 		end 
 
-		-- Get some blizzard info about the current item
-		local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
-
-		local effectiveLevel, previewLevel, origLevel = GetDetailedItemLevelInfo(itemLink)
-
-		local itemStats = GetItemStats(itemLink)
-		local primaryStat
-
-		tbl.itemName = itemName -- localized
-		tbl.itemID = tonumber(string_match(itemLink, "item:(%d+)"))
-		tbl.itemString = string_match(itemLink, "item[%-?%d:]+")
-
-		tbl.itemRarity = itemRarity
-		tbl.itemMinLevel = itemMinLevel
-		tbl.itemType = itemType -- localized
-		tbl.itemSubType = itemSubType -- localized
-		tbl.itemStackCount = itemStackCount
-		tbl.itemEquipLoc = itemEquipLoc
-		tbl.itemClassID = itemClassID
-		tbl.itemSubClassID = itemSubClassID
-		tbl.itemBindType = bindType 
-		tbl.itemSetID = itemSetID
-		tbl.isCraftingReagent = isCraftingReagent
-		tbl.itemArmor = itemStats and tonumber(itemStats.RESISTANCE0_NAME)
-		tbl.itemStamina = itemStats and tonumber(itemStats.ITEM_MOD_STAMINA_SHORT)
-		tbl.itemDPS = itemStats and tonumber(itemStats.ITEM_MOD_DAMAGE_PER_SECOND_SHORT)
-		tbl.primaryStats = {}
-		tbl.secondaryStats = {}
-
-		local primaryKey
-		if (primaryStat == LE_UNIT_STAT_STRENGTH) then 
-			primaryKey = "ITEM_MOD_STRENGTH_SHORT"
-			tbl.primaryStat = ITEM_MOD_STRENGTH_SHORT
-			tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_STRENGTH_SHORT)
-		elseif (primaryStat == LE_UNIT_STAT_AGILITY) then 
-			primaryKey = "ITEM_MOD_AGILITY_SHORT"
-			tbl.primaryStat = ITEM_MOD_AGILITY_SHORT
-			tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_AGILITY_SHORT)
-		elseif (primaryStat == LE_UNIT_STAT_INTELLECT) then 
-			primaryKey = "ITEM_MOD_INTELLECT_SHORT"
-			tbl.primaryStat = ITEM_MOD_INTELLECT_SHORT
-			tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_INTELLECT_SHORT)
-		end 
-
-		local has2ndStats
-		if itemStats then
-			for key,value in pairs(itemStats) do 
-				if (isPrimaryStat[key] and (key ~= primaryKey)) then 
-					tbl.primaryStats[key] = value
-				end 
-				if (isSecondaryStat[key]) then 
-					tbl.secondaryStats[key] = value
-					has2ndStats = true
-				end 
-			end 
-		end 
-
-		-- make a sort table of secondary stats
-		if has2ndStats then 
-			tbl.sorted2ndStats = {}
-			for i,key in pairs(sorted2ndStats) do 
-				local value = tbl.secondaryStats[key]
-				if value then 
-					tbl.sorted2ndStats[#tbl.sorted2ndStats + 1] = string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key])
-				end 
-			end 
-		end 
-
-		-- Get the item level
-		local line = _G[ScannerName.."TextLeft2"]
-		if line then
-			local msg = line:GetText()
-			if msg and string_find(msg, Patterns.ItemLevel) then
-				local itemLevel = tonumber(string_match(msg, Patterns.ItemLevel))
-				if (itemLevel and (itemLevel > 0)) then
-					tbl.itemLevel = itemLevel
-				end
-			else
-				-- Check line 3, some artifacts have the ilevel there
-				line = _G[ScannerName.."TextLeft3"]
-				if line then
-					local msg = line:GetText()
-					if msg and string_find(msg, Patterns.ItemLevel) then
-						local itemLevel = tonumber(string_match(msg, Patterns.ItemLevel))
-						if (itemLevel and (itemLevel > 0)) then
-							tbl.itemLevel = itemLevel
-						end
-					end
-				end
-			end
-		end
-
-		local foundItemBlock, foundItemBind, foundItemUnique, foundItemDurability, foundItemDamage, foundItemSpeed, foundItemSellPrice, foundItemReqLevel, foundUseEffect, foundEquipEffect
-					
-		local numLines = Scanner:NumLines()
-		local firstLine, lastLine = 2, numLines
-
-		for lineIndex = 2,numLines do 
-			local line = _G[ScannerName.."TextLeft"..lineIndex]
-			if line then 
-				local msg = line:GetText()
-				if msg then 
-
-					-- item damage 
-					if ((not foundItemDamage) and (string_find(msg, Patterns.ItemDamage))) then 
-						local min,max = string_match(msg, Patterns.ItemDamage)
-						if (max) then 
-							foundItemDamage = lineIndex
-							tbl.itemDamageMin = tonumber(min)
-							tbl.itemDamageMax = tonumber(max)
-							if (not foundItemSpeed) then 
-								local line = _G[ScannerName.."TextRight"..lineIndex]
-								if line then 
-									local msg = line:GetText()
-									if msg then 
-										local int,float = string_match(msg, "(%d+)%.(%d+)")
-										if (int or float) then 
-											if (lineIndex >= firstLine) then 
-												firstLine = lineIndex + 1
-											end 
-											foundItemSpeed = lineIndex
-											tbl.itemSpeed = int .. "." .. (float or 00)
-										end 
-									end 
-								end 
-							end 
-						end 
-					end 
-
-					-- item durability
-					if ((not foundItemDurability) and (string_find(msg, Patterns.ItemDurability))) then 
-						local min,max = string_match(msg, Patterns.ItemDurability)
-						if (max) then 
-							if (lineIndex <= lastLine) then 
-								lastLine = lineIndex - 1
-							end 
-							foundItemDurability = lineIndex
-							tbl.itemDurability = tonumber(min)
-							tbl.itemDurabilityMax = tonumber(max)
-						end 
-					end 
-
-					-- shield block isn't included in the itemstats table for some reason
-					if ((not foundItemBlock) and (string_find(msg, Patterns.ItemBlock))) then 
-						local itemBlock = tonumber(string_match(msg, Patterns.ItemBlock))
-						if (itemBlock and (itemBlock ~= 0)) then 
-							if (lineIndex >= firstLine) then 
-								firstLine = lineIndex + 1
-							end 
-							foundItemBlock = lineIndex
-							tbl.itemBlock = itemBlock
-						end 
-					end 
-
-					-- item binds
-					if ((not foundItemBind) and ((bindType == 1) or (bindType == 2) or (bindType == 3))) then 
-						local id = 1
-						while Patterns["ItemBind"..id] do 
-							if (string_find(msg, Patterns["ItemBind"..id])) then 
-								if (lineIndex >= firstLine) then 
-									firstLine = lineIndex + 1
-								end 
-								
-								-- found the bind line
-								foundItemBind = lineIndex
-								tbl.itemBind = msg
-								tbl.itemIsBound = true
-	
-								break
-							end 
-							id = id + 1
-						end 
-					end 
-
-					-- item unique stats
-					if (not foundItemUnique) then 
-						local id = 1
-						while Patterns["ItemUnique"..id] do 
-							if (string_find(msg, Patterns["ItemUnique"..id])) then 
-								if (lineIndex >= firstLine) then 
-									firstLine = lineIndex + 1 
-								end 
-								
-								-- found the unique line
-								foundItemUnique = lineIndex
-								tbl.itemUnique = msg
-								tbl.itemIsUnique = true
-	
-								break
-							end 
-							id = id + 1
-						end 
-					end 
-
-					-- item Use effect. Can only be one. I think. 
-					if ((not foundUseEffect) and (string_find(msg, Patterns.ItemUseEffect))) then 
-						foundUseEffect = lineIndex
-						tbl.itemUseEffect = msg
-						tbl.itemHasUseEffect = true
-					end 
-
-					-- Items can have multiple Equip effects
-					--if ((not foundEquipEffect) and (string_find(msg, Patterns.ItemEquipEffect))) then 
-					if (string_find(msg, Patterns.ItemEquipEffect)) then 
-						if (not tbl.itemEquipEffects) then 
-							tbl.itemEquipEffects = {}
-						end 
-						if (not foundEquipEffect) then
-							foundEquipEffect = {}
-						end  
-						foundEquipEffect[#foundEquipEffect + 1] = lineIndex
-						tbl.itemEquipEffects[#tbl.itemEquipEffects + 1] = msg
-						tbl.itemHasEquipEffect = true
-					end 
-
-					-- item sell price
-					-- *we don't retrieve this from here, but need to know the line number
-					if ((not foundItemSellPrice) and (string_find(msg, Patterns.ItemSellPrice))) then 
-						if (lineIndex <= lastLine) then 
-							lastLine = lineIndex - 1
-						end 
-						foundItemSellPrice = lineIndex
-					end 
-
-					-- item required level
-					-- *we don't retrieve this from here, but need to know the line number
-					if ((not foundItemReqLevel) and (string_find(msg, Patterns.ItemReqLevel))) then 
-						if (lineIndex <= lastLine) then 
-							lastLine = lineIndex - 1
-						end 
-						foundItemReqLevel = lineIndex
-					end 
-
-				end 
-			end 
-		end 
-
-		-- Figure out a description for select items
-		if (itemClassID == LE_ITEM_CLASS_MISCELLANEOUS) or (itemClassID == LE_ITEM_CLASS_CONSUMABLE) then 
-			for lineIndex = firstLine, lastLine do 
-				if (lineIndex ~= foundItemBlock)
-					and (lineIndex ~= foundItemBind)
-					and (lineIndex ~= foundItemUnique)
-					and (lineIndex ~= foundItemDamage)
-					and (lineIndex ~= foundItemDurability)
-					and (lineIndex ~= foundItemSpeed)
-					and (lineIndex ~= foundItemSellPrice)
-					and (lineIndex ~= foundItemReqLevel)
-					and (lineIndex ~= foundUseEffect)
-				then 
-					local skip
-					if foundEquipEffect then 
-						for lineID in pairs(foundEquipEffect) do 
-							if (lineID == lineIndex) then 
-								skip = true 
-								break 
-							end
-						end
-					end 
-					if (not skip) then 
-						local line = _G[ScannerName.."TextLeft"..lineIndex]
-						if line then 
-							local msg = line:GetText()
-							if (msg and (msg ~= "") and (msg ~= " ")) then 
-								if (not tbl.itemDescription) then 
-									tbl.itemDescription = {}
-								end 
-								tbl.itemDescription[#tbl.itemDescription + 1] = msg
-							end 
-						end 
-					end 
-				end
-			end 
-		end 
+		tbl = SetItemData(itemLink, tbl)
 
 		return validateResults(tbl)
 	end 
@@ -1910,9 +1976,9 @@ end
 LibTooltipScanner.GetTooltipDataForItemLink = function(self, itemLink, tbl)
 	ClearScanner()
 
-	local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
+	--local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
 
-	if itemName then 
+	if itemLink then 
 		Scanner:SetHyperlink(itemLink)
 
 		tbl = tbl or {}
@@ -1920,15 +1986,14 @@ LibTooltipScanner.GetTooltipDataForItemLink = function(self, itemLink, tbl)
 			tbl[i] = nil
 		end 
 
-		-- Get some blizzard info about the current item
-		local effectiveLevel, previewLevel, origLevel = GetDetailedItemLevelInfo(itemLink)
+		tbl = SetItemData(itemLink, tbl)
 
-		tbl.itemID = tonumber(string_match(itemLink, "item:(%d+)"))
-		tbl.itemString = string_match(itemLink, "item[%-?%d:]+")
-		tbl.itemName = itemName
-		tbl.itemRarity = itemRarity
-		tbl.itemSellPrice = itemSellPrice
-		tbl.itemStackCount = itemStackCount
+		--tbl.itemID = tonumber(string_match(itemLink, "item:(%d+)"))
+		--tbl.itemString = string_match(itemLink, "item[%-?%d:]+")
+		--tbl.itemName = itemName
+		--tbl.itemRarity = itemRarity
+		--tbl.itemSellPrice = itemSellPrice
+		--tbl.itemStackCount = itemStackCount
 
 		return validateResults(tbl)
 	end 
@@ -1940,7 +2005,9 @@ LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID,
 
 	local itemID = GetContainerItemID(bagID, slotID)
 	if (itemID) then 
-		local hasCooldown, repairCost = Scanner:SetBagItem(bagID, slotID)
+
+		-- Take care to only set the scanner here, do NOT reset it to an itemLink later.
+		local hasCooldown, repairCost, speciesID, level, breedQuality, maxHealth, power, speed, name = Scanner:SetBagItem(bagID, slotID)
 
 		tbl = tbl or {}
 		for i,v in pairs(tbl) do 
@@ -1948,8 +2015,25 @@ LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID,
 		end 
 
 		local itemLink = GetContainerItemLink(bagID, slotID)
+		if (itemLink) then
 
+			tbl = SetItemData(itemLink, tbl)
 
+			tbl.hasCooldown = hasCooldown
+			tbl.repairCost = repairCost
+
+			-- Add battlepet tooltip info, if it exists.
+			if ((speciesID) and (speciesID > 0)) then
+				tbl.speciesID = speciesID
+				tbl.level = level
+				tbl.breedQuality = breedQuality
+				tbl.maxHealth = maxHealth
+				tbl.power = power
+				tbl.speed = speed
+				tbl.name = name
+			end
+
+		end
 
 		return validateResults(tbl)
 	end 

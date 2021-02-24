@@ -1,4 +1,4 @@
-local LibTime = Wheel:Set("LibTime", 7)
+local LibTime = Wheel:Set("LibTime", 9)
 if (not LibTime) then	
 	return
 end
@@ -44,41 +44,9 @@ local dateInRange = function(day1, month1, year1, day2, month2, year2)
 	local currentDay = tonumber(date("%d"))
 	local currentMonth = tonumber(date("%m"))
 	local currentYear = tonumber(date("%Y")) -- full 4 digit year
-
-	-- First check the year range
-	if (currentYear >= year1) and (currentYear <= year2) then
-
-		-- If the current year is between the two requested, 
-		-- we are most definitely within the range.
-		if (currentYear > year1) and (currentYear < year2) then
-			return true
-		else
-			-- If the current year is the first requested, 
-			-- we have to check if it has passed the date.
-			if (currentYear == year1) then
-				-- We've passed the requested month, definitely within range.
-				if (currentMonth > month1) then
-					return true
-				-- We're within the same month, let's check the day!
-				elseif (currentMonth == month1) and (currentDay >= day1) then
-					return true
-				end
-
-			-- The current year is the last one requested, 
-			-- we have to make sure we haven't moved outside the range.
-			elseif (currentYear == year2) then
-				-- We haven't reached the requested month, definitely within range.
-				if (currentMonth < month2) then
-					return true
-				-- We're within the same month, let's check the day!
-				elseif (currentMonth == month2) and (currentDay <= day2) then
-					return true
-				end
-			end
-		end
-	end
-
-	return false
+	local firstReached = (currentYear >= year1) and (currentMonth >= month1) and (currentDay >= day1)
+	local secondNotPassed = (currentYear <= year2) and (currentMonth <= month2) and (currentDay <= day2)
+	return (firstReached) and (secondNotPassed)
 end
 
 -- Calculates standard hours from a give 24-hour time
@@ -128,14 +96,14 @@ LibTime.GetTime = function(self, useStandardTime, useServerTime)
 	return self[useServerTime and "GetServerTime" or "GetLocalTime"](self, useStandardTime)
 end
 
--- 2020 Retail Winter Veil.
+-- 2021 Retail Winter Veil.
 LibTime.IsWinterVeil = function(self)
-	return dateInRange(16,12,2020,2,1,2021)
+	return dateInRange(16,12,2021,2,1,2022)
 end
 
--- 2021 Retail Love is in the Air.
+-- 2022 Retail Love is in the Air.
 LibTime.IsLoveFestival = function(self)
-	return dateInRange(8,2,2021,22,2,2021)
+	return dateInRange(7,2,2022,21,2,2022)
 end
 
 local embedMethods = {

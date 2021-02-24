@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.453-RC] 2021-02-24
+### Changed
+- Updated the time library with dates for the 2021/2022 events.
+- Various back-end updates in preparation for the future.
+
 ## [3.1.452-RC] 2021-02-11
 ### Added
 - Added Hunter's Primal Rage to the aura whitelists, in the same manner as other boosts similar to Bloodlust and Heroism.
