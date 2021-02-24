@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 93)
+local LibTooltip = Wheel:Set("LibTooltip", 95)
 if (not LibTooltip) then
 	return
 end
@@ -41,6 +41,7 @@ local ipairs = ipairs
 local math_abs = math.abs
 local math_ceil = math.ceil 
 local math_floor = math.floor
+local math_mod = math.fmod
 local pairs = pairs
 local select = select 
 local setmetatable = setmetatable
@@ -519,6 +520,10 @@ Tooltip.UpdateBackdropLayout = function(self)
 		return self:OverrideBackdrop()
 	end 
 
+	if self.PreUpdateBackdrop then 
+		self:PreUpdateBackdrop()
+	end 
+
 	-- Retrieve current settings
 	local left, right, top, bottom = unpack(self:GetCValue("backdropOffsets"))
 	local barSpacing = self:GetCValue("barSpacing") 
@@ -982,7 +987,7 @@ Tooltip.SetBackdropOffset = function(self, left, right, top, bottom)
 	check(right, 2, "number")
 	check(top, 3, "number")
 	check(bottom, 4, "number")
-	self:SetCValue("backdropOffset", { left, right, top, bottom })
+	self:SetCValue("backdropOffsets", { left, right, top, bottom })
 	self:UpdateBackdropLayout()
 	self:UpdateBarLayout()
 end 
@@ -1068,6 +1073,25 @@ Tooltip.SetSmartAnchor = function(self, parent, offsetX, offsetY)
 	local top = height - parent:GetTop()
 	local point = ((bottom < top) and "BOTTOM" or "TOP") .. ((left < right) and "LEFT" or "RIGHT") 
 	local rPoint = ((bottom < top) and "TOP" or "BOTTOM") .. ((left < right) and "RIGHT" or "LEFT") 
+	
+	offsetX = (offsetX or 10) * ((left < right) and 1 or -1)
+	offsetY = (offsetY or 10) * ((bottom < top) and 1 or -1)
+
+	self:Place(point, parent, rPoint, offsetX, offsetY)
+end 
+
+Tooltip.SetSmartItemAnchor = function(self, parent, offsetX, offsetY)
+
+	-- Keyword parse the owner frame, to allow tooltips to use our custom crames. 
+	self:SetOwner(LibTooltip:GetFrame(parent), "ANCHOR_NONE")
+
+	local width, height = UIParent:GetSize()
+	local left = parent:GetLeft()
+	local right = width - parent:GetRight()
+	local bottom = parent:GetBottom() 
+	local top = height - parent:GetTop()
+	local point = ((bottom < top) and "BOTTOM" or "TOP") .. ((left < right) and "LEFT" or "RIGHT") 
+	local rPoint = ((bottom < top) and "BOTTOM" or "TOP") .. ((left < right) and "RIGHT" or "LEFT") 
 	
 	offsetX = (offsetX or 10) * ((left < right) and 1 or -1)
 	offsetY = (offsetY or 10) * ((bottom < top) and 1 or -1)
@@ -1231,13 +1255,24 @@ local SetItemInfo = function(self, data, useSimplified)
 			end 
 		
 		elseif (data.itemType or data.itemSubType) then 
+
 			if (data.itemClassID == LE_ITEM_CLASS_MISCELLANEOUS) then 
 				-- This includes hearthstones, flight master's whistle and similar
 
-			elseif (data.itemClassID == LE_ITEM_CLASS_CONSUMABLE) then 
-				-- Food, drink, flasks, etc
-				self:AddLine(data.itemSubType or data.itemType, offwhiteR, offwhiteG, offwhiteB)
+			elseif (data.itemClassID == LE_ITEM_MISCELLANEOUS_OTHER) then
 
+			elseif (data.itemClassID == LE_ITEM_CLASS_CONSUMABLE) then 
+
+				-- Subtypes usually do not have any constants to reference them by.
+				-- Source: https://wow.gamepedia.com/ItemType
+				if (data.itemSubClassID == 8) then 
+					-- "Other", used for conservatory seeds in shadowlands
+
+				else
+					-- Food, drink, flasks, etc
+					self:AddLine(data.itemSubType or data.itemType, offwhiteR, offwhiteG, offwhiteB)
+				end
+			
 			else 
 				self:AddLine(data.itemSubType or data.itemType, offwhiteR, offwhiteG, offwhiteB)
 			end 
@@ -1353,6 +1388,31 @@ local SetItemInfo = function(self, data, useSimplified)
 	end 
 
 	-- sell value
+	if (data.itemSellPrice) and ((data.itemRarity == 0) or (MerchantFrame:IsShown())) then 
+		local moneyString
+		if (self.coinStringGold) and (self.coinStringSilver) and (self.coinStringCopper) then 
+
+			local gold = math_floor(data.itemSellPrice / (100 * 100))
+			if (gold > 0) then 
+				moneyString = string_format("%d%s", gold, self.coinStringGold)
+			end
+
+			local silver = math_floor((data.itemSellPrice - (gold * 100 * 100)) / 100)
+			if (silver > 0) then 
+				moneyString = (moneyString and moneyString.." " or "") .. string_format("%d%s", silver, self.coinStringSilver)
+			end
+
+			local copper = math_mod(data.itemSellPrice, 100)
+			if (copper > 0) then 
+				moneyString = (moneyString and moneyString.." " or "") .. string_format("%d%s", copper, self.coinStringCopper)
+			end 
+		else
+			moneyString = GetMoneyString(money, false)
+		end
+		if (moneyString) then
+			self:AddLine(moneyString, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+		end
+	end
 
 end
 
@@ -2402,6 +2462,32 @@ local SetDefaultAnchor = function(tooltip, parent)
 	end 
 end 
 
+local SetDefaultPosition = function(tooltip)
+	-- Previous statement applies.
+	if (tooltip:IsForbidden()) or (tooltip:GetAnchorType() ~= "ANCHOR_NONE") then -- (not tooltip:IsShown())
+		return 
+	end
+
+	-- Attempt to find our own defaults, or just go with normal blizzard defaults otherwise. 
+	-- Retrieve default anchor for this tooltip
+	local defaultAnchor = LibTooltip:GetDefaultCValue("defaultAnchor")
+	if defaultAnchor then 
+		local position
+		if (type(defaultAnchor) == "function") then 
+			local parent = tooltip:GetOwner()
+			if (not parent) then 
+				return
+			end
+			position = { defaultAnchor(tooltip, parent) }
+		else 
+			position = { unpack(defaultAnchor) }
+		end
+		Tooltip.Place(tooltip, unpack(position))
+	else 
+		Tooltip.Place(tooltip, "BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -_G.CONTAINER_OFFSET_X - 13, _G.CONTAINER_OFFSET_Y)
+	end 
+end
+
 -- Set a default position for all registered tooltips. 
 -- Also used as a fallback position for Blizzard / 3rd Party addons 
 -- that rely on GameTooltip_SetDefaultAnchor to position their tooltips. 
@@ -2418,14 +2504,17 @@ LibTooltip.SetDefaultTooltipPosition = function(self, ...)
 	else 
 		LibTooltip:SetDefaultCValue("defaultAnchor", { ... })
 	end 
+	LibTooltip:ForAllTooltips("UpdatePosition")
 	LibTooltip:SetSecureHook("GameTooltip_SetDefaultAnchor", SetDefaultAnchor)
+
+	SetDefaultPosition(GameTooltip)
 end 
 
 LibTooltip.SetDefaultTooltipBackdrop = function(self, backdropTable)
 	check(backdropTable, 1, "table", "nil")
 	LibTooltip:SetDefaultCValue("backdrop", backdropTable)
-	LibTooltip:ForAllTooltips("UpdateBackdrop")
-	LibTooltip:ForAllTooltips("UpdateBars")
+	LibTooltip:ForAllTooltips("UpdateBackdropLayout")
+	LibTooltip:ForAllTooltips("UpdateBarLayout")
 end 
 
 LibTooltip.SetDefaultTooltipBackdropColor = function(self, r, g, b, a)
@@ -2434,7 +2523,7 @@ LibTooltip.SetDefaultTooltipBackdropColor = function(self, r, g, b, a)
 	check(b, 3, "number")
 	check(a, 4, "number", "nil")
 	LibTooltip:SetDefaultCValue("backdropColor", { r, g, b, a })
-	LibTooltip:ForAllTooltips("UpdateBackdrop")
+	LibTooltip:ForAllTooltips("UpdateBackdropLayout")
 end 
 
 LibTooltip.SetDefaultTooltipBackdropBorderColor = function(self, r, g, b, a)
@@ -2443,7 +2532,7 @@ LibTooltip.SetDefaultTooltipBackdropBorderColor = function(self, r, g, b, a)
 	check(b, 3, "number")
 	check(a, 4, "number", "nil")
 	LibTooltip:SetDefaultCValue("backdropBorderColor", { r, g, b, a })
-	LibTooltip:ForAllTooltips("UpdateBackdrop")
+	LibTooltip:ForAllTooltips("UpdateBackdropLayout")
 end 
 
 LibTooltip.SetDefaultTooltipBackdropOffset = function(self, left, right, top, bottom)
@@ -2452,22 +2541,22 @@ LibTooltip.SetDefaultTooltipBackdropOffset = function(self, left, right, top, bo
 	check(top, 3, "number")
 	check(bottom, 4, "number")
 	LibTooltip:SetDefaultCValue("backdropOffsets", { left, right, top, bottom })
-	LibTooltip:ForAllTooltips("UpdateBackdrop")
+	LibTooltip:ForAllTooltips("UpdateBackdropLayout")
 end 
 
 LibTooltip.SetDefaultTooltipStatusBarInset = function(self, left, right)
 	check(left, 1, "number")
 	check(right, 2, "number")
 	LibTooltip:SetDefaultCValue("barInsets", { left, right })
-	LibTooltip:ForAllTooltips("UpdateBackdrop")
-	LibTooltip:ForAllTooltips("UpdateBars")
+	LibTooltip:ForAllTooltips("UpdateBackdropLayout")
+	LibTooltip:ForAllTooltips("UpdateBarLayout")
 end 
 
 LibTooltip.SetDefaultTooltipStatusBarOffset = function(self, barOffset)
 	check(barOffset, 1, "number")
 	LibTooltip:SetDefaultCValue("barOffset", barOffset)
-	LibTooltip:ForAllTooltips("UpdateBackdrop")
-	LibTooltip:ForAllTooltips("UpdateBars")
+	LibTooltip:ForAllTooltips("UpdateBackdropLayout")
+	LibTooltip:ForAllTooltips("UpdateBarLayout")
 end 
 
 LibTooltip.SetDefaultTooltipStatusBarHeight = function(self, barHeight, barType)
@@ -2478,15 +2567,15 @@ LibTooltip.SetDefaultTooltipStatusBarHeight = function(self, barHeight, barType)
 	else 
 		LibTooltip:SetDefaultCValue("barHeight", barHeight)
 	end 
-	LibTooltip:ForAllTooltips("UpdateBars")
-	LibTooltip:ForAllTooltips("UpdateBackdrop")
+	LibTooltip:ForAllTooltips("UpdateBarLayout")
+	LibTooltip:ForAllTooltips("UpdateBackdropLayout")
 end 
 
 LibTooltip.SetDefaultTooltipStatusBarSpacing = function(self, barSpacing)
 	check(barSpacing, 1, "number")
 	LibTooltip:SetDefaultCValue("barSpacing", barSpacing)
-	LibTooltip:ForAllTooltips("UpdateBackdrop")
-	LibTooltip:ForAllTooltips("UpdateBars")
+	LibTooltip:ForAllTooltips("UpdateBackdropLayout")
+	LibTooltip:ForAllTooltips("UpdateBarLayout")
 end 
 
 LibTooltip.SetDefaultTooltipColorTable = function(self, colorTable)

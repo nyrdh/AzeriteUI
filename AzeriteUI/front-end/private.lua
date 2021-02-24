@@ -4907,8 +4907,8 @@ end
 -- Library tooltip proxies.
 -- This way the modules can access all of them, 
 -- without having to embed or reference libraries.
-Private.GetActionButtonTooltip = function(self) return LibBagButton:GetActionButtonTooltip() end
-Private.GetBagButtonTooltip = function(self) return LibUnitFrame:GetBagButtonTooltip() end
+Private.GetActionButtonTooltip = function(self) return LibSecureButton:GetActionButtonTooltip() end
+Private.GetBagButtonTooltip = function(self) return LibBagButton:GetBagButtonTooltip() end
 Private.GetBindingsTooltip = function(self) return LibBindTool:GetBindingsTooltip() end
 Private.GetMinimapTooltip = function(self) return LibMinimap:GetMinimapTooltip() end
 Private.GetMoverTooltip = function(self) return LibMover:GetMoverTooltip() end

@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("Tooltips", "LibEvent", "LibDB", "LibTooltip")
+local Module = Core:NewModule("Tooltips", "LibMessage", "LibEvent", "LibDB", "LibTooltip")
 
 -- Lua API
 
@@ -76,6 +76,21 @@ end
 Module.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_LOGIN") then 
 		self:PostCreateCustomTips()
+
+	elseif (event == "GP_BAGS_SHOWN") then 
+
+		local bags = Wheel("LibModule"):GetModule("Backpacker", true)
+		if (bags) then
+			local containerFrame = bags:GetCointainerFrame()
+			if (containerFrame) then
+				self:SetDefaultTooltipPosition("BOTTOMRIGHT", containerFrame, "BOTTOMLEFT", -20, 20)
+			end
+		end
+
+	elseif (event == "GP_BAGS_HIDDEN") then 
+	
+		-- Default position of all tooltips.
+		self:SetDefaultTooltipPosition(unpack(self.layout.TooltipPlace))
 	end 
 end 
 
@@ -85,6 +100,8 @@ Module.OnInit = function(self)
 		return self:SetUserDisabled(true)
 	end
 	self:StyleCustomTips()
+	self:RegisterMessage("GP_BAGS_HIDDEN", "OnEvent")
+	self:RegisterMessage("GP_BAGS_SHOWN", "OnEvent")
 end 
 
 Module.OnEnable = function(self)

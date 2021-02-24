@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 72)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 73)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -836,6 +836,7 @@ local SetItemData = function(itemLink, tbl)
 	tbl.itemID = tonumber(string_match(itemLink, "item:(%d+)"))
 	tbl.itemString = string_match(itemLink, "item[%-?%d:]+")
 
+	tbl.itemSellPrice = (itemSellPrice and (itemSellPrice > 0)) and itemSellPrice 
 	tbl.itemRarity = itemRarity
 	tbl.itemMinLevel = itemMinLevel
 	tbl.itemType = itemType -- localized
