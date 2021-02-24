@@ -709,13 +709,23 @@ LibBagButton.ShowBags = function(self)
 end
 
 -- Hides your containers containing bag buttons.
+-- *This one is called when Esc is clicked and bags forcehidden.
+-- Suppresses the blizzard method if 'true' is returned.
 LibBagButton.HideBags = function(self)
 	local hasBags
+	local changesMade
 	for container, bagType in pairs(Containers) do
 		if (bagType == "Bag") then
+			if (container:IsShown()) then
+				changesMade = true
+			end
 			container:Hide()
 			hasBags = true
 		end
+	end
+	-- Alert the environment.
+	if (changesMade) then
+		self:SendMessage("GP_BAGS_HIDDEN")
 	end
 	-- A return value other than false
 	-- suppresses the blizzard methods.

@@ -474,7 +474,6 @@ Module.InitRetailTracker = function(self)
 		ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight)
 	end	
 
-
 	hooksecurefunc(ObjectiveTrackerFrame,"SetPoint", function(_, ...) self:PositionRetailTracker() end)
 	hooksecurefunc(ObjectiveTrackerFrame,"SetAllPoints", function(_, ...) self:PositionRetailTracker() end)
 
@@ -497,7 +496,7 @@ Module.PositionRetailTracker = function(self, event, ...)
 	-- Possible taints: SetWidth, SetParent
 	local _,anchor = ObjectiveTrackerFrame:GetPoint()
 	if (anchor ~= self.ObjectiveFrameHolder) then
-		ObjectiveTrackerFrame:SetIgnoreParentAlpha(false)
+		ObjectiveTrackerFrame:SetIgnoreParentAlpha(false) -- something is altering this on first login
 		ObjectiveTrackerFrame:SetClampedToScreen(false)
 		ObjectiveTrackerFrame:SetMovable(true)
 		ObjectiveTrackerFrame:SetUserPlaced(true)
@@ -530,6 +529,7 @@ Module.CreateDriver = function(self)
 
 		local shouldHide = self.bagsVisible or (hiddenBydriver and tracker)
 		if (shouldHide) then
+			tracker:SetIgnoreParentAlpha(false)
 			self.frame:SetAlpha(0)
 			self.frame.cover:SetFrameStrata(tracker:GetFrameStrata())
 			self.frame.cover:SetFrameLevel(tracker:GetFrameLevel() + 5)
@@ -538,6 +538,9 @@ Module.CreateDriver = function(self)
 			self.frame.cover:SetHitRectInsets(-40, -80, -40, 40)
 			self.frame.cover:Show()
 		else
+			if (tracker) then
+				tracker:SetIgnoreParentAlpha(false)
+			end
 			self.frame:SetAlpha(.9)
 			self.frame.cover:Hide()
 		end
@@ -595,6 +598,16 @@ Module.OnEvent = function(self, event, ...)
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 		self:PositionRetailTracker()
 
+	elseif (event == "PLAYER_ENTERING_WORLD") then 
+
+		local bags = Wheel("LibModule"):GetModule("Backpacker", true)
+		if (bags) then
+			self.bagsVisible = bags:IsVisible()
+			if (self.driverFrame) then
+				self.driverFrame:Update()
+			end
+		end
+
 	elseif (event == "GP_BAGS_HIDDEN") then
 		self.bagsVisible = nil
 		if (self.driverFrame) then
@@ -626,7 +639,8 @@ Module.OnInit = function(self)
 	if (IsRetail) then
 		self:InitRetailTracker()
 	end
-
+	
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("VARIABLES_LOADED", "OnEvent")
 	self:RegisterMessage("GP_BAGS_HIDDEN", "OnEvent")
 	self:RegisterMessage("GP_BAGS_SHOWN", "OnEvent")

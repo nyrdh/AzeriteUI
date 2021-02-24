@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 85)
+local LibBlizzard = Wheel:Set("LibBlizzard", 87)
 if (not LibBlizzard) then 
 	return
 end
@@ -28,6 +28,7 @@ local _G = _G
 local assert = assert
 local debugstack = debugstack
 local error = error
+local math_max = math.max
 local pairs = pairs
 local select = select
 local string_format = string.format
@@ -1058,6 +1059,13 @@ UIWidgetStyling["BagButtons"] = function(self, ...)
 	-- Retrieve the first slot button and the backpack
 	local firstSlot = CharacterBag0Slot
 	local backpack = ContainerFrame1
+
+	-- Try to avoid the potential error with anima deposit animations. 
+	-- Just give it a simplified version of the default position it is given, 
+	-- it will be replaced by UpdateContainerFrameAnchors() later on anyway.
+	if (not backpack:GetPoint()) then
+		backpack:SetPoint("BOTTOMRIGHT", backpack:GetParent(), "BOTTOMRIGHT", -14, 93 )
+	end
 
 	-- These should always exist, but Blizz do have a way of changing things,
 	-- and I prefer having functionality not be applied in a future update 

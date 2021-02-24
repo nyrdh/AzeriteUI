@@ -87,7 +87,7 @@ Module.OnEvent = function(self, event, ...)
 			end
 		end
 
-	elseif (event == "GP_BAGS_HIDDEN") then 
+	elseif (event == "GP_BAGS_HIDDEN") or (event == "PLAYER_ENTERING_WORLD") then 
 	
 		-- Default position of all tooltips.
 		self:SetDefaultTooltipPosition(unpack(self.layout.TooltipPlace))
@@ -100,6 +100,7 @@ Module.OnInit = function(self)
 		return self:SetUserDisabled(true)
 	end
 	self:StyleCustomTips()
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterMessage("GP_BAGS_HIDDEN", "OnEvent")
 	self:RegisterMessage("GP_BAGS_SHOWN", "OnEvent")
 end 
