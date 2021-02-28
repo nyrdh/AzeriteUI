@@ -6,7 +6,7 @@ on a widgetcontainer aura plugin element.
 
 --]]--
 
-local LibAuraTool = Wheel:Set("LibAuraTool", 14)
+local LibAuraTool = Wheel:Set("LibAuraTool", 15)
 if (not LibAuraTool) then
 	return
 end
@@ -1412,6 +1412,8 @@ elseif (IsRetail) then
 		AddUserFlags(127372, OnPlayer) 						-- Unstable Serum (Klaxxi Enhancement: Raining Blood)
 		AddUserFlags(240640, OnPlayer) 						-- The Shadow of the Sentinax (Mark of the Sentinax)
 		AddUserFlags(254873, OnPlayer) 						-- Irontide Recruit (Tiragarde Sound Storyline)
+		AddUserFlags(312394, OnPlayer) 						-- Shackled Soul (Battered and Bruised World Quest Revendreth)
+
 
 		-- Heroism
 		------------------------------------------------------------------------

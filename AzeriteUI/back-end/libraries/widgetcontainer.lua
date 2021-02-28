@@ -1,4 +1,4 @@
-local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 27)
+local LibWidgetContainer = Wheel:Set("LibWidgetContainer", 29)
 if (not LibWidgetContainer) then	
 	return
 end
@@ -23,6 +23,7 @@ LibFrame:Embed(LibWidgetContainer)
 -- Lua API
 local _G = _G
 local math_floor = math.floor
+local math_random = math.random
 local pairs = pairs
 local select = select
 local setmetatable = setmetatable
@@ -578,14 +579,11 @@ LibWidgetContainer.CreateWidgetContainer = function(self, frameType, parent, tem
 
 	-- This is for Clique compatibility, 
 	-- as it requires global frame names to function. 
-	local name
-	if unit then 
-		local counter = 0
-		for frame in pairs(frames) do 
-			counter = counter + 1
-		end 
-		name = "GP_UnitFrame_"..(counter + 1)
-	end 
+	-- We do however not require a constant one.
+	local name = "GP_WidgetContainer_"..(math_floor(math_random()*100000))
+	while (_G[name]) do
+		name = "GP_WidgetContainer_"..(math_floor(math_random()*100000))
+	end
 
 	local frame = setmetatable(LibWidgetContainer:CreateFrame(frameType or "Frame", name, parent, template or "SecureHandlerAttributeTemplate"), WidgetFrame_MT)
 
@@ -598,10 +596,11 @@ LibWidgetContainer.CreateWidgetContainer = function(self, frameType, parent, tem
 	-- so no use to go the long way around module embedding.
 	LibForge:Embed(frame)
 	
+	-- This will init it, and add it to our registry.
 	return LibWidgetContainer:InitWidgetContainer(frame, unit, styleFunc, ...)
 end
 
--- register a widget/element
+-- Register a widget/element
 LibWidgetContainer.RegisterElement = function(self, elementName, enableFunc, disableFunc, updateFunc, version)
 	check(elementName, 1, "string")
 	check(enableFunc, 2, "function")

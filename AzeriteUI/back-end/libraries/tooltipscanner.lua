@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 73)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 75)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -64,6 +64,7 @@ local UnitLevel = UnitLevel
 local UnitName = UnitName
 local UnitRace = UnitRace
 local UnitReaction = UnitReaction
+local UnitSex = UnitSex
 local DoesSpellExist = C_Spell.DoesSpellExist 
 
 -- Constants for client version
@@ -134,9 +135,17 @@ local Constants = {
 	ItemBindQuest = ITEM_BIND_QUEST, -- "Quest Item"
 	ItemBindAccount = ITEM_BIND_TO_ACCOUNT, -- "Binds to account"
 	ItemBindBnet = ITEM_BIND_TO_BNETACCOUNT, -- "Binds to Blizzard account"
+
+	-- Click actions (filters assume #1 is opening)
+	ItemClickable1 = ITEM_OPENABLE, -- "<Right Click to Open>"
+	ItemClickable2 = ITEM_READABLE, -- "<Right Click to Read>"
+	ItemClickable3 = ITEM_SOCKETABLE, -- "<Shift Right Click to Socket>"
+	--POWER_TYPE_ANIMA = "Anima"
+	--POWER_TYPE_ANIMA_V2 = "Anima"
 	
 	-- Adding this mostly to filter it out
 	ItemStartsQuest = ITEM_STARTS_QUEST, -- "This Item Begins a Quest"
+
 	
 	ItemBlock = SHIELD_BLOCK_TEMPLATE,
 	ItemDamage = DAMAGE_TEMPLATE,
@@ -245,6 +254,14 @@ local Patterns = {
 	ItemBind5 = 				"^" .. Constants.ItemBindAccount, 
 	ItemBind6 = 				"^" .. Constants.ItemBindBnet, 
 
+	ItemBindBoE = 				"^" .. Constants.ItemBindBoE,
+	ItemBindBoU = 				"^" .. Constants.ItemBindUse, 
+	ItemBindBoA = 				"^" .. Constants.ItemBindAccount, 
+
+	ItemClickable1 = 			"^" .. Constants.ItemClickable1,
+	ItemClickable2 = 			"^" .. Constants.ItemClickable2,
+	ItemClickable3 = 			"^" .. Constants.ItemClickable3,
+
 	-- Item required level 
 	ItemReqLevel = 				"^" .. Constants.ItemReqLevel, 
 
@@ -352,13 +369,6 @@ local check = function(value, num, ...)
 	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
--- Clear the scanner tooltip
-local ClearScanner = function()
-	Scanner:Hide()
-	Scanner.owner = UIParent
-	Scanner:SetOwner(UIParent, "ANCHOR_NONE")
-end
-
 -- Just to avoid empty tables being sent back, causing bugs.
 local validateResults = function(data)
 	local hasContent
@@ -377,6 +387,15 @@ local clearSpace = function(msg)
 	return msg
 end 
 
+-- Strip away color codes
+local clearColors = function(msg)
+	if (msg) then
+		msg = string_gsub(msg, "\124[cC]%x%x%x%x%x%x%x%x", "")
+		msg = string_gsub(msg, "\124[rR]", "")
+	end
+	return msg
+end
+
 -- Library API
 ---------------------------------------------------------
 -- *Methods will return nil if no data was found, 
@@ -391,8 +410,10 @@ LibTooltipScanner.IsActionItem = function(self, actionSlot, tbl)
 			return true
 
 		elseif (actionType == "macro") then 
-			ClearScanner()
-
+			-- Initiate the scanner tooltip
+			Scanner:Hide()
+			Scanner.owner = UIParent
+			Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 			Scanner:SetAction(actionSlot)
 
 			local numLines = Scanner:NumLines() 
@@ -427,7 +448,10 @@ LibTooltipScanner.IsActionItem = function(self, actionSlot, tbl)
 end
 
 LibTooltipScanner.GetTooltipDataForAction = function(self, actionSlot, tbl)
-	ClearScanner()
+	-- Initiate the scanner tooltip
+	Scanner:Hide()
+	Scanner.owner = UIParent
+	Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 
 	--  Blizz Action Tooltip Structure: 
 	--  *the order is consistent, bracketed elements optional
@@ -823,20 +847,19 @@ end
 -- As items can be part of multiple tooltip types, we use this for all of them.
 -- Todo: avoid calling GetItemInfo() so many times through the proxies. 
 local SetItemData = function(itemLink, tbl)
-
+	
 	-- Get some blizzard info about the current item
 	local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
 
 	local effectiveLevel, previewLevel, origLevel = GetDetailedItemLevelInfo(itemLink)
 
 	local itemStats = GetItemStats(itemLink)
-	local primaryStat
 
 	tbl.itemName = itemName -- localized
 	tbl.itemID = tonumber(string_match(itemLink, "item:(%d+)"))
 	tbl.itemString = string_match(itemLink, "item[%-?%d:]+")
-
-	tbl.itemSellPrice = (itemSellPrice and (itemSellPrice > 0)) and itemSellPrice 
+	tbl.itemIcon = iconFileDataID
+	tbl.itemSellPrice = (itemSellPrice and (itemSellPrice > 0)) and itemSellPrice
 	tbl.itemRarity = itemRarity
 	tbl.itemMinLevel = itemMinLevel
 	tbl.itemType = itemType -- localized
@@ -854,21 +877,33 @@ local SetItemData = function(itemLink, tbl)
 	tbl.primaryStats = {}
 	tbl.secondaryStats = {}
 
+	-- Note: This could be done by an eventhandler, and stored.
+	-- Not a problem when only called for pure tooltip usage, 
+	-- but when used as info retrieval on hidden scanner tooltips, 
+	-- this could stack up to a micro lag we do not want. 
+	local primaryStatID, spec, role
+	spec = GetSpecialization()
+	if (spec) then
+		role = GetSpecializationRole(spec)
+		primaryStatID = select(6, GetSpecializationInfo(spec, nil, nil, nil, UnitSex("player")))
+	end
+
 	local primaryKey
-	if (primaryStat == LE_UNIT_STAT_STRENGTH) then 
+	if (primaryStatID == LE_UNIT_STAT_STRENGTH) then 
 		primaryKey = "ITEM_MOD_STRENGTH_SHORT"
-		tbl.primaryStat = ITEM_MOD_STRENGTH_SHORT
+		tbl.primaryStatID = ITEM_MOD_STRENGTH_SHORT
 		tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_STRENGTH_SHORT)
-	elseif (primaryStat == LE_UNIT_STAT_AGILITY) then 
+	elseif (primaryStatID == LE_UNIT_STAT_AGILITY) then 
 		primaryKey = "ITEM_MOD_AGILITY_SHORT"
-		tbl.primaryStat = ITEM_MOD_AGILITY_SHORT
+		tbl.primaryStatID = ITEM_MOD_AGILITY_SHORT
 		tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_AGILITY_SHORT)
-	elseif (primaryStat == LE_UNIT_STAT_INTELLECT) then 
+	elseif (primaryStatID == LE_UNIT_STAT_INTELLECT) then 
 		primaryKey = "ITEM_MOD_INTELLECT_SHORT"
-		tbl.primaryStat = ITEM_MOD_INTELLECT_SHORT
+		tbl.primaryStatID = ITEM_MOD_INTELLECT_SHORT
 		tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_INTELLECT_SHORT)
 	end 
-
+	tbl.primaryStatKey = primaryKey
+	
 	local has2ndStats
 	if itemStats then
 		for key,value in pairs(itemStats) do 
@@ -917,7 +952,7 @@ local SetItemData = function(itemLink, tbl)
 		end
 	end
 
-	local foundItemBlock, foundItemBind, foundItemBound, foundItemUnique, foundItemDurability, foundItemDamage, foundItemSpeed, foundItemSellPrice, foundItemReqLevel, foundUseEffect, foundEquipEffect
+	local foundItemBlock, foundItemBind, foundItemBound, foundItemUnique, foundItemDurability, foundItemDamage, foundItemSpeed, foundItemSellPrice, foundItemReqLevel, foundUseEffect, foundEquipEffect, foundClickable
 				
 	local numLines = Scanner:NumLines()
 	local firstLine, lastLine = 2, numLines
@@ -927,6 +962,9 @@ local SetItemData = function(itemLink, tbl)
 		if line then 
 			local msg = line:GetText()
 			if msg then 
+
+				-- clean away color codes
+				msg = clearColors(msg)
 
 				-- item damage 
 				if ((not foundItemDamage) and (string_find(msg, Patterns.ItemDamage))) then 
@@ -979,6 +1017,37 @@ local SetItemData = function(itemLink, tbl)
 					end 
 				end 
 
+				--TRANSMOGRIFIED = "Transmogrified to:\n%s"
+				--TRANSMOGRIFIED_ENCHANT = "Illusion: %s"
+				--ENCHANTED_TOOLTIP_LINE = "Enchanted: %s"
+				--ITEM_MIN_LEVEL = "Requires Level %d"
+				--ITEM_MIN_SKILL = "Requires %s (%d)"
+
+				-- item clickable
+				if (not foundClickable) then
+					local id = 1
+					while Patterns["ItemClickable"..id] do 
+						if (string_find(msg, Patterns["ItemClickable"..id])) then 
+							if (lineIndex >= firstLine) then 
+								firstLine = lineIndex + 1
+							end 
+
+							-- found the bind line
+							foundClickable = lineIndex
+							tbl.itemClickAction = msg
+							tbl.itemIsClickable = true
+
+							-- Add our own flag for openables
+							if (id == 1) then
+								tbl.isOpenable = true
+							end
+
+							break
+						end 
+						id = id + 1
+					end
+				end
+
 				-- item bound to
 				if (not foundItemBound) then 
 					local id = 1
@@ -1011,6 +1080,8 @@ local SetItemData = function(itemLink, tbl)
 							-- found the bind line
 							foundItemBind = lineIndex
 							tbl.itemBind = msg
+							tbl.itemIsBoE = bindType == 2
+							tbl.itemIsBoU = bindType == 3
 							tbl.itemCanBind = true
 
 							break
@@ -1083,9 +1154,9 @@ local SetItemData = function(itemLink, tbl)
 	end 
 
 	-- Figure out a description for select items
-	if (itemClassID == LE_ITEM_CLASS_MISCELLANEOUS) 
-	or (itemClassID == LE_ITEM_CLASS_CONSUMABLE) 
-	or (itemClassID == LE_ITEM_CLASS_QUESTITEM)
+	if (itemClassID == LE_ITEM_CLASS_MISCELLANEOUS) -- 15
+	or (itemClassID == LE_ITEM_CLASS_CONSUMABLE) -- 0 
+	or (itemClassID == LE_ITEM_CLASS_QUESTITEM) -- 12
 	then 
 		for lineIndex = firstLine, lastLine do 
 			if (lineIndex ~= foundItemBlock)
@@ -1113,8 +1184,8 @@ local SetItemData = function(itemLink, tbl)
 					if line then 
 						local msg = line:GetText()
 						if (msg and (msg ~= "") and (msg ~= " ")) then 
-
 							local ignore
+							msg = clearColors(msg)
 							for i,v in pairs(Constants) do
 								if (msg == v) then
 									ignore = true
@@ -1142,7 +1213,10 @@ end
 -- We'll truncate the info a bit here to make it feel more like a spell
 -- and less like an item. Full item details will be included in pure item methods.
 LibTooltipScanner.GetTooltipDataForActionItem = function(self, actionSlot, tbl)
-	ClearScanner()
+	-- Initiate the scanner tooltip
+	Scanner:Hide()
+	Scanner.owner = UIParent
+	Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 
 	--  Blizz Action Tooltip Structure: 
 	--  *the order is consistent, bracketed elements optional
@@ -1178,11 +1252,14 @@ LibTooltipScanner.GetTooltipDataForActionItem = function(self, actionSlot, tbl)
 end 
 
 LibTooltipScanner.GetTooltipDataForPetAction = function(self, actionSlot, tbl)
-	ClearScanner()
 
 	local name, texture, isToken, isActive, autoCastAllowed, autoCastEnabled, spellID = GetPetActionInfo(actionSlot)
 	if name then 
 		
+		-- Initiate the scanner tooltip
+		Scanner:Hide()
+		Scanner.owner = UIParent
+		Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 		Scanner:SetPetAction(actionSlot)
 
 		tbl = tbl or {}
@@ -1395,9 +1472,12 @@ LibTooltipScanner.GetTooltipDataForPetAction = function(self, actionSlot, tbl)
 end
 
 LibTooltipScanner.GetTooltipDataForSpellID = function(self, spellID, tbl)
-	ClearScanner()
 
 	if (spellID and DoesSpellExist(spellID)) then 
+		-- Initiate the scanner tooltip
+		Scanner:Hide()
+		Scanner.owner = UIParent
+		Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 		Scanner:SetSpellByID(spellID)
 
 		tbl = tbl or {}
@@ -1623,9 +1703,12 @@ LibTooltipScanner.GetTooltipDataForSpellID = function(self, spellID, tbl)
 end
 
 LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
-	ClearScanner()
 
 	if UnitExists(unit) then 
+		-- Initiate the scanner tooltip
+		Scanner:Hide()
+		Scanner.owner = UIParent
+		Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 		Scanner:SetUnit(unit)
 
 		tbl = tbl or {}
@@ -1962,12 +2045,11 @@ end
 -- Will only return generic data based on mere itemID, no special instances of the item.
 -- This is basically just a proxy for GetTooltipDataForItemLink. 
 LibTooltipScanner.GetTooltipDataForItemID = function(self, itemID, tbl)
-	ClearScanner()
 
-	local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemID)
+	local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemID)
 
 	if itemName then 
-		return self:GetTooltipDataForItemLink(_itemLink, tbl)
+		return self:GetTooltipDataForItemLink(itemLink, tbl)
 	end
 end
 
@@ -1975,11 +2057,12 @@ end
 -- TODO: Add in everything from GetTooltipDataForActionItem()
 -- TODO: Add in scanning for sets, enchants, and descriptions. 
 LibTooltipScanner.GetTooltipDataForItemLink = function(self, itemLink, tbl)
-	ClearScanner()
-
-	--local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
 
 	if itemLink then 
+		-- Initiate the scanner tooltip
+		Scanner:Hide()
+		Scanner.owner = UIParent
+		Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 		Scanner:SetHyperlink(itemLink)
 
 		tbl = tbl or {}
@@ -2002,12 +2085,16 @@ end
 
 -- Returns data about the exact bag- or bank slot. Will return all current modifications.
 LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID, tbl)
-	ClearScanner()
 
-	local itemID = GetContainerItemID(bagID, slotID)
-	if (itemID) then 
+	local icon, itemCount, locked, quality, readable, lootable, itemLink, isFiltered, noValue, itemID = GetContainerItemInfo(bagID, slotID)
+
+	--local itemID = GetContainerItemID(bagID, slotID)
+	if (itemLink) then 
 
 		-- Take care to only set the scanner here, do NOT reset it to an itemLink later.
+		Scanner:Hide()
+		Scanner.owner = UIParent
+		Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 		local hasCooldown, repairCost, speciesID, level, breedQuality, maxHealth, power, speed, name = Scanner:SetBagItem(bagID, slotID)
 
 		tbl = tbl or {}
@@ -2015,13 +2102,25 @@ LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID,
 			tbl[i] = nil
 		end 
 
-		local itemLink = GetContainerItemLink(bagID, slotID)
 		if (itemLink) then
+
+			tbl.xxxx = xxx
+			tbl.xxxx = xxx
+			tbl.xxxx = xxx
+			tbl.xxxx = xxx
+			tbl.xxxx = xxx
+			tbl.xxxx = xxx
+			tbl.xxxx = xxx
+			tbl.xxxx = xxx
+			tbl.xxxx = xxx
+			tbl.noValue = noValue
 
 			tbl = SetItemData(itemLink, tbl)
 
 			tbl.hasCooldown = hasCooldown
 			tbl.repairCost = repairCost
+
+			tbl.itemCount = itemCount or 1
 
 			-- Add battlepet tooltip info, if it exists.
 			if ((speciesID) and (speciesID > 0)) then
@@ -2043,12 +2142,15 @@ end
 
 -- Returns data about the exact guild bank slot. Will return all current modifications.
 LibTooltipScanner.GetTooltipDataForGuildBankSlot = function(self, tabID, slotID, tbl)
-	ClearScanner()
 
 	local itemLink = GetGuildBankItemInfo(tabID, slotID)
 	if itemLink then 
 		local texturePath, itemCount, locked, isFiltered = GetGuildBankItemInfo(tabID, slotID)
 
+		-- Initiate the scanner tooltip
+		Scanner:Hide()
+		Scanner.owner = UIParent
+		Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 		Scanner:SetGuildBankItem(tabID, slotID)
 
 		tbl = tbl or {}
@@ -2063,7 +2165,11 @@ end
 
 -- Returns data about equipped items
 LibTooltipScanner.GetTooltipDataForInventorySlot = function(self, unit, inventorySlotID, tbl)
-	ClearScanner()
+
+	-- Initiate the scanner tooltip
+	Scanner:Hide()
+	Scanner.owner = UIParent
+	Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 
 	-- https://wow.gamepedia.com/InventorySlotId
 	local hasItem, hasCooldown, repairCost = Scanner:SetInventoryItem(unit, inventorySlotID)
@@ -2081,7 +2187,11 @@ end
 
 -- Returns data about mail inbox items
 LibTooltipScanner.GetTooltipDataForInboxItem = function(self, inboxID, attachIndex, tbl)
-	ClearScanner()
+
+	-- Initiate the scanner tooltip
+	Scanner:Hide()
+	Scanner.owner = UIParent
+	Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 
 	-- https://wow.gamepedia.com/API_GameTooltip_SetInboxItem
 	-- attachIndex is in the range of [1,ATTACHMENTS_MAX_RECEIVE(16)]
@@ -2099,11 +2209,14 @@ end
 
 -- Returns data about unit auras 
 LibTooltipScanner.GetTooltipDataForUnitAura = function(self, unit, auraID, filter, tbl)
-	ClearScanner()
 
 	local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitAura(unit, auraID, filter)
 
 	if name then 
+		-- Initiate the scanner tooltip
+		Scanner:Hide()
+		Scanner.owner = UIParent
+		Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 		Scanner:SetUnitAura(unit, auraID, filter)
 
 		tbl = tbl or {}
@@ -2194,11 +2307,14 @@ end
 
 -- Returns data about unit buffs
 LibTooltipScanner.GetTooltipDataForUnitBuff = function(self, unit, buffID, filter, tbl)
-	ClearScanner()
 
 	local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitBuff(unit, buffID, filter)
 
 	if name then 
+		-- Initiate the scanner tooltip
+		Scanner:Hide()
+		Scanner.owner = UIParent
+		Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 		Scanner:SetUnitBuff(unit, buffID, filter)
 
 		tbl = tbl or {}
@@ -2290,11 +2406,14 @@ end
 
 -- Returns data about unit buffs
 LibTooltipScanner.GetTooltipDataForUnitDebuff = function(self, unit, debuffID, filter, tbl)
-	ClearScanner()
 
 	local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitDebuff(unit, debuffID, filter)
 
 	if name then 
+		-- Initiate the scanner tooltip
+		Scanner:Hide()
+		Scanner.owner = UIParent
+		Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 		Scanner:SetUnitDebuff(unit, debuffID, filter)
 
 		tbl = tbl or {}
@@ -2384,10 +2503,13 @@ LibTooltipScanner.GetTooltipDataForUnitDebuff = function(self, unit, debuffID, f
 end
 
 LibTooltipScanner.GetTooltipDataForTrackingSpell = function(self, tbl)
-	ClearScanner()
 
 	local trackingTexture = GetTrackingTexture()
 	if trackingTexture then 
+		-- Initiate the scanner tooltip
+		Scanner:Hide()
+		Scanner.owner = UIParent
+		Scanner:SetOwner(UIParent, "ANCHOR_NONE")
 		Scanner:SetTrackingSpell()
 		
 		tbl = tbl or {}

@@ -1,4 +1,4 @@
-local LibBagButton = Wheel:Set("LibBagButton", 28)
+local LibBagButton = Wheel:Set("LibBagButton", 31)
 if (not LibBagButton) then	
 	return
 end
@@ -21,16 +21,22 @@ assert(LibTooltipScanner, "LibBagButton requires LibTooltipScanner to be loaded.
 local LibTooltip = Wheel("LibTooltip")
 assert(LibTooltip, "LibBagButton requires LibTooltip to be loaded.")
 
+local LibWidgetContainer = Wheel("LibWidgetContainer")
+assert(LibWidgetContainer, "LibBagButton requires LibWidgetContainer to be loaded.")
+
 LibEvent:Embed(LibBagButton)
 LibMessage:Embed(LibBagButton)
 LibFrame:Embed(LibBagButton)
 LibTooltip:Embed(LibBagButton)
+LibTooltipScanner:Embed(LibBagButton)
+LibWidgetContainer:Embed(LibBagButton)
 
 -- Lua API
 local _G = _G
 local assert = assert
 local debugstack = debugstack
 local error = error
+local math_floor = math.floor
 local pairs = pairs
 local select = select
 local setmetatable = setmetatable
@@ -38,6 +44,7 @@ local string_format = string.format
 local string_join = string.join
 local string_match = string.match
 local table_insert = table.insert
+local table_remove = table.remove
 local table_sort = table.sort
 local tonumber = tonumber
 local type = type
@@ -46,6 +53,7 @@ local unpack = unpack
 -- WoW API
 local GetBagName = GetBagName
 local GetContainerItemLink = GetContainerItemLink
+local GetContainerItemQuestInfo = GetContainerItemQuestInfo
 local GetContainerNumFreeSlots = GetContainerNumFreeSlots
 local GetContainerNumSlots = GetContainerNumSlots
 local GetCVarBool = GetCVarBool
@@ -74,20 +82,130 @@ LibBagButton.buttons.ReagentBank = LibBagButton.buttons.ReagentBank or {}
 LibBagButton.buttonParents = LibBagButton.buttonParents or {} -- cache of hidden button parents spawned
 LibBagButton.buttonSlots = LibBagButton.buttonSlots or {} -- cache of actual usable button objects
 LibBagButton.containers = LibBagButton.containers or {} -- cache of virtual containers spawned
+LibBagButton.elements = LibBagButton.elements or {} -- global container element registry
 LibBagButton.contents = LibBagButton.contents or {} -- cache of actual bank and bag contents
 LibBagButton.queuedContainerIDs = LibBagButton.queuedContainerIDs or {} -- Queue system for uncached items 
 LibBagButton.queuedItemIDs = LibBagButton.queuedItemIDs or {} -- Queue system for uncached items 
+LibBagButton.callbacks = LibBagButton.callbacks or {} -- button callback registry
+LibBagButton.messages = LibBagButton.messages or {} -- library callback message cache
 LibBagButton.blizzardMethods = LibBagButton.blizzardMethods or {}
 
 -- Speed
 local Buttons = LibBagButton.buttons
 local ButtonParents = LibBagButton.buttonParents
 local ButtonSlots = LibBagButton.buttonSlots
+local Callbacks = LibBagButton.callbacks
+local Messages = LibBagButton.messages
 local Containers = LibBagButton.containers
+local Elements = LibBagButton.elements
 local Contents = LibBagButton.contents
 local QueuedContainerIDs = LibBagButton.queuedContainerIDs
 local QueuedItemIDs = LibBagButton.queuedItemIDs
 local BlizzardMethods = LibBagButton.blizzardMethods
+
+-- Blizzard FontObjects
+local TextFontTiny = Game11Font_o1 -- 11
+local TextFontSmall = Game13Font_o1 -- 13
+local TextFontNormal = Game15Font_o1 --15
+local TextFontHuge = SystemFont_Huge1_Outline -- 20
+local NumberFontTiny = Number12Font_o1 -- 12
+local NumberFontSmall = NumberFont_Outline_Med -- 14
+local NumberFontNormal = NumberFont_Outline_Large -- 16
+local NumberFontHuge = NumberFont_Outline_Huge -- 30
+
+-- Color table assigned to buttons. Can be replaced.
+-----------------------------------------------------------------
+-- Color Template
+local ColorTemplate = {}
+
+-- Emulate some of the Blizzard methods, 
+-- since they too do colors this way now. 
+-- Goal is not to be fully interchangeable. 
+ColorTemplate.GetRGB = function(self)
+	return self[1], self[2], self[3]
+end
+
+ColorTemplate.GetRGBAsBytes = function(self)
+	return self[1]*255, self[2]*255, self[3]*255
+end
+
+ColorTemplate.GenerateHexColor = function(self)
+	return string_format("ff%02x%02x%02x", math_floor(self[1]*255), math_floor(self[2]*255), math_floor(self[3]*255))
+end
+
+ColorTemplate.GenerateHexColorMarkup = function(self)
+	return "|c" .. self:GenerateHexColor()
+end
+
+-- Convert a Blizzard Color or RGB value set 
+-- into our own custom color table format. 
+local createColor = function(...)
+	local tbl
+	if (select("#", ...) == 1) then
+		local old = ...
+		if (old.r) then 
+			tbl = {}
+			tbl[1] = old.r or 1
+			tbl[2] = old.g or 1
+			tbl[3] = old.b or 1
+		else
+			tbl = { unpack(old) }
+		end
+	else
+		tbl = { ... }
+	end
+	-- Do NOT use a metatable, just embed.
+	for name,method in pairs(ColorTemplate) do 
+		tbl[name] = method
+	end
+	if (#tbl == 3) then
+		tbl.colorCode = tbl:GenerateHexColorMarkup()
+		tbl.colorCodeClean = tbl:GenerateHexColor()
+	end
+	return tbl
+end
+
+local Colors = {}
+
+Colors.normal = createColor(229/255, 178/255, 38/255)
+Colors.highlight = createColor(250/255, 250/255, 250/255)
+Colors.title = createColor(255/255, 234/255, 137/255)
+Colors.offwhite = createColor(196/255, 196/255, 196/255)
+Colors.green = createColor( 25/255, 178/255, 25/255 )
+Colors.red = createColor( 204/255, 25/255, 25/255 )
+
+Colors.quality = {}
+Colors.quality[0] = createColor(157/255, 157/255, 157/255) -- Poor
+Colors.quality[1] = createColor(240/255, 240/255, 240/255) -- Common
+Colors.quality[2] = createColor( 30/255, 178/255, 0/255) -- Uncommon
+Colors.quality[3] = createColor( 0/255, 112/255, 221/255) -- Rare
+Colors.quality[4] = createColor(163/255, 53/255, 238/255) -- Epic
+Colors.quality[5] = createColor(225/255, 96/255, 0/255) -- Legendary
+Colors.quality[6] = createColor(230/255, 204/255, 128/255) -- Artifact
+Colors.quality[7] = createColor( 79/255, 196/255, 225/255) -- Heirloom
+Colors.quality[8] = createColor( 79/255, 196/255, 225/255) -- Blizard
+
+Colors.quest = {}
+Colors.quest.red = createColor(204/255, 26/255, 26/255)
+Colors.quest.orange = createColor(255/255, 106/255, 26/255)
+Colors.quest.yellow = createColor(255/255, 178/255, 38/255)
+Colors.quest.green = createColor(89/255, 201/255, 89/255)
+Colors.quest.gray = createColor(120/255, 120/255, 120/255)
+
+Colors.class = {}
+Colors.class.DEATHKNIGHT = createColor(176/255, 31/255, 79/255)
+Colors.class.DEMONHUNTER = createColor(163/255, 48/255, 201/255)
+Colors.class.DRUID = createColor(225/255, 125/255, 35/255)
+Colors.class.HUNTER = createColor(191/255, 232/255, 115/255) 
+Colors.class.MAGE = createColor(105/255, 204/255, 240/255)
+Colors.class.MONK = createColor(0/255, 255/255, 150/255)
+Colors.class.PALADIN = createColor(225/255, 160/255, 226/255)
+Colors.class.PRIEST = createColor(176/255, 200/255, 225/255)
+Colors.class.ROGUE = createColor(255/255, 225/255, 95/255) 
+Colors.class.SHAMAN = createColor(32/255, 122/255, 222/255) 
+Colors.class.WARLOCK = createColor(148/255, 130/255, 201/255) 
+Colors.class.WARRIOR = createColor(229/255, 156/255, 110/255) 
+Colors.class.UNKNOWN = createColor(195/255, 202/255, 217/255)
 
 -- Button Creation Templates
 -----------------------------------------------------------------
@@ -207,17 +325,123 @@ end
 -----------------------------------------------------------------
 local Button = LibBagButton:CreateFrame(BUTTON_TYPE)
 local Button_MT = { __index = Button }
-
 local Methods = getmetatable(Button).__index
+
+-- Grab some original methods for our own event handlers
+local ClearAllPoints = Methods.ClearAllPoints
 local CreateFontString = Methods.CreateFontString
 local CreateTexture = Methods.CreateTexture
 local IsEventRegistered = Methods.IsEventRegistered
-local SetSize = Methods.SetSize
-local SetWidth = Methods.SetWidth
+local RegisterEvent = Methods.RegisterEvent
+local RegisterUnitEvent = Methods.RegisterUnitEvent
+local SetAllPoints = Methods.SetAllPoints
 local SetHeight = Methods.SetHeight
 local SetPoint = Methods.SetPoint
-local SetAllPoints = Methods.SetAllPoints
-local ClearAllPoints = Methods.ClearAllPoints
+local SetSize = Methods.SetSize
+local SetWidth = Methods.SetWidth
+local UnregisterEvent = Methods.UnregisterEvent
+local UnregisterAllEvents = Methods.UnregisterAllEvents
+
+-- ActionButton Event Handling
+----------------------------------------------------
+Button.RegisterEvent = function(self, event, func)
+	if (not Callbacks[self]) then
+		Callbacks[self] = {}
+	end
+	if (not Callbacks[self][event]) then
+		Callbacks[self][event] = {}
+	end
+
+	local events = Callbacks[self][event]
+	if (#events > 0) then
+		for i = #events, 1, -1 do
+			if (events[i] == func) then
+				return
+			end
+		end
+	end
+
+	table_insert(events, func)
+
+	if (not IsEventRegistered(self, event)) then
+		RegisterEvent(self, event)
+	end
+end
+
+Button.UnregisterEvent = function(self, event, func)
+	if not Callbacks[self] or not Callbacks[self][event] then
+		return
+	end
+	local events = Callbacks[self][event]
+	if #events > 0 then
+		for i = #events, 1, -1 do
+			if events[i] == func then
+				table_remove(events, i)
+				if #events == 0 then
+					UnregisterEvent(self, event) 
+					break
+				end
+			end
+		end
+	end
+end
+
+Button.UnregisterAllEvents = function(self)
+	if not Callbacks[self] then 
+		return
+	end
+	for event, funcs in pairs(Callbacks[self]) do
+		for i = #funcs, 1, -1 do
+			table_remove(funcs, i)
+		end
+	end
+	UnregisterAllEvents(self)
+end
+
+Button.RegisterMessage = function(self, event, func)
+	if (not Callbacks[self]) then
+		Callbacks[self] = {}
+	end
+	if (not Callbacks[self][event]) then
+		Callbacks[self][event] = {}
+	end
+
+	local events = Callbacks[self][event]
+	if (#events > 0) then
+		for i = #events, 1, -1 do
+			if (events[i] == func) then
+				return
+			end
+		end
+	end
+
+	table_insert(events, func)
+	Messages[event] = (Messages[event] or 0) + 1
+
+	if (not LibBagButton.IsMessageRegistered(self, event, func)) then
+		LibBagButton.RegisterMessage(self, event, func)
+	end
+end
+
+Button.UnregisterMessage = function(self, event, func)
+	if not Callbacks[self] or not Callbacks[self][event] then
+		return
+	end
+	local events = Callbacks[self][event]
+	if #events > 0 then
+		for i = #events, 1, -1 do
+			if events[i] == func then
+				table_remove(events, i)
+				if #events == 0 then
+					if (LibBagButton.IsMessageRegistered(self, event, func)) then
+						LibBagButton.UnregisterMessage(self, event, func)
+					end
+					break
+				end
+			end
+		end
+	end
+end
 
 Button.SetSize = function(self, ...)
 	SetSize(self, ...)
@@ -295,14 +519,96 @@ end
 
 -- Updates the stack/charge count of a slot button.
 Button.UpdateCount = function(self)
+	local count = self.itemCount
+	if (count and count > 1) then
+		local previous = self.Count.previousCount
+		if (count > 999) then
+			if (previous) and ((previous > 99) and (previous <= 999)) then
+				self.Count:SetFontObject(NumberFontNormal)
+			end
+			self.Count:SetText("*")  
+		elseif (count > 99) then
+			if (not previous) or ((previous <= 99) or (previous > 999)) then
+				self.Count:SetFontObject(NumberFontSmall)
+			end
+			self.Count:SetText(count)
+		else
+			if (previous) and ((previous > 99) and (previous <= 999)) then
+				self.Count:SetFontObject(NumberFontNormal)
+			end
+			self.Count:SetText(count)
+		end
+		self.Count.previousCount = count
+	else
+		self.Count:SetText("")
+	end
 end
 
--- Updates the rarity colorign of a slot button.
+-- Updates the rarity coloring of a slot button.
 Button.UpdateRarity = function(self)
+
+end
+
+-- Updates item level.
+Button.UpdateItemLevel = function(self)
+	if (self.itemRarity) and (self.itemRarity > 1) and (self.itemLevel) and (self.itemLevel > 1) then
+		local color
+		if (self.colorItemLevelByRarity) then
+			color = self.colors.quality[self.itemRarity]
+		else
+			color = self.colors.normal
+		end
+		self.ItemLevel:SetTextColor(color[1], color[2], color[3])
+		self.ItemLevel:SetText(self.itemLevel)
+	else
+		self.ItemLevel:SetText("")
+	end
+end
+
+-- Updates the BoE, BoU, BoA text.
+Button.UpdateItemBind = function(self)
+	if (self.itemBindType == 2) then
+		local color = self.colors.quality[self.itemRarity]
+		self.ItemBind:SetTextColor(color[1], color[2], color[3])
+		self.ItemBind:SetText("BoE")
+	elseif (self.itemBindType == 3) then
+		self.ItemBind:SetTextColor(color[1], color[2], color[3])
+		self.ItemBind:SetText("BoU")
+	else
+		self.ItemBind:SetText("")
+	end
 end
 
 -- Updates the quest icons of a slot button.
 Button.UpdateQuest = function(self)
+	local isQuestItem, questID, isActive = GetContainerItemQuestInfo(self.bagID, self.slotID)
+	self.isQuestItem = isQuestItem or (self.itemClassID == LE_ITEM_CLASS_QUESTITEM)
+	self.isQuestActive = isActive
+	self.isUsableQuestItem = self.isQuestItem and self.isUsable
+	self.questID = questID
+
+	-- Quest starter
+	if (self.questID) and (not self.isQuestActive) then
+		self.QuestIcon:Show()
+
+	-- Active quests. We indicate this with border color instead.
+	elseif (self.questID) or (self.isQuestItem) then
+		self.QuestIcon:Hide()
+	else
+		self.QuestIcon:Hide()
+	end
+end
+
+-- Updates the junk coin icon of a slot button.
+Button.UpdateJunk = function(self)
+	if (self.itemRarity) and (self.itemRarity == 0) and (not self.noValue) and (MerchantFrame:IsShown()) and (MerchantFrame.selectedTab == 1) then
+		self.CoinIcon:Show()
+	else
+		self.CoinIcon:Hide()
+	end
+end
+
+Button.UpdateCooldown = function(self)
 end
 
 -- All the following are applied to all button types, 
@@ -310,12 +616,20 @@ end
 -----------------------------------------------------------------
 
 -- Updates all the sub-elements of a slot button at once.
+-- This is a big update and should only be run when shown,
+-- or when the buttons slot and bag IDs are set or changed.
 Button.Update = function(self)
 	-- Update flags and information
 	local clear
 	if (self.bagID) and (self.slotID) then
 		local Item = LibBagButton:GetBlizzardContainerSlotCache(self.bagID, self.slotID)
 		if (Item) then
+			local isQuestItem, questID, isActive = GetContainerItemQuestInfo(self.bagID, self.slotID)
+			Item.isQuestItem = isQuestItem or (self.itemClassID == LE_ITEM_CLASS_QUESTITEM)
+			Item.isQuestActive = isActive
+			Item.isUsableQuestItem = self.isQuestItem and Item.isUsable
+			Item.questID = questID
+
 			self.itemID = Item.itemID
 			self.itemString = Item.itemString
 			self.itemName = Item.itemName
@@ -326,21 +640,25 @@ Button.Update = function(self)
 			self.itemType = Item.itemType
 			self.itemSubType = Item.itemSubType
 			self.itemStackCount = Item.itemStackCount
+			self.itemCount = Item.itemCount
 			self.itemEquipLoc = Item.itemEquipLoc
 			self.itemEquipLocLabel = Item.itemEquipLocLabel
 			self.itemIcon = Item.itemIcon
 			self.itemSellPrice = Item.itemSellPrice
 			self.itemClassID = Item.itemClassID
 			self.itemSubClassID = Item.itemSubClassID
-			self.bindType = Item.bindType
+			self.itemBindType = Item.itemBindType
 			self.expacID = Item.expacID
 			self.itemSetID = Item.itemSetID
 			self.isCraftingReagent = Item.isCraftingReagent
 			self.isUsable = Item.isUsable
 			self.isQuestItem = Item.isQuestItem
-			self.isQuestActive = Item.isQuestActive
 			self.isUsableQuestItem = Item.isUsableQuestItem
+			self.isQuestActive = Item.isQuestActive
 			self.questID = Item.questID
+			self.isOpenable = Item.isOpenable
+			self.noValue = Item.noValue
+
 		else
 			clear = true
 		end
@@ -358,13 +676,14 @@ Button.Update = function(self)
 		self.itemType = nil
 		self.itemSubType = nil
 		self.itemStackCount = nil
+		self.itemCount = nil
 		self.itemEquipLoc = nil
 		self.itemEquipLocLabel = nil
 		self.itemIcon = ""
 		self.itemSellPrice = nil
 		self.itemClassID = nil
 		self.itemSubClassID = nil
-		self.bindType = nil
+		self.itemBindType = nil
 		self.expacID = nil
 		self.itemSetID = nil
 		self.isCraftingReagent = nil
@@ -373,21 +692,33 @@ Button.Update = function(self)
 		self.isQuestActive = nil
 		self.isUsableQuestItem = nil
 		self.questID = nil
+		self.isOpenable = nil
+		self.noValue = nil
 	end
 
 	-- Update layers
 	self:UpdateIcon()
 	self:UpdateCount()
-	self:UpdateRarity()
 	self:UpdateQuest()
+	self:UpdateJunk()	
+	self:UpdateCooldown()
+	self:UpdateRarity()
+	self:UpdateItemLevel()
+	self:UpdateItemBind()
+
+	local tooltip = self:GetTooltip()
+	if (tooltip:IsShown()) and (tooltip:GetOwner() == self) then
+		self:OnUpdate()
+	end
 
 	-- Run user post updates
-	if (self._owner) and (self._owner.PostCreateItemButton) then
-		self._owner:PostUpdateItemButton(self)
+	if (self.PostUpdate) then
+		self:PostUpdate()
 	end
 end
 
 -- Basically a tooltip function that needs regular updates.
+-- Used only with OnUpdate, OnEnter and OnLeave.
 Button.OnUpdate = function(self)
 	-- Avoid nil bugs. 
 	if (not self.bagID) or (not self.bagID) then
@@ -396,31 +727,28 @@ Button.OnUpdate = function(self)
 
 	-- Is it a classic keyring? Add code. 
 
-	-- retrieve item info from tooltip backend
-	local showSell
-	local tooltip = self:GetTooltip() 
 	local Item = LibBagButton:GetBlizzardContainerSlotCache(self.bagID, self.slotID)
-	
-	-- calculate tooltip anchors
-	tooltip:SetSmartItemAnchor(self, tooltip.tooltipAnchorX or 4, tooltip.tooltipAnchorY or 0) 
-
-	local 	hasCooldown, 
-			repairCost, 
-			speciesID, 
-			level, 
-			breedQuality, 
-			maxHealth, 
-			power, 
-			speed, 
-			name = tooltip:SetBagItem(self.bagID, self.slotID)
-
+	if (Item) and (Item.itemName) then
+		-- Note that we are not using our available cache here, 
+		-- this is to avoid display bugs related to the repair cost of newly repaired items.
+		local tooltip = self:GetTooltip()
+		tooltip:SetSmartItemAnchor(self, tooltip.tooltipAnchorX or 4, tooltip.tooltipAnchorY or 0) 
+		tooltip:SetBagItem(self.bagID, self.slotID) 
+	else
+		local tooltip = self:GetTooltip()
+		if (tooltip:IsShown()) and (tooltip:GetOwner() == self) then
+			tooltip:Hide()
+		end
+	end
 
 	-- check for modified clicks, show compare tips if need be.
 	if (IsModifiedClick("COMPAREITEMS")) or (GetCVarBool("alwaysCompareItems")) then
 		-- Show compare item. 
+		-- We will use our own system here.
 	end
 
-	if (InRepairMode()) and ((repairCost) and (repairCost > 0)) then
+	local showSell
+	if (InRepairMode()) and ((Item.repairCost) and (Item.repairCost > 0)) then
 		-- REPAIR_COST = "Repair Cost:"
 		-- show tooltip
 
@@ -428,7 +756,7 @@ Button.OnUpdate = function(self)
 		showSell = 1
 	end
 
-	if ( not SpellIsTargeting() ) then
+	if (not SpellIsTargeting()) then
 		if (IsModifiedClick("DRESSUP")) and ((Item) or (self.hasItem)) then
 			ShowInspectCursor()
 
@@ -453,7 +781,7 @@ Button.OnLeave = function(self)
 	self:OnUpdate()
 
 	local tooltip = self:GetTooltip()
-	if (tooltip:IsShown()) then
+	if (tooltip:IsShown()) and (tooltip:GetOwner() == self) then
 		tooltip:Hide()
 	end
 
@@ -462,23 +790,80 @@ Button.OnLeave = function(self)
 	end
 end
 
-Button.OnHide = function(self)
-	self.isShown = nil
+-- The button's actual event handler, 
+-- as we are routing all our own callbacks to this one.
+local UpdateButton = function(self, event, ...)
+	local arg1, arg2 = ...
+	if (event == "GP_BAG_UPDATE") then
+		if (self.bagID == arg1) then
+			self:Update()
+		end
+
+	elseif (event == "BAG_UPDATE_COOLDOWN") then
+		-- Update all item cooldowns.
+		self:UpdateCooldown()
+
+	elseif (event == "BAG_NEW_ITEMS_UPDATED") then
+
+
+	elseif (event == "ITEM_LOCK_CHANGED") then
+		if (arg1 and arg2 and (self.bagID == arg1) and (self.slotID == arg2)) then
+			-- Update item lock desaturation and darkening.
+		end
+
+	elseif (event == "QUEST_ACCEPTED") or ((event == "UNIT_QUEST_LOG_CHANGED") and (arg1 == "player")) then
+
+		-- Update quest icons.
+		self:UpdateQuest()
+
+		-- Run user post updates
+		if (self.PostUpdate) then
+			self:PostUpdate()
+		end
+
+
+	elseif (event == "UNIT_INVENTORY_CHANGED") or (event == "PLAYER_SPECIALIZATION_CHANGED") then
+		-- Update item upgrade icons.
+	end
 end
 
 Button.OnShow = function(self)
-	self.isShown = true
+	self:RegisterMessage("GP_BAG_UPDATE", UpdateButton)
+	self:RegisterEvent("BAG_UPDATE_COOLDOWN", UpdateButton)
+	self:RegisterEvent("ITEM_LOCK_CHANGED", UpdateButton)
+	self:RegisterEvent("QUEST_ACCEPTED", UpdateButton)
+	self:RegisterEvent("UNIT_QUEST_LOG_CHANGED", UpdateButton)
+	self:RegisterEvent("UNIT_INVENTORY_CHANGED", UpdateButton)
+	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", UpdateButton)
 	self:Update()
 end
 
-Button.OnEvent = function(self)
-	if (not self.isShown) then
-		return
-	end
+Button.OnHide = function(self)
+	self:UnregisterMessage("GP_BAG_UPDATE", UpdateButton)
+	self:UnregisterEvent("BAG_UPDATE_COOLDOWN", UpdateButton)
+	self:UnregisterEvent("ITEM_LOCK_CHANGED", UpdateButton)
+	self:UnregisterEvent("QUEST_ACCEPTED", UpdateButton)
+	self:UnregisterEvent("UNIT_QUEST_LOG_CHANGED", UpdateButton)
+	self:UnregisterEvent("UNIT_INVENTORY_CHANGED", UpdateButton)
+	self:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED", UpdateButton)
+end
+
+
+Button.OnEvent = function(self, event, ...)
+	if (self:IsVisible() and Callbacks[self] and Callbacks[self][event]) then 
+		local events = Callbacks[self][event]
+		for i = 1, #events do
+			events[i](self, event, ...)
+		end
+	end 
 end
 
 Button.GetTooltip = function(self)
 	return LibBagButton:GetBagButtonTooltip()
+end
+
+Button.GetCompareTooltips = function(self)
+	return LibBagButton:GetBagButtonCompareTooltips()
 end
 
 -- Container Template
@@ -522,14 +907,31 @@ Container.GetTooltip = function(self)
 	return LibBagButton:GetBagButtonTooltip()
 end
 
-Container.OnEvent = function(self, event, ...)
+Container.GetCompareTooltips = function(self)
+	return LibBagButton:GetBagButtonCompareTooltips()
 end
+
+-- Doing this?
+Container.GetTextFontTiny = function(self) return TextFontTiny end
+Container.GetTextFontSmall = function(self) return TextFontSmall end
+Container.GetTextFontNormal = function(self) return TextFontNormal end
+Container.GetTextFontHuge = function(self) return TextFontHuge end
+Container.GetNumberFontTiny = function(self) return NumberFontTiny end
+Container.GetNumberFontSmall = function(self) return NumberFontSmall end
+Container.GetNumberFontNormal = function(self) return NumberFontNormal end
+Container.GetNumberFontHuge = function(self) return NumberFontHuge end
+
 
 -- Library API
 -- *The 'self' is the library here.
 -----------------------------------------------------------------
 LibBagButton.GetBagButtonTooltip = function(self)
 	return LibBagButton:GetTooltip("GP_BagButtonTooltip") or LibBagButton:CreateTooltip("GP_BagButtonTooltip")
+end
+
+LibBagButton.GetBagButtonCompareTooltips = function(self)
+	return	LibBagButton:GetTooltip("GP_BagButtonCompareTooltip1") or LibBagButton:CreateTooltip("GP_BagButtonCompareTooltip1"),
+			LibBagButton:GetTooltip("GP_BagButtonCompareTooltip2") or LibBagButton:CreateTooltip("GP_BagButtonCompareTooltip2")
 end
 
 --[[-- 
@@ -591,10 +993,9 @@ end
 
 -- Parse and cache a specific slot in a blizzard container. 
 LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID)
-	local _
-	local itemID, itemName, itemIcon, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount
-	local itemEquipLoc, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent
+
 	local isQuestItem, questID, isActive
+	local itemID, itemType, itemSubType, itemEquipLoc, itemIcon, itemClassID, itemSubClassID
 
 	-- Check if the Blizzard slot has an item in it
 	local itemLink = GetContainerItemLink(bagID, slotID)
@@ -608,15 +1009,25 @@ LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID)
 		-- and update or retrieve the contents to our cache if need be.
 		if (Item.itemLink ~= itemLink) then
 
-			-- No quest item info in classic
-			if (not IsClassic) then
-				isQuestItem, questID, isActive = GetContainerItemQuestInfo(bagID, slotID)
-			end
+			-- Retrieve data scanned from tooltips,
+			-- pass our existing table and fill it in.
+			Item = self:GetTooltipDataForContainerSlot(bagID, slotID, Item)
 
-			itemName, _, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemIcon, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
-			
-			-- Get some basic info if the item hasn't been cached up yet
-			if (not itemName) then
+			if (Item.itemName) then 
+
+				-- No quest item info in classic
+				if (not IsClassic) then
+					isQuestItem, questID, isActive = GetContainerItemQuestInfo(bagID, slotID)
+				end
+				
+				Item.isUsable = IsUsableItem(Item.itemID)
+				Item.isQuestItem = isQuestItem or (Item.itemClassID == LE_ITEM_CLASS_QUESTITEM)
+				Item.isQuestActive = isActive
+				Item.isUsableQuestItem = Item.isQuestItem and Item.isUsable
+				Item.questID = questID
+
+			else
+				-- Get some basic info if the item hasn't been cached up yet
 				if (not QueuedContainerIDs[bagID]) then
 					QueuedContainerIDs[bagID] = {}
 				end
@@ -626,34 +1037,15 @@ LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID)
 				self:RegisterEvent("GET_ITEM_INFO_RECEIVED", "OnEvent")
 	
 				-- Use the client-only API for faster lookups here
-				itemID, itemType, itemSubType, itemEquipLoc, itemIcon, itemClassID, itemSubClassID = GetItemInfoInstant(itemLink)
-			end
+				Item.itemID,
+				Item.itemType,
+				Item.itemSubType,
+				Item.itemEquipLoc,
+				Item.itemIcon,
+				Item.itemClassID,
+				Item.itemSubClassID = GetItemInfoInstant(itemLink) 
 
-			Item.itemID = itemID or tonumber(string_match(itemLink, "item:(%d+)"))
-			Item.itemString = string_match(itemLink, "item[%-?%d:]+")
-			Item.itemName = itemName
-			Item.itemLink = itemLink
-			Item.itemRarity = itemRarity
-			Item.itemLevel = itemLevel
-			Item.itemMinLevel = itemMinLevel
-			Item.itemType = itemType
-			Item.itemSubType = itemSubType
-			Item.itemStackCount = itemStackCount
-			Item.itemEquipLoc = itemEquipLoc
-			Item.itemEquipLocLabel = (itemEquipLoc and (itemEquipLoc ~= "")) and _G[itemEquipLoc] or nil
-			Item.itemIcon = itemIcon
-			Item.itemSellPrice = itemSellPrice
-			Item.itemClassID = itemClassID
-			Item.itemSubClassID = itemSubClassID
-			Item.bindType = bindType
-			Item.expacID = expacID
-			Item.itemSetID = itemSetID
-			Item.isCraftingReagent = isCraftingReagent
-			Item.isUsable = IsUsableItem(Item.itemID)
-			Item.isQuestItem = isQuestItem or (itemClassID == LE_ITEM_CLASS_QUESTITEM)
-			Item.isQuestActive = isQuestItem and isActive
-			Item.isUsableQuestItem = Item.isQuestItem and Item.isUsable
-			Item.questID = isQuestItem and questID
+			end
 		end
 
 	else
@@ -697,11 +1089,18 @@ end
 -- Suppresses the blizzard method if 'true' is returned.
 LibBagButton.ShowBags = function(self)
 	local hasBags
+	local changesMade
 	for container, bagType in pairs(Containers) do
 		if (bagType == "Bag") then
-			container:Show()
+			if (not container:IsShown()) then
+				changesMade = true
+				container:Show()
+			end
 			hasBags = true
 		end
+	end
+	if (changesMade) then
+		self:SendMessage("GP_BAGS_SHOWN")
 	end
 	-- A return value other than false
 	-- suppresses the blizzard methods.
@@ -916,7 +1315,8 @@ LibBagButton.OnEvent = function(self, event, ...)
 		-- Check if anything is still queued
 		for bagID in pairs(QueuedContainerIDs) do
 			for slotID, itemID in pairs(QueuedContainerIDs[bagID]) do
-				-- If anything is found, just return
+				-- If anything is found, just return.
+				-- We still need the event.
 				return 
 			end
 		end
@@ -1010,22 +1410,112 @@ LibBagButton.Start = function(self)
 
 end
 
+-- Library Widget API
+-----------------------------------------------------------------
+
+-- Register a widget/element
+LibBagButton.RegisterElement2 = function(self, elementName, enableFunc, disableFunc, updateFunc, version)
+	check(elementName, 1, "string")
+	check(enableFunc, 2, "function")
+	check(disableFunc, 3, "function")
+	check(updateFunc, 4, "function")
+	check(version, 5, "number", "nil")
+
+	-- Does an old version of the element exist?
+	local old = Elements[elementName]
+	local needUpdate
+	if old then
+		if old.version then 
+			if version then 
+				if version <= old.version then 
+					return 
+				end 
+				-- A more recent version is being registered
+				needUpdate = true 
+			else 
+				return 
+			end 
+		else 
+			if version then 
+				-- A more recent version is being registered
+				needUpdate = true 
+			else 
+				-- Two unversioned. just follow first come first served, 
+				-- to allow the standalone addon to trumph. 
+				return 
+			end 
+		end  
+	end 
+
+	-- Create our new element 
+	local new = {
+		Enable = enableFunc,
+		Disable = disableFunc,
+		Update = updateFunc,
+		version = version
+	}
+
+	-- Change the pointer to the new element
+	-- (doesn't change what table 'old' still points to)
+	Elements[elementName] = new 
+
+	-- Postupdate existing frames embedding this if it exists
+	if (needUpdate) then 
+
+		-- Iterate all frames for it
+		for widgetFrame, element in pairs(frameElementsEnabled) do 
+			if (element == elementName) then 
+
+				-- Run the old disable method, 
+				-- to get rid of old events and onupdate handlers.
+				if old.Disable then 
+					old.Disable(widgetFrame)
+				end 
+
+				-- Run the new enable method
+				if new.Enable then 
+					new.Enable(widgetFrame, widgetFrame.unit, true)
+				end 
+			end 
+		end 
+	end 
+end
+
+
 -- Library Public API
 -- *The 'self' is the module embedding it here.
 -----------------------------------------------------------------
 LibBagButton.SpawnItemContainer = function(self, ...)
-	local bagType = ...
+	local bagType, styleFunc = ...
 
 	check(bagType, 1, "string")
+	check(styleFunc, 2, "function", "nil")
 
 	if (bagType ~= "Bag") and (bagType ~= "Bank") then
 		return error(string_format("No bagType named '%d' exists!", bagType))
 	end
 
-	local frame = setmetatable(self:CreateFrame("Frame", nil, "UICenter"), Container_MT)
+	local setup = function(self, ...)
+		-- Manually embed our methods.
+		for i,v in pairs(Container) do
+			if (not self[i]) then
+				self[i] = v
+			end
+		end
+		if (styleFunc) then
+			return styleFunc(self, ...)
+		end
+	end
+
+
+	local frame = LibBagButton:CreateWidgetContainer("Frame", "UICenter", BackdropTemplateMixin and "BackdropTemplate" or "", nil, setup)
+
+	--local frame = setmetatable(self:CreateFrame("Frame", nil, "UICenter"), Container_MT)
 	frame:SetFrameStrata("HIGH")
 	frame:EnableMouse(true)
 	frame:Hide()
+
+	frame:RegisterEvent("PLAYER_ENTERING_WORLD", frame.Hide, true)
 
 	Containers[frame] = bagType
 
@@ -1074,6 +1564,7 @@ LibBagButton.SpawnItemButton = function(self, ...)
 	button.bagType = bagType
 	button.bagID = bagID
 	button.slotID = slotID
+	button.colors = Colors
 
 	-- This is basically a bag for all intents and purposes, 
 	-- except that it totally isn't that at all. 
@@ -1107,9 +1598,13 @@ LibBagButton.SpawnItemButton = function(self, ...)
 	-- Let these be proxies
 	slot:SetScript("OnEnter", function(slot) button:OnEnter() end)
 	slot:SetScript("OnLeave", function(slot) button:OnLeave() end)
-	slot:SetScript("OnHide", function(slot) button:OnHide() end)
-	slot:SetScript("OnShow", function(slot) button:OnShow() end)
-	slot:SetScript("OnEvent", function(slot) button:OnEvent() end)
+	--slot:SetScript("OnHide", function(slot) button:OnHide() end)
+	--slot:SetScript("OnShow", function(slot) button:OnShow() end)
+	--slot:SetScript("OnEvent", function(slot) button:OnEvent() end)
+
+	button:SetScript("OnHide", button.OnHide)
+	button:SetScript("OnShow", button.OnShow)
+	button:SetScript("OnEvent", button.OnEvent)
 
 	-- Cache up our elements 
 	ButtonParents[button] = parent
@@ -1118,31 +1613,82 @@ LibBagButton.SpawnItemButton = function(self, ...)
 	-- Insert the virtual button slot object into the correct cache.
 	table_insert(Buttons[bagType], button) 
 
-	-- Create button layers.
+	-- Button Scaffolds
+	-----------------------------------------------------------
+	-- Frame to contain art overlays, texts, etc
+	local overlay = button:CreateFrame("Frame")
+	overlay:SetAllPoints()
+	overlay:SetFrameLevel(button:GetFrameLevel() + 2)
+
+	-- Button Layers
+	-----------------------------------------------------------
+	-- Slot backdrop visible on empty buttons 
+	local slot = button:CreateTexture()
+	slot:SetDrawLayer("BACKGROUND", -1)
+	slot:SetAllPoints()
+	button.Slot = slot
+
+	-- Button icon
 	local icon = button:CreateTexture()
 	icon:SetDrawLayer("BACKGROUND", 0)
 	icon:SetAllPoints()
 	icon:SetTexCoord(5/64, 59/64, 5/64, 59/64)
 	button.Icon = icon
 
-	--[[-- 
+	-- Cooldown frame
 
-		frame
-			backdrop
-			icon
+	-- Border texture
+	-- Used to indicate rarity and quest items
+	local border = overlay:CreateTexture()
+	border:SetDrawLayer("BORDER", 0)
+	border:SetAllPoints()
+	button.Border = border
 
-		cooldownframe
-			cooldown
+	-- Item count text
+	local count = overlay:CreateFontString()
+	count:SetDrawLayer("BORDER", 1)
+	count:SetPoint("BOTTOMRIGHT", -7, 8)
+	count:SetFontObject(NumberFontNormal)
+	count:SetJustifyH("RIGHT")
+	count:SetJustifyV("BOTTOM")
+	button.Count = count
 
-		borderframe
-			border
-			stack
+	-- Item level text
+	local level = overlay:CreateFontString()
+	level:SetDrawLayer("BORDER", 1)
+	level:SetPoint("TOPLEFT", 8, -8)
+	level:SetFontObject(NumberFontSmall)
+	level:SetJustifyH("LEFT")
+	level:SetJustifyV("TOP")
+	button.ItemLevel = level
 
-		overlayframe
-			itemlevel
-			questtexture
+	-- BoE, BoU, BoA text
+	local bind = overlay:CreateFontString()
+	bind:SetDrawLayer("BORDER", 1)
+	bind:SetPoint("BOTTOMLEFT", 8, 8)
+	bind:SetFontObject(NumberFontSmall)
+	bind:SetJustifyH("LEFT")
+	bind:SetJustifyV("BOTTOM")
+	button.ItemBind = bind
 
-	--]]--
+	-- Quest texture for quest starters
+	local quest = overlay:CreateTexture()
+	quest:SetDrawLayer("BORDER", 2)
+	quest:SetPoint("BOTTOMLEFT", -1, 8)
+	quest:SetSize(32,32)
+	quest:SetTexture([[Interface\MINIMAP\TRACKING\OBJECTICONS]])
+	quest:SetTexCoord(1/8,2/8,1/2,1)
+	quest:SetVertexColor(1,.82,0)
+	button.QuestIcon = quest
+
+	-- Gold texture for vendor trash
+	local coin = overlay:CreateTexture()
+	coin:SetDrawLayer("BORDER", 2)
+	coin:SetPoint("TOPLEFT",8,-8)
+	coin:SetSize(14,14)
+	coin:SetTexture([[Interface\MoneyFrame\UI-GoldIcon]])
+	coin:SetVertexColor(1,.82,0)
+	button.CoinIcon = coin
 
 	-- Return the button slot object to the user
 	return button
@@ -1256,7 +1802,6 @@ LibBagButton.GetIteratorForReagentBankIDs = function(self)
 	local new = {}
 	return ipairs(new)
 end
-
 
 -- Returns true if we're at the bank.
 LibBagButton.IsAtBank = function(self)

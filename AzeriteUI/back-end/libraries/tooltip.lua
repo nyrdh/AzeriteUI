@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 95)
+local LibTooltip = Wheel:Set("LibTooltip", 98)
 if (not LibTooltip) then
 	return
 end
@@ -62,6 +62,7 @@ local unpack = unpack
 -- WoW API 
 local GetBestMapForUnit = C_Map.GetBestMapForUnit
 local GetCVarBool = GetCVarBool
+local GetMoneyString = GetMoneyString
 local GetQuestGreenRange = GetQuestGreenRange
 local GetScalingQuestGreenRange = GetScalingQuestGreenRange
 local GetTime = GetTime
@@ -1216,13 +1217,19 @@ local SetItemInfo = function(self, data, useSimplified)
 	-- we make sure the bars are reset!
 	self:ClearStatusBars(true) -- suppress layout updates
 
+	-- Add the item count.
+	local displayName = data.itemName
+	if (data.itemCount) and (data.itemCount > 1) then
+		displayName = displayName .." ".. colors.offwhite.colorCode.."("..data.itemCount..")|r"
+	end
+
 	-- item name and item level on top
-	if (data.itemLevel) and (not skipItemLevel) then 
-		self:AddDoubleLine(data.itemName, data.itemLevel, colors.quality[data.itemRarity][1], colors.quality[data.itemRarity][2], colors.quality[data.itemRarity][3], colors.normal[1], colors.normal[2], colors.normal[3], true)
+	if (data.itemLevel) and (not skipItemLevel) and (data.itemLevel > 1) then 
+		self:AddDoubleLine(displayName, data.itemLevel, colors.quality[data.itemRarity][1], colors.quality[data.itemRarity][2], colors.quality[data.itemRarity][3], colors.normal[1], colors.normal[2], colors.normal[3], true)
 	elseif colorNameAsSpell then 
-		self:AddLine(data.itemName, colors.title[1], colors.title[2], colors.title[3], true)
+		self:AddLine(displayName, colors.title[1], colors.title[2], colors.title[3], true)
 	else 
-		self:AddLine(data.itemName, colors.quality[data.itemRarity][1], colors.quality[data.itemRarity][2], colors.quality[data.itemRarity][3], true)
+		self:AddLine(displayName, colors.quality[data.itemRarity][1], colors.quality[data.itemRarity][2], colors.quality[data.itemRarity][3], true)
 	end 
 
 	-- item bind status
@@ -1310,16 +1317,21 @@ local SetItemInfo = function(self, data, useSimplified)
 
 		-- parry?
 
-		-- primary stats
-		if data.primaryStatValue and (data.primaryStatValue ~= 0) then 
-			self:AddLine(string_format("%s %s", (data.primaryStatValue > 0) and ("+"..tostring(data.primaryStatValue)) or tostring(data.primaryStatValue), data.primaryStat), statR, statG, statB)
-
-		end 
-		if data.primaryStats then 
-			for key,value in pairs(data.primaryStats) do 
-				self:AddLine(string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key]), statR, statG, statB)
+		-- primary stat
+		if (IsRetail) then
+			if data.primaryStatValue and (data.primaryStatValue ~= 0) then 
+				self:AddLine(string_format("%s %s", (data.primaryStatValue > 0) and ("+"..tostring(data.primaryStatValue)) or tostring(data.primaryStatValue), data.primaryStatID), statR, statG, statB)
 			end 
-		end 
+		end
+
+		-- for multiple primary stats. classic thing?
+		if (IsClassic) then
+			if data.primaryStats then 
+				for key,value in pairs(data.primaryStats) do 
+					self:AddLine(string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key]), statR, statG, statB)
+				end 
+			end 
+		end
 
 		-- stamina
 		if data.itemStamina and (data.itemStamina ~= 0) then 
@@ -1335,74 +1347,80 @@ local SetItemInfo = function(self, data, useSimplified)
 		end 
 
 		-- no benefit stats
-		if data.uselessStats then 
-			for key,value in pairs(data.uselessStats) do 
-				self:AddLine(string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key]), colors.quest.gray[1], colors.quest.gray[2], colors.quest.gray[3])
+		if (IsRetail) then
+			if data.primaryStats then 
+				for key,value in pairs(data.primaryStats) do 
+					if (key ~= data.primaryStatKey) then
+						self:AddLine(string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key]), colors.quest.gray[1], colors.quest.gray[2], colors.quest.gray[3])
+					end
+				end 
 			end 
-		end 
-
-	end
-
-	-- description
-	local hasDescription
-	if data.itemDescription then
-		local hasDescription
-		for _,msg in ipairs(data.itemDescription) do 
-			hasDescription = true
-			break
 		end
+
+		--if data.uselessStats then 
+		--	for key,value in pairs(data.uselessStats) do 
+		--		self:AddLine(string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key]), colors.quest.gray[1], colors.--quest.gray[2], colors.quest.gray[3])
+		--	end 
+		--end 
+
 	end
-	
+
 	-- use effect
 	if data.itemHasUseEffect then 
-		if (not useSimplified) and ((data.itemHasEquipEffect or hasDescription) or (self:GetNumLines() > 3)) then
-			self:AddLine(" ")
-		end
+		--if (not useSimplified) and ((data.itemHasEquipEffect or data.itemDescription) or (self:GetNumLines() > 3)) then
+		--	self:AddLine(" ")
+		--end
 		self:AddLine(data.itemUseEffect, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3], true)
 	end 
 
 	-- equip effect(s)
 	if data.itemHasEquipEffect then 
-		if (not useSimplified) and (hasDescription or (self:GetNumLines() > 3)) then
-			self:AddLine(" ")
-		end
+		--if (not useSimplified) and (data.itemDescription or (self:GetNumLines() > 3)) then
+		--	self:AddLine(" ")
+		--end
 		for _,stat in ipairs(data.itemEquipEffects) do 
 			self:AddLine(stat, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3], true)
 		end 
 	end 
 
 	-- description
-	if (hasDescription) then
-		if (not useSimplified) and (self:GetNumLines() > 3) then
-			self:AddLine(" ")
-		end
+	if (data.itemDescription) and (not useSimplified) then
+		--if (not useSimplified) and (self:GetNumLines() > 3) then
+		--	self:AddLine(" ")
+		--end
 		for _,msg in ipairs(data.itemDescription) do 
 			--self:AddLine(msg, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3], true)
 			self:AddLine(msg, colors.quest.yellow[1], colors.quest.yellow[2], colors.quest.yellow[3], true)
 		end 
 	end
 
+	-- click action for books, chests, etc.
+	if (data.itemIsClickable) and (not useSimplified) then
+		self:AddLine(data.itemClickAction, colors.quest.green[1], colors.quest.green[2], colors.quest.green[3], true)
+	end
+
 	-- durability
-	if data.itemDurability then 
+	if (data.itemDurability) and (not useSimplified) then 
 		self:AddLine(string_format(DURABILITY_TEMPLATE, data.itemDurability, data.itemDurabilityMax), offwhiteR, offwhiteG, offwhiteB)
 	end 
 
-	-- sell value
-	if (data.itemSellPrice) and ((data.itemRarity == 0) or (MerchantFrame:IsShown())) then 
+	-- Only show repair costs when in repair mode, not the sell value.
+	if (InRepairMode()) and ((data.repairCost) and (data.repairCost > 0)) then
+		local money = data.repairCost
 		local moneyString
 		if (self.coinStringGold) and (self.coinStringSilver) and (self.coinStringCopper) then 
 
-			local gold = math_floor(data.itemSellPrice / (100 * 100))
+			local gold = math_floor(money / (100 * 100))
 			if (gold > 0) then 
 				moneyString = string_format("%d%s", gold, self.coinStringGold)
 			end
 
-			local silver = math_floor((data.itemSellPrice - (gold * 100 * 100)) / 100)
+			local silver = math_floor((money - (gold * 100 * 100)) / 100)
 			if (silver > 0) then 
 				moneyString = (moneyString and moneyString.." " or "") .. string_format("%d%s", silver, self.coinStringSilver)
 			end
 
-			local copper = math_mod(data.itemSellPrice, 100)
+			local copper = math_mod(money, 100)
 			if (copper > 0) then 
 				moneyString = (moneyString and moneyString.." " or "") .. string_format("%d%s", copper, self.coinStringCopper)
 			end 
@@ -1410,7 +1428,46 @@ local SetItemInfo = function(self, data, useSimplified)
 			moneyString = GetMoneyString(money, false)
 		end
 		if (moneyString) then
+			local repairCost = string_gsub(REPAIR_COST, "(%a)([%w_']*)", function(first, rest)
+				return first:upper()..rest:lower()
+			end)
+			self:AddLine(" ")
+			self:AddLine(repairCost, Colors.quest.yellow[1], Colors.quest.yellow[2], Colors.quest.yellow[3])
 			self:AddLine(moneyString, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+		end
+	else
+		-- Sell value. Only shown on garbage, or for all sellable items when at a merchant.
+		if (data.itemSellPrice) and ((data.itemRarity == 0) or (MerchantFrame:IsShown())) then 
+			local money = data.itemSellPrice * data.itemCount
+			local moneyString
+			if (self.coinStringGold) and (self.coinStringSilver) and (self.coinStringCopper) then 
+
+				local gold = math_floor(money / (100 * 100))
+				if (gold > 0) then 
+					moneyString = string_format("%d%s", gold, self.coinStringGold)
+				end
+
+				local silver = math_floor((money - (gold * 100 * 100)) / 100)
+				if (silver > 0) then 
+					moneyString = (moneyString and moneyString.." " or "") .. string_format("%d%s", silver, self.coinStringSilver)
+				end
+
+				local copper = math_mod(money, 100)
+				if (copper > 0) then 
+					moneyString = (moneyString and moneyString.." " or "") .. string_format("%d%s", copper, self.coinStringCopper)
+				end 
+			else
+				moneyString = GetMoneyString(money, false)
+			end
+			if (moneyString) then
+				if (MerchantFrame:IsShown()) then
+					self:AddLine(" ")
+					self:AddLine(SELL_PRICE, Colors.quest.yellow[1], Colors.quest.yellow[2], Colors.quest.yellow[3])
+					self:AddLine(moneyString, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+				else
+					self:AddLine(moneyString, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
+				end
+			end
 		end
 	end
 
@@ -1501,12 +1558,16 @@ Tooltip.SetPetAction = function(self, slot)
 	end 
 end
 
-Tooltip.SetBagItem = function(self, bagID, slotID)
+-- Allow data table to be passed instead of created, 
+-- to allow tooltip building based on stored caches.
+-- This is to avoid double calls in cases such as bags
+-- where much info is retrieved through the scanner back-end.
+Tooltip.SetBagItem = function(self, bagID, slotID, data)
 	if (not self.owner) then
 		self:Hide()
 		return
 	end
-	local data = self:GetTooltipDataForContainerSlot(bagID, slotID, self.data)
+	local data = data or self:GetTooltipDataForContainerSlot(bagID, slotID, self.data)
 	if (data) then
 
 		SetItemInfo(self, data, false) -- don't simplify in bags, we want more info here.
@@ -2505,7 +2566,11 @@ LibTooltip.SetDefaultTooltipPosition = function(self, ...)
 		LibTooltip:SetDefaultCValue("defaultAnchor", { ... })
 	end 
 	LibTooltip:ForAllTooltips("UpdatePosition")
-	LibTooltip:SetSecureHook("GameTooltip_SetDefaultAnchor", SetDefaultAnchor)
+
+	-- I experienced a stack overflow with this one recently, which might be because  
+	-- of multiple versions of the function being registered, and a loop happening. 
+	-- So I am adding a unique identifier to make sure the hook is always the same.
+	LibTooltip:SetSecureHook("GameTooltip_SetDefaultAnchor", SetDefaultAnchor, "GP_LibTooltip_SetDefaultAnchor")
 
 	SetDefaultPosition(GameTooltip)
 end 

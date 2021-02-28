@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.454-RC] Unreleased
+- This update also contains a lot of undocument back-end changes related to primarily the bagbutton and tooltips libraries, as I'm actively developing both in preparation of both my upcoming standalone bag addon, as well as a potential quest item bar feature in AzeriteUI. 
+
+### Added
+- Added the debuff counting currently held Shackled Souls in the Revendreth World Quest "Bruised and Battered" to the aura whitelist, to better track your debuff status in combat as this affects not only the quest, but your damage taken.
+
 ## [3.1.453-RC] 2021-02-24
 ### Changed
 - Updated the time library with dates for the 2021/2022 events.

@@ -39,7 +39,7 @@ LibColorTool.colorDB = LibColorTool.colorDB or {}
 local Colors = LibColorTool.colorDB
 
 -- Templates
-ColorTemplate = {}
+local ColorTemplate = {}
 
 -- Utility Functions
 -----------------------------------------------------------------
