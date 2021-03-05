@@ -469,7 +469,6 @@ Aura.UpdateTooltip = function(button)
 	local tooltip = button:GetTooltip()
 	tooltip:Hide()
 	tooltip:SetMinimumWidth(160)
-	tooltip.hideSpellID = button.isFiltered
 	local element = button._owner
 	if (element.tooltipDefaultPosition) then 
 		tooltip:SetDefaultAnchor(button)
@@ -616,10 +615,10 @@ local Iterate = function(element)
 		if (entry.id) then
 
 			local hideAura
-			local auraPriority, isFiltered
+			local auraPriority
 			
 			if (element.customFilter) then 
-				local displayAura, displayPriority, filtered = element:customFilter(
+				local displayAura, displayPriority = element:customFilter(
 					entry.isBuff, 
 					entry.unit, 
 					entry.isOwnedByPlayer, 
@@ -647,7 +646,6 @@ local Iterate = function(element)
 				else 
 					hideAura = true
 				end 
-				isFiltered = filtered
 			end 
 
 			-- Stop iteration if we've hit the maximum displayed allowed.
@@ -701,7 +699,6 @@ local Iterate = function(element)
 					button.isCastByPlayer = entry.isCastByPlayer
 					button.isOwnedByPlayer = entry.isOwnedByPlayer
 					button.auraPriority = auraPriority
-					button.isFiltered = isFiltered
 
 					-- Update the icon texture
 					button.Icon:SetTexture(button.icon)
@@ -1127,5 +1124,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 70)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 71)
 end 

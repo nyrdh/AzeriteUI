@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Added the debuff counting currently held Shackled Souls in the Revendreth World Quest "Bruised and Battered" to the aura whitelist, to better track your debuff status in combat as this affects not only the quest, but your damage taken.
 
+### Changed
+- Aura tooltips will now only show their spellID if the Shift key is currently held down, and hidden otherwise. 
+
+### Fixed
+- The chat styling filter's reputation coloring should now be more accurate for friendship reputations, even those friendship reputations that aren't displayed as friendship reputations in the reputation tab.
+
 ## [3.1.453-RC] 2021-02-24
 ### Changed
 - Updated the time library with dates for the 2021/2022 events.

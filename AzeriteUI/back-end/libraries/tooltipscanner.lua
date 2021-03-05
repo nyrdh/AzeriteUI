@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 75)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 79)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -143,8 +143,9 @@ local Constants = {
 	--POWER_TYPE_ANIMA = "Anima"
 	--POWER_TYPE_ANIMA_V2 = "Anima"
 	
-	-- Adding this mostly to filter it out
+	-- Adding these mostly to filter them out
 	ItemStartsQuest = ITEM_STARTS_QUEST, -- "This Item Begins a Quest"
+	ItemIsCrafting = PROFESSIONS_USED_IN_COOKING, -- "Crafting Reagent"
 
 	
 	ItemBlock = SHIELD_BLOCK_TEMPLATE,
@@ -877,6 +878,38 @@ local SetItemData = function(itemLink, tbl)
 	tbl.primaryStats = {}
 	tbl.secondaryStats = {}
 
+	local _, _, _, linkType, itemID, enchantID, gemID1, gemID2, gemID3, gemID4, suffixID, uniqueID, linkLevel, reforging, Name = string_find(itemLink, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
+
+	local gem1 = tonumber(gemID1)
+	local gem2 = tonumber(gemID2)
+	local gem3 = tonumber(gemID3)
+	local gem4 = tonumber(gemID4)
+
+	if (gem1 or gem2 or gem3 or gem4) then
+		tbl.gemIDs = {
+			[1] = tonumber(gemID1) or 0,
+			[2] = tonumber(gemID2) or 0,
+			[3] = tonumber(gemID3) or 0,
+			[4] = tonumber(gemID4) or 0
+		}
+	end
+
+	-- todo:
+	-- scan for empty gem slots by strings
+		-- count slots and number per slotType
+			-- make a slotType system?
+			--EMPTY_SOCKET = "Level %d Socket"
+			--EMPTY_SOCKET_BLUE = "Blue Socket"
+			--EMPTY_SOCKET_COGWHEEL = "Cogwheel Socket"
+			--EMPTY_SOCKET_HYDRAULIC = "Sha-Touched"
+			--EMPTY_SOCKET_META = "Meta Socket"
+			--EMPTY_SOCKET_NO_COLOR = "Prismatic Socket"
+			--EMPTY_SOCKET_PRISMATIC = "Prismatic Socket"
+			--EMPTY_SOCKET_RED = "Red Socket"
+			--EMPTY_SOCKET_YELLOW = "Yellow Socket"
+	-- recursively parse iteminfo of the equipped gems
+		-- acquire stats, add to own lines
+
 	-- Note: This could be done by an eventhandler, and stored.
 	-- Not a problem when only called for pure tooltip usage, 
 	-- but when used as info retrieval on hidden scanner tooltips, 
@@ -1157,6 +1190,7 @@ local SetItemData = function(itemLink, tbl)
 	if (itemClassID == LE_ITEM_CLASS_MISCELLANEOUS) -- 15
 	or (itemClassID == LE_ITEM_CLASS_CONSUMABLE) -- 0 
 	or (itemClassID == LE_ITEM_CLASS_QUESTITEM) -- 12
+	or (itemClassID == LE_ITEM_CLASS_TRADEGOODS) -- 7
 	then 
 		for lineIndex = firstLine, lastLine do 
 			if (lineIndex ~= foundItemBlock)

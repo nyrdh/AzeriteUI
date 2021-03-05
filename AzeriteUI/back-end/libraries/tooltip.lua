@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 98)
+local LibTooltip = Wheel:Set("LibTooltip", 103)
 if (not LibTooltip) then
 	return
 end
@@ -1232,6 +1232,13 @@ local SetItemInfo = function(self, data, useSimplified)
 		self:AddLine(displayName, colors.quality[data.itemRarity][1], colors.quality[data.itemRarity][2], colors.quality[data.itemRarity][3], true)
 	end 
 
+	-- itemID
+	if (data.itemID) and (not self.hideItemID) and (IsShiftKeyDown()) then
+		-- How to NOT localize. This is just baaaaad!
+		local itemIDstring = ENCOUNTER_JOURNAL_ITEM .. " " .. ID
+		self:AddLine(itemIDstring .. ": " .. data.itemID, offwhiteR, offwhiteG, offwhiteB)
+	end
+
 	-- item bind status
 	if (not skipBinds) then
 		if (data.itemIsBound) then 
@@ -1402,7 +1409,7 @@ local SetItemInfo = function(self, data, useSimplified)
 	-- durability
 	if (data.itemDurability) and (not useSimplified) then 
 		self:AddLine(string_format(DURABILITY_TEMPLATE, data.itemDurability, data.itemDurabilityMax), offwhiteR, offwhiteG, offwhiteB)
-	end 
+	end
 
 	-- Only show repair costs when in repair mode, not the sell value.
 	if (InRepairMode()) and ((data.repairCost) and (data.repairCost > 0)) then
@@ -1437,7 +1444,7 @@ local SetItemInfo = function(self, data, useSimplified)
 		end
 	else
 		-- Sell value. Only shown on garbage, or for all sellable items when at a merchant.
-		if (data.itemSellPrice) and ((data.itemRarity == 0) or (MerchantFrame:IsShown())) then 
+		if (data.itemSellPrice) and ((data.itemRarity == 0) or (MerchantFrame:IsShown()) or (IsShiftKeyDown())) then 
 			local money = data.itemSellPrice * data.itemCount
 			local moneyString
 			if (self.coinStringGold) and (self.coinStringSilver) and (self.coinStringCopper) then 
@@ -1909,7 +1916,7 @@ local ShowAuraTooltip = function(self, data)
 		self:AddLine(data.name, colors.title[1], colors.title[2], colors.title[3], true)
 	end 
 
-	if (data.spellId and (not self.hideSpellID)) then 
+	if (data.spellId and (not self.hideSpellID)) and (IsShiftKeyDown()) then 
 		-- How to NOT localize. This is just baaaaad!
 		local spellIDText = STAT_CATEGORY_SPELL .. " " .. ID
 		self:AddLine(spellIDText .. ": " .. data.spellId, colors.offwhite[1], colors.offwhite[2], colors.offwhite[3])
@@ -2491,6 +2498,10 @@ local SetDefaultAnchor = function(tooltip, parent)
 	if tooltip:IsForbidden() then 
 		return 
 	end
+	if (tooltip.isLockedBecauseOfAnchoring) then
+		return
+	end
+	tooltip.isLockedBecauseOfAnchoring = true
 
 	-- Set the tooltip to the same scale as our own. 
 	local targetScale = LibTooltip:GetFrame("UICenter"):GetEffectiveScale()
@@ -2521,6 +2532,7 @@ local SetDefaultAnchor = function(tooltip, parent)
 	else 
 		Tooltip.Place(tooltip, "BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -_G.CONTAINER_OFFSET_X - 13, _G.CONTAINER_OFFSET_Y)
 	end 
+	tooltip.isLockedBecauseOfAnchoring = nil
 end 
 
 local SetDefaultPosition = function(tooltip)
@@ -2528,6 +2540,10 @@ local SetDefaultPosition = function(tooltip)
 	if (tooltip:IsForbidden()) or (tooltip:GetAnchorType() ~= "ANCHOR_NONE") then -- (not tooltip:IsShown())
 		return 
 	end
+	if (tooltip.isLockedBecauseOfAnchoring) then
+		return
+	end
+	tooltip.isLockedBecauseOfAnchoring = true
 
 	-- Attempt to find our own defaults, or just go with normal blizzard defaults otherwise. 
 	-- Retrieve default anchor for this tooltip
@@ -2547,6 +2563,7 @@ local SetDefaultPosition = function(tooltip)
 	else 
 		Tooltip.Place(tooltip, "BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -_G.CONTAINER_OFFSET_X - 13, _G.CONTAINER_OFFSET_Y)
 	end 
+	tooltip.isLockedBecauseOfAnchoring = nil
 end
 
 -- Set a default position for all registered tooltips. 
