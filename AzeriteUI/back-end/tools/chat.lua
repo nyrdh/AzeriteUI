@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 2)
+local LibChatTool = Wheel:Set("LibChatTool", 3)
 if (not LibChatTool) then
 	return
 end
@@ -366,14 +366,23 @@ local OnChatMessage = function(frame, event, message, author, ...)
 				value = a
 			end
 			if (faction) then
-				local standingID, factionID
+				local standingID, factionID, isFriend
 				for i = 1, GetNumFactions() do
 					local factionName, description, standingId, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionId, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(i)
+
 					if (factionName == faction) then
 						standingID = standingId
 						factionID = factionId
+
+						if (IsRetail) then
+							local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID)
+							if (friendID) then 
+								isFriend = true
+							end 
+						end
+	
 						if (factionID) and (standingID) then
-							faction = Colors.reaction[standingID].colorCode .. faction .. "|r"
+							faction = Colors[isFriend and "friendship" or "reaction"][standingID].colorCode .. faction .. "|r"
 						end
 						break
 					end
@@ -392,8 +401,16 @@ local OnChatMessage = function(frame, event, message, author, ...)
 						if (factionName == faction) then
 							standingID = standingId
 							factionID = factionId
+
+							if (IsRetail) then
+								local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID)
+								if (friendID) then 
+									isFriend = true
+								end 
+							end
+	
 							if (factionID) and (standingID) then
-								faction = Colors.reaction[standingID].colorCode .. faction .. "|r"
+								faction = Colors[isFriend and "friendship" or "reaction"][standingID].colorCode .. faction .. "|r"
 							end
 							break
 						end
