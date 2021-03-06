@@ -757,6 +757,36 @@ local Tooltip_StatusBar_PostUpdate = function(tooltip, bar, value, min, max, isR
 	end 
 end 
 
+-- zhCN exceptions
+local gameLocale = GetLocale()
+if (gameLocale == "zhCN") then
+	Tooltip_StatusBar_PostUpdate = function(tooltip, bar, value, min, max, isRealValue)
+		if (bar.barType == "health") then 
+			if (isRealValue) then 
+				if (value >= 1e8) then 			bar.Value:SetFormattedText("%.2f亿", value/1e8)
+				elseif (value >= 1e4) then 		bar.Value:SetFormattedText("%.2f万", value/1e4)
+				elseif (value > 0) then 		bar.Value:SetText(tostring(math_floor(value)))
+				else 							bar.Value:SetText("")
+				end 
+			else 
+				if (value > 0) then 
+					bar.Value:SetFormattedText("%.0f%%", value)
+				else 
+					bar.Value:SetText("")
+				end
+			end
+			if (not bar.Value:IsShown()) then 
+				bar.Value:Show()
+			end
+		else 
+			if (bar.Value:IsShown()) then 
+				bar.Value:Hide()
+				bar.Value:SetText("")
+			end
+		end 
+	end 
+end 
+
 local Tooltip_LinePair_PostCreate = function(tooltip, lineIndex, left, right)
 	local oldLeftObject = left:GetFontObject()
 	local oldRightObject = right:GetFontObject()
@@ -1578,6 +1608,18 @@ local TinyFrame_OverrideValue = function(element, unit, min, max, disconnected, 
 	elseif (min > 0) then 		element.Value:SetText(min) 						  -- 1 - 999
 	else 						element.Value:SetText("")
 	end 
+end 
+
+-- zhCN exceptions
+local gameLocale = GetLocale()
+if (gameLocale == "zhCN") then 
+	TinyFrame_OverrideValue = function(element, unit, min, max, disconnected, dead, tapped)
+		if (min >= 1e8) then 		element.Value:SetFormattedText("%.2f亿", min/1e8)
+		elseif (min >= 1e4) then 	element.Value:SetFormattedText("%.2f万", min/1e4)
+		elseif (min > 0) then 		element.Value:SetText(min)
+		else 						element.Value:SetText("")
+		end 
+	end
 end 
 
 local TinyFrame_OverrideHealthValue = function(element, unit, min, max, disconnected, dead, tapped)
