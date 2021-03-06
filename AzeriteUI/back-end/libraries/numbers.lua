@@ -77,8 +77,8 @@ if (gameLocale == "zhCN") then
 		if (not value) then 
 			return "" 
 		end
-		if (value >= 1e8) then 							return string_format("%.1f亿", value/1e8)
-		elseif (value >= 1e4) then 						return string_format("%.1f万", value/1e4)
+		if (value >= 1e8) then 							return string_format("%.2f亿", value/1e8)
+		elseif (value >= 1e4) then 						return string_format("%.2f万", value/1e4)
 		elseif (value > 0) then 						return tostring(math_floor(value))
 		else 											return ""
 		end 
@@ -89,8 +89,8 @@ if (gameLocale == "zhCN") then
 		if (not value) then 
 			return "" 
 		end
-		if (value >= 1e8) then							return ("%.1f亿"):format(value / 1e8):gsub("%.?0+([km])$", "%1")
-		elseif (value >= 1e4) or (value <= -1e3) then	return ("%.1f万"):format(value / 1e4):gsub("%.?0+([km])$", "%1")
+		if (value >= 1e8) then							return ("%.2f亿"):format(value / 1e8):gsub("%.?0+([km])$", "%1")
+		elseif (value >= 1e4) or (value <= -1e3) then	return ("%.2f万"):format(value / 1e4):gsub("%.?0+([km])$", "%1")
 		elseif (value > 0) then 						return tostring(math_floor(value))
 		else 											return ""
 		end 
