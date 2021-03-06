@@ -527,7 +527,7 @@ Module.CreateDriver = function(self)
 		local tracker = QuestWatchFrame or ObjectiveTrackerFrame
 		local hiddenBydriver = tracker and (not this:IsShown())
 
-		local shouldHide = self.bagsVisible or (hiddenBydriver and tracker)
+		local shouldHide = self.immersionVisible or self.bagsVisible or (hiddenBydriver and tracker)
 		if (shouldHide) then
 			tracker:SetIgnoreParentAlpha(false)
 			self.frame:SetAlpha(0)
@@ -599,10 +599,40 @@ Module.OnEvent = function(self, event, ...)
 		self:PositionRetailTracker()
 
 	elseif (event == "PLAYER_ENTERING_WORLD") then 
+		local needUpdate
+
+		if (self.queueImmersionHook) then
+			local frame = ImmersionFrame
+			if (frame) then
+				self.queueImmersionHook = nil
+				frame:HookScript("OnShow", function() 
+					self.immersionVisible = true 
+					if (self.driverFrame) then
+						self.driverFrame:Update()
+					end
+				end)
+				frame:HookScript("OnHide", function() 
+					self.immersionVisible = nil 
+					if (self.driverFrame) then
+						self.driverFrame:Update()
+					end
+				end)
+			end
+		end
+
+		local frame = ImmersionFrame
+		if (frame) then
+			self.immersionVisible = frame:IsShown()
+			needUpdate = true
+		end
 
 		local bags = Wheel("LibModule"):GetModule("Backpacker", true)
 		if (bags) then
 			self.bagsVisible = bags:IsVisible()
+			needUpdate = true
+		end
+
+		if (needUpdate) then 
 			if (self.driverFrame) then
 				self.driverFrame:Update()
 			end
@@ -639,7 +669,10 @@ Module.OnInit = function(self)
 	if (IsRetail) then
 		self:InitRetailTracker()
 	end
-	
+	if (self:IsAddOnEnabled("Immersion")) then
+		self.queueImmersionHook = true
+	end
+
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("VARIABLES_LOADED", "OnEvent")
 	self:RegisterMessage("GP_BAGS_HIDDEN", "OnEvent")
