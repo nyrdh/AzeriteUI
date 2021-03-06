@@ -11,7 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added the debuff counting currently held Shackled Souls in the Revendreth World Quest "Bruised and Battered" to the aura whitelist, to better track your debuff status in combat as this affects not only the quest, but your damage taken.
 
 ### Changed
+- The Blizzard objectives tracker should now hide in a corner while Immersion is visible.
 - Aura tooltips will now only show their spellID if the Shift key is currently held down, and hidden otherwise. 
+- Added updated zhCN number abbreviations by Mengqyzh. 
 
 ### Fixed
 - The chat styling filter's reputation coloring should now be more accurate for friendship reputations, even those friendship reputations that aren't displayed as friendship reputations in the reputation tab.
