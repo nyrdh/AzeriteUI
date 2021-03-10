@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 3)
+local LibChatTool = Wheel:Set("LibChatTool", 5)
 if (not LibChatTool) then
 	return
 end
@@ -239,31 +239,110 @@ if (IsClassic) then
 	table_insert(Replacements, 	{ "%["..string_match(CHAT_BATTLEGROUND_LEADER_GET, "%[(.-)%]") .. "%]", "BGL" })
 	table_insert(Replacements, 	{ "%["..string_match(CHAT_BATTLEGROUND_GET, "%[(.-)%]") .. "%]", "BG" })
 end
-table_insert(Replacements, 	{ "%["..string_match(CHAT_PARTY_LEADER_GET, "%[(.-)%]") .. "%]", "PL" })
-table_insert(Replacements, 	{ "%["..string_match(CHAT_PARTY_GET, "%[(.-)%]") .. "%]", "P" })
-table_insert(Replacements, 	{ "%["..string_match(CHAT_RAID_LEADER_GET, "%[(.-)%]") .. "%]", "RL" })
-table_insert(Replacements, 	{ "%["..string_match(CHAT_RAID_GET, "%[(.-)%]") .. "%]", "R" })
-table_insert(Replacements, 	{ "%["..string_match(CHAT_INSTANCE_CHAT_LEADER_GET, "%[(.-)%]") .. "%]", "IL" })
-table_insert(Replacements, 	{ "%["..string_match(CHAT_INSTANCE_CHAT_GET, "%[(.-)%]") .. "%]", "I" })
-table_insert(Replacements, 	{ "%["..string_match(CHAT_GUILD_GET, "%[(.-)%]") .. "%]", "G" })
-table_insert(Replacements, 	{ "%["..string_match(CHAT_OFFICER_GET, "%[(.-)%]") .. "%]", "O" })
-table_insert(Replacements, 	{ "%["..string_match(CHAT_RAID_WARNING_GET, "%[(.-)%]") .. "%]", "|cffff0000!|r" })
-table_insert(Replacements, 	{ "|Hchannel:(%w+):(%d)|h%[(%d)%. (%w+)%]|h", "|Hchannel:%1:%2|h%3.|h" }) -- numbered channels
-table_insert(Replacements, 	{ "|Hchannel:(%w+)|h%[(%w+)%]|h", "|Hchannel:%1|h%2|h" }) -- non-numbered channels 
-table_insert(Replacements, 	{ "^To (.-|h)", "|cffad2424@|r%1" })
-table_insert(Replacements, 	{ "^(.-|h) whispers", "%1" })
-table_insert(Replacements, 	{ "^(.-|h) says", "%1" })
-table_insert(Replacements, 	{ "^(.-|h) yells", "%1" })
-table_insert(Replacements, 	{ "<"..AFK..">", "|cffFF0000<"..AFK..">|r " })
-table_insert(Replacements, 	{ "<"..DND..">", "|cffE7E716<"..DND..">|r " })
+table_insert(Replacements, { "%["..string_match(CHAT_PARTY_LEADER_GET, "%[(.-)%]") .. "%]", "PL" })
+table_insert(Replacements, { "%["..string_match(CHAT_PARTY_GET, "%[(.-)%]") .. "%]", "P" })
+table_insert(Replacements, { "%["..string_match(CHAT_RAID_LEADER_GET, "%[(.-)%]") .. "%]", "RL" })
+table_insert(Replacements, { "%["..string_match(CHAT_RAID_GET, "%[(.-)%]") .. "%]", "R" })
+table_insert(Replacements, { "%["..string_match(CHAT_INSTANCE_CHAT_LEADER_GET, "%[(.-)%]") .. "%]", "IL" })
+table_insert(Replacements, { "%["..string_match(CHAT_INSTANCE_CHAT_GET, "%[(.-)%]") .. "%]", "I" })
+table_insert(Replacements, { "%["..string_match(CHAT_GUILD_GET, "%[(.-)%]") .. "%]", "G" })
+table_insert(Replacements, { "%["..string_match(CHAT_OFFICER_GET, "%[(.-)%]") .. "%]", "O" })
+table_insert(Replacements, { "%["..string_match(CHAT_RAID_WARNING_GET, "%[(.-)%]") .. "%]", "|cffff0000!|r" })
+table_insert(Replacements, { "|Hchannel:(%w+):(%d)|h%[(%d)%. (%w+)%]|h", "|Hchannel:%1:%2|h%3.|h" }) -- numbered channels
+table_insert(Replacements, { "|Hchannel:(%w+)|h%[(%w+)%]|h", "|Hchannel:%1|h%2|h" }) -- non-numbered channels 
+table_insert(Replacements, { "^To (.-|h)", "|cffad2424@|r%1" })
+table_insert(Replacements, { "^(.-|h) whispers", "%1" })
+table_insert(Replacements, { "^(.-|h) says", "%1" })
+table_insert(Replacements, { "^(.-|h) yells", "%1" })
+table_insert(Replacements, { "<"..AFK..">", "|cffFF0000<"..AFK..">|r " })
+table_insert(Replacements, { "<"..DND..">", "|cffE7E716<"..DND..">|r " })
+--table_insert(Replacements, { "You gained", "Stuff appeared" })
 
 -- Utility Functions
 -----------------------------------------------------------------
+-- Make the money display pretty
+local CreateMoneyString = function(gold, silver, copper)
+	local moneyString
+	if (gold > 0) then 
+		moneyString = string_format("|cfff0f0f0%d|r%s", gold, L_GOLD)
+	end
+	if (silver > 0) then 
+		moneyString = (moneyString and moneyString.." " or "") .. string_format("|cfff0f0f0%d|r%s", silver, L_SILVER)
+	end
+	if (copper > 0) then 
+		moneyString = (moneyString and moneyString.." " or "") .. string_format("|cfff0f0f0%d|r%s", copper, L_COPPER)
+	end 
+	return moneyString
+end
+
+local ParseForMoney = function(message)
+
+	-- Remove large number formatting 
+	message = string_gsub(message, "(%d)%"..LARGE_NUMBER_SEPERATOR.."(%d)", "%1%2")
+
+	-- Basic old-style parsing first.
+	local gold_amount = tonumber(string_match(message, P_GOLD)) or 0
+	local silver_amount = tonumber(string_match(message, P_SILVER)) or 0
+	local copper_amount = tonumber(string_match(message, P_COPPER)) or 0
+
+	-- Now we have to do it the hard way. 
+	if (gold_amount == 0) and (silver_amount == 0) and (copper_amount == 0) then
+
+		-- Discover icon and currency existence.
+		local hasGold, hasSilver, hasCopper
+		if (ENABLE_COLORBLIND_MODE == "1") then
+			hasGold = string_find(message,"%d"..GOLD_AMOUNT_SYMBOL)
+			hasSilver = string_find(message,"%d"..SILVER_AMOUNT_SYMBOL)
+			hasCopper = string_find(message,"%d"..COPPER_AMOUNT_SYMBOL)
+		else
+			hasGold = string_find(message,"(UI%-GoldIcon)")
+			hasSilver = string_find(message,"(UI%-SilverIcon)")
+			hasCopper = string_find(message,"(UI%-CopperIcon)")
+		end
+
+		-- These patterns should work for both coins and symbols. Let's parse!
+		if (hasGold) or (hasSilver) or (hasCopper) then
+			
+			-- Now kill off texture strings, replace with space for number separation.
+			message = string_gsub(message, "\124T(.-)\124t", " ") 
+
+			-- Kill off color codes. They might fuck up this thing. 
+			message = string_gsub(message, "\124[cC]%x%x%x%x%x%x%x%x", "")
+			message = string_gsub(message, "\124[rR]", "")
+
+			if (hasGold) then
+				if (hasSilver) and (hasCopper) then
+					gold_amount, silver_amount, copper_amount = string_match(message,"(%d+).*%s+(%d+).*%s+(%d+).*")
+				elseif (hasSilver) then
+					gold_amount, silver_amount = string_match(message,"(%d+).*%s+(%d+).*")
+				elseif (hasCopper) then
+					gold_amount, copper_amount = string_match(message,"(%d+).*%s+(%d+).*")
+				else
+					gold_amount = string_match(message,"(%d+).*%s")
+				end
+			elseif (hasSilver) then
+				if (hasCopper) then
+					silver_amount, copper_amount = string_match(message,"(%d+).*%s+(%d+).*")
+				else
+					silver_amount = string_match(message,"(%d+).*%s")
+				end
+			elseif (hasCopper) then
+				copper_amount = string_match(message,"(%d+).*%s")
+			end
+		end
+		
+	end
+
+	return tonumber(gold_amount) or 0, tonumber(silver_amount) or 0, tonumber(copper_amount) or 0
+end
+
 -- Custom method for filtering messages
 local AddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
 	if (not msg) or (msg == "") then
 		return
 	end
+
+	local filtered
 
 	-- This can be used for any addon using AceConsole for output spam.
 	if (FilterStatus.MaxDps) then
@@ -277,8 +356,22 @@ local AddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
 	-- Only do this if the option is enabled,
 	-- but always go through our proxy method here regardless.
 	if (FilterStatus.Styling) then
+		local count
 		for i,info in ipairs(Replacements) do
 			msg = string_gsub(msg, info[1], info[2])
+			if (count) and (count > 0) then
+				filtered = true
+			end
+		end
+
+		-- New 9.0.5 "You gained:"-style of money.
+		-- These are neither system- nor money loot events, 
+		-- they are simply added to the frame.
+		if (not filtered) then
+			local moneyString = CreateMoneyString(ParseForMoney(msg))
+			if (moneyString) then
+				msg = string_format(LOOT_TEMPLATE, moneyString)
+			end
 		end
 	end
 
@@ -300,21 +393,6 @@ local AddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
 
 	-- Return the new message to the old method
 	return MethodCache[frame](frame, msg, r, g, b, chatID, ...)
-end
-
--- Make the money display pretty
-local CreateMoneyString = function(gold, silver, copper)
-	local moneyString
-	if (gold > 0) then 
-		moneyString = string_format("|cfff0f0f0%d|r%s", gold, L_GOLD)
-	end
-	if (silver > 0) then 
-		moneyString = (moneyString and moneyString.." " or "") .. string_format("|cfff0f0f0%d|r%s", silver, L_SILVER)
-	end
-	if (copper > 0) then 
-		moneyString = (moneyString and moneyString.." " or "") .. string_format("|cfff0f0f0%d|r%s", copper, L_COPPER)
-	end 
-	return moneyString
 end
 
 local SendMonsterMessage = function(chatType, message, monster, ...)
@@ -342,11 +420,8 @@ local OnChatMessage = function(frame, event, message, author, ...)
 		return true
 	
 	elseif (event == "CHAT_MSG_MONEY") then
-		local gold_amount = tonumber(string_match(message, P_GOLD)) or 0
-		local silver_amount = tonumber(string_match(message, P_SILVER)) or 0
-		local copper_amount = tonumber(string_match(message, P_COPPER)) or 0
 
-		local moneyString = CreateMoneyString(gold_amount, silver_amount, copper_amount)
+		local moneyString = CreateMoneyString(ParseForMoney(message))
 		if (moneyString) then
 			return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
 		else
@@ -548,7 +623,6 @@ local OnChatMessage = function(frame, event, message, author, ...)
 				-- GARRISON_FOLLOWER_XP_ADDED_ZONE_SUPPORT_QUALITY_UP = "%s has gained a quality level!"
 			end
 
-
 			-- Discovery XP?
 			local xp_discovery_pattern = getFilter(ERR_ZONE_EXPLORED_XP) -- "Discovered %s: %d experience gained"
 			local name, total = string_match(message, xp_discovery_pattern)
@@ -557,20 +631,26 @@ local OnChatMessage = function(frame, event, message, author, ...)
 			end
 
 			-- Quest money?
-			local money_pattern = getFilter(ERR_QUEST_REWARD_MONEY_S) -- "Received %s."
-			local money_string = string_match(message, money_pattern)
-			if (money_string) then
-		
-				local gold_amount = tonumber(string_match(money_string, P_GOLD)) or 0
-				local silver_amount = tonumber(string_match(money_string, P_SILVER)) or 0
-				local copper_amount = tonumber(string_match(money_string, P_COPPER)) or 0
-		
-				local moneyString = CreateMoneyString(gold_amount, silver_amount, copper_amount)
-				if (moneyString) then
-					return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
-				else
-					return true
-				end
+			--local money_pattern = getFilter(ERR_QUEST_REWARD_MONEY_S) -- "Received %s."
+			--local money_string = string_match(message, money_pattern)
+			--if (money_string) then
+			--	
+			--	local gold_amount = tonumber(string_match(money_string, P_GOLD)) or 0
+			--	local silver_amount = tonumber(string_match(money_string, P_SILVER)) or 0
+			--	local copper_amount = tonumber(string_match(money_string, P_COPPER)) or 0
+			--	
+			--	local moneyString = CreateMoneyString(gold_amount, silver_amount, copper_amount)
+			--	if (moneyString) then
+			--		return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
+			--	else
+			--		return true
+			--	end
+			--end
+
+			-- New 9.0.5 "You gained:"-style of money.
+			local moneyString = CreateMoneyString(ParseForMoney(message))
+			if (moneyString) then
+				return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
 			end
 
 			-- AFK
