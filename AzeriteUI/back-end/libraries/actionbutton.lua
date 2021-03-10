@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 130)
+local LibSecureButton = Wheel:Set("LibSecureButton", 133)
 if (not LibSecureButton) then
 	return
 end
@@ -2016,6 +2016,13 @@ end
 StanceButton.UpdateUsable = function(self)
 end
 
+StanceButton.AbbreviateBindText = ActionButton.AbbreviateBindText
+StanceButton.GetBindingText = ActionButton.GetBindingText
+StanceButton.GetBindingTextAbbreviated = ActionButton.GetBindingTextAbbreviated
+StanceButton.GetPager = ActionButton.GetPager
+StanceButton.GetVisibilityDriverFrame = ActionButton.GetVisibilityDriverFrame
+StanceButton.GetTooltip = ActionButton.GetTooltip
+
 -- StanceButton Script Handlers
 ----------------------------------------------------
 StanceButton.OnEnable = function(self)
@@ -2444,14 +2451,6 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
 
 	elseif (buttonType == "stance") then
-		button = setmetatable(visibility:CreateFrame("CheckButton", name, "StanceButtonTemplate"), StanceButton_MT)
-		button:SetFrameStrata("LOW")
-
-
-		button:SetScript("OnEnter", StanceButton.OnEnter)
-		button:SetScript("OnLeave", StanceButton.OnLeave)
-		button:SetScript("OnDragStart", StanceButton.OnDragStart)
-		button:SetScript("OnReceiveDrag", StanceButton.OnReceiveDrag)
 
 	elseif (buttonType == "petbattle") then
 

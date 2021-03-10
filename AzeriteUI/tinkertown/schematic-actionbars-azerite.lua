@@ -44,7 +44,6 @@ local L = Wheel("LibLocale"):GetLocale(ADDON)
 -----------------------------------------------------------
 local Construct_Normal = function(self) self:Forge(GetSchematic("WidgetForge::ActionButton::Normal", "Azerite")) end 
 local Construct_Small = function(self) self:Forge(GetSchematic("WidgetForge::ActionButton::Small", "Azerite")) end 
-local Construct_Large = function(self) self:Forge(GetSchematic("WidgetForge::ActionButton::Large", "Azerite")) end 
 
 -- Module Schematics
 -----------------------------------------------------------
@@ -66,6 +65,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 						-- Cache of buttons
 						"Buttons", {}, -- all action buttons
 						"PetButtons", {}, -- all pet buttons
+						"StanceButtons", {}, -- all stance buttons
 						"HoverButtons", {}, -- all action buttons that can fade out
 						"ButtonLookup", {}, -- quickly identify a frame as our button
 
@@ -293,6 +293,7 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 									PetButtons = table.new();
 									PetPagers = table.new();
 									StanceButtons = table.new();
+									StancePagers = table.new();
 								]=])
 					
 								-- Apply references and attributes used for updates.
@@ -445,7 +446,42 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 							end
 						end,
 					
+						-- Something in the back-end kept crashing the game, 
+						-- so I'm rebuilding these buttons manually here in the front-end for now. 
 						"SpawnStanceBar", function(self)
+							
+							local db = self.db
+							local proxy = self:GetSecureUpdater()
+
+							-- Spawn the Pet Bar
+							for id = 1,NUM_STANCE_SLOTS do
+								self.StanceButtons[id] = self.frame:CreateFrame("CheckButton", nil, "StanceButtonTemplate")
+							end
+						
+							-- Apply common stuff to the stance buttons
+							for id,button in pairs(self.StanceButtons) do
+						
+								-- Identify it easily.
+								--self.ButtonLookup[button] = true
+						
+								-- Apply saved buttonLock setting
+								--button:SetAttribute("buttonLock", db.buttonLock)
+						
+								-- Link the buttons and their pagers 
+								--proxy:SetFrameRef("StanceButton"..id, self.StanceButtons[id])
+								--proxy:SetFrameRef("StancePager"..id, self.StanceButtons[id]:GetPager())
+						
+								--if (not self:GetDB("stanceBarEnabled")) then
+								--	self.StanceButtons[id]:GetPager():Hide()
+								--end
+								
+								-- Reference all buttons in our menu callback frame
+								--proxy:Execute(([=[
+								--	table.insert(StanceButtons, self:GetFrameRef("StanceButton"..%.0f)); 
+								--	table.insert(StancePagers, self:GetFrameRef("StancePager"..%.0f)); 
+								--]=]):format(id, id))
+								
+							end
 						end,
 						
 						"SpawnTotemBar", function(self)
@@ -625,6 +661,11 @@ Private.RegisterSchematic("ModuleForge::ActionBars", "Azerite", {
 						-- Return an iterator for actionbar buttons
 						"GetButtons", function(self)
 							return pairs(self.Buttons)
+						end,
+
+						-- Return an iterator for stancebar buttons
+						"GetStanceButtons", function(self)
+							return pairs(self.StanceButtons)
 						end,
 
 						-- Return an iterator for pet actionbar buttons

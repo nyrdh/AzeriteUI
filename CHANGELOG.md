@@ -4,13 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.1.454-RC] Unreleased
+## [3.1.454-RC] 2021-03-10
 - This update also contains a lot of undocument back-end changes related to primarily the bagbutton and tooltips libraries, as I'm actively developing both in preparation of both my upcoming standalone bag addon, as well as a potential quest item bar feature in AzeriteUI. 
 
 ### Added
 - Added the debuff counting currently held Shackled Souls in the Revendreth World Quest "Bruised and Battered" to the aura whitelist, to better track your debuff status in combat as this affects not only the quest, but your damage taken.
 
 ### Changed
+- Bump to WoW client patch 9.0.5.
 - The Blizzard objectives tracker should now hide in a corner while Immersion is visible.
 - Aura tooltips will now only show their spellID if the Shift key is currently held down, and hidden otherwise. 
 - Added updated zhCN number abbreviations by Mengqyzh. 

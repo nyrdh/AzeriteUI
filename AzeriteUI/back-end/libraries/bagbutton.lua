@@ -1,4 +1,4 @@
-local LibBagButton = Wheel:Set("LibBagButton", 42)
+local LibBagButton = Wheel:Set("LibBagButton", 44)
 if (not LibBagButton) then	
 	return
 end
@@ -573,7 +573,8 @@ end
 
 -- Updates item level.
 Button.UpdateItemLevel = function(self)
-	if (self.itemRarity) and (self.itemRarity > 1) and (self.itemLevel) and (self.itemLevel > 1) then
+	if (self.isBattlePet) -- Always show the level of battle pets.
+	or ((self.itemRarity) and (self.itemRarity > 1) and (self.itemLevel) and (self.itemLevel > 1)) then 
 		local color
 		if (self.isLocked) then
 			color = self.colors.quest.gray
@@ -591,7 +592,7 @@ end
 
 -- Updates the BoE, BoU, BoA text.
 Button.UpdateItemBind = function(self)
-	if (self.itemBindType == 2) or (self.itemBindType == 3) then
+	if (not self.itemIsBound) and ((self.itemBindType == 2) or (self.itemBindType == 3)) then
 		local color
 		if (self.isLocked) then
 			color = self.colors.quest.gray
@@ -690,6 +691,9 @@ Button.Update = function(self)
 			self.itemClassID = Item.itemClassID
 			self.itemSubClassID = Item.itemSubClassID
 			self.itemBindType = Item.itemBindType
+			self.itemIsBound = Item.itemIsBound
+			self.itemCanBind = Item.itemCanBind
+			self.itemBind = Item.itemBind
 			self.expacID = Item.expacID
 			self.itemSetID = Item.itemSetID
 			self.isCraftingReagent = Item.isCraftingReagent
@@ -700,6 +704,7 @@ Button.Update = function(self)
 			self.questID = Item.questID
 			self.isLocked = Item.isLocked
 			self.isOpenable = Item.isOpenable
+			self.isBattlePet = Item.isBattlePet
 			self.noValue = Item.noValue
 
 		else
@@ -737,6 +742,7 @@ Button.Update = function(self)
 		self.questID = nil
 		self.isLocked = nil
 		self.isOpenable = nil
+		self.isBattlePet = nil
 		self.noValue = nil
 	end
 
@@ -912,7 +918,6 @@ Button.OnHide = function(self)
 	self:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED", UpdateButton)
 end
 
-
 Button.OnEvent = function(self, event, ...)
 	if (self:IsVisible() and Callbacks[self] and Callbacks[self][event]) then 
 		local events = Callbacks[self][event]
@@ -939,19 +944,71 @@ end
 local Container = LibBagButton:CreateFrame("Frame")
 local Container_MT = { __index = Container }
 
-Container.SetFilter = function(self, filterMethod)
+Container.SetFilter = function(self, filterFunction)
+	check(filterFunction, 1, "function", "string", "nil")
+	self.filterFunction = filterFunction
 end
 
-Container.SetSorting = function(self, sortMethod)
+Container.SetSorting = function(self, sortFunction)
+	check(sortFunction, 1, "function", "string", "nil")
+	self.sortFunction = sortFunction
 end
 
--- Updates available buttons
-Container.Update = function(self, forceUpdate)
-	if (forceUpdate) then
-		for slot,button in pairs(self.slotButtons) do
-			if (button.isShown) then
-				button:Update()
+-- Updates the container's buttons
+Container.Update = function(self)
+
+	-- Create the display cache if it doesn't exist
+	if (not self.displayCache) then
+		self.displayCache = {}
+	end
+
+	-- Wipe out the display cache
+	for i in pairs(self.displayCache) do
+		self.displayCache[i] = nil
+	end
+
+	-- Retrieve all buttons matching the container's bagType,
+	-- and insert them into our freshly wiped display cache.
+	local bagType = Containers[self] 
+	for i,bagID in ipairs(bagIDs) do
+		if (BagTypesFromID[bagID] == bagType) then
+			local container = LibBagButton:GetBlizzardContainerCache(bagID)
+			if (container) then
+				for slotID = 1,container.totalSlots do
+					local Item = LibBagButton:GetBlizzardContainerSlotCache(bagID,slotID)
+					if (Item) then
+						-- Add the existing items to our local indexed cache
+						self.displayCache[#self.displayCache + 1] = Item
+					end
+				end
 			end
+		end
+	end
+
+	-- Filter the display cache
+	if (self.filterFunction) then
+		for i = #self.displayCache,1,-1 do
+			local cache = self.displayCache[i]
+			if (cache) and (not self.filterFunction(cache)) then
+				self.displayCache[i] = nil
+			end
+		end
+	end
+
+	-- Sort the display cache
+	if (self.sortFunction) then
+		table_sort(self.displayCache,self.sortFunction)
+	end
+
+	-- Display and arrange the display cache
+	-- Start ordering buttons
+		-- Add extra when needed
+		-- Hide empty buttons
+	
+	-- Update all visible buttons
+	for slot,button in pairs(self.buttons) do
+		if (button.isShown) then
+			button:Update()
 		end
 	end
 end
@@ -959,9 +1016,6 @@ end
 Container.SpawnItemButton = function(self, bagType)
 	if (not self.buttons) then
 		self.buttons = {}
-	end
-	if (not self.buttons[bagType]) then
-		self.buttons[bagType] = {}
 	end
 
 	local button = LibBagButton:SpawnItemButton(bagType)
@@ -973,7 +1027,7 @@ Container.SpawnItemButton = function(self, bagType)
 	end
 
 	-- Insert the virtual button slot object into the correct cache.
-	table_insert(self.buttons[bagType], button) 
+	table_insert(self.buttons, button) 
 
 	return button
 end
@@ -1080,6 +1134,10 @@ LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID, forceUpd
 		-- or create an empty cache table if none exist.
 		local Item = self:GetBlizzardContainerSlotCache(bagID, slotID)
 
+		-- This is implicit by the existence of all the other values, 
+		-- but for the sake of semantics and simplicity, we use a separate value for this.
+		Item.hasItem = true
+
 		-- Compare the cache's itemlink to the blizzard itemlink, 
 		-- and update or retrieve the contents to our cache if need be.
 		if (Item.itemLink ~= itemLink) or (forceUpdate) then
@@ -1182,7 +1240,7 @@ LibBagButton.ShowBags = function(self, forceUpdate)
 			-- This is needed if the bags are open before
 			-- visiting a merchant, to show junk coin icons.
 			elseif (forceUpdate) then
-				container:Update(forceUpdate)
+				container:Update()
 			end
 			hasBags = true
 		end
@@ -1553,7 +1611,7 @@ LibBagButton.SpawnItemContainer = function(self, ...)
 	check(styleFunc, 2, "function", "nil")
 
 	if (bagType ~= "Bag") and (bagType ~= "Bank") then
-		return error(string_format("No bagType named '%d' exists!", bagType))
+		return error(string_format("No bagType named '%s' exists!", bagType))
 	end
 
 	local frame = LibBagButton:CreateWidgetContainer("Frame", "UICenter", BackdropTemplateMixin and "BackdropTemplate" or "", nil, function(self, ...)
@@ -1576,6 +1634,9 @@ LibBagButton.SpawnItemContainer = function(self, ...)
 	frame:SetToplevel(true) 
 	frame:EnableMouse(true)
 	frame:Hide()
+
+	frame.buttons = {}
+	frame.slots = {}
 
 	-- It just makes life easier if we simply hide it, 
 	-- or we will have to forceUpdate everything on zoning.
@@ -1614,7 +1675,7 @@ LibBagButton.SpawnItemButton = function(self, ...)
 
 	-- An unknown bagType was requested.
 	if (not Buttons[bagType]) then
-		return error(string_format("No bagType named '%d' exists!", bagID))
+		return error(string_format("No bagType named '%s' exists!", bagType))
 	end
 
 	local button -- virtual button object returned to the user.

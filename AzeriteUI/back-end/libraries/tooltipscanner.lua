@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 79)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 81)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -2120,7 +2120,7 @@ end
 -- Returns data about the exact bag- or bank slot. Will return all current modifications.
 LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID, tbl)
 
-	local icon, itemCount, locked, quality, readable, lootable, itemLink, isFiltered, noValue, itemID = GetContainerItemInfo(bagID, slotID)
+	local itemIcon, itemCount, locked, quality, readable, lootable, itemLink, isFiltered, noValue, itemID = GetContainerItemInfo(bagID, slotID)
 
 	--local itemID = GetContainerItemID(bagID, slotID)
 	if (itemLink) then 
@@ -2138,15 +2138,6 @@ LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID,
 
 		if (itemLink) then
 
-			tbl.xxxx = xxx
-			tbl.xxxx = xxx
-			tbl.xxxx = xxx
-			tbl.xxxx = xxx
-			tbl.xxxx = xxx
-			tbl.xxxx = xxx
-			tbl.xxxx = xxx
-			tbl.xxxx = xxx
-			tbl.xxxx = xxx
 			tbl.noValue = noValue
 
 			tbl = SetItemData(itemLink, tbl)
@@ -2156,16 +2147,33 @@ LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID,
 
 			tbl.itemCount = itemCount or 1
 
-			-- Add battlepet tooltip info, if it exists.
-			if ((speciesID) and (speciesID > 0)) then
-				tbl.speciesID = speciesID
-				tbl.level = level
-				tbl.breedQuality = breedQuality
-				tbl.maxHealth = maxHealth
-				tbl.power = power
-				tbl.speed = speed
-				tbl.name = name
+			if (string_find(itemLink, "battlepet:")) then
+				local _, speciesID, level, breedQuality, maxHealth, power, speed = strsplit(":", itemLink)
+				local name = itemLink:match("%[(.-)%]")
+				if (name) then 
+					tbl.speciesID = tonumber(speciesID)
+					tbl.maxHealth = tonumber(maxHealth)
+					tbl.power = tonumber(power)
+					tbl.speed = tonumber(speed)
+
+					tbl.itemName = name
+					tbl.itemIcon = tbl.itemIcon or itemIcon
+					tbl.itemLevel = tonumber(level)
+					tbl.itemRarity = tonumber(breedQuality)
+					tbl.isBattlePet = true
+				end
 			end
+
+			-- Add battlepet tooltip info, if it exists.
+			--if ((speciesID) and (speciesID > 0)) then
+			--	tbl.speciesID = speciesID
+			--	tbl.level = level
+			--	tbl.breedQuality = breedQuality
+			--	tbl.maxHealth = maxHealth
+			--	tbl.power = power
+			--	tbl.speed = speed
+			--	tbl.name = name
+			--end
 
 		end
 
