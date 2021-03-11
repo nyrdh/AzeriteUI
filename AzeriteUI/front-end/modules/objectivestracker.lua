@@ -74,7 +74,7 @@ end
 local USE_OBJECTIVES_TRACKER_CODE_V2 = true
 local BAGS_SHOWN, IMMERSION_SHOWN
 
-local ObjectiveTracker = Module:CreateFrame("Frame", nil, "UICenter")
+local ObjectiveTracker = {}
 
 ObjectiveTracker.Disable = function(self)
 	ObjectiveTrackerFrameHeaderMenuMinimizeButton:Hide()
@@ -88,20 +88,12 @@ ObjectiveTracker.Toggle = function(self)
 	end
 end
 
-ObjectiveTracker.OnClick = function(self)
-	if (ObjectiveTrackerFrame:IsVisible()) then
-		ObjectiveTrackerFrame:Hide()
-	else
-		ObjectiveTrackerFrame:Show()
-	end
-end
-
-ObjectiveTracker.SetDefaultPosition = function(self)
+ObjectiveTracker.SetToDefaultPosition = function(self)
 	local layout = Module.layout
 
 	local ObjectiveFrameHolder = Module:CreateFrame("Frame", "AzeriteUI_ObjectiveTracker", "UICenter")
-	ObjectiveFrameHolder:SetSize(layout.WidthV2, 22)
-	ObjectiveFrameHolder:Place(unpack(layout.PlaceV2))
+	ObjectiveFrameHolder:SetSize(235,22) -- Blizzard default width
+	ObjectiveFrameHolder:Place(unpack(layout.Place))
 
 	ObjectiveTrackerFrame:ClearAllPoints()
 	ObjectiveTrackerFrame:SetPoint("TOP", ObjectiveFrameHolder)
@@ -146,7 +138,7 @@ end
 ObjectiveTracker.Enable = function(self)
 	self:AddHooks()
 	self:Disable()
-	self:SetDefaultPosition()
+	self:SetToDefaultPosition()
 	
 	-- Add a keybind for toggling (SHIFT-O)
 	self.ToggleButton = Module:CreateFrame("Button", "AzeriteUI_ObjectiveTrackerToggleButton", "UICenter", "SecureActionButtonTemplate")
@@ -156,8 +148,7 @@ ObjectiveTracker.Enable = function(self)
 end
 
 
-local ObjectiveCover = ObjectiveTracker:CreateFrame("Frame")
-ObjectiveCover:SetAllPoints()
+local ObjectiveCover = Module:CreateFrame("Frame", nil, "UICenter")
 ObjectiveCover:EnableMouse(true)
 ObjectiveCover:Hide()
 
@@ -167,10 +158,10 @@ ObjectiveAlphaDriver.Update = function(this)
 	local tracker = QuestWatchFrame or ObjectiveTrackerFrame
 	local hiddenBydriver = tracker and (not this:IsShown())
 
-	local shouldHide = IMMERSION_SHOWN or BAGS_SHOWN or (hiddenBydriver and tracker)
-	if (shouldHide) then
+	local shouldHide = IMMERSION_SHOWN or BAGS_SHOWN or hiddenBydriver
+	if (tracker) and (shouldHide) then
 		tracker:SetIgnoreParentAlpha(false)
-		ObjectiveTracker:SetAlpha(0)
+		tracker:SetAlpha(0)
 		
 		ObjectiveCover:SetFrameStrata(tracker:GetFrameStrata())
 		ObjectiveCover:SetFrameLevel(tracker:GetFrameLevel() + 5)
@@ -181,8 +172,8 @@ ObjectiveAlphaDriver.Update = function(this)
 	else
 		if (tracker) then
 			tracker:SetIgnoreParentAlpha(false)
+			tracker:SetAlpha(.9)
 		end
-		ObjectiveTracker:SetAlpha(.9)
 		ObjectiveCover:Hide()
 	end
 end

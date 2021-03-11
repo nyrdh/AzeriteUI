@@ -2072,10 +2072,10 @@ Defaults.BlizzardFloaterHUD = (IsClassic) and {
 	enableRaidWarnings = true -- not yet implemented!
 
 } or (IsRetail) and {
-	enableAlerts = false, -- spams like crazy. can we filter it? I did in legion. MUST LOOK UP!
-	enableAnnouncements = false, -- level up, loot
+	enableAlerts = false, -- achievements and currency. spams like crazy. can we filter it? I did in legion. MUST LOOK UP! 
+	enableAnnouncements = false, -- level up, loot, the various types of "banners"
 	enableObjectivesTracker = true, -- the blizzard monstrosity
-	enableRaidBossEmotes = true, -- partly needed for instance encounters
+	enableRaidBossEmotes = true, -- partly needed for instance encounters, and some wqs like snapdragon flying
 	enableRaidWarnings = true,  -- groups would want this
 	enableTalkingHead = true -- immersive and nice
 }
@@ -2419,9 +2419,6 @@ Azerite.BlizzardObjectivesTracker = (IsClassic) and {
 	SpaceTop = 260, 
 	Width = 255 -- 280 is classic default
 } or (IsRetail) and {
-	PlaceV2 = { "TOPRIGHT", -(60 + 0/2), -280 },
-	WidthV2 = 235, 
-
 	Place = { "TOPRIGHT", -60, -280 },
 	Width = 235, -- 235 default
 	Scale = 1.1, 
@@ -2445,10 +2442,6 @@ Legacy.BlizzardObjectivesTracker = (IsClassic) and {
 	SpaceTop = 260, 
 	Width = 255 -- 280 is classic default
 } or (IsRetail) and {
-
-	PlaceV2 = { "TOPRIGHT", -(60 + 0/2), -420 },
-	WidthV2 = 235, 
-
 	Place = { "TOPRIGHT", -60, -420 },
 	Width = 220, -- 235 default
 	Scale = 1.1, 
