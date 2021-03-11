@@ -2419,6 +2419,9 @@ Azerite.BlizzardObjectivesTracker = (IsClassic) and {
 	SpaceTop = 260, 
 	Width = 255 -- 280 is classic default
 } or (IsRetail) and {
+	PlaceV2 = { "TOPRIGHT", -(60 + 0/2), -280 },
+	WidthV2 = 235, 
+
 	Place = { "TOPRIGHT", -60, -280 },
 	Width = 235, -- 235 default
 	Scale = 1.1, 
@@ -2442,6 +2445,10 @@ Legacy.BlizzardObjectivesTracker = (IsClassic) and {
 	SpaceTop = 260, 
 	Width = 255 -- 280 is classic default
 } or (IsRetail) and {
+
+	PlaceV2 = { "TOPRIGHT", -(60 + 0/2), -420 },
+	WidthV2 = 235, 
+
 	Place = { "TOPRIGHT", -60, -420 },
 	Width = 220, -- 235 default
 	Scale = 1.1, 

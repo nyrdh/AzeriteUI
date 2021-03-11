@@ -30,6 +30,16 @@ local GetScreenHeight = GetScreenHeight
 local IsQuestWatched = IsQuestWatched
 local IsUnitOnQuest = IsUnitOnQuest
 
+-- WoW Globals
+local ObjectiveTrackerFrame = ObjectiveTrackerFrame
+local ObjectiveTrackerFrameHeaderMenuMinimizeButton = ObjectiveTrackerFrame.HeaderMenu.MinimizeButton
+local SCENARIO_CONTENT_TRACKER_MODULE = SCENARIO_CONTENT_TRACKER_MODULE
+local QUEST_TRACKER_MODULE = QUEST_TRACKER_MODULE
+local WORLD_QUEST_TRACKER_MODULE = WORLD_QUEST_TRACKER_MODULE
+local DEFAULT_OBJECTIVE_TRACKER_MODULE = DEFAULT_OBJECTIVE_TRACKER_MODULE
+local BONUS_OBJECTIVE_TRACKER_MODULE = BONUS_OBJECTIVE_TRACKER_MODULE
+local SCENARIO_TRACKER_MODULE = SCENARIO_TRACKER_MODULE
+
 -- Private API
 local Colors = Private.Colors
 local GetFont = Private.GetFont
@@ -55,6 +65,125 @@ local GetQuestDifficultyColor = function(level, playerLevel)
 		return Colors.quest.green
 	else
 		return Colors.quest.gray
+	end
+end
+
+-----------------------------------------------------------------
+-- Anchor Template (Retail)
+-----------------------------------------------------------------
+local USE_OBJECTIVES_TRACKER_CODE_V2 = true
+local BAGS_SHOWN, IMMERSION_SHOWN
+
+local ObjectiveTracker = Module:CreateFrame("Frame", nil, "UICenter")
+
+ObjectiveTracker.Disable = function(self)
+	ObjectiveTrackerFrameHeaderMenuMinimizeButton:Hide()
+end
+
+ObjectiveTracker.Toggle = function(self)
+	if (ObjectiveTrackerFrame:IsVisible()) then
+		ObjectiveTrackerFrame:Hide()
+	else
+		ObjectiveTrackerFrame:Show()
+	end
+end
+
+ObjectiveTracker.OnClick = function(self)
+	if (ObjectiveTrackerFrame:IsVisible()) then
+		ObjectiveTrackerFrame:Hide()
+	else
+		ObjectiveTrackerFrame:Show()
+	end
+end
+
+ObjectiveTracker.SetDefaultPosition = function(self)
+	local layout = Module.layout
+
+	local ObjectiveFrameHolder = Module:CreateFrame("Frame", "AzeriteUI_ObjectiveTracker", "UICenter")
+	ObjectiveFrameHolder:SetSize(layout.WidthV2, 22)
+	ObjectiveFrameHolder:Place(unpack(layout.PlaceV2))
+
+	ObjectiveTrackerFrame:ClearAllPoints()
+	ObjectiveTrackerFrame:SetPoint("TOP", ObjectiveFrameHolder)
+
+	local uiCenter = Module:GetFrame("UICenter")
+	local top = ObjectiveTrackerFrame:GetTop() or 0
+	local screenHeight = uiCenter:GetHeight() -- need to use our parenting frame's height instead.
+	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
+	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
+	local newScale = (layout.Scale or 1) / ((UIParent:GetScale() or 1)/(uiCenter:GetScale() or 1))
+
+	if (layout.Scale) then 
+		ObjectiveTrackerFrame:SetScale(newScale)
+		ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight / newScale)
+	else
+		ObjectiveTrackerFrame:SetScale(1)
+		ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight)
+	end	
+
+	ObjectiveTrackerFrame.IsUserPlaced = function() return true end
+
+end
+
+ObjectiveTracker.Style = function()
+	local frame = ObjectiveTrackerFrame.MODULES
+	if (frame) then
+		for i = 1, #frame do
+			local modules = frame[i]
+			if (modules) then
+				local header = modules.Header
+				local background = modules.Header.Background
+				background:SetAtlas(nil)
+			end
+		end
+	end
+end
+
+ObjectiveTracker.AddHooks = function(self)
+	hooksecurefunc("ObjectiveTracker_Update", self.Style)
+end
+
+ObjectiveTracker.Enable = function(self)
+	self:AddHooks()
+	self:Disable()
+	self:SetDefaultPosition()
+	
+	-- Add a keybind for toggling (SHIFT-O)
+	self.ToggleButton = Module:CreateFrame("Button", "AzeriteUI_ObjectiveTrackerToggleButton", "UICenter", "SecureActionButtonTemplate")
+	self.ToggleButton:SetScript("OnClick", self.Toggle)
+
+	SetOverrideBindingClick(self.ToggleButton, true, "SHIFT-O", "AzeriteUI_ObjectiveTrackerToggleButton")
+end
+
+
+local ObjectiveCover = ObjectiveTracker:CreateFrame("Frame")
+ObjectiveCover:SetAllPoints()
+ObjectiveCover:EnableMouse(true)
+ObjectiveCover:Hide()
+
+local ObjectiveAlphaDriver = Module:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
+
+ObjectiveAlphaDriver.Update = function(this)
+	local tracker = QuestWatchFrame or ObjectiveTrackerFrame
+	local hiddenBydriver = tracker and (not this:IsShown())
+
+	local shouldHide = IMMERSION_SHOWN or BAGS_SHOWN or (hiddenBydriver and tracker)
+	if (shouldHide) then
+		tracker:SetIgnoreParentAlpha(false)
+		ObjectiveTracker:SetAlpha(0)
+		
+		ObjectiveCover:SetFrameStrata(tracker:GetFrameStrata())
+		ObjectiveCover:SetFrameLevel(tracker:GetFrameLevel() + 5)
+		ObjectiveCover:ClearAllPoints()
+		ObjectiveCover:SetAllPoints(tracker)
+		ObjectiveCover:SetHitRectInsets(-40, -80, -40, 40)
+		ObjectiveCover:Show()
+	else
+		if (tracker) then
+			tracker:SetIgnoreParentAlpha(false)
+		end
+		ObjectiveTracker:SetAlpha(.9)
+		ObjectiveCover:Hide()
 	end
 end
 
@@ -410,27 +539,15 @@ Module.StyleRetailTracker = function(self)
 		return
 	end
 	if (ObjectiveTracker_Update) then 
-		hooksecurefunc("ObjectiveTracker_Update", function()
-			local frame = ObjectiveTrackerFrame.MODULES
-			if (frame) then
-				for i = 1, #frame do
-					local modules = frame[i]
-					if (modules) then
-						local header = modules.Header
-						local background = modules.Header.Background
-						background:SetAtlas(nil)
-
-						-- This will shrink the header texts
-						--local text = modules.Header.Text
-						--text:SetParent(header)
-					end
-				end
-			end
-		end)
+		hooksecurefunc("ObjectiveTracker_Update", ObjectiveTracker.Style)
 	end
 end
 
 Module.InitRetailTracker = function(self)
+	if (USE_OBJECTIVES_TRACKER_CODE_V2) then 
+		return self:InitTracker()
+	end
+
 	if (not IsRetail) then
 		return
 	end
@@ -482,6 +599,10 @@ Module.InitRetailTracker = function(self)
 end
 
 Module.PositionRetailTracker = function(self, event, ...)
+	if (USE_OBJECTIVES_TRACKER_CODE_V2) then
+		return
+	end
+
 	if (InCombatLockdown()) then
 		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	end
@@ -513,42 +634,31 @@ Module.PositionRetailTracker = function(self, event, ...)
 end
 
 -----------------------------------------------------------------
+-- New Version (Retail)
+-----------------------------------------------------------------
+Module.InitTracker = function(self)
+	if (not ObjectiveTrackerFrame) then 
+		return self:RegisterEvent("ADDON_LOADED", "OnEvent")
+	end
+	ObjectiveTracker:Enable()
+end
+
+-----------------------------------------------------------------
 -- Startup
 -----------------------------------------------------------------
-Module.CreateDriver = function(self)
-	if (self.driverFrame) then
+-- This creates a driver frames that toggles 
+-- the displayed alpha of the tracker,
+-- and also covers it with a mouse enabled overlay. 
+-- The driver frame does NOT toggle the actual tracker. 
+Module.InitAlphaDriver = function(self)
+
+	if (ObjectiveAlphaDriver.isHooked) then
 		return
 	end
 
-	local driverFrame = self:CreateFrame("Frame", nil, _G.UIParent, "SecureHandlerAttributeTemplate")
-	self.driverFrame = driverFrame
-
-	driverFrame.Update = function(this)
-		local tracker = QuestWatchFrame or ObjectiveTrackerFrame
-		local hiddenBydriver = tracker and (not this:IsShown())
-
-		local shouldHide = self.immersionVisible or self.bagsVisible or (hiddenBydriver and tracker)
-		if (shouldHide) then
-			tracker:SetIgnoreParentAlpha(false)
-			self.frame:SetAlpha(0)
-			self.frame.cover:SetFrameStrata(tracker:GetFrameStrata())
-			self.frame.cover:SetFrameLevel(tracker:GetFrameLevel() + 5)
-			self.frame.cover:ClearAllPoints()
-			self.frame.cover:SetAllPoints(tracker)
-			self.frame.cover:SetHitRectInsets(-40, -80, -40, 40)
-			self.frame.cover:Show()
-		else
-			if (tracker) then
-				tracker:SetIgnoreParentAlpha(false)
-			end
-			self.frame:SetAlpha(.9)
-			self.frame.cover:Hide()
-		end
-	end
-
-	driverFrame:HookScript("OnShow", driverFrame.Update)
-	driverFrame:HookScript("OnHide", driverFrame.Update)
-	driverFrame:SetAttribute("_onattributechanged", [=[
+	ObjectiveAlphaDriver:HookScript("OnShow", ObjectiveAlphaDriver.Update)
+	ObjectiveAlphaDriver:HookScript("OnHide", ObjectiveAlphaDriver.Update)
+	ObjectiveAlphaDriver:SetAttribute("_onattributechanged", [=[
 		if (name == "state-vis") then
 			if (value == "show") then 
 				if (not self:IsShown()) then 
@@ -562,25 +672,24 @@ Module.CreateDriver = function(self)
 		end
 	]=])
 
-	local layout = self.layout
 	local driver = "hide;show"
 	if (IsRetail) then 
-		if (layout.HideInVehicles) then
+		if (self.layout.HideInVehicles) then
 			driver = "[overridebar][possessbar][shapeshift][vehicleui]"  .. driver
 		end 
-		if (layout.HideInArena) then 
+		if (self.layout.HideInArena) then 
 			driver = "[@arena1,exists][@arena2,exists][@arena3,exists][@arena4,exists][@arena5,exists]" .. driver
 		end
 	end
-	if (layout.HideInBossFights) then
+	if (self.layout.HideInBossFights) then
 		driver = "[@boss1,exists][@boss2,exists][@boss3,exists][@boss4,exists]" .. driver
 	end 
-	if (layout.HideInCombat) then
+	if (self.layout.HideInCombat) then
 		driver = "[combat]" .. driver
 	end 
+	RegisterAttributeDriver(ObjectiveAlphaDriver, "state-vis", driver)
 
-	RegisterAttributeDriver(driverFrame, "state-vis", driver)
-
+	ObjectiveAlphaDriver.isHooked = true
 end
 
 Module.OnEvent = function(self, event, ...)
@@ -606,15 +715,15 @@ Module.OnEvent = function(self, event, ...)
 			if (frame) then
 				self.queueImmersionHook = nil
 				frame:HookScript("OnShow", function() 
-					self.immersionVisible = true 
-					if (self.driverFrame) then
-						self.driverFrame:Update()
+					IMMERSION_SHOWN = true 
+					if (ObjectiveAlphaDriver) then
+						ObjectiveAlphaDriver:Update()
 					end
 				end)
 				frame:HookScript("OnHide", function() 
-					self.immersionVisible = nil 
-					if (self.driverFrame) then
-						self.driverFrame:Update()
+					IMMERSION_SHOWN = nil 
+					if (ObjectiveAlphaDriver) then
+						ObjectiveAlphaDriver:Update()
 					end
 				end)
 			end
@@ -622,32 +731,32 @@ Module.OnEvent = function(self, event, ...)
 
 		local frame = ImmersionFrame
 		if (frame) then
-			self.immersionVisible = frame:IsShown()
+			IMMERSION_SHOWN = frame:IsShown()
 			needUpdate = true
 		end
 
 		local bags = Wheel("LibModule"):GetModule("Backpacker", true)
 		if (bags) then
-			self.bagsVisible = bags:IsVisible()
+			BAGS_SHOWN = bags:IsVisible()
 			needUpdate = true
 		end
 
 		if (needUpdate) then 
-			if (self.driverFrame) then
-				self.driverFrame:Update()
+			if (ObjectiveAlphaDriver) then
+				ObjectiveAlphaDriver:Update()
 			end
 		end
 
 	elseif (event == "GP_BAGS_HIDDEN") then
-		self.bagsVisible = nil
-		if (self.driverFrame) then
-			self.driverFrame:Update()
+		BAGS_SHOWN = nil
+		if (ObjectiveAlphaDriver) then
+			ObjectiveAlphaDriver:Update()
 		end
 
 	elseif (event == "GP_BAGS_SHOWN") then
-		self.bagsVisible = true
-		if (self.driverFrame) then
-			self.driverFrame:Update()
+		BAGS_SHOWN = true
+		if (ObjectiveAlphaDriver) then
+			ObjectiveAlphaDriver:Update()
 		end
 
 	end 
@@ -659,26 +768,27 @@ Module.OnInit = function(self)
 		return self:SetUserDisabled(true)
 	end
 
-	self.frame = self:CreateFrame("Frame", nil, "UICenter")
-	self.frame:SetFrameStrata("LOW")
-
 	if (IsClassic) then
+		self.frame = self:CreateFrame("Frame", nil, "UICenter")
+		self.frame:SetFrameStrata("LOW")
 		self:StyleClassicLog()
 		self:StyleClassicTracker()
 	end
+
 	if (IsRetail) then
 		self:InitRetailTracker()
 	end
+
 	if (self:IsAddOnEnabled("Immersion")) then
 		self.queueImmersionHook = true
 	end
 
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("VARIABLES_LOADED", "OnEvent")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterMessage("GP_BAGS_HIDDEN", "OnEvent")
 	self:RegisterMessage("GP_BAGS_SHOWN", "OnEvent")
 end 
 
 Module.OnEnable = function(self)
-	self:CreateDriver()
+	self:InitAlphaDriver()
 end
