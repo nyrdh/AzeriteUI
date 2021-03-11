@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 5)
+local LibChatTool = Wheel:Set("LibChatTool", 7)
 if (not LibChatTool) then
 	return
 end
@@ -65,9 +65,9 @@ local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 local PlayerFaction, PlayerFactionLabel = UnitFactionGroup("player")
 
--- Stuff we need to clean up
+-- Output Templates
 -----------------------------------------------------------------
--- Chat output templates
+-- Chat output color codes
 local sign, value, label = "|cffeaeaea", "|cfff0f0f0", "|cffffb200"
 local red = "|cffcc0000"
 local green = "|cff00cc00"
@@ -76,26 +76,28 @@ local yellow = "|cffffb200"
 local orange = "|cffff6600"
 local gain, loss, busy = gray, red, yellow
 
-local ACHIEVEMENT_TEMPLATE = "!%s: %s"
-local HONOR_KILL_TEMPLATE = gain.."+|r "..value.."%d|r "..label.."%s:|r %s "..sign.."(%d %s)|r"
-local HONOR_BONUS_TEMPLATE = gain.."+|r "..value.."%d|r "..label.."%s|r"
-local HONOR_BATTLEFIELD_TEMPLATE = "%s: "..value.."%d|r "..label.."%s|r"
-local LOOT_TEMPLATE = gain.."+|r %s"
-local LOOT_TEMPLATE_MULTIPLE = gain.."+|r %s "..sign.."(%d)|r"
-local LOOT_MINUS_TEMPLATE = loss.."- %s|r"
-local REP_TEMPLATE = gain.."+ %s:|r %s"
-local REP_TEMPLATE_MULTIPLE = gain.."+|r "..value.."%d|r "..sign.."%s:|r %s"
-local XP_TEMPLATE = gain.."+|r "..value.."%d|r "..sign.."%s|r"
-local XP_TEMPLATE_MULTIPLE = gain.."+|r "..value.."%d|r "..sign.."%s:|r "..label.."%s|r"
-local AFK_ADDED_TEMPLATE = busy.."+ "..FRIENDS_LIST_AWAY.."|r"
-local AFK_ADDED_TEMPLATE_MESSAGE = busy.."+ "..FRIENDS_LIST_AWAY..": |r"..value.."%s|r"
-local AFK_CLEARED_TEMPLATE = green.."- "..FRIENDS_LIST_AWAY.."|r"
-local DND_ADDED_TEMPLATE = orange.."+ "..FRIENDS_LIST_BUSY.."|r"
-local DND_ADDED_TEMPLATE_MESSAGE = orange.."+ "..FRIENDS_LIST_BUSY..": |r"..value.."%s|r"
-local DND_CLEARED_TEMPLATE = green.."- "..FRIENDS_LIST_BUSY.."|r"
-local RESTED_ADDED_TEMPLATE = gain.."+ "..TUTORIAL_TITLE26.."|r"
-local RESTED_CLEARED_TEMPLATE = busy.."- "..TUTORIAL_TITLE26.."|r"
-local SKILL_TEMPLATE = gain.."+|r %s "..sign.."(%d)|r"
+-- Chat output templates
+local T = {}
+T.ACHIEVEMENT = "!%s: %s"
+T.HONOR_KILL = gain.."+|r "..value.."%d|r "..label.."%s:|r %s "..sign.."(%d %s)|r"
+T.HONOR_BONUS = gain.."+|r "..value.."%d|r "..label.."%s|r"
+T.HONOR_BATTLEFIELD = "%s: "..value.."%d|r "..label.."%s|r"
+T.LOOT = gain.."+|r %s"
+T.LOOT_MULTIPLE = gain.."+|r %s "..sign.."(%d)|r"
+T.LOOT_MINUS = loss.."- %s|r"
+T.REP = gain.."+ %s:|r %s"
+T.REP_MULTIPLE = gain.."+|r "..value.."%d|r "..sign.."%s:|r %s"
+T.XP = gain.."+|r "..value.."%d|r "..sign.."%s|r"
+T.XP_MULTIPLE = gain.."+|r "..value.."%d|r "..sign.."%s:|r "..label.."%s|r"
+T.AFK_ADDED = busy.."+ "..FRIENDS_LIST_AWAY.."|r"
+T.AFK_ADDED_MESSAGE = busy.."+ "..FRIENDS_LIST_AWAY..": |r"..value.."%s|r"
+T.AFK_CLEARED = green.."- "..FRIENDS_LIST_AWAY.."|r"
+T.DND_ADDED = orange.."+ "..FRIENDS_LIST_BUSY.."|r"
+T.DND_ADDED_MESSAGE = orange.."+ "..FRIENDS_LIST_BUSY..": |r"..value.."%s|r"
+T.DND_CLEARED = green.."- "..FRIENDS_LIST_BUSY.."|r"
+T.RESTED_ADDED = gain.."+ "..TUTORIAL_TITLE26.."|r"
+T.RESTED_CLEARED = busy.."- "..TUTORIAL_TITLE26.."|r"
+T.SKILL = gain.."+|r %s "..sign.."(%d)|r"
 
 -- Get the current game client locale.
 -- We're treating enGB on old clients as enUS, as it's the same in-game anyway.
@@ -117,12 +119,14 @@ local L_SILVER = L_SILVER_DEFAULT
 local L_COPPER_DEFAULT = string_format("|TInterface\\MoneyFrame\\UI-CopperIcon:16:16:2:0|t")
 local L_COPPER = L_COPPER_DEFAULT
 
--- Search Patterns
-local P_GOLD = getFilter(GOLD_AMOUNT) -- "%d Gold"
-local P_SILVER = getFilter(SILVER_AMOUNT) -- "%d Silver"
-local P_COPPER = getFilter(COPPER_AMOUNT) -- "%d Copper"
+-- Search Pattern Cache.
+-- This will generate the pattern on the first lookup.
+local P = setmetatable({}, { __index = function(t,k) 
+	rawset(t,k,getFilter(k))
+	return rawget(t,k)
+end })
 
--- Patterns to identify loot
+-- Patterns to identify loot.
 local LootPatterns = {}
 for i,global in ipairs({
 	"LOOT_ITEM_CREATED_SELF", -- "You create: %s."
@@ -143,7 +147,7 @@ for i,global in ipairs({
 	end
 end
 
--- Patterns to identify reputation changes
+-- Patterns to identify reputation changes.
 local FactionPatterns = {}
 for i,global in ipairs({
 	"FACTION_STANDING_INCREASED", -- "Your %s reputation has increased by %d."
@@ -158,6 +162,7 @@ for i,global in ipairs({
 end
 
 -- Localized search patterns created from global strings.
+-- Anything here is filtered away when the Spam filter is active.
 local FilteredGlobals = {}
 for i,global in ipairs({
 	-- Verified to work
@@ -281,14 +286,19 @@ local ParseForMoney = function(message)
 	message = string_gsub(message, "(%d)%"..LARGE_NUMBER_SEPERATOR.."(%d)", "%1%2")
 
 	-- Basic old-style parsing first.
-	local gold_amount = tonumber(string_match(message, P_GOLD)) or 0
-	local silver_amount = tonumber(string_match(message, P_SILVER)) or 0
-	local copper_amount = tonumber(string_match(message, P_COPPER)) or 0
+	-- Doing it in two steps to limit number of needed function calls.
+	local gold = string_match(message, P[GOLD_AMOUNT]) -- "%d Gold"
+	local gold_amount = gold and tonumber(gold) or 0
+	local silver = string_match(message, P[SILVER_AMOUNT]) -- "%d Silver"
+	local silver_amount = silver and tonumber(silver) or 0
+	local copper = string_match(message, P[COPPER_AMOUNT]) -- "%d Copper"
+	local copper_amount = copper and tonumber(copper) or 0
 
 	-- Now we have to do it the hard way. 
 	if (gold_amount == 0) and (silver_amount == 0) and (copper_amount == 0) then
 
 		-- Discover icon and currency existence.
+		-- Could definitely simplify this. But. We don't.
 		local hasGold, hasSilver, hasCopper
 		if (ENABLE_COLORBLIND_MODE == "1") then
 			hasGold = string_find(message,"%d"..GOLD_AMOUNT_SYMBOL)
@@ -310,30 +320,44 @@ local ParseForMoney = function(message)
 			message = string_gsub(message, "\124[cC]%x%x%x%x%x%x%x%x", "")
 			message = string_gsub(message, "\124[rR]", "")
 
+			-- And again we do it the clunky way, to minimize needed function calls.
 			if (hasGold) then
 				if (hasSilver) and (hasCopper) then
 					gold_amount, silver_amount, copper_amount = string_match(message,"(%d+).*%s+(%d+).*%s+(%d+).*")
+					return tonumber(gold_amount) or 0, tonumber(silver_amount) or 0, tonumber(copper_amount) or 0
+
 				elseif (hasSilver) then
 					gold_amount, silver_amount = string_match(message,"(%d+).*%s+(%d+).*")
+					return tonumber(gold_amount) or 0, tonumber(silver_amount) or 0, 0
+
 				elseif (hasCopper) then
 					gold_amount, copper_amount = string_match(message,"(%d+).*%s+(%d+).*")
+					return tonumber(gold_amount), 0, tonumber(copper_amount) or 0
+
 				else
 					gold_amount = string_match(message,"(%d+).*%s")
+					return tonumber(gold_amount) or 0,0,0
+
 				end
 			elseif (hasSilver) then
 				if (hasCopper) then
 					silver_amount, copper_amount = string_match(message,"(%d+).*%s+(%d+).*")
+					return 0, tonumber(silver_amount) or 0, tonumber(copper_amount) or 0
+
 				else
 					silver_amount = string_match(message,"(%d+).*%s")
+					return 0, tonumber(silver_amount) or 0,0
+
 				end
 			elseif (hasCopper) then
 				copper_amount = string_match(message,"(%d+).*%s")
+				return 0,0, tonumber(copper_amount) or 0
 			end
 		end
 		
 	end
 
-	return tonumber(gold_amount) or 0, tonumber(silver_amount) or 0, tonumber(copper_amount) or 0
+	return gold_amount, silver_amount, copper_amount
 end
 
 -- Custom method for filtering messages
@@ -370,7 +394,7 @@ local AddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
 		if (not filtered) then
 			local moneyString = CreateMoneyString(ParseForMoney(msg))
 			if (moneyString) then
-				msg = string_format(LOOT_TEMPLATE, moneyString)
+				msg = string_format(T.LOOT, moneyString)
 			end
 		end
 	end
@@ -423,7 +447,7 @@ local OnChatMessage = function(frame, event, message, author, ...)
 
 		local moneyString = CreateMoneyString(ParseForMoney(message))
 		if (moneyString) then
-			return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
+			return false, string_format(T.LOOT, moneyString), author, ...
 		else
 			return true
 		end
@@ -492,9 +516,9 @@ local OnChatMessage = function(frame, event, message, author, ...)
 					end
 				end
 				if (value) then
-					return false, string_format(REP_TEMPLATE_MULTIPLE, value, REPUTATION, faction), author, ...
+					return false, string_format(T.REP_MULTIPLE, value, REPUTATION, faction), author, ...
 				else
-					return false, string_format(REP_TEMPLATE, REPUTATION, faction), author, ...
+					return false, string_format(T.REP, REPUTATION, faction), author, ...
 				end
 			end
 		end
@@ -502,49 +526,49 @@ local OnChatMessage = function(frame, event, message, author, ...)
 	elseif (event == "CHAT_MSG_COMBAT_XP_GAIN") then
 
 		-- Monster with rested bonus
-		local xp_bonus_pattern = getFilter(COMBATLOG_XPGAIN_EXHAUSTION1) -- "%s dies, you gain %d experience. (%s exp %s bonus)"
+		local xp_bonus_pattern = P[COMBATLOG_XPGAIN_EXHAUSTION1] -- "%s dies, you gain %d experience. (%s exp %s bonus)"
 		local name, total, xp, bonus = string_match(message, xp_bonus_pattern)
 		if (total) then
-			return false, string_format(XP_TEMPLATE_MULTIPLE, total, XP, name), author, ...
+			return false, string_format(T.XP_MULTIPLE, total, XP, name), author, ...
 		end
 
 		-- Quest with rested bonus
-		local xp_quest_rested_pattern = getFilter(COMBATLOG_XPGAIN_QUEST) -- "You gain %d experience. (%s exp %s bonus)"
+		local xp_quest_rested_pattern = P[COMBATLOG_XPGAIN_QUEST] -- "You gain %d experience. (%s exp %s bonus)"
 		name, total, xp, bonus = string_match(message, xp_bonus_pattern)
 		if (total) then
-			return false, string_format(XP_TEMPLATE_MULTIPLE, total, XP, name), author, ...
+			return false, string_format(T.XP_MULTIPLE, total, XP, name), author, ...
 		end
 
 		-- Named monster
-		local xp_normal_pattern = getFilter(COMBATLOG_XPGAIN_FIRSTPERSON) -- "%s dies, you gain %d experience."
+		local xp_normal_pattern = P[COMBATLOG_XPGAIN_FIRSTPERSON] -- "%s dies, you gain %d experience."
 		name, total = string_match(message, xp_normal_pattern)
 		if (total) then
-			return false, string_format(XP_TEMPLATE_MULTIPLE, total, XP, name), author, ...
+			return false, string_format(T.XP_MULTIPLE, total, XP, name), author, ...
 		end
 	
 		-- Quest
-		local xp_quest_pattern = getFilter(COMBATLOG_XPGAIN_FIRSTPERSON_UNNAMED) -- "You gain %d experience."
+		local xp_quest_pattern = P[COMBATLOG_XPGAIN_FIRSTPERSON_UNNAMED] -- "You gain %d experience."
 		total = string_match(message, xp_quest_pattern)
 		if (total) then
-			return false, string_format(XP_TEMPLATE, total, XP), author, ...
+			return false, string_format(T.XP, total, XP), author, ...
 		end
 
 		-- Unknown
-		local xp_quest_pattern = getFilter(ERR_QUEST_REWARD_EXP_I) -- "Experience gained: %d."
+		local xp_quest_pattern = P[ERR_QUEST_REWARD_EXP_I] -- "Experience gained: %d."
 		total = string_match(message, xp_quest_pattern)
 		if (total) then
-			return false, string_format(XP_TEMPLATE, total, XP), author, ...
+			return false, string_format(T.XP, total, XP), author, ...
 		end
 
 	elseif (event == "CHAT_MSG_SKILL") then
 	
-		local skillup_pattern = getFilter(SKILL_RANK_UP) -- "Your skill in %s has increased to %d."
+		local skillup_pattern = P[SKILL_RANK_UP] -- "Your skill in %s has increased to %d."
 		local skill, gain = string_match(message, skillup_pattern)
 		if (skill and gain) then
 			gain = tonumber(gain)
 			if (gain) then
 				-- CHAT_MSG_SKILL "Skill"
-				return false, string_format(SKILL_TEMPLATE, skill, gain), author, ...
+				return false, string_format(T.SKILL, skill, gain), author, ...
 			end
 		end
 
@@ -572,7 +596,7 @@ local OnChatMessage = function(frame, event, message, author, ...)
 	elseif (event == "CHAT_MSG_ACHIEVEMENT") then
 
 		-- Achievement announce
-		local achievement_pattern = getFilter(ACHIEVEMENT_BROADCAST) -- "%s has earned the achievement %s!"
+		local achievement_pattern = P[ACHIEVEMENT_BROADCAST] -- "%s has earned the achievement %s!"
 		local player_name, achievement = string_match(message, achievement_pattern)
 		if (player_name) and (achievement) then
 
@@ -580,7 +604,7 @@ local OnChatMessage = function(frame, event, message, author, ...)
 			player_name = string_gsub(player_name, "[%[/%]]", "")
 			achievement = string_gsub(achievement, "[%[/%]]", "")
 			
-			return false, string_format(ACHIEVEMENT_TEMPLATE, player_name, achievement), author, ...
+			return false, string_format(T.ACHIEVEMENT, player_name, achievement), author, ...
 		end
 
 		-- Pass everything else through
@@ -596,25 +620,25 @@ local OnChatMessage = function(frame, event, message, author, ...)
 			-- Followers
 			if (IsRetail) then
 				-- Exhausted
-				local follower_exhausted_pattern = getFilter(GARRISON_FOLLOWER_DISBANDED) -- "%s has been exhausted."
+				local follower_exhausted_pattern = P[GARRISON_FOLLOWER_DISBANDED] -- "%s has been exhausted."
 				local follower_name = string_match(message, follower_exhausted_pattern)
 				if (follower_name) then
-					return false, string_format(LOOT_MINUS_TEMPLATE, follower_name), author, ...
+					return false, string_format(T.LOOT_MINUS, follower_name), author, ...
 				end
 
 				-- Removed
-				local follower_removed_pattern = getFilter(GARRISON_FOLLOWER_REMOVED) -- "%s is no longer your follower."
+				local follower_removed_pattern = P[GARRISON_FOLLOWER_REMOVED] -- "%s is no longer your follower."
 				follower_name = string_match(message, follower_removed_pattern)
 				if (follower_name) then
-					return false, string_format(LOOT_MINUS_TEMPLATE, follower_name), author, ...
+					return false, string_format(T.LOOT_MINUS, follower_name), author, ...
 				end
 
 				-- Added
-				local follower_added_pattern = getFilter(GARRISON_FOLLOWER_ADDED) -- "%s recruited."
+				local follower_added_pattern = P[GARRISON_FOLLOWER_ADDED] -- "%s recruited."
 				follower_name = string_match(message, follower_added_pattern)
 				if (follower_name) then
 					follower_name = string_gsub(follower_name, "[%[/%]]", "") -- kill brackets
-					return false, string_format(LOOT_TEMPLATE, follower_name), author, ...
+					return false, string_format(T.LOOT, follower_name), author, ...
 				end
 
 				-- GARRISON_FOLLOWER_LEVEL_UP = "LEVEL UP!"
@@ -624,24 +648,24 @@ local OnChatMessage = function(frame, event, message, author, ...)
 			end
 
 			-- Discovery XP?
-			local xp_discovery_pattern = getFilter(ERR_ZONE_EXPLORED_XP) -- "Discovered %s: %d experience gained"
+			local xp_discovery_pattern = P[ERR_ZONE_EXPLORED_XP] -- "Discovered %s: %d experience gained"
 			local name, total = string_match(message, xp_discovery_pattern)
 			if (total) then
-				return false, string_format(XP_TEMPLATE_MULTIPLE, total, XP, name), author, ...
+				return false, string_format(T.XP_MULTIPLE, total, XP, name), author, ...
 			end
 
 			-- Quest money?
-			--local money_pattern = getFilter(ERR_QUEST_REWARD_MONEY_S) -- "Received %s."
+			--local money_pattern = P[ERR_QUEST_REWARD_MONEY_S] -- "Received %s."
 			--local money_string = string_match(message, money_pattern)
 			--if (money_string) then
 			--	
-			--	local gold_amount = tonumber(string_match(money_string, P_GOLD)) or 0
-			--	local silver_amount = tonumber(string_match(money_string, P_SILVER)) or 0
-			--	local copper_amount = tonumber(string_match(money_string, P_COPPER)) or 0
+			--	local gold_amount = tonumber(string_match(money_string, P[GOLD_AMOUNT])) or 0
+			--	local silver_amount = tonumber(string_match(money_string, P[SILVER_AMOUNT])) or 0
+			--	local copper_amount = tonumber(string_match(money_string, P[COPPER_AMOUNT])) or 0
 			--	
 			--	local moneyString = CreateMoneyString(gold_amount, silver_amount, copper_amount)
 			--	if (moneyString) then
-			--		return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
+			--		return false, string_format(T.LOOT, moneyString), author, ...
 			--	else
 			--		return true
 			--	end
@@ -650,49 +674,49 @@ local OnChatMessage = function(frame, event, message, author, ...)
 			-- New 9.0.5 "You gained:"-style of money.
 			local moneyString = CreateMoneyString(ParseForMoney(message))
 			if (moneyString) then
-				return false, string_format(LOOT_TEMPLATE, moneyString), author, ...
+				return false, string_format(T.LOOT, moneyString), author, ...
 			end
 
 			-- AFK
 			if (message == MARKED_AFK) then -- "You are now AFK."
-				return false, AFK_ADDED_TEMPLATE, author, ...
+				return false, T.AFK_ADDED, author, ...
 			end
 			if (message == CLEARED_AFK) then -- "You are no longer AFK."
-				return false, AFK_CLEARED_TEMPLATE, author, ...
+				return false, T.AFK_CLEARED, author, ...
 			end
-			local afk_pattern = getFilter(MARKED_AFK_MESSAGE) -- "You are now AFK: %s"
+			local afk_pattern = P[MARKED_AFK_MESSAGE] -- "You are now AFK: %s"
 			local afk_message = string_match(message, afk_pattern)
 			if (afk_message) then
 				if (afk_message == DEFAULT_AFK_MESSAGE) then -- "Away from Keyboard"
-					return false, AFK_ADDED_TEMPLATE, author, ...
+					return false, T.AFK_ADDED, author, ...
 				end
-				return false, string_format(AFK_ADDED_TEMPLATE_MESSAGE, afk_message), author, ...
+				return false, string_format(T.AFK_ADDED_MESSAGE, afk_message), author, ...
 			end
 
 			-- DND
 			if (message == CLEARED_DND) then -- "You are no longer marked DND."
-				return false, DND_CLEARED_TEMPLATE, author, ...
+				return false, T.DND_CLEARED, author, ...
 			end
-			local dnd_pattern = getFilter(MARKED_DND) -- "You are now DND: %s."
+			local dnd_pattern = P[MARKED_DND] -- "You are now DND: %s."
 			local dnd_message = string_match(message, dnd_pattern)
 			if (dnd_message) then
 				if (dnd_message == DEFAULT_DND_MESSAGE) then -- "Do not Disturb"
-					return false, DND_ADDED_TEMPLATE, author, ...
+					return false, T.DND_ADDED, author, ...
 				end
-				return false, string_format(DND_ADDED_TEMPLATE_MESSAGE, dnd_message), author, ...
+				return false, string_format(T.DND_ADDED_MESSAGE, dnd_message), author, ...
 			end
 
 			-- Rested
 			if (message == ERR_EXHAUSTION_WELLRESTED) then -- "You feel well rested."
-				return false, RESTED_ADDED_TEMPLATE, author, ...
+				return false, T.RESTED_ADDED, author, ...
 			end
 			if (message == ERR_EXHAUSTION_NORMAL) then -- "You feel normal."
-				return false, RESTED_CLEARED_TEMPLATE, author, ...
+				return false, T.RESTED_CLEARED, author, ...
 			end
 
 			-- Artifact Power?
 			if (IsRetail) then
-				local artifact_pattern = getFilter(ARTIFACT_XP_GAIN) -- "%s gains %s Artifact Power."
+				local artifact_pattern = P[ARTIFACT_XP_GAIN] -- "%s gains %s Artifact Power."
 				local artifact, artifactPower = string_match(message, artifact_pattern)
 				if (artifact) then
 					local first, last = string_find(message, "|c(.+)|r")
@@ -702,7 +726,7 @@ local OnChatMessage = function(frame, event, message, author, ...)
 						local countString = string_sub(message, last + 1)
 						local artifactPower = tonumber(string_match(countString, "(%d+)"))
 						if (artifactPower) and (artifactPower > 1) then
-							return false, string_format(REP_TEMPLATE_MULTIPLE, artifactPower, ARTIFACT_POWER, artifact), author, ...
+							return false, string_format(T.REP_MULTIPLE, artifactPower, ARTIFACT_POWER, artifact), author, ...
 						end
 					end
 				end
@@ -723,9 +747,9 @@ local OnChatMessage = function(frame, event, message, author, ...)
 						local countString = string_sub(message, last + 1)
 						local count = tonumber(string_match(countString, "(%d+)"))
 						if (count) and (count > 1) then
-							return false, string_format(LOOT_TEMPLATE_MULTIPLE, item, count), author, ...
+							return false, string_format(T.LOOT_MULTIPLE, item, count), author, ...
 						else
-							return false, string_format(LOOT_TEMPLATE, item), author, ...
+							return false, string_format(T.LOOT, item), author, ...
 						end
 					else
 						return false, string_gsub(message, "|", "||"), author, ...
