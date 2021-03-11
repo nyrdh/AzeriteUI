@@ -1,4 +1,4 @@
-local Version = 59
+local Version = 60
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -416,9 +416,7 @@ LibMinimap.HandleObjectivesTracker = function(self, event, addon)
 	end
 	if (ObjectiveTrackerFrame) then
 		if (not ObjectiveTrackerFrame:IsUserPlaced()) then
-			ObjectiveTrackerFrame:SetClampedToScreen(false)
-			ObjectiveTrackerFrame:SetMovable(true)
-			ObjectiveTrackerFrame:SetUserPlaced(true)
+			ObjectiveTrackerFrame.IsUserPlaced = function() return true end
 		end
 	else
 		LibMinimap:RegisterEvent("ADDON_LOADED", "HandleObjectivesTracker")
