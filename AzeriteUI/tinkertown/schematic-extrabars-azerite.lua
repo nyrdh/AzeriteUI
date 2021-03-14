@@ -260,11 +260,13 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Azerite", {
 						"CreateScaffolds", function(self)
 
 							local extraScaffold = self:CreateFrame("Frame", nil, "UICenter")
+							extraScaffold:SetFrameStrata("LOW")
 							extraScaffold:Place("CENTER", "UICenter", "BOTTOMRIGHT", -482, 360 + 52 + 4) -- do not collide!
 							extraScaffold:SetSize(64,64)
 							self.extraScaffold = extraScaffold
 						
 							local zoneScaffold = self:CreateFrame("Frame", nil, "UICenter")
+							zoneScaffold:SetFrameStrata("LOW")
 							zoneScaffold:Place("CENTER", "UICenter", "BOTTOMRIGHT", -482, 360)
 							zoneScaffold:SetSize(64,64)
 							self.zoneScaffold = zoneScaffold
@@ -280,6 +282,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Azerite", {
 
 							UIPARENT_MANAGED_FRAME_POSITIONS.ExtraAbilityContainer = nil
 							ExtraAbilityContainer.SetSize = function() end
+							ExtraAbilityContainer:SetFrameStrata("LOW")
 							ExtraActionBarFrame:SetParent(self.extraScaffold)
 							ExtraActionBarFrame:ClearAllPoints()
 							ExtraActionBarFrame:SetAllPoints()
@@ -288,6 +291,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Azerite", {
 							ExtraActionBarFrame.ignoreFramePositionManager = true
 						
 							ZoneAbilityFrame.SpellButtonContainer.holder = self.zoneScaffold
+							ZoneAbilityFrame.SpellButtonContainer:SetFrameStrata("LOW")
 							ZoneAbilityFrame:SetParent(self.zoneScaffold)
 							ZoneAbilityFrame:ClearAllPoints()
 							ZoneAbilityFrame:SetAllPoints()
@@ -310,7 +314,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Azerite", {
 
 								-- Give the button access to its scaffold
 								button.scaffold = self.extraScaffold
-								
+
 								-- Unified styling method for the buttons 
 								StripNStyle(button)
 

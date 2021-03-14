@@ -255,11 +255,13 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 						"CreateScaffolds", function(self)
 
 							local extraScaffold = self:CreateFrame("Frame", nil, "UICenter")
+							extraScaffold:SetFrameStrata("LOW")
 							extraScaffold:Place("BOTTOM", -150, 300)
 							extraScaffold:SetSize(64,64)
 							self.extraScaffold = extraScaffold
 						
 							local zoneScaffold = self:CreateFrame("Frame", nil, "UICenter")
+							zoneScaffold:SetFrameStrata("LOW")
 							zoneScaffold:Place("BOTTOM", 150, 300)
 							zoneScaffold:SetSize(64,64)
 							self.zoneScaffold = zoneScaffold
@@ -275,6 +277,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 
 							UIPARENT_MANAGED_FRAME_POSITIONS.ExtraAbilityContainer = nil
 							ExtraAbilityContainer.SetSize = function() end
+							ExtraAbilityContainer:SetFrameStrata("LOW")
 							ExtraActionBarFrame:SetParent(self.extraScaffold)
 							ExtraActionBarFrame:ClearAllPoints()
 							ExtraActionBarFrame:SetAllPoints()
@@ -283,6 +286,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 							ExtraActionBarFrame.ignoreFramePositionManager = true
 						
 							ZoneAbilityFrame.SpellButtonContainer.holder = self.zoneScaffold
+							ZoneAbilityFrame.SpellButtonContainer:SetFrameStrata("LOW")
 							ZoneAbilityFrame:SetParent(self.zoneScaffold)
 							ZoneAbilityFrame:ClearAllPoints()
 							ZoneAbilityFrame:SetAllPoints()
