@@ -1,4 +1,4 @@
-local LibBagButton = Wheel:Set("LibBagButton", 44)
+local LibBagButton = Wheel:Set("LibBagButton", 46)
 if (not LibBagButton) then	
 	return
 end
@@ -472,6 +472,8 @@ Button.SetHeight = function(self, ...)
 end
 
 -- ItemButton ID Handling
+-- Don't use these for blizz buttons, 
+-- we should just let them keep what they have. 
 ----------------------------------------------------
 -- Set the bagID of the button.
 -- Only accept changes within the same bagType range,
@@ -841,6 +843,12 @@ Button.OnLeave = function(self)
 	end
 end
 
+Button.OnPreClick = function(self)
+end
+
+Button.OnPostClick = function(self)
+end
+
 -- The button's actual event handler, 
 -- as we are routing all our own callbacks to this one.
 local UpdateButton = function(self, event, ...)
@@ -1013,12 +1021,12 @@ Container.Update = function(self)
 	end
 end
 
-Container.SpawnItemButton = function(self, bagType)
+Container.SpawnItemButton = function(self, ...)
 	if (not self.buttons) then
 		self.buttons = {}
 	end
 
-	local button = LibBagButton:SpawnItemButton(bagType)
+	local button = LibBagButton:SpawnItemButton(...)
 	button:SetParent(self)
 	button._owner = self
 
@@ -1651,6 +1659,21 @@ end
 local hidden = CreateFrame("Frame")
 hidden:Hide()
 
+LibBagButton.GetBlizzardSlotButton = function(self, bagID, slotID)
+	if (bagID) and (slotID) then
+		local button = _G[string_format("ContainerFrame%dItem%d", bagID, slotID)]
+		if (button) then
+			button:ClearAllPoints()
+			return self:PrepareBlizzardSlotButton(button)
+		end
+	end
+end
+
+LibBagButton.PrepareBlizzardSlotButton = function(self, button)
+
+	return button
+end
+
 -- @input bagType <integer,string> bagID or bagType
 -- @return <frame> the button
 LibBagButton.SpawnItemButton = function(self, ...)
@@ -1684,7 +1707,6 @@ LibBagButton.SpawnItemButton = function(self, ...)
 
 	-- Our virtual object. We don't want the front-end to directly
 	-- interact with any of the actual objects created below.
-	--button = setmetatable(self:CreateFrame(BUTTON_TYPE), Button_MT)
 	button = setmetatable(self:CreateFrame("Frame"), Button_MT)
 	button:EnableMouse(false)
 	button.bagType = bagType
@@ -1696,13 +1718,13 @@ LibBagButton.SpawnItemButton = function(self, ...)
 	-- except that it totally isn't that at all. 
 	-- We just need a parent for the slot with and ID for the template to work.
 	parent = button:CreateFrame("Frame")
-	--parent:SetAllPoints()
 	parent:EnableMouse(false)
 	parent:SetID(bagID or 100)
 
 	-- Need to clear away blizzard layers from this one, 
 	-- as they interfere with anything we do.
-	slot = parent:CreateFrame(BUTTON_TYPE, nil, ButtonTemplates[bagType])
+	slot = self:GetBlizzardSlotButton(bagID, slotID) or parent:CreateFrame(BUTTON_TYPE, nil, ButtonTemplates[bagType])
+	slot:SetParent(parent) -- in case it's a blizz button. need to grab it.
 	slot:SetAllPoints(button) -- bypass the parent/fakebag object
 	slot:SetPoint("CENTER", button, "CENTER", 0, 0)
 	slot:EnableMouse(true)
@@ -1713,20 +1735,35 @@ LibBagButton.SpawnItemButton = function(self, ...)
 	slot:DisableDrawLayer("BORDER")
 	slot:DisableDrawLayer("ARTWORK")
 	slot:DisableDrawLayer("OVERLAY")
-	slot:GetNormalTexture():SetParent(hidden)
-	slot:GetPushedTexture():SetParent(hidden)
-	slot:GetHighlightTexture():SetParent(hidden)
+	slot:SetNormalTexture(nil)
+	slot:SetPushedTexture(nil)
+	slot:SetHighlightTexture(nil)
+
+	--local normalTexture = slot:GetNormalTexture()
+	--if (normalTexture) then
+	--	normalTexture:SetParent(hidden)
+	--end
+	--local pushedTexture = slot:GetPushedTexture()
+	--if (pushedTexture) then
+	--	pushedTexture:SetParent(hidden)
+	--end
+	--local highlightTexture = slot:GetHighlightTexture()
+	--if (highlightTexture) then
+	--	highlightTexture:SetParent(hidden)
+	--end
 
 	slot:SetID(slotID or 0)
 	slot:Show() -- do this before we add the scripthandlers below!
 
 	-- Set Scripts
 	-- Let these be proxies
+	slot:SetScript("OnEvent", nil)
 	slot:SetScript("OnEnter", function(slot) button:OnEnter() end)
 	slot:SetScript("OnLeave", function(slot) button:OnLeave() end)
 	--slot:SetScript("OnHide", function(slot) button:OnHide() end)
 	--slot:SetScript("OnShow", function(slot) button:OnShow() end)
-	--slot:SetScript("OnEvent", function(slot) button:OnEvent() end)
+	slot:SetScript("PreClick", function(slot) button:OnPreClick() end)
+	slot:HookScript("OnClick", function(slot) button:OnPostClick() end)
 
 	button:SetScript("OnHide", button.OnHide)
 	button:SetScript("OnShow", button.OnShow)
