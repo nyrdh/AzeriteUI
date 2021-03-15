@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.455-RC] 2021-03-15
+### Fixed
+- There might not be as many taints and blocked action messages when trying to click quest items spawning in the quest tracker while engaged in combat. 
+
 ## [3.1.454-RC] 2021-03-10
 - This update also contains a lot of undocument back-end changes related to primarily the bagbutton and tooltips libraries, as I'm actively developing both in preparation of both my upcoming standalone bag addon, as well as a potential quest item bar feature in AzeriteUI. 
 
