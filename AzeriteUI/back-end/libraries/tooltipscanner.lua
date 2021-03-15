@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 81)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 82)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -2138,14 +2138,14 @@ LibTooltipScanner.GetTooltipDataForContainerSlot = function(self, bagID, slotID,
 
 		if (itemLink) then
 
-			tbl.noValue = noValue
-
 			tbl = SetItemData(itemLink, tbl)
+
+			tbl.noValue = noValue
+			tbl.isReadable = readable
+			tbl.itemCount = itemCount or 1
 
 			tbl.hasCooldown = hasCooldown
 			tbl.repairCost = repairCost
-
-			tbl.itemCount = itemCount or 1
 
 			if (string_find(itemLink, "battlepet:")) then
 				local _, speciesID, level, breedQuality, maxHealth, power, speed = strsplit(":", itemLink)

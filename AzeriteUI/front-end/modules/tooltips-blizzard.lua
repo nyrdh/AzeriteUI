@@ -422,49 +422,49 @@ local OnTooltipHide = function(tooltip)
 	end
 end
 
-local OnTooltipAddLine = function(tooltip, msg)
-	if (tooltip:IsForbidden()) then 
-		return
-	end
-	if not(LOCKDOWNS[tooltip]) then
-		return OnTooltipShow(tooltip)
-	end 
-	for i = 2, tooltip:NumLines() do
-		local line = _G[tooltip:GetName().."TextLeft"..i]
-		if line then
-			align(line)
-			local text = line:GetText()
-			-- We found the new line
-			if (text == msg) then
-				line:SetText("")
-				return
-			end 
-		end
-	end
-end
+--local OnTooltipAddLine = function(tooltip, msg)
+--	if (tooltip:IsForbidden()) then 
+--		return
+--	end
+--	if not(LOCKDOWNS[tooltip]) then
+--		return OnTooltipShow(tooltip)
+--	end 
+--	for i = 2, tooltip:NumLines() do
+--		local line = _G[tooltip:GetName().."TextLeft"..i]
+--		if line then
+--			align(line)
+--			local text = line:GetText()
+--			-- We found the new line
+--			if (text == msg) then
+--				line:SetText("")
+--				return
+--			end 
+--		end
+--	end
+--end
 
-local OnTooltipAddDoubleLine = function(tooltip, leftText, rightText)
-	if (tooltip:IsForbidden()) then 
-		return
-	end
-	if not(LOCKDOWNS[tooltip]) then
-		return OnTooltipShow(tooltip)
-	end 
-	for i = 2, tooltip:NumLines() do
-		local left = _G[tooltip:GetName().."TextLeft"..i]
-		local right = _G[tooltip:GetName().."TextRight"..i]
-		if (left) then
-			local leftMsg = left:GetText()
-			local rightMsg = right:GetText()
-			if (leftMsg == leftText) or (rightMsg == rightText) then
-				align(left)
-				left:SetText("")
-				right:SetText("")
-				return
-			end 
-		end
-	end
-end
+--local OnTooltipAddDoubleLine = function(tooltip, leftText, rightText)
+--	if (tooltip:IsForbidden()) then 
+--		return
+--	end
+--	if not(LOCKDOWNS[tooltip]) then
+--		return OnTooltipShow(tooltip)
+--	end 
+--	for i = 2, tooltip:NumLines() do
+--		local left = _G[tooltip:GetName().."TextLeft"..i]
+--		local right = _G[tooltip:GetName().."TextRight"..i]
+--		if (left) then
+--			local leftMsg = left:GetText()
+--			local rightMsg = right:GetText()
+--			if (leftMsg == leftText) or (rightMsg == rightText) then
+--				align(left)
+--				left:SetText("")
+--				right:SetText("")
+--				return
+--			end 
+--		end
+--	end
+--end
 
 local OnTooltipSetItem = function(tooltip)
 	if (tooltip:IsForbidden()) then 
@@ -817,17 +817,21 @@ Module.OnEnable = function(self)
 		self:SetBlizzardTooltipBackdropBorderColor(tooltip, unpack(self.layout.TooltipBackdropBorderColor))
 		self:SetBlizzardTooltipBackdropOffsets(tooltip, 10, 10, 10, 12)
 
-		if (tooltip.SetText) then 
-			hooksecurefunc(tooltip, "SetText", OnTooltipAddLine)
-		end
+		-- These fuckers were causing the tooltips to taint 
+		-- the quest log item buttons when they spawned in combat!
 
-		if (tooltip.AddLine) then 
-			hooksecurefunc(tooltip, "AddLine", OnTooltipAddLine)
-		end 
+		--if (tooltip.SetText) then 
+		--	hooksecurefunc(tooltip, "SetText", OnTooltipAddLine)
+		--end
 
-		if (tooltip.AddDoubleLine) then 
-			hooksecurefunc(tooltip, "AddDoubleLine", OnTooltipAddDoubleLine)
-		end 
+		-- This was probably the largest culprit!
+		--if (tooltip.AddLine) then 
+		--	hooksecurefunc(tooltip, "AddLine", OnTooltipAddLine)
+		--end 
+
+		--if (tooltip.AddDoubleLine) then 
+		--	hooksecurefunc(tooltip, "AddDoubleLine", OnTooltipAddDoubleLine)
+		--end 
 
 		if (tooltip:HasScript("OnTooltipSetUnit")) then 
 			tooltip:HookScript("OnTooltipSetUnit", OnTooltipSetUnit)
