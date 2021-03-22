@@ -1,4 +1,4 @@
-local LibChatBubble = Wheel:Set("LibChatBubble", 26)
+local LibChatBubble = Wheel:Set("LibChatBubble", 27)
 if (not LibChatBubble) then	
 	return
 end
@@ -211,7 +211,10 @@ LibChatBubble.DisableBlizzard = function(self, bubble)
 
 	-- Remove all the default textures
 	for region, texture in pairs(customBubbles[bubble].blizzardRegions) do
-		--region:SetTexture(nil)
+		-- Needed in classic, as the game keeps resetting the alpha.
+		if (IsClassic) then
+			region:SetTexture(nil)
+		end
 		region:SetAlpha(0)
 	end
 	--if (customBubble.blizzardBackdropFrame) then
@@ -281,6 +284,7 @@ LibChatBubble.InitBubble = function(self, bubble)
 	customBubble.text:SetShadowColor(0, 0, 0, 0)
 	
 	-- Old way, still active in classic.
+	-- Update 22-03-2021: NOT working in classic anymore?!
 	for i = 1, bubble:GetNumRegions() do
 		local region = select(i, bubble:GetRegions())
 		if (region:GetObjectType() == "Texture") then

@@ -10,7 +10,6 @@
 <Script file='schematic-unitframes-legacy.lua'/>
 
 <!-- Non-specific schematics -->
-<Script file='schematic-root.lua'/>
 <Script file='schematic-widgets.lua'/>
 
 </Ui>

@@ -5,13 +5,16 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 7)
+local LibChatTool = Wheel:Set("LibChatTool", 9)
 if (not LibChatTool) then
 	return
 end
 
 local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, "LibChatTool requires LibClientBuild to be loaded.")
+
+local LibSecureHook = Wheel("LibSecureHook")
+assert(LibSecureHook, "LibChatTool requires LibSecureHook to be loaded.")
 
 local LibEvent = Wheel("LibEvent")
 assert(LibEvent, "LibChatTool requires LibEvent to be loaded.")
@@ -20,6 +23,7 @@ local LibColorTool = Wheel("LibColorTool")
 assert(LibColorTool, "LibChatTool requires LibColorTool to be loaded.")
 
 LibEvent:Embed(LibChatTool)
+LibSecureHook:Embed(LibChatTool)
 
 -- Library registries
 LibChatTool.embeds = LibChatTool.embeds or {}
@@ -400,18 +404,21 @@ local AddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
 	end
 
 	-- Replace color codes. 
-	-- This is part of the UI design, so we enforce it.
-	for i,color in pairs(Colors.blizzquality) do
-		msg = string_gsub(msg, color.colorCode, Colors.quality[i].colorCode)
+	if (FilterStatus.QualityColors) then
+		for i,color in pairs(Colors.blizzquality) do
+			msg = string_gsub(msg, color.colorCode, Colors.quality[i].colorCode)
+		end
 	end
 
 	-- Replace class colors.
 	-- Make sure to not check for shamans on alliance characters or paladins on horde characters,
 	-- as blizzard are still using the same color for these two in classic.
-	for i,color in pairs(Colors.blizzclass) do
-		local skip = IsClassic and ((PlayerFaction == "Alliance" and i == "SHAMAN") or (PlayerFaction == "Horde" and i == "PALADIN"))
-		if (not skip) then
-			msg = string_gsub(msg, color.colorCode, Colors.class[i].colorCode)
+	if (FilterStatus.ClassColors) then
+		for i,color in pairs(Colors.blizzclass) do
+			local skip = IsClassic and ((PlayerFaction == "Alliance" and i == "SHAMAN") or (PlayerFaction == "Horde" and i == "PALADIN"))
+			if (not skip) then
+				msg = string_gsub(msg, color.colorCode, Colors.class[i].colorCode)
+			end
 		end
 	end
 
@@ -772,7 +779,39 @@ local OnChatMessage = function(frame, event, message, author, ...)
 	return false, message, author, ...
 end
 
+local OnOpenTemporaryWindow = function(...)
+	CacheMessageMethod((FCF_GetCurrentChatFrame())) 
+end
+
+
 -- Tool API
+-----------------------------------------------------------------
+LibChatTool.CacheAllMessageMethods = function(self)
+
+	-- Setup all initial chat frames
+	for _,chatFrameName in ipairs(CHAT_FRAMES) do 
+		CacheMessageMethod(_G[chatFrameName]) 
+	end
+
+	-- Hook creation of temporary windows
+	LibChatTool:SetSecureHook("FCF_OpenTemporaryWindow", OnOpenTemporaryWindow, "GP_CHAT_TOOL_CACHE_TEMPORARY_WINDOW")
+
+	-- Flag that we're doing this now.
+	LibChatTool.IsCachingMessageMethods = true
+end
+
+-- Re-enable all active filters. Use on library updates.
+LibChatTool.UpdateAllFilters = function(self)
+	for filterType,isEnabled in pairs(FilterStatus) do
+		if (isEnabled) then
+			local filter = Filters[filterType]
+			filter:Disable()
+			filter:Enable()
+		end
+	end
+end
+
+-- Tool Public API
 -----------------------------------------------------------------
 LibChatTool.SetChatFilterEnabled = function(self, filterType, shouldEnable)
 	local filter = Filters[filterType]
@@ -796,17 +835,6 @@ LibChatTool.SetChatFilterMoneyTextures = function(self, goldTextureString, silve
 	L_COPPER = copperTextureString or L_COPPER_DEFAULT
 end
 
--- Re-enable all active filters. Use on library updates.
-LibChatTool.UpdateAllFilters = function(self)
-	for filterType,isEnabled in pairs(FilterStatus) do
-		if (isEnabled) then
-			local filter = Filters[filterType]
-			filter:Disable()
-			filter:Enable()
-		end
-	end
-end
-
 local embedMethods = {
 	SetChatFilterEnabled = true,
 	SetChatFilterMoneyTextures = true
@@ -827,6 +855,10 @@ end
 
 Filters.Styling = {
 	Enable = function(module)
+		if (not LibChatTool.IsCachingMessageMethods) then
+			LibChatTool:CacheAllMessageMethods()
+		end
+
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_COMBAT_FACTION_CHANGE", OnChatMessage) -- reputation
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_COMBAT_XP_GAIN", OnChatMessage) -- xp
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_CURRENCY", OnChatMessage) -- money loot
@@ -913,24 +945,37 @@ Filters.Monster = {
 	end
 }
 
--- Just a placeholder for the filter to exist at all.
--- Since it's messages created by addons, we filter it in AddMessage.
-Filters.MaxDps = {
+Filters.ClassColors = {
 	Enable = function(module)
+		if (not LibChatTool.IsCachingMessageMethods) then
+			LibChatTool:CacheAllMessageMethods()
+		end
 	end,
 	Disable = function(module)
 	end
 }
 
--- Setup all initial chat frames
-for _,chatFrameName in ipairs(CHAT_FRAMES) do 
-	CacheMessageMethod(_G[chatFrameName]) 
-end
+Filters.QualityColors = {
+	Enable = function(module)
+		if (not LibChatTool.IsCachingMessageMethods) then
+			LibChatTool:CacheAllMessageMethods()
+		end
+	end,
+	Disable = function(module)
+	end
+}
 
--- Hook creation of temporary windows
-hooksecurefunc("FCF_OpenTemporaryWindow", function() 
-	CacheMessageMethod((FCF_GetCurrentChatFrame())) 
-end)
+-- Just a placeholder for the filter to exist at all.
+-- Since it's messages created by addons, we filter it in AddMessage.
+Filters.MaxDps = {
+	Enable = function(module)
+		if (not LibChatTool.IsCachingMessageMethods) then
+			LibChatTool:CacheAllMessageMethods()
+		end
+	end,
+	Disable = function(module)
+	end
+}
 
--- Update existing filters
+-- Update existing filters in case this is an upgrade.
 LibChatTool:UpdateAllFilters()

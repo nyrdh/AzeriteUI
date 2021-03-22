@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 82)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 83)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -915,27 +915,29 @@ local SetItemData = function(itemLink, tbl)
 	-- but when used as info retrieval on hidden scanner tooltips, 
 	-- this could stack up to a micro lag we do not want. 
 	local primaryStatID, spec, role
-	spec = GetSpecialization()
-	if (spec) then
-		role = GetSpecializationRole(spec)
-		primaryStatID = select(6, GetSpecializationInfo(spec, nil, nil, nil, UnitSex("player")))
-	end
+	if (IsRetail) then
+		spec = GetSpecialization()
+		if (spec) then
+			role = GetSpecializationRole(spec)
+			primaryStatID = select(6, GetSpecializationInfo(spec, nil, nil, nil, UnitSex("player")))
+		end
 
-	local primaryKey
-	if (primaryStatID == LE_UNIT_STAT_STRENGTH) then 
-		primaryKey = "ITEM_MOD_STRENGTH_SHORT"
-		tbl.primaryStatID = ITEM_MOD_STRENGTH_SHORT
-		tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_STRENGTH_SHORT)
-	elseif (primaryStatID == LE_UNIT_STAT_AGILITY) then 
-		primaryKey = "ITEM_MOD_AGILITY_SHORT"
-		tbl.primaryStatID = ITEM_MOD_AGILITY_SHORT
-		tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_AGILITY_SHORT)
-	elseif (primaryStatID == LE_UNIT_STAT_INTELLECT) then 
-		primaryKey = "ITEM_MOD_INTELLECT_SHORT"
-		tbl.primaryStatID = ITEM_MOD_INTELLECT_SHORT
-		tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_INTELLECT_SHORT)
-	end 
-	tbl.primaryStatKey = primaryKey
+		local primaryKey
+		if (primaryStatID == LE_UNIT_STAT_STRENGTH) then 
+			primaryKey = "ITEM_MOD_STRENGTH_SHORT"
+			tbl.primaryStatID = ITEM_MOD_STRENGTH_SHORT
+			tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_STRENGTH_SHORT)
+		elseif (primaryStatID == LE_UNIT_STAT_AGILITY) then 
+			primaryKey = "ITEM_MOD_AGILITY_SHORT"
+			tbl.primaryStatID = ITEM_MOD_AGILITY_SHORT
+			tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_AGILITY_SHORT)
+		elseif (primaryStatID == LE_UNIT_STAT_INTELLECT) then 
+			primaryKey = "ITEM_MOD_INTELLECT_SHORT"
+			tbl.primaryStatID = ITEM_MOD_INTELLECT_SHORT
+			tbl.primaryStatValue = itemStats and tonumber(itemStats.ITEM_MOD_INTELLECT_SHORT)
+		end 
+		tbl.primaryStatKey = primaryKey
+	end
 	
 	local has2ndStats
 	if itemStats then

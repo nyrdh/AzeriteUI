@@ -3,7 +3,7 @@
 ## Title: |c00000002|r|cff7284abA|r|cff6a7a9ez|r|cff617092e|r|cff596785r|r|cff505d78i|r|cff48536bt|r|cff3f495fe|r|cffffffffUI|r |cfffff5693.1|r |cFFFF7D00Beta|r
 ## Author: Daniel Troko, Lars Norberg
 ## Notes: Custom user graphical interface.|n|nDesign by Daniel Troko and Lars Norberg.|nCode by Lars Norberg.|n|n|cff4488ffPayPal|r|cffffffff:|r |n|cffffffffwww.paypal.me/GoldpawsStuff|r|n|n|cff4488ffPatreon|r|cffffffff:|r |n|cffffffffwww.patreon.com/GoldpawsStuff|r
-## Version: 3.1-Beta
+## Version: 3.2-Beta
 ## DefaultState: Enabled
 ## SavedVariables: AzeriteUI_DB
 ## OptionalDeps: Clique
@@ -29,56 +29,70 @@ back-end\plugins.xml
 back-end\tools.xml
 
 # Addon localization.
-locale\enUS.lua
-locale\deDE.lua
-locale\esES.lua
-locale\esMX.lua
-locale\esMX.lua
-locale\frFR.lua
-locale\itIT.lua
-locale\koKR.lua
-locale\ptBR.lua
-locale\ptPT.lua
-locale\ruRU.lua
-locale\zhCN.lua
-locale\zhTW.lua  
+front-end\locale\enUS.lua
+front-end\locale\deDE.lua
+front-end\locale\esES.lua
+front-end\locale\esMX.lua
+front-end\locale\esMX.lua
+front-end\locale\frFR.lua
+front-end\locale\itIT.lua
+front-end\locale\koKR.lua
+front-end\locale\ptBR.lua
+front-end\locale\ptPT.lua
+front-end\locale\ruRU.lua
+front-end\locale\zhCN.lua
+front-end\locale\zhTW.lua  
 
 # Private addon API and tools. 
-# Also the old addon specific layouts and design,
-# though these will eventually all be moved tools
-# the new tinkertown schematics system. 
-front-end\private.lua
+front-end\core\api.lua
+
+# Static layout data.
+front-end\config\static-configs.lua
+front-end\config\user-settings.lua
 
 # Where tinkerers should tinker. 
 tinkertown\tinkertown.xml
 
 # Main addon module, 
 # all others are children of this one. 
-front-end\root.lua
+front-end\core\root.lua
 
 # Menu Module. 
 # This one is required, even by the root.
-front-end\modules\menu-addon.lua
+front-end\config\menu.lua
 
-# Modules.
-front-end\modules\actionbars.lua
-front-end\modules\extrabars.lua
-front-end\modules\chatwindows.lua
-front-end\modules\menu-game.lua
-front-end\modules\menu-gamepanels.lua
-front-end\modules\minimap.lua
-front-end\modules\misc.lua
-front-end\modules\misc-floaters.lua
-front-end\modules\misc-timers.lua
-front-end\modules\objectivestracker.lua
-front-end\modules\tooltips.lua
-front-end\modules\tooltips-blizzard.lua
-front-end\modules\unitframes.lua
-front-end\modules\unitframes-grouptools.lua
-front-end\modules\unitframes-nameplates.lua
+# Blizzard Modules.
+# These are modifications, not additions, 
+# as the game most commonly won't allow us to replace them. 
+front-end\modules\blizzard\blizzard-bags.lua
+front-end\modules\blizzard\blizzard-chatbubbles.lua
+front-end\modules\blizzard\blizzard-chatwindows.lua
+front-end\modules\blizzard\blizzard-extrabars.lua
+front-end\modules\blizzard\blizzard-floaters.lua
+front-end\modules\blizzard\blizzard-fonts.lua
+front-end\modules\blizzard\blizzard-gamemenu.lua
+front-end\modules\blizzard\blizzard-micromenu.lua
+front-end\modules\blizzard\blizzard-minimap.lua
+front-end\modules\blizzard\blizzard-objectivestracker.lua
+front-end\modules\blizzard\blizzard-popups.lua
+front-end\modules\blizzard\blizzard-timers.lua
+front-end\modules\blizzard\blizzard-tooltips.lua
+front-end\modules\blizzard\blizzard-worldmap.lua
+
+# Custom Modules.
+# These are made from scratch, and fully ours.
+front-end\modules\custom\actionbars.lua
+front-end\modules\custom\bindings.lua
+front-end\modules\custom\chatfilters.lua
+front-end\modules\custom\durability.lua
+front-end\modules\custom\explorermode.lua
+front-end\modules\custom\tooltips.lua
+front-end\modules\custom\unitframes.lua
+front-end\modules\custom\unitframes-grouptools.lua
+front-end\modules\custom\unitframes-nameplates.lua
 
 # These will be removed later.
 front-end\modules\deprecated\unitframes.lua
 
 # All addon- and module incompatibilities in one place.
-front-end\auto-disable.lua
+front-end\core\auto-disable.lua

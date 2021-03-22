@@ -93,7 +93,7 @@ local L = Wheel("LibLocale"):GetLocale(ADDON)
 local Colors = LibColorTool:GetColorTable()
 local GetAuraFilterFunc = function(...) return LibAuraTool:GetAuraFilter(...) end
 local GetFont = function(...) return LibFontTool:GetFont(...) end
-local GetMedia = function(name, type) return ([[Interface\AddOns\%s\media\%s.%s]]):format(ADDON, name, type or "tga") end
+local GetMedia = function(name, type) return ([[Interface\AddOns\%s\front-end\media\%s.%s]]):format(ADDON, name, type or "tga") end
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
@@ -2508,7 +2508,7 @@ Azerite.Bindings = {
 }
 
 -- Floaters. Durability only currently. 
-Azerite.FloaterHUD = {
+Azerite.Durability = {
 	Place = FloaterSlots.Durability
 }
 
@@ -4770,7 +4770,7 @@ Legacy.NamePlates = Azerite.NamePlates
 
 -- Few changes
 Legacy.Bindings = setmetatable({ BindButtonTexture = GetMedia("actionbutton-mask-square") }, { __index = Azerite.Bindings })
-Legacy.FloaterHUD = setmetatable({ 	Place = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 } }, { __index = Azerite.FloaterHUD })
+Legacy.Durability = setmetatable({ 	Place = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 } }, { __index = Azerite.Durability })
 Legacy.Tooltips = setmetatable({ TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -54, 66 } }, { __index = Azerite.Tooltips })
 Legacy.OptionsMenu = setmetatable({ 
 	MenuPlace = { "TOPRIGHT", -41, -32 },

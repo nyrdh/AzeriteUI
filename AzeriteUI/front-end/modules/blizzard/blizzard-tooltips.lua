@@ -7,7 +7,6 @@ end
 local LibNumbers = Wheel("LibNumbers")
 assert(LibNumbers, ADDON..":BlizzardTooltips requires LibNumbers to be loaded.")
 
-
 local Module = Core:NewModule("BlizzardTooltips", "LibEvent", "LibDB", "LibFrame", "LibTooltip", "LibTooltipScanner", "LibPlayerData", "LibClientBuild")
 
 -- Lua API
@@ -68,9 +67,6 @@ local FACTION_HORDE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Horde:14:14:-
 
 -- Method template
 local meta = getmetatable(CreateFrame("GameTooltip", nil, WorldFrame, "GameTooltipTemplate")).__index
-
--- Lockdowns
-local LOCKDOWNS = {}
 
 -- Flag set to true if any other known
 -- addon with vendor sell prices is enabled.
@@ -414,57 +410,12 @@ local OnTooltipShow = function(tooltip)
 end
 
 local OnTooltipHide = function(tooltip)
-	tooltip.unit = nil
-	tooltip.vendorSellLineID = nil
-	LOCKDOWNS[tooltip] = nil
 	if (tooltip:IsForbidden()) then 
 		return
 	end
+	tooltip.unit = nil
+	tooltip.vendorSellLineID = nil
 end
-
---local OnTooltipAddLine = function(tooltip, msg)
---	if (tooltip:IsForbidden()) then 
---		return
---	end
---	if not(LOCKDOWNS[tooltip]) then
---		return OnTooltipShow(tooltip)
---	end 
---	for i = 2, tooltip:NumLines() do
---		local line = _G[tooltip:GetName().."TextLeft"..i]
---		if line then
---			align(line)
---			local text = line:GetText()
---			-- We found the new line
---			if (text == msg) then
---				line:SetText("")
---				return
---			end 
---		end
---	end
---end
-
---local OnTooltipAddDoubleLine = function(tooltip, leftText, rightText)
---	if (tooltip:IsForbidden()) then 
---		return
---	end
---	if not(LOCKDOWNS[tooltip]) then
---		return OnTooltipShow(tooltip)
---	end 
---	for i = 2, tooltip:NumLines() do
---		local left = _G[tooltip:GetName().."TextLeft"..i]
---		local right = _G[tooltip:GetName().."TextRight"..i]
---		if (left) then
---			local leftMsg = left:GetText()
---			local rightMsg = right:GetText()
---			if (leftMsg == leftText) or (rightMsg == rightText) then
---				align(left)
---				left:SetText("")
---				right:SetText("")
---				return
---			end 
---		end
---	end
---end
 
 local OnTooltipSetItem = function(tooltip)
 	if (tooltip:IsForbidden()) then 
@@ -501,8 +452,6 @@ local OnTooltipSetItem = function(tooltip)
 			local _,link = tooltip:GetItem()
 			if (link) then
 				if (itemSellPrice and (itemSellPrice > 0)) then
-					LOCKDOWNS[tooltip] = nil
-
 					local itemCount = frame.count and tonumber(frame.count) or (frame.Count and frame.Count.GetText) and tonumber(frame.Count:GetText())
 					local label = string_format("%s:", SELL_PRICE)
 					local price = formatMoney((itemCount or 1) * itemSellPrice)
@@ -517,9 +466,6 @@ local OnTooltipSetItem = function(tooltip)
 					tooltip.vendorSellLineID = tooltip:NumLines() + 1
 					meta.AddLine(tooltip, BLANK)
 					meta.AddDoubleLine(tooltip, label, price, color[1], color[2], color[3], color[1], color[2], color[3])
-
-					-- Not doing this yet. But we will. Oh yes we will. 
-					--LOCKDOWNS[tooltip] = true
 				end
 			end
 		end
@@ -545,8 +491,6 @@ local OnTooltipSetUnit = function(tooltip)
 		return
 	end
 
-	LOCKDOWNS[tooltip] = nil
-	
 	tooltip.unit = unit
 
 	-- Kill off texts
@@ -794,9 +738,6 @@ local OnTooltipSetUnit = function(tooltip)
 		end
 	end
 
-	-- We don't want additions.
-	LOCKDOWNS[tooltip] = true
-
 	-- Aligns the backdrop to the current number of active lines.
 	tooltip:Show()
 end
@@ -816,22 +757,6 @@ Module.OnEnable = function(self)
 		self:SetBlizzardTooltipBackdropColor(tooltip, unpack(self.layout.TooltipBackdropColor))
 		self:SetBlizzardTooltipBackdropBorderColor(tooltip, unpack(self.layout.TooltipBackdropBorderColor))
 		self:SetBlizzardTooltipBackdropOffsets(tooltip, 10, 10, 10, 12)
-
-		-- These fuckers were causing the tooltips to taint 
-		-- the quest log item buttons when they spawned in combat!
-
-		--if (tooltip.SetText) then 
-		--	hooksecurefunc(tooltip, "SetText", OnTooltipAddLine)
-		--end
-
-		-- This was probably the largest culprit!
-		--if (tooltip.AddLine) then 
-		--	hooksecurefunc(tooltip, "AddLine", OnTooltipAddLine)
-		--end 
-
-		--if (tooltip.AddDoubleLine) then 
-		--	hooksecurefunc(tooltip, "AddDoubleLine", OnTooltipAddDoubleLine)
-		--end 
 
 		if (tooltip:HasScript("OnTooltipSetUnit")) then 
 			tooltip:HookScript("OnTooltipSetUnit", OnTooltipSetUnit)

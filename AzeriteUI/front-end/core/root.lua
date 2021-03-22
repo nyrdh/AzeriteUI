@@ -877,18 +877,12 @@ Core.SetTheme = function(self, editBox, theme)
 end
 
 Core.OnInit = function(self)
-	self:PurgeSavedSettingFromAllProfiles(ADDON, 
-		"blockGroupInvites", 
-		"allowGuildInvites", 
-		"allowFriendInvites", 
-		"blockCounter"
-	)
 	self.db = GetConfig(ADDON)
 	
 	-- This sets the fallback layouts used when 
 	-- the requested module isn't found in the current.
 	--Private.SetFallbackLayout("Generic")
-	
+	  
 	-- This sets the current layout. 
 	-- This will be moved to a user setting when implemented.
 	Private.SetLayout(self.db.theme)
@@ -967,15 +961,45 @@ Core.OnInit = function(self)
 	end
 
 	-- Apply theme based edits.	
-	if (Private.HasSchematic("ModuleForge::Root")) then
-		self:Forge(Private.GetSchematic("ModuleForge::Root").OnInit) 
+	-- Should be moved to some settings table later on.
+	if (self.db.theme == "Legacy") then
+		self:SetObjectFadeDurationOut(.15)
+		self:SetObjectFadeHold(.5)
 	end
-
 end 
 
 Core.OnEnable = function(self)
 	if (Private.HasSchematic("ModuleForge::Root")) then
 		self:Forge(Private.GetSchematic("ModuleForge::Root").OnEnable) 
+	end
+
+	-- Clean the slate, clear out blizzard elements.
+	self:DisableUIWidget("ActionBars")
+	self:DisableUIWidget("Auras")
+	self:DisableUIWidget("BuffTimer")
+	self:DisableUIWidget("CastBars")
+	self:DisableUIWidget("Chat")
+	self:DisableUIWidget("Durability")
+	self:DisableUIWidget("Minimap")
+	self:DisableUIWidget("OrderHall")
+	self:DisableUIWidget("PlayerPowerBarAlt")
+	self:DisableUIWidget("Tutorials")
+	self:DisableUIWidget("UnitFramePlayer")
+	self:DisableUIWidget("UnitFramePet")
+	self:DisableUIWidget("UnitFrameTarget")
+	self:DisableUIWidget("UnitFrameToT")
+	self:DisableUIWidget("UnitFrameFocus")
+	self:DisableUIWidget("UnitFrameParty")
+	self:DisableUIWidget("UnitFrameRaid")
+	self:DisableUIWidget("UnitFrameBoss")
+	self:DisableUIWidget("UnitFrameArena")
+	self:DisableUIWidget("ZoneText")
+	self:DisableUIMenuPage(5, "InterfaceOptionsActionBarsPanel")
+	self:DisableUIMenuPage(10, "CompactUnitFrameProfiles")
+	self:DisableUIMenuOption(true, "InterfaceOptionsCombatPanelTargetOfTarget")
+	if (IsRetail) then
+		self:DisableUIMenuOption("Vertical", "InterfaceOptionsNamesPanelUnitNameplatesPersonalResource")
+		self:DisableUIMenuOption("Vertical", "InterfaceOptionsNamesPanelUnitNameplatesPersonalResourceOnEnemy")
 	end
 
 	-- Experimental stuff we move to relevant modules once done

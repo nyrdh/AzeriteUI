@@ -1,4 +1,4 @@
-local LibModule = Wheel:Set("LibModule", 40)
+local LibModule = Wheel:Set("LibModule", 42)
 if (not LibModule) then	
 	return
 end
@@ -309,6 +309,8 @@ local ModuleProtoType = {
 			return self.OnDisable and self:OnDisable(...)
 		end
 	end,
+
+
 
 	SetUserDisabled = function(self, disable)
 		if (disable) then
@@ -804,11 +806,18 @@ LibModule.IsAddOnAvailable = function(self, target)
 	end
 end
 
+-- True if the module exists, can be loaded, is compatible, has its dependencies available.
+LibModule.IsModuleAvailable = function(self, moduleName)
+	local module = self:GetModule(moduleName, true)
+	return module and not(module:IsUserDisabled() or module:IsIncompatible() or module:DependencyFailed())
+end
+
 -- Borrow some module methods here
 LibModule.AddDebugMessage = ModuleProtoType.AddDebugMessage
 LibModule.AddDebugMessageFormatted = ModuleProtoType.AddDebugMessageFormatted
 
 local embedMethods = {
+	IsModuleAvailable = true,
 	NewModule = true, 
 	GetModule = true,
 	IsInitialized = true, 

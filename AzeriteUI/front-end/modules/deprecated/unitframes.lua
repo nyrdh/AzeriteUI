@@ -426,12 +426,12 @@ local StyleSmallFrame = function(self, unit, id, layout, ...)
 	-- frame to contain bars, icons, etc
 	local content = self:CreateFrame("Frame")
 	content:SetAllPoints()
-	content:SetFrameLevel(self:GetFrameLevel() + 10)
+	content:SetFrameLevel(self:GetFrameLevel() + 15)
 
 	-- frame to contain art overlays, texts, etc
 	local overlay = self:CreateFrame("Frame")
 	overlay:SetAllPoints()
-	overlay:SetFrameLevel(self:GetFrameLevel() + 20)
+	overlay:SetFrameLevel(self:GetFrameLevel() + 30)
 
 	-- Health Bar
 	-----------------------------------------------------------	
@@ -581,12 +581,12 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	-- frame to contain bars, icons, etc
 	local content = self:CreateFrame("Frame")
 	content:SetAllPoints()
-	content:SetFrameLevel(self:GetFrameLevel() + 10)
+	content:SetFrameLevel(self:GetFrameLevel() + 15)
 
 	-- frame to contain art overlays, texts, etc
 	local overlay = self:CreateFrame("Frame")
 	overlay:SetAllPoints()
-	overlay:SetFrameLevel(self:GetFrameLevel() + 20)
+	overlay:SetFrameLevel(self:GetFrameLevel() + 30)
 
 	-- Health Bar
 	-----------------------------------------------------------	
@@ -636,7 +636,8 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	
 	-- Power 
 	-----------------------------------------------------------
-	local power = overlay:CreateStatusBar()
+	local power = content:CreateStatusBar()
+	power:SetFrameLevel(power:GetFrameLevel() + 5)
 	power:SetSize(unpack(layout.PowerSize))
 	power:Place(unpack(layout.PowerPlace))
 	power:SetStatusBarTexture(layout.PowerBarTexture)

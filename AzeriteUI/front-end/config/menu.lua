@@ -1023,10 +1023,6 @@ Module.CreateCallbackFrame = function(self, module)
 	return callbackFrame
 end
 
-Module.ShouldHaveMenu = function(self, module)
-	return module and not(module:IsUserDisabled() or module:IsIncompatible() or module:DependencyFailed())
-end
-
 -- Menu options are here! Here! Here!!!
 Module.CreateMenuTable = function(self)
 	local theme = Private.GetLayoutID()
@@ -1130,9 +1126,7 @@ Module.CreateMenuTable = function(self)
 	})
 	
 	-- Actionbars
-	local ActionBarMain = Core:GetModule("ActionBarMain", true)
-	if (self:ShouldHaveMenu(ActionBarMain)) then 
-
+	if (Core:IsModuleAvailable("ActionBarMain")) then 
 		local ActionBarMenu = {
 			title = L["ActionBars"], type = nil, hasWindow = true, 
 			buttons = {}
@@ -1352,8 +1346,7 @@ Module.CreateMenuTable = function(self)
 				} 
 			}
 
-			local Bindings = Core:GetModule("Bindings", true)
-			if (self:ShouldHaveMenu(Bindings)) then 
+			if (Core:IsModuleAvailable("Bindings")) then 
 				table_insert(bindMenu.buttons, {
 					enabledTitle = L_ENABLED:format(L["Bind Mode"]),
 					disabledTitle = L_DISABLED:format(L["Bind Mode"]),
@@ -1364,8 +1357,7 @@ Module.CreateMenuTable = function(self)
 			table_insert(ActionBarMenu.buttons, bindMenu)
 		else
 			-- Just add the bind mode option and nothing else for classic.
-			local Bindings = Core:GetModule("Bindings", true)
-			if (self:ShouldHaveMenu(Bindings)) then 
+			if (Core:IsModuleAvailable("Bindings")) then 
 				table_insert(ActionBarMenu.buttons, {
 					enabledTitle = L_ENABLED:format(L["Bind Mode"]),
 					disabledTitle = L_DISABLED:format(L["Bind Mode"]),
@@ -1434,8 +1426,7 @@ Module.CreateMenuTable = function(self)
 		}
 	}
 	-- Only apply these when no conflicting addon is loaded.
-	local BlizzardChatFrames = Core:GetModule("BlizzardChatFrames", true)
-	if (self:ShouldHaveMenu(BlizzardChatFrames)) then 
+	if (Core:IsModuleAvailable("BlizzardChatFrames")) then 
 		table_insert(ChatFrameMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Chat Outline"]),
 			disabledTitle = L_DISABLED:format(L["Chat Outline"]),
@@ -1447,9 +1438,7 @@ Module.CreateMenuTable = function(self)
 	table_insert(MenuTable, ChatFrameMenu)
 
 	-- Nameplates
-	local NamePlates = Core:GetModule("NamePlates", true)
-	if (self:ShouldHaveMenu(NamePlates)) then 
-
+	if (Core:IsModuleAvailable("NamePlates")) then 
 		local NamePlateMenu = { title = L["NamePlates"], type = nil, hasWindow = true, buttons = {} }
 
 		-- Personal Resource Display settings.
@@ -1536,8 +1525,7 @@ Module.CreateMenuTable = function(self)
 	}
 
 	if (IsAzerite) then
-		local UnitFrameParty = Core:GetModule("UnitFrameParty", true)
-		if (self:ShouldHaveMenu(UnitFrameParty)) then 
+		if (Core:IsModuleAvailable("UnitFrameParty")) then 
 			hasUnits = true
 			table_insert(UnitFrameMenu.buttons, {
 				enabledTitle = L_ENABLED:format(L["Party Frames"]),
@@ -1548,8 +1536,7 @@ Module.CreateMenuTable = function(self)
 			})
 		end
 
-		local UnitFrameRaid = Core:GetModule("UnitFrameRaid", true)
-		if (self:ShouldHaveMenu(UnitFrameRaid)) then 
+		if (Core:IsModuleAvailable("UnitFrameRaid")) then 
 			hasUnits = true
 			table_insert(UnitFrameMenu.buttons, {
 				enabledTitle = L_ENABLED:format(L["Raid Frames"]),
@@ -1562,8 +1549,7 @@ Module.CreateMenuTable = function(self)
 	end
 
 	if (IsAzerite) then
-		local UnitFramePlayer = Core:GetModule("UnitFramePlayer", true)
-		if (self:ShouldHaveMenu(UnitFramePlayer)) then 
+		if (Core:IsModuleAvailable("UnitFramePlayer")) then 
 			if (PlayerClass == "DRUID") or (PlayerClass == "HUNTER") 
 			or (PlayerClass == "PALADIN") or (PlayerClass == "SHAMAN")
 			or (PlayerClass == "MAGE") or (PlayerClass == "PRIEST") or (PlayerClass == "WARLOCK") then
@@ -1583,8 +1569,7 @@ Module.CreateMenuTable = function(self)
 	end
 
 	-- HUD
-	local UnitFramePlayerHUD = Core:GetModule("UnitFramePlayerHUD", true)
-	if (self:ShouldHaveMenu(UnitFramePlayerHUD)) then 
+	if (Core:IsModuleAvailable("UnitFramePlayerHUD")) then 
 		local HUDMenu = {
 			title = L["HUD"], type = nil, hasWindow = true, 
 			buttons = clean({
@@ -1622,8 +1607,7 @@ Module.CreateMenuTable = function(self)
 		end
 
 		-- Objectives Tracker
-		local BlizzardObjectivesTracker = Core:GetModule("BlizzardObjectivesTracker", true)
-		if (self:ShouldHaveMenu(BlizzardObjectivesTracker)) then 
+		if (Core:IsModuleAvailable("BlizzardObjectivesTracker")) then 
 			table_insert(HUDMenu.buttons, {
 				enabledTitle = L_ENABLED:format(L["Objectives Tracker"]),
 				disabledTitle = L_DISABLED:format(L["Objectives Tracker"]),
@@ -1676,8 +1660,7 @@ Module.CreateMenuTable = function(self)
 
 	-- Explorer Mode
 	if (IsAzerite or IsLegacy) then
-		local ExplorerMode = Core:GetModule("ExplorerMode", true)
-		if (self:ShouldHaveMenu(ExplorerMode)) then 
+		if (Core:IsModuleAvailable("ExplorerMode")) then 
 			if (IsAzerite) then
 				table_insert(MenuTable, {
 					title = L["Explorer Mode"], type = nil, hasWindow = true, 

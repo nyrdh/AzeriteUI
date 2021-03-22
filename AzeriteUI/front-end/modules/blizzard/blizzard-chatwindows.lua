@@ -1030,10 +1030,6 @@ Module.OnEvent = function(self, event, ...)
 end 
 
 Module.OnInit = function(self)
-	self:PurgeSavedSettingFromAllProfiles(self:GetName(), 
-		"enableBGSpamFilter",
-		"enableAllChatFilters"
-	)
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
 	if (not self.layout) then

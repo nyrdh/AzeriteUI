@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.458-Alpha] 2021-03-22
+- Restructuring. Before moving into the next phase of the UI, and the next group of standalone projects, I want to bring the UI code down to a much simpler level again. 
+
+### Fixed
+- Classic users should finally be rid of the Love Festival hearts. 
+- Classic chat bubbles should be rid of the blizzard backdrop once again. 
+
 ## [3.1.455-RC] 2021-03-15
 ### Fixed
 - There might not be as many taints and blocked action messages when trying to click quest items spawning in the quest tracker while engaged in combat. 

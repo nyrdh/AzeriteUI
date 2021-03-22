@@ -31,8 +31,6 @@ local IsQuestWatched = IsQuestWatched
 local IsUnitOnQuest = IsUnitOnQuest
 
 -- WoW Globals
-local ObjectiveTrackerFrame = ObjectiveTrackerFrame
-local ObjectiveTrackerFrameHeaderMenuMinimizeButton = ObjectiveTrackerFrame.HeaderMenu.MinimizeButton
 local SCENARIO_CONTENT_TRACKER_MODULE = SCENARIO_CONTENT_TRACKER_MODULE
 local QUEST_TRACKER_MODULE = QUEST_TRACKER_MODULE
 local WORLD_QUEST_TRACKER_MODULE = WORLD_QUEST_TRACKER_MODULE
@@ -484,7 +482,7 @@ Module.InitRetailTracker = function(self)
 	end
 
 	-- kills this shit off. We use our keybind instead. 
-	ObjectiveTrackerFrameHeaderMenuMinimizeButton:Hide()
+	ObjectiveTrackerFrame.HeaderMenu.MinimizeButton:Hide()
 
 	local ObjectiveFrameHolder = self:CreateFrame("Frame", "AzeriteUI_ObjectiveTracker", "UICenter")
 	ObjectiveFrameHolder:SetSize(235,22) -- Blizzard default width
