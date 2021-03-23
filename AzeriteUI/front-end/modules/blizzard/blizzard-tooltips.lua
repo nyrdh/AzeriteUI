@@ -758,21 +758,25 @@ Module.OnEnable = function(self)
 		self:SetBlizzardTooltipBackdropBorderColor(tooltip, unpack(self.layout.TooltipBackdropBorderColor))
 		self:SetBlizzardTooltipBackdropOffsets(tooltip, 10, 10, 10, 12)
 
+		-- These might be the only two we safely can hook like this,
+		-- as script hooking has a tendency to cause taint.
 		if (tooltip:HasScript("OnTooltipSetUnit")) then 
 			tooltip:HookScript("OnTooltipSetUnit", OnTooltipSetUnit)
 		end
-
 		if (tooltip:HasScript("OnTooltipSetItem")) then 
 			tooltip:HookScript("OnTooltipSetItem", OnTooltipSetItem)
 		end
 
-		if (tooltip:HasScript("OnHide")) then 
-			tooltip:HookScript("OnHide", OnTooltipHide)
-		end
-		
-		if (tooltip:HasScript("OnShow")) then 
-			tooltip:HookScript("OnShow", OnTooltipShow)
-		end
+		-- This should be fine. Or?
+		hooksecurefunc(tooltip, "Hide", OnTooltipHide)
+		hooksecurefunc(tooltip, "Show", OnTooltipShow)
+
+		--if (tooltip:HasScript("OnHide")) then 
+		--	tooltip:HookScript("OnHide", OnTooltipHide)
+		--end
+		--if (tooltip:HasScript("OnShow")) then 
+		--	tooltip:HookScript("OnShow", OnTooltipShow)
+		--end
 
 		local bar = _G[tooltip:GetName().."StatusBar"]
 		if (bar) then 
