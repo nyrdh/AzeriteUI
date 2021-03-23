@@ -1,3 +1,5 @@
+-- Note that all the listed modules 
+-- must exist when running this file.
 local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 

@@ -43,23 +43,18 @@ front-end\locale\ruRU.lua
 front-end\locale\zhCN.lua
 front-end\locale\zhTW.lua  
 
-# Private addon API and tools. 
-front-end\core\api.lua
+# Addon API, configs and user defaults.
+front-end\config\api.lua
+front-end\config\colors.lua
+front-end\config\configs.lua
+front-end\config\defaults.lua
 
-# Static layout data.
-front-end\config\static-configs.lua
-front-end\config\user-settings.lua
-
-# Where tinkerers should tinker. 
+# A dying town.
 tinkertown\tinkertown.xml
 
-# Main addon module, 
-# all others are children of this one. 
+# Core module and addon menu. 
 front-end\core\root.lua
-
-# Menu Module. 
-# This one is required, even by the root.
-front-end\config\menu.lua
+front-end\core\gui.lua
 
 # Blizzard Modules.
 # These are modifications, not additions, 
@@ -95,4 +90,4 @@ front-end\modules\custom\unitframes-nameplates.lua
 front-end\modules\deprecated\unitframes.lua
 
 # All addon- and module incompatibilities in one place.
-front-end\core\auto-disable.lua
+front-end\config\incompatibilities.lua

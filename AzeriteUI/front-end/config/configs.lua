@@ -1,54 +1,7 @@
---[[--
-
-The purpose of this file is to supply all the front-end modules 
-with static layout data used during the setup phase, as well as
-with any custom colors, fonts and aura tables local to the addon only. 
-
-*The majority of the methods and templates here are primarily 
- used for the default Azerite theme, while Legacy is for the most
- part using the new schematics and forge system for its layouts.
-
- *Some of the methods here are just proxies for tool our library methods.
-
---]]--
-
 local ADDON, Private = ...
 
 local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, ADDON.." requires LibClientBuild to be loaded.")
-
-local LibDB = Wheel("LibDB")
-assert(LibDB, ADDON.." requires LibDB to be loaded.")
-
-local LibMinimap = Wheel("LibMinimap")
-assert(LibMinimap, ADDON.." requires LibMinimap to be loaded.")
-
-local LibMover = Wheel("LibMover")
-assert(LibMover, ADDON.." requires LibMover to be loaded.")
-
-local LibTooltip = Wheel("LibTooltip")
-assert(LibTooltip, ADDON.." requires LibTooltip to be loaded.")
-
-local LibBagButton = Wheel("LibBagButton")
-assert(LibBagButton, ADDON.." requires LibBagButton to be loaded.")
-
-local LibSecureButton = Wheel("LibSecureButton")
-assert(LibSecureButton, ADDON.." requires LibSecureButton to be loaded.")
-
-local LibUnitFrame = Wheel("LibUnitFrame")
-assert(LibUnitFrame, ADDON.." requires LibUnitFrame to be loaded.")
-
-local LibAuraTool = Wheel("LibAuraTool")
-assert(LibAuraTool, ADDON.." requires LibAuraTool to be loaded.")
-
-local LibBindTool = Wheel("LibBindTool")
-assert(LibBindTool, ADDON.." requires LibBindTool to be loaded.")
-
-local LibColorTool = Wheel("LibColorTool")
-assert(LibColorTool, ADDON.." requires LibColorTool to be loaded.")
-
-local LibFontTool = Wheel("LibFontTool")
-assert(LibFontTool, ADDON.." requires LibFontTool to be loaded.")
 
 local LibNumbers = Wheel("LibNumbers")
 assert(LibNumbers, ADDON.." requires LibNumbers to be loaded.")
@@ -82,36 +35,24 @@ local UnitIsUnit = UnitIsUnit
 local UnitLevel = UnitLevel
 local UnitPowerMax = UnitPowerMax
 
+-- Addon localization
+local L = Wheel("LibLocale"):GetLocale(ADDON)
+
 -- Number Abbreviation
 local short = LibNumbers:GetNumberAbbreviationShort()
 local large = LibNumbers:GetNumberAbbreviationLong()
 
--- Addon localization
-local L = Wheel("LibLocale"):GetLocale(ADDON)
-
 -- Private API
-local Colors = LibColorTool:GetColorTable()
-local GetAuraFilterFunc = function(...) return LibAuraTool:GetAuraFilter(...) end
-local GetFont = function(...) return LibFontTool:GetFont(...) end
-local GetMedia = function(name, type) return ([[Interface\AddOns\%s\front-end\media\%s.%s]]):format(ADDON, name, type or "tga") end
+local Colors = Private.Colors
+local GetFont = Private.GetFont
+local GetMedia = Private.GetMedia 
+local GetAuraFilter = Private.GetAuraFilter
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 
 local NEW = "*"
-
--- Use a metatable to dynamically create the colors
-local spellTypeColor = setmetatable({
-	["Custom"] = { 1, .9294, .7607 } 
-}, { __index = function(tbl,key)
-		local v = DebuffTypeColor[key]
-		if v then
-			tbl[key] = { v.r, v.g, v.b }
-			return tbl[key]
-		end
-	end
-})
 
 ------------------------------------------------
 -- Utility Functions
@@ -129,36 +70,6 @@ local getTimeStrings = function(h, m, suffix, useStandardTime, abbreviateSuffix)
 		return "%02.0f:%02.0f", h, m
 	end 
 end 
-
------------------------------------------------------------------
--- Color Tables
------------------------------------------------------------------
--- Our player health bar color
-Colors.health = Colors:CreateColor(245/255, 0/255, 45/255)
-
--- Global UI vertex coloring
-Colors.ui = Colors:CreateColor(192/255, 192/255, 192/255)
-
--- Power Crystal Colors
-local fast = Colors:CreateColor(0/255, 208/255, 176/255) 
-local slow = Colors:CreateColor(116/255, 156/255, 255/255)
-local angry = Colors:CreateColor(156/255, 116/255, 255/255)
-
-Colors.power.ENERGY_CRYSTAL = fast -- Rogues, Druids
-Colors.power.FOCUS_CRYSTAL = slow -- Hunter Pets (?)
-Colors.power.FURY_CRYSTAL = angry -- Havoc Demon Hunter 
-Colors.power.INSANITY_CRYSTAL = angry -- Shadow Priests
-Colors.power.LUNAR_POWER_CRYSTAL = slow -- Balance Druid Astral Power 
-Colors.power.MAELSTROM_CRYSTAL = slow -- Elemental Shamans
-Colors.power.PAIN_CRYSTAL = angry -- Vengeance Demon Hunter 
-Colors.power.RAGE_CRYSTAL = angry -- Druids, Warriors
-Colors.power.RUNIC_POWER_CRYSTAL = slow -- Death Knights
-
--- Only occurs when the orb is manually disabled by the player.
-Colors.power.MANA_CRYSTAL = Colors:CreateColor(101/255, 93/255, 191/255) -- Druid, Hunter (Classic), Mage, Paladin, Priest, Shaman, Warlock
-
--- Orb Power Colors
-Colors.power.MANA_ORB = Colors:CreateColor(135/255, 125/255, 255/255) -- Druid, Hunter (Classic), Mage, Paladin, Priest, Shaman, Warlock
 
 ------------------------------------------------
 -- Backdrops
@@ -833,7 +744,6 @@ local Tooltip_PostCreate = function(tooltip)
 	-- Add our post updates for statusbars
 	tooltip.PostUpdateStatusBar = Tooltip_StatusBar_PostUpdate
 end
-
 
 local PlayerFrame_CastBarPostUpdate = function(element, unit)
 	local self = element._owner
@@ -1941,7 +1851,7 @@ local Template_SmallFrameReversed_Auras = setmetatable({
 		auraWidth = nil, 
 		debuffsFirst = false, 
 		disableMouse = false, 
-		customFilter = GetAuraFilterFunc(), 
+		customFilter = GetAuraFilter(), 
 		growthX = "LEFT", 
 		growthY = "DOWN", 
 		maxVisible = 6, 
@@ -2029,140 +1939,18 @@ local Template_TinyFrame = {
 	TargetHighlightShowFocus = true, TargetHighlightFocusColor = { 44/255, 165/255, 255/255, 1 }, 
 }
 
-------------------------------------------------
--- Module Defaults
-------------------------------------------------
--- The purpose of this is to supply all the front-end modules
--- with default settings for all the user configurable choices.
--- 
--- Note that changing these won't change anything for existing characters,
--- they only affect new characters or the first install.
--- I generally advice tinkerers to leave these as they are. 
-local Defaults = {}
+-- Because it's chaotic having these all over the place.
+local FloaterSlots = {
+	-- Bottomright floaters
+	-- These used to be center right, but was ultimately in the way of gameplay.
+	VehicleSeatSelector = { "CENTER", "UICenter", "BOTTOMRIGHT", -480, 210 }, -- "CENTER", "UICenter", "CENTER", 424, 0
+	Durability = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 }, -- "CENTER", "UICenter", "CENTER", 190, 0
 
-Defaults[ADDON] = {
-
-	-- Limits the width of the UI
-	aspectRatio = "wide", -- wide/ultrawide/full
-
-	-- Sets the aura filter level 
-	--auraFilter = "strict", -- strict/slack
-	auraFilterLevel = 2, -- 0 = strict, 1 = slack, 2 = spam
-
-	-- yay!
-	theme = "Azerite", -- Current variations are Azerite and Legacy. Diabolic IS coming too!
-
-	-- Enables a layout switch targeted towards healers
-	enableHealerMode = false,
-
-	-- Loads all child modules with debug functionality, 
-	-- doesn't actually load any consoles. 
-	loadDebugConsole = true, 
-
-	-- Enable console visibility. 
-	-- Requires the above to be true. 
-	enableDebugConsole = false
-}
-
-Defaults.BlizzardChatFrames = {
-	enableChatOutline = true -- enable outlined chat for readability
-}
-
-Defaults.BlizzardFloaterHUD = (IsClassic) and {
-	enableRaidWarnings = true -- not yet implemented!
-
-} or (IsRetail) and {
-	enableAlerts = false, -- achievements and currency. spams like crazy. can we filter it? I did in legion. MUST LOOK UP! 
-	enableAnnouncements = false, -- level up, loot, the various types of "banners"
-	enableObjectivesTracker = true, -- the blizzard monstrosity
-	enableRaidBossEmotes = true, -- partly needed for instance encounters, and some wqs like snapdragon flying
-	enableRaidWarnings = true,  -- groups would want this
-	enableTalkingHead = true -- immersive and nice
-}
-
-Defaults.ChatFilters = {
-	--enableAllChatFilters = true, -- enable chat filters to pretty things up!
-	enableChatStyling = true,
-	enableMonsterFilter = true,
-	enableBossFilter = true,
-	enableSpamFilter = true
-}
-
-Defaults.ExplorerMode = {
-	enableExplorer = true,
-	enableExplorerChat = true,
-	enableTrackerFading = false
-}
-
-Defaults.Minimap = {
-	useStandardTime = true, -- as opposed to military/24-hour time
-	useServerTime = false, -- as opposed to your local computer time
-	stickyBars = false
-}
-
-Defaults.NamePlates = {
-	enableAuras = true,
-	clickThroughEnemies = false, 
-	clickThroughFriends = false, 
-	clickThroughSelf = false,
-	nameplateShowSelf = false, 
-	NameplatePersonalShowAlways = false,
-	NameplatePersonalShowInCombat = true,
-	NameplatePersonalShowWithTarget = true
-}
-
-Defaults.UnitFramePlayer = {
-	enablePlayerManaOrb = true
-}
-
-Defaults.UnitFramePlayerHUD = {
-	enableCast = true,
-	enableClassPower = true
-}
-
-Defaults.UnitFrameParty = {
-	enablePartyFrames = true
-}
-
-Defaults.UnitFrameRaid = {
-	enableRaidFrames = true,
-	enableRaidFrameTestMode = false
-}
-
-------------------------------------------------
--- New Forge Driven Defaults
-------------------------------------------------
--- New saved settings which included
--- different entries for different themes.
-Defaults["ModuleForge::ActionBars"] = {
-	-- General settings. No prefix on them.
-	["buttonLock"] = true,
-	["castOnDown"] = true,
-	["keybindDisplayPriority"] = "default", -- can be 'gamepad', 'keyboard', 'default'
-	["lastKeybindDisplayType"] = "keyboard", -- not a user setting, just to save the state.
-	["gamePadType"] = "default", -- gamepad icons used. 'xbox', 'xbox-reversed', 'playstation', 'default'
-	
-	-- Legacy specific settings
-	["Legacy::enableSecondaryBar"] = false, -- bottom left multibar
-	["Legacy::enableSideBarRight"] = false, -- right (first) side bar
-	["Legacy::enableSideBarLeft"] = false, -- left (second) side bar
-	["Legacy::enablePetBar"] = true,
-
-	-- Azerite specific settings
-	-- *Note: Not yet using these!
-	["Azerite::extraButtonsCount"] = 5, -- Valid range is 0 to 17, 5 means a single full bar.
-	["Azerite::extraButtonsVisibility"] = "combat", -- can be 'always','hover','combat'
-	["Azerite::petBarEnabled"] = true,
-	["Azerite::petBarVisibility"] = "hover"
-
-}
-
--- New defaults for the new forge driven module.
--- Themes will be added to this as we transition them.
-Defaults["ModuleForge::UnitFrames"] = {
-	-- Legacy specific settings
-	["Legacy::EnableCastBar"] = true,
-	["Legacy::EnableClassPower"] = true
+	-- Bottom center floaters
+	-- Below these you'll find 2 potentional rows of actionbuttons, and the petbar.
+	Archeology = { "BOTTOM", "UICenter", "BOTTOM", 0, 390 },
+	AltPower = { "BOTTOM", "UICenter", "BOTTOM", 0, 340 }, -- "CENTER", "UICenter", "CENTER", 0, -(133 + 56)
+	CastBar = { "BOTTOM", "UICenter", "BOTTOM", 0, 290 }, -- CENTER, 0, -133
 }
 
 ------------------------------------------------
@@ -2178,21 +1966,12 @@ Defaults["ModuleForge::UnitFrames"] = {
 -- like which way tooltips grow, where the default position of all tooltips are,
 -- where the integrated MBB button is placed, and so on. 
 -- Not all of those can be changed through the layout, some things are in the modules.
-local GENERIC_STYLE = "Generic"
-local Layouts = { [GENERIC_STYLE] = {}, Azerite = {}, Diabolic = {}, Legacy = {} }
-local Schematics = { [GENERIC_STYLE] = {}, Azerite = {}, Diabolic = {}, Legacy = {} }
+local RegisterLayout = Private.RegisterLayout
+local RegisterLayoutVariation = Private.RegisterLayoutVariation
+local RegisterSchematic = Private.RegisterSchematic
 
--- Shortcuts to ease registrations
-local Generic = Layouts[GENERIC_STYLE]
-local Azerite = Layouts.Azerite
-local Diabolic = Layouts.Diabolic
-local Legacy = Layouts.Legacy
-
-------------------------------------------------
--- Themes
-------------------------------------------------
-
-Azerite.OptionsMenu = {
+-- Options menu
+RegisterLayout("OptionsMenu", "Azerite", {
 	MenuBorderBackdropBorderColor = { 1, 1, 1, 1 },
 	MenuBorderBackdropColor = { .05, .05, .05, .85 },
 	MenuButton_PostCreate = Core_MenuButton_PostCreate, 
@@ -2209,10 +1988,10 @@ Azerite.OptionsMenu = {
 	MenuToggleButtonIconSize = { 96, 96 },
 	MenuToggleButtonIconColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
 	MenuWindow_CreateBorder = function(self) return GetBorder(self) end
-}
+})
 
 -- Blizzard Chat Frames
-Azerite.BlizzardChatFrames = {
+RegisterLayout("BlizzardChatFrames", "Azerite", {
 	AlternateChatFramePlace = { "TOPLEFT", 85, -64 },
 	AlternateChatFrameSize = { 499, 176 }, 
 	AlternateClampRectInsets = { -54, -54, -64, -350 },
@@ -2235,9 +2014,8 @@ Azerite.BlizzardChatFrames = {
 	DefaultClampRectInsetsFaded = { -54, -54, -310, -64 },
 	EditBoxHeight = 45, 
 	EditBoxOffsetH = 15
-}
-
-Legacy.BlizzardChatFrames = setmetatable({
+})
+RegisterLayoutVariation("BlizzardChatFrames", "Legacy", "Azerite", {
 	AlternateChatFramePlace = false,
 	AlternateChatFrameSize = false, 
 	AlternateClampRectInsets = false, 
@@ -2246,25 +2024,10 @@ Legacy.BlizzardChatFrames = setmetatable({
 	DefaultClampRectInsets = { -54, -54, -54, -54 },
 	DefaultChatFramePlaceFaded = false, 
 	DefaultClampRectInsetsFaded = false
-
-}, { __index = Azerite.BlizzardChatFrames })
-
--- Because it's chaotic having these all over the place.
-local FloaterSlots = {
-	-- Bottomright floaters
-	-- These used to be center right, but was ultimately in the way of gameplay.
-	VehicleSeatSelector = { "CENTER", "UICenter", "BOTTOMRIGHT", -480, 210 }, -- "CENTER", "UICenter", "CENTER", 424, 0
-	Durability = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 }, -- "CENTER", "UICenter", "CENTER", 190, 0
-
-	-- Bottom center floaters
-	-- Below these you'll find 2 potentional rows of actionbuttons, and the petbar.
-	Archeology = { "BOTTOM", "UICenter", "BOTTOM", 0, 390 },
-	AltPower = { "BOTTOM", "UICenter", "BOTTOM", 0, 340 }, -- "CENTER", "UICenter", "CENTER", 0, -(133 + 56)
-	CastBar = { "BOTTOM", "UICenter", "BOTTOM", 0, 290 }, -- CENTER, 0, -133
-}
+})
 
 -- Blizzard Floaters
-Azerite.BlizzardFloaterHUD = {
+RegisterLayout("BlizzardFloaterHUD", "Azerite", {
 	AlertFramesAnchor = "BOTTOM",
 	AlertFramesOffset = -10,
 	AlertFramesPlace = { "TOP", "UICenter", "TOP", 0, -40 },
@@ -2330,30 +2093,30 @@ Azerite.BlizzardFloaterHUD = {
 	ZoneAbilityButtonShowCooldownSwipe = true,
 	ZoneAbilityButtonShowCooldownBling = true,
 	ZoneAbilityButtonSize = { 64, 64 }
-}
-Legacy.BlizzardFloaterHUD = setmetatable({
+})
+RegisterLayoutVariation("BlizzardFloaterHUD", "Legacy", "Azerite", {
 	VehicleSeatIndicatorPlace = { "CENTER", "UICenter", "BOTTOMRIGHT", -130, 80 }, 
 	ArcheologyDigsiteProgressBarPlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 390 },
-}, { __index = Azerite.BlizzardFloaterHUD })
+})
 
 -- Blizzard font replacements
-Azerite.BlizzardFonts = {
+RegisterLayout("BlizzardFonts", "Azerite", {
 	BlizzChatBubbleFont = GetFont(13, true, false),
 	ChatBubbleFont = GetFont(16, true, true),
 	ChatFont = GetFont(15, true, true)
-}
+})
 
 -- Blizzard Game Menu (Esc)
-Azerite.BlizzardGameMenu = {
+RegisterLayout("BlizzardGameMenu", "Azerite", {
 	MenuButton_PostCreate = Core_MenuButton_PostCreate,
 	MenuButton_PostUpdate = Core_MenuButton_PostUpdate,
 	MenuButtonSize = { 300, 50 },
 	MenuButtonSizeMod = .75, 
 	MenuButtonSpacing = 8
-}
+})
 
 -- Blizzard MicroMenu
-Azerite.BlizzardMicroMenu = {
+RegisterLayout("BlizzardMicroMenu", "Azerite", {
 	ButtonFont = GetFont(14, false),
 	ButtonFontColor = { 0, 0, 0 }, 
 	ButtonFontShadowColor = { 1, 1, 1, .5 },
@@ -2367,10 +2130,10 @@ Azerite.BlizzardMicroMenu = {
 	MenuButtonSpacing = 8, 
 	MenuButtonTitleColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
 	MenuWindow_CreateBorder = function(self) return GetBorder(self) end
-}
+})
 
 -- Blizzard Timers (mirror, quest)
-Azerite.BlizzardTimers = {
+RegisterLayout("BlizzardTimers", "Azerite", {
 	MirrorAnchor = Wheel("LibFrame"):GetFrame(),
 	MirrorAnchorOffsetX = 0,
 	MirrorAnchorOffsetY = -370, 
@@ -2404,10 +2167,10 @@ Azerite.BlizzardTimers = {
 	MirrorBlankTexture = GetMedia("blank"), 
 	MirrorGrowth = -50, 
 	MirrorSize = { 111, 14 }
-}
+})
 
 -- Blizzard Objectives Tracker
-Azerite.BlizzardObjectivesTracker = (IsClassic) and {
+RegisterLayout("BlizzardObjectivesTracker", "Azerite", (IsClassic) and {
 	FontObject = GetFont(13, true),
 	FontObjectTitle = GetFont(15, true),
 	HideInBossFights = true,
@@ -2429,8 +2192,8 @@ Azerite.BlizzardObjectivesTracker = (IsClassic) and {
 	HideInBossFights = true, 
 	HideInVehicles = false,
 	HideInArena = true
-}
-Legacy.BlizzardObjectivesTracker = (IsClassic) and {
+})
+RegisterLayoutVariation("BlizzardObjectivesTracker", "Legacy", "Azerite", (IsClassic) and {
 	FontObject = GetFont(13, true),
 	FontObjectTitle = GetFont(15, true),
 	HideInBossFights = true,
@@ -2452,10 +2215,10 @@ Legacy.BlizzardObjectivesTracker = (IsClassic) and {
 	HideInBossFights = true, 
 	HideInVehicles = false,
 	HideInArena = true
-}
+})
 
 -- Blizzard Popup Styling
-Azerite.BlizzardPopupStyling = {
+RegisterLayout("BlizzardPopupStyling", "Azerite", {
 	EditBoxBackdrop = BACKDROPS.PopupEditBox,
 	EditBoxBackdropColor = { 0, 0, 0, 0 },
 	EditBoxBackdropBorderColor = { .15, .1, .05, 1 },
@@ -2471,31 +2234,31 @@ Azerite.BlizzardPopupStyling = {
 	PopupButtonBackdropHoverColor = { .1, .1, .1, .75 },
 	PopupButtonBackdropHoverBorderColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3] },
 	PopupVerticalOffset = 32
-}
+})
 
 -- Blizzard Tooltips
-Azerite.BlizzardTooltips = {
+RegisterLayout("BlizzardTooltips", "Azerite", {
 	TooltipBackdrop = BACKDROPS.Tooltips,
 	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
 	TooltipBackdropColor = { .05, .05, .05, .85 },
 	TooltipStatusBarTexture = GetMedia("statusbar-dark")
-}
+})
 
 -- Blizzard World Map
-Generic.BlizzardWorldMap = {}
-Azerite.BlizzardWorldMap = {}
+RegisterLayout("BlizzardWorldMap", "Azerite", {})
+RegisterLayoutVariation("BlizzardWorldMap", "Legacy", "Azerite", {})
 
 -- ActionBars
-Azerite.ActionBarMain = {
+RegisterLayout("ActionBarMain", "Azerite", {
 	ExitButtonPlace = { "CENTER", "Minimap", "CENTER", -math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
 	ExitButtonSize = { 32, 32 },
 	ExitButtonTexturePath = GetMedia("icon_exit_flight"),
 	ExitButtonTexturePlace = { "CENTER", 0, 0 }, 
 	ExitButtonTextureSize = { 80, 80 }
-}
+})
 
 -- Bind Mode
-Azerite.Bindings = {
+RegisterLayout("Bindings", "Azerite", {
 	BindButtonOffset = 8, 
 	BindButtonTexture = GetMedia("actionbutton-mask-circular"),
 	MenuButtonNormalTexture = GetMedia("menu_button_disabled"),
@@ -2505,15 +2268,15 @@ Azerite.Bindings = {
 	MenuButtonTextShadowColor = { 1, 1, 1, .5 },
 	MenuButtonTextShadowOffset = { 0, -.85 },
 	MenuWindowGetBorder = function(self) return GetBorder(self) end
-}
+})
 
 -- Floaters. Durability only currently. 
-Azerite.Durability = {
+RegisterLayout("Durability", "Azerite", {
 	Place = FloaterSlots.Durability
-}
+})
 
 -- Group Leader Tools
-Azerite.GroupTools = IsClassic and {
+RegisterLayout("GroupTools", "Azerite", IsClassic and {
 	ConvertButtonPlace = { "TOP", 0, -360 + 140 }, 
 	ConvertButtonSize = { 300*.75, 50*.75 },
 	ConvertButtonTextColor = { 0, 0, 0 }, 
@@ -2639,10 +2402,10 @@ Azerite.GroupTools = IsClassic and {
 	WorldMarkerFlagBackdropSize = { 512 *1/3 *.75, 256 *1/3 *.75 },
 	WorldMarkerFlagBackdropTexture = GetMedia("menu_button_tiny"), 
 
-}
+})
 
 -- Minimap
-Azerite.Minimap = {
+RegisterLayout("Minimap", "Azerite", {
 	AP_OverrideValue = Minimap_AP_OverrideValue,
 	BattleGroundEyeColor = { .90, .95, 1 }, 
 	BattleGroundEyePlace = { "CENTER", math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
@@ -2788,8 +2551,8 @@ Azerite.Minimap = {
 	ZonePlaceFunc = function(Handler) return "BOTTOMRIGHT", Handler.Clock, "BOTTOMLEFT", -8, 0 end,
 	ZoneFont = GetFont(15, true),
 	UseBars = true, -- copout
-}
-Legacy.Minimap = setmetatable({
+})
+RegisterLayoutVariation("Minimap", "Legacy", "Azerite", {
 	Size = { 210, 210 }, 
 	--Place = { "TOPRIGHT", "UICenter", "TOPRIGHT", -50, -56 }, 
 	Place = { "TOPRIGHT", "UICenter", "TOPRIGHT", -60, -70 }, 
@@ -2874,10 +2637,10 @@ Legacy.Minimap = setmetatable({
 	ToggleBackdropSize = { 85, 85 },
 	ToggleSize = { 48, 48 }, 
 
-} , { __index = Azerite.Minimap })
+})
 
 -- NamePlates
-Azerite.NamePlates = {
+RegisterLayout("NamePlates", "Azerite", {
 	PostCreateAuraButton = NamePlates_Auras_PostCreateButton,
 	PostUpdateAuraButton = NamePlates_Auras_PostUpdateButton,
 	AuraAnchor = "Health", 
@@ -2906,7 +2669,7 @@ Azerite.NamePlates = {
 		auraSize = 30, 
 		maxVisible = 6, 
 		filter = "PLAYER", 
-		customFilter = GetAuraFilterFunc("nameplate"),
+		customFilter = GetAuraFilter("nameplate"),
 		debuffsFirst = true, 
 		disableMouse = true, 
 		showSpirals = false, 
@@ -3162,10 +2925,10 @@ Azerite.NamePlates = {
 	ThreatSize = { 84*256/(256-28), 14*64/(64-28) },
 	ThreatTexture = GetMedia("nameplate_glow"),
 
-}
+})
 
 -- Custom Tooltips
-Azerite.Tooltips = {
+RegisterLayout("Tooltips", "Azerite", {
 	PostCreateBar = Tooltip_Bar_PostCreate,
 	PostCreateLinePair = Tooltip_LinePair_PostCreate,
 	PostCreateTooltip = Tooltip_PostCreate,
@@ -3174,13 +2937,13 @@ Azerite.Tooltips = {
 	TooltipBackdropColor = { .05, .05, .05, .85 },
 	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -319, 166 }, 
 	TooltipStatusBarTexture = GetMedia("statusbar-dark")
-}
+})
 
 ------------------------------------------------
 -- Unit Frame Layouts
 ------------------------------------------------
 -- Player
-Azerite.UnitFramePlayer = { 
+RegisterLayout("UnitFramePlayer", "Azerite", { 
 	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
 	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
 	AuraBorderBackdrop = BACKDROPS.AuraBorder,
@@ -3203,7 +2966,7 @@ Azerite.UnitFramePlayer = {
 		customSort = false,
 		debuffsFirst = true, 
 		disableMouse = false, 
-		customFilter = GetAuraFilterFunc("player"),
+		customFilter = GetAuraFilter("player"),
 		growthX = "RIGHT", 
 		growthY = "UP", 
 		maxBuffs = nil, 
@@ -3499,10 +3262,10 @@ Azerite.UnitFramePlayer = {
 	WinterVeilPowerPlace = { "CENTER", -2, 24 },
 	WinterVeilPowerTexture = GetMedia("seasonal_winterveil_crystal"), 
 	WinterVeilPowerSize = { 120 / ((255-50*2)/255), 140 / ((255-37*2)/255) }
-}
+})
 
 -- PlayerHUD (combo points and castbar)
-Azerite.UnitFramePlayerHUD = {
+RegisterLayout("UnitFramePlayerHUD", "Azerite", {
 	CastBarColor = { 70/255, 255/255, 131/255, .69 },
 	CastBarOrientation = "RIGHT",
 	CastTimeToHoldFailed = .5,
@@ -3616,10 +3379,10 @@ Azerite.UnitFramePlayerHUD = {
 	PlayerAltPowerBarValueJustifyV = "MIDDLE",
 	PlayerAltPowerBarValuePlace = { "CENTER", 0, 0 },
 	Size = { 103, 103 }
-}
+})
 
 -- Target
-Azerite.UnitFrameTarget = { 
+RegisterLayout("UnitFrameTarget", "Azerite", { 
 	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
 	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
 	AuraBorderBackdrop = BACKDROPS.AuraBorder,
@@ -3643,7 +3406,7 @@ Azerite.UnitFrameTarget = {
 		customSort = false,
 		debuffsFirst = true, 
 		disableMouse = false, 
-		customFilter = GetAuraFilterFunc("target"),
+		customFilter = GetAuraFilter("target"),
 		growthX = "LEFT", 
 		growthY = "DOWN", 
 		maxBuffs = nil, 
@@ -4072,13 +3835,13 @@ Azerite.UnitFrameTarget = {
 	ThreatPortraitPlace = { "CENTER", -1, 2 + 1 },
 	ThreatPortraitSize = { 187, 187 },
 	ThreatPortraitTexture = GetMedia("portrait_frame_glow")
-}
+})
 
 ------------------------------------------------
 -- Template Unit Frame Layouts
 ------------------------------------------------
 -- Boss 
-Azerite.UnitFrameBoss = setmetatable({
+RegisterLayout("UnitFrameBoss", "Azerite", setmetatable({
 	GrowthX = 0, -- Horizontal growth per new unit
 	GrowthY = -97, -- Vertical growth per new unit
 	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
@@ -4095,10 +3858,10 @@ Azerite.UnitFrameBoss = setmetatable({
 	HealthColorTapped = false, -- color tap denied units 
 	HealthColorThreat = true, -- threat coloring on non-friendly health bars
 	Place = { "TOPRIGHT", "UICenter", "RIGHT", -64, 261 } -- Position of the initial frame
-}, { __index = Template_SmallFrameReversed_Auras })
+}, { __index = Template_SmallFrameReversed_Auras }))
 
 -- 2-5 player groups
-Azerite.UnitFrameParty = setmetatable({
+RegisterLayout("UnitFrameParty", "Azerite", setmetatable({
 
 	HitRectInsets = { 0, 0, 0, -10 },
 
@@ -4174,7 +3937,7 @@ Azerite.UnitFrameParty = setmetatable({
 		auraSize = 30,  
 		maxVisible = 6, 
 		filter = "PLAYER",
-		customFilter = GetAuraFilterFunc("party"), 
+		customFilter = GetAuraFilter("party"), 
 		debuffsFirst = false, 
 		disableMouse = false, 
 		showSpirals = false, 
@@ -4270,7 +4033,7 @@ Azerite.UnitFrameParty = setmetatable({
 
 			-- Colorize the border
 			if (element.filter == "HARMFUL") then 
-				local color = element.debuffType and spellTypeColor[element.debuffType]
+				local color = element.debuffType and colors.debuff[element.debuffType]
 				if color then 
 					element.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 				else
@@ -4409,10 +4172,10 @@ Azerite.UnitFrameParty = setmetatable({
 		end 
 	end,
 	
-}, { __index = Template_TinyFrame })
+}, { __index = Template_TinyFrame }))
 
 -- Player Pet
-Azerite.UnitFramePet = setmetatable({
+RegisterLayout("UnitFramePet", "Azerite", setmetatable({
 	HealthColorClass = false, -- color players by class 
 	HealthColorDisconnected = false, -- color disconnected units
 	HealthColorHealth = true, -- color anything else in the default health color
@@ -4421,18 +4184,18 @@ Azerite.UnitFramePet = setmetatable({
 	HealthColorTapped = false, -- color tap denied units 
 	HealthFrequentUpdates = true, 
 	Place = { "LEFT", "UICenter", "BOTTOMLEFT", 362, 125 }
-}, { __index = Template_SmallFrame })
+}, { __index = Template_SmallFrame }))
 
 -- Focus
 if (IsRetail) then
-	Azerite.UnitFrameFocus = setmetatable({
+	RegisterLayout("UnitFrameFocus", "Azerite", setmetatable({
 		AuraProperties = {
 			growthX = "RIGHT", 
 			growthY = "UP", 
 			spacingH = 4, 
 			spacingV = 4, 
 			auraSize = Constant.SmallAuraSize, 
-			customFilter = GetAuraFilterFunc("focus"), 
+			customFilter = GetAuraFilter("focus"), 
 			debuffsFirst = false, 
 			disableMouse = false, 
 			showSpirals = false, 
@@ -4464,11 +4227,11 @@ if (IsRetail) then
 		NameSize = nil,
 		Place = { "RIGHT", "UICenter", "BOTTOMLEFT", 332, 270 }, -- collides with 2nd row of player auras.
 		--Place = { "RIGHT", "UICenter", "BOTTOMLEFT", 332, 270 + 50 }
-	}, { __index = Template_SmallFrame_Auras })
+	}, { __index = Template_SmallFrame_Auras }))
 end
 
 -- 6-40 player groups
-Azerite.UnitFrameRaid = setmetatable({
+RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 
 	TargetHighlightSize = { 140 * .94, 90 *.94 },
 	HitRectInsets = { 0, 0, 0, -10 },
@@ -4616,7 +4379,7 @@ Azerite.UnitFrameRaid = setmetatable({
 
 			-- Colorize the border
 			if (element.filter == "HARMFUL") then 
-				local color = element.debuffType and spellTypeColor[element.debuffType]
+				local color = element.debuffType and colors.debuff[element.debuffType]
 				if color then 
 					element.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 				else
@@ -4726,10 +4489,10 @@ Azerite.UnitFrameRaid = setmetatable({
 		end 
 	end,
 
-}, { __index = Template_TinyFrame })
+}, { __index = Template_TinyFrame }))
 
 -- Target of Target
-Azerite.UnitFrameToT = setmetatable({
+RegisterLayout("UnitFrameToT", "Azerite", setmetatable({
 	HealthColorClass = true, -- color players by class 
 	HealthColorDisconnected = true, -- color disconnected units
 	HealthColorHealth = false, -- color anything else in the default health color
@@ -4748,9 +4511,7 @@ Azerite.UnitFrameToT = setmetatable({
 	NameJustifyV = "TOP",
 	NamePlace = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 - 4 }, 
 	Place = { "RIGHT", "UICenter", "TOPRIGHT", -492, -96 + 6 }
-}, { __index = Template_SmallFrameReversed })
-
-
+}, { __index = Template_SmallFrameReversed }))
 
 ------------------------------------------------
 -- Lease & Lend
@@ -4758,207 +4519,18 @@ Azerite.UnitFrameToT = setmetatable({
 --  with none or very few changes.
 ------------------------------------------------
 -- No changes
-Legacy.BlizzardFonts = Azerite.BlizzardFonts
-Legacy.BlizzardGameMenu = Azerite.BlizzardGameMenu
-Legacy.BlizzardMicroMenu = Azerite.BlizzardMicroMenu
-Legacy.BlizzardPopupStyling = Azerite.BlizzardPopupStyling
-Legacy.BlizzardTimers = Azerite.BlizzardTimers
-Legacy.BlizzardTooltips = Azerite.BlizzardTooltips
-Legacy.BlizzardWorldMap = Azerite.BlizzardWorldMap
-Legacy.GroupTools = Azerite.GroupTools
-Legacy.NamePlates = Azerite.NamePlates
+RegisterLayoutVariation("BlizzardFonts", "Legacy", "Azerite", {})
+RegisterLayoutVariation("BlizzardGameMenu", "Legacy", "Azerite", {})
+RegisterLayoutVariation("BlizzardMicroMenu", "Legacy", "Azerite", {})
+RegisterLayoutVariation("BlizzardPopupStyling", "Legacy", "Azerite", {})
+RegisterLayoutVariation("BlizzardTimers", "Legacy", "Azerite", {})
+RegisterLayoutVariation("BlizzardTooltips", "Legacy", "Azerite", {})
+RegisterLayoutVariation("BlizzardWorldMap", "Legacy", "Azerite", {})
+RegisterLayoutVariation("GroupTools", "Legacy", "Azerite", {})
+RegisterLayoutVariation("NamePlates", "Legacy", "Azerite", {})
 
 -- Few changes
-Legacy.Bindings = setmetatable({ BindButtonTexture = GetMedia("actionbutton-mask-square") }, { __index = Azerite.Bindings })
-Legacy.Durability = setmetatable({ 	Place = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 } }, { __index = Azerite.Durability })
-Legacy.Tooltips = setmetatable({ TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -54, 66 } }, { __index = Azerite.Tooltips })
-Legacy.OptionsMenu = setmetatable({ 
-	MenuPlace = { "TOPRIGHT", -41, -32 },
-	MenuToggleButtonPlace = { "TOPRIGHT", -4, -4 }
-}, { __index = Azerite.OptionsMenu })
-
-
-
-------------------------------------------------
--- Private Addon API
-------------------------------------------------
-Private.Colors = Colors
-Private.GetFont = GetFont
-Private.GetMedia = GetMedia
-
--- Use a hidden setting in the perChar database to store the settings profile
-local GetProfile = function()
-	local db = Private.GetConfig(ADDON, "character") -- crossing the beams!
-	return db.settingsProfile or "character"
-end
-
--- Initialize or retrieve the saved settings for the current character.
--- Note that this will silently return nothing if no defaults are registered.
--- This is to prevent invalid databases being saved.
-Private.GetConfig = function(name, profile)
-	local db = Wheel("LibModule"):GetModule(ADDON):GetConfig(name, profile or GetProfile(), nil, true)
-	if (db) then
-		return db
-	else
-		local defaults = Private.GetDefaults(name)
-		if (defaults) then
-			return Wheel("LibModule"):GetModule(ADDON):NewConfig(name, defaults, profile or GetProfile())
-		end
-	end
-end 
-
--- Initialize or retrieve the global settings
-Private.GetGlobalConfig = function(name)
-	local db = Wheel("LibModule"):GetModule(ADDON):GetConfig(name, "global", nil, true)
-	return db or Wheel("LibModule"):GetModule(ADDON):NewConfig(name, Private.GetDefaults(name), "global")
-end 
-
--- Retrieve default settings
-Private.GetDefaults = function(name) 
-	return Defaults[name] 
-end 
-
--- Proxy this one
-Private.GetAuraFilter = function(...) 
-	return LibAuraTool:GetAuraFilter(...) 
-end
-
--- Whether or not aura filters are in forced slack mode.
--- This happens if aura data isn't available for the current class.
-Private.IsForcingSlackAuraFilterMode = function() 
-	return LibAuraTool:IsForcingSlackAuraFilterMode() 
-end
-
-------------------------------------------------
--- Private Theme API
-------------------------------------------------
--- What layout we're currently using, and the fallback for unknowns.
-local CURRENT_LAYOUT, FALLBACK_LAYOUT
-
--- Retrieve static layout data for a named module
--- Will return a specific variation if requested, 
--- use the current one if a specific is not specified,
--- or default to fallbacks or generic layouts if nothing is set.
-Private.GetLayout = function(moduleName, layoutName) 
-	local layout 
-	if (layoutName) and Layouts[layoutName] and Layouts[layoutName][moduleName] then
-		layout = Layouts[layoutName][moduleName]
-	else
-		if (CURRENT_LAYOUT) and (Layouts[CURRENT_LAYOUT]) and (Layouts[CURRENT_LAYOUT][moduleName]) then
-			layout = Layouts[CURRENT_LAYOUT][moduleName]
-
-		elseif (FALLBACK_LAYOUT) and (Layouts[FALLBACK_LAYOUT]) and (Layouts[FALLBACK_LAYOUT][moduleName]) then
-			layout = Layouts[FALLBACK_LAYOUT][moduleName]
-
-		elseif (GENERIC_STYLE) and (Layouts[GENERIC_STYLE]) and (Layouts[GENERIC_STYLE][moduleName]) then
-			layout = Layouts[GENERIC_STYLE][moduleName]
-		end
-	end
-	return layout
-end 
-
--- Set which layout variation to use
-Private.SetLayout = function(layoutName) 
-	if (Layouts[layoutName]) then
-		CURRENT_LAYOUT = layoutName
-	end
-end 
-
--- Set which fallback variation to use
-Private.SetFallbackLayout = function(layoutName) 
-	if (Layouts[layoutName]) then
-		FALLBACK_LAYOUT = layoutName
-	end
-end 
-
-Private.GetFallbackLayoutID = function()
-	return FALLBACK_LAYOUT
-end
-
-Private.GetLayoutID = function()
-	return CURRENT_LAYOUT
-end
-
--- Private.RegisterSchematic(uniqueID[, layoutID], schematic)
-Private.RegisterSchematic = function(uniqueID, ...)
-	local schematic, layoutID
-	local numArgs = select("#", ...)
-	if (numArgs == 1) then
-		schematic = ...
-		layoutID = Private.GetLayoutID()
-	elseif (numArgs == 2) then
-		layoutID, schematic = ...
-	end
-	Schematics[layoutID][uniqueID] = schematic
-end
-
-Private.HasSchematic = function(uniqueID, layoutID)
-	if ((layoutID) and Schematics[layoutID] and Schematics[layoutID][uniqueID]) 
-	or ((CURRENT_LAYOUT) and (Schematics[CURRENT_LAYOUT]) and (Schematics[CURRENT_LAYOUT][uniqueID])) 
-	or ((FALLBACK_LAYOUT) and (Schematics[FALLBACK_LAYOUT]) and (Schematics[FALLBACK_LAYOUT][uniqueID])) 
-	or ((GENERIC_STYLE) and (Schematics[GENERIC_STYLE]) and (Schematics[GENERIC_STYLE][uniqueID])) then
-		return true
-	end
-end
-
-Private.GetSchematic = function(uniqueID, layoutID)
-	local schematic 
-	if (layoutID) and Schematics[layoutID] and Schematics[layoutID][uniqueID] then
-		schematic = Schematics[layoutID][uniqueID]
-	else
-		if (CURRENT_LAYOUT) and (Schematics[CURRENT_LAYOUT]) and (Schematics[CURRENT_LAYOUT][uniqueID]) then
-			schematic = Schematics[CURRENT_LAYOUT][uniqueID]
-
-		elseif (FALLBACK_LAYOUT) and (Schematics[FALLBACK_LAYOUT]) and (Schematics[FALLBACK_LAYOUT][uniqueID]) then
-			schematic = Schematics[FALLBACK_LAYOUT][uniqueID]
-
-		elseif (GENERIC_STYLE) and (Schematics[GENERIC_STYLE]) and (Schematics[GENERIC_STYLE][uniqueID]) then
-			schematic = Schematics[GENERIC_STYLE][uniqueID]
-		end
-	end
-	return schematic
-end
-
-------------------------------------------------
--- Private Sanity Filter
-------------------------------------------------
-for i,v in pairs({
-	[(function(msg)
-		local new = {}
-		for i,v in ipairs({ string.split("::", msg) }) do
-			local c = tonumber(v)
-			 if (c) then
-				table.insert(new, string.char(c))
-			end
-		end
-		return table.concat(new)
-	end)("77::111:118::101::65::110::121::116::104::105::110::103")] = true
-}) do 
-	if (Wheel("LibModule"):IsAddOnEnabled(i)) then
-		Private.EngineFailure = string.format("|cffff0000%s is incompatible with |cffffd200%s|r. Bailing out.|r", ADDON, i)
-		break
-	end
-end
-
-------------------------------------------------
--- Private Tooltip API
-------------------------------------------------
-local GetTooltip = function(name)
-	return LibTooltip:GetTooltip(name) or LibTooltip:CreateTooltip(name)
-end
-
--- Library tooltip proxies.
--- This way the modules can access all of them, 
--- without having to embed or reference libraries.
-Private.GetActionButtonTooltip = function(self) return LibSecureButton:GetActionButtonTooltip() end
-Private.GetBagButtonTooltip = function(self) return LibBagButton:GetBagButtonTooltip() end
-Private.GetBindingsTooltip = function(self) return LibBindTool:GetBindingsTooltip() end
-Private.GetMinimapTooltip = function(self) return LibMinimap:GetMinimapTooltip() end
-Private.GetMoverTooltip = function(self) return LibMover:GetMoverTooltip() end
-Private.GetUnitFrameTooltip = function(self) return LibUnitFrame:GetUnitFrameTooltip() end
-
--- Commonly used module tooltips.
--- These follow the same naming scheme as the library tooltips,
--- but are created and used by our own front-end modules.
-Private.GetFloaterTooltip = function(self) return GetTooltip("GP_FloaterTooltip") end
-Private.GetOptionsMenuTooltip = function(self) return GetTooltip("GP_OptionsMenuTooltip") end
+RegisterLayoutVariation("Bindings", "Legacy", "Azerite", { BindButtonTexture = GetMedia("actionbutton-mask-square") })
+RegisterLayoutVariation("Durability", "Legacy", "Azerite", { 	Place = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 } })
+RegisterLayoutVariation("Tooltips", "Legacy", "Azerite", { TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -54, 66 } })
+RegisterLayoutVariation("OptionsMenu", "Legacy", "Azerite", { MenuPlace = { "TOPRIGHT", -41, -32 }, MenuToggleButtonPlace = { "TOPRIGHT", -4, -4 } })
