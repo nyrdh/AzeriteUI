@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 103)
+local LibTooltip = Wheel:Set("LibTooltip", 104)
 if (not LibTooltip) then
 	return
 end
@@ -1064,7 +1064,7 @@ end
 
 Tooltip.SetSmartAnchor = function(self, parent, offsetX, offsetY)
 
-	-- Keyword parse the owner frame, to allow tooltips to use our custom crames. 
+	-- Keyword parse the owner frame, to allow tooltips to use our custom frames. 
 	self:SetOwner(LibTooltip:GetFrame(parent), "ANCHOR_NONE")
 
 	local width, height = UIParent:GetSize()
@@ -1081,9 +1081,25 @@ Tooltip.SetSmartAnchor = function(self, parent, offsetX, offsetY)
 	self:Place(point, parent, rPoint, offsetX, offsetY)
 end 
 
+Tooltip.SetSmartVerticalAnchor = function(self, parent, offsetY)
+
+	-- Keyword parse the owner frame, to allow tooltips to use our custom frames. 
+	self:SetOwner(LibTooltip:GetFrame(parent), "ANCHOR_NONE")
+
+	local width, height = UIParent:GetSize()
+	local bottom = parent:GetBottom() 
+	local top = height - parent:GetTop()
+	local point = ((bottom < top) and "BOTTOM" or "TOP")
+	local rPoint = ((bottom < top) and "TOP" or "BOTTOM")
+	
+	offsetY = (offsetY or 10) * ((bottom < top) and 1 or -1)
+
+	self:Place(point, parent, rPoint, 0, offsetY)
+end 
+
 Tooltip.SetSmartItemAnchor = function(self, parent, offsetX, offsetY)
 
-	-- Keyword parse the owner frame, to allow tooltips to use our custom crames. 
+	-- Keyword parse the owner frame, to allow tooltips to use our custom frames. 
 	self:SetOwner(LibTooltip:GetFrame(parent), "ANCHOR_NONE")
 
 	local width, height = UIParent:GetSize()

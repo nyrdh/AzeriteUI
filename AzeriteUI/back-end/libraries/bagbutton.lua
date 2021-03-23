@@ -1,4 +1,4 @@
-local LibBagButton = Wheel:Set("LibBagButton", 49)
+local LibBagButton = Wheel:Set("LibBagButton", 50)
 if (not LibBagButton) then	
 	return
 end
@@ -610,14 +610,15 @@ Button.UpdateItemBind = function(self)
 	end
 end
 
-
 -- Updates the quest icons of a slot button.
 Button.UpdateQuest = function(self)
-	local isQuestItem, questID, isActive = GetContainerItemQuestInfo(self.bagID, self.slotID)
-	self.isQuestItem = isQuestItem or (self.itemClassID == LE_ITEM_CLASS_QUESTITEM)
-	self.isQuestActive = isActive
-	self.isUsableQuestItem = self.isQuestItem and self.isUsable
-	self.questID = questID
+	if (IsRetail) then
+		local isQuestItem, questID, isActive = GetContainerItemQuestInfo(self.bagID, self.slotID)
+		self.isQuestItem = isQuestItem or (self.itemClassID == LE_ITEM_CLASS_QUESTITEM)
+		self.isQuestActive = isActive
+		self.isUsableQuestItem = self.isQuestItem and self.isUsable
+		self.questID = questID
+	end
 
 	-- Quest starter
 	if (self.questID) and (not self.isQuestActive) then
@@ -666,11 +667,13 @@ Button.Update = function(self)
 	if (self.bagID) and (self.slotID) then
 		local Item = LibBagButton:GetBlizzardContainerSlotCache(self.bagID, self.slotID)
 		if (Item) then
-			local isQuestItem, questID, isActive = GetContainerItemQuestInfo(self.bagID, self.slotID)
-			Item.isQuestItem = isQuestItem or (self.itemClassID == LE_ITEM_CLASS_QUESTITEM)
-			Item.isQuestActive = isActive
-			Item.isUsableQuestItem = self.isQuestItem and Item.isUsable
-			Item.questID = questID
+			if (IsRetail) then
+				local isQuestItem, questID, isActive = GetContainerItemQuestInfo(self.bagID, self.slotID)
+				Item.isQuestItem = isQuestItem or (self.itemClassID == LE_ITEM_CLASS_QUESTITEM)
+				Item.isQuestActive = isActive
+				Item.isUsableQuestItem = self.isQuestItem and Item.isUsable
+				Item.questID = questID
+			end
 
 			local _, _, locked = GetContainerItemInfo(self.bagID, self.slotID)
 			Item.isLocked = locked
@@ -915,10 +918,14 @@ Button.OnShow = function(self)
 	self:RegisterMessage("GP_BAG_UPDATE", UpdateButton)
 	self:RegisterEvent("BAG_UPDATE_COOLDOWN", UpdateButton)
 	self:RegisterEvent("ITEM_LOCK_CHANGED", UpdateButton)
-	self:RegisterEvent("QUEST_ACCEPTED", UpdateButton)
-	self:RegisterEvent("UNIT_QUEST_LOG_CHANGED", UpdateButton)
-	self:RegisterEvent("UNIT_INVENTORY_CHANGED", UpdateButton)
-	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", UpdateButton)
+
+	if (IsRetail) then
+		self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", UpdateButton)
+		self:RegisterEvent("QUEST_ACCEPTED", UpdateButton)
+		self:RegisterEvent("UNIT_QUEST_LOG_CHANGED", UpdateButton)
+		self:RegisterEvent("UNIT_INVENTORY_CHANGED", UpdateButton)
+	end
+
 	self:Update()
 end
 
@@ -1167,7 +1174,7 @@ LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID, forceUpd
 			if (Item.itemName) then 
 
 				-- No quest item info in classic
-				if (not IsClassic) then
+				if (IsRetail) then
 					isQuestItem, questID, isActive = GetContainerItemQuestInfo(bagID, slotID)
 				end
 				
@@ -1867,6 +1874,7 @@ LibBagButton.SpawnItemButton = function(self, ...)
 
 	-- Quest texture for quest starters
 	local quest = overlay:CreateTexture()
+	--quest:Hide() -- for classic
 	quest:SetDrawLayer("BORDER", 2)
 	quest:SetPoint("BOTTOMLEFT", -1, 8)
 	quest:SetSize(32,32)
