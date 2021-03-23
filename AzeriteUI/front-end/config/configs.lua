@@ -78,56 +78,56 @@ end
 local BACKDROPS = {
 
 	-- Most unit frame auras
-	AuraBorder = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
+	["AuraBorder"] = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
 
 	-- Nameplate auras and other small frames
-	AuraBorderSmall = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
+	["AuraBorderSmall"] = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
 
 	-- Blizzard micro menu
-	ConfigWindow = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = GetMedia("tooltip_border"), edgeSize = 23, 
-		insets = { top = 17.25, bottom = 17.25, left = 17.25, right = 17.25 }
+	["ConfigWindow"] = {
+		["bgFile"] = [[Interface\ChatFrame\ChatFrameBackground]],
+		["edgeFile"] = GetMedia("tooltip_border"), edgeSize = 23, 
+		["insets"] = { top = 17.25, bottom = 17.25, left = 17.25, right = 17.25 }
 	},
 
 	-- Popup window background
-	Popup = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
-		edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 23,  
-		insets = { top = 7.5, bottom = 7.5, left = 7.5, right = 7.5 }
+	["Popup"] = {
+		["bgFile"] = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
+		["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 23,  
+		["insets"] = { top = 7.5, bottom = 7.5, left = 7.5, right = 7.5 }
 	},
 
 	-- Popup window buttons
-	PopupButton = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
-		edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 18,
-		insets = { left = 6, right = 6, top = 6, bottom = 6 }
+	["PopupButton"] = {
+		["bgFile"] = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
+		["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 18,
+		["insets"] = { left = 6, right = 6, top = 6, bottom = 6 }
 	},
 
 	-- Popup window input boxes
-	PopupEditBox = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
-		edgeFile = [[Interface\ChatFrame\ChatFrameBackground]], edgeSize = 1,
-		insets = { left = -6, right = -6, top = 0, bottom = 0 }
+	["PopupEditBox"] = {
+		["bgFile"] = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
+		["edgeFile"] = [[Interface\ChatFrame\ChatFrameBackground]], edgeSize = 1,
+		["insets"] = { left = -6, right = -6, top = 0, bottom = 0 }
 	},
 
 	-- Tooltips and most standard frames
-	Tooltips = {
-		bgFile = [[Interface\ChatFrame\ChatFrameBackground]], tile = false,
-		edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
-		insets = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
+	["Tooltips"] = {
+		["bgFile"] = [[Interface\ChatFrame\ChatFrameBackground]], tile = false,
+		["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 32, 
+		["insets"] = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
 	}, 
 
-	GenericBorder = {
-		bgFile = nil, tile = false, 
-		edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
-		insets = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
+	["GenericBorder"] = {
+		["bgFile"] = nil, tile = false, 
+		["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 32, 
+		["insets"] = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
 	}, 
 
-	GenericRoundedBorder = {
-		bgFile = nil, tile = false, 
-		edgeFile = GetMedia("tooltip_border_rounded"), edgeSize = 32, 
-		insets = { top = 15, bottom = 15, left = 15, right = 15 }
+	["GenericRoundedBorder"] = {
+		["bgFile"] = nil, tile = false, 
+		["edgeFile"] = GetMedia("tooltip_border_rounded"), edgeSize = 32, 
+		["insets"] = { top = 15, bottom = 15, left = 15, right = 15 }
 	}
 
 }
@@ -142,15 +142,15 @@ local GetBorder = function(self, edgeFile, edgeSize, bgFile, bgInsets, offsetX, 
 	border:SetPoint("TOPLEFT", -(offsetX or 6), (offsetY or 8))
 	border:SetPoint("BOTTOMRIGHT", (offsetX or 6), -(offsetY or 8))
 	border:SetBackdrop({
-		bgFile = bgFile or [[Interface\ChatFrame\ChatFrameBackground]],
-		edgeFile = edgeFile or GetMedia("tooltip_border_hex"),
-		edgeSize = 32, 
-		tile = false, 
-		insets = { 
-			top = bgInsets or 10.5, 
-			bottom = bgInsets or 10.5, 
-			left = bgInsets or 10.5, 
-			right = bgInsets or 10.5 
+		["bgFile"] = bgFile or [[Interface\ChatFrame\ChatFrameBackground]],
+		["edgeFile"] = edgeFile or GetMedia("tooltip_border_hex"),
+		["edgeSize"] = 32, 
+		["tile"] = false, 
+		["insets"] = { 
+			["top"] = bgInsets or 10.5, 
+			["bottom"] = bgInsets or 10.5, 
+			["left"] = bgInsets or 10.5, 
+			["right"] = bgInsets or 10.5 
 		}
 	})
 	border:SetBackdropBorderColor(1, 1, 1, 1)
@@ -643,13 +643,7 @@ end
 local Tooltip_StatusBar_PostUpdate = function(tooltip, bar, value, min, max, isRealValue)
 	if (bar.barType == "health") then 
 		if (isRealValue) then 
-			if (value >= 1e8) then 			bar.Value:SetFormattedText("%.0fm", value/1e6) 		-- 100m, 1000m, 2300m, etc
-			elseif (value >= 1e6) then 		bar.Value:SetFormattedText("%.1fm", value/1e6) 		-- 1.0m - 99.9m 
-			elseif (value >= 1e5) then 		bar.Value:SetFormattedText("%.0fk", value/1e3) 		-- 100k - 999k
-			elseif (value >= 1e3) then 		bar.Value:SetFormattedText("%.1fk", value/1e3) 		-- 1.0k - 99.9k
-			elseif (value > 0) then 		bar.Value:SetText(tostring(math_floor(value))) 		-- 1 - 999
-			else 							bar.Value:SetText("")
-			end 
+			bar.Value:SetText(large(value))
 		else 
 			if (value > 0) then 
 				bar.Value:SetFormattedText("%.0f%%", value)
@@ -665,36 +659,6 @@ local Tooltip_StatusBar_PostUpdate = function(tooltip, bar, value, min, max, isR
 			bar.Value:Hide()
 			bar.Value:SetText("")
 		end
-	end 
-end 
-
--- zhCN exceptions
-local gameLocale = GetLocale()
-if (gameLocale == "zhCN") then
-	Tooltip_StatusBar_PostUpdate = function(tooltip, bar, value, min, max, isRealValue)
-		if (bar.barType == "health") then 
-			if (isRealValue) then 
-				if (value >= 1e8) then 			bar.Value:SetFormattedText("%.2f亿", value/1e8)
-				elseif (value >= 1e4) then 		bar.Value:SetFormattedText("%.2f万", value/1e4)
-				elseif (value > 0) then 		bar.Value:SetText(tostring(math_floor(value)))
-				else 							bar.Value:SetText("")
-				end 
-			else 
-				if (value > 0) then 
-					bar.Value:SetFormattedText("%.0f%%", value)
-				else 
-					bar.Value:SetText("")
-				end
-			end
-			if (not bar.Value:IsShown()) then 
-				bar.Value:Show()
-			end
-		else 
-			if (bar.Value:IsShown()) then 
-				bar.Value:Hide()
-				bar.Value:SetText("")
-			end
-		end 
 	end 
 end 
 
@@ -1510,48 +1474,6 @@ local SmallFrame_BarTextPostUpdate = function(element, unit)
 	end
 end
 
-local TinyFrame_OverrideValue = function(element, unit, min, max, disconnected, dead, tapped)
-	if (min >= 1e8) then 		element.Value:SetFormattedText("%.0fm", min/1e6)  -- 100m, 1000m, 2300m, etc
-	elseif (min >= 1e6) then 	element.Value:SetFormattedText("%.1fm", min/1e6)  -- 1.0m - 99.9m 
-	elseif (min >= 1e5) then 	element.Value:SetFormattedText("%.0fk", min/1e3)  -- 100k - 999k
-	elseif (min >= 1e3) then 	element.Value:SetFormattedText("%.1fk", min/1e3)  -- 1.0k - 99.9k
-	elseif (min > 0) then 		element.Value:SetText(min) 						  -- 1 - 999
-	else 						element.Value:SetText("")
-	end 
-end 
-
--- zhCN exceptions
-local gameLocale = GetLocale()
-if (gameLocale == "zhCN") then 
-	TinyFrame_OverrideValue = function(element, unit, min, max, disconnected, dead, tapped)
-		if (min >= 1e8) then 		element.Value:SetFormattedText("%.2f亿", min/1e8)
-		elseif (min >= 1e4) then 	element.Value:SetFormattedText("%.2f万", min/1e4)
-		elseif (min > 0) then 		element.Value:SetText(min)
-		else 						element.Value:SetText("")
-		end 
-	end
-end 
-
-local TinyFrame_OverrideHealthValue = function(element, unit, min, max, disconnected, dead, tapped)
-	if dead then 
-		if element.Value then 
-			return element.Value:SetText(DEAD)
-		end
-	elseif (UnitIsAFK(unit)) then 
-		if element.Value then 
-			return element.Value:SetText(AFK)
-		end
-	else 
-		if element.Value then 
-			if element.Value.showPercent and (min < max) then 
-				return element.Value:SetFormattedText("%.0f%%", min/max*100 - (min/max*100)%1)
-			else 
-				return TinyFrame_OverrideValue(element, unit, min, max, disconnected, dead, tapped)
-			end 
-		end 
-	end 
-end 
-
 local TinyFrame_PowerBarPostUpdate = function(element, unit, min, max, powerType, powerID)
 	if (min == 0) or (max == 0) then
 		element:SetAlpha(0)
@@ -1696,37 +1618,37 @@ end
 ------------------------------------------------------------------
 -- Table containing common values for the unit frame templates.
 local Constant = {
-	SmallAuraSize = 30, 
-	SmallBar = { 112, 11 }, 
-	SmallBarTexture = GetMedia("cast_bar"),
-	SmallFrame = { 136, 47 },
-	RaidBar = { 80 *.94, 14  *.94}, 
-	RaidFrame = { 110 *.94, 30 *.94 }, 
-	TinyBar = { 80, 14 }, 
-	TinyBarTexture = GetMedia("cast_bar"),
-	TinyFrame = { 130, 30 }
+	["SmallAuraSize"] = 30, 
+	["SmallBar"] = { 112, 11 }, 
+	["SmallBarTexture"] = GetMedia("cast_bar"),
+	["SmallFrame"] = { 136, 47 },
+	["RaidBar"] = { 80 *.94, 14  *.94}, 
+	["RaidFrame"] = { 110 *.94, 30 *.94 }, 
+	["TinyBar"] = { 80, 14 }, 
+	["TinyBarTexture"] = GetMedia("cast_bar"),
+	["TinyFrame"] = { 130, 30 }
 }
 
 -- Used for Pet, also the base for the variants below.
 local Template_SmallFrame = {
-	AlphaPostUpdate = SmallFrame_AlphaPostUpdate,
-	CastBarColor = { 1, 1, 1, .15 },
-	CastBarNameColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-	CastBarNameDrawLayer = { "OVERLAY", 1 }, 
-	CastBarNameFont = GetFont(12, true),
-	CastBarNameJustifyH = "CENTER", 
-	CastBarNameJustifyV = "MIDDLE",
-	CastBarNameParent = "Health",
-	CastBarNamePlace = { "CENTER", 0, 1 },
-	CastBarNameSize = { Constant.SmallBar[1] - 20, Constant.SmallBar[2] }, 
-	CastBarOrientation = "RIGHT", 
-	CastBarPlace = { "CENTER", 0, 0 },
+	["AlphaPostUpdate"] = SmallFrame_AlphaPostUpdate,
+	["CastBarColor"] = { 1, 1, 1, .15 },
+	["CastBarNameColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	["CastBarNameDrawLayer"] = { "OVERLAY", 1 }, 
+	["CastBarNameFont"] = GetFont(12, true),
+	["CastBarNameJustifyH"] = "CENTER", 
+	["CastBarNameJustifyV"] = "MIDDLE",
+	["CastBarNameParent"] = "Health",
+	["CastBarNamePlace"] = { "CENTER", 0, 1 },
+	["CastBarNameSize"] = { Constant.SmallBar[1] - 20, Constant.SmallBar[2] }, 
+	["CastBarOrientation"] = "RIGHT", 
+	["CastBarPlace"] = { "CENTER", 0, 0 },
 	CastBarPostUpdate =	SmallFrame_BarTextPostUpdate,
-	CastBarSize = Constant.SmallBar,
-	CastBarSmoothingFrequency = .15,
-	CastBarSmoothingMode = "bezier-fast-in-slow-out", 
-	CastBarSparkMap = {
-		top = {
+	["CastBarSize"] = Constant.SmallBar,
+	["CastBarSmoothingFrequency"] = .15,
+	["CastBarSmoothingMode"] = "bezier-fast-in-slow-out", 
+	["CastBarSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =   4/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
@@ -1734,7 +1656,7 @@ local Template_SmallFrame = {
 			{ keyPercent = 126/128, offset = -16/32 },
 			{ keyPercent = 128/128, offset = -16/32 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =   4/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
@@ -1743,26 +1665,26 @@ local Template_SmallFrame = {
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	CastBarTexture = Constant.SmallBarTexture, 
-	FrameLevel = 20, 
-	HealthBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	HealthBackdropDrawLayer = { "BACKGROUND", -1 },
-	HealthBackdropPlace = { "CENTER", 1, -2 },
-	HealthBackdropSize = { 193,93 },
-	HealthBackdropTexture = GetMedia("cast_back"), 
-	HealthBarTexture = Constant.SmallBarTexture, 
-	HealthBarOrientation = "RIGHT", 
-	HealthBarPostUpdate = SmallFrame_BarTextPostUpdate, 
-	HealthBarSetFlippedHorizontally = false, 
-	HealthBarSparkMap = {
-		top = {
+	["CastBarTexture"] = Constant.SmallBarTexture, 
+	["FrameLevel"] = 20, 
+	["HealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["HealthBackdropDrawLayer"] = { "BACKGROUND", -1 },
+	["HealthBackdropPlace"] = { "CENTER", 1, -2 },
+	["HealthBackdropSize"] = { 193,93 },
+	["HealthBackdropTexture"] = GetMedia("cast_back"), 
+	["HealthBarTexture"] = Constant.SmallBarTexture, 
+	["HealthBarOrientation"] = "RIGHT", 
+	["HealthBarPostUpdate"] = SmallFrame_BarTextPostUpdate, 
+	["HealthBarSetFlippedHorizontally"] = false, 
+	["HealthBarSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =   4/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =   4/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
@@ -1771,186 +1693,185 @@ local Template_SmallFrame = {
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	HealthFrequentUpdates = true, 
-	HealthPercentColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-	HealthPercentDrawLayer = { "OVERLAY", 1 },
-	HealthPercentFont = GetFont(14, true),
-	HealthPercentJustifyH = "CENTER", 
-	HealthPercentJustifyV = "MIDDLE", 
-	HealthPercentPlace = { "CENTER", 0, 0 },
-	HealthPlace = { "CENTER", 0, 0 }, 
-	HealthSize = Constant.SmallBar,
-	HealthSmoothingFrequency = .2, 
-	HealthSmoothingMode = "bezier-fast-in-slow-out", 
-	Size = Constant.SmallFrame,
-	TargetHighlightDrawLayer = { "BACKGROUND", 0 },
-	TargetHighlightParent = "Health", 
-	TargetHighlightPlace = { "CENTER", 1, -2 },
-	TargetHighlightSize = { 193,93 },
-	TargetHighlightShowFocus = true, TargetHighlightFocusColor = { 144/255, 195/255, 255/255, 1 }, 
-	TargetHighlightShowTarget = true, TargetHighlightTargetColor = { 255/255, 239/255, 169/255, 1 }, 
-	TargetHighlightTexture = GetMedia("cast_back_outline")
+	["HealthFrequentUpdates"] = true, 
+	["HealthPercentColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	["HealthPercentDrawLayer"] = { "OVERLAY", 1 },
+	["HealthPercentFont"] = GetFont(14, true),
+	["HealthPercentJustifyH"] = "CENTER", 
+	["HealthPercentJustifyV"] = "MIDDLE", 
+	["HealthPercentPlace"] = { "CENTER", 0, 0 },
+	["HealthPlace"] = { "CENTER", 0, 0 }, 
+	["HealthSize"] = Constant.SmallBar,
+	["HealthSmoothingFrequency"] = .2, 
+	["HealthSmoothingMode"] = "bezier-fast-in-slow-out", 
+	["Size"] = Constant.SmallFrame,
+	["TargetHighlightDrawLayer"] = { "BACKGROUND", 0 },
+	["TargetHighlightParent"] = "Health", 
+	["TargetHighlightPlace"] = { "CENTER", 1, -2 },
+	["TargetHighlightSize"] = { 193,93 },
+	["TargetHighlightShowFocus"] = true, TargetHighlightFocusColor = { 144/255, 195/255, 255/255, 1 }, 
+	["TargetHighlightShowTarget"] = true, TargetHighlightTargetColor = { 255/255, 239/255, 169/255, 1 }, 
+	["TargetHighlightTexture"] = GetMedia("cast_back_outline")
 }
 
 -- Really just a base for the reversed variant below.
 local Template_SmallFrame_Auras = setmetatable({
-	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
-	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
-	AuraBorderBackdrop = BACKDROPS.AuraBorder,
-	AuraBorderBackdropColor = { 0, 0, 0, 0 },
-	AuraBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
-	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-	AuraBorderFrameSize = { Constant.SmallAuraSize + 14, Constant.SmallAuraSize + 14 },
-	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	AuraCountFont = GetFont(12, true),
-	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-	AuraFramePlace = { "LEFT", Constant.SmallFrame[1] + 13, -1 },
-	AuraFrameSize = { Constant.SmallAuraSize*6 + 4*5, Constant.SmallAuraSize },
-	AuraIconPlace = { "CENTER", 0, 0 },
-	AuraIconSize = { Constant.SmallAuraSize - 6, Constant.SmallAuraSize - 6 },
-	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 },
-	AuraProperties = {
-		auraHeight = nil, 
-		auraSize = Constant.SmallAuraSize, 
-		auraWidth = nil, 
-		debuffsFirst = false, 
-		disableMouse = false, 
-		growthX = "RIGHT", 
-		growthY = "UP", 
-		maxVisible = 6, 
-		showDurations = true, 
-		showSpirals = false, 
-		showLongDurations = true,
-		spacingH = 4, 
-		spacingV = 4, 
-		tooltipAnchor = nil,
-		tooltipDefaultPosition = false, 
-		tooltipOffsetX = 8,
-		tooltipOffsetY = 16,
-		tooltipPoint = "BOTTOMLEFT",
-		tooltipRelPoint = "TOPLEFT"
+	["Aura_PostCreateButton"] = UnitFrame_Aura_PostCreateButton,
+	["Aura_PostUpdateButton"] = UnitFrame_Aura_PostUpdateButton,
+	["AuraBorderBackdrop"] = BACKDROPS.AuraBorder,
+	["AuraBorderBackdropColor"] = { 0, 0, 0, 0 },
+	["AuraBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
+	["AuraBorderFramePlace"] = { "CENTER", 0, 0 }, 
+	["AuraBorderFrameSize"] = { Constant.SmallAuraSize + 14, Constant.SmallAuraSize + 14 },
+	["AuraCountColor"] = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	["AuraCountFont"] = GetFont(12, true),
+	["AuraCountPlace"] = { "BOTTOMRIGHT", 9, -6 },
+	["AuraFramePlace"] = { "LEFT", Constant.SmallFrame[1] + 13, -1 },
+	["AuraFrameSize"] = { Constant.SmallAuraSize*6 + 4*5, Constant.SmallAuraSize },
+	["AuraIconPlace"] = { "CENTER", 0, 0 },
+	["AuraIconSize"] = { Constant.SmallAuraSize - 6, Constant.SmallAuraSize - 6 },
+	["AuraIconTexCoord"] = { 5/64, 59/64, 5/64, 59/64 },
+	["AuraProperties"] = {
+		["auraHeight"] = nil, 
+		["auraSize"] = Constant.SmallAuraSize, 
+		["auraWidth"] = nil, 
+		["debuffsFirst"] = false, 
+		["disableMouse"] = false, 
+		["growthX"] = "RIGHT", 
+		["growthY"] = "UP", 
+		["maxVisible"] = 6, 
+		["showDurations"] = true, 
+		["showSpirals"] = false, 
+		["showLongDurations"] = true,
+		["spacingH"] = 4, 
+		["spacingV"] = 4, 
+		["tooltipAnchor"] = nil,
+		["tooltipDefaultPosition"] = false, 
+		["tooltipOffsetX"] = 8,
+		["tooltipOffsetY"] = 16,
+		["tooltipPoint"] = "BOTTOMLEFT",
+		["tooltipRelPoint"] = "TOPLEFT"
 	},
-	AuraTimeFont = GetFont(11, true),
-	AuraTimePlace = { "TOPLEFT", -6, 6 }
+	["AuraTimeFont"] = GetFont(11, true),
+	["AuraTimePlace"] = { "TOPLEFT", -6, 6 }
 }, { __index = Template_SmallFrame })
 
 -- Used for ToT.
 local Template_SmallFrameReversed = setmetatable({
-	CastBarOrientation = "LEFT", 
-	CastBarSetFlippedHorizontally = true, 
-	HealthBarOrientation = "LEFT", 
-	HealthBarSetFlippedHorizontally = true 
+	["CastBarOrientation"] = "LEFT", 
+	["CastBarSetFlippedHorizontally"] = true, 
+	["HealthBarOrientation"] = "LEFT", 
+	["HealthBarSetFlippedHorizontally"] = true 
 }, { __index = Template_SmallFrame })
 
 -- Used for Boss.
 local Template_SmallFrameReversed_Auras = setmetatable({
-	AuraFramePlace = { "RIGHT", -(Constant.SmallFrame[1] + 13), -1 },
-	AuraProperties = {
-		auraHeight = nil, 
-		auraSize = Constant.SmallAuraSize, 
-		auraWidth = nil, 
-		debuffsFirst = false, 
-		disableMouse = false, 
-		customFilter = GetAuraFilter(), 
-		growthX = "LEFT", 
-		growthY = "DOWN", 
-		maxVisible = 6, 
-		showDurations = true, 
-		showSpirals = false, 
-		showLongDurations = true,
-		spacingH = 4, 
-		spacingV = 4, 
-		tooltipAnchor = nil,
-		tooltipDefaultPosition = false, 
-		tooltipOffsetX = -8,
-		tooltipOffsetY = -16,
-		tooltipPoint = "TOPRIGHT",
-		tooltipRelPoint = "BOTTOMRIGHT"
+	["AuraFramePlace"] = { "RIGHT", -(Constant.SmallFrame[1] + 13), -1 },
+	["AuraProperties"] = {
+		["auraHeight"] = nil, 
+		["auraSize"] = Constant.SmallAuraSize, 
+		["auraWidth"] = nil, 
+		["debuffsFirst"] = false, 
+		["disableMouse"] = false, 
+		["customFilter"] = GetAuraFilter(), 
+		["growthX"] = "LEFT", 
+		["growthY"] = "DOWN", 
+		["maxVisible"] = 6, 
+		["showDurations"] = true, 
+		["showSpirals"] = false, 
+		["showLongDurations"] = true,
+		["spacingH"] = 4, 
+		["spacingV"] = 4, 
+		["tooltipAnchor"] = nil,
+		["tooltipDefaultPosition"] = false, 
+		["tooltipOffsetX"] = -8,
+		["tooltipOffsetY"] = -16,
+		["tooltipPoint"] = "TOPRIGHT",
+		["tooltipRelPoint"] = "BOTTOMRIGHT"
 	},
-	CastBarOrientation = "LEFT", 
-	CastBarSetFlippedHorizontally = true, 
-	HealthBarOrientation = "LEFT", 
-	HealthBarSetFlippedHorizontally = true
+	["CastBarOrientation"] = "LEFT", 
+	["CastBarSetFlippedHorizontally"] = true, 
+	["HealthBarOrientation"] = "LEFT", 
+	["HealthBarSetFlippedHorizontally"] = true
 }, { __index = Template_SmallFrame_Auras })
 
 -- Used for Raid and Party frames.
 local Template_TinyFrame = {
-	Size = Constant.TinyFrame,
+	["Size"] = Constant.TinyFrame,
 
-	RangeOutsideAlpha = .6, -- was .35, but that's too hard to see
+	["RangeOutsideAlpha"] = .6, -- was .35, but that's too hard to see
 
-	HealthPlace = { "BOTTOM", 0, 0 }, 
-	HealthSize = Constant.TinyBar,  -- health size
-	HealthBarTexture = Constant.TinyBarTexture, 
-	HealthBarOrientation = "RIGHT", -- bar orientation
-	HealthBarSetFlippedHorizontally = false, 
-	HealthBarSparkMap = {
-		top = {
+	["HealthPlace"] = { "BOTTOM", 0, 0 }, 
+	["HealthSize"] = Constant.TinyBar,  -- health size
+	["HealthBarTexture"] = Constant.TinyBarTexture, 
+	["HealthBarOrientation"] = "RIGHT", -- bar orientation
+	["HealthBarSetFlippedHorizontally"] = false, 
+	["HealthBarSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	HealthSmoothingMode = "bezier-fast-in-slow-out", -- smoothing method
-	HealthSmoothingFrequency = .2, -- speed of the smoothing method
-	HealthFrequentUpdates = true, -- listen to frequent health events for more accurate updates
-	HealthBackdropPlace = { "CENTER", 1, -2 },
-	HealthBackdropSize = { 140,90 },
-	HealthBackdropTexture = GetMedia("cast_back"), 
-	HealthBackdropDrawLayer = { "BACKGROUND", -1 },
-	HealthBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	HealthValueOverride = TinyFrame_OverrideHealthValue,
+	["HealthSmoothingMode"] = "bezier-fast-in-slow-out", -- smoothing method
+	["HealthSmoothingFrequency"] = .2, -- speed of the smoothing method
+	["HealthFrequentUpdates"] = true, -- listen to frequent health events for more accurate updates
+	["HealthBackdropPlace"] = { "CENTER", 1, -2 },
+	["HealthBackdropSize"] = { 140,90 },
+	["HealthBackdropTexture"] = GetMedia("cast_back"), 
+	["HealthBackdropDrawLayer"] = { "BACKGROUND", -1 },
+	["HealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
 
-	CastBarPlace = { "BOTTOM", 0, 0 },
-	CastBarSize = Constant.TinyBar,
-	CastBarOrientation = "RIGHT", 
-	CastBarSmoothingMode = "bezier-fast-in-slow-out", 
-	CastBarSmoothingFrequency = .15,
-	CastBarSparkMap = {
-		top = {
+	["CastBarPlace"] = { "BOTTOM", 0, 0 },
+	["CastBarSize"] = Constant.TinyBar,
+	["CastBarOrientation"] = "RIGHT", 
+	["CastBarSmoothingMode"] = "bezier-fast-in-slow-out", 
+	["CastBarSmoothingFrequency"] = .15,
+	["CastBarSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	CastBarTexture = Constant.TinyBarTexture, 
-	CastBarColor = { 1, 1, 1, .15 },
+	["CastBarTexture"] = Constant.TinyBarTexture, 
+	["CastBarColor"] = { 1, 1, 1, .15 },
 
-	TargetHighlightParent = "Health", 
-	TargetHighlightPlace = { "CENTER", 1, -2 },
-	TargetHighlightSize = { 140, 90 },
-	TargetHighlightTexture = GetMedia("cast_back_outline"), 
-	TargetHighlightDrawLayer = { "BACKGROUND", 0 },
-	TargetHighlightShowTarget = true, TargetHighlightTargetColor = { 255/255, 229/255, 109/255, 1 }, 
-	TargetHighlightShowFocus = true, TargetHighlightFocusColor = { 44/255, 165/255, 255/255, 1 }, 
+	["TargetHighlightParent"] = "Health", 
+	["TargetHighlightPlace"] = { "CENTER", 1, -2 },
+	["TargetHighlightSize"] = { 140, 90 },
+	["TargetHighlightTexture"] = GetMedia("cast_back_outline"), 
+	["TargetHighlightDrawLayer"] = { "BACKGROUND", 0 },
+	["TargetHighlightShowTarget"] = true, TargetHighlightTargetColor = { 255/255, 229/255, 109/255, 1 }, 
+	["TargetHighlightShowFocus"] = true, TargetHighlightFocusColor = { 44/255, 165/255, 255/255, 1 }, 
 }
 
 -- Because it's chaotic having these all over the place.
 local FloaterSlots = {
 	-- Bottomright floaters
 	-- These used to be center right, but was ultimately in the way of gameplay.
-	VehicleSeatSelector = { "CENTER", "UICenter", "BOTTOMRIGHT", -480, 210 }, -- "CENTER", "UICenter", "CENTER", 424, 0
-	Durability = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 }, -- "CENTER", "UICenter", "CENTER", 190, 0
+	["VehicleSeatSelector"] = { "CENTER", "UICenter", "BOTTOMRIGHT", -480, 210 }, -- "CENTER", "UICenter", "CENTER", 424, 0
+	["Durability"] = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 }, -- "CENTER", "UICenter", "CENTER", 190, 0
 
 	-- Bottom center floaters
 	-- Below these you'll find 2 potentional rows of actionbuttons, and the petbar.
-	Archeology = { "BOTTOM", "UICenter", "BOTTOM", 0, 390 },
-	AltPower = { "BOTTOM", "UICenter", "BOTTOM", 0, 340 }, -- "CENTER", "UICenter", "CENTER", 0, -(133 + 56)
-	CastBar = { "BOTTOM", "UICenter", "BOTTOM", 0, 290 }, -- CENTER, 0, -133
+	["Archeology"] = { "BOTTOM", "UICenter", "BOTTOM", 0, 390 },
+	["AltPower"] = { "BOTTOM", "UICenter", "BOTTOM", 0, 340 }, -- "CENTER", "UICenter", "CENTER", 0, -(133 + 56)
+	["CastBar"] = { "BOTTOM", "UICenter", "BOTTOM", 0, 290 }, -- CENTER, 0, -133
 }
 
 ------------------------------------------------
@@ -1972,276 +1893,276 @@ local RegisterSchematic = Private.RegisterSchematic
 
 -- Options menu
 RegisterLayout("OptionsMenu", "Azerite", {
-	MenuBorderBackdropBorderColor = { 1, 1, 1, 1 },
-	MenuBorderBackdropColor = { .05, .05, .05, .85 },
-	MenuButton_PostCreate = Core_MenuButton_PostCreate, 
-	MenuButton_PostUpdate = Core_MenuButton_PostUpdate,
-	MenuButtonSize = { 300, 50 },
-	MenuButtonSizeMod = .75, 
-	MenuButtonSpacing = 8, 
-	MenuPlace = { "BOTTOMRIGHT", -41, 32 },
-	MenuSize = { 320 -10, 70 }, 
-	MenuToggleButtonSize = { 48, 48 }, 
-	MenuToggleButtonPlace = { "BOTTOMRIGHT", -4, 4 },
-	MenuToggleButtonIcon = GetMedia("config_button"),
-	MenuToggleButtonIconPlace = { "CENTER", 0, 0 },
-	MenuToggleButtonIconSize = { 96, 96 },
-	MenuToggleButtonIconColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	MenuWindow_CreateBorder = function(self) return GetBorder(self) end
+	["MenuBorderBackdropBorderColor"] = { 1, 1, 1, 1 },
+	["MenuBorderBackdropColor"] = { .05, .05, .05, .85 },
+	["MenuButton_PostCreate"] = Core_MenuButton_PostCreate, 
+	["MenuButton_PostUpdate"] = Core_MenuButton_PostUpdate,
+	["MenuButtonSize"] = { 300, 50 },
+	["MenuButtonSizeMod"] = .75, 
+	["MenuButtonSpacing"] = 8, 
+	["MenuPlace"] = { "BOTTOMRIGHT", -41, 32 },
+	["MenuSize"] = { 320 -10, 70 }, 
+	["MenuToggleButtonSize"] = { 48, 48 }, 
+	["MenuToggleButtonPlace"] = { "BOTTOMRIGHT", -4, 4 },
+	["MenuToggleButtonIcon"] = GetMedia("config_button"),
+	["MenuToggleButtonIconPlace"] = { "CENTER", 0, 0 },
+	["MenuToggleButtonIconSize"] = { 96, 96 },
+	["MenuToggleButtonIconColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["MenuWindow_CreateBorder"] = function(self) return GetBorder(self) end
 })
 
 -- Blizzard Chat Frames
 RegisterLayout("BlizzardChatFrames", "Azerite", {
-	AlternateChatFramePlace = { "TOPLEFT", 85, -64 },
-	AlternateChatFrameSize = { 499, 176 }, 
-	AlternateClampRectInsets = { -54, -54, -64, -350 },
-	ButtonFrameWidth = 48, ScrollBarWidth = 32, 
-	ButtonTextureChatEmotes = GetMedia("config_button_emotes"),
-	ButtonTextureColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	ButtonTextureMinimizeButton = GetMedia("icon_chat_minus"),
-	ButtonTextureNormal = GetMedia("point_block"),
-	ButtonTextureScrollUpButton = GetMedia("icon_chat_up"), 
-	ButtonTextureScrollDownButton = GetMedia("icon_chat_down"), 
-	ButtonTextureScrollToBottomButton = GetMedia("icon_chat_bottom"), 
-	ButtonTextureSize = { 64, 64 },
-	ChatFadeTime = 5, 
-	ChatIndentedWordWrap = false, 
-	ChatVisibleTime = 15, 
-	DefaultChatFramePlace = { "BOTTOMLEFT", 85, 350 }, 
-	DefaultChatFramePlaceFaded = { "BOTTOMLEFT", 85, 64 }, 
-	DefaultChatFrameSize = { 499, 176 }, 
-	DefaultClampRectInsets = { -54, -54, -310, -350 },
-	DefaultClampRectInsetsFaded = { -54, -54, -310, -64 },
-	EditBoxHeight = 45, 
-	EditBoxOffsetH = 15
+	["AlternateChatFramePlace"] = { "TOPLEFT", 85, -64 },
+	["AlternateChatFrameSize"] = { 499, 176 }, 
+	["AlternateClampRectInsets"] = { -54, -54, -64, -350 },
+	["ButtonFrameWidth"] = 48, ScrollBarWidth = 32, 
+	["ButtonTextureChatEmotes"] = GetMedia("config_button_emotes"),
+	["ButtonTextureColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["ButtonTextureMinimizeButton"] = GetMedia("icon_chat_minus"),
+	["ButtonTextureNormal"] = GetMedia("point_block"),
+	["ButtonTextureScrollUpButton"] = GetMedia("icon_chat_up"), 
+	["ButtonTextureScrollDownButton"] = GetMedia("icon_chat_down"), 
+	["ButtonTextureScrollToBottomButton"] = GetMedia("icon_chat_bottom"), 
+	["ButtonTextureSize"] = { 64, 64 },
+	["ChatFadeTime"] = 5, 
+	["ChatIndentedWordWrap"] = false, 
+	["ChatVisibleTime"] = 15, 
+	["DefaultChatFramePlace"] = { "BOTTOMLEFT", 85, 350 }, 
+	["DefaultChatFramePlaceFaded"] = { "BOTTOMLEFT", 85, 64 }, 
+	["DefaultChatFrameSize"] = { 499, 176 }, 
+	["DefaultClampRectInsets"] = { -54, -54, -310, -350 },
+	["DefaultClampRectInsetsFaded"] = { -54, -54, -310, -64 },
+	["EditBoxHeight"] = 45, 
+	["EditBoxOffsetH"] = 15
 })
 RegisterLayoutVariation("BlizzardChatFrames", "Legacy", "Azerite", {
-	AlternateChatFramePlace = false,
-	AlternateChatFrameSize = false, 
-	AlternateClampRectInsets = false, 
-	DefaultChatFramePlace = { "BOTTOMLEFT", 70, 54 },
-	DefaultChatFrameSize = { 420, 160 }, -- way too large to fit down there; 419, 196
-	DefaultClampRectInsets = { -54, -54, -54, -54 },
-	DefaultChatFramePlaceFaded = false, 
-	DefaultClampRectInsetsFaded = false
+	["AlternateChatFramePlace"] = false,
+	["AlternateChatFrameSize"] = false, 
+	["AlternateClampRectInsets"] = false, 
+	["DefaultChatFramePlace"] = { "BOTTOMLEFT", 70, 54 },
+	["DefaultChatFrameSize"] = { 420, 160 }, -- way too large to fit down there; 419, 196
+	["DefaultClampRectInsets"] = { -54, -54, -54, -54 },
+	["DefaultChatFramePlaceFaded"] = false, 
+	["DefaultClampRectInsetsFaded"] = false
 })
 
 -- Blizzard Floaters
 RegisterLayout("BlizzardFloaterHUD", "Azerite", {
-	AlertFramesAnchor = "BOTTOM",
-	AlertFramesOffset = -10,
-	AlertFramesPlace = { "TOP", "UICenter", "TOP", 0, -40 },
-	AlertFramesPlaceTalkingHead = { "TOP", "UICenter", "TOP", 0, -240 },
-	AlertFramesPosition = "TOP",
-	AlertFramesSize = { 180, 20 },
-	ErrorFrameStrata = "LOW",
-	ExtraActionButtonBorderColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
-	ExtraActionButtonBorderDrawLayer = { "BORDER", 1 },
-	ExtraActionButtonBorderPlace = { "CENTER", 0, 0 },
-	ExtraActionButtonBorderSize = { 64/(122/256), 64/(122/256) },
-	ExtraActionButtonBorderTexture = GetMedia("actionbutton-border"),
-	ExtraActionButtonCooldownBlingColor = { 0, 0, 0 , 0 },
-	ExtraActionButtonCooldownBlingTexture = GetMedia("blank"),
-	ExtraActionButtonCooldownPlace = { "CENTER", 0, 0 },
-	ExtraActionButtonCooldownSize = { 44, 44 },
-	ExtraActionButtonCooldownSwipeColor = { 0, 0, 0, .75 },
-	ExtraActionButtonCooldownSwipeTexture = GetMedia("actionbutton-mask-circular"),
-	ExtraActionButtonCount = GetFont(18, true),
-	ExtraActionButtonCountJustifyH = "CENTER",
-	ExtraActionButtonCountJustifyV = "BOTTOM",
-	ExtraActionButtonCountPlace = { "BOTTOMRIGHT", -3, 3 },
-	ExtraActionButtonFramePlace = FloaterSlots.ExtraButton,
-	ExtraActionButtonIconSize = { 44, 44 },
-	ExtraActionButtonIconMaskTexture = GetMedia("actionbutton-mask-circular"),  
-	ExtraActionButtonIconPlace = { "CENTER", 0, 0 },
-	ExtraActionButtonKeybindColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 },
-	ExtraActionButtonKeybindFont = GetFont(15, true),
-	ExtraActionButtonKeybindPlace = { "TOPLEFT", 5, -5 },
-	ExtraActionButtonKeybindJustifyH = "CENTER",
-	ExtraActionButtonKeybindJustifyV = "BOTTOM",
-	ExtraActionButtonKeybindShadowColor = { 0, 0, 0, 1 },
-	ExtraActionButtonKeybindShadowOffset = { 0, 0 },
-	ExtraActionButtonPlace = { "CENTER", 0, 0 },
-	ExtraActionButtonShowCooldownBling = true,
-	ExtraActionButtonShowCooldownSwipe = true,
-	ExtraActionButtonSize = { 64, 64 },
-	QuestTimerFramePlace = { "CENTER", UIParent, "CENTER", 0, 220 },
-	TalkingHeadFramePlace = { "TOP", "UICenter", "TOP", 0, -(60 + 40) },
-	ArcheologyDigsiteProgressBarPlace = FloaterSlots.Archeology,
+	["AlertFramesAnchor"] = "BOTTOM",
+	["AlertFramesOffset"] = -10,
+	["AlertFramesPlace"] = { "TOP", "UICenter", "TOP", 0, -40 },
+	["AlertFramesPlaceTalkingHead"] = { "TOP", "UICenter", "TOP", 0, -240 },
+	["AlertFramesPosition"] = "TOP",
+	["AlertFramesSize"] = { 180, 20 },
+	["ErrorFrameStrata"] = "LOW",
+	["ExtraActionButtonBorderColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
+	["ExtraActionButtonBorderDrawLayer"] = { "BORDER", 1 },
+	["ExtraActionButtonBorderPlace"] = { "CENTER", 0, 0 },
+	["ExtraActionButtonBorderSize"] = { 64/(122/256), 64/(122/256) },
+	["ExtraActionButtonBorderTexture"] = GetMedia("actionbutton-border"),
+	["ExtraActionButtonCooldownBlingColor"] = { 0, 0, 0 , 0 },
+	["ExtraActionButtonCooldownBlingTexture"] = GetMedia("blank"),
+	["ExtraActionButtonCooldownPlace"] = { "CENTER", 0, 0 },
+	["ExtraActionButtonCooldownSize"] = { 44, 44 },
+	["ExtraActionButtonCooldownSwipeColor"] = { 0, 0, 0, .75 },
+	["ExtraActionButtonCooldownSwipeTexture"] = GetMedia("actionbutton-mask-circular"),
+	["ExtraActionButtonCount"] = GetFont(18, true),
+	["ExtraActionButtonCountJustifyH"] = "CENTER",
+	["ExtraActionButtonCountJustifyV"] = "BOTTOM",
+	["ExtraActionButtonCountPlace"] = { "BOTTOMRIGHT", -3, 3 },
+	["ExtraActionButtonFramePlace"] = FloaterSlots.ExtraButton,
+	["ExtraActionButtonIconSize"] = { 44, 44 },
+	["ExtraActionButtonIconMaskTexture"] = GetMedia("actionbutton-mask-circular"),  
+	["ExtraActionButtonIconPlace"] = { "CENTER", 0, 0 },
+	["ExtraActionButtonKeybindColor"] = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3], .75 },
+	["ExtraActionButtonKeybindFont"] = GetFont(15, true),
+	["ExtraActionButtonKeybindPlace"] = { "TOPLEFT", 5, -5 },
+	["ExtraActionButtonKeybindJustifyH"] = "CENTER",
+	["ExtraActionButtonKeybindJustifyV"] = "BOTTOM",
+	["ExtraActionButtonKeybindShadowColor"] = { 0, 0, 0, 1 },
+	["ExtraActionButtonKeybindShadowOffset"] = { 0, 0 },
+	["ExtraActionButtonPlace"] = { "CENTER", 0, 0 },
+	["ExtraActionButtonShowCooldownBling"] = true,
+	["ExtraActionButtonShowCooldownSwipe"] = true,
+	["ExtraActionButtonSize"] = { 64, 64 },
+	["QuestTimerFramePlace"] = { "CENTER", UIParent, "CENTER", 0, 220 },
+	["TalkingHeadFramePlace"] = { "TOP", "UICenter", "TOP", 0, -(60 + 40) },
+	["ArcheologyDigsiteProgressBarPlace"] = FloaterSlots.Archeology,
 
-	VehicleSeatIndicatorPlace = FloaterSlots.VehicleSeatSelector,
-	ZoneAbilityButtonBorderColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
-	ZoneAbilityButtonBorderDrawLayer = { "BORDER", 1 },
-	ZoneAbilityButtonBorderPlace = { "CENTER", 0, 0 },
-	ZoneAbilityButtonBorderSize = { 64/(122/256), 64/(122/256) },
-	ZoneAbilityButtonBorderTexture = GetMedia("actionbutton-border"),
-	ZoneAbilityButtonCooldownBlingColor = { 0, 0, 0 , 0 },
-	ZoneAbilityButtonCooldownBlingTexture = GetMedia("blank"),
-	ZoneAbilityButtonCooldownPlace = { "CENTER", 0, 0 },
-	ZoneAbilityButtonCooldownSize = { 44, 44 },
-	ZoneAbilityButtonCooldownSwipeColor = { 0, 0, 0, .75 },
-	ZoneAbilityButtonCooldownSwipeTexture = GetMedia("actionbutton-mask-circular"),
-	ZoneAbilityButtonCount = GetFont(18, true),
-	ZoneAbilityButtonCountPlace = { "BOTTOMRIGHT", -3, 3 },
-	ZoneAbilityButtonCountJustifyH = "CENTER",
-	ZoneAbilityButtonCountJustifyV = "BOTTOM",
-	ZoneAbilityButtonFramePlace = FloaterSlots.ExtraButton,
-	ZoneAbilityButtonIconMaskTexture = GetMedia("actionbutton-mask-circular"),
-	ZoneAbilityButtonIconPlace = { "CENTER", 0, 0 },
-	ZoneAbilityButtonIconSize = { 44, 44 },
-	ZoneAbilityButtonPlace = { "CENTER", 0, 0 },
-	ZoneAbilityButtonShowCooldownSwipe = true,
-	ZoneAbilityButtonShowCooldownBling = true,
-	ZoneAbilityButtonSize = { 64, 64 }
+	["VehicleSeatIndicatorPlace"] = FloaterSlots.VehicleSeatSelector,
+	["ZoneAbilityButtonBorderColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
+	["ZoneAbilityButtonBorderDrawLayer"] = { "BORDER", 1 },
+	["ZoneAbilityButtonBorderPlace"] = { "CENTER", 0, 0 },
+	["ZoneAbilityButtonBorderSize"] = { 64/(122/256), 64/(122/256) },
+	["ZoneAbilityButtonBorderTexture"] = GetMedia("actionbutton-border"),
+	["ZoneAbilityButtonCooldownBlingColor"] = { 0, 0, 0 , 0 },
+	["ZoneAbilityButtonCooldownBlingTexture"] = GetMedia("blank"),
+	["ZoneAbilityButtonCooldownPlace"] = { "CENTER", 0, 0 },
+	["ZoneAbilityButtonCooldownSize"] = { 44, 44 },
+	["ZoneAbilityButtonCooldownSwipeColor"] = { 0, 0, 0, .75 },
+	["ZoneAbilityButtonCooldownSwipeTexture"] = GetMedia("actionbutton-mask-circular"),
+	["ZoneAbilityButtonCount"] = GetFont(18, true),
+	["ZoneAbilityButtonCountPlace"] = { "BOTTOMRIGHT", -3, 3 },
+	["ZoneAbilityButtonCountJustifyH"] = "CENTER",
+	["ZoneAbilityButtonCountJustifyV"] = "BOTTOM",
+	["ZoneAbilityButtonFramePlace"] = FloaterSlots.ExtraButton,
+	["ZoneAbilityButtonIconMaskTexture"] = GetMedia("actionbutton-mask-circular"),
+	["ZoneAbilityButtonIconPlace"] = { "CENTER", 0, 0 },
+	["ZoneAbilityButtonIconSize"] = { 44, 44 },
+	["ZoneAbilityButtonPlace"] = { "CENTER", 0, 0 },
+	["ZoneAbilityButtonShowCooldownSwipe"] = true,
+	["ZoneAbilityButtonShowCooldownBling"] = true,
+	["ZoneAbilityButtonSize"] = { 64, 64 }
 })
 RegisterLayoutVariation("BlizzardFloaterHUD", "Legacy", "Azerite", {
-	VehicleSeatIndicatorPlace = { "CENTER", "UICenter", "BOTTOMRIGHT", -130, 80 }, 
-	ArcheologyDigsiteProgressBarPlace = { "BOTTOM", "UICenter", "BOTTOM", 0, 390 },
+	["VehicleSeatIndicatorPlace"] = { "CENTER", "UICenter", "BOTTOMRIGHT", -130, 80 }, 
+	["ArcheologyDigsiteProgressBarPlace"] = { "BOTTOM", "UICenter", "BOTTOM", 0, 390 },
 })
 
 -- Blizzard font replacements
 RegisterLayout("BlizzardFonts", "Azerite", {
-	BlizzChatBubbleFont = GetFont(13, true, false),
-	ChatBubbleFont = GetFont(16, true, true),
-	ChatFont = GetFont(15, true, true)
+	["BlizzChatBubbleFont"] = GetFont(13, true, false),
+	["ChatBubbleFont"] = GetFont(16, true, true),
+	["ChatFont"] = GetFont(15, true, true)
 })
 
 -- Blizzard Game Menu (Esc)
 RegisterLayout("BlizzardGameMenu", "Azerite", {
-	MenuButton_PostCreate = Core_MenuButton_PostCreate,
-	MenuButton_PostUpdate = Core_MenuButton_PostUpdate,
-	MenuButtonSize = { 300, 50 },
-	MenuButtonSizeMod = .75, 
-	MenuButtonSpacing = 8
+	["MenuButton_PostCreate"] = Core_MenuButton_PostCreate,
+	["MenuButton_PostUpdate"] = Core_MenuButton_PostUpdate,
+	["MenuButtonSize"] = { 300, 50 },
+	["MenuButtonSizeMod"] = .75, 
+	["MenuButtonSpacing"] = 8
 })
 
 -- Blizzard MicroMenu
 RegisterLayout("BlizzardMicroMenu", "Azerite", {
-	ButtonFont = GetFont(14, false),
-	ButtonFontColor = { 0, 0, 0 }, 
-	ButtonFontShadowColor = { 1, 1, 1, .5 },
-	ButtonFontShadowOffset = { 0, -.85 },
-	ConfigWindowBackdrop = BACKDROPS.ConfigWindow,
-	MenuButton_PostCreate = Core_MenuButton_PostCreate,
-	MenuButton_PostUpdate = Core_MenuButton_PostUpdate, 
-	MenuButtonNormalColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
-	MenuButtonSize = { 300, 50 },
-	MenuButtonSizeMod = .75, 
-	MenuButtonSpacing = 8, 
-	MenuButtonTitleColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
-	MenuWindow_CreateBorder = function(self) return GetBorder(self) end
+	["ButtonFont"] = GetFont(14, false),
+	["ButtonFontColor"] = { 0, 0, 0 }, 
+	["ButtonFontShadowColor"] = { 1, 1, 1, .5 },
+	["ButtonFontShadowOffset"] = { 0, -.85 },
+	["ConfigWindowBackdrop"] = BACKDROPS.ConfigWindow,
+	["MenuButton_PostCreate"] = Core_MenuButton_PostCreate,
+	["MenuButton_PostUpdate"] = Core_MenuButton_PostUpdate, 
+	["MenuButtonNormalColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
+	["MenuButtonSize"] = { 300, 50 },
+	["MenuButtonSizeMod"] = .75, 
+	["MenuButtonSpacing"] = 8, 
+	["MenuButtonTitleColor"] = { Colors.title[1], Colors.title[2], Colors.title[3] },
+	["MenuWindow_CreateBorder"] = function(self) return GetBorder(self) end
 })
 
 -- Blizzard Timers (mirror, quest)
 RegisterLayout("BlizzardTimers", "Azerite", {
-	MirrorAnchor = Wheel("LibFrame"):GetFrame(),
-	MirrorAnchorOffsetX = 0,
-	MirrorAnchorOffsetY = -370, 
-	MirrorAnchorPoint = "TOP",
-	MirrorBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	MirrorBackdropDrawLayer = { "BACKGROUND", -5 },
-	MirrorBackdropPlace = { "CENTER", 1, -2 }, 
-	MirrorBackdropSize = { 193,93 }, 
-	MirrorBackdropTexture = GetMedia("cast_back"),
-	MirrorBarColor = { Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3] }, 
-	MirrorBarPlace = { "CENTER", 0, 0 },
-	MirrorBarSize = { 111, 12 }, 
-	MirrorBarSparkMap = {
-		top = {
+	["MirrorAnchor"] = Wheel("LibFrame"):GetFrame(),
+	["MirrorAnchorOffsetX"] = 0,
+	["MirrorAnchorOffsetY"] = -370, 
+	["MirrorAnchorPoint"] = "TOP",
+	["MirrorBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["MirrorBackdropDrawLayer"] = { "BACKGROUND", -5 },
+	["MirrorBackdropPlace"] = { "CENTER", 1, -2 }, 
+	["MirrorBackdropSize"] = { 193,93 }, 
+	["MirrorBackdropTexture"] = GetMedia("cast_back"),
+	["MirrorBarColor"] = { Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3] }, 
+	["MirrorBarPlace"] = { "CENTER", 0, 0 },
+	["MirrorBarSize"] = { 111, 12 }, 
+	["MirrorBarSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	MirrorBarTexture = GetMedia("cast_bar"), 
-	MirrorBarValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .7 },
-	MirrorBarValueFont = GetFont(14, true),
-	MirrorBarValuePlace = { "CENTER", 0, 0 }, 
-	MirrorBlankTexture = GetMedia("blank"), 
-	MirrorGrowth = -50, 
-	MirrorSize = { 111, 14 }
+	["MirrorBarTexture"] = GetMedia("cast_bar"), 
+	["MirrorBarValueColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .7 },
+	["MirrorBarValueFont"] = GetFont(14, true),
+	["MirrorBarValuePlace"] = { "CENTER", 0, 0 }, 
+	["MirrorBlankTexture"] = GetMedia("blank"), 
+	["MirrorGrowth"] = -50, 
+	["MirrorSize"] = { 111, 14 }
 })
 
 -- Blizzard Objectives Tracker
 RegisterLayout("BlizzardObjectivesTracker", "Azerite", (IsClassic) and {
-	FontObject = GetFont(13, true),
-	FontObjectTitle = GetFont(15, true),
-	HideInBossFights = true,
-	HideInCombat = false,
-	MaxHeight = 400,
-	Place = { "BOTTOMRIGHT", -60, 380 },
-	Scale = 1.0, 
-	SpaceBottom = 380, 
-	SpaceTop = 260, 
-	Width = 255 -- 280 is classic default
+	["FontObject"] = GetFont(13, true),
+	["FontObjectTitle"] = GetFont(15, true),
+	["HideInBossFights"] = true,
+	["HideInCombat"] = false,
+	["MaxHeight"] = 400,
+	["Place"] = { "BOTTOMRIGHT", -60, 380 },
+	["Scale"] = 1.0, 
+	["SpaceBottom"] = 380, 
+	["SpaceTop"] = 260, 
+	["Width"] = 255 -- 280 is classic default
 } or (IsRetail) and {
-	Place = { "TOPRIGHT", -60, -280 },
-	Width = 235, -- 235 default
-	Scale = 1.1, 
-	SpaceTop = 260, 
-	SpaceBottom = 380, 
-	MaxHeight = 340, -- need room for totems and stuff.
-	HideInCombat = false, 
-	HideInBossFights = true, 
-	HideInVehicles = false,
-	HideInArena = true
+	["Place"] = { "TOPRIGHT", -60, -280 },
+	["Width"] = 235, -- 235 default
+	["Scale"] = 1.1, 
+	["SpaceTop"] = 260, 
+	["SpaceBottom"] = 380, 
+	["MaxHeight"] = 340, -- need room for totems and stuff.
+	["HideInCombat"] = false, 
+	["HideInBossFights"] = true, 
+	["HideInVehicles"] = false,
+	["HideInArena"] = true
 })
 RegisterLayoutVariation("BlizzardObjectivesTracker", "Legacy", "Azerite", (IsClassic) and {
-	FontObject = GetFont(13, true),
-	FontObjectTitle = GetFont(15, true),
-	HideInBossFights = true,
-	HideInCombat = false,
-	MaxHeight = 1080 - (60 + 380),
-	Place = { "BOTTOMRIGHT", -60, 60 },
-	Scale = 1.0, 
-	SpaceBottom = 380, 
-	SpaceTop = 260, 
-	Width = 255 -- 280 is classic default
+	["FontObject"] = GetFont(13, true),
+	["FontObjectTitle"] = GetFont(15, true),
+	["HideInBossFights"] = true,
+	["HideInCombat"] = false,
+	["MaxHeight"] = 1080 - (60 + 380),
+	["Place"] = { "BOTTOMRIGHT", -60, 60 },
+	["Scale"] = 1.0, 
+	["SpaceBottom"] = 380, 
+	["SpaceTop"] = 260, 
+	["Width"] = 255 -- 280 is classic default
 } or (IsRetail) and {
-	Place = { "TOPRIGHT", -60, -420 },
-	Width = 220, -- 235 default
-	Scale = 1.1, 
-	SpaceTop = 420, 
-	SpaceBottom = 220, 
-	MaxHeight = 1080 - (60 + 380),
-	HideInCombat = false, 
-	HideInBossFights = true, 
-	HideInVehicles = false,
-	HideInArena = true
+	["Place"] = { "TOPRIGHT", -60, -420 },
+	["Width"] = 220, -- 235 default
+	["Scale"] = 1.1, 
+	["SpaceTop"] = 420, 
+	["SpaceBottom"] = 220, 
+	["MaxHeight"] = 1080 - (60 + 380),
+	["HideInCombat"] = false, 
+	["HideInBossFights"] = true, 
+	["HideInVehicles"] = false,
+	["HideInArena"] = true
 })
 
 -- Blizzard Popup Styling
 RegisterLayout("BlizzardPopupStyling", "Azerite", {
-	EditBoxBackdrop = BACKDROPS.PopupEditBox,
-	EditBoxBackdropColor = { 0, 0, 0, 0 },
-	EditBoxBackdropBorderColor = { .15, .1, .05, 1 },
-	EditBoxInsets = { 6, 6, 0, 0 },
-	PopupBackdrop = BACKDROPS.Popup,
-	PopupBackdropOffsets = { 4, 4, 4, 4 },
-	PopupBackdropColor = { .05, .05, .05, .85 },
-	PopupBackdropBorderColor = { 1, 1, 1, 1 },
-	PopupButtonBackdrop = BACKDROPS.PopupButton,
-	PopupButtonBackdropOffsets = { 20/3, 20/3, 20/3-2, 20/3-2 },
-	PopupButtonBackdropColor = { .05, .05, .05, .75 },
-	PopupButtonBackdropBorderColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
-	PopupButtonBackdropHoverColor = { .1, .1, .1, .75 },
-	PopupButtonBackdropHoverBorderColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3] },
-	PopupVerticalOffset = 32
+	["EditBoxBackdrop"] = BACKDROPS.PopupEditBox,
+	["EditBoxBackdropColor"] = { 0, 0, 0, 0 },
+	["EditBoxBackdropBorderColor"] = { .15, .1, .05, 1 },
+	["EditBoxInsets"] = { 6, 6, 0, 0 },
+	["PopupBackdrop"] = BACKDROPS.Popup,
+	["PopupBackdropOffsets"] = { 4, 4, 4, 4 },
+	["PopupBackdropColor"] = { .05, .05, .05, .85 },
+	["PopupBackdropBorderColor"] = { 1, 1, 1, 1 },
+	["PopupButtonBackdrop"] = BACKDROPS.PopupButton,
+	["PopupButtonBackdropOffsets"] = { 20/3, 20/3, 20/3-2, 20/3-2 },
+	["PopupButtonBackdropColor"] = { .05, .05, .05, .75 },
+	["PopupButtonBackdropBorderColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
+	["PopupButtonBackdropHoverColor"] = { .1, .1, .1, .75 },
+	["PopupButtonBackdropHoverBorderColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3] },
+	["PopupVerticalOffset"] = 32
 })
 
 -- Blizzard Tooltips
 RegisterLayout("BlizzardTooltips", "Azerite", {
-	TooltipBackdrop = BACKDROPS.Tooltips,
-	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
-	TooltipBackdropColor = { .05, .05, .05, .85 },
-	TooltipStatusBarTexture = GetMedia("statusbar-dark")
+	["TooltipBackdrop"] = BACKDROPS.Tooltips,
+	["TooltipBackdropBorderColor"] = { 1, 1, 1, 1 },
+	["TooltipBackdropColor"] = { .05, .05, .05, .85 },
+	["TooltipStatusBarTexture"] = GetMedia("statusbar-dark")
 })
 
 -- Blizzard World Map
@@ -2250,168 +2171,168 @@ RegisterLayoutVariation("BlizzardWorldMap", "Legacy", "Azerite", {})
 
 -- ActionBars
 RegisterLayout("ActionBarMain", "Azerite", {
-	ExitButtonPlace = { "CENTER", "Minimap", "CENTER", -math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
-	ExitButtonSize = { 32, 32 },
-	ExitButtonTexturePath = GetMedia("icon_exit_flight"),
-	ExitButtonTexturePlace = { "CENTER", 0, 0 }, 
-	ExitButtonTextureSize = { 80, 80 }
+	["ExitButtonPlace"] = { "CENTER", "Minimap", "CENTER", -math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
+	["ExitButtonSize"] = { 32, 32 },
+	["ExitButtonTexturePath"] = GetMedia("icon_exit_flight"),
+	["ExitButtonTexturePlace"] = { "CENTER", 0, 0 }, 
+	["ExitButtonTextureSize"] = { 80, 80 }
 })
 
 -- Bind Mode
 RegisterLayout("Bindings", "Azerite", {
-	BindButtonOffset = 8, 
-	BindButtonTexture = GetMedia("actionbutton-mask-circular"),
-	MenuButtonNormalTexture = GetMedia("menu_button_disabled"),
-	MenuButtonPushedTexture = GetMedia("menu_button_pushed"),
-	MenuButtonSize = { 256, 64 },
-	MenuButtonTextColor = { 0, 0, 0 },
-	MenuButtonTextShadowColor = { 1, 1, 1, .5 },
-	MenuButtonTextShadowOffset = { 0, -.85 },
-	MenuWindowGetBorder = function(self) return GetBorder(self) end
+	["BindButtonOffset"] = 8, 
+	["BindButtonTexture"] = GetMedia("actionbutton-mask-circular"),
+	["MenuButtonNormalTexture"] = GetMedia("menu_button_disabled"),
+	["MenuButtonPushedTexture"] = GetMedia("menu_button_pushed"),
+	["MenuButtonSize"] = { 256, 64 },
+	["MenuButtonTextColor"] = { 0, 0, 0 },
+	["MenuButtonTextShadowColor"] = { 1, 1, 1, .5 },
+	["MenuButtonTextShadowOffset"] = { 0, -.85 },
+	["MenuWindowGetBorder"] = function(self) return GetBorder(self) end
 })
 
 -- Floaters. Durability only currently. 
 RegisterLayout("Durability", "Azerite", {
-	Place = FloaterSlots.Durability
+	["Place"] = FloaterSlots.Durability
 })
 
 -- Group Leader Tools
 RegisterLayout("GroupTools", "Azerite", IsClassic and {
-	ConvertButtonPlace = { "TOP", 0, -360 + 140 }, 
-	ConvertButtonSize = { 300*.75, 50*.75 },
-	ConvertButtonTextColor = { 0, 0, 0 }, 
-	ConvertButtonTextFont = GetFont(14, false), 
-	ConvertButtonTextShadowColor = { 1, 1, 1, .5 }, 
-	ConvertButtonTextShadowOffset = { 0, -.85 }, 
-	ConvertButtonTextureNormal = GetMedia("menu_button_disabled"), 
-	ConvertButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
-	MemberCountNumberColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
-	MemberCountNumberFont = GetFont(14, true),
-	MemberCountNumberJustifyH = "CENTER",
-	MemberCountNumberJustifyV = "MIDDLE", 
-	MemberCountNumberPlace = { "TOP", 0, -20 }, 
-	MenuAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 22, 350 },
-	MenuPlace = { "TOPLEFT", "UICenter", "TOPLEFT", 22, -42 },
-	MenuSize = { 300*.75 +30, 410 - 140 }, 
-	MenuToggleButtonSize = { 48, 48 }, 
-	MenuToggleButtonPlace = { "TOPLEFT", "UICenter", "TOPLEFT", -18, -40 }, 
-	MenuToggleButtonAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", -18, 348 }, 
-	MenuToggleButtonIcon = GetMedia("raidtoolsbutton"), 
-	MenuToggleButtonIconPlace = { "CENTER", 0, 0 }, 
-	MenuToggleButtonIconSize = { 64*.75, 128*.75 }, 
-	MenuToggleButtonIconColor = { 1, 1, 1 }, 
-	MenuWindow_CreateBorder = function(self) return GetBorder(self, GetMedia("tooltip_border"), 23, nil, nil, 23, 23) end,
-	RaidRoleRaidTargetTexture = GetMedia("raid_target_icons"),
-	RaidTargetIcon1Place = { "TOP", -80, -140 + 86 },
-	RaidTargetIcon2Place = { "TOP", -28, -140 + 86 },
-	RaidTargetIcon3Place = { "TOP",  28, -140 + 86 },
-	RaidTargetIcon4Place = { "TOP",  80, -140 + 86 },
-	RaidTargetIcon5Place = { "TOP", -80, -190 + 86 },
-	RaidTargetIcon6Place = { "TOP", -28, -190 + 86 },
-	RaidTargetIcon7Place = { "TOP",  28, -190 + 86 },
-	RaidTargetIcon8Place = { "TOP",  80, -190 + 86 },
-	RaidTargetIconsSize = { 48, 48 }, 
-	ReadyCheckButtonPlace = { "TOP", -30, -310 + 140 }, 
-	ReadyCheckButtonSize = { 300*.75 - 80, 50*.75 },
-	ReadyCheckButtonTextColor = { 0, 0, 0 }, 
-	ReadyCheckButtonTextFont = GetFont(14, false), 
-	ReadyCheckButtonTextShadowColor = { 1, 1, 1, .5 }, 
-	ReadyCheckButtonTextShadowOffset = { 0, -.85 }, 
-	ReadyCheckButtonTextureNormal = GetMedia("menu_button_smaller"), 
-	ReadyCheckButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+	["ConvertButtonPlace"] = { "TOP", 0, -360 + 140 }, 
+	["ConvertButtonSize"] = { 300*.75, 50*.75 },
+	["ConvertButtonTextColor"] = { 0, 0, 0 }, 
+	["ConvertButtonTextFont"] = GetFont(14, false), 
+	["ConvertButtonTextShadowColor"] = { 1, 1, 1, .5 }, 
+	["ConvertButtonTextShadowOffset"] = { 0, -.85 }, 
+	["ConvertButtonTextureNormal"] = GetMedia("menu_button_disabled"), 
+	["ConvertButtonTextureSize"] = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+	["MemberCountNumberColor"] = { Colors.title[1], Colors.title[2], Colors.title[3] },
+	["MemberCountNumberFont"] = GetFont(14, true),
+	["MemberCountNumberJustifyH"] = "CENTER",
+	["MemberCountNumberJustifyV"] = "MIDDLE", 
+	["MemberCountNumberPlace"] = { "TOP", 0, -20 }, 
+	["MenuAlternatePlace"] = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 22, 350 },
+	["MenuPlace"] = { "TOPLEFT", "UICenter", "TOPLEFT", 22, -42 },
+	["MenuSize"] = { 300*.75 +30, 410 - 140 }, 
+	["MenuToggleButtonSize"] = { 48, 48 }, 
+	["MenuToggleButtonPlace"] = { "TOPLEFT", "UICenter", "TOPLEFT", -18, -40 }, 
+	["MenuToggleButtonAlternatePlace"] = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", -18, 348 }, 
+	["MenuToggleButtonIcon"] = GetMedia("raidtoolsbutton"), 
+	["MenuToggleButtonIconPlace"] = { "CENTER", 0, 0 }, 
+	["MenuToggleButtonIconSize"] = { 64*.75, 128*.75 }, 
+	["MenuToggleButtonIconColor"] = { 1, 1, 1 }, 
+	["MenuWindow_CreateBorder"] = function(self) return GetBorder(self, GetMedia("tooltip_border"), 23, nil, nil, 23, 23) end,
+	["RaidRoleRaidTargetTexture"] = GetMedia("raid_target_icons"),
+	["RaidTargetIcon1Place"] = { "TOP", -80, -140 + 86 },
+	["RaidTargetIcon2Place"] = { "TOP", -28, -140 + 86 },
+	["RaidTargetIcon3Place"] = { "TOP",  28, -140 + 86 },
+	["RaidTargetIcon4Place"] = { "TOP",  80, -140 + 86 },
+	["RaidTargetIcon5Place"] = { "TOP", -80, -190 + 86 },
+	["RaidTargetIcon6Place"] = { "TOP", -28, -190 + 86 },
+	["RaidTargetIcon7Place"] = { "TOP",  28, -190 + 86 },
+	["RaidTargetIcon8Place"] = { "TOP",  80, -190 + 86 },
+	["RaidTargetIconsSize"] = { 48, 48 }, 
+	["ReadyCheckButtonPlace"] = { "TOP", -30, -310 + 140 }, 
+	["ReadyCheckButtonSize"] = { 300*.75 - 80, 50*.75 },
+	["ReadyCheckButtonTextColor"] = { 0, 0, 0 }, 
+	["ReadyCheckButtonTextFont"] = GetFont(14, false), 
+	["ReadyCheckButtonTextShadowColor"] = { 1, 1, 1, .5 }, 
+	["ReadyCheckButtonTextShadowOffset"] = { 0, -.85 }, 
+	["ReadyCheckButtonTextureNormal"] = GetMedia("menu_button_smaller"), 
+	["ReadyCheckButtonTextureSize"] = { 1024 *1/3 *.75, 256 *1/3 *.75 },
 
 
 } or IsRetail and {
-	ConvertButtonPlace = { "TOP", 0, -360 }, 
-	ConvertButtonSize = { 300*.75, 50*.75 },
-	ConvertButtonTextColor = { 0, 0, 0 }, 
-	ConvertButtonTextFont = GetFont(14, false), 
-	ConvertButtonTextShadowColor = { 1, 1, 1, .5 }, 
-	ConvertButtonTextShadowOffset = { 0, -.85 }, 
-	ConvertButtonTextureNormal = GetMedia("menu_button_disabled"), 
-	ConvertButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
-	MemberCountNumberColor = { Colors.title[1], Colors.title[2], Colors.title[3] },
-	MemberCountNumberFont = GetFont(14, true),
-	MemberCountNumberJustifyH = "CENTER",
-	MemberCountNumberJustifyV = "MIDDLE", 
-	MemberCountNumberPlace = { "TOP", 0, -20 }, 
-	MenuAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 22, 350 },
-	MenuPlace = { "TOPLEFT", "UICenter", "TOPLEFT", 22, -42 },
-	MenuSize = { 300*.75 +30, 410 }, 
-	MenuToggleButtonSize = { 48, 48 }, 
-	MenuToggleButtonPlace = { "TOPLEFT", "UICenter", "TOPLEFT", -18, -40 }, 
-	MenuToggleButtonAlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", -18, 348 }, 
-	MenuToggleButtonIcon = GetMedia("raidtoolsbutton"), 
-	MenuToggleButtonIconPlace = { "CENTER", 0, 0 }, 
-	MenuToggleButtonIconSize = { 64*.75, 128*.75 }, 
-	MenuToggleButtonIconColor = { 1, 1, 1 }, 
-	MenuWindow_CreateBorder = function(self) return GetBorder(self, GetMedia("tooltip_border"), 23, nil, nil, 23, 23) end,
-	RaidRoleRaidTargetTexture = GetMedia("raid_target_icons"),
-	RaidTargetIcon1Place = { "TOP", -80, -140 },
-	RaidTargetIcon2Place = { "TOP", -28, -140 },
-	RaidTargetIcon3Place = { "TOP",  28, -140 },
-	RaidTargetIcon4Place = { "TOP",  80, -140 },
-	RaidTargetIcon5Place = { "TOP", -80, -190 },
-	RaidTargetIcon6Place = { "TOP", -28, -190 },
-	RaidTargetIcon7Place = { "TOP",  28, -190 },
-	RaidTargetIcon8Place = { "TOP",  80, -190 },
-	RaidTargetIconsSize = { 48, 48 }, 
-	ReadyCheckButtonPlace = { "TOP", -30, -310 }, 
-	ReadyCheckButtonSize = { 300*.75 - 80, 50*.75 },
-	ReadyCheckButtonTextColor = { 0, 0, 0 }, 
-	ReadyCheckButtonTextFont = GetFont(14, false), 
-	ReadyCheckButtonTextShadowColor = { 1, 1, 1, .5 }, 
-	ReadyCheckButtonTextShadowOffset = { 0, -.85 }, 
-	ReadyCheckButtonTextureNormal = GetMedia("menu_button_smaller"), 
-	ReadyCheckButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+	["ConvertButtonPlace"] = { "TOP", 0, -360 }, 
+	["ConvertButtonSize"] = { 300*.75, 50*.75 },
+	["ConvertButtonTextColor"] = { 0, 0, 0 }, 
+	["ConvertButtonTextFont"] = GetFont(14, false), 
+	["ConvertButtonTextShadowColor"] = { 1, 1, 1, .5 }, 
+	["ConvertButtonTextShadowOffset"] = { 0, -.85 }, 
+	["ConvertButtonTextureNormal"] = GetMedia("menu_button_disabled"), 
+	["ConvertButtonTextureSize"] = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+	["MemberCountNumberColor"] = { Colors.title[1], Colors.title[2], Colors.title[3] },
+	["MemberCountNumberFont"] = GetFont(14, true),
+	["MemberCountNumberJustifyH"] = "CENTER",
+	["MemberCountNumberJustifyV"] = "MIDDLE", 
+	["MemberCountNumberPlace"] = { "TOP", 0, -20 }, 
+	["MenuAlternatePlace"] = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 22, 350 },
+	["MenuPlace"] = { "TOPLEFT", "UICenter", "TOPLEFT", 22, -42 },
+	["MenuSize"] = { 300*.75 +30, 410 }, 
+	["MenuToggleButtonSize"] = { 48, 48 }, 
+	["MenuToggleButtonPlace"] = { "TOPLEFT", "UICenter", "TOPLEFT", -18, -40 }, 
+	["MenuToggleButtonAlternatePlace"] = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", -18, 348 }, 
+	["MenuToggleButtonIcon"] = GetMedia("raidtoolsbutton"), 
+	["MenuToggleButtonIconPlace"] = { "CENTER", 0, 0 }, 
+	["MenuToggleButtonIconSize"] = { 64*.75, 128*.75 }, 
+	["MenuToggleButtonIconColor"] = { 1, 1, 1 }, 
+	["MenuWindow_CreateBorder"] = function(self) return GetBorder(self, GetMedia("tooltip_border"), 23, nil, nil, 23, 23) end,
+	["RaidRoleRaidTargetTexture"] = GetMedia("raid_target_icons"),
+	["RaidTargetIcon1Place"] = { "TOP", -80, -140 },
+	["RaidTargetIcon2Place"] = { "TOP", -28, -140 },
+	["RaidTargetIcon3Place"] = { "TOP",  28, -140 },
+	["RaidTargetIcon4Place"] = { "TOP",  80, -140 },
+	["RaidTargetIcon5Place"] = { "TOP", -80, -190 },
+	["RaidTargetIcon6Place"] = { "TOP", -28, -190 },
+	["RaidTargetIcon7Place"] = { "TOP",  28, -190 },
+	["RaidTargetIcon8Place"] = { "TOP",  80, -190 },
+	["RaidTargetIconsSize"] = { 48, 48 }, 
+	["ReadyCheckButtonPlace"] = { "TOP", -30, -310 }, 
+	["ReadyCheckButtonSize"] = { 300*.75 - 80, 50*.75 },
+	["ReadyCheckButtonTextColor"] = { 0, 0, 0 }, 
+	["ReadyCheckButtonTextFont"] = GetFont(14, false), 
+	["ReadyCheckButtonTextShadowColor"] = { 1, 1, 1, .5 }, 
+	["ReadyCheckButtonTextShadowOffset"] = { 0, -.85 }, 
+	["ReadyCheckButtonTextureNormal"] = GetMedia("menu_button_smaller"), 
+	["ReadyCheckButtonTextureSize"] = { 1024 *1/3 *.75, 256 *1/3 *.75 },
 
 
-	RoleCountTankPlace = { "TOP", -70, -100 }, 
-	RoleCountTankFont = GetFont(14, true),
-	RoleCountTankColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
-	RoleCountTankTexturePlace = { "TOP", -70, -44 },
-	RoleCountTankTextureSize = { 64, 64 },
-	RoleCountTankTexture = GetMedia("grouprole-icons-tank"),
+	["RoleCountTankPlace"] = { "TOP", -70, -100 }, 
+	["RoleCountTankFont"] = GetFont(14, true),
+	["RoleCountTankColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
+	["RoleCountTankTexturePlace"] = { "TOP", -70, -44 },
+	["RoleCountTankTextureSize"] = { 64, 64 },
+	["RoleCountTankTexture"] = GetMedia("grouprole-icons-tank"),
 	
-	RoleCountHealerPlace = { "TOP", 0, -100 }, 
-	RoleCountHealerFont = GetFont(14, true),
-	RoleCountHealerColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
-	RoleCountHealerTexturePlace = { "TOP", 0, -44 },
-	RoleCountHealerTextureSize = { 64, 64 },
-	RoleCountHealerTexture = GetMedia("grouprole-icons-heal"),
+	["RoleCountHealerPlace"] = { "TOP", 0, -100 }, 
+	["RoleCountHealerFont"] = GetFont(14, true),
+	["RoleCountHealerColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
+	["RoleCountHealerTexturePlace"] = { "TOP", 0, -44 },
+	["RoleCountHealerTextureSize"] = { 64, 64 },
+	["RoleCountHealerTexture"] = GetMedia("grouprole-icons-heal"),
 
-	RoleCountDPSPlace = { "TOP", 70, -100 }, 
-	RoleCountDPSFont = GetFont(14, true),
-	RoleCountDPSColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
-	RoleCountDPSTexturePlace = { "TOP", 70, -44 },
-	RoleCountDPSTextureSize = { 64, 64 },
-	RoleCountDPSTexture = GetMedia("grouprole-icons-dps"),
+	["RoleCountDPSPlace"] = { "TOP", 70, -100 }, 
+	["RoleCountDPSFont"] = GetFont(14, true),
+	["RoleCountDPSColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
+	["RoleCountDPSTexturePlace"] = { "TOP", 70, -44 },
+	["RoleCountDPSTextureSize"] = { 64, 64 },
+	["RoleCountDPSTexture"] = GetMedia("grouprole-icons-dps"),
 
-	RolePollButtonPlace = { "TOP", 0, -260 }, 
-	RolePollButtonSize = { 300*.75, 50*.75 },
-	RolePollButtonTextFont = GetFont(14, false), 
-	RolePollButtonTextColor = { 0, 0, 0 }, 
-	RolePollButtonTextShadowColor = { 1, 1, 1, .5 }, 
-	RolePollButtonTextShadowOffset = { 0, -.85 }, 
-	RolePollButtonTextureSize = { 1024 *1/3 *.75, 256 *1/3 *.75 },
-	RolePollButtonTextureNormal = GetMedia("menu_button_disabled"), 
+	["RolePollButtonPlace"] = { "TOP", 0, -260 }, 
+	["RolePollButtonSize"] = { 300*.75, 50*.75 },
+	["RolePollButtonTextFont"] = GetFont(14, false), 
+	["RolePollButtonTextColor"] = { 0, 0, 0 }, 
+	["RolePollButtonTextShadowColor"] = { 1, 1, 1, .5 }, 
+	["RolePollButtonTextShadowOffset"] = { 0, -.85 }, 
+	["RolePollButtonTextureSize"] = { 1024 *1/3 *.75, 256 *1/3 *.75 },
+	["RolePollButtonTextureNormal"] = GetMedia("menu_button_disabled"), 
 
-	WorldMarkerFlagPlace = { "TOP", 88, -310 }, 
-	WorldMarkerFlagSize = { 70*.75, 50*.75 },
-	WorldMarkerFlagContentSize = { 32, 32 }, 
-	WorldMarkerFlagBackdropSize = { 512 *1/3 *.75, 256 *1/3 *.75 },
-	WorldMarkerFlagBackdropTexture = GetMedia("menu_button_tiny"), 
+	["WorldMarkerFlagPlace"] = { "TOP", 88, -310 }, 
+	["WorldMarkerFlagSize"] = { 70*.75, 50*.75 },
+	["WorldMarkerFlagContentSize"] = { 32, 32 }, 
+	["WorldMarkerFlagBackdropSize"] = { 512 *1/3 *.75, 256 *1/3 *.75 },
+	["WorldMarkerFlagBackdropTexture"] = GetMedia("menu_button_tiny"), 
 
 })
 
 -- Minimap
 RegisterLayout("Minimap", "Azerite", {
-	AP_OverrideValue = Minimap_AP_OverrideValue,
-	BattleGroundEyeColor = { .90, .95, 1 }, 
-	BattleGroundEyePlace = { "CENTER", math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
-	BattleGroundEyeSize = { 64, 64 }, 
-	BattleGroundEyeTexture = GetMedia("group-finder-eye-green"),
-	BlipTextures = 
+	["AP_OverrideValue"] = Minimap_AP_OverrideValue,
+	["BattleGroundEyeColor"] = { .90, .95, 1 }, 
+	["BattleGroundEyePlace"] = { "CENTER", math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
+	["BattleGroundEyeSize"] = { 64, 64 }, 
+	["BattleGroundEyeTexture"] = GetMedia("group-finder-eye-green"),
+	["BlipTextures"] = 
 		(IsClassic) and 
 			setmetatable({
 			}, { __index = function(t,k) return GetMedia("Blip-Nandini-New-113_2") end }) or
@@ -2423,165 +2344,165 @@ RegisterLayout("Minimap", "Azerite", {
 				["9.0.2"] = GetMedia("Blip-Nandini-New-902"),
 				-- 9.0.5 is changed again. fuck. fuck you blizzard. fuck you very much. 
 			}, { __index = function(t,k) return [[Interface\Minimap\ObjectIconsAtlas.blp]] end }),
-	BlobAlpha = { 0, 96, 0, 0 }, -- blobInside, blobOutside, ringOutside, ringInside
-	Clock_OverrideValue = Minimap_Clock_OverrideValue,
-	ClockColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
-	ClockFont = GetFont(15, true),
-	ClockPlace = { "BOTTOMRIGHT", -(13 + 213), -8 },
-	CompassColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .75 }, 
-	CompassFont = GetFont(12, true), 
-	CompassRadiusInset = 10, -- move the text 10 points closer to the center of the map
-	CompassTexts = { L["N"] }, -- only setting the North tag text, as we don't want a full compass ( order is NESW )
-	CoordinateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 }, 
-	CoordinateFont = GetFont(12, true), 
-	CoordinatePlace = { "BOTTOM", 3, 23 },
-	Coordinates_OverrideValue = Minimap_Coordinates_OverrideValue,
-	FrameRate_OverrideValue = Minimap_FrameRate_OverrideValue,
-	FrameRateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
-	FrameRateFont = GetFont(12, true), 
-	FrameRatePlaceFunc = function(Handler) return "BOTTOM", Handler.Clock, "TOP", 0, 6 end, 
-	GroupFinderEyeColor = { .90, .95, 1 }, 
-	GroupFinderEyePlace = { "CENTER", math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
-	GroupFinderEyeSize = { 64, 64 }, 
-	GroupFinderEyeTexture = GetMedia("group-finder-eye-green"),
-	GroupFinderQueueStatusPlace = { "BOTTOMRIGHT", _G.QueueStatusMinimapButton, "TOPLEFT", 0, 0 },
-	InnerRingBackdropMultiplier = 1, 
-	InnerRingBarTexture = GetMedia("minimap-bars-two-inner"),
-	InnerRingClockwise = true, 
-	InnerRingColorPower = true,
-	InnerRingColorStanding = true,
-	InnerRingColorValue = true,
-	InnerRingColorXP = true,
-	InnerRingDegreeOffset = 90*3 - 21,
-	InnerRingDegreeSpan = 360 - 21*2, 
-	InnerRingPlace = { "CENTER", 0, 2 }, 
-	InnerRingShowSpark = true, 
-	InnerRingSize = { 208, 208 }, 
-	InnerRingSparkBlendMode = "ADD",
-	InnerRingSparkFlash = { nil, nil, 1, 1 }, 
-	InnerRingSparkInset = 46 * 208/256,  
-	InnerRingSparkMultiplier = 1, 
-	InnerRingSparkOffset = -1/10,
-	InnerRingSparkSize = { 6, 27 * 208/256 },
-	InnerRingValueFont = GetFont(15, true),
-	InnerRingValuePercentFont = GetFont(15, true), 
-	Latency_OverrideValue = Minimap_Latency_OverrideValue,
-	LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
-	LatencyFont = GetFont(12, true), 
-	LatencyPlaceFunc = function(Handler) return "BOTTOMRIGHT", Handler.Zone, "TOPRIGHT", 0, 6 end, 
-	MailPlace = Wheel("LibModule"):IsAddOnEnabled("MBB") and { "BOTTOMRIGHT", -(31 + 213 + 40), 35 } or { "BOTTOMRIGHT", -(31 + 213), 35 },
-	MailSize = { 43, 32 },
-	MailTexture = GetMedia("icon_mail"),
-	MailTextureDrawLayer = { "ARTWORK", 1 },
-	MailTexturePlace = { "CENTER", 0, 0 }, 
-	MailTextureRotation = 15*deg2rad,
-	MailTextureSize = { 66, 66 },
-	MapBackdropColor = { 0, 0, 0, .75 }, 
-	MapBackdropTexture = GetMedia("minimap_mask_circle"),
-	MapBorderColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	MapBorderPlace = { "CENTER", 0, 0 }, 
-	MapBorderSize = { 419, 419 }, 
-	MapBorderTexture = GetMedia("minimap-border"),
-	MapOverlayColor = { 0, 0, 0, .15 },
-	MapOverlayTexture = GetMedia("minimap_mask_circle"),
-	MaskTexture = GetMedia("minimap_mask_circle_transparent"),
-	MBBPlace = { "BOTTOMRIGHT", -(31 + 213), 35 },
-	MBBSize = { 32, 32 },
-	MBBTexture = GetMedia("plus"),
-	OuterRingBackdropMultiplier = 1, 
-	OuterRingClockwise = true, 
-	OuterRingColorPower = true,
-	OuterRingColorStanding = true,
-	OuterRingColorValue = true,
-	OuterRingColorXP = true,
-	OuterRingDegreeOffset = 90*3 - 14,
-	OuterRingDegreeSpan = 360 - 14*2, 
-	OuterRingPlace = { "CENTER", 0, 2 }, 
-	OuterRingSize = { 208, 208 }, 
-	OuterRingShowSpark = true, 
-	OuterRingSparkBlendMode = "ADD",
-	OuterRingSparkFlash = { nil, nil, 1, 1 }, 
-	OuterRingSparkOffset = -1/10, 
-	OuterRingSparkMultiplier = 1, 
-	OuterRingValueFont = GetFont(15, true),
-	OuterRingValuePlace = { "CENTER", 0, -9 },
-	OuterRingValueJustifyH = "CENTER",
-	OuterRingValueJustifyV = "MIDDLE",
-	OuterRingValueShowDeficit = true, 
-	OuterRingValueDescriptionColor = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3] }, 
-	OuterRingValueDescriptionFont = GetFont(12, true),
-	OuterRingValueDescriptionJustifyH = "CENTER", 
-	OuterRingValueDescriptionJustifyV = "MIDDLE", 
-	OuterRingValueDescriptionPlace = { "CENTER", 0, -(15/2 + 2) }, 
-	OuterRingValueDescriptionWidth = 100, 
-	OuterRingValuePercentFont = GetFont(16, true),
-	PerformanceFramePlaceAdvancedFunc = Minimap_Performance_PlaceFunc,
-	Place = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -58, 59 }, 
-	Rep_OverrideValue = Minimap_Rep_OverrideValue,
-	RingFrameBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	RingFrameBackdropDoubleTexture = GetMedia("minimap-twobars-backdrop"), 
-	RingFrameBackdropDrawLayer = { "BACKGROUND", 1 }, 
-	RingFrameBackdropPlace = { "CENTER", 0, 0 },
-	RingFrameBackdropSize = { 413, 413 }, 
-	RingFrameBackdropTexture = GetMedia("minimap-onebar-backdrop"), 
-	RingFrameOuterRingSparkInset = { 15 * 208/256 }, 
-	RingFrameOuterRingSparkSize = { 6,20 * 208/256 }, 
-	RingFrameOuterRingTexture = GetMedia("minimap-bars-two-outer"), 
-	RingFrameOuterRingValueFunc = Minimap_RingFrame_OuterRing_ValueFunc,
-	RingFrameSingleRingSparkInset = { 22 * 208/256 }, 
-	RingFrameSingleRingSparkSize = { 6,34 * 208/256 }, 
-	RingFrameSingleRingValueFunc = Minimap_RingFrame_SingleRing_ValueFunc,
-	RingFrameSingleRingTexture = GetMedia("minimap-bars-single"), 
-	Size = { 213, 213 }, 
-	ToggleBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	ToggleBackdropTexture = GetMedia("point_plate"), 
-	ToggleBackdropSize = { 100, 100 },
-	ToggleSize = { 56, 56 }, 
-	TrackingButtonBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	TrackingButtonBackdropSize = { 100, 100 },
-	TrackingButtonBackdropTexture = GetMedia("point_plate"), 
-	TrackingButtonIconBgSize = { 32, 32 },
-	TrackingButtonIconBgTexture = GetMedia("hp_critter_case_glow"),
-	TrackingButtonIconMask = GetMedia("hp_critter_case_glow"), -- actionbutton-mask-circular
-	TrackingButtonIconSize = { 28, 28 },
-	TrackingButtonPlace = { "CENTER", math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
-	TrackingButtonPlaceAlternate = { "CENTER", math_cos(22.*deg2rad) * (213/2 + 10), math_sin(22.5*deg2rad) * (213/2 + 10) }, 
-	TrackingButtonSize = { 56, 56 }, 
-	XP_OverrideValue = Minimap_XP_OverrideValue,
-	ZonePlaceFunc = function(Handler) return "BOTTOMRIGHT", Handler.Clock, "BOTTOMLEFT", -8, 0 end,
-	ZoneFont = GetFont(15, true),
-	UseBars = true, -- copout
+	["BlobAlpha"] = { 0, 96, 0, 0 }, -- blobInside, blobOutside, ringOutside, ringInside
+	["Clock_OverrideValue"] = Minimap_Clock_OverrideValue,
+	["ClockColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
+	["ClockFont"] = GetFont(15, true),
+	["ClockPlace"] = { "BOTTOMRIGHT", -(13 + 213), -8 },
+	["CompassColor"] = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .75 }, 
+	["CompassFont"] = GetFont(12, true), 
+	["CompassRadiusInset"] = 10, -- move the text 10 points closer to the center of the map
+	["CompassTexts"] = { L["N"] }, -- only setting the North tag text, as we don't want a full compass ( order is NESW )
+	["CoordinateColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 }, 
+	["CoordinateFont"] = GetFont(12, true), 
+	["CoordinatePlace"] = { "BOTTOM", 3, 23 },
+	["Coordinates_OverrideValue"] = Minimap_Coordinates_OverrideValue,
+	["FrameRate_OverrideValue"] = Minimap_FrameRate_OverrideValue,
+	["FrameRateColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
+	["FrameRateFont"] = GetFont(12, true), 
+	["FrameRatePlaceFunc"] = function(Handler) return "BOTTOM", Handler.Clock, "TOP", 0, 6 end, 
+	["GroupFinderEyeColor"] = { .90, .95, 1 }, 
+	["GroupFinderEyePlace"] = { "CENTER", math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
+	["GroupFinderEyeSize"] = { 64, 64 }, 
+	["GroupFinderEyeTexture"] = GetMedia("group-finder-eye-green"),
+	["GroupFinderQueueStatusPlace"] = { "BOTTOMRIGHT", _G.QueueStatusMinimapButton, "TOPLEFT", 0, 0 },
+	["InnerRingBackdropMultiplier"] = 1, 
+	["InnerRingBarTexture"] = GetMedia("minimap-bars-two-inner"),
+	["InnerRingClockwise"] = true, 
+	["InnerRingColorPower"] = true,
+	["InnerRingColorStanding"] = true,
+	["InnerRingColorValue"] = true,
+	["InnerRingColorXP"] = true,
+	["InnerRingDegreeOffset"] = 90*3 - 21,
+	["InnerRingDegreeSpan"] = 360 - 21*2, 
+	["InnerRingPlace"] = { "CENTER", 0, 2 }, 
+	["InnerRingShowSpark"] = true, 
+	["InnerRingSize"] = { 208, 208 }, 
+	["InnerRingSparkBlendMode"] = "ADD",
+	["InnerRingSparkFlash"] = { nil, nil, 1, 1 }, 
+	["InnerRingSparkInset"] = 46 * 208/256,  
+	["InnerRingSparkMultiplier"] = 1, 
+	["InnerRingSparkOffset"] = -1/10,
+	["InnerRingSparkSize"] = { 6, 27 * 208/256 },
+	["InnerRingValueFont"] = GetFont(15, true),
+	["InnerRingValuePercentFont"] = GetFont(15, true), 
+	["Latency_OverrideValue"] = Minimap_Latency_OverrideValue,
+	["LatencyColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
+	["LatencyFont"] = GetFont(12, true), 
+	["LatencyPlaceFunc"] = function(Handler) return "BOTTOMRIGHT", Handler.Zone, "TOPRIGHT", 0, 6 end, 
+	["MailPlace"] = Wheel("LibModule"):IsAddOnEnabled("MBB") and { "BOTTOMRIGHT", -(31 + 213 + 40), 35 } or { "BOTTOMRIGHT", -(31 + 213), 35 },
+	["MailSize"] = { 43, 32 },
+	["MailTexture"] = GetMedia("icon_mail"),
+	["MailTextureDrawLayer"] = { "ARTWORK", 1 },
+	["MailTexturePlace"] = { "CENTER", 0, 0 }, 
+	["MailTextureRotation"] = 15*deg2rad,
+	["MailTextureSize"] = { 66, 66 },
+	["MapBackdropColor"] = { 0, 0, 0, .75 }, 
+	["MapBackdropTexture"] = GetMedia("minimap_mask_circle"),
+	["MapBorderColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["MapBorderPlace"] = { "CENTER", 0, 0 }, 
+	["MapBorderSize"] = { 419, 419 }, 
+	["MapBorderTexture"] = GetMedia("minimap-border"),
+	["MapOverlayColor"] = { 0, 0, 0, .15 },
+	["MapOverlayTexture"] = GetMedia("minimap_mask_circle"),
+	["MaskTexture"] = GetMedia("minimap_mask_circle_transparent"),
+	["MBBPlace"] = { "BOTTOMRIGHT", -(31 + 213), 35 },
+	["MBBSize"] = { 32, 32 },
+	["MBBTexture"] = GetMedia("plus"),
+	["OuterRingBackdropMultiplier"] = 1, 
+	["OuterRingClockwise"] = true, 
+	["OuterRingColorPower"] = true,
+	["OuterRingColorStanding"] = true,
+	["OuterRingColorValue"] = true,
+	["OuterRingColorXP"] = true,
+	["OuterRingDegreeOffset"] = 90*3 - 14,
+	["OuterRingDegreeSpan"] = 360 - 14*2, 
+	["OuterRingPlace"] = { "CENTER", 0, 2 }, 
+	["OuterRingSize"] = { 208, 208 }, 
+	["OuterRingShowSpark"] = true, 
+	["OuterRingSparkBlendMode"] = "ADD",
+	["OuterRingSparkFlash"] = { nil, nil, 1, 1 }, 
+	["OuterRingSparkOffset"] = -1/10, 
+	["OuterRingSparkMultiplier"] = 1, 
+	["OuterRingValueFont"] = GetFont(15, true),
+	["OuterRingValuePlace"] = { "CENTER", 0, -9 },
+	["OuterRingValueJustifyH"] = "CENTER",
+	["OuterRingValueJustifyV"] = "MIDDLE",
+	["OuterRingValueShowDeficit"] = true, 
+	["OuterRingValueDescriptionColor"] = { Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3] }, 
+	["OuterRingValueDescriptionFont"] = GetFont(12, true),
+	["OuterRingValueDescriptionJustifyH"] = "CENTER", 
+	["OuterRingValueDescriptionJustifyV"] = "MIDDLE", 
+	["OuterRingValueDescriptionPlace"] = { "CENTER", 0, -(15/2 + 2) }, 
+	["OuterRingValueDescriptionWidth"] = 100, 
+	["OuterRingValuePercentFont"] = GetFont(16, true),
+	["PerformanceFramePlaceAdvancedFunc"] = Minimap_Performance_PlaceFunc,
+	["Place"] = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -58, 59 }, 
+	["Rep_OverrideValue"] = Minimap_Rep_OverrideValue,
+	["RingFrameBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["RingFrameBackdropDoubleTexture"] = GetMedia("minimap-twobars-backdrop"), 
+	["RingFrameBackdropDrawLayer"] = { "BACKGROUND", 1 }, 
+	["RingFrameBackdropPlace"] = { "CENTER", 0, 0 },
+	["RingFrameBackdropSize"] = { 413, 413 }, 
+	["RingFrameBackdropTexture"] = GetMedia("minimap-onebar-backdrop"), 
+	["RingFrameOuterRingSparkInset"] = { 15 * 208/256 }, 
+	["RingFrameOuterRingSparkSize"] = { 6,20 * 208/256 }, 
+	["RingFrameOuterRingTexture"] = GetMedia("minimap-bars-two-outer"), 
+	["RingFrameOuterRingValueFunc"] = Minimap_RingFrame_OuterRing_ValueFunc,
+	["RingFrameSingleRingSparkInset"] = { 22 * 208/256 }, 
+	["RingFrameSingleRingSparkSize"] = { 6,34 * 208/256 }, 
+	["RingFrameSingleRingValueFunc"] = Minimap_RingFrame_SingleRing_ValueFunc,
+	["RingFrameSingleRingTexture"] = GetMedia("minimap-bars-single"), 
+	["Size"] = { 213, 213 }, 
+	["ToggleBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["ToggleBackdropTexture"] = GetMedia("point_plate"), 
+	["ToggleBackdropSize"] = { 100, 100 },
+	["ToggleSize"] = { 56, 56 }, 
+	["TrackingButtonBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["TrackingButtonBackdropSize"] = { 100, 100 },
+	["TrackingButtonBackdropTexture"] = GetMedia("point_plate"), 
+	["TrackingButtonIconBgSize"] = { 32, 32 },
+	["TrackingButtonIconBgTexture"] = GetMedia("hp_critter_case_glow"),
+	["TrackingButtonIconMask"] = GetMedia("hp_critter_case_glow"), -- actionbutton-mask-circular
+	["TrackingButtonIconSize"] = { 28, 28 },
+	["TrackingButtonPlace"] = { "CENTER", math_cos(45*deg2rad) * (213/2 + 10), math_sin(45*deg2rad) * (213/2 + 10) }, 
+	["TrackingButtonPlaceAlternate"] = { "CENTER", math_cos(22.*deg2rad) * (213/2 + 10), math_sin(22.5*deg2rad) * (213/2 + 10) }, 
+	["TrackingButtonSize"] = { 56, 56 }, 
+	["XP_OverrideValue"] = Minimap_XP_OverrideValue,
+	["ZonePlaceFunc"] = function(Handler) return "BOTTOMRIGHT", Handler.Clock, "BOTTOMLEFT", -8, 0 end,
+	["ZoneFont"] = GetFont(15, true),
+	["UseBars"] = true, -- copout
 })
 RegisterLayoutVariation("Minimap", "Legacy", "Azerite", {
-	Size = { 210, 210 }, 
+	["Size"] = { 210, 210 }, 
 	--Place = { "TOPRIGHT", "UICenter", "TOPRIGHT", -50, -56 }, 
-	Place = { "TOPRIGHT", "UICenter", "TOPRIGHT", -60, -70 }, 
+	["Place"] = { "TOPRIGHT", "UICenter", "TOPRIGHT", -60, -70 }, 
 
 	-- Border icon positions
-	BattleGroundEyePlace = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
-	GroupFinderEyePlace = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
-	TrackingButtonPlace = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
-	TrackingButtonPlaceAlternate = { "CENTER", math_cos(22.5*deg2rad) * (196/2 + 10), math_sin(22.5*deg2rad) * (196/2 + 10) }, 
+	["BattleGroundEyePlace"] = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
+	["GroupFinderEyePlace"] = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
+	["TrackingButtonPlace"] = { "CENTER", math_cos(45*deg2rad) * (196/2 + 10), math_sin(45*deg2rad) * (196/2 + 10) }, 
+	["TrackingButtonPlaceAlternate"] = { "CENTER", math_cos(22.5*deg2rad) * (196/2 + 10), math_sin(22.5*deg2rad) * (196/2 + 10) }, 
 
 	-- Element positions
 	--MBBPlace = { "TOPRIGHT", 24, 20 },
-	MBBPlace = { "BOTTOMLEFT", -24, -20 },
-	ClockPlace = { "BOTTOM", 1, 18 },
-	CoordinatePlace = { "TOP", 4, -22 },
-	GroupFinderQueueStatusPlace = { "TOPRIGHT", _G.QueueStatusMinimapButton, "BOTTOMLEFT", 0, 0 },
+	["MBBPlace"] = { "BOTTOMLEFT", -24, -20 },
+	["ClockPlace"] = { "BOTTOM", 1, 18 },
+	["CoordinatePlace"] = { "TOP", 4, -22 },
+	["GroupFinderQueueStatusPlace"] = { "TOPRIGHT", _G.QueueStatusMinimapButton, "BOTTOMLEFT", 0, 0 },
 
 	--MailPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -64, 12 },
-	MailPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -24, 12 },
+	["MailPlace"] = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -24, 12 },
 
 	-- Element position functions
-	ZonePlaceFunc = function(Handler) return "TOP", Handler, "BOTTOM", 0, -36 end,
-	PerformanceFramePlaceFunc = function(Handler) return "TOP", Handler.Zone, "BOTTOM", 0, -6	end,
-	LatencyPlaceFunc = function(Handler) return "TOPLEFT", Handler.PerformanceFrame, "TOPLEFT", 0, 0 end, 
-	FrameRatePlaceFunc = function(Handler) return "LEFT", Handler.Latency, "RIGHT", 6, 0 end, 
+	["ZonePlaceFunc"] = function(Handler) return "TOP", Handler, "BOTTOM", 0, -36 end,
+	["PerformanceFramePlaceFunc"] = function(Handler) return "TOP", Handler.Zone, "BOTTOM", 0, -6	end,
+	["LatencyPlaceFunc"] = function(Handler) return "TOPLEFT", Handler.PerformanceFrame, "TOPLEFT", 0, 0 end, 
+	["FrameRatePlaceFunc"] = function(Handler) return "LEFT", Handler.Latency, "RIGHT", 6, 0 end, 
 
-	FrameRate_OverrideValue = function(element, fps) element:SetFormattedText("%.0f|cff888888%s|r", math_floor(fps), FPS_ABBR) end,
-	Latency_OverrideValue = function(element, home, world) element:SetFormattedText("%.0f|cff888888%s|r", math_floor(world), MILLISECONDS_ABBR) end,
-	Performance_PostUpdate = function(element)
+	["FrameRate_OverrideValue"] = function(element, fps) element:SetFormattedText("%.0f|cff888888%s|r", math_floor(fps), FPS_ABBR) end,
+	["Latency_OverrideValue"] = function(element, home, world) element:SetFormattedText("%.0f|cff888888%s|r", math_floor(world), MILLISECONDS_ABBR) end,
+	["Performance_PostUpdate"] = function(element)
 		local self = element._owner
 	
 		local latency = self.Latency
@@ -2596,146 +2517,146 @@ RegisterLayoutVariation("Minimap", "Legacy", "Azerite", {
 		end 
 	end,
 
-	ClockFont = GetFont(14, true),
-	LatencyFont = GetFont(12, true), 
-	ZoneFont = GetFont(14, true),
-	ZoneAlpha = .75,
+	["ClockFont"] = GetFont(14, true),
+	["LatencyFont"] = GetFont(12, true), 
+	["ZoneFont"] = GetFont(14, true),
+	["ZoneAlpha"] = .75,
 
-	ClockColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-	CoordinateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-	FrameRateColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-	LatencyColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	["ClockColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	["CoordinateColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	["FrameRateColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	["LatencyColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 
-	ClockFrameInOverlay = true,
-	CoordFrameInOverlay = true, 
-	CompassRadiusInset = 2, -- move the text 2 points closer to the center of the map
-	MapBorderSize = { 256, 256 }, 
-	MapBorderTexture = GetMedia("minimap-border-legacy"),
-	PerformanceFramePlaceAdvancedFunc = false,
+	["ClockFrameInOverlay"] = true,
+	["CoordFrameInOverlay"] = true, 
+	["CompassRadiusInset"] = 2, -- move the text 2 points closer to the center of the map
+	["MapBorderSize"] = { 256, 256 }, 
+	["MapBorderTexture"] = GetMedia("minimap-border-legacy"),
+	["PerformanceFramePlaceAdvancedFunc"] = false,
 
-	UseBars = true,
+	["UseBars"] = true,
 
-	RingFrameBackdropSize = { 410, 410 }, 
-	RingFrameOuterRingSparkInset = { 15 * 205/256 }, 
-	RingFrameOuterRingSparkSize = { 6,20 * 205/256 }, 
-	RingFrameSingleRingSparkInset = { 22 * 205/256 }, 
-	RingFrameSingleRingSparkSize = { 6,34 * 205/256 }, 
+	["RingFrameBackdropSize"] = { 410, 410 }, 
+	["RingFrameOuterRingSparkInset"] = { 15 * 205/256 }, 
+	["RingFrameOuterRingSparkSize"] = { 6,20 * 205/256 }, 
+	["RingFrameSingleRingSparkInset"] = { 22 * 205/256 }, 
+	["RingFrameSingleRingSparkSize"] = { 6,34 * 205/256 }, 
 
-	InnerRingSize = { 205, 205 }, 
-	InnerRingSparkInset = 46 * 205/256,  
-	InnerRingSparkSize = { 6, 27 * 205/256 },
-	InnerRingValueFont = GetFont(14, true),
-	InnerRingValuePercentFont = GetFont(14, true), 
+	["InnerRingSize"] = { 205, 205 }, 
+	["InnerRingSparkInset"] = 46 * 205/256,  
+	["InnerRingSparkSize"] = { 6, 27 * 205/256 },
+	["InnerRingValueFont"] = GetFont(14, true),
+	["InnerRingValuePercentFont"] = GetFont(14, true), 
 
-	OuterRingSize = { 205, 205 }, 
-	OuterRingValuePlace = { "CENTER", 0, -9 },
-	OuterRingValueJustifyH = "CENTER",
-	OuterRingValueJustifyV = "MIDDLE",
-	OuterRingValueDescriptionFont = GetFont(12, true),
-	OuterRingValuePercentFont = GetFont(12, true),
+	["OuterRingSize"] = { 205, 205 }, 
+	["OuterRingValuePlace"] = { "CENTER", 0, -9 },
+	["OuterRingValueJustifyH"] = "CENTER",
+	["OuterRingValueJustifyV"] = "MIDDLE",
+	["OuterRingValueDescriptionFont"] = GetFont(12, true),
+	["OuterRingValuePercentFont"] = GetFont(12, true),
 
-	ToggleBackdropSize = { 85, 85 },
-	ToggleSize = { 48, 48 }, 
+	["ToggleBackdropSize"] = { 85, 85 },
+	["ToggleSize"] = { 48, 48 }, 
 
 })
 
 -- NamePlates
 RegisterLayout("NamePlates", "Azerite", {
-	PostCreateAuraButton = NamePlates_Auras_PostCreateButton,
-	PostUpdateAuraButton = NamePlates_Auras_PostUpdateButton,
-	AuraAnchor = "Health", 
-	AuraBorderBackdrop = BACKDROPS.AuraBorderSmall,
-	AuraBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
-	AuraBorderBackdropColor = { 0, 0, 0, 0 },
-	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-	AuraBorderFrameSize = { 30 + 10, 30 + 10 },
-	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	AuraCountFont = GetFont(12, true),
-	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-	AuraFramePlace = { "TOPLEFT", (84 - (30*3 + 4*2))/2, 30*2 + 4 + 10 },
-	AuraFrameSize = { 30*3 + 4*2, 30*2 + 4  }, 
-	AuraIconPlace = { "CENTER", 0, 0 },
-	AuraIconSize = { 30 - 6, 30 - 6 },
-	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-	AuraOffsetX = (84 - (30*3 + 4*2))/2, 
-	AuraOffsetY = 10 + 4 - 10,
-	AuraSize = 30, AuraPadding = 4,
-	AuraPoint = "BOTTOMLEFT", 
-	AuraProperties = {
-		growthX = "LEFT", 
-		growthY = "UP", 
-		spacingH = 4, 
-		spacingV = 4, 
-		auraSize = 30, 
-		maxVisible = 6, 
-		filter = "PLAYER", 
-		customFilter = GetAuraFilter("nameplate"),
-		debuffsFirst = true, 
-		disableMouse = true, 
-		showSpirals = false, 
-		showDurations = true, 
-		showLongDurations = true,
-		tooltipDefaultPosition = false, 
-		tooltipPoint = "BOTTOMLEFT",
-		tooltipAnchor = nil,
-		tooltipRelPoint = "TOPLEFT",
-		tooltipOffsetX = -8,
-		tooltipOffsetY = -16
+	["PostCreateAuraButton"] = NamePlates_Auras_PostCreateButton,
+	["PostUpdateAuraButton"] = NamePlates_Auras_PostUpdateButton,
+	["AuraAnchor"] = "Health", 
+	["AuraBorderBackdrop"] = BACKDROPS.AuraBorderSmall,
+	["AuraBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
+	["AuraBorderBackdropColor"] = { 0, 0, 0, 0 },
+	["AuraBorderFramePlace"] = { "CENTER", 0, 0 }, 
+	["AuraBorderFrameSize"] = { 30 + 10, 30 + 10 },
+	["AuraCountColor"] = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	["AuraCountFont"] = GetFont(12, true),
+	["AuraCountPlace"] = { "BOTTOMRIGHT", 9, -6 },
+	["AuraFramePlace"] = { "TOPLEFT", (84 - (30*3 + 4*2))/2, 30*2 + 4 + 10 },
+	["AuraFrameSize"] = { 30*3 + 4*2, 30*2 + 4  }, 
+	["AuraIconPlace"] = { "CENTER", 0, 0 },
+	["AuraIconSize"] = { 30 - 6, 30 - 6 },
+	["AuraIconTexCoord"] = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+	["AuraOffsetX"] = (84 - (30*3 + 4*2))/2, 
+	["AuraOffsetY"] = 10 + 4 - 10,
+	["AuraSize"] = 30, AuraPadding = 4,
+	["AuraPoint"] = "BOTTOMLEFT", 
+	["AuraProperties"] = {
+		["growthX"] = "LEFT", 
+		["growthY"] = "UP", 
+		["spacingH"] = 4, 
+		["spacingV"] = 4, 
+		["auraSize"] = 30, 
+		["maxVisible"] = 6, 
+		["filter"] = "PLAYER", 
+		["customFilter"] = GetAuraFilter("nameplate"),
+		["debuffsFirst"] = true, 
+		["disableMouse"] = true, 
+		["showSpirals"] = false, 
+		["showDurations"] = true, 
+		["showLongDurations"] = true,
+		["tooltipDefaultPosition"] = false, 
+		["tooltipPoint"] = "BOTTOMLEFT",
+		["tooltipAnchor"] = nil,
+		["tooltipRelPoint"] = "TOPLEFT",
+		["tooltipOffsetX"] = -8,
+		["tooltipOffsetY"] = -16
 	},
-	AuraRelPoint = "TOPLEFT",
-	AuraTimeFont = GetFont(11, true),
-	AuraTimePlace = { "TOPLEFT", -6, 6 },
-	CastBackdropColor = { 1, 1, 1, 1 },
-	CastBackdropDrawLayer = { "BACKGROUND", 0 },
-	CastBackdropPlace = { "CENTER", 0, 0 },
-	CastBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
-	CastBackdropTexture = GetMedia("nameplate_backdrop"),
-	CastBarSpellQueuePlace = { "CENTER", 0, 0 }, 
-	CastBarSpellQueueSize = { 84, 14 },
-	CastBarSpellQueueTexture = GetMedia("nameplate_bar"), 
-	CastBarSpellQueueCastTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
-	CastBarSpellQueueColor = { 1, 1, 1, .5 },
-	CastBarSpellQueueOrientation = "LEFT",
-	CastBarSpellQueueSparkMap = {
-		top = {
+	["AuraRelPoint"] = "TOPLEFT",
+	["AuraTimeFont"] = GetFont(11, true),
+	["AuraTimePlace"] = { "TOPLEFT", -6, 6 },
+	["CastBackdropColor"] = { 1, 1, 1, 1 },
+	["CastBackdropDrawLayer"] = { "BACKGROUND", 0 },
+	["CastBackdropPlace"] = { "CENTER", 0, 0 },
+	["CastBackdropSize"] = { 84*256/(256-28), 14*64/(64-28) },
+	["CastBackdropTexture"] = GetMedia("nameplate_backdrop"),
+	["CastBarSpellQueuePlace"] = { "CENTER", 0, 0 }, 
+	["CastBarSpellQueueSize"] = { 84, 14 },
+	["CastBarSpellQueueTexture"] = GetMedia("nameplate_bar"), 
+	["CastBarSpellQueueCastTexCoord"] = { 14/256,(256-14)/256,14/64,(64-14)/64 },
+	["CastBarSpellQueueColor"] = { 1, 1, 1, .5 },
+	["CastBarSpellQueueOrientation"] = "LEFT",
+	["CastBarSpellQueueSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	CastColor = { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
-	CastNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	CastNameDrawLayer = { "OVERLAY", 1 }, 
-	CastNameFont = GetFont(12, true),
-	CastNameJustifyH = "CENTER", 
-	CastNameJustifyV = "MIDDLE",
-	CastNamePlace = { "TOP", 0, -18 },
-	CastOrientation = "LEFT", 
-	CastOrientationPlayer = "RIGHT", 
-	CastPlace = { "TOP", 0, -20 },
-	CastPlacePlayer = { "TOP", 0, -(2 + 18 + 18) },
-	CastShieldColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	CastShieldDrawLayer = { "BACKGROUND", -5 },
-	CastShieldPlace = { "CENTER", 0, -1 }, 
-	CastShieldSize = { 124, 69 },
-	CastShieldTexture = GetMedia("cast_back_spiked"),
-	CastSize = { 84, 14 }, 
-	CastSparkMap = {
-		top = {
+	["CastColor"] = { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
+	["CastNameColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["CastNameDrawLayer"] = { "OVERLAY", 1 }, 
+	["CastNameFont"] = GetFont(12, true),
+	["CastNameJustifyH"] = "CENTER", 
+	["CastNameJustifyV"] = "MIDDLE",
+	["CastNamePlace"] = { "TOP", 0, -18 },
+	["CastOrientation"] = "LEFT", 
+	["CastOrientationPlayer"] = "RIGHT", 
+	["CastPlace"] = { "TOP", 0, -20 },
+	["CastPlacePlayer"] = { "TOP", 0, -(2 + 18 + 18) },
+	["CastShieldColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["CastShieldDrawLayer"] = { "BACKGROUND", -5 },
+	["CastShieldPlace"] = { "CENTER", 0, -1 }, 
+	["CastShieldSize"] = { 124, 69 },
+	["CastShieldTexture"] = GetMedia("cast_back_spiked"),
+	["CastSize"] = { 84, 14 }, 
+	["CastSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/256, offset = -16/32 }, 
 			{ keyPercent =   4/256, offset = -16/32 }, 
 			{ keyPercent =  19/256, offset =   0/32 }, 
 			{ keyPercent = 236/256, offset =   0/32 }, 
 			{ keyPercent = 256/256, offset = -16/32 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/256, offset = -16/32 }, 
 			{ keyPercent =   4/256, offset = -16/32 }, 
 			{ keyPercent =  19/256, offset =   0/32 }, 
@@ -2743,36 +2664,36 @@ RegisterLayout("NamePlates", "Azerite", {
 			{ keyPercent = 256/256, offset = -16/32 }
 		}
 	},
-	CastTexture = GetMedia("nameplate_bar"),
-	CastTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
-	CastTimeToHoldFailed = .5, 
-	HealthBackdropColor = { 1, 1, 1, 1 },
-	HealthBackdropDrawLayer = { "BACKGROUND", -2 },
-	HealthBackdropPlace = { "CENTER", 0, 0 },
-	HealthBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
-	HealthBackdropTexture = GetMedia("nameplate_backdrop"),
-	HealthBarOrientation = "LEFT", 
-	HealthBarOrientationPlayer = "RIGHT", 
-	HealthColorCivilian = true, 
-	HealthColorClass = true, 
-	HealthColorDisconnected = true,
-	HealthColorHealth = true,
-	HealthColorPlayer = true, 
-	HealthColorReaction = true,
-	HealthColorTapped = true,
-	HealthColorThreat = true,
-	HealthFrequent = true,
-	HealthPlace = { "TOP", 0, -2 },
-	HealthSize = { 84, 14 }, 
-	HealthSparkMap = {
-		top = {
+	["CastTexture"] = GetMedia("nameplate_bar"),
+	["CastTexCoord"] = { 14/256,(256-14)/256,14/64,(64-14)/64 },
+	["CastTimeToHoldFailed"] = .5, 
+	["HealthBackdropColor"] = { 1, 1, 1, 1 },
+	["HealthBackdropDrawLayer"] = { "BACKGROUND", -2 },
+	["HealthBackdropPlace"] = { "CENTER", 0, 0 },
+	["HealthBackdropSize"] = { 84*256/(256-28), 14*64/(64-28) },
+	["HealthBackdropTexture"] = GetMedia("nameplate_backdrop"),
+	["HealthBarOrientation"] = "LEFT", 
+	["HealthBarOrientationPlayer"] = "RIGHT", 
+	["HealthColorCivilian"] = true, 
+	["HealthColorClass"] = true, 
+	["HealthColorDisconnected"] = true,
+	["HealthColorHealth"] = true,
+	["HealthColorPlayer"] = true, 
+	["HealthColorReaction"] = true,
+	["HealthColorTapped"] = true,
+	["HealthColorThreat"] = true,
+	["HealthFrequent"] = true,
+	["HealthPlace"] = { "TOP", 0, -2 },
+	["HealthSize"] = { 84, 14 }, 
+	["HealthSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/256, offset = -16/32 }, 
 			{ keyPercent =   4/256, offset = -16/32 }, 
 			{ keyPercent =  19/256, offset =   0/32 }, 
 			{ keyPercent = 236/256, offset =   0/32 }, 
 			{ keyPercent = 256/256, offset = -16/32 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/256, offset = -16/32 }, 
 			{ keyPercent =   4/256, offset = -16/32 }, 
 			{ keyPercent =  19/256, offset =   0/32 }, 
@@ -2780,68 +2701,68 @@ RegisterLayout("NamePlates", "Azerite", {
 			{ keyPercent = 256/256, offset = -16/32 }
 		}
 	},
-	HealthTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
-	HealthTexture = GetMedia("nameplate_bar"),
+	["HealthTexCoord"] = { 14/256,(256-14)/256,14/64,(64-14)/64 },
+	["HealthTexture"] = GetMedia("nameplate_bar"),
 
-	HealthValuePlace = { "TOP", 0, -18 },
-	HealthValueDrawLayer = { "OVERLAY", 1 },
-	HealthValueFontObject = GetFont(12,true),
-	HealthValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	HealthValueJustifyH = "CENTER",
-	HealthValueJustifyV = "MIDDLE",
-	HealthValueHidePlayer = true,
-	HealthValueHideWhileCasting = true,
-	HealthValueShowInCombat = false,
-	HealthValueShowOnMouseover = true,
-	HealthValueShowOnTarget = true,
-	HealthValueShowAtMax = true,
+	["HealthValuePlace"] = { "TOP", 0, -18 },
+	["HealthValueDrawLayer"] = { "OVERLAY", 1 },
+	["HealthValueFontObject"] = GetFont(12,true),
+	["HealthValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["HealthValueJustifyH"] = "CENTER",
+	["HealthValueJustifyV"] = "MIDDLE",
+	["HealthValueHidePlayer"] = true,
+	["HealthValueHideWhileCasting"] = true,
+	["HealthValueShowInCombat"] = false,
+	["HealthValueShowOnMouseover"] = true,
+	["HealthValueShowOnTarget"] = true,
+	["HealthValueShowAtMax"] = true,
 
-	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	NameDrawLayer = { "ARTWORK", 1 },
-	NameFont = GetFont(12,true),
-	NameJustifyH = "CENTER",
-	NameJustifyV = "MIDDLE",
-	NamePlace = { "TOP", 0, 16 },
-	NameOffsetWhenShown = 12 + 4,
-	NameShowLevel = nil,
-	NameShowLevelLast = nil,
-	NameHidePlayer = true,
-	NameShowInCombat = true,
-	NameShowOnMouseover = true,
-	NameShowOnTarget = true,
+	["NameColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["NameDrawLayer"] = { "ARTWORK", 1 },
+	["NameFont"] = GetFont(12,true),
+	["NameJustifyH"] = "CENTER",
+	["NameJustifyV"] = "MIDDLE",
+	["NamePlace"] = { "TOP", 0, 16 },
+	["NameOffsetWhenShown"] = 12 + 4,
+	["NameShowLevel"] = nil,
+	["NameShowLevelLast"] = nil,
+	["NameHidePlayer"] = true,
+	["NameShowInCombat"] = true,
+	["NameShowOnMouseover"] = true,
+	["NameShowOnTarget"] = true,
 
-	ClassificationPlace = { "RIGHT", 18, -1 },
-	ClassificationSize = { 40, 40 },
-	ClassificationColor = { 1, 1, 1, 1 },
-	ClassificationHideOnFriendly = true,
-	ClassificationIndicatorBossTexture = GetMedia("icon_badges_boss"),
-	ClassificationIndicatorEliteTexture = GetMedia("icon_classification_elite"),
-	ClassificationIndicatorRareTexture = GetMedia("icon_classification_rare"),
+	["ClassificationPlace"] = { "RIGHT", 18, -1 },
+	["ClassificationSize"] = { 40, 40 },
+	["ClassificationColor"] = { 1, 1, 1, 1 },
+	["ClassificationHideOnFriendly"] = true,
+	["ClassificationIndicatorBossTexture"] = GetMedia("icon_badges_boss"),
+	["ClassificationIndicatorEliteTexture"] = GetMedia("icon_classification_elite"),
+	["ClassificationIndicatorRareTexture"] = GetMedia("icon_classification_rare"),
 
-	PreUpdate = IsRetail and NamePlates_PreUpdate,
-	PostUpdate = NamePlates_PostUpdate,
-	PostUpdateAura = NamePlates_PostUpdate_ElementProxy,
-	PostUpdateCast = NamePlates_CastBar_PostUpdate,
-	PostUpdateRaidTarget = NamePlates_PostUpdate_ElementProxy,
+	["PreUpdate"] = IsRetail and NamePlates_PreUpdate,
+	["PostUpdate"] = NamePlates_PostUpdate,
+	["PostUpdateAura"] = NamePlates_PostUpdate_ElementProxy,
+	["PostUpdateCast"] = NamePlates_CastBar_PostUpdate,
+	["PostUpdateRaidTarget"] = NamePlates_PostUpdate_ElementProxy,
 
-	PowerBackdropColor = { 1, 1, 1, 1 },
-	PowerBackdropDrawLayer = { "BACKGROUND", -2 },
-	PowerBackdropPlace = { "CENTER", 0, 0 },
-	PowerBackdropSize = { 84*256/(256-28), 14*64/(64-28) },
-	PowerBackdropTexture = GetMedia("nameplate_backdrop"),
-	PowerBarOrientation = "RIGHT", 
-	PowerFrequent = true,
-	PowerPlace = { "TOP", 0, -20 },
-	PowerSize = { 84, 14 }, 
-	PowerSparkMap = {
-		top = {
+	["PowerBackdropColor"] = { 1, 1, 1, 1 },
+	["PowerBackdropDrawLayer"] = { "BACKGROUND", -2 },
+	["PowerBackdropPlace"] = { "CENTER", 0, 0 },
+	["PowerBackdropSize"] = { 84*256/(256-28), 14*64/(64-28) },
+	["PowerBackdropTexture"] = GetMedia("nameplate_backdrop"),
+	["PowerBarOrientation"] = "RIGHT", 
+	["PowerFrequent"] = true,
+	["PowerPlace"] = { "TOP", 0, -20 },
+	["PowerSize"] = { 84, 14 }, 
+	["PowerSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/256, offset = -16/32 }, 
 			{ keyPercent =   4/256, offset = -16/32 }, 
 			{ keyPercent =  19/256, offset =   0/32 }, 
 			{ keyPercent = 236/256, offset =   0/32 }, 
 			{ keyPercent = 256/256, offset = -16/32 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/256, offset = -16/32 }, 
 			{ keyPercent =   4/256, offset = -16/32 }, 
 			{ keyPercent =  19/256, offset =   0/32 }, 
@@ -2849,20 +2770,20 @@ RegisterLayout("NamePlates", "Azerite", {
 			{ keyPercent = 256/256, offset = -16/32 }
 		}
 	},
-	PowerTexCoord = { 14/256,(256-14)/256,14/64,(64-14)/64 },
-	PowerTexture = GetMedia("nameplate_bar"),
+	["PowerTexCoord"] = { 14/256,(256-14)/256,14/64,(64-14)/64 },
+	["PowerTexture"] = GetMedia("nameplate_bar"),
 
-	RaidTargetDrawLayer = { "ARTWORK", 0 },
-	RaidTargetPoint = "BOTTOM",
-	RaidTargetRelPoint = "TOP",
-	RaidTargetOffsetX = 0,
-	RaidTargetOffsetY = 6,
+	["RaidTargetDrawLayer"] = { "ARTWORK", 0 },
+	["RaidTargetPoint"] = "BOTTOM",
+	["RaidTargetRelPoint"] = "TOP",
+	["RaidTargetOffsetX"] = 0,
+	["RaidTargetOffsetY"] = 6,
 	--RaidTargetPlace = { "TOP", 0, 20+ 44 -6 }, -- no auras
 	--RaidTargetPlace_AuraRow = { "TOP", 0, 20+ 80 -6 }, -- auras, 1 row
 	--RaidTargetPlace_AuraRows = { "TOP", 0, 20+ 112 -6 }, -- auras, 2 rows
-	RaidTargetSize = { 64, 64 },
-	RaidTargetTexture = GetMedia("raid_target_icons"),
-	SetConsoleVars = {
+	["RaidTargetSize"] = { 64, 64 },
+	["RaidTargetTexture"] = GetMedia("raid_target_icons"),
+	["SetConsoleVars"] = {
 		-- Because we want friendly NPC nameplates
 		-- We're toning them down a lot as it is, 
 		-- but we still prefer to have them visible, 
@@ -2873,70 +2794,70 @@ RegisterLayout("NamePlates", "Azerite", {
 		-- which the target nameplate will be kept away from. 
 		-- Used to avoid the target plate being overlapped 
 		-- by the target frame or actionbars and keep it in view.
-		nameplateLargeTopInset = .125, -- default .1
-		nameplateOtherTopInset = .125, -- default .08
-		nameplateLargeBottomInset = .02, -- default .15
-		nameplateOtherBottomInset = .02, -- default .1
-		nameplateClassResourceTopInset = 0,
-		clampTargetNameplateToScreen = 1, -- new CVar July 14th 2020. Wohoo! Thanks torhaala for telling me! :)
+		["nameplateLargeTopInset"] = .125, -- default .1
+		["nameplateOtherTopInset"] = .125, -- default .08
+		["nameplateLargeBottomInset"] = .02, -- default .15
+		["nameplateOtherBottomInset"] = .02, -- default .1
+		["nameplateClassResourceTopInset"] = 0,
+		["clampTargetNameplateToScreen"] = 1, -- new CVar July 14th 2020. Wohoo! Thanks torhaala for telling me! :)
 	
 		-- Nameplate scale
-		nameplateMinScale = .85, -- .8
-		nameplateMaxScale = 1, 
-		nameplateLargerScale = 1, -- Scale modifier for large plates, used for important monsters
-		nameplateGlobalScale = 1,
-		NamePlateHorizontalScale = 1,
-		NamePlateVerticalScale = 1,
+		["nameplateMinScale"] = .85, -- .8
+		["nameplateMaxScale"] = 1, 
+		["nameplateLargerScale"] = 1, -- Scale modifier for large plates, used for important monsters
+		["nameplateGlobalScale"] = 1,
+		["NamePlateHorizontalScale"] = 1,
+		["NamePlateVerticalScale"] = 1,
 	
 		-- The minimum distance from the camera plates will reach their minimum scale and alpha
-		nameplateMinScaleDistance = 20, -- 10
+		["nameplateMinScaleDistance"] = 20, -- 10
 		
 		-- The maximum distance from the camera where plates will still have max scale and alpha
-		nameplateMaxScaleDistance = 20, -- 10
+		["nameplateMaxScaleDistance"] = 20, -- 10
 	
 		-- Show nameplates above heads or at the base (0 or 2,
-		nameplateOtherAtBase = 0,
+		["nameplateOtherAtBase"] = 0,
 	
 		-- Scale and Alpha of the selected nameplate (current target,
-		nameplateSelectedScale = 1.2, -- default 1.2
+		["nameplateSelectedScale"] = 1.2, -- default 1.2
 	
 		-- The max distance to show nameplates.
-		nameplateMaxDistance = false, -- 20 is classic upper limit, 60 is BfA default
+		["nameplateMaxDistance"] = false, -- 20 is classic upper limit, 60 is BfA default
 	
 		-- The max distance to show the target nameplate when the target is behind the camera.
-		nameplateTargetBehindMaxDistance = 15 -- default 15
+		["nameplateTargetBehindMaxDistance"] = 15 -- default 15
 	},
-	Size = { 80, 32 },
+	["Size"] = { 80, 32 },
 
-	UseTargetHighlight = true,
-	TargetHighlightDrawLayer = { "OVERLAY", 0 },
-	TargetHighlightParent = "Health", 
-	TargetHighlightPlace = { "CENTER", 0, 0 },
+	["UseTargetHighlight"] = true,
+	["TargetHighlightDrawLayer"] = { "OVERLAY", 0 },
+	["TargetHighlightParent"] = "Health", 
+	["TargetHighlightPlace"] = { "CENTER", 0, 0 },
 	--TargetHighlightSize = { 84, 14 },
-	TargetHighlightSize = { 84 * 256/(256-(14*2)) *1.05, 1.2* 64/(64-(14*2)) * 14 }, -- math. sux.
-	TargetHighlightShowFocus = true, TargetHighlightFocusColor = { 144/255, 195/255, 255/255, 1 }, 
-	TargetHighlightShowTarget = true, TargetHighlightTargetColor = { 255/255, 239/255, 169/255, 1 }, 
-	TargetHighlightTexture = GetMedia("nameplate_outline"),
+	["TargetHighlightSize"] = { 84 * 256/(256-(14*2)) *1.05, 1.2* 64/(64-(14*2)) * 14 }, -- math. sux.
+	["TargetHighlightShowFocus"] = true, TargetHighlightFocusColor = { 144/255, 195/255, 255/255, 1 }, 
+	["TargetHighlightShowTarget"] = true, TargetHighlightTargetColor = { 255/255, 239/255, 169/255, 1 }, 
+	["TargetHighlightTexture"] = GetMedia("nameplate_outline"),
 
-	ThreatColor = { 1, 1, 1, 1 },
-	ThreatDrawLayer = { "BACKGROUND", -3 },
-	ThreatHideSolo = false, 
-	ThreatPlace = { "CENTER", 0, 0 },
-	ThreatSize = { 84*256/(256-28), 14*64/(64-28) },
-	ThreatTexture = GetMedia("nameplate_glow"),
+	["ThreatColor"] = { 1, 1, 1, 1 },
+	["ThreatDrawLayer"] = { "BACKGROUND", -3 },
+	["ThreatHideSolo"] = false, 
+	["ThreatPlace"] = { "CENTER", 0, 0 },
+	["ThreatSize"] = { 84*256/(256-28), 14*64/(64-28) },
+	["ThreatTexture"] = GetMedia("nameplate_glow"),
 
 })
 
 -- Custom Tooltips
 RegisterLayout("Tooltips", "Azerite", {
-	PostCreateBar = Tooltip_Bar_PostCreate,
-	PostCreateLinePair = Tooltip_LinePair_PostCreate,
-	PostCreateTooltip = Tooltip_PostCreate,
-	TooltipBackdrop = BACKDROPS.Tooltips,
-	TooltipBackdropBorderColor = { 1, 1, 1, 1 },
-	TooltipBackdropColor = { .05, .05, .05, .85 },
-	TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -319, 166 }, 
-	TooltipStatusBarTexture = GetMedia("statusbar-dark")
+	["PostCreateBar"] = Tooltip_Bar_PostCreate,
+	["PostCreateLinePair"] = Tooltip_LinePair_PostCreate,
+	["PostCreateTooltip"] = Tooltip_PostCreate,
+	["TooltipBackdrop"] = BACKDROPS.Tooltips,
+	["TooltipBackdropBorderColor"] = { 1, 1, 1, 1 },
+	["TooltipBackdropColor"] = { .05, .05, .05, .85 },
+	["TooltipPlace"] = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -319, 166 }, 
+	["TooltipStatusBarTexture"] = GetMedia("statusbar-dark")
 })
 
 ------------------------------------------------
@@ -2944,62 +2865,62 @@ RegisterLayout("Tooltips", "Azerite", {
 ------------------------------------------------
 -- Player
 RegisterLayout("UnitFramePlayer", "Azerite", { 
-	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
-	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
-	AuraBorderBackdrop = BACKDROPS.AuraBorder,
-	AuraBorderBackdropColor = { 0, 0, 0, 0 },
-	AuraBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
-	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-	AuraBorderFrameSize = { 40 + 14, 40 + 14 },
-	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	AuraCountFont = GetFont(14, true),
-	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-	AuraFramePlace = { "BOTTOMLEFT", 27 + 10, 27 + 24 + 40 },
-	AuraFrameSize = { 40*8 + 6*7, 40*2 + 6 },
-	AuraIconPlace = { "CENTER", 0, 0 },
-	AuraIconSize = { 40 - 6, 40 - 6 },
-	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 },
-	AuraProperties = {
-		auraHeight = nil, 
-		auraSize = 40, 
-		auraWidth = nil, 
-		customSort = false,
-		debuffsFirst = true, 
-		disableMouse = false, 
-		customFilter = GetAuraFilter("player"),
-		growthX = "RIGHT", 
-		growthY = "UP", 
-		maxBuffs = nil, 
-		maxDebuffs = nil, 
-		maxVisible = 16, 
-		showDurations = true, 
-		showSpirals = false, 
-		showLongDurations = true,
-		spacingH = 6, 
-		spacingV = 6, 
-		tooltipAnchor = nil,
-		tooltipDefaultPosition = false, 
-		tooltipOffsetX = 8,
-		tooltipOffsetY = 16,
-		tooltipPoint = "BOTTOMLEFT",
-		tooltipRelPoint = "TOPLEFT"
+	["Aura_PostCreateButton"] = UnitFrame_Aura_PostCreateButton,
+	["Aura_PostUpdateButton"] = UnitFrame_Aura_PostUpdateButton,
+	["AuraBorderBackdrop"] = BACKDROPS.AuraBorder,
+	["AuraBorderBackdropColor"] = { 0, 0, 0, 0 },
+	["AuraBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
+	["AuraBorderFramePlace"] = { "CENTER", 0, 0 }, 
+	["AuraBorderFrameSize"] = { 40 + 14, 40 + 14 },
+	["AuraCountColor"] = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	["AuraCountFont"] = GetFont(14, true),
+	["AuraCountPlace"] = { "BOTTOMRIGHT", 9, -6 },
+	["AuraFramePlace"] = { "BOTTOMLEFT", 27 + 10, 27 + 24 + 40 },
+	["AuraFrameSize"] = { 40*8 + 6*7, 40*2 + 6 },
+	["AuraIconPlace"] = { "CENTER", 0, 0 },
+	["AuraIconSize"] = { 40 - 6, 40 - 6 },
+	["AuraIconTexCoord"] = { 5/64, 59/64, 5/64, 59/64 },
+	["AuraProperties"] = {
+		["auraHeight"] = nil, 
+		["auraSize"] = 40, 
+		["auraWidth"] = nil, 
+		["customSort"] = false,
+		["debuffsFirst"] = true, 
+		["disableMouse"] = false, 
+		["customFilter"] = GetAuraFilter("player"),
+		["growthX"] = "RIGHT", 
+		["growthY"] = "UP", 
+		["maxBuffs"] = nil, 
+		["maxDebuffs"] = nil, 
+		["maxVisible"] = 16, 
+		["showDurations"] = true, 
+		["showSpirals"] = false, 
+		["showLongDurations"] = true,
+		["spacingH"] = 6, 
+		["spacingV"] = 6, 
+		["tooltipAnchor"] = nil,
+		["tooltipDefaultPosition"] = false, 
+		["tooltipOffsetX"] = 8,
+		["tooltipOffsetY"] = 16,
+		["tooltipPoint"] = "BOTTOMLEFT",
+		["tooltipRelPoint"] = "TOPLEFT"
 	},
-	AuraTimeFont = GetFont(14, true),
-	AuraTimePlace = { "TOPLEFT", -6, 6 },
-	CastBarColor = { 1, 1, 1, .25 }, 
-	CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	CastBarNameDrawLayer = { "OVERLAY", 1 }, 
-	CastBarNameFont = GetFont(16, true),
-	CastBarNameJustifyH = "LEFT", 
-	CastBarNameJustifyV = "MIDDLE",
-	CastBarNameParent = "Health",
-	CastBarNamePlace = { "LEFT", 27, 4 },
-	CastBarNameSize = { 250, 40 }, 
-	CastBarOrientation = "RIGHT",
-	CastBarPlace = { "BOTTOMLEFT", 27, 27 },
-	CastBarPostUpdate = PlayerFrame_CastBarPostUpdate,
-	CastBarSize = { 385, 40 },
-	CastBarSparkMap = {
+	["AuraTimeFont"] = GetFont(14, true),
+	["AuraTimePlace"] = { "TOPLEFT", -6, 6 },
+	["CastBarColor"] = { 1, 1, 1, .25 }, 
+	["CastBarNameColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["CastBarNameDrawLayer"] = { "OVERLAY", 1 }, 
+	["CastBarNameFont"] = GetFont(16, true),
+	["CastBarNameJustifyH"] = "LEFT", 
+	["CastBarNameJustifyV"] = "MIDDLE",
+	["CastBarNameParent"] = "Health",
+	["CastBarNamePlace"] = { "LEFT", 27, 4 },
+	["CastBarNameSize"] = { 250, 40 }, 
+	["CastBarOrientation"] = "RIGHT",
+	["CastBarPlace"] = { "BOTTOMLEFT", 27, 27 },
+	["CastBarPostUpdate"] = PlayerFrame_CastBarPostUpdate,
+	["CastBarSize"] = { 385, 40 },
+	["CastBarSparkMap"] = {
 		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
 		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
 		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
@@ -3008,38 +2929,38 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
-	CastBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	CastBarValueDrawLayer = { "OVERLAY", 1 },
-	CastBarValueFont = GetFont(18, true),
-	CastBarValueParent = "Health",
-	CastBarValuePlace = { "RIGHT", -27, 4 },
-	CastBarValueJustifyH = "CENTER",
-	CastBarValueJustifyV = "MIDDLE",
-	ClassificationColor = { 1, 1, 1 },
-	ClassificationIndicatorAllianceTexture = GetMedia("icon_badges_alliance"),
-	ClassificationIndicatorHordeTexture = GetMedia("icon_badges_horde"),
+	["CastBarValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["CastBarValueDrawLayer"] = { "OVERLAY", 1 },
+	["CastBarValueFont"] = GetFont(18, true),
+	["CastBarValueParent"] = "Health",
+	["CastBarValuePlace"] = { "RIGHT", -27, 4 },
+	["CastBarValueJustifyH"] = "CENTER",
+	["CastBarValueJustifyV"] = "MIDDLE",
+	["ClassificationColor"] = { 1, 1, 1 },
+	["ClassificationIndicatorAllianceTexture"] = GetMedia("icon_badges_alliance"),
+	["ClassificationIndicatorHordeTexture"] = GetMedia("icon_badges_horde"),
 	ClassificationPlace ={ "BOTTOMLEFT", -(41 + 80/2), (22 - 80/2) },
-	ClassificationSize = { 84, 84 },
-	CombatIndicatorColor = { Colors.ui[1] *.75, Colors.ui[2] *.75, Colors.ui[3] *.75 }, 
-	CombatIndicatorDrawLayer = {"OVERLAY", -2 },
-	CombatIndicatorPlace = { "BOTTOMLEFT", -(41 + 80/2), (22 - 80/2) },
-	CombatIndicatorSize = { 80,80 },
-	CombatIndicatorTexture = GetMedia("icon-combat"),
+	["ClassificationSize"] = { 84, 84 },
+	["CombatIndicatorColor"] = { Colors.ui[1] *.75, Colors.ui[2] *.75, Colors.ui[3] *.75 }, 
+	["CombatIndicatorDrawLayer"] = {"OVERLAY", -2 },
+	["CombatIndicatorPlace"] = { "BOTTOMLEFT", -(41 + 80/2), (22 - 80/2) },
+	["CombatIndicatorSize"] = { 80,80 },
+	["CombatIndicatorTexture"] = GetMedia("icon-combat"),
 
-	CombatFeedbackFont = GetFont(20, true),
-	CombatFeedbackFontSmall = GetFont(18, true),
-	CombatFeedbackFontLarge = GetFont(24, true),
-	CombatFeedbackJustifyH = "CENTER", 
-	CombatFeedbackJustifyV = "MIDDLE", 
-	CombatFeedbackPlace = { "CENTER", 0, 5 },
+	["CombatFeedbackFont"] = GetFont(20, true),
+	["CombatFeedbackFontSmall"] = GetFont(18, true),
+	["CombatFeedbackFontLarge"] = GetFont(24, true),
+	["CombatFeedbackJustifyH"] = "CENTER", 
+	["CombatFeedbackJustifyV"] = "MIDDLE", 
+	["CombatFeedbackPlace"] = { "CENTER", 0, 5 },
 
-	ExplorerHitRects = { 60, 0, -140, 0 },
-	HardenedCastSize = { 385, 37 },
-	HardenedCastTexture = GetMedia("hp_lowmid_bar"),
-	HardenedHealthBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	HardenedHealthBackdropTexture = GetMedia("hp_mid_case"),
-	HardenedHealthSize = { 385, 37 },
-	HardenedHealthSparkMap = {
+	["ExplorerHitRects"] = { 60, 0, -140, 0 },
+	["HardenedCastSize"] = { 385, 37 },
+	["HardenedCastTexture"] = GetMedia("hp_lowmid_bar"),
+	["HardenedHealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["HardenedHealthBackdropTexture"] = GetMedia("hp_mid_case"),
+	["HardenedHealthSize"] = { 385, 37 },
+	["HardenedHealthSparkMap"] = {
 		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
 		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
 		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
@@ -3048,25 +2969,25 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
-	HardenedHealthTexture = GetMedia("hp_lowmid_bar"),
-	HardenedHealthThreatTexture = GetMedia("hp_mid_case_glow"),
-	HardenedLevel = IsClassic and 40 or 30,
-	HardenedManaOrbColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	HardenedManaOrbTexture = GetMedia("orb_case_hi"),
-	HardenedPowerForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	HardenedPowerForegroundTexture = GetMedia("pw_crystal_case"),
-	HealthAbsorbValuePlaceFunction = function(self) return "LEFT", self.Health.Value, "RIGHT", 13, 0 end, 
-	HealthAbsorbValueDrawLayer = { "OVERLAY", 1 }, 
-	HealthAbsorbValueFont = GetFont(18, true),
-	HealthAbsorbValueJustifyH = "CENTER", 
-	HealthAbsorbValueJustifyV = "MIDDLE",
-	HealthAbsorbValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	HealthBackdropDrawLayer = { "BACKGROUND", -1 },
-	HealthBackdropPlace = { "CENTER", 1, -.5 },
-	HealthBackdropSize = { 716, 188 },
-	HealthBarOrientation = "RIGHT", 
-	HealthBarSetFlippedHorizontally = false, 
-	HealthBarSparkMap = {
+	["HardenedHealthTexture"] = GetMedia("hp_lowmid_bar"),
+	["HardenedHealthThreatTexture"] = GetMedia("hp_mid_case_glow"),
+	["HardenedLevel"] = IsClassic and 40 or 30,
+	["HardenedManaOrbColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["HardenedManaOrbTexture"] = GetMedia("orb_case_hi"),
+	["HardenedPowerForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["HardenedPowerForegroundTexture"] = GetMedia("pw_crystal_case"),
+	["HealthAbsorbValuePlaceFunction"] = function(self) return "LEFT", self.Health.Value, "RIGHT", 13, 0 end, 
+	["HealthAbsorbValueDrawLayer"] = { "OVERLAY", 1 }, 
+	["HealthAbsorbValueFont"] = GetFont(18, true),
+	["HealthAbsorbValueJustifyH"] = "CENTER", 
+	["HealthAbsorbValueJustifyV"] = "MIDDLE",
+	["HealthAbsorbValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["HealthBackdropDrawLayer"] = { "BACKGROUND", -1 },
+	["HealthBackdropPlace"] = { "CENTER", 1, -.5 },
+	["HealthBackdropSize"] = { 716, 188 },
+	["HealthBarOrientation"] = "RIGHT", 
+	["HealthBarSetFlippedHorizontally"] = false, 
+	["HealthBarSparkMap"] = {
 		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
 		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
 		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
@@ -3075,52 +2996,52 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
-	HealthColorClass = false, -- color players by class 
-	HealthColorDisconnected = false, -- color disconnected units
-	HealthColorHealth = true, -- color anything else in the default health color
-	HealthColorReaction = false, -- color NPCs by their reaction standing with us
-	HealthColorTapped = false, -- color tap denied units 
-	HealthFrequentUpdates = true, -- listen to frequent health events for more accurate updates
-	HealthPlace = { "BOTTOMLEFT", 27, 27 },
-	HealthSmoothingMode = "bezier-fast-in-slow-out", 
-	HealthSmoothingFrequency = 3,
-	HealthValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	HealthValueDrawLayer = { "OVERLAY", 1 },
-	HealthValueFont = GetFont(18, true),
-	HealthValueJustifyH = "LEFT", 
-	HealthValueJustifyV = "MIDDLE", 
-	HealthValuePlace = { "LEFT", 27, 4 },
-	HitRectInsets = { 0, 0, 0, 6 }, 
-	LoveCombatIndicatorColor = { Colors.ui[1] *.75, Colors.ui[2] *.75, Colors.ui[3] *.75 }, 
-	LoveCombatIndicatorDrawLayer = {"OVERLAY", -2 },
-	LoveCombatIndicatorPlace = { "BOTTOMLEFT", -(41 + 48/2 -4), (22 - 48/2 +4) },
-	LoveCombatIndicatorSize = { 48,48 },
-	LoveCombatIndicatorTexture = GetMedia("icon-heart-red"),
-	ManaBackgroundColor = { 22/255, 26/255, 22/255, .82 },
-	ManaBackgroundDrawLayer = { "BACKGROUND", -2 }, 
-	ManaBackgroundPlace = { "CENTER", 0, 0 }, 
-	ManaBackgroundSize = { 113, 113 }, 
-	ManaBackgroundTexture = GetMedia("pw_orb_bar3"),
-	ManaColorSuffix = "_ORB", 
-	ManaExclusiveResource = "MANA", 
-	ManaForegroundDrawLayer = { "BORDER", 1 },
-	ManaForegroundPlace = { "CENTER", 0, 0 }, 
-	ManaForegroundSize = { 188, 188 }, 
-	ManaOrbTextures = { GetMedia("pw_orb_bar4"), GetMedia("pw_orb_bar3"), GetMedia("pw_orb_bar3") },
-	ManaOverridePowerColor = PlayerFrame_ExtraPowerOverrideColor,
-	ManaPlace = { "BOTTOMLEFT", -97 +5, 22 + 5 }, 
-	ManaShadeColor = { 1, 1, 1, 1 }, 
-	ManaShadeDrawLayer = { "BORDER", -1 }, 
-	ManaShadePlace = { "CENTER", 0, 0 }, 
-	ManaShadeSize = { 127, 127 }, 
-	ManaShadeTexture = GetMedia("shade_circle"), 
-	ManaSize = { 103, 103 },
-	ManaTextColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	ManaTextDrawLayer = { "OVERLAY", 1 },
-	ManaTextFont = GetFont(14, true),
-	ManaTextJustifyH = "CENTER", 
-	ManaTextJustifyV = "MIDDLE", 
-	ManaTextOverride = function(element, unit, min, max)
+	["HealthColorClass"] = false, -- color players by class 
+	["HealthColorDisconnected"] = false, -- color disconnected units
+	["HealthColorHealth"] = true, -- color anything else in the default health color
+	["HealthColorReaction"] = false, -- color NPCs by their reaction standing with us
+	["HealthColorTapped"] = false, -- color tap denied units 
+	["HealthFrequentUpdates"] = true, -- listen to frequent health events for more accurate updates
+	["HealthPlace"] = { "BOTTOMLEFT", 27, 27 },
+	["HealthSmoothingMode"] = "bezier-fast-in-slow-out", 
+	["HealthSmoothingFrequency"] = 3,
+	["HealthValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["HealthValueDrawLayer"] = { "OVERLAY", 1 },
+	["HealthValueFont"] = GetFont(18, true),
+	["HealthValueJustifyH"] = "LEFT", 
+	["HealthValueJustifyV"] = "MIDDLE", 
+	["HealthValuePlace"] = { "LEFT", 27, 4 },
+	["HitRectInsets"] = { 0, 0, 0, 6 }, 
+	["LoveCombatIndicatorColor"] = { Colors.ui[1] *.75, Colors.ui[2] *.75, Colors.ui[3] *.75 }, 
+	["LoveCombatIndicatorDrawLayer"] = {"OVERLAY", -2 },
+	["LoveCombatIndicatorPlace"] = { "BOTTOMLEFT", -(41 + 48/2 -4), (22 - 48/2 +4) },
+	["LoveCombatIndicatorSize"] = { 48,48 },
+	["LoveCombatIndicatorTexture"] = GetMedia("icon-heart-red"),
+	["ManaBackgroundColor"] = { 22/255, 26/255, 22/255, .82 },
+	["ManaBackgroundDrawLayer"] = { "BACKGROUND", -2 }, 
+	["ManaBackgroundPlace"] = { "CENTER", 0, 0 }, 
+	["ManaBackgroundSize"] = { 113, 113 }, 
+	["ManaBackgroundTexture"] = GetMedia("pw_orb_bar3"),
+	["ManaColorSuffix"] = "_ORB", 
+	["ManaExclusiveResource"] = "MANA", 
+	["ManaForegroundDrawLayer"] = { "BORDER", 1 },
+	["ManaForegroundPlace"] = { "CENTER", 0, 0 }, 
+	["ManaForegroundSize"] = { 188, 188 }, 
+	["ManaOrbTextures"] = { GetMedia("pw_orb_bar4"), GetMedia("pw_orb_bar3"), GetMedia("pw_orb_bar3") },
+	["ManaOverridePowerColor"] = PlayerFrame_ExtraPowerOverrideColor,
+	["ManaPlace"] = { "BOTTOMLEFT", -97 +5, 22 + 5 }, 
+	["ManaShadeColor"] = { 1, 1, 1, 1 }, 
+	["ManaShadeDrawLayer"] = { "BORDER", -1 }, 
+	["ManaShadePlace"] = { "CENTER", 0, 0 }, 
+	["ManaShadeSize"] = { 127, 127 }, 
+	["ManaShadeTexture"] = GetMedia("shade_circle"), 
+	["ManaSize"] = { 103, 103 },
+	["ManaTextColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["ManaTextDrawLayer"] = { "OVERLAY", 1 },
+	["ManaTextFont"] = GetFont(14, true),
+	["ManaTextJustifyH"] = "CENTER", 
+	["ManaTextJustifyV"] = "MIDDLE", 
+	["ManaTextOverride"] = function(element, unit, min, max)
 		if (not min) or (not max) or (min == 0) or (max == 0) or (min == max) then
 			element:SetText("")
 		else
@@ -3133,20 +3054,20 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 			element:SetFormattedText("%.0f", math_floor(min/max * 100))
 		end 
 	end,
-	ManaTextParent = "Power", 
-	ManaTextPlace = { "CENTER", 1, -32 },
-	ManaValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .4 },
-	ManaValueDrawLayer = { "OVERLAY", 1 },
-	ManaValueFont = GetFont(18, true),
-	ManaValueJustifyH = "CENTER", 
-	ManaValueJustifyV = "MIDDLE", 
-	ManaValuePlace = { "CENTER", 3, 0 },
-	NoviceCastSize = { 385, 37 },
-	NoviceCastTexture = GetMedia("hp_lowmid_bar"),
-	NoviceHealthBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	NoviceHealthBackdropTexture = GetMedia("hp_low_case"),
-	NoviceHealthSize = { 385, 37 },
-	NoviceHealthSparkMap = {
+	["ManaTextParent"] = "Power", 
+	["ManaTextPlace"] = { "CENTER", 1, -32 },
+	["ManaValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .4 },
+	["ManaValueDrawLayer"] = { "OVERLAY", 1 },
+	["ManaValueFont"] = GetFont(18, true),
+	["ManaValueJustifyH"] = "CENTER", 
+	["ManaValueJustifyV"] = "MIDDLE", 
+	["ManaValuePlace"] = { "CENTER", 3, 0 },
+	["NoviceCastSize"] = { 385, 37 },
+	["NoviceCastTexture"] = GetMedia("hp_lowmid_bar"),
+	["NoviceHealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["NoviceHealthBackdropTexture"] = GetMedia("hp_low_case"),
+	["NoviceHealthSize"] = { 385, 37 },
+	["NoviceHealthSparkMap"] = {
 		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
 		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
 		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
@@ -3155,32 +3076,32 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
-	NoviceHealthTexture = GetMedia("hp_lowmid_bar"),
-	NoviceHealthThreatTexture = GetMedia("hp_low_case_glow"),
-	NoviceManaOrbColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	NoviceManaOrbTexture = GetMedia("orb_case_low"),
-	NovicePowerForegroundTexture = GetMedia("pw_crystal_case_low"),
-	NovicePowerForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	Place = { "BOTTOMLEFT", 167, 100 },
-	PostUpdateTextures = PlayerFrame_TexturesPostUpdate,
-	PowerOverrideColor = PlayerFrame_PowerOverrideColor, 
-	PowerBackgroundColor = { 1, 1, 1, .95 },
-	PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
-	PowerBackgroundPlace = { "CENTER", 0, 0 },
-	PowerBackgroundSize = { 120/(206-50)*255, 140/(219-37)*255 },
-	PowerBackgroundTexture = GetMedia("power_crystal_back"),
-	PowerBarOrientation = "UP",
-	PowerBarSmoothingFrequency = .45,
-	PowerBarSmoothingMode = "bezier-fast-in-slow-out",
-	PowerBarSparkMap = {
-		top = {
+	["NoviceHealthTexture"] = GetMedia("hp_lowmid_bar"),
+	["NoviceHealthThreatTexture"] = GetMedia("hp_low_case_glow"),
+	["NoviceManaOrbColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["NoviceManaOrbTexture"] = GetMedia("orb_case_low"),
+	["NovicePowerForegroundTexture"] = GetMedia("pw_crystal_case_low"),
+	["NovicePowerForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["Place"] = { "BOTTOMLEFT", 167, 100 },
+	["PostUpdateTextures"] = PlayerFrame_TexturesPostUpdate,
+	["PowerOverrideColor"] = PlayerFrame_PowerOverrideColor, 
+	["PowerBackgroundColor"] = { 1, 1, 1, .95 },
+	["PowerBackgroundDrawLayer"] = { "BACKGROUND", -2 },
+	["PowerBackgroundPlace"] = { "CENTER", 0, 0 },
+	["PowerBackgroundSize"] = { 120/(206-50)*255, 140/(219-37)*255 },
+	["PowerBackgroundTexture"] = GetMedia("power_crystal_back"),
+	["PowerBarOrientation"] = "UP",
+	["PowerBarSmoothingFrequency"] = .45,
+	["PowerBarSmoothingMode"] = "bezier-fast-in-slow-out",
+	["PowerBarSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/256, offset =  -65/256 }, 
 			{ keyPercent =  72/256, offset =    0/256 }, 
 			{ keyPercent = 116/256, offset =  -16/256 }, 
 			{ keyPercent = 128/256, offset =  -28/256 }, 
 			{ keyPercent = 256/256, offset =  -84/256 }, 
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/256, offset =  -47/256 }, 
 			{ keyPercent =  84/256, offset =    0/256 }, 
 			{ keyPercent = 135/256, offset =  -24/256 }, 
@@ -3189,29 +3110,29 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 			{ keyPercent = 256/256, offset = -168/256 }, 
 		}
 	},
-	PowerBarTexCoord = { 50/255, 206/255, 37/255, 219/255 },
-	PowerBarTexture = GetMedia("power_crystal_front"),
-	PowerColorSuffix = "_CRYSTAL", 
-	PowerForegroundPlace = { "BOTTOM", 7, -51 }, 
-	PowerForegroundSize = { 198,98 }, 
-	PowerForegroundTexture = GetMedia("pw_crystal_case"), 
-	PowerForegroundDrawLayer = { "ARTWORK", 1 },
-	PowerIgnoredResource = "MANA",
-	PowerPlace = { "BOTTOMLEFT", -101, 38 },
-	PowerSize = { 120, 140 },
-	PowerType = "StatusBar",
-	PowerValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .4 },
-	PowerValueDrawLayer = { "OVERLAY", 1 },
-	PowerValueFont = GetFont(18, true),
-	PowerValueJustifyH = "CENTER", 
-	PowerValueJustifyV = "MIDDLE", 
-	PowerValuePlace = { "CENTER", 0, -16 },
-	SeasonedCastSize = { 385, 40 },
-	SeasonedCastTexture = GetMedia("hp_cap_bar_highlight"),
-	SeasonedHealthBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	SeasonedHealthBackdropTexture = GetMedia("hp_cap_case"),
-	SeasonedHealthSize = { 385, 40 },
-	SeasonedHealthSparkMap = {
+	["PowerBarTexCoord"] = { 50/255, 206/255, 37/255, 219/255 },
+	["PowerBarTexture"] = GetMedia("power_crystal_front"),
+	["PowerColorSuffix"] = "_CRYSTAL", 
+	["PowerForegroundPlace"] = { "BOTTOM", 7, -51 }, 
+	["PowerForegroundSize"] = { 198,98 }, 
+	["PowerForegroundTexture"] = GetMedia("pw_crystal_case"), 
+	["PowerForegroundDrawLayer"] = { "ARTWORK", 1 },
+	["PowerIgnoredResource"] = "MANA",
+	["PowerPlace"] = { "BOTTOMLEFT", -101, 38 },
+	["PowerSize"] = { 120, 140 },
+	["PowerType"] = "StatusBar",
+	["PowerValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .4 },
+	["PowerValueDrawLayer"] = { "OVERLAY", 1 },
+	["PowerValueFont"] = GetFont(18, true),
+	["PowerValueJustifyH"] = "CENTER", 
+	["PowerValueJustifyV"] = "MIDDLE", 
+	["PowerValuePlace"] = { "CENTER", 0, -16 },
+	["SeasonedCastSize"] = { 385, 40 },
+	["SeasonedCastTexture"] = GetMedia("hp_cap_bar_highlight"),
+	["SeasonedHealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["SeasonedHealthBackdropTexture"] = GetMedia("hp_cap_case"),
+	["SeasonedHealthSize"] = { 385, 40 },
+	["SeasonedHealthSparkMap"] = {
 		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
 		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
 		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
@@ -3220,222 +3141,222 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
-	SeasonedHealthTexture = GetMedia("hp_cap_bar"),
-	SeasonedHealthThreatTexture = GetMedia("hp_cap_case_glow"),
-	SeasonedManaOrbColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	SeasonedManaOrbTexture = GetMedia("orb_case_hi"),
-	SeasonedPowerForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	SeasonedPowerForegroundTexture = GetMedia("pw_crystal_case"),
-	Size = { 439, 93 },
-	ThreatColorPostUpdate = PlayerFrame_Threat_UpdateColor,
-	ThreatFadeOut = 3,
-	ThreatHealthAlpha = .5,
-	ThreatHealthDrawLayer = { "BACKGROUND", -2 },
-	ThreatHealthPlace = { "CENTER", 1, 0 },
-	ThreatHealthSize = { 716, 188 },
-	ThreadHide = PlayerFrame_Threat_Hide,
-	ThreatHideSolo = true, -- only set to false when testing
-	ThreatIsShown = PlayerFrame_Threat_IsShown,
-	ThreatManaAlpha = .5,
-	ThreatManaPlace = { "CENTER", 0, 0 },
-	ThreatManaDrawLayer = { "BACKGROUND", -2 },
-	ThreatManaSize = { 188, 188 },
-	ThreatManaTexture = GetMedia("orb_case_glow"),
-	ThreatPowerAlpha = .5,
-	ThreatPowerBgAlpha = .5,
-	ThreatPowerBgPlace = { "BOTTOM", 7, -51 },
-	ThreatPowerBgDrawLayer = { "BACKGROUND", -3 },
-	ThreatPowerBgSize = { 198,98 },
-	ThreatPowerBgTexture = GetMedia("pw_crystal_case_glow"),
-	ThreatPowerDrawLayer = { "BACKGROUND", -2 },
-	ThreatPowerPlace = { "CENTER", 0, 1 }, 
-	ThreatPowerSize = { 120/157*256, 140/183*256 },
-	ThreatPowerTexture = GetMedia("power_crystal_glow"),
-	ThreatShow = PlayerFrame_Threat_Show,
-	WinterVeilManaColor = { 1, 1, 1 },
-	WinterVeilManaDrawLayer = { "OVERLAY", 0 },
-	WinterVeilManaPlace = { "CENTER", 0, 0 },
-	WinterVeilManaSize = { 188, 188 },
-	WinterVeilManaTexture = GetMedia("seasonal_winterveil_orb"),
-	WinterVeilPowerColor = { 1, 1, 1 }, 
-	WinterVeilPowerDrawLayer = { "OVERLAY", 0 },
-	WinterVeilPowerPlace = { "CENTER", -2, 24 },
-	WinterVeilPowerTexture = GetMedia("seasonal_winterveil_crystal"), 
-	WinterVeilPowerSize = { 120 / ((255-50*2)/255), 140 / ((255-37*2)/255) }
+	["SeasonedHealthTexture"] = GetMedia("hp_cap_bar"),
+	["SeasonedHealthThreatTexture"] = GetMedia("hp_cap_case_glow"),
+	["SeasonedManaOrbColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["SeasonedManaOrbTexture"] = GetMedia("orb_case_hi"),
+	["SeasonedPowerForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["SeasonedPowerForegroundTexture"] = GetMedia("pw_crystal_case"),
+	["Size"] = { 439, 93 },
+	["ThreatColorPostUpdate"] = PlayerFrame_Threat_UpdateColor,
+	["ThreatFadeOut"] = 3,
+	["ThreatHealthAlpha"] = .5,
+	["ThreatHealthDrawLayer"] = { "BACKGROUND", -2 },
+	["ThreatHealthPlace"] = { "CENTER", 1, 0 },
+	["ThreatHealthSize"] = { 716, 188 },
+	["ThreadHide"] = PlayerFrame_Threat_Hide,
+	["ThreatHideSolo"] = true, -- only set to false when testing
+	["ThreatIsShown"] = PlayerFrame_Threat_IsShown,
+	["ThreatManaAlpha"] = .5,
+	["ThreatManaPlace"] = { "CENTER", 0, 0 },
+	["ThreatManaDrawLayer"] = { "BACKGROUND", -2 },
+	["ThreatManaSize"] = { 188, 188 },
+	["ThreatManaTexture"] = GetMedia("orb_case_glow"),
+	["ThreatPowerAlpha"] = .5,
+	["ThreatPowerBgAlpha"] = .5,
+	["ThreatPowerBgPlace"] = { "BOTTOM", 7, -51 },
+	["ThreatPowerBgDrawLayer"] = { "BACKGROUND", -3 },
+	["ThreatPowerBgSize"] = { 198,98 },
+	["ThreatPowerBgTexture"] = GetMedia("pw_crystal_case_glow"),
+	["ThreatPowerDrawLayer"] = { "BACKGROUND", -2 },
+	["ThreatPowerPlace"] = { "CENTER", 0, 1 }, 
+	["ThreatPowerSize"] = { 120/157*256, 140/183*256 },
+	["ThreatPowerTexture"] = GetMedia("power_crystal_glow"),
+	["ThreatShow"] = PlayerFrame_Threat_Show,
+	["WinterVeilManaColor"] = { 1, 1, 1 },
+	["WinterVeilManaDrawLayer"] = { "OVERLAY", 0 },
+	["WinterVeilManaPlace"] = { "CENTER", 0, 0 },
+	["WinterVeilManaSize"] = { 188, 188 },
+	["WinterVeilManaTexture"] = GetMedia("seasonal_winterveil_orb"),
+	["WinterVeilPowerColor"] = { 1, 1, 1 }, 
+	["WinterVeilPowerDrawLayer"] = { "OVERLAY", 0 },
+	["WinterVeilPowerPlace"] = { "CENTER", -2, 24 },
+	["WinterVeilPowerTexture"] = GetMedia("seasonal_winterveil_crystal"), 
+	["WinterVeilPowerSize"] = { 120 / ((255-50*2)/255), 140 / ((255-37*2)/255) }
 })
 
 -- PlayerHUD (combo points and castbar)
 RegisterLayout("UnitFramePlayerHUD", "Azerite", {
-	CastBarColor = { 70/255, 255/255, 131/255, .69 },
-	CastBarOrientation = "RIGHT",
-	CastTimeToHoldFailed = .5,
-	CastBarBackgroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	CastBarBackgroundDrawLayer = { "BACKGROUND", 1 },
-	CastBarBackgroundPlace = { "CENTER", 1, -1 }, 
-	CastBarBackgroundSize = { 193,93 },
-	CastBarBackgroundTexture = GetMedia("cast_back"), 
-	CastBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	CastBarValueDrawLayer = { "OVERLAY", 1 },
-	CastBarValueFont = GetFont(14, true),
-	CastBarValueJustifyH = "CENTER",
-	CastBarValueJustifyV = "MIDDLE",
-	CastBarValuePlace = { "CENTER", 0, 0 },
-	CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	CastBarNameDrawLayer = { "OVERLAY", 1 },
-	CastBarNameFont = GetFont(15, true),
-	CastBarNameJustifyH = "CENTER",
-	CastBarNameJustifyV = "MIDDLE",
-	CastBarNamePlace = { "TOP", 0, -(12 + 14) },
-	CastBarPlace = FloaterSlots.CastBar,
-	CastBarSize = Constant.SmallBar,
-	CastBarShieldColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	CastBarShieldDrawLayer = { "BACKGROUND", 1 }, 
-	CastBarShieldPlace = { "CENTER", 1, -2 }, 
-	CastBarShieldSize = { 193, 93 },
-	CastBarShieldTexture = GetMedia("cast_back_spiked"), 
-	CastBarSparkMap = {
-		top = {
+	["CastBarColor"] = { 70/255, 255/255, 131/255, .69 },
+	["CastBarOrientation"] = "RIGHT",
+	["CastTimeToHoldFailed"] = .5,
+	["CastBarBackgroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["CastBarBackgroundDrawLayer"] = { "BACKGROUND", 1 },
+	["CastBarBackgroundPlace"] = { "CENTER", 1, -1 }, 
+	["CastBarBackgroundSize"] = { 193,93 },
+	["CastBarBackgroundTexture"] = GetMedia("cast_back"), 
+	["CastBarValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["CastBarValueDrawLayer"] = { "OVERLAY", 1 },
+	["CastBarValueFont"] = GetFont(14, true),
+	["CastBarValueJustifyH"] = "CENTER",
+	["CastBarValueJustifyV"] = "MIDDLE",
+	["CastBarValuePlace"] = { "CENTER", 0, 0 },
+	["CastBarNameColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["CastBarNameDrawLayer"] = { "OVERLAY", 1 },
+	["CastBarNameFont"] = GetFont(15, true),
+	["CastBarNameJustifyH"] = "CENTER",
+	["CastBarNameJustifyV"] = "MIDDLE",
+	["CastBarNamePlace"] = { "TOP", 0, -(12 + 14) },
+	["CastBarPlace"] = FloaterSlots.CastBar,
+	["CastBarSize"] = Constant.SmallBar,
+	["CastBarShieldColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["CastBarShieldDrawLayer"] = { "BACKGROUND", 1 }, 
+	["CastBarShieldPlace"] = { "CENTER", 1, -2 }, 
+	["CastBarShieldSize"] = { 193, 93 },
+	["CastBarShieldTexture"] = GetMedia("cast_back_spiked"), 
+	["CastBarSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	CastBarSpellQueuePlace = FloaterSlots.CastBar, 
-	CastBarSpellQueueSize = Constant.SmallBar,
-	CastBarSpellQueueTexture = Constant.SmallBarTexture, 
-	CastBarSpellQueueColor = { 1, 1, 1, .5 },
-	CastBarSpellQueueOrientation = "LEFT",
-	CastBarSpellQueueSparkMap = {
-		top = {
+	["CastBarSpellQueuePlace"] = FloaterSlots.CastBar, 
+	["CastBarSpellQueueSize"] = Constant.SmallBar,
+	["CastBarSpellQueueTexture"] = Constant.SmallBarTexture, 
+	["CastBarSpellQueueColor"] = { 1, 1, 1, .5 },
+	["CastBarSpellQueueOrientation"] = "LEFT",
+	["CastBarSpellQueueSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/128, offset = -16/32 }, 
 			{ keyPercent =  10/128, offset =   0/32 }, 
 			{ keyPercent = 119/128, offset =   0/32 }, 
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	CastBarTexture = Constant.SmallBarTexture, 
-	ClassPowerAlphaWhenEmpty = .5, 
-	ClassPowerAlphaWhenOutOfCombat = 1,
-	ClassPowerAlphaWhenOutOfCombatRunes = .75, -- .5,  
-	ClassPowerAlphaWhenHiddenRunes = 0, -- .10, -- this is when runes are full and you're out of combat, etc
-	ClassPowerHideWhenNoTarget = true, 
-	ClassPowerHideWhenUnattackable = true, 
-	ClassPowerMaxComboPoints = 5, 
-	ClassPowerPlace = { "CENTER", "UICenter", "CENTER", 0, 0 }, 
-	ClassPowerPostCreatePoint = PlayerHUD_ClassPowerPostCreatePoint,
-	ClassPowerPostUpdate = PlayerHUD_ClassPowerPostUpdate,
-	ClassPowerReverseSides = false,
-	ClassPowerRuneSortOrder = "ASC",
-	ClassPowerSize = { 2,2 },
-	IgnoreMouseOver = true,
-	Place = { "BOTTOMLEFT", 75, 127 },
-	PlayerAltPowerBarBackgroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	PlayerAltPowerBarBackgroundDrawLayer = { "BACKGROUND", 1 },
-	PlayerAltPowerBarBackgroundPlace = { "CENTER", 1, -2 },
-	PlayerAltPowerBarBackgroundSize = { 193,93 },
-	PlayerAltPowerBarBackgroundTexture = GetMedia("cast_back"),
-	PlayerAltPowerBarColor = { Colors.power.ALTERNATE[1], Colors.power.ALTERNATE[2], Colors.power.ALTERNATE[3], .69 },
-	PlayerAltPowerBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	PlayerAltPowerBarNameDrawLayer = { "OVERLAY", 1 },
-	PlayerAltPowerBarNameFont = GetFont(15, true),
-	PlayerAltPowerBarNameJustifyH = "CENTER",
-	PlayerAltPowerBarNameJustifyV = "MIDDLE",
-	PlayerAltPowerBarNamePlace = { "TOP", 0, -(12 + 14) },
-	PlayerAltPowerBarOrientation = "RIGHT",
-	PlayerAltPowerBarPlace = FloaterSlots.AltPower,
-	PlayerAltPowerBarSize = Constant.SmallBar,
-	PlayerAltPowerBarSparkMap = {
-		top = {
+	["CastBarTexture"] = Constant.SmallBarTexture, 
+	["ClassPowerAlphaWhenEmpty"] = .5, 
+	["ClassPowerAlphaWhenOutOfCombat"] = 1,
+	["ClassPowerAlphaWhenOutOfCombatRunes"] = .75, -- .5,  
+	["ClassPowerAlphaWhenHiddenRunes"] = 0, -- .10, -- this is when runes are full and you're out of combat, etc
+	["ClassPowerHideWhenNoTarget"] = true, 
+	["ClassPowerHideWhenUnattackable"] = true, 
+	["ClassPowerMaxComboPoints"] = 5, 
+	["ClassPowerPlace"] = { "CENTER", "UICenter", "CENTER", 0, 0 }, 
+	["ClassPowerPostCreatePoint"] = PlayerHUD_ClassPowerPostCreatePoint,
+	["ClassPowerPostUpdate"] = PlayerHUD_ClassPowerPostUpdate,
+	["ClassPowerReverseSides"] = false,
+	["ClassPowerRuneSortOrder"] = "ASC",
+	["ClassPowerSize"] = { 2,2 },
+	["IgnoreMouseOver"] = true,
+	["Place"] = { "BOTTOMLEFT", 75, 127 },
+	["PlayerAltPowerBarBackgroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["PlayerAltPowerBarBackgroundDrawLayer"] = { "BACKGROUND", 1 },
+	["PlayerAltPowerBarBackgroundPlace"] = { "CENTER", 1, -2 },
+	["PlayerAltPowerBarBackgroundSize"] = { 193,93 },
+	["PlayerAltPowerBarBackgroundTexture"] = GetMedia("cast_back"),
+	["PlayerAltPowerBarColor"] = { Colors.power.ALTERNATE[1], Colors.power.ALTERNATE[2], Colors.power.ALTERNATE[3], .69 },
+	["PlayerAltPowerBarNameColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["PlayerAltPowerBarNameDrawLayer"] = { "OVERLAY", 1 },
+	["PlayerAltPowerBarNameFont"] = GetFont(15, true),
+	["PlayerAltPowerBarNameJustifyH"] = "CENTER",
+	["PlayerAltPowerBarNameJustifyV"] = "MIDDLE",
+	["PlayerAltPowerBarNamePlace"] = { "TOP", 0, -(12 + 14) },
+	["PlayerAltPowerBarOrientation"] = "RIGHT",
+	["PlayerAltPowerBarPlace"] = FloaterSlots.AltPower,
+	["PlayerAltPowerBarSize"] = Constant.SmallBar,
+	["PlayerAltPowerBarSparkMap"] = {
+		["top"] = {
 			{ keyPercent =   0/128, offset = -16/32 },
 			{ keyPercent =  10/128, offset =   0/32 },
 			{ keyPercent = 119/128, offset =   0/32 },
 			{ keyPercent = 128/128, offset = -16/32 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =   0/128, offset = -16/32 },
 			{ keyPercent =  10/128, offset =   0/32 },
 			{ keyPercent = 119/128, offset =   0/32 },
 			{ keyPercent = 128/128, offset = -16/32 }
 		}
 	},
-	PlayerAltPowerBarTexture = Constant.SmallBarTexture,
-	PlayerAltPowerBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	PlayerAltPowerBarValueDrawLayer = { "OVERLAY", 1 },
-	PlayerAltPowerBarValueFont = GetFont(14, true),
-	PlayerAltPowerBarValueJustifyH = "CENTER",
-	PlayerAltPowerBarValueJustifyV = "MIDDLE",
-	PlayerAltPowerBarValuePlace = { "CENTER", 0, 0 },
-	Size = { 103, 103 }
+	["PlayerAltPowerBarTexture"] = Constant.SmallBarTexture,
+	["PlayerAltPowerBarValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["PlayerAltPowerBarValueDrawLayer"] = { "OVERLAY", 1 },
+	["PlayerAltPowerBarValueFont"] = GetFont(14, true),
+	["PlayerAltPowerBarValueJustifyH"] = "CENTER",
+	["PlayerAltPowerBarValueJustifyV"] = "MIDDLE",
+	["PlayerAltPowerBarValuePlace"] = { "CENTER", 0, 0 },
+	["Size"] = { 103, 103 }
 })
 
 -- Target
 RegisterLayout("UnitFrameTarget", "Azerite", { 
-	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
-	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
-	AuraBorderBackdrop = BACKDROPS.AuraBorder,
-	AuraBorderBackdropColor = { 0, 0, 0, 0 },
-	AuraBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 }, 
-	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-	AuraBorderFrameSize = { 40 + 14, 40 + 14 },
-	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	AuraCountFont = GetFont(14, true),
-	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-	AuraFramePlace = { "TOPRIGHT", -(27 + 10), -(27 + 40 + 20) },
-	AuraFrameSize = { 40*7 + 6*6, 40*2 + 6 },
-	AuraFrameSizeBoss = { 40*10 + 6*9, 40*2 + 6 },
-	AuraIconPlace = { "CENTER", 0, 0 },
-	AuraIconSize = { 40 - 6, 40 - 6 },
-	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, 
-	AuraProperties = {
-		auraHeight = nil, 
-		auraSize = 40, 
-		auraWidth = nil, 
-		customSort = false,
-		debuffsFirst = true, 
-		disableMouse = false, 
-		customFilter = GetAuraFilter("target"),
-		growthX = "LEFT", 
-		growthY = "DOWN", 
-		maxBuffs = nil, 
-		maxDebuffs = nil, 
-		maxVisible = 14, -- classic max is 16(?)
-		showDurations = true, 
-		showLongDurations = true,
-		showSpirals = false, 
-		spacingH = 6, 
-		spacingV = 6, 
-		tooltipAnchor = nil,
-		tooltipDefaultPosition = false, 
-		tooltipOffsetX = -8,
-		tooltipOffsetY = -16,
-		tooltipPoint = "TOPRIGHT",
-		tooltipRelPoint = "BOTTOMRIGHT"
+	["Aura_PostCreateButton"] = UnitFrame_Aura_PostCreateButton,
+	["Aura_PostUpdateButton"] = UnitFrame_Aura_PostUpdateButton,
+	["AuraBorderBackdrop"] = BACKDROPS.AuraBorder,
+	["AuraBorderBackdropColor"] = { 0, 0, 0, 0 },
+	["AuraBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 }, 
+	["AuraBorderFramePlace"] = { "CENTER", 0, 0 }, 
+	["AuraBorderFrameSize"] = { 40 + 14, 40 + 14 },
+	["AuraCountColor"] = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	["AuraCountFont"] = GetFont(14, true),
+	["AuraCountPlace"] = { "BOTTOMRIGHT", 9, -6 },
+	["AuraFramePlace"] = { "TOPRIGHT", -(27 + 10), -(27 + 40 + 20) },
+	["AuraFrameSize"] = { 40*7 + 6*6, 40*2 + 6 },
+	["AuraFrameSizeBoss"] = { 40*10 + 6*9, 40*2 + 6 },
+	["AuraIconPlace"] = { "CENTER", 0, 0 },
+	["AuraIconSize"] = { 40 - 6, 40 - 6 },
+	["AuraIconTexCoord"] = { 5/64, 59/64, 5/64, 59/64 }, 
+	["AuraProperties"] = {
+		["auraHeight"] = nil, 
+		["auraSize"] = 40, 
+		["auraWidth"] = nil, 
+		["customSort"] = false,
+		["debuffsFirst"] = true, 
+		["disableMouse"] = false, 
+		["customFilter"] = GetAuraFilter("target"),
+		["growthX"] = "LEFT", 
+		["growthY"] = "DOWN", 
+		["maxBuffs"] = nil, 
+		["maxDebuffs"] = nil, 
+		["maxVisible"] = 14, -- classic max is 16(?)
+		["showDurations"] = true, 
+		["showLongDurations"] = true,
+		["showSpirals"] = false, 
+		["spacingH"] = 6, 
+		["spacingV"] = 6, 
+		["tooltipAnchor"] = nil,
+		["tooltipDefaultPosition"] = false, 
+		["tooltipOffsetX"] = -8,
+		["tooltipOffsetY"] = -16,
+		["tooltipPoint"] = "TOPRIGHT",
+		["tooltipRelPoint"] = "BOTTOMRIGHT"
 	},
-	AuraTimeFont = GetFont(14, true),
-	AuraTimePlace = { "TOPLEFT", -6, 6 }, 
-	BossCastPlace = { "TOPRIGHT", -27, -27 }, 
-	BossCastSize = { 533, 40 },
-	BossCastSparkMap = {
-		top = {
+	["AuraTimeFont"] = GetFont(14, true),
+	["AuraTimePlace"] = { "TOPLEFT", -6, 6 }, 
+	["BossCastPlace"] = { "TOPRIGHT", -27, -27 }, 
+	["BossCastSize"] = { 533, 40 },
+	["BossCastSparkMap"] = {
+		["top"] = {
 			{ keyPercent =    0/1024, offset = -24/64 }, 
 			{ keyPercent =   13/1024, offset =   0/64 }, 
 			{ keyPercent = 1018/1024, offset =   0/64 }, 
 			{ keyPercent = 1024/1024, offset = -10/64 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =    0/1024, offset = -39/64 }, 
 			{ keyPercent =   13/1024, offset = -16/64 }, 
 			{ keyPercent =  949/1024, offset = -16/64 }, 
@@ -3444,22 +3365,22 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 			{ keyPercent = 1024/1024, offset = -52/64 }
 		}
 	},
-	BossCastTexture = GetMedia("hp_boss_bar"),
-	BossHealthBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	BossHealthBackdropPlace = { "CENTER", -.5, 1 }, 
-	BossHealthBackdropSize = { 694, 190 }, 
-	BossHealthBackdropTexture = GetMedia("hp_boss_case"),
-	BossHealthPercentVisible = true, 
-	BossHealthPlace = { "TOPRIGHT", -27, -27 }, 
-	BossHealthSize = { 533, 40 },
-	BossHealthSparkMap = {
-		top = {
+	["BossCastTexture"] = GetMedia("hp_boss_bar"),
+	["BossHealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["BossHealthBackdropPlace"] = { "CENTER", -.5, 1 }, 
+	["BossHealthBackdropSize"] = { 694, 190 }, 
+	["BossHealthBackdropTexture"] = GetMedia("hp_boss_case"),
+	["BossHealthPercentVisible"] = true, 
+	["BossHealthPlace"] = { "TOPRIGHT", -27, -27 }, 
+	["BossHealthSize"] = { 533, 40 },
+	["BossHealthSparkMap"] = {
+		["top"] = {
 			{ keyPercent =    0/1024, offset = -24/64 }, 
 			{ keyPercent =   13/1024, offset =   0/64 }, 
 			{ keyPercent = 1018/1024, offset =   0/64 }, 
 			{ keyPercent = 1024/1024, offset = -10/64 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =    0/1024, offset = -39/64 }, 
 			{ keyPercent =   13/1024, offset = -16/64 }, 
 			{ keyPercent =  949/1024, offset = -16/64 }, 
@@ -3468,31 +3389,31 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 			{ keyPercent = 1024/1024, offset = -52/64 }
 		}
 	},
-	BossHealthTexture = GetMedia("hp_boss_bar"),
-	BossHealthThreatPlace = { "CENTER", -.5, 1 },
-	BossHealthThreatSize = { 694, 190 },
-	BossHealthThreatTexture = GetMedia("hp_boss_case_glow"),
-	BossHealthValueVisible = true, 
-	BossPortraitForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	BossPortraitForegroundTexture = GetMedia("portrait_frame_hi"),
-	BossPowerForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	BossPowerForegroundTexture = GetMedia("pw_crystal_case"),
-	CastBarColor = { 1, 1, 1, .25 }, 
-	CastBarNameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	CastBarNameDrawLayer = { "OVERLAY", 1 }, 
-	CastBarNameFont = GetFont(16, true),
-	CastBarNameJustifyH = "RIGHT", 
-	CastBarNameJustifyV = "MIDDLE",
-	CastBarNamePlace = { "RIGHT", -27, 4 },
-	CastBarNameSize = { 250, 40 }, 
-	CastBarOrientation = "LEFT", 
-	CastBarPlace = { "BOTTOMLEFT", 27, 27 },
-	CastBarPostUpdate = TargetFrame_CastBarPostUpdate,
-	CastBarSetFlippedHorizontally = true, 
-	CastBarSmoothingMode = "bezier-fast-in-slow-out", 
-	CastBarSmoothingFrequency = .15,
-	CastBarSize = { 385, 40 },
-	CastBarSparkMap = {
+	["BossHealthTexture"] = GetMedia("hp_boss_bar"),
+	["BossHealthThreatPlace"] = { "CENTER", -.5, 1 },
+	["BossHealthThreatSize"] = { 694, 190 },
+	["BossHealthThreatTexture"] = GetMedia("hp_boss_case_glow"),
+	["BossHealthValueVisible"] = true, 
+	["BossPortraitForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["BossPortraitForegroundTexture"] = GetMedia("portrait_frame_hi"),
+	["BossPowerForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["BossPowerForegroundTexture"] = GetMedia("pw_crystal_case"),
+	["CastBarColor"] = { 1, 1, 1, .25 }, 
+	["CastBarNameColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["CastBarNameDrawLayer"] = { "OVERLAY", 1 }, 
+	["CastBarNameFont"] = GetFont(16, true),
+	["CastBarNameJustifyH"] = "RIGHT", 
+	["CastBarNameJustifyV"] = "MIDDLE",
+	["CastBarNamePlace"] = { "RIGHT", -27, 4 },
+	["CastBarNameSize"] = { 250, 40 }, 
+	["CastBarOrientation"] = "LEFT", 
+	["CastBarPlace"] = { "BOTTOMLEFT", 27, 27 },
+	["CastBarPostUpdate"] = TargetFrame_CastBarPostUpdate,
+	["CastBarSetFlippedHorizontally"] = true, 
+	["CastBarSmoothingMode"] = "bezier-fast-in-slow-out", 
+	["CastBarSmoothingFrequency"] = .15,
+	["CastBarSize"] = { 385, 40 },
+	["CastBarSparkMap"] = {
 		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
 		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
 		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
@@ -3501,38 +3422,38 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
-	CastBarValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	CastBarValueDrawLayer = { "OVERLAY", 1 },
-	CastBarValueFont = GetFont(18, true),
-	CastBarValueJustifyH = "CENTER",
-	CastBarValueJustifyV = "MIDDLE",
-	CastBarValuePlace = { "LEFT", 27, 4 },
+	["CastBarValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["CastBarValueDrawLayer"] = { "OVERLAY", 1 },
+	["CastBarValueFont"] = GetFont(18, true),
+	["CastBarValueJustifyH"] = "CENTER",
+	["CastBarValueJustifyV"] = "MIDDLE",
+	["CastBarValuePlace"] = { "LEFT", 27, 4 },
 
-	CombatFeedbackFont = GetFont(20, true),
-	CombatFeedbackFontSmall = GetFont(18, true),
-	CombatFeedbackFontLarge = GetFont(24, true),
-	CombatFeedbackJustifyH = "CENTER", 
-	CombatFeedbackJustifyV = "MIDDLE", 
-	CombatFeedbackPlace = { "CENTER", 0, 3 },
+	["CombatFeedbackFont"] = GetFont(20, true),
+	["CombatFeedbackFontSmall"] = GetFont(18, true),
+	["CombatFeedbackFontLarge"] = GetFont(24, true),
+	["CombatFeedbackJustifyH"] = "CENTER", 
+	["CombatFeedbackJustifyV"] = "MIDDLE", 
+	["CombatFeedbackPlace"] = { "CENTER", 0, 3 },
 
-	ClassificationColor = { 1, 1, 1 },
-	ClassificationIndicatorAllianceTexture = GetMedia("icon_badges_alliance"),
-	ClassificationIndicatorBossTexture = GetMedia("icon_badges_boss"),
-	ClassificationIndicatorEliteTexture = GetMedia("icon_classification_elite"),
-	ClassificationIndicatorHordeTexture = GetMedia("icon_badges_horde"),
-	ClassificationIndicatorRareTexture = GetMedia("icon_classification_rare"),
-	ClassificationPlace = { "BOTTOMRIGHT", 72, -43 },
-	ClassificationSize = { 84, 84 },
-	CritterCastPlace = { "TOPRIGHT", -24, -24 },
-	CritterCastSize = { 40, 36 },
-	CritterCastSparkMap = {
-		top = {
+	["ClassificationColor"] = { 1, 1, 1 },
+	["ClassificationIndicatorAllianceTexture"] = GetMedia("icon_badges_alliance"),
+	["ClassificationIndicatorBossTexture"] = GetMedia("icon_badges_boss"),
+	["ClassificationIndicatorEliteTexture"] = GetMedia("icon_classification_elite"),
+	["ClassificationIndicatorHordeTexture"] = GetMedia("icon_badges_horde"),
+	["ClassificationIndicatorRareTexture"] = GetMedia("icon_classification_rare"),
+	["ClassificationPlace"] = { "BOTTOMRIGHT", 72, -43 },
+	["ClassificationSize"] = { 84, 84 },
+	["CritterCastPlace"] = { "TOPRIGHT", -24, -24 },
+	["CritterCastSize"] = { 40, 36 },
+	["CritterCastSparkMap"] = {
+		["top"] = {
 			{ keyPercent =  0/64, offset = -30/64 }, 
 			{ keyPercent = 14/64, offset =  -1/64 }, 
 			{ keyPercent = 49/64, offset =  -1/64 }, 
 			{ keyPercent = 64/64, offset = -34/64 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =  0/64, offset = -30/64 }, 
 			{ keyPercent = 15/64, offset =   0/64 }, 
 			{ keyPercent = 32/64, offset =  -1/64 }, 
@@ -3540,22 +3461,22 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 			{ keyPercent = 64/64, offset = -27/64 }
 		}
 	},
-	CritterCastTexture = GetMedia("hp_critter_bar"),
-	CritterHealthBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	CritterHealthBackdropPlace = { "CENTER", 0, 1 }, 
-	CritterHealthBackdropSize = { 98,96 }, 
-	CritterHealthBackdropTexture = GetMedia("hp_critter_case"),
-	CritterHealthPercentVisible = false, 
-	CritterHealthPlace = { "TOPRIGHT", -24, -24 }, 
-	CritterHealthSize = { 40, 36 },
-	CritterHealthSparkMap = {
-		top = {
+	["CritterCastTexture"] = GetMedia("hp_critter_bar"),
+	["CritterHealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["CritterHealthBackdropPlace"] = { "CENTER", 0, 1 }, 
+	["CritterHealthBackdropSize"] = { 98,96 }, 
+	["CritterHealthBackdropTexture"] = GetMedia("hp_critter_case"),
+	["CritterHealthPercentVisible"] = false, 
+	["CritterHealthPlace"] = { "TOPRIGHT", -24, -24 }, 
+	["CritterHealthSize"] = { 40, 36 },
+	["CritterHealthSparkMap"] = {
+		["top"] = {
 			{ keyPercent =  0/64, offset = -30/64 }, 
 			{ keyPercent = 14/64, offset =  -1/64 }, 
 			{ keyPercent = 49/64, offset =  -1/64 }, 
 			{ keyPercent = 64/64, offset = -34/64 }
 		},
-		bottom = {
+		["bottom"] = {
 			{ keyPercent =  0/64, offset = -30/64 }, 
 			{ keyPercent = 15/64, offset =   0/64 }, 
 			{ keyPercent = 32/64, offset =  -1/64 }, 
@@ -3563,18 +3484,18 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 			{ keyPercent = 64/64, offset = -27/64 }
 		}
 	},
-	CritterHealthTexture = GetMedia("hp_critter_bar"),
-	CritterHealthThreatPlace = { "CENTER", 0, 0 },
-	CritterHealthThreatSize = { 98,96 },
-	CritterHealthThreatTexture = GetMedia("hp_critter_case_glow"),
-	CritterHealthValueVisible = false, 
-	CritterPortraitForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	CritterPortraitForegroundTexture = GetMedia("portrait_frame_lo"),
-	CritterPowerForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	CritterPowerForegroundTexture = GetMedia("pw_crystal_case_low"),
-	HardenedCastPlace = { "TOPRIGHT", -27, -27 }, 
-	HardenedCastSize = { 385, 37 },
-	HardenedCastSparkMap = {
+	["CritterHealthTexture"] = GetMedia("hp_critter_bar"),
+	["CritterHealthThreatPlace"] = { "CENTER", 0, 0 },
+	["CritterHealthThreatSize"] = { 98,96 },
+	["CritterHealthThreatTexture"] = GetMedia("hp_critter_case_glow"),
+	["CritterHealthValueVisible"] = false, 
+	["CritterPortraitForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["CritterPortraitForegroundTexture"] = GetMedia("portrait_frame_lo"),
+	["CritterPowerForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["CritterPowerForegroundTexture"] = GetMedia("pw_crystal_case_low"),
+	["HardenedCastPlace"] = { "TOPRIGHT", -27, -27 }, 
+	["HardenedCastSize"] = { 385, 37 },
+	["HardenedCastSparkMap"] = {
 		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
 		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
 		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
@@ -3583,15 +3504,15 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
-	HardenedCastTexture = GetMedia("hp_lowmid_bar"),
-	HardenedHealthBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	HardenedHealthBackdropPlace = { "CENTER", -2, -1 }, 
-	HardenedHealthBackdropSize = { 716, 188 }, 
-	HardenedHealthBackdropTexture = GetMedia("hp_mid_case"),
-	HardenedHealthPercentVisible = true, 
-	HardenedHealthPlace = { "TOPRIGHT", -27, -27 }, 
-	HardenedHealthSize = { 385, 37 },
-	HardenedHealthSparkMap = {
+	["HardenedCastTexture"] = GetMedia("hp_lowmid_bar"),
+	["HardenedHealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["HardenedHealthBackdropPlace"] = { "CENTER", -2, -1 }, 
+	["HardenedHealthBackdropSize"] = { 716, 188 }, 
+	["HardenedHealthBackdropTexture"] = GetMedia("hp_mid_case"),
+	["HardenedHealthPercentVisible"] = true, 
+	["HardenedHealthPlace"] = { "TOPRIGHT", -27, -27 }, 
+	["HardenedHealthSize"] = { 385, 37 },
+	["HardenedHealthSparkMap"] = {
 		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
 		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
 		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
@@ -3600,96 +3521,96 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
-	HardenedHealthTexture = GetMedia("hp_lowmid_bar"),
-	HardenedHealthThreatPlace = { "CENTER", 0, 1 },
-	HardenedHealthThreatSize = { 716, 188 },
-	HardenedHealthThreatTexture = GetMedia("hp_mid_case_glow"),
-	HardenedHealthValueVisible = true,
-	HardenedLevel = IsClassic and 40 or 30,
-	HardenedPortraitForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	HardenedPortraitForegroundTexture = GetMedia("portrait_frame_hi"),
-	HardenedPowerForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	HardenedPowerForegroundTexture = GetMedia("pw_crystal_case"),
-	HealthAbsorbValuePlaceFunction = function(self) return "RIGHT", self.Health.Value, "LEFT", -13, 0 end, 
-	HealthAbsorbValueDrawLayer = { "OVERLAY", 1 }, 
-	HealthAbsorbValueFont = GetFont(18, true),
-	HealthAbsorbValueJustifyH = "CENTER", 
-	HealthAbsorbValueJustifyV = "MIDDLE",
-	HealthAbsorbValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	HealthBackdropDrawLayer = { "BACKGROUND", -1 },
-	HealthBackdropPlace = { "CENTER", 1, -.5 },
-	HealthBackdropSize = { 716, 188 },
-	HealthBackdropTexCoord = { 1, 0, 0, 1 }, 
-	HealthBarOrientation = "LEFT",
-	HealthBarSetFlippedHorizontally = true, 
-	HealthColorClass = true, -- color players by class 
-	HealthColorDisconnected = true, -- color disconnected units
-	HealthColorHealth = false, -- color anything else in the default health color
-	HealthColorReaction = true, -- color NPCs by their reaction standing with us
-	HealthColorTapped = true, -- color tap denied units 
-	HealthColorThreat = true, -- threat coloring on non-friendly health bars
-	HealthFrequentUpdates = true, -- listen to frequent health events for more accurate updates
-	HealthPercentColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	HealthPercentDrawLayer = { "OVERLAY", 1 },
-	HealthPercentFont = GetFont(18, true),
-	HealthPercentJustifyH = "LEFT",
-	HealthPercentJustifyV = "MIDDLE",
-	HealthPercentPlace = { "LEFT", 27, 4 },
-	HealthPlace = { "TOPRIGHT", 27, 27 },
-	HealthSmoothingFrequency = .2, -- speed of the smoothing method
-	HealthSmoothingMode = "bezier-fast-in-slow-out", 
-	HealthValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	HealthValueFont = GetFont(18, true),
-	HealthValueDrawLayer = { "OVERLAY", 1 },
-	HealthValueJustifyH = "RIGHT", 
-	HealthValueJustifyV = "MIDDLE", 
-	HealthValuePlace = { "RIGHT", -27, 4 },
-	HitRectInsets = { 0, -80, -30, 0 }, 
-	LevelAlpha = .7,
-	LevelBadgeColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	LevelBadgeDrawLayer = { "BACKGROUND", 1 },
-	LevelBadgeSize = { 86, 86 }, 
-	LevelBadgeTexture = GetMedia("point_plate"),
-	LevelColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3] },
-	LevelDeadSkullColor = { 1, 1, 1, 1 }, 
-	LevelDeadSkullDrawLayer = { "BORDER", 2 }, 
-	LevelDeadSkullSize = { 64, 64 }, 
-	LevelDeadSkullTexture = GetMedia("icon_skull_dead"),
-	LevelDrawLayer = { "BORDER", 1 },
-	LevelFont = GetFont(13, true),
-	LevelHideCapped = true, 
-	LevelHideFloored = true, 
-	LevelJustifyH = "CENTER",
-	LevelJustifyV = "MIDDLE", 
-	LevelPlace = { "CENTER", 298, -15 }, 
-	LevelSkullColor = { 1, 1, 1, 1 }, 
-	LevelSkullDrawLayer = { "BORDER", 2 }, 
-	LevelSkullSize = { 64, 64 }, 
-	LevelSkullTexture = GetMedia("icon_skull"),
-	LevelVisibilityFilter = TargetFrame_LevelVisibilityFilter,
-	LoveTargetIndicatorPetByEnemyColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	LoveTargetIndicatorPetByEnemyPlace = { "TOPRIGHT", -10 + 50/2 + 4, 12 + 50/2 -4 },
-	LoveTargetIndicatorPetByEnemySize = { 48,48 },
-	LoveTargetIndicatorPetByEnemyTexture = GetMedia("icon-heart-blue"),
-	LoveTargetIndicatorYouByEnemyColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	LoveTargetIndicatorYouByEnemyPlace = { "TOPRIGHT", -10 + 50/2 + 4, 12 + 50/2 -4 },
-	LoveTargetIndicatorYouByEnemySize = { 48,48 },
-	LoveTargetIndicatorYouByEnemyTexture = GetMedia("icon-heart-red"),
-	LoveTargetIndicatorYouByFriendColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	LoveTargetIndicatorYouByFriendPlace = { "TOPRIGHT", -10 + 50/2 + 4, 12 + 50/2 -4 },
-	LoveTargetIndicatorYouByFriendSize = { 48,48 },
-	LoveTargetIndicatorYouByFriendTexture = GetMedia("icon-heart-green"),
-	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-	NameDrawLayer = { "OVERLAY", 1 }, 
-	NameFont = GetFont(18, true),
-	NameJustifyH = "RIGHT", 
-	NameJustifyV = "TOP",
-	NamePlace = { "TOPRIGHT", -40, 18 },
-	NamePostUpdateBecauseOfToT = TargetFrame_NamePostUpdate,
-	NameSize = { 250, 18 },
-	NoviceCastPlace = { "TOPRIGHT", -27, -27 }, 
-	NoviceCastSize = { 385, 37 },
-	NoviceCastSparkMap = {
+	["HardenedHealthTexture"] = GetMedia("hp_lowmid_bar"),
+	["HardenedHealthThreatPlace"] = { "CENTER", 0, 1 },
+	["HardenedHealthThreatSize"] = { 716, 188 },
+	["HardenedHealthThreatTexture"] = GetMedia("hp_mid_case_glow"),
+	["HardenedHealthValueVisible"] = true,
+	["HardenedLevel"] = IsClassic and 40 or 30,
+	["HardenedPortraitForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["HardenedPortraitForegroundTexture"] = GetMedia("portrait_frame_hi"),
+	["HardenedPowerForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["HardenedPowerForegroundTexture"] = GetMedia("pw_crystal_case"),
+	["HealthAbsorbValuePlaceFunction"] = function(self) return "RIGHT", self.Health.Value, "LEFT", -13, 0 end, 
+	["HealthAbsorbValueDrawLayer"] = { "OVERLAY", 1 }, 
+	["HealthAbsorbValueFont"] = GetFont(18, true),
+	["HealthAbsorbValueJustifyH"] = "CENTER", 
+	["HealthAbsorbValueJustifyV"] = "MIDDLE",
+	["HealthAbsorbValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["HealthBackdropDrawLayer"] = { "BACKGROUND", -1 },
+	["HealthBackdropPlace"] = { "CENTER", 1, -.5 },
+	["HealthBackdropSize"] = { 716, 188 },
+	["HealthBackdropTexCoord"] = { 1, 0, 0, 1 }, 
+	["HealthBarOrientation"] = "LEFT",
+	["HealthBarSetFlippedHorizontally"] = true, 
+	["HealthColorClass"] = true, -- color players by class 
+	["HealthColorDisconnected"] = true, -- color disconnected units
+	["HealthColorHealth"] = false, -- color anything else in the default health color
+	["HealthColorReaction"] = true, -- color NPCs by their reaction standing with us
+	["HealthColorTapped"] = true, -- color tap denied units 
+	["HealthColorThreat"] = true, -- threat coloring on non-friendly health bars
+	["HealthFrequentUpdates"] = true, -- listen to frequent health events for more accurate updates
+	["HealthPercentColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["HealthPercentDrawLayer"] = { "OVERLAY", 1 },
+	["HealthPercentFont"] = GetFont(18, true),
+	["HealthPercentJustifyH"] = "LEFT",
+	["HealthPercentJustifyV"] = "MIDDLE",
+	["HealthPercentPlace"] = { "LEFT", 27, 4 },
+	["HealthPlace"] = { "TOPRIGHT", 27, 27 },
+	["HealthSmoothingFrequency"] = .2, -- speed of the smoothing method
+	["HealthSmoothingMode"] = "bezier-fast-in-slow-out", 
+	["HealthValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["HealthValueFont"] = GetFont(18, true),
+	["HealthValueDrawLayer"] = { "OVERLAY", 1 },
+	["HealthValueJustifyH"] = "RIGHT", 
+	["HealthValueJustifyV"] = "MIDDLE", 
+	["HealthValuePlace"] = { "RIGHT", -27, 4 },
+	["HitRectInsets"] = { 0, -80, -30, 0 }, 
+	["LevelAlpha"] = .7,
+	["LevelBadgeColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["LevelBadgeDrawLayer"] = { "BACKGROUND", 1 },
+	["LevelBadgeSize"] = { 86, 86 }, 
+	["LevelBadgeTexture"] = GetMedia("point_plate"),
+	["LevelColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3] },
+	["LevelDeadSkullColor"] = { 1, 1, 1, 1 }, 
+	["LevelDeadSkullDrawLayer"] = { "BORDER", 2 }, 
+	["LevelDeadSkullSize"] = { 64, 64 }, 
+	["LevelDeadSkullTexture"] = GetMedia("icon_skull_dead"),
+	["LevelDrawLayer"] = { "BORDER", 1 },
+	["LevelFont"] = GetFont(13, true),
+	["LevelHideCapped"] = true, 
+	["LevelHideFloored"] = true, 
+	["LevelJustifyH"] = "CENTER",
+	["LevelJustifyV"] = "MIDDLE", 
+	["LevelPlace"] = { "CENTER", 298, -15 }, 
+	["LevelSkullColor"] = { 1, 1, 1, 1 }, 
+	["LevelSkullDrawLayer"] = { "BORDER", 2 }, 
+	["LevelSkullSize"] = { 64, 64 }, 
+	["LevelSkullTexture"] = GetMedia("icon_skull"),
+	["LevelVisibilityFilter"] = TargetFrame_LevelVisibilityFilter,
+	["LoveTargetIndicatorPetByEnemyColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["LoveTargetIndicatorPetByEnemyPlace"] = { "TOPRIGHT", -10 + 50/2 + 4, 12 + 50/2 -4 },
+	["LoveTargetIndicatorPetByEnemySize"] = { 48,48 },
+	["LoveTargetIndicatorPetByEnemyTexture"] = GetMedia("icon-heart-blue"),
+	["LoveTargetIndicatorYouByEnemyColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["LoveTargetIndicatorYouByEnemyPlace"] = { "TOPRIGHT", -10 + 50/2 + 4, 12 + 50/2 -4 },
+	["LoveTargetIndicatorYouByEnemySize"] = { 48,48 },
+	["LoveTargetIndicatorYouByEnemyTexture"] = GetMedia("icon-heart-red"),
+	["LoveTargetIndicatorYouByFriendColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["LoveTargetIndicatorYouByFriendPlace"] = { "TOPRIGHT", -10 + 50/2 + 4, 12 + 50/2 -4 },
+	["LoveTargetIndicatorYouByFriendSize"] = { 48,48 },
+	["LoveTargetIndicatorYouByFriendTexture"] = GetMedia("icon-heart-green"),
+	["NameColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	["NameDrawLayer"] = { "OVERLAY", 1 }, 
+	["NameFont"] = GetFont(18, true),
+	["NameJustifyH"] = "RIGHT", 
+	["NameJustifyV"] = "TOP",
+	["NamePlace"] = { "TOPRIGHT", -40, 18 },
+	["NamePostUpdateBecauseOfToT"] = TargetFrame_NamePostUpdate,
+	["NameSize"] = { 250, 18 },
+	["NoviceCastPlace"] = { "TOPRIGHT", -27, -27 }, 
+	["NoviceCastSize"] = { 385, 37 },
+	["NoviceCastSparkMap"] = {
 		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
 		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
 		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
@@ -3698,15 +3619,15 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
-	NoviceCastTexture = GetMedia("hp_lowmid_bar"),
-	NoviceHealthBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	NoviceHealthBackdropPlace = { "CENTER", -1, -.5 }, 
-	NoviceHealthBackdropSize = { 716, 188 }, 
-	NoviceHealthBackdropTexture = GetMedia("hp_low_case"),
-	NoviceHealthPercentVisible = true, 
-	NoviceHealthPlace = { "TOPRIGHT", -27, -27 }, 
-	NoviceHealthSize = { 385, 37 },
-	NoviceHealthSparkMap = {
+	["NoviceCastTexture"] = GetMedia("hp_lowmid_bar"),
+	["NoviceHealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["NoviceHealthBackdropPlace"] = { "CENTER", -1, -.5 }, 
+	["NoviceHealthBackdropSize"] = { 716, 188 }, 
+	["NoviceHealthBackdropTexture"] = GetMedia("hp_low_case"),
+	["NoviceHealthPercentVisible"] = true, 
+	["NoviceHealthPlace"] = { "TOPRIGHT", -27, -27 }, 
+	["NoviceHealthSize"] = { 385, 37 },
+	["NoviceHealthSparkMap"] = {
 		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
 		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
 		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
@@ -3715,69 +3636,69 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
-	NoviceHealthTexture = GetMedia("hp_lowmid_bar"),
-	NoviceHealthThreatPlace = { "CENTER", 0, 1 },
-	NoviceHealthThreatSize = { 716, 188 },
-	NoviceHealthThreatTexture = GetMedia("hp_low_case_glow"),
-	NoviceHealthValueVisible = true,
-	NovicePortraitForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	NovicePortraitForegroundTexture = GetMedia("portrait_frame_lo"),
-	NovicePowerForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	NovicePowerForegroundTexture = GetMedia("pw_crystal_case_low"),
-	Place = { "TOPRIGHT", -153, -79 },
-	PortraitAlpha = .85, 
-	PortraitBackgroundColor = { .5, .5, .5 }, 
-	PortraitBackgroundDrawLayer = { "BACKGROUND", 0 }, 
-	PortraitBackgroundPlace = { "TOPRIGHT", 116, 55 },
-	PortraitBackgroundSize = { 173, 173 },
-	PortraitBackgroundTexture = GetMedia("party_portrait_back"), 
-	PortraitDistanceScale = 1,
-	PortraitForegroundDrawLayer = { "BACKGROUND", 0 },
-	PortraitForegroundPlace = { "TOPRIGHT", 123, 61 },
-	PortraitForegroundSize = { 187, 187 },
-	PortraitPlace = { "TOPRIGHT", 73, 8 },
-	PortraitPositionX = 0,
-	PortraitPositionY = 0,
-	PortraitPositionZ = 0,
-	PortraitRotation = 0, 
-	PortraitShowFallback2D = true, 
-	PortraitShadeDrawLayer = { "BACKGROUND", -1 },
-	PortraitShadePlace = { "TOPRIGHT", 83, 21 },
-	PortraitShadeSize = { 107, 107 }, 
-	PortraitShadeTexture = GetMedia("shade_circle"),
-	PortraitSize = { 85, 85 }, 
-	PostUpdateTextures = TargetFrame_TexturesPostUpdate,
-	PowerBackgroundColor = { 1, 1, 1, .85 },
-	PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
-	PowerBackgroundPlace = { "CENTER", 0, 0 },
-	PowerBackgroundSize = { 68 +12, 68 +12 },
-	PowerBackgroundTexCoord = { 0, 1, 0, 1 },
-	PowerBackgroundTexture = GetMedia("power_crystal_small_back"),
-	PowerBarOrientation = "UP",
-	PowerBarSetFlippedHorizontally = false, 
-	PowerBarSmoothingFrequency = .5,
-	PowerBarSmoothingMode = "bezier-fast-in-slow-out",
-	PowerBarSparkTexture = GetMedia("blank"),
-	PowerBarTexCoord = { 0, 1, 0, 1 },
-	PowerBarTexture = GetMedia("power_crystal_small_front"),
-	PowerColorSuffix = "_CRYSTAL", 
-	PowerHideWhenDead = true,  
-	PowerHideWhenEmpty = true,
-	PowerIgnoredResource = nil,
+	["NoviceHealthTexture"] = GetMedia("hp_lowmid_bar"),
+	["NoviceHealthThreatPlace"] = { "CENTER", 0, 1 },
+	["NoviceHealthThreatSize"] = { 716, 188 },
+	["NoviceHealthThreatTexture"] = GetMedia("hp_low_case_glow"),
+	["NoviceHealthValueVisible"] = true,
+	["NovicePortraitForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["NovicePortraitForegroundTexture"] = GetMedia("portrait_frame_lo"),
+	["NovicePowerForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["NovicePowerForegroundTexture"] = GetMedia("pw_crystal_case_low"),
+	["Place"] = { "TOPRIGHT", -153, -79 },
+	["PortraitAlpha"] = .85, 
+	["PortraitBackgroundColor"] = { .5, .5, .5 }, 
+	["PortraitBackgroundDrawLayer"] = { "BACKGROUND", 0 }, 
+	["PortraitBackgroundPlace"] = { "TOPRIGHT", 116, 55 },
+	["PortraitBackgroundSize"] = { 173, 173 },
+	["PortraitBackgroundTexture"] = GetMedia("party_portrait_back"), 
+	["PortraitDistanceScale"] = 1,
+	["PortraitForegroundDrawLayer"] = { "BACKGROUND", 0 },
+	["PortraitForegroundPlace"] = { "TOPRIGHT", 123, 61 },
+	["PortraitForegroundSize"] = { 187, 187 },
+	["PortraitPlace"] = { "TOPRIGHT", 73, 8 },
+	["PortraitPositionX"] = 0,
+	["PortraitPositionY"] = 0,
+	["PortraitPositionZ"] = 0,
+	["PortraitRotation"] = 0, 
+	["PortraitShowFallback2D"] = true, 
+	["PortraitShadeDrawLayer"] = { "BACKGROUND", -1 },
+	["PortraitShadePlace"] = { "TOPRIGHT", 83, 21 },
+	["PortraitShadeSize"] = { 107, 107 }, 
+	["PortraitShadeTexture"] = GetMedia("shade_circle"),
+	["PortraitSize"] = { 85, 85 }, 
+	["PostUpdateTextures"] = TargetFrame_TexturesPostUpdate,
+	["PowerBackgroundColor"] = { 1, 1, 1, .85 },
+	["PowerBackgroundDrawLayer"] = { "BACKGROUND", -2 },
+	["PowerBackgroundPlace"] = { "CENTER", 0, 0 },
+	["PowerBackgroundSize"] = { 68 +12, 68 +12 },
+	["PowerBackgroundTexCoord"] = { 0, 1, 0, 1 },
+	["PowerBackgroundTexture"] = GetMedia("power_crystal_small_back"),
+	["PowerBarOrientation"] = "UP",
+	["PowerBarSetFlippedHorizontally"] = false, 
+	["PowerBarSmoothingFrequency"] = .5,
+	["PowerBarSmoothingMode"] = "bezier-fast-in-slow-out",
+	["PowerBarSparkTexture"] = GetMedia("blank"),
+	["PowerBarTexCoord"] = { 0, 1, 0, 1 },
+	["PowerBarTexture"] = GetMedia("power_crystal_small_front"),
+	["PowerColorSuffix"] = "_CRYSTAL", 
+	["PowerHideWhenDead"] = true,  
+	["PowerHideWhenEmpty"] = true,
+	["PowerIgnoredResource"] = nil,
 	PowerPlace ={ "CENTER", 439/2 + 79 +2, -6+ 93/2 -62 + 4 +6 }, 
-	PowerSize = { 68 +12, 68 +12 },
-	PowerShowAlternate = true, 
-	PowerValueColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
-	PowerValueDrawLayer = { "OVERLAY", 1 },
-	PowerValueFont = GetFont(14, true),
-	PowerValueJustifyH = "CENTER", 
-	PowerValueJustifyV = "MIDDLE", 
-	PowerValuePlace = { "CENTER", 0, -5 },
-	PowerValueOverride = TargetFrame_PowerValueOverride,
-	PowerVisibilityFilter = TargetFrame_PowerVisibilityFilter,
-	SeasonedCastPlace = { "TOPRIGHT", -27, -27 }, 
-	SeasonedCastSize = { 385, 40 },
-	SeasonedCastSparkMap = {
+	["PowerSize"] = { 68 +12, 68 +12 },
+	["PowerShowAlternate"] = true, 
+	["PowerValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
+	["PowerValueDrawLayer"] = { "OVERLAY", 1 },
+	["PowerValueFont"] = GetFont(14, true),
+	["PowerValueJustifyH"] = "CENTER", 
+	["PowerValueJustifyV"] = "MIDDLE", 
+	["PowerValuePlace"] = { "CENTER", 0, -5 },
+	["PowerValueOverride"] = TargetFrame_PowerValueOverride,
+	["PowerVisibilityFilter"] = TargetFrame_PowerVisibilityFilter,
+	["SeasonedCastPlace"] = { "TOPRIGHT", -27, -27 }, 
+	["SeasonedCastSize"] = { 385, 40 },
+	["SeasonedCastSparkMap"] = {
 		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
 		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
 		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
@@ -3786,15 +3707,15 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
-	SeasonedCastTexture = GetMedia("hp_cap_bar"),
-	SeasonedHealthBackdropColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	SeasonedHealthBackdropPlace = { "CENTER", -2, 0 }, 
-	SeasonedHealthBackdropSize = { 716, 188 },
-	SeasonedHealthBackdropTexture = GetMedia("hp_cap_case"),
-	SeasonedHealthPercentVisible = true, 
-	SeasonedHealthPlace = { "TOPRIGHT", -27, -27 }, 
-	SeasonedHealthSize = { 385, 40 },
-	SeasonedHealthSparkMap = {
+	["SeasonedCastTexture"] = GetMedia("hp_cap_bar"),
+	["SeasonedHealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["SeasonedHealthBackdropPlace"] = { "CENTER", -2, 0 }, 
+	["SeasonedHealthBackdropSize"] = { 716, 188 },
+	["SeasonedHealthBackdropTexture"] = GetMedia("hp_cap_case"),
+	["SeasonedHealthPercentVisible"] = true, 
+	["SeasonedHealthPlace"] = { "TOPRIGHT", -27, -27 }, 
+	["SeasonedHealthSize"] = { 385, 40 },
+	["SeasonedHealthSparkMap"] = {
 		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
 		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
 		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
@@ -3803,38 +3724,38 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
 		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
 	},
-	SeasonedHealthTexture = GetMedia("hp_cap_bar"),
-	SeasonedHealthThreatPlace = { "CENTER", 0, 1 },
-	SeasonedHealthThreatSize = { 716, 188 },
-	SeasonedHealthThreatTexture = GetMedia("hp_cap_case_glow"),
-	SeasonedHealthValueVisible = true, 
-	SeasonedPortraitForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
-	SeasonedPortraitForegroundTexture = GetMedia("portrait_frame_hi"),
-	SeasonedPowerForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	SeasonedPowerForegroundTexture = GetMedia("pw_crystal_case"),
-	Size = { 439, 93 },
-	TargetIndicatorPetByEnemyColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	TargetIndicatorPetByEnemyPlace = { "TOPRIGHT", -10 + 96/2, 12 + 48/2 },
-	TargetIndicatorPetByEnemySize = { 96, 48 },
-	TargetIndicatorPetByEnemyTexture = GetMedia("icon_target_blue"),
-	TargetIndicatorYouByEnemyColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	TargetIndicatorYouByEnemyPlace = { "TOPRIGHT", -10 + 96/2, 12 + 48/2 },
-	TargetIndicatorYouByEnemySize = { 96, 48 },
-	TargetIndicatorYouByEnemyTexture = GetMedia("icon_target_red"),
-	TargetIndicatorYouByFriendColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
-	TargetIndicatorYouByFriendPlace = { "TOPRIGHT", -10 + 96/2, 12 + 48/2 },
-	TargetIndicatorYouByFriendSize = { 96, 48 },
-	TargetIndicatorYouByFriendTexture = GetMedia("icon_target_green"),
-	ThreatFadeOut = 3,
-	ThreatHealthAlpha = .5,
-	ThreatHealthDrawLayer = { "BACKGROUND", -2 },
-	ThreatHealthTexCoord = { 1,0,0,1 },
-	ThreatHideSolo = true, -- only set to false when testing
-	ThreatPortraitAlpha = .5,
-	ThreatPortraitDrawLayer = { "BACKGROUND", -2 },
-	ThreatPortraitPlace = { "CENTER", -1, 2 + 1 },
-	ThreatPortraitSize = { 187, 187 },
-	ThreatPortraitTexture = GetMedia("portrait_frame_glow")
+	["SeasonedHealthTexture"] = GetMedia("hp_cap_bar"),
+	["SeasonedHealthThreatPlace"] = { "CENTER", 0, 1 },
+	["SeasonedHealthThreatSize"] = { 716, 188 },
+	["SeasonedHealthThreatTexture"] = GetMedia("hp_cap_case_glow"),
+	["SeasonedHealthValueVisible"] = true, 
+	["SeasonedPortraitForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["SeasonedPortraitForegroundTexture"] = GetMedia("portrait_frame_hi"),
+	["SeasonedPowerForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["SeasonedPowerForegroundTexture"] = GetMedia("pw_crystal_case"),
+	["Size"] = { 439, 93 },
+	["TargetIndicatorPetByEnemyColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["TargetIndicatorPetByEnemyPlace"] = { "TOPRIGHT", -10 + 96/2, 12 + 48/2 },
+	["TargetIndicatorPetByEnemySize"] = { 96, 48 },
+	["TargetIndicatorPetByEnemyTexture"] = GetMedia("icon_target_blue"),
+	["TargetIndicatorYouByEnemyColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["TargetIndicatorYouByEnemyPlace"] = { "TOPRIGHT", -10 + 96/2, 12 + 48/2 },
+	["TargetIndicatorYouByEnemySize"] = { 96, 48 },
+	["TargetIndicatorYouByEnemyTexture"] = GetMedia("icon_target_red"),
+	["TargetIndicatorYouByFriendColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
+	["TargetIndicatorYouByFriendPlace"] = { "TOPRIGHT", -10 + 96/2, 12 + 48/2 },
+	["TargetIndicatorYouByFriendSize"] = { 96, 48 },
+	["TargetIndicatorYouByFriendTexture"] = GetMedia("icon_target_green"),
+	["ThreatFadeOut"] = 3,
+	["ThreatHealthAlpha"] = .5,
+	["ThreatHealthDrawLayer"] = { "BACKGROUND", -2 },
+	["ThreatHealthTexCoord"] = { 1,0,0,1 },
+	["ThreatHideSolo"] = true, -- only set to false when testing
+	["ThreatPortraitAlpha"] = .5,
+	["ThreatPortraitDrawLayer"] = { "BACKGROUND", -2 },
+	["ThreatPortraitPlace"] = { "CENTER", -1, 2 + 1 },
+	["ThreatPortraitSize"] = { 187, 187 },
+	["ThreatPortraitTexture"] = GetMedia("portrait_frame_glow")
 })
 
 ------------------------------------------------
@@ -3842,181 +3763,181 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 ------------------------------------------------
 -- Boss 
 RegisterLayout("UnitFrameBoss", "Azerite", setmetatable({
-	GrowthX = 0, -- Horizontal growth per new unit
-	GrowthY = -97, -- Vertical growth per new unit
-	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-	NameDrawLayer = { "OVERLAY", 1 },
-	NameFont = GetFont(14, true),
-	NameJustifyH = "CENTER",
-	NameJustifyV = "TOP",
-	NamePlace = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 }, 
-	HealthColorClass = false, -- color players by class 
-	HealthColorDisconnected = false, -- color disconnected units
-	HealthColorHealth = true, -- color anything else in the default health color
-	HealthColorPetAsPlayer = false, -- color your pet as you 
-	HealthColorReaction = true, -- color NPCs by their reaction standing with us
-	HealthColorTapped = false, -- color tap denied units 
-	HealthColorThreat = true, -- threat coloring on non-friendly health bars
-	Place = { "TOPRIGHT", "UICenter", "RIGHT", -64, 261 } -- Position of the initial frame
+	["GrowthX"] = 0, -- Horizontal growth per new unit
+	["GrowthY"] = -97, -- Vertical growth per new unit
+	["NameColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	["NameDrawLayer"] = { "OVERLAY", 1 },
+	["NameFont"] = GetFont(14, true),
+	["NameJustifyH"] = "CENTER",
+	["NameJustifyV"] = "TOP",
+	["NamePlace"] = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 }, 
+	["HealthColorClass"] = false, -- color players by class 
+	["HealthColorDisconnected"] = false, -- color disconnected units
+	["HealthColorHealth"] = true, -- color anything else in the default health color
+	["HealthColorPetAsPlayer"] = false, -- color your pet as you 
+	["HealthColorReaction"] = true, -- color NPCs by their reaction standing with us
+	["HealthColorTapped"] = false, -- color tap denied units 
+	["HealthColorThreat"] = true, -- threat coloring on non-friendly health bars
+	["Place"] = { "TOPRIGHT", "UICenter", "RIGHT", -64, 261 } -- Position of the initial frame
 }, { __index = Template_SmallFrameReversed_Auras }))
 
 -- 2-5 player groups
 RegisterLayout("UnitFrameParty", "Azerite", setmetatable({
 
-	HitRectInsets = { 0, 0, 0, -10 },
+	["HitRectInsets"] = { 0, 0, 0, -10 },
 
-	AlternateGroupAnchor = "BOTTOMLEFT", 
-	AlternateGrowthX = 140, -- Horizontal growth per new unit
-	AlternateGrowthY = 0, -- Vertical growth per new unit
-	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 56, 360 + 10 }, -- Position of the healermode frame
-	Aura_PostCreateButton = UnitFrame_Aura_PostCreateButton,
-	Aura_PostUpdateButton = UnitFrame_Aura_PostUpdateButton,
+	["AlternateGroupAnchor"] = "BOTTOMLEFT", 
+	["AlternateGrowthX"] = 140, -- Horizontal growth per new unit
+	["AlternateGrowthY"] = 0, -- Vertical growth per new unit
+	["AlternatePlace"] = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 56, 360 + 10 }, -- Position of the healermode frame
+	["Aura_PostCreateButton"] = UnitFrame_Aura_PostCreateButton,
+	["Aura_PostUpdateButton"] = UnitFrame_Aura_PostUpdateButton,
 	
-	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 50, -42 }, -- Position of the initial frame
-	GroupAnchor = "TOPLEFT", 
-	GrowthX = 130, -- Horizontal growth per new unit
-	GrowthY = 0, -- Vertical growth per new unit
+	["Place"] = { "TOPLEFT", "UICenter", "TOPLEFT", 50, -42 }, -- Position of the initial frame
+	["GroupAnchor"] = "TOPLEFT", 
+	["GrowthX"] = 130, -- Horizontal growth per new unit
+	["GrowthY"] = 0, -- Vertical growth per new unit
 	
-	HealthColorTapped = false, -- color tap denied units 
-	HealthColorDisconnected = true, -- color disconnected units
-	HealthColorClass = true, -- color players by class
-	HealthColorPetAsPlayer = true, -- color your pet as you 
-	HealthColorReaction = true, -- color NPCs by their reaction standing with us
-	HealthColorHealth = true, -- color anything else in the default health color
-	HealthValuePlace = { "CENTER", 0, 0 },
-	HealthValueDrawLayer = { "OVERLAY", 1 },
-	HealthValueJustifyH = "CENTER", 
-	HealthValueJustifyV = "MIDDLE", 
-	HealthValueFont = GetFont(13, true),
-	HealthValueColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-	HealthShowPercent = true, 
+	["HealthColorTapped"] = false, -- color tap denied units 
+	["HealthColorDisconnected"] = true, -- color disconnected units
+	["HealthColorClass"] = true, -- color players by class
+	["HealthColorPetAsPlayer"] = true, -- color your pet as you 
+	["HealthColorReaction"] = true, -- color NPCs by their reaction standing with us
+	["HealthColorHealth"] = true, -- color anything else in the default health color
+	["HealthValuePlace"] = { "CENTER", 0, 0 },
+	["HealthValueDrawLayer"] = { "OVERLAY", 1 },
+	["HealthValueJustifyH"] = "CENTER", 
+	["HealthValueJustifyV"] = "MIDDLE", 
+	["HealthValueFont"] = GetFont(13, true),
+	["HealthValueColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	["HealthShowPercent"] = true, 
 
-	PowerBackgroundColor = { 0, 0, 0, .75 },
-	PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
-	PowerBackgroundSize = { 74, 3 },
-	PowerBackgroundPlace = { "CENTER", 0, 0 },
-	PowerBackgroundTexture = [[Interface\ChatFrame\ChatFrameBackground]], -- GetMedia("statusbar-dark"),
-	PowerBarOrientation = "RIGHT",
-	PowerBarSmoothingFrequency = .45,
-	PowerBarSmoothingMode = "bezier-fast-in-slow-out",
-	PowerBarTexCoord = nil, --{ 14/256,(256-14)/256,14/64,(64-14)/64 },
-	PowerBarTexture = [[Interface\ChatFrame\ChatFrameBackground]], --GetMedia("statusbar-dark"),
-	PowerPlace = { "BOTTOM", 0, -1.5 },
-	PowerSize = { 72, 1 },
-	PowerBarPostUpdate = TinyFrame_PowerBarPostUpdate,
+	["PowerBackgroundColor"] = { 0, 0, 0, .75 },
+	["PowerBackgroundDrawLayer"] = { "BACKGROUND", -2 },
+	["PowerBackgroundSize"] = { 74, 3 },
+	["PowerBackgroundPlace"] = { "CENTER", 0, 0 },
+	["PowerBackgroundTexture"] = [[Interface\ChatFrame\ChatFrameBackground]], -- GetMedia("statusbar-dark"),
+	["PowerBarOrientation"] = "RIGHT",
+	["PowerBarSmoothingFrequency"] = .45,
+	["PowerBarSmoothingMode"] = "bezier-fast-in-slow-out",
+	["PowerBarTexCoord"] = nil, --{ 14/256,(256-14)/256,14/64,(64-14)/64 },
+	["PowerBarTexture"] = [[Interface\ChatFrame\ChatFrameBackground]], --GetMedia("statusbar-dark"),
+	["PowerPlace"] = { "BOTTOM", 0, -1.5 },
+	["PowerSize"] = { 72, 1 },
+	["PowerBarPostUpdate"] = TinyFrame_PowerBarPostUpdate,
 
-	PortraitPlace = { "BOTTOM", 0, 22 },
-	PortraitSize = { 70, 73 }, 
-	PortraitAlpha = .85, 
-	PortraitDistanceScale = 1,
-	PortraitPositionX = 0,
-	PortraitPositionY = 0,
-	PortraitPositionZ = 0,
-	PortraitRotation = 0, -- in degrees
-	PortraitShowFallback2D = true, -- display 2D portraits when unit is out of range of 3D models
-	PortraitBackgroundPlace = { "BOTTOM", 0, -6 }, 
-	PortraitBackgroundSize = { 130, 130 },
-	PortraitBackgroundTexture = GetMedia("party_portrait_back"), 
-	PortraitBackgroundDrawLayer = { "BACKGROUND", 0 }, 
-	PortraitBackgroundColor = { .5, .5, .5 }, 
-	PortraitShadePlace = { "BOTTOM", 0, 16 },
-	PortraitShadeSize = { 86, 86 }, 
-	PortraitShadeTexture = GetMedia("shade_circle"),
-	PortraitShadeDrawLayer = { "BACKGROUND", -1 },
-	PortraitForegroundPlace = { "BOTTOM", 0, -38 },
-	PortraitForegroundSize = { 194, 194 },
-	PortraitForegroundTexture = GetMedia("party_portrait_border"), 
-	PortraitForegroundDrawLayer = { "BACKGROUND", 0 },
-	PortraitForegroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["PortraitPlace"] = { "BOTTOM", 0, 22 },
+	["PortraitSize"] = { 70, 73 }, 
+	["PortraitAlpha"] = .85, 
+	["PortraitDistanceScale"] = 1,
+	["PortraitPositionX"] = 0,
+	["PortraitPositionY"] = 0,
+	["PortraitPositionZ"] = 0,
+	["PortraitRotation"] = 0, -- in degrees
+	["PortraitShowFallback2D"] = true, -- display 2D portraits when unit is out of range of 3D models
+	["PortraitBackgroundPlace"] = { "BOTTOM", 0, -6 }, 
+	["PortraitBackgroundSize"] = { 130, 130 },
+	["PortraitBackgroundTexture"] = GetMedia("party_portrait_back"), 
+	["PortraitBackgroundDrawLayer"] = { "BACKGROUND", 0 }, 
+	["PortraitBackgroundColor"] = { .5, .5, .5 }, 
+	["PortraitShadePlace"] = { "BOTTOM", 0, 16 },
+	["PortraitShadeSize"] = { 86, 86 }, 
+	["PortraitShadeTexture"] = GetMedia("shade_circle"),
+	["PortraitShadeDrawLayer"] = { "BACKGROUND", -1 },
+	["PortraitForegroundPlace"] = { "BOTTOM", 0, -38 },
+	["PortraitForegroundSize"] = { 194, 194 },
+	["PortraitForegroundTexture"] = GetMedia("party_portrait_border"), 
+	["PortraitForegroundDrawLayer"] = { "BACKGROUND", 0 },
+	["PortraitForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
 		
-	AuraProperties = {
-		growthX = "RIGHT", 
-		growthY = "DOWN", 
-		spacingH = 4, 
-		spacingV = 4, 
-		auraSize = 30,  
-		maxVisible = 6, 
-		filter = "PLAYER",
-		customFilter = GetAuraFilter("party"), 
-		debuffsFirst = false, 
-		disableMouse = false, 
-		showSpirals = false, 
-		showDurations = true, 
-		showLongDurations = true,
-		tooltipDefaultPosition = false, 
-		tooltipPoint = "TOPLEFT",
-		tooltipAnchor = nil,
-		tooltipRelPoint = "BOTTOMLEFT",
-		tooltipOffsetX = 8,
-		tooltipOffsetY = -16
+	["AuraProperties"] = {
+		["growthX"] = "RIGHT", 
+		["growthY"] = "DOWN", 
+		["spacingH"] = 4, 
+		["spacingV"] = 4, 
+		["auraSize"] = 30,  
+		["maxVisible"] = 6, 
+		["filter"] = "PLAYER",
+		["customFilter"] = GetAuraFilter("party"), 
+		["debuffsFirst"] = false, 
+		["disableMouse"] = false, 
+		["showSpirals"] = false, 
+		["showDurations"] = true, 
+		["showLongDurations"] = true,
+		["tooltipDefaultPosition"] = false, 
+		["tooltipPoint"] = "TOPLEFT",
+		["tooltipAnchor"] = nil,
+		["tooltipRelPoint"] = "BOTTOMLEFT",
+		["tooltipOffsetX"] = 8,
+		["tooltipOffsetY"] = -16
 	},
-	AuraFrameSize = { 30*3 + 2*5, 30*2 + 5  }, 
-	AuraFramePlace = { "BOTTOM", 0, -(30*2 + 5 + 16) },
-	AuraIconPlace = { "CENTER", 0, 0 },
-	AuraIconSize = { 30 - 6, 30 - 6 },
-	AuraIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-	AuraCountPlace = { "BOTTOMRIGHT", 9, -6 },
-	AuraCountFont = GetFont(12, true),
-	AuraCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	AuraTimePlace = { "TOPLEFT", -6, 6 },
-	AuraTimeFont = GetFont(11, true),
-	AuraBorderFramePlace = { "CENTER", 0, 0 }, 
-	AuraBorderFrameSize = { 30 + 10, 30 + 10 },
-	AuraBorderBackdrop = BACKDROPS.AuraBorderSmall,
-	AuraBorderBackdropColor = { 0, 0, 0, 0 },
-	AuraBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
-	Size = { 130, 130 }, 
+	["AuraFrameSize"] = { 30*3 + 2*5, 30*2 + 5  }, 
+	["AuraFramePlace"] = { "BOTTOM", 0, -(30*2 + 5 + 16) },
+	["AuraIconPlace"] = { "CENTER", 0, 0 },
+	["AuraIconSize"] = { 30 - 6, 30 - 6 },
+	["AuraIconTexCoord"] = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+	["AuraCountPlace"] = { "BOTTOMRIGHT", 9, -6 },
+	["AuraCountFont"] = GetFont(12, true),
+	["AuraCountColor"] = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	["AuraTimePlace"] = { "TOPLEFT", -6, 6 },
+	["AuraTimeFont"] = GetFont(11, true),
+	["AuraBorderFramePlace"] = { "CENTER", 0, 0 }, 
+	["AuraBorderFrameSize"] = { 30 + 10, 30 + 10 },
+	["AuraBorderBackdrop"] = BACKDROPS.AuraBorderSmall,
+	["AuraBorderBackdropColor"] = { 0, 0, 0, 0 },
+	["AuraBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
+	["Size"] = { 130, 130 }, 
 
-	UseGroupRole = IsRetail, 
-	GroupRolePlace = { "TOP", 0, 0 }, 
-	GroupRoleSize = { 40, 40 }, 
+	["UseGroupRole"] = IsRetail, 
+	["GroupRolePlace"] = { "TOP", 0, 0 }, 
+	["GroupRoleSize"] = { 40, 40 }, 
 
-	UseGroupRoleBackground = true, 
-		GroupRoleBackgroundPlace = { "CENTER", 0, 0 }, 
-		GroupRoleBackgroundSize = { 77, 77 }, 
-		GroupRoleBackgroundDrawLayer = { "BACKGROUND", 1 }, 
-		GroupRoleBackgroundTexture = GetMedia("point_plate"),
-		GroupRoleBackgroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["UseGroupRoleBackground"] = true, 
+		["GroupRoleBackgroundPlace"] = { "CENTER", 0, 0 }, 
+		["GroupRoleBackgroundSize"] = { 77, 77 }, 
+		["GroupRoleBackgroundDrawLayer"] = { "BACKGROUND", 1 }, 
+		["GroupRoleBackgroundTexture"] = GetMedia("point_plate"),
+		["GroupRoleBackgroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
 
-	UseGroupRoleHealer = true, 
-		GroupRoleHealerPlace = { "CENTER", 0, 0 }, 
-		GroupRoleHealerSize = { 34, 34 },
-		GroupRoleHealerTexture = GetMedia("grouprole-icons-heal"),
-		GroupRoleHealerDrawLayer = { "ARTWORK", 1 },
+	["UseGroupRoleHealer"] = true, 
+		["GroupRoleHealerPlace"] = { "CENTER", 0, 0 }, 
+		["GroupRoleHealerSize"] = { 34, 34 },
+		["GroupRoleHealerTexture"] = GetMedia("grouprole-icons-heal"),
+		["GroupRoleHealerDrawLayer"] = { "ARTWORK", 1 },
 
-	UseGroupRoleTank = true, 
-		GroupRoleTankPlace = { "CENTER", 0, 0 }, 
-		GroupRoleTankSize = { 34, 34 },
-		GroupRoleTankTexture = GetMedia("grouprole-icons-tank"),
-		GroupRoleTankDrawLayer = { "ARTWORK", 1 },
+	["UseGroupRoleTank"] = true, 
+		["GroupRoleTankPlace"] = { "CENTER", 0, 0 }, 
+		["GroupRoleTankSize"] = { 34, 34 },
+		["GroupRoleTankTexture"] = GetMedia("grouprole-icons-tank"),
+		["GroupRoleTankDrawLayer"] = { "ARTWORK", 1 },
 
-	UseGroupRoleDPS = true, 
-		GroupRoleDPSPlace = { "CENTER", 0, 0 }, 
-		GroupRoleDPSSize = { 34, 34 },
-		GroupRoleDPSTexture = GetMedia("grouprole-icons-dps"),
-		GroupRoleDPSDrawLayer = { "ARTWORK", 1 },
+	["UseGroupRoleDPS"] = true, 
+		["GroupRoleDPSPlace"] = { "CENTER", 0, 0 }, 
+		["GroupRoleDPSSize"] = { 34, 34 },
+		["GroupRoleDPSTexture"] = GetMedia("grouprole-icons-dps"),
+		["GroupRoleDPSDrawLayer"] = { "ARTWORK", 1 },
 
 
 	-- Prio #1
-	GroupAuraSize = { 36, 36 },
-	GroupAuraPlace = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 36/2 -1 }, 
-	GroupAuraButtonIconPlace = { "CENTER", 0, 0 },
-	GroupAuraButtonIconSize = { 36 - 6, 36 - 6 },
-	GroupAuraButtonIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-	GroupAuraButtonCountPlace = { "BOTTOMRIGHT", 9, -6 },
-	GroupAuraButtonCountFont = GetFont(12, true),
-	GroupAuraButtonCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	GroupAuraButtonTimePlace = { "CENTER", 0, 0 },
-	GroupAuraButtonTimeFont = GetFont(11, true),
-	GroupAuraButtonTimeColor = { 250/255, 250/255, 250/255, .85 },
-	GroupAuraButtonBorderFramePlace = { "CENTER", 0, 0 }, 
-	GroupAuraButtonBorderFrameSize = { 36 + 16, 36 + 16 },
-	GroupAuraButtonBorderBackdrop = BACKDROPS.AuraBorder,
-	GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
-	GroupAuraButtonBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
-	GroupAuraButtonDisableMouse = true, 
-	GroupAuraTooltipDefaultPosition = nil, 
-	GroupAuraPostUpdate = function(element, unit)
+	["GroupAuraSize"] = { 36, 36 },
+	["GroupAuraPlace"] = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 36/2 -1 }, 
+	["GroupAuraButtonIconPlace"] = { "CENTER", 0, 0 },
+	["GroupAuraButtonIconSize"] = { 36 - 6, 36 - 6 },
+	["GroupAuraButtonIconTexCoord"] = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+	["GroupAuraButtonCountPlace"] = { "BOTTOMRIGHT", 9, -6 },
+	["GroupAuraButtonCountFont"] = GetFont(12, true),
+	["GroupAuraButtonCountColor"] = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	["GroupAuraButtonTimePlace"] = { "CENTER", 0, 0 },
+	["GroupAuraButtonTimeFont"] = GetFont(11, true),
+	["GroupAuraButtonTimeColor"] = { 250/255, 250/255, 250/255, .85 },
+	["GroupAuraButtonBorderFramePlace"] = { "CENTER", 0, 0 }, 
+	["GroupAuraButtonBorderFrameSize"] = { 36 + 16, 36 + 16 },
+	["GroupAuraButtonBorderBackdrop"] = BACKDROPS.AuraBorder,
+	["GroupAuraButtonBorderBackdropColor"] = { 0, 0, 0, 0 },
+	["GroupAuraButtonBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
+	["GroupAuraButtonDisableMouse"] = true, 
+	["GroupAuraTooltipDefaultPosition"] = nil, 
+	["GroupAuraPostUpdate"] = function(element, unit)
 		local self = element._owner 
 
 		local rz = self.ResurrectIndicator
@@ -4067,10 +3988,10 @@ RegisterLayout("UnitFrameParty", "Azerite", setmetatable({
 	end, 
 
 	-- Prio #2
-	ReadyCheckPlace = { "CENTER", 0, -7 }, 
-	ReadyCheckSize = { 32, 32 }, 
-	ReadyCheckDrawLayer = { "OVERLAY", 7 },
-	ReadyCheckPostUpdate = function(element, unit, status) 
+	["ReadyCheckPlace"] = { "CENTER", 0, -7 }, 
+	["ReadyCheckSize"] = { 32, 32 }, 
+	["ReadyCheckDrawLayer"] = { "OVERLAY", 7 },
+	["ReadyCheckPostUpdate"] = function(element, unit, status) 
 		local self = element._owner
 
 		local rd = self.GroupAura
@@ -4109,10 +4030,10 @@ RegisterLayout("UnitFrameParty", "Azerite", setmetatable({
 	end,
 	
 	-- Prio #3
-	ResurrectIndicatorPlace = { "CENTER", 0, -7 }, 
-	ResurrectIndicatorSize = { 32, 32 }, 
-	ResurrectIndicatorDrawLayer = { "OVERLAY", 1 },
-	ResurrectIndicatorPostUpdate = function(element, unit, incomingResurrect) 
+	["ResurrectIndicatorPlace"] = { "CENTER", 0, -7 }, 
+	["ResurrectIndicatorSize"] = { 32, 32 }, 
+	["ResurrectIndicatorDrawLayer"] = { "OVERLAY", 1 },
+	["ResurrectIndicatorPostUpdate"] = function(element, unit, incomingResurrect) 
 		local self = element._owner
 
 		local rc = self.ReadyCheck
@@ -4143,17 +4064,17 @@ RegisterLayout("UnitFrameParty", "Azerite", setmetatable({
 	end,
 
 	-- Prio #4
-	UnitStatusPlace = { "CENTER", 0, -(7 + 100/2) },
-	UnitStatusDrawLayer = { "ARTWORK", 2 },
-	UnitStatusJustifyH = "CENTER",
-	UnitStatusJustifyV = "MIDDLE",
-	UnitStatusFont = GetFont(12, true),
-	UnitStatusColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-	UseUnitStatusMessageOOM = L["oom"],
-	UnitStatusHideAFK = true, 
-	UnitStatusHideOffline = true, 
-	UnitStatusHideDead = true, 
-	UnitStatusPostUpdate = function(element, unit) 
+	["UnitStatusPlace"] = { "CENTER", 0, -(7 + 100/2) },
+	["UnitStatusDrawLayer"] = { "ARTWORK", 2 },
+	["UnitStatusJustifyH"] = "CENTER",
+	["UnitStatusJustifyV"] = "MIDDLE",
+	["UnitStatusFont"] = GetFont(12, true),
+	["UnitStatusColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	["UseUnitStatusMessageOOM"] = L["oom"],
+	["UnitStatusHideAFK"] = true, 
+	["UnitStatusHideOffline"] = true, 
+	["UnitStatusHideDead"] = true, 
+	["UnitStatusPostUpdate"] = function(element, unit) 
 		local self = element._owner
 
 		local rc = self.ReadyCheck
@@ -4176,56 +4097,56 @@ RegisterLayout("UnitFrameParty", "Azerite", setmetatable({
 
 -- Player Pet
 RegisterLayout("UnitFramePet", "Azerite", setmetatable({
-	HealthColorClass = false, -- color players by class 
-	HealthColorDisconnected = false, -- color disconnected units
-	HealthColorHealth = true, -- color anything else in the default health color
-	HealthColorPetAsPlayer = false, -- color your pet as you 
-	HealthColorReaction = false, -- color NPCs by their reaction standing with us
-	HealthColorTapped = false, -- color tap denied units 
-	HealthFrequentUpdates = true, 
-	Place = { "LEFT", "UICenter", "BOTTOMLEFT", 362, 125 }
+	["HealthColorClass"] = false, -- color players by class 
+	["HealthColorDisconnected"] = false, -- color disconnected units
+	["HealthColorHealth"] = true, -- color anything else in the default health color
+	["HealthColorPetAsPlayer"] = false, -- color your pet as you 
+	["HealthColorReaction"] = false, -- color NPCs by their reaction standing with us
+	["HealthColorTapped"] = false, -- color tap denied units 
+	["HealthFrequentUpdates"] = true, 
+	["Place"] = { "LEFT", "UICenter", "BOTTOMLEFT", 362, 125 }
 }, { __index = Template_SmallFrame }))
 
 -- Focus
 if (IsRetail) then
 	RegisterLayout("UnitFrameFocus", "Azerite", setmetatable({
-		AuraProperties = {
-			growthX = "RIGHT", 
-			growthY = "UP", 
-			spacingH = 4, 
-			spacingV = 4, 
-			auraSize = Constant.SmallAuraSize, 
-			customFilter = GetAuraFilter("focus"), 
-			debuffsFirst = false, 
-			disableMouse = false, 
-			showSpirals = false, 
-			showDurations = true, 
-			showLongDurations = false,
-			tooltipDefaultPosition = false, 
-			tooltipPoint = "BOTTOMLEFT",
-			tooltipAnchor = nil,
-			tooltipRelPoint = "TOPLEFT",
-			tooltipOffsetX = 8,
-			tooltipOffsetY = 16
+		["AuraProperties"] = {
+			["growthX"] = "RIGHT", 
+			["growthY"] = "UP", 
+			["spacingH"] = 4, 
+			["spacingV"] = 4, 
+			["auraSize"] = Constant.SmallAuraSize, 
+			["customFilter"] = GetAuraFilter("focus"), 
+			["debuffsFirst"] = false, 
+			["disableMouse"] = false, 
+			["showSpirals"] = false, 
+			["showDurations"] = true, 
+			["showLongDurations"] = false,
+			["tooltipDefaultPosition"] = false, 
+			["tooltipPoint"] = "BOTTOMLEFT",
+			["tooltipAnchor"] = nil,
+			["tooltipRelPoint"] = "TOPLEFT",
+			["tooltipOffsetX"] = 8,
+			["tooltipOffsetY"] = 16
 		},
-		HealthColorClass = true, -- color players by class 
-		HealthColorDisconnected = true, -- color disconnected units
-		HealthColorHealth = false, -- color anything else in the default health color
-		HealthColorPetAsPlayer = true, -- color your pet as you 
-		HealthColorReaction = true, -- color NPCs by their reaction standing with us
-		HealthColorTapped = true, -- color tap denied units 
-		HealthColorThreat = true, -- threat coloring on non-friendly health bars
-		HealthFrequentUpdates = true, 
-		HideWhenUnitIsPlayer = false, -- hide the frame when the unit is the player, or the target
-		HideWhenTargetIsCritter = false, -- hide the frame when unit is a critter
-		NamePlace = { "BOTTOMLEFT", (Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 10 }, 
-		NameDrawLayer = { "OVERLAY", 1 },
-		NameJustifyH = "LEFT",
-		NameJustifyV = "TOP",
-		NameFont = GetFont(14, true),
-		NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-		NameSize = nil,
-		Place = { "RIGHT", "UICenter", "BOTTOMLEFT", 332, 270 }, -- collides with 2nd row of player auras.
+		["HealthColorClass"] = true, -- color players by class 
+		["HealthColorDisconnected"] = true, -- color disconnected units
+		["HealthColorHealth"] = false, -- color anything else in the default health color
+		["HealthColorPetAsPlayer"] = true, -- color your pet as you 
+		["HealthColorReaction"] = true, -- color NPCs by their reaction standing with us
+		["HealthColorTapped"] = true, -- color tap denied units 
+		["HealthColorThreat"] = true, -- threat coloring on non-friendly health bars
+		["HealthFrequentUpdates"] = true, 
+		["HideWhenUnitIsPlayer"] = false, -- hide the frame when the unit is the player, or the target
+		["HideWhenTargetIsCritter"] = false, -- hide the frame when unit is a critter
+		["NamePlace"] = { "BOTTOMLEFT", (Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 10 }, 
+		["NameDrawLayer"] = { "OVERLAY", 1 },
+		["NameJustifyH"] = "LEFT",
+		["NameJustifyV"] = "TOP",
+		["NameFont"] = GetFont(14, true),
+		["NameColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+		["NameSize"] = nil,
+		["Place"] = { "RIGHT", "UICenter", "BOTTOMLEFT", 332, 270 }, -- collides with 2nd row of player auras.
 		--Place = { "RIGHT", "UICenter", "BOTTOMLEFT", 332, 270 + 50 }
 	}, { __index = Template_SmallFrame_Auras }))
 end
@@ -4233,109 +4154,109 @@ end
 -- 6-40 player groups
 RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 
-	TargetHighlightSize = { 140 * .94, 90 *.94 },
-	HitRectInsets = { 0, 0, 0, -10 },
-	Size = Constant.RaidFrame, 
-	Place = { "TOPLEFT", "UICenter", "TOPLEFT", 64, -42 }, -- Position of the initial frame
-	AlternatePlace = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 64, 360 - 10 }, -- Position of the initial frame
+	["TargetHighlightSize"] = { 140 * .94, 90 *.94 },
+	["HitRectInsets"] = { 0, 0, 0, -10 },
+	["Size"] = Constant.RaidFrame, 
+	["Place"] = { "TOPLEFT", "UICenter", "TOPLEFT", 64, -42 }, -- Position of the initial frame
+	["AlternatePlace"] = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 64, 360 - 10 }, -- Position of the initial frame
 
-	GroupSizeNormal = 5,
-	GrowthXNormal = 0, -- Horizontal growth per new unit within a group
-	GrowthYNormal = -38 - 4, -- Vertical growth per new unit within a group
-	GrowthYNormalHealerMode = -(-38 - 4), -- Vertical growth per new unit within a group
-	GroupGrowthXNormal = 110, 
-	GroupGrowthYNormal = -(38 + 8)*5 - 10,
-	GroupGrowthYNormalHealerMode = -(-(38 + 8)*5 - 10),
-	GroupColsNormal = 5, 
-	GroupRowsNormal = 1, 
-	GroupAnchorNormal = "TOPLEFT", 
-	GroupAnchorNormalHealerMode = "BOTTOMLEFT", 
-	GroupSizeEpic = 8,
-	GrowthXEpic = 0, 
-	GrowthYEpic = -38 - 4,
-	GrowthYEpicHealerMode = -(-38 - 4),
-	GroupGrowthXEpic = 110, 
-	GroupGrowthYEpic = -(38 + 8)*8 - 10,
-	GroupGrowthYEpicHealerMode = -(-(38 + 8)*8 - 10),
-	GroupColsEpic = 5, 
-	GroupRowsEpic = 1, 
-	GroupAnchorEpic = "TOPLEFT", 
-	GroupAnchorEpicHealerMode = "BOTTOMLEFT", 
+	["GroupSizeNormal"] = 5,
+	["GrowthXNormal"] = 0, -- Horizontal growth per new unit within a group
+	["GrowthYNormal"] = -38 - 4, -- Vertical growth per new unit within a group
+	["GrowthYNormalHealerMode"] = -(-38 - 4), -- Vertical growth per new unit within a group
+	["GroupGrowthXNormal"] = 110, 
+	["GroupGrowthYNormal"] = -(38 + 8)*5 - 10,
+	["GroupGrowthYNormalHealerMode"] = -(-(38 + 8)*5 - 10),
+	["GroupColsNormal"] = 5, 
+	["GroupRowsNormal"] = 1, 
+	["GroupAnchorNormal"] = "TOPLEFT", 
+	["GroupAnchorNormalHealerMode"] = "BOTTOMLEFT", 
+	["GroupSizeEpic"] = 8,
+	["GrowthXEpic"] = 0, 
+	["GrowthYEpic"] = -38 - 4,
+	["GrowthYEpicHealerMode"] = -(-38 - 4),
+	["GroupGrowthXEpic"] = 110, 
+	["GroupGrowthYEpic"] = -(38 + 8)*8 - 10,
+	["GroupGrowthYEpicHealerMode"] = -(-(38 + 8)*8 - 10),
+	["GroupColsEpic"] = 5, 
+	["GroupRowsEpic"] = 1, 
+	["GroupAnchorEpic"] = "TOPLEFT", 
+	["GroupAnchorEpicHealerMode"] = "BOTTOMLEFT", 
 
-	GroupNumberColor = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-	GroupNumberDrawLayer = { "ARTWORK", 1 },
-	GroupNumberFont = GetFont(11,true),
-	GroupNumberJustifyH = "RIGHT",
-	GroupNumberJustifyV = "BOTTOM",
-	GroupNumberPlace = { "BOTTOMLEFT", 2, -6 },
+	["GroupNumberColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	["GroupNumberDrawLayer"] = { "ARTWORK", 1 },
+	["GroupNumberFont"] = GetFont(11,true),
+	["GroupNumberJustifyH"] = "RIGHT",
+	["GroupNumberJustifyV"] = "BOTTOM",
+	["GroupNumberPlace"] = { "BOTTOMLEFT", 2, -6 },
 
-	HealthSize = Constant.RaidBar, 
-	HealthBackdropSize = { 140 *.94, 90 *.94 },
-	HealthColorTapped = false, -- color tap denied units 
-	HealthColorDisconnected = true, -- color disconnected units
-	HealthColorClass = true, -- color players by class
-	HealthColorPetAsPlayer = true, -- color your pet as you 
-	HealthColorReaction = true, -- color NPCs by their reaction standing with us
-	HealthColorHealth = true, -- color anything else in the default health color
+	["HealthSize"] = Constant.RaidBar, 
+	["HealthBackdropSize"] = { 140 *.94, 90 *.94 },
+	["HealthColorTapped"] = false, -- color tap denied units 
+	["HealthColorDisconnected"] = true, -- color disconnected units
+	["HealthColorClass"] = true, -- color players by class
+	["HealthColorPetAsPlayer"] = true, -- color your pet as you 
+	["HealthColorReaction"] = true, -- color NPCs by their reaction standing with us
+	["HealthColorHealth"] = true, -- color anything else in the default health color
 
-	PowerBackgroundColor = { 0, 0, 0, .75 },
-	PowerBackgroundDrawLayer = { "BACKGROUND", -2 },
-	PowerBackgroundSize = { 68, 3 },
-	PowerBackgroundPlace = { "CENTER", 0, 0 },
-	PowerBackgroundTexture = [[Interface\ChatFrame\ChatFrameBackground]], -- GetMedia("statusbar-dark"),
-	PowerBarOrientation = "RIGHT",
-	PowerBarSmoothingFrequency = .45,
-	PowerBarSmoothingMode = "bezier-fast-in-slow-out",
-	PowerBarTexCoord = nil, --{ 14/256,(256-14)/256,14/64,(64-14)/64 },
-	PowerBarTexture = [[Interface\ChatFrame\ChatFrameBackground]], --GetMedia("statusbar-dark"),
-	PowerPlace = { "BOTTOM", 0, -.5 },
-	PowerSize = { 66, 1 },
-	PowerBarPostUpdate = TinyFrame_PowerBarPostUpdate,
+	["PowerBackgroundColor"] = { 0, 0, 0, .75 },
+	["PowerBackgroundDrawLayer"] = { "BACKGROUND", -2 },
+	["PowerBackgroundSize"] = { 68, 3 },
+	["PowerBackgroundPlace"] = { "CENTER", 0, 0 },
+	["PowerBackgroundTexture"] = [[Interface\ChatFrame\ChatFrameBackground]], -- GetMedia("statusbar-dark"),
+	["PowerBarOrientation"] = "RIGHT",
+	["PowerBarSmoothingFrequency"] = .45,
+	["PowerBarSmoothingMode"] = "bezier-fast-in-slow-out",
+	["PowerBarTexCoord"] = nil, --{ 14/256,(256-14)/256,14/64,(64-14)/64 },
+	["PowerBarTexture"] = [[Interface\ChatFrame\ChatFrameBackground]], --GetMedia("statusbar-dark"),
+	["PowerPlace"] = { "BOTTOM", 0, -.5 },
+	["PowerSize"] = { 66, 1 },
+	["PowerBarPostUpdate"] = TinyFrame_PowerBarPostUpdate,
 
-	NamePlace = { "TOP", 0, 1 - 2 }, 
-	NameDrawLayer = { "ARTWORK", 1 },
-	NameJustifyH = "CENTER",
-	NameJustifyV = "TOP",
-	NameFont = GetFont(11, true),
-	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-	NameMaxChars = 8, 
-	NameUseDots = false, 
+	["NamePlace"] = { "TOP", 0, 1 - 2 }, 
+	["NameDrawLayer"] = { "ARTWORK", 1 },
+	["NameJustifyH"] = "CENTER",
+	["NameJustifyV"] = "TOP",
+	["NameFont"] = GetFont(11, true),
+	["NameColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	["NameMaxChars"] = 8, 
+	["NameUseDots"] = false, 
 
-	RaidRolePoint = "RIGHT", RaidRoleAnchor = "Name", RaidRolePlace = { "LEFT", -1, 1 }, 
-	RaidRoleSize = { 16, 16 }, 
-	RaidRoleDrawLayer = { "ARTWORK", 3 },
-	RaidRoleRaidTargetTexture = GetMedia("raid_target_icons_small"),
+	["RaidRolePoint"] = "RIGHT", RaidRoleAnchor = "Name", RaidRolePlace = { "LEFT", -1, 1 }, 
+	["RaidRoleSize"] = { 16, 16 }, 
+	["RaidRoleDrawLayer"] = { "ARTWORK", 3 },
+	["RaidRoleRaidTargetTexture"] = GetMedia("raid_target_icons_small"),
 	
-	UseGroupRole = IsRetail, 
-	GroupRolePlace = { "RIGHT", 10, -8 }, 
-	GroupRoleSize = { 28, 28 }, 
+	["UseGroupRole"] = IsRetail, 
+	["GroupRolePlace"] = { "RIGHT", 10, -8 }, 
+	["GroupRoleSize"] = { 28, 28 }, 
 
-	UseGroupRoleBackground = true, 
-		GroupRoleBackgroundPlace = { "CENTER", 0, 0 }, 
-		GroupRoleBackgroundSize = { 54, 54 }, 
-		GroupRoleBackgroundDrawLayer = { "BACKGROUND", 1 }, 
-		GroupRoleBackgroundTexture = GetMedia("point_plate"),
-		GroupRoleBackgroundColor = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
+	["UseGroupRoleBackground"] = true, 
+		["GroupRoleBackgroundPlace"] = { "CENTER", 0, 0 }, 
+		["GroupRoleBackgroundSize"] = { 54, 54 }, 
+		["GroupRoleBackgroundDrawLayer"] = { "BACKGROUND", 1 }, 
+		["GroupRoleBackgroundTexture"] = GetMedia("point_plate"),
+		["GroupRoleBackgroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
 
-	UseGroupRoleHealer = true, 
-		GroupRoleHealerPlace = { "CENTER", 0, 0 }, 
-		GroupRoleHealerSize = { 24, 24 },
-		GroupRoleHealerTexture = GetMedia("grouprole-icons-heal"),
-		GroupRoleHealerDrawLayer = { "ARTWORK", 1 },
+	["UseGroupRoleHealer"] = true, 
+		["GroupRoleHealerPlace"] = { "CENTER", 0, 0 }, 
+		["GroupRoleHealerSize"] = { 24, 24 },
+		["GroupRoleHealerTexture"] = GetMedia("grouprole-icons-heal"),
+		["GroupRoleHealerDrawLayer"] = { "ARTWORK", 1 },
 
-	UseGroupRoleTank = true, 
-		GroupRoleTankPlace = { "CENTER", 0, 0 }, 
-		GroupRoleTankSize = { 24, 24 },
-		GroupRoleTankTexture = GetMedia("grouprole-icons-tank"),
-		GroupRoleTankDrawLayer = { "ARTWORK", 1 },
+	["UseGroupRoleTank"] = true, 
+		["GroupRoleTankPlace"] = { "CENTER", 0, 0 }, 
+		["GroupRoleTankSize"] = { 24, 24 },
+		["GroupRoleTankTexture"] = GetMedia("grouprole-icons-tank"),
+		["GroupRoleTankDrawLayer"] = { "ARTWORK", 1 },
 
-	UseGroupRoleDPS = false, 
-		GroupRoleDPSPlace = { "CENTER", 0, 0 }, 
-		GroupRoleDPSSize = { 24, 24 },
-		GroupRoleDPSTexture = GetMedia("grouprole-icons-dps"),
-		GroupRoleDPSDrawLayer = { "ARTWORK", 1 },
+	["UseGroupRoleDPS"] = false, 
+		["GroupRoleDPSPlace"] = { "CENTER", 0, 0 }, 
+		["GroupRoleDPSSize"] = { 24, 24 },
+		["GroupRoleDPSTexture"] = GetMedia("grouprole-icons-dps"),
+		["GroupRoleDPSDrawLayer"] = { "ARTWORK", 1 },
 
-	GroupRolePostUpdate = function(element, unit, groupRole)
+	["GroupRolePostUpdate"] = function(element, unit, groupRole)
 		if groupRole then 
 			if groupRole == "DAMAGER" then 
 				element.Bg:Hide()
@@ -4346,25 +4267,25 @@ RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 	end, 
 
 	-- Prio #1
-	GroupAuraSize = { 24, 24 },
-	GroupAuraPlace = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 24/2 -(1 + 2) }, 
-	GroupAuraButtonIconPlace = { "CENTER", 0, 0 },
-	GroupAuraButtonIconSize = { 24 - 6, 24 - 6 },
-	GroupAuraButtonIconTexCoord = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
-	GroupAuraButtonCountPlace = { "BOTTOMRIGHT", 9, -6 },
-	GroupAuraButtonCountFont = GetFont(12, true),
-	GroupAuraButtonCountColor = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
-	GroupAuraButtonTimePlace = { "CENTER", 0, 0 },
-	GroupAuraButtonTimeFont = GetFont(11, true),
-	GroupAuraButtonTimeColor = { 250/255, 250/255, 250/255, .85 },
-	GroupAuraButtonBorderFramePlace = { "CENTER", 0, 0 }, 
-	GroupAuraButtonBorderFrameSize = { 24 + 12, 24 + 12 },
-	GroupAuraButtonBorderBackdrop = BACKDROPS.AuraBorderSmall,
-	GroupAuraButtonBorderBackdropColor = { 0, 0, 0, 0 },
-	GroupAuraButtonBorderBackdropBorderColor = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
-	GroupAuraButtonDisableMouse = true, 
-	GroupAuraTooltipDefaultPosition = nil, 
-	GroupAuraPostUpdate = function(element, unit)
+	["GroupAuraSize"] = { 24, 24 },
+	["GroupAuraPlace"] = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 24/2 -(1 + 2) }, 
+	["GroupAuraButtonIconPlace"] = { "CENTER", 0, 0 },
+	["GroupAuraButtonIconSize"] = { 24 - 6, 24 - 6 },
+	["GroupAuraButtonIconTexCoord"] = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
+	["GroupAuraButtonCountPlace"] = { "BOTTOMRIGHT", 9, -6 },
+	["GroupAuraButtonCountFont"] = GetFont(12, true),
+	["GroupAuraButtonCountColor"] = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
+	["GroupAuraButtonTimePlace"] = { "CENTER", 0, 0 },
+	["GroupAuraButtonTimeFont"] = GetFont(11, true),
+	["GroupAuraButtonTimeColor"] = { 250/255, 250/255, 250/255, .85 },
+	["GroupAuraButtonBorderFramePlace"] = { "CENTER", 0, 0 }, 
+	["GroupAuraButtonBorderFrameSize"] = { 24 + 12, 24 + 12 },
+	["GroupAuraButtonBorderBackdrop"] = BACKDROPS.AuraBorderSmall,
+	["GroupAuraButtonBorderBackdropColor"] = { 0, 0, 0, 0 },
+	["GroupAuraButtonBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
+	["GroupAuraButtonDisableMouse"] = true, 
+	["GroupAuraTooltipDefaultPosition"] = nil, 
+	["GroupAuraPostUpdate"] = function(element, unit)
 		local self = element._owner 
 
 		local rz = self.ResurrectIndicator
@@ -4408,10 +4329,10 @@ RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 	end, 
 
 	-- Prio #2
-	ReadyCheckPlace = { "CENTER", 0, -7 }, 
-	ReadyCheckSize = { 32, 32 }, 
-	ReadyCheckDrawLayer = { "OVERLAY", 7 },
-	ReadyCheckPostUpdate = function(element, unit, status) 
+	["ReadyCheckPlace"] = { "CENTER", 0, -7 }, 
+	["ReadyCheckSize"] = { 32, 32 }, 
+	["ReadyCheckDrawLayer"] = { "OVERLAY", 7 },
+	["ReadyCheckPostUpdate"] = function(element, unit, status) 
 		local self = element._owner
 
 		local rd = self.GroupAura
@@ -4441,10 +4362,10 @@ RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 	end,
 
 	-- Prio #3
-	ResurrectIndicatorPlace = { "CENTER", 0, -7 }, 
-	ResurrectIndicatorSize = { 32, 32 }, 
-	ResurrectIndicatorDrawLayer = { "OVERLAY", 1 },
-	ResurrectIndicatorPostUpdate = function(element, unit, incomingResurrect) 
+	["ResurrectIndicatorPlace"] = { "CENTER", 0, -7 }, 
+	["ResurrectIndicatorSize"] = { 32, 32 }, 
+	["ResurrectIndicatorDrawLayer"] = { "OVERLAY", 1 },
+	["ResurrectIndicatorPostUpdate"] = function(element, unit, incomingResurrect) 
 		local self = element._owner
 
 		local rc = self.ReadyCheck
@@ -4469,14 +4390,14 @@ RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 	end,
 
 	-- Prio #4
-	UnitStatusPlace = { "CENTER", 0, -7 },
-	UnitStatusDrawLayer = { "ARTWORK", 2 },
-	UnitStatusJustifyH = "CENTER",
-	UnitStatusJustifyV = "MIDDLE",
-	UnitStatusFont = GetFont(12, true),
-	UnitStatusColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-	UseUnitStatusMessageOOM = L["oom"],
-	UnitStatusPostUpdate = function(element, unit) 
+	["UnitStatusPlace"] = { "CENTER", 0, -7 },
+	["UnitStatusDrawLayer"] = { "ARTWORK", 2 },
+	["UnitStatusJustifyH"] = "CENTER",
+	["UnitStatusJustifyV"] = "MIDDLE",
+	["UnitStatusFont"] = GetFont(12, true),
+	["UnitStatusColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	["UseUnitStatusMessageOOM"] = L["oom"],
+	["UnitStatusPostUpdate"] = function(element, unit) 
 		local self = element._owner
 		local rc = self.ReadyCheck
 		local rd = self.GroupAura
@@ -4493,24 +4414,24 @@ RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 
 -- Target of Target
 RegisterLayout("UnitFrameToT", "Azerite", setmetatable({
-	HealthColorClass = true, -- color players by class 
-	HealthColorDisconnected = true, -- color disconnected units
-	HealthColorHealth = false, -- color anything else in the default health color
-	HealthColorPetAsPlayer = true, -- color your pet as you 
-	HealthColorReaction = true, -- color NPCs by their reaction standing with us
-	HealthColorTapped = true, -- color tap denied units 
-	HealthColorThreat = true, -- threat coloring on non-friendly health bars
-	HealthFrequentUpdates = true, 
-	HideWhenTargetIsCritter = true, -- hide the frame when unit is a critter
-	HideWhenUnitIsPlayer = true, -- hide the frame when the unit is the player
-	HideWhenUnitIsTarget = true, -- hide the frame when the unit matches our target
-	NameColor = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
-	NameDrawLayer = { "OVERLAY", 1 },
-	NameFont = GetFont(14, true),
-	NameJustifyH = "RIGHT",
-	NameJustifyV = "TOP",
-	NamePlace = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 - 4 }, 
-	Place = { "RIGHT", "UICenter", "TOPRIGHT", -492, -96 + 6 }
+	["HealthColorClass"] = true, -- color players by class 
+	["HealthColorDisconnected"] = true, -- color disconnected units
+	["HealthColorHealth"] = false, -- color anything else in the default health color
+	["HealthColorPetAsPlayer"] = true, -- color your pet as you 
+	["HealthColorReaction"] = true, -- color NPCs by their reaction standing with us
+	["HealthColorTapped"] = true, -- color tap denied units 
+	["HealthColorThreat"] = true, -- threat coloring on non-friendly health bars
+	["HealthFrequentUpdates"] = true, 
+	["HideWhenTargetIsCritter"] = true, -- hide the frame when unit is a critter
+	["HideWhenUnitIsPlayer"] = true, -- hide the frame when the unit is the player
+	["HideWhenUnitIsTarget"] = true, -- hide the frame when the unit matches our target
+	["NameColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .75 },
+	["NameDrawLayer"] = { "OVERLAY", 1 },
+	["NameFont"] = GetFont(14, true),
+	["NameJustifyH"] = "RIGHT",
+	["NameJustifyV"] = "TOP",
+	["NamePlace"] = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 - 4 }, 
+	["Place"] = { "RIGHT", "UICenter", "TOPRIGHT", -492, -96 + 6 }
 }, { __index = Template_SmallFrameReversed }))
 
 ------------------------------------------------
@@ -4531,6 +4452,6 @@ RegisterLayoutVariation("NamePlates", "Legacy", "Azerite", {})
 
 -- Few changes
 RegisterLayoutVariation("Bindings", "Legacy", "Azerite", { BindButtonTexture = GetMedia("actionbutton-mask-square") })
-RegisterLayoutVariation("Durability", "Legacy", "Azerite", { 	Place = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 } })
+RegisterLayoutVariation("Durability", "Legacy", "Azerite", { 	["Place"] = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 } })
 RegisterLayoutVariation("Tooltips", "Legacy", "Azerite", { TooltipPlace = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -54, 66 } })
 RegisterLayoutVariation("OptionsMenu", "Legacy", "Azerite", { MenuPlace = { "TOPRIGHT", -41, -32 }, MenuToggleButtonPlace = { "TOPRIGHT", -4, -4 } })

@@ -27,6 +27,7 @@ local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 local UnitGUID = UnitGUID
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
+local UnitIsAFK = UnitIsAFK
 local UnitIsConnected = UnitIsConnected
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitIsFriend = UnitIsFriend
@@ -88,8 +89,10 @@ local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 		else
 			if (health.disconnected) then 
 				healthValue:SetText(S_PLAYER_OFFLINE)
-			elseif (health.dead) then 
+			elseif (health.dead) or (min == 0) then -- is the latter always true?
 				healthValue:SetText(S_DEAD)
+			elseif (health.afk and health.ShowAFK) then
+				healthValue:SetText(S_AFK)
 			else 
 				if (min == 0 or max == 0) and (not healthValue.showAtZero) then
 					healthValue:SetText("")
@@ -100,12 +103,12 @@ local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 						else
 							healthValue:SetFormattedText("%.0f%%", min/max*100 - (min/max*100)%1)
 						end
+					elseif (healthValue.showPercent) and (min < max) then
+						healthValue:SetFormattedText("%.0f%%", min/max*100 - (min/max*100)%1)
+					elseif (healthValue.showMaxValue) then
+						healthValue:SetFormattedText("%s / %s", large(min), large(max))
 					else
-						if (healthValue.showMaxValue) then
-							healthValue:SetFormattedText("%s / %s", large(min), large(max))
-						else
-							healthValue:SetFormattedText("%s", large(min))
-						end
+						healthValue:SetFormattedText("%s", large(min))
 					end
 				end
 			end
@@ -315,6 +318,7 @@ local Update = function(self, event, unit)
 
 	-- Store some basic values on the health element
 	health.guid = guid
+	health.afk = UnitIsAFK(unit)
 	health.disconnected = not UnitIsConnected(unit)
 	health.dead = UnitIsDeadOrGhost(unit)
 	health.tapped = (not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit) and UnitCanAttack("player", unit)
@@ -665,5 +669,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 64)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 66)
 end 
