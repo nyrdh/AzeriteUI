@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 14)
+local LibChatTool = Wheel:Set("LibChatTool", 16)
 if (not LibChatTool) then
 	return
 end
@@ -849,6 +849,15 @@ local COPPER_PER_SILVER = COPPER_PER_SILVER -- 100
 local SILVER_PER_GOLD = SILVER_PER_GOLD -- 100
 local COPPER_PER_GOLD = COPPER_PER_SILVER * SILVER_PER_GOLD
 
+LibChatTool.OnFrameHide = function(self, event, ...)
+	-- Just store the value and exit for auction house closing.
+	if (event == "GP_LibChatTool_AuctionHouseFrameHide") then
+		LibChatTool:OnEvent("PLAYER_ENTERING_WORLD")
+		return
+	end
+	-- This would be when the merchant frame closes.
+	LibChatTool:OnEvent("PLAYER_MONEY")
+end
 
 LibChatTool.OnEvent = function(self, event, ...)
 
@@ -858,11 +867,28 @@ LibChatTool.OnEvent = function(self, event, ...)
 	elseif (event == "PLAYER_MONEY") then
 		if (LibChatTool:IsUsingAlternateMoneyFilter()) then
 
-			-- Just delay everything while at the merchant?
-			if (MerchantFrame:IsShown()) then 
+			-- Check for spam frames, and wait for them to hide.
+			if (MerchantFrame:IsShown()) then
+				LibChatTool.isMerchantFrameShown = true
+				LibChatTool:SetSecureHook(MerchantFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MerchantFrameHide")
 				return
+			else
+				LibChatTool.isMerchantFrameShown = nil
+				LibChatTool:ClearSecureHook(MerchantFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MerchantFrameHide")
 			end
 
+			-- The Auction house can be mega spammy too, 
+			-- we don't need to see every single deposit listed.
+			if ((AuctionHouseFrame) and (AuctionHouseFrame:IsShown())) then
+				LibChatTool.isAuctionHouseFrameShown = true
+				LibChatTool:SetSecureHook(AuctionHouseFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
+				return
+			else
+				LibChatTool.isAuctionHouseFrameShown = nil
+				LibChatTool:ClearSecureHook(AuctionHouseFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
+			end
+
+			-- Get the current money value.
 			local currentMoney = GetMoney()
 
 			-- Check if the value has been cached up previously.
@@ -973,11 +999,6 @@ Filters.Styling = {
 			LibChatTool.playerMoney = GetMoney()
 			LibChatTool:RegisterEvent("PLAYER_ENTERING_WORLD", LibChatTool.OnEvent)
 			LibChatTool:RegisterEvent("PLAYER_MONEY", LibChatTool.OnEvent)
-		
-			-- Hook the merchantframe to our update system.
-			--LibChatTool:SetSecureHook("MerchantFrame_Update", "OnEvent", "GP_LibChatTool_MerchantFrameUpdate")
-			LibChatTool:SetSecureHook(MerchantFrame, "Show", "OnEvent", "GP_LibChatTool_MerchantFrameShow")
-			LibChatTool:SetSecureHook(MerchantFrame, "Hide", "OnEvent", "GP_LibChatTool_MerchantFrameHide")
 		else
 			ChatFrame_AddMessageEventFilter("CHAT_MSG_MONEY", OnChatMessage) -- money loot
 		end
@@ -997,11 +1018,8 @@ Filters.Styling = {
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_LOOT", OnChatMessage) -- item loot
 
 		if (LibChatTool:IsUsingAlternateMoneyFilter()) then
-			LibChatTool:UnregisterEvent("PLAYER_ENTERING_WORLD", LibChatTool.OnEvent)
 			LibChatTool:UnregisterEvent("PLAYER_MONEY", LibChatTool.OnEvent)
-
-			-- Unhook the merchantframe from our update system.
-			LibChatTool:ClearSecureHook("MerchantFrame_Update", "OnEvent", "GP_LibChatTool_MerchantFrameUpdate")
+			LibChatTool:UnregisterEvent("PLAYER_ENTERING_WORLD", LibChatTool.OnEvent)
 		else
 			ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONEY", OnChatMessage) -- money loot
 		end
