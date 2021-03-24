@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 9)
+local LibChatTool = Wheel:Set("LibChatTool", 14)
 if (not LibChatTool) then
 	return
 end
@@ -30,6 +30,12 @@ LibChatTool.embeds = LibChatTool.embeds or {}
 LibChatTool.filterStatus = LibChatTool.filterStatus or {}
 LibChatTool.methodCache = LibChatTool.methodCache or {}
 
+-- Enforce the new filter, without the need for settings.
+-- Add option to opt out of its usage instead.
+if (LibChatTool.useMoneyFilterV2 == nil) then 
+	LibChatTool.useMoneyFilterV2 = true
+end
+
 -- Filter Cache
 local Filters = {}
 
@@ -40,6 +46,9 @@ local MethodCache = LibChatTool.methodCache
 -- Lua API
 local hooksecurefunc = hooksecurefunc
 local ipairs = ipairs
+local math_abs = math.abs
+local math_floor = math.floor
+local math_mod = math.fmod
 local pairs = pairs
 local string_find = string.find
 local string_format = string.format
@@ -55,6 +64,7 @@ local ChatFrame_AddMessageEventFilter = ChatFrame_AddMessageEventFilter
 local ChatFrame_RemoveMessageEventFilter = ChatFrame_RemoveMessageEventFilter
 local FCF_GetCurrentChatFrame = FCF_GetCurrentChatFrame
 local GetFactionInfo = GetFactionInfo
+local GetMoney = GetMoney
 local GetNumFactions = GetNumFactions
 local ExpandFactionHeader = ExpandFactionHeader
 local UnitFactionGroup = UnitFactionGroup
@@ -89,6 +99,7 @@ T.HONOR_BATTLEFIELD = "%s: "..value.."%d|r "..label.."%s|r"
 T.LOOT = gain.."+|r %s"
 T.LOOT_MULTIPLE = gain.."+|r %s "..sign.."(%d)|r"
 T.LOOT_MINUS = loss.."- %s|r"
+T.MONEY_MINUS = gain.."-|r %s"
 T.REP = gain.."+ %s:|r %s"
 T.REP_MULTIPLE = gain.."+|r "..value.."%d|r "..sign.."%s:|r %s"
 T.XP = gain.."+|r "..value.."%d|r "..sign.."%s|r"
@@ -270,16 +281,17 @@ table_insert(Replacements, { "<"..DND..">", "|cffE7E716<"..DND..">|r " })
 -- Utility Functions
 -----------------------------------------------------------------
 -- Make the money display pretty
-local CreateMoneyString = function(gold, silver, copper)
+local CreateMoneyString = function(gold, silver, copper, colorCode)
+	colorCode = colorCode or "|cfff0f0f0"
 	local moneyString
 	if (gold > 0) then 
-		moneyString = string_format("|cfff0f0f0%d|r%s", gold, L_GOLD)
+		moneyString = string_format(colorCode.."%d|r%s", gold, L_GOLD)
 	end
 	if (silver > 0) then 
-		moneyString = (moneyString and moneyString.." " or "") .. string_format("|cfff0f0f0%d|r%s", silver, L_SILVER)
+		moneyString = (moneyString and moneyString.." " or "") .. string_format(colorCode.."%d|r%s", silver, L_SILVER)
 	end
 	if (copper > 0) then 
-		moneyString = (moneyString and moneyString.." " or "") .. string_format("|cfff0f0f0%d|r%s", copper, L_COPPER)
+		moneyString = (moneyString and moneyString.." " or "") .. string_format(colorCode.."%d|r%s", copper, L_COPPER)
 	end 
 	return moneyString
 end
@@ -398,7 +410,12 @@ local AddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
 		if (not filtered) then
 			local moneyString = CreateMoneyString(ParseForMoney(msg))
 			if (moneyString) then
-				msg = string_format(T.LOOT, moneyString)
+				-- We're only tracking money events with the new filter. 
+				if (LibChatTool:IsUsingAlternateMoneyFilter()) then
+					return
+				else
+					msg = string_format(T.LOOT, moneyString)
+				end
 			end
 		end
 	end
@@ -452,6 +469,11 @@ local OnChatMessage = function(frame, event, message, author, ...)
 	
 	elseif (event == "CHAT_MSG_MONEY") then
 
+		-- We're only tracking money events with the new filter. 
+		if (LibChatTool:IsUsingAlternateMoneyFilter()) then
+			return true
+		end
+	
 		local moneyString = CreateMoneyString(ParseForMoney(message))
 		if (moneyString) then
 			return false, string_format(T.LOOT, moneyString), author, ...
@@ -670,9 +692,15 @@ local OnChatMessage = function(frame, event, message, author, ...)
 			--	local silver_amount = tonumber(string_match(money_string, P[SILVER_AMOUNT])) or 0
 			--	local copper_amount = tonumber(string_match(money_string, P[COPPER_AMOUNT])) or 0
 			--	
+			--
 			--	local moneyString = CreateMoneyString(gold_amount, silver_amount, copper_amount)
 			--	if (moneyString) then
-			--		return false, string_format(T.LOOT, moneyString), author, ...
+			--		-- We're only tracking money events with the new filter. 
+			--		if (LibChatTool:IsUsingAlternateMoneyFilter()) then
+			--			return true
+			--		else
+			--			return false, string_format(T.LOOT, moneyString), author, ...
+			--		end
 			--	else
 			--		return true
 			--	end
@@ -681,7 +709,12 @@ local OnChatMessage = function(frame, event, message, author, ...)
 			-- New 9.0.5 "You gained:"-style of money.
 			local moneyString = CreateMoneyString(ParseForMoney(message))
 			if (moneyString) then
-				return false, string_format(T.LOOT, moneyString), author, ...
+				-- We're only tracking money events with the new filter. 
+				if (LibChatTool:IsUsingAlternateMoneyFilter()) then
+					return true
+				else
+					return false, string_format(T.LOOT, moneyString), author, ...
+				end
 			end
 
 			-- AFK
@@ -811,6 +844,69 @@ LibChatTool.UpdateAllFilters = function(self)
 	end
 end
 
+-- Sourced from SharedXML\FormattingUtil.lua#54
+local COPPER_PER_SILVER = COPPER_PER_SILVER -- 100
+local SILVER_PER_GOLD = SILVER_PER_GOLD -- 100
+local COPPER_PER_GOLD = COPPER_PER_SILVER * SILVER_PER_GOLD
+
+
+LibChatTool.OnEvent = function(self, event, ...)
+
+	if (event == "PLAYER_ENTERING_WORLD") then
+		LibChatTool.playerMoney = GetMoney()
+
+	elseif (event == "PLAYER_MONEY") then
+		if (LibChatTool:IsUsingAlternateMoneyFilter()) then
+
+			-- Just delay everything while at the merchant?
+			if (MerchantFrame:IsShown()) then 
+				return
+			end
+
+			local currentMoney = GetMoney()
+
+			-- Check if the value has been cached up previously.
+			if (LibChatTool.playerMoney) then
+				local money = currentMoney - LibChatTool.playerMoney
+				local gold = math_floor(math_abs(money) / (COPPER_PER_SILVER * SILVER_PER_GOLD))
+				local silver = math_floor((math_abs(money) - (gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER)
+				local copper = math_mod(math_abs(money), COPPER_PER_SILVER)
+
+				if (money > 0) then
+				
+					local moneyString = CreateMoneyString(gold, silver, copper)
+					local moneyMessage = string_format(T.LOOT, moneyString)
+					local info = ChatTypeInfo["MONEY"]
+					DEFAULT_CHAT_FRAME:AddMessage(moneyMessage, info.r, info.g, info.b, info.id)
+
+				elseif (money < 0) then
+
+					local moneyString = CreateMoneyString(gold, silver, copper, red)
+					local moneyMessage = string_format(T.MONEY_MINUS, moneyString)
+					local info = ChatTypeInfo["MONEY"]
+					DEFAULT_CHAT_FRAME:AddMessage(moneyMessage, info.r, info.g, info.b, info.id)
+
+				end
+				LibChatTool.playerMoney = currentMoney
+			end
+		end
+
+	elseif (event == "GP_LibChatTool_MerchantFrameUpdate") 
+		or (event == "GP_LibChatTool_MerchantFrameShow") 
+		or (event == "GP_LibChatTool_MerchantFrameHide") 
+	then
+		if (MerchantFrame:IsShown()) then
+			LibChatTool.isMerchantFrameShown = true
+		else
+			-- Check for delayed money messages
+			if (LibChatTool.isMerchantFrameShown) then
+				LibChatTool:OnEvent("PLAYER_MONEY")
+			end
+			LibChatTool.isMerchantFrameShown = nil
+		end
+	end
+end
+
 -- Tool Public API
 -----------------------------------------------------------------
 LibChatTool.SetChatFilterEnabled = function(self, filterType, shouldEnable)
@@ -834,6 +930,15 @@ LibChatTool.SetChatFilterMoneyTextures = function(self, goldTextureString, silve
 	L_SILVER = silverTextureString or L_SILVER_DEFAULT
 	L_COPPER = copperTextureString or L_COPPER_DEFAULT
 end
+
+LibChatTool.UseAlternateMoneyFilter = function(self, useMoneyFilterV2)
+	LibChatTool.useMoneyFilterV2 = (useMoneyFilterV2) and true or false
+end
+
+LibChatTool.IsUsingAlternateMoneyFilter = function(self)
+	return LibChatTool.useMoneyFilterV2 and true or false
+end
+
 
 local embedMethods = {
 	SetChatFilterEnabled = true,
@@ -863,7 +968,20 @@ Filters.Styling = {
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_COMBAT_XP_GAIN", OnChatMessage) -- xp
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_CURRENCY", OnChatMessage) -- money loot
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_LOOT", OnChatMessage) -- item loot
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONEY", OnChatMessage) -- money loot
+		
+		if (LibChatTool:IsUsingAlternateMoneyFilter()) then
+			LibChatTool.playerMoney = GetMoney()
+			LibChatTool:RegisterEvent("PLAYER_ENTERING_WORLD", LibChatTool.OnEvent)
+			LibChatTool:RegisterEvent("PLAYER_MONEY", LibChatTool.OnEvent)
+		
+			-- Hook the merchantframe to our update system.
+			--LibChatTool:SetSecureHook("MerchantFrame_Update", "OnEvent", "GP_LibChatTool_MerchantFrameUpdate")
+			LibChatTool:SetSecureHook(MerchantFrame, "Show", "OnEvent", "GP_LibChatTool_MerchantFrameShow")
+			LibChatTool:SetSecureHook(MerchantFrame, "Hide", "OnEvent", "GP_LibChatTool_MerchantFrameHide")
+		else
+			ChatFrame_AddMessageEventFilter("CHAT_MSG_MONEY", OnChatMessage) -- money loot
+		end
+		
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_SKILL", OnChatMessage) -- skill ups
 		if (IsRetail) then
 			ChatFrame_AddMessageEventFilter("CHAT_MSG_ACHIEVEMENT", OnChatMessage)
@@ -877,7 +995,17 @@ Filters.Styling = {
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_COMBAT_XP_GAIN", OnChatMessage) -- xp
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_CURRENCY", OnChatMessage) -- money loot
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_LOOT", OnChatMessage) -- item loot
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONEY", OnChatMessage) -- money loot
+
+		if (LibChatTool:IsUsingAlternateMoneyFilter()) then
+			LibChatTool:UnregisterEvent("PLAYER_ENTERING_WORLD", LibChatTool.OnEvent)
+			LibChatTool:UnregisterEvent("PLAYER_MONEY", LibChatTool.OnEvent)
+
+			-- Unhook the merchantframe from our update system.
+			LibChatTool:ClearSecureHook("MerchantFrame_Update", "OnEvent", "GP_LibChatTool_MerchantFrameUpdate")
+		else
+			ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONEY", OnChatMessage) -- money loot
+		end
+
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SKILL", OnChatMessage) -- skill ups
 		if (IsRetail) then
 			ChatFrame_RemoveMessageEventFilter("CHAT_MSG_ACHIEVEMENT", OnChatMessage)
