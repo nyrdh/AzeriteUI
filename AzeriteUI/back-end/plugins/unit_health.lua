@@ -89,7 +89,8 @@ local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 		else
 			if (health.disconnected) then 
 				healthValue:SetText(S_PLAYER_OFFLINE)
-			elseif (health.dead) or (min == 0) then -- is the latter always true?
+			-- In classic, min can be 0 for players, but minPerc/maxPerc available.
+			elseif (health.dead) or (min == 0 and ((not minPerc) or (minPerc == 0))) then
 				healthValue:SetText(S_DEAD)
 			elseif (health.afk and healthValue.ShowAFK) then
 				healthValue:SetText(S_AFK)
@@ -674,5 +675,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 67)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 68)
 end 
