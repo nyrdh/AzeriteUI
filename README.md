@@ -2,14 +2,16 @@
 
 This is a custom user interface suite for World of Warcraft, containing multiple full interfaces in a single addon. Coded and designed by Lars Norberg and Daniel Troconis. 
 
-During the 3.1 beta phase, theme switching has been enabled with the commands `/go azerite` and `/go legacy`, where they each represent the themes of AzeriteUI and GoldpawUI. Menu options will be added for this later.
+From the 3.1 beta phase and onwards, theme switching has been enabled with the commands `/go azerite` and `/go legacy`, where they each represent the themes of AzeriteUI and GoldpawUI. Menu options will be added for this later.
 
-## **Pledge to my work:**  
+## **Motivate me!**  
+If you like this addon or others I have made, and wish to see more, consider supporting my work by sending a donation with PayPal or pledging monthly on Patreon. Your support is what motivates me to share my addons with the world, develop them further and keep them updated! 
+
 * Patreon: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)  
 * PayPal: [www.paypal.me/goldpawsstuff](https://www.paypal.me/goldpawsstuff)  
-* Liberapay: [liberapay.com/goldpawsstuff/donate](https://liberapay.com/goldpawsstuff/donate)  
+* Liberapay: [liberapay.com/goldpawsstuff/donate](https://liberapay.com/goldpawsstuff/donate)
 
-## **Join me on social media:**  
+## **Join me on social media!**  
 * Discord: [discord.gg/MUSfWXd](https://discord.gg/MUSfWXd)  
 * Twitter: [@GoldpawsStuff](https://twitter.com/goldpawsstuff)  
 

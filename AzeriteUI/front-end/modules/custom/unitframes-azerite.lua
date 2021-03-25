@@ -364,22 +364,6 @@ local CreateSecureCallbackFrame = function(module, owner, db, script)
 end
 
 -----------------------------------------------------------
--- Callbacks
------------------------------------------------------------
--- Tiny little "hack" for faster AFK status updates.
-local TinyFrame_OnEvent = function(self, event, unit, ...)
-	if (event == "PLAYER_FLAGS_CHANGED") then 
-		-- Do some trickery to instantly update the afk status, 
-		-- without having to add additional events or methods to the widget. 
-		if (UnitIsAFK(unit)) then 
-			self.Health:OverrideValue(unit)
-		else 
-			self.Health:ForceUpdate(event, unit)
-		end 
-	end 
-end 
-
------------------------------------------------------------
 -- Templates
 -----------------------------------------------------------
 -- Boss, Pet, ToT
@@ -629,10 +613,8 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	healthVal:SetFontObject(layout.HealthValueFont)
 	healthVal:SetTextColor(unpack(layout.HealthValueColor))
 	healthVal.showPercent = layout.HealthShowPercent
+	healthVal.ShowAFK = layout.HealthShowAFK
 	self.Health.Value = healthVal
-
-	-- Health Value Callback
-	self:RegisterEvent("PLAYER_FLAGS_CHANGED", TinyFrame_OnEvent)
 	
 	-- Power 
 	-----------------------------------------------------------

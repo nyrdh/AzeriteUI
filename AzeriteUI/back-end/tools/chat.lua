@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 16)
+local LibChatTool = Wheel:Set("LibChatTool", 18)
 if (not LibChatTool) then
 	return
 end
@@ -68,6 +68,7 @@ local GetMoney = GetMoney
 local GetNumFactions = GetNumFactions
 local ExpandFactionHeader = ExpandFactionHeader
 local UnitFactionGroup = UnitFactionGroup
+local UnitOnTaxi = UnitOnTaxi
 local RaidNotice_AddMessage = RaidNotice_AddMessage
 
 -- WoW Objects
@@ -856,6 +857,7 @@ LibChatTool.OnFrameHide = function(self, event, ...)
 		return
 	end
 	-- This would be when the merchant frame closes.
+	-- Add mailframe!! 
 	LibChatTool:OnEvent("PLAYER_MONEY")
 end
 
@@ -867,6 +869,12 @@ LibChatTool.OnEvent = function(self, event, ...)
 	elseif (event == "PLAYER_MONEY") then
 		if (LibChatTool:IsUsingAlternateMoneyFilter()) then
 
+			-- Return and hide if it's a taxi cost.
+			if (UnitOnTaxi("player")) then
+				LibChatTool.playerMoney = GetMoney()
+				return
+			end
+
 			-- Check for spam frames, and wait for them to hide.
 			if (MerchantFrame:IsShown()) then
 				LibChatTool.isMerchantFrameShown = true
@@ -875,6 +883,15 @@ LibChatTool.OnEvent = function(self, event, ...)
 			else
 				LibChatTool.isMerchantFrameShown = nil
 				LibChatTool:ClearSecureHook(MerchantFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MerchantFrameHide")
+			end
+
+			if (MailFrame:IsShown()) then
+				LibChatTool.isMailFrameShown = true
+				LibChatTool:SetSecureHook(MailFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MailFrameHide")
+				return
+			else
+				LibChatTool.isMailFrameShown = nil
+				LibChatTool:ClearSecureHook(MailFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MailFrameHide")
 			end
 
 			-- The Auction house can be mega spammy too, 

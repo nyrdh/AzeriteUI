@@ -91,7 +91,7 @@ local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 				healthValue:SetText(S_PLAYER_OFFLINE)
 			elseif (health.dead) or (min == 0) then -- is the latter always true?
 				healthValue:SetText(S_DEAD)
-			elseif (health.afk and health.ShowAFK) then
+			elseif (health.afk and healthValue.ShowAFK) then
 				healthValue:SetText(S_AFK)
 			else 
 				if (min == 0 or max == 0) and (not healthValue.showAtZero) then
@@ -564,6 +564,10 @@ local Enable = function(self)
 		end
 		self:RegisterEvent("UNIT_MAXHEALTH", Proxy)
 
+		-- Status events
+		self:RegisterEvent("PLAYER_FLAGS_CHANGED", Proxy)
+
+
 		-- Color events
 		self:RegisterEvent("UNIT_CONNECTION", Proxy)
 		self:RegisterEvent("UNIT_FACTION", Proxy) 
@@ -633,6 +637,7 @@ local Disable = function(self)
 		self:UnregisterEvent("UNIT_FACTION", Proxy) 
 		self:UnregisterEvent("UNIT_THREAT_SITUATION_UPDATE", Proxy)
 		self:UnregisterEvent("UNIT_THREAT_LIST_UPDATE", Proxy)
+		self:UnregisterEvent("PLAYER_FLAGS_CHANGED", Proxy)
 
 		if (IsRetail) then
 			self:UnregisterEvent("UNIT_HEAL_PREDICTION", Proxy)
@@ -669,5 +674,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 66)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 67)
 end 

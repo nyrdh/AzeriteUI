@@ -52,6 +52,7 @@ local GetAuraFilter = Private.GetAuraFilter
 local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 
+local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
 local NEW = "*"
 
 ------------------------------------------------
@@ -85,35 +86,35 @@ local BACKDROPS = {
 
 	-- Blizzard micro menu
 	["ConfigWindow"] = {
-		["bgFile"] = [[Interface\ChatFrame\ChatFrameBackground]],
+		["bgFile"] = BLANK_TEXTURE,
 		["edgeFile"] = GetMedia("tooltip_border"), edgeSize = 23, 
 		["insets"] = { top = 17.25, bottom = 17.25, left = 17.25, right = 17.25 }
 	},
 
 	-- Popup window background
 	["Popup"] = {
-		["bgFile"] = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
+		["bgFile"] = BLANK_TEXTURE, tile = false, 
 		["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 23,  
 		["insets"] = { top = 7.5, bottom = 7.5, left = 7.5, right = 7.5 }
 	},
 
 	-- Popup window buttons
 	["PopupButton"] = {
-		["bgFile"] = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
+		["bgFile"] = BLANK_TEXTURE, tile = false, 
 		["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 18,
 		["insets"] = { left = 6, right = 6, top = 6, bottom = 6 }
 	},
 
 	-- Popup window input boxes
 	["PopupEditBox"] = {
-		["bgFile"] = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
-		["edgeFile"] = [[Interface\ChatFrame\ChatFrameBackground]], edgeSize = 1,
+		["bgFile"] = BLANK_TEXTURE, tile = false, 
+		["edgeFile"] = BLANK_TEXTURE, edgeSize = 1,
 		["insets"] = { left = -6, right = -6, top = 0, bottom = 0 }
 	},
 
 	-- Tooltips and most standard frames
 	["Tooltips"] = {
-		["bgFile"] = [[Interface\ChatFrame\ChatFrameBackground]], tile = false,
+		["bgFile"] = BLANK_TEXTURE, tile = false,
 		["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 32, 
 		["insets"] = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
 	}, 
@@ -142,7 +143,7 @@ local GetBorder = function(self, edgeFile, edgeSize, bgFile, bgInsets, offsetX, 
 	border:SetPoint("TOPLEFT", -(offsetX or 6), (offsetY or 8))
 	border:SetPoint("BOTTOMRIGHT", (offsetX or 6), -(offsetY or 8))
 	border:SetBackdrop({
-		["bgFile"] = bgFile or [[Interface\ChatFrame\ChatFrameBackground]],
+		["bgFile"] = bgFile or BLANK_TEXTURE,
 		["edgeFile"] = edgeFile or GetMedia("tooltip_border_hex"),
 		["edgeSize"] = 32, 
 		["tile"] = false, 
@@ -1649,20 +1650,20 @@ local Template_SmallFrame = {
 	["CastBarSmoothingMode"] = "bezier-fast-in-slow-out", 
 	["CastBarSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =   4/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 126/128, offset = -16/32 },
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =   4/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 126/128, offset = -16/32 },
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		},
 		["bottom"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =   4/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 126/128, offset = -16/32 },
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =   4/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 126/128, offset = -16/32 },
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
 	["CastBarTexture"] = Constant.SmallBarTexture, 
@@ -1678,19 +1679,19 @@ local Template_SmallFrame = {
 	["HealthBarSetFlippedHorizontally"] = false, 
 	["HealthBarSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =   4/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =   4/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		},
 		["bottom"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =   4/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 126/128, offset = -16/32 },
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =   4/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 126/128, offset = -16/32 },
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
 	["HealthFrequentUpdates"] = true, 
@@ -1808,16 +1809,16 @@ local Template_TinyFrame = {
 	["HealthBarSetFlippedHorizontally"] = false, 
 	["HealthBarSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		},
 		["bottom"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
 	["HealthSmoothingMode"] = "bezier-fast-in-slow-out", -- smoothing method
@@ -1836,16 +1837,16 @@ local Template_TinyFrame = {
 	["CastBarSmoothingFrequency"] = .15,
 	["CastBarSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		},
 		["bottom"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
 	["CastBarTexture"] = Constant.TinyBarTexture, 
@@ -2069,16 +2070,16 @@ RegisterLayout("BlizzardTimers", "Azerite", {
 	["MirrorBarSize"] = { 111, 12 }, 
 	["MirrorBarSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		},
 		["bottom"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
 	["MirrorBarTexture"] = GetMedia("cast_bar"), 
@@ -2619,16 +2620,16 @@ RegisterLayout("NamePlates", "Azerite", {
 	["CastBarSpellQueueOrientation"] = "LEFT",
 	["CastBarSpellQueueSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		},
 		["bottom"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
 	["CastColor"] = { Colors.cast[1], Colors.cast[2], Colors.cast[3], 1 },
@@ -2650,18 +2651,18 @@ RegisterLayout("NamePlates", "Azerite", {
 	["CastSize"] = { 84, 14 }, 
 	["CastSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/256, offset = -16/32 }, 
-			{ keyPercent =   4/256, offset = -16/32 }, 
-			{ keyPercent =  19/256, offset =   0/32 }, 
-			{ keyPercent = 236/256, offset =   0/32 }, 
-			{ keyPercent = 256/256, offset = -16/32 }
+			{ ["keyPercent"] =   0/256, offset = -16/32 }, 
+			{ ["keyPercent"] =   4/256, offset = -16/32 }, 
+			{ ["keyPercent"] =  19/256, offset =   0/32 }, 
+			{ ["keyPercent"] = 236/256, offset =   0/32 }, 
+			{ ["keyPercent"] = 256/256, offset = -16/32 }
 		},
 		["bottom"] = {
-			{ keyPercent =   0/256, offset = -16/32 }, 
-			{ keyPercent =   4/256, offset = -16/32 }, 
-			{ keyPercent =  19/256, offset =   0/32 }, 
-			{ keyPercent = 236/256, offset =   0/32 }, 
-			{ keyPercent = 256/256, offset = -16/32 }
+			{ ["keyPercent"] =   0/256, offset = -16/32 }, 
+			{ ["keyPercent"] =   4/256, offset = -16/32 }, 
+			{ ["keyPercent"] =  19/256, offset =   0/32 }, 
+			{ ["keyPercent"] = 236/256, offset =   0/32 }, 
+			{ ["keyPercent"] = 256/256, offset = -16/32 }
 		}
 	},
 	["CastTexture"] = GetMedia("nameplate_bar"),
@@ -2687,18 +2688,18 @@ RegisterLayout("NamePlates", "Azerite", {
 	["HealthSize"] = { 84, 14 }, 
 	["HealthSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/256, offset = -16/32 }, 
-			{ keyPercent =   4/256, offset = -16/32 }, 
-			{ keyPercent =  19/256, offset =   0/32 }, 
-			{ keyPercent = 236/256, offset =   0/32 }, 
-			{ keyPercent = 256/256, offset = -16/32 }
+			{ ["keyPercent"] =   0/256, offset = -16/32 }, 
+			{ ["keyPercent"] =   4/256, offset = -16/32 }, 
+			{ ["keyPercent"] =  19/256, offset =   0/32 }, 
+			{ ["keyPercent"] = 236/256, offset =   0/32 }, 
+			{ ["keyPercent"] = 256/256, offset = -16/32 }
 		},
 		["bottom"] = {
-			{ keyPercent =   0/256, offset = -16/32 }, 
-			{ keyPercent =   4/256, offset = -16/32 }, 
-			{ keyPercent =  19/256, offset =   0/32 }, 
-			{ keyPercent = 236/256, offset =   0/32 }, 
-			{ keyPercent = 256/256, offset = -16/32 }
+			{ ["keyPercent"] =   0/256, offset = -16/32 }, 
+			{ ["keyPercent"] =   4/256, offset = -16/32 }, 
+			{ ["keyPercent"] =  19/256, offset =   0/32 }, 
+			{ ["keyPercent"] = 236/256, offset =   0/32 }, 
+			{ ["keyPercent"] = 256/256, offset = -16/32 }
 		}
 	},
 	["HealthTexCoord"] = { 14/256,(256-14)/256,14/64,(64-14)/64 },
@@ -2756,18 +2757,18 @@ RegisterLayout("NamePlates", "Azerite", {
 	["PowerSize"] = { 84, 14 }, 
 	["PowerSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/256, offset = -16/32 }, 
-			{ keyPercent =   4/256, offset = -16/32 }, 
-			{ keyPercent =  19/256, offset =   0/32 }, 
-			{ keyPercent = 236/256, offset =   0/32 }, 
-			{ keyPercent = 256/256, offset = -16/32 }
+			{ ["keyPercent"] =   0/256, offset = -16/32 }, 
+			{ ["keyPercent"] =   4/256, offset = -16/32 }, 
+			{ ["keyPercent"] =  19/256, offset =   0/32 }, 
+			{ ["keyPercent"] = 236/256, offset =   0/32 }, 
+			{ ["keyPercent"] = 256/256, offset = -16/32 }
 		},
 		["bottom"] = {
-			{ keyPercent =   0/256, offset = -16/32 }, 
-			{ keyPercent =   4/256, offset = -16/32 }, 
-			{ keyPercent =  19/256, offset =   0/32 }, 
-			{ keyPercent = 236/256, offset =   0/32 }, 
-			{ keyPercent = 256/256, offset = -16/32 }
+			{ ["keyPercent"] =   0/256, offset = -16/32 }, 
+			{ ["keyPercent"] =   4/256, offset = -16/32 }, 
+			{ ["keyPercent"] =  19/256, offset =   0/32 }, 
+			{ ["keyPercent"] = 236/256, offset =   0/32 }, 
+			{ ["keyPercent"] = 256/256, offset = -16/32 }
 		}
 	},
 	["PowerTexCoord"] = { 14/256,(256-14)/256,14/64,(64-14)/64 },
@@ -2921,13 +2922,13 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 	["CastBarPostUpdate"] = PlayerFrame_CastBarPostUpdate,
 	["CastBarSize"] = { 385, 40 },
 	["CastBarSparkMap"] = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		{ ["keyPercent"] =   0/512, ["topOffset"] = -24/64, ["bottomOffset"] = -39/64 }, 
+		{ ["keyPercent"] =   9/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 460/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 478/512, ["topOffset"] =   0/64, ["bottomOffset"] =   0/64 }, 
+		{ ["keyPercent"] = 483/512, ["topOffset"] =   0/64, ["bottomOffset"] =  -3/64 }, 
+		{ ["keyPercent"] = 507/512, ["topOffset"] =   0/64, ["bottomOffset"] = -46/64 }, 
+		{ ["keyPercent"] = 512/512, ["topOffset"] = -11/64, ["bottomOffset"] = -54/64 }  
 	},
 	["CastBarValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
 	["CastBarValueDrawLayer"] = { "OVERLAY", 1 },
@@ -2961,13 +2962,13 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 	["HardenedHealthBackdropTexture"] = GetMedia("hp_mid_case"),
 	["HardenedHealthSize"] = { 385, 37 },
 	["HardenedHealthSparkMap"] = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		{ ["keyPercent"] =   0/512, ["topOffset"] = -24/64, ["bottomOffset"] = -39/64 }, 
+		{ ["keyPercent"] =   9/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 460/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 478/512, ["topOffset"] =   0/64, ["bottomOffset"] =   0/64 }, 
+		{ ["keyPercent"] = 483/512, ["topOffset"] =   0/64, ["bottomOffset"] =  -3/64 }, 
+		{ ["keyPercent"] = 507/512, ["topOffset"] =   0/64, ["bottomOffset"] = -46/64 }, 
+		{ ["keyPercent"] = 512/512, ["topOffset"] = -11/64, ["bottomOffset"] = -54/64 }  
 	},
 	["HardenedHealthTexture"] = GetMedia("hp_lowmid_bar"),
 	["HardenedHealthThreatTexture"] = GetMedia("hp_mid_case_glow"),
@@ -2988,13 +2989,13 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 	["HealthBarOrientation"] = "RIGHT", 
 	["HealthBarSetFlippedHorizontally"] = false, 
 	["HealthBarSparkMap"] = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		{ ["keyPercent"] =   0/512, ["topOffset"] = -24/64, ["bottomOffset"] = -39/64 }, 
+		{ ["keyPercent"] =   9/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 460/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 478/512, ["topOffset"] =   0/64, ["bottomOffset"] =   0/64 }, 
+		{ ["keyPercent"] = 483/512, ["topOffset"] =   0/64, ["bottomOffset"] =  -3/64 }, 
+		{ ["keyPercent"] = 507/512, ["topOffset"] =   0/64, ["bottomOffset"] = -46/64 }, 
+		{ ["keyPercent"] = 512/512, ["topOffset"] = -11/64, ["bottomOffset"] = -54/64 }  
 	},
 	["HealthColorClass"] = false, -- color players by class 
 	["HealthColorDisconnected"] = false, -- color disconnected units
@@ -3068,13 +3069,13 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 	["NoviceHealthBackdropTexture"] = GetMedia("hp_low_case"),
 	["NoviceHealthSize"] = { 385, 37 },
 	["NoviceHealthSparkMap"] = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		{ ["keyPercent"] =   0/512, ["topOffset"] = -24/64, ["bottomOffset"] = -39/64 }, 
+		{ ["keyPercent"] =   9/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 460/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 478/512, ["topOffset"] =   0/64, ["bottomOffset"] =   0/64 }, 
+		{ ["keyPercent"] = 483/512, ["topOffset"] =   0/64, ["bottomOffset"] =  -3/64 }, 
+		{ ["keyPercent"] = 507/512, ["topOffset"] =   0/64, ["bottomOffset"] = -46/64 }, 
+		{ ["keyPercent"] = 512/512, ["topOffset"] = -11/64, ["bottomOffset"] = -54/64 }  
 	},
 	["NoviceHealthTexture"] = GetMedia("hp_lowmid_bar"),
 	["NoviceHealthThreatTexture"] = GetMedia("hp_low_case_glow"),
@@ -3095,19 +3096,19 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 	["PowerBarSmoothingMode"] = "bezier-fast-in-slow-out",
 	["PowerBarSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/256, offset =  -65/256 }, 
-			{ keyPercent =  72/256, offset =    0/256 }, 
-			{ keyPercent = 116/256, offset =  -16/256 }, 
-			{ keyPercent = 128/256, offset =  -28/256 }, 
-			{ keyPercent = 256/256, offset =  -84/256 }, 
+			{ ["keyPercent"] =   0/256, offset =  -65/256 }, 
+			{ ["keyPercent"] =  72/256, offset =    0/256 }, 
+			{ ["keyPercent"] = 116/256, offset =  -16/256 }, 
+			{ ["keyPercent"] = 128/256, offset =  -28/256 }, 
+			{ ["keyPercent"] = 256/256, offset =  -84/256 }, 
 		},
 		["bottom"] = {
-			{ keyPercent =   0/256, offset =  -47/256 }, 
-			{ keyPercent =  84/256, offset =    0/256 }, 
-			{ keyPercent = 135/256, offset =  -24/256 }, 
-			{ keyPercent = 142/256, offset =  -32/256 }, 
-			{ keyPercent = 225/256, offset =  -79/256 }, 
-			{ keyPercent = 256/256, offset = -168/256 }, 
+			{ ["keyPercent"] =   0/256, offset =  -47/256 }, 
+			{ ["keyPercent"] =  84/256, offset =    0/256 }, 
+			{ ["keyPercent"] = 135/256, offset =  -24/256 }, 
+			{ ["keyPercent"] = 142/256, offset =  -32/256 }, 
+			{ ["keyPercent"] = 225/256, offset =  -79/256 }, 
+			{ ["keyPercent"] = 256/256, offset = -168/256 }, 
 		}
 	},
 	["PowerBarTexCoord"] = { 50/255, 206/255, 37/255, 219/255 },
@@ -3133,13 +3134,13 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 	["SeasonedHealthBackdropTexture"] = GetMedia("hp_cap_case"),
 	["SeasonedHealthSize"] = { 385, 40 },
 	["SeasonedHealthSparkMap"] = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		{ ["keyPercent"] =   0/512, ["topOffset"] = -24/64, ["bottomOffset"] = -39/64 }, 
+		{ ["keyPercent"] =   9/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 460/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 478/512, ["topOffset"] =   0/64, ["bottomOffset"] =   0/64 }, 
+		{ ["keyPercent"] = 483/512, ["topOffset"] =   0/64, ["bottomOffset"] =  -3/64 }, 
+		{ ["keyPercent"] = 507/512, ["topOffset"] =   0/64, ["bottomOffset"] = -46/64 }, 
+		{ ["keyPercent"] = 512/512, ["topOffset"] = -11/64, ["bottomOffset"] = -54/64 }  
 	},
 	["SeasonedHealthTexture"] = GetMedia("hp_cap_bar"),
 	["SeasonedHealthThreatTexture"] = GetMedia("hp_cap_case_glow"),
@@ -3216,16 +3217,16 @@ RegisterLayout("UnitFramePlayerHUD", "Azerite", {
 	["CastBarShieldTexture"] = GetMedia("cast_back_spiked"), 
 	["CastBarSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		},
 		["bottom"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
 	["CastBarSpellQueuePlace"] = FloaterSlots.CastBar, 
@@ -3235,20 +3236,20 @@ RegisterLayout("UnitFramePlayerHUD", "Azerite", {
 	["CastBarSpellQueueOrientation"] = "LEFT",
 	["CastBarSpellQueueSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		},
 		["bottom"] = {
-			{ keyPercent =   0/128, offset = -16/32 }, 
-			{ keyPercent =  10/128, offset =   0/32 }, 
-			{ keyPercent = 119/128, offset =   0/32 }, 
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 }, 
+			{ ["keyPercent"] =  10/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 119/128, offset =   0/32 }, 
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
 	["CastBarTexture"] = Constant.SmallBarTexture, 
-	["ClassPowerAlphaWhenEmpty"] = .5, 
+	["ClassPowerAlphaWhenEmpty"] = .25, -- .5 
 	["ClassPowerAlphaWhenOutOfCombat"] = 1,
 	["ClassPowerAlphaWhenOutOfCombatRunes"] = .75, -- .5,  
 	["ClassPowerAlphaWhenHiddenRunes"] = 0, -- .10, -- this is when runes are full and you're out of combat, etc
@@ -3280,16 +3281,16 @@ RegisterLayout("UnitFramePlayerHUD", "Azerite", {
 	["PlayerAltPowerBarSize"] = Constant.SmallBar,
 	["PlayerAltPowerBarSparkMap"] = {
 		["top"] = {
-			{ keyPercent =   0/128, offset = -16/32 },
-			{ keyPercent =  10/128, offset =   0/32 },
-			{ keyPercent = 119/128, offset =   0/32 },
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 },
+			{ ["keyPercent"] =  10/128, offset =   0/32 },
+			{ ["keyPercent"] = 119/128, offset =   0/32 },
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		},
 		["bottom"] = {
-			{ keyPercent =   0/128, offset = -16/32 },
-			{ keyPercent =  10/128, offset =   0/32 },
-			{ keyPercent = 119/128, offset =   0/32 },
-			{ keyPercent = 128/128, offset = -16/32 }
+			{ ["keyPercent"] =   0/128, offset = -16/32 },
+			{ ["keyPercent"] =  10/128, offset =   0/32 },
+			{ ["keyPercent"] = 119/128, offset =   0/32 },
+			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
 	["PlayerAltPowerBarTexture"] = Constant.SmallBarTexture,
@@ -3351,18 +3352,18 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 	["BossCastSize"] = { 533, 40 },
 	["BossCastSparkMap"] = {
 		["top"] = {
-			{ keyPercent =    0/1024, offset = -24/64 }, 
-			{ keyPercent =   13/1024, offset =   0/64 }, 
-			{ keyPercent = 1018/1024, offset =   0/64 }, 
-			{ keyPercent = 1024/1024, offset = -10/64 }
+			{ ["keyPercent"] =    0/1024, offset = -24/64 }, 
+			{ ["keyPercent"] =   13/1024, offset =   0/64 }, 
+			{ ["keyPercent"] = 1018/1024, offset =   0/64 }, 
+			{ ["keyPercent"] = 1024/1024, offset = -10/64 }
 		},
 		["bottom"] = {
-			{ keyPercent =    0/1024, offset = -39/64 }, 
-			{ keyPercent =   13/1024, offset = -16/64 }, 
-			{ keyPercent =  949/1024, offset = -16/64 }, 
-			{ keyPercent =  977/1024, offset =  -1/64 }, 
-			{ keyPercent =  984/1024, offset =  -2/64 }, 
-			{ keyPercent = 1024/1024, offset = -52/64 }
+			{ ["keyPercent"] =    0/1024, offset = -39/64 }, 
+			{ ["keyPercent"] =   13/1024, offset = -16/64 }, 
+			{ ["keyPercent"] =  949/1024, offset = -16/64 }, 
+			{ ["keyPercent"] =  977/1024, offset =  -1/64 }, 
+			{ ["keyPercent"] =  984/1024, offset =  -2/64 }, 
+			{ ["keyPercent"] = 1024/1024, offset = -52/64 }
 		}
 	},
 	["BossCastTexture"] = GetMedia("hp_boss_bar"),
@@ -3375,18 +3376,18 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 	["BossHealthSize"] = { 533, 40 },
 	["BossHealthSparkMap"] = {
 		["top"] = {
-			{ keyPercent =    0/1024, offset = -24/64 }, 
-			{ keyPercent =   13/1024, offset =   0/64 }, 
-			{ keyPercent = 1018/1024, offset =   0/64 }, 
-			{ keyPercent = 1024/1024, offset = -10/64 }
+			{ ["keyPercent"] =    0/1024, offset = -24/64 }, 
+			{ ["keyPercent"] =   13/1024, offset =   0/64 }, 
+			{ ["keyPercent"] = 1018/1024, offset =   0/64 }, 
+			{ ["keyPercent"] = 1024/1024, offset = -10/64 }
 		},
 		["bottom"] = {
-			{ keyPercent =    0/1024, offset = -39/64 }, 
-			{ keyPercent =   13/1024, offset = -16/64 }, 
-			{ keyPercent =  949/1024, offset = -16/64 }, 
-			{ keyPercent =  977/1024, offset =  -1/64 }, 
-			{ keyPercent =  984/1024, offset =  -2/64 }, 
-			{ keyPercent = 1024/1024, offset = -52/64 }
+			{ ["keyPercent"] =    0/1024, offset = -39/64 }, 
+			{ ["keyPercent"] =   13/1024, offset = -16/64 }, 
+			{ ["keyPercent"] =  949/1024, offset = -16/64 }, 
+			{ ["keyPercent"] =  977/1024, offset =  -1/64 }, 
+			{ ["keyPercent"] =  984/1024, offset =  -2/64 }, 
+			{ ["keyPercent"] = 1024/1024, offset = -52/64 }
 		}
 	},
 	["BossHealthTexture"] = GetMedia("hp_boss_bar"),
@@ -3414,13 +3415,13 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 	["CastBarSmoothingFrequency"] = .15,
 	["CastBarSize"] = { 385, 40 },
 	["CastBarSparkMap"] = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		{ ["keyPercent"] =   0/512, ["topOffset"] = -24/64, ["bottomOffset"] = -39/64 }, 
+		{ ["keyPercent"] =   9/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 460/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 478/512, ["topOffset"] =   0/64, ["bottomOffset"] =   0/64 }, 
+		{ ["keyPercent"] = 483/512, ["topOffset"] =   0/64, ["bottomOffset"] =  -3/64 }, 
+		{ ["keyPercent"] = 507/512, ["topOffset"] =   0/64, ["bottomOffset"] = -46/64 }, 
+		{ ["keyPercent"] = 512/512, ["topOffset"] = -11/64, ["bottomOffset"] = -54/64 }  
 	},
 	["CastBarValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
 	["CastBarValueDrawLayer"] = { "OVERLAY", 1 },
@@ -3448,17 +3449,17 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 	["CritterCastSize"] = { 40, 36 },
 	["CritterCastSparkMap"] = {
 		["top"] = {
-			{ keyPercent =  0/64, offset = -30/64 }, 
-			{ keyPercent = 14/64, offset =  -1/64 }, 
-			{ keyPercent = 49/64, offset =  -1/64 }, 
-			{ keyPercent = 64/64, offset = -34/64 }
+			{ ["keyPercent"] =  0/64, offset = -30/64 }, 
+			{ ["keyPercent"] = 14/64, offset =  -1/64 }, 
+			{ ["keyPercent"] = 49/64, offset =  -1/64 }, 
+			{ ["keyPercent"] = 64/64, offset = -34/64 }
 		},
 		["bottom"] = {
-			{ keyPercent =  0/64, offset = -30/64 }, 
-			{ keyPercent = 15/64, offset =   0/64 }, 
-			{ keyPercent = 32/64, offset =  -1/64 }, 
-			{ keyPercent = 50/64, offset =  -4/64 }, 
-			{ keyPercent = 64/64, offset = -27/64 }
+			{ ["keyPercent"] =  0/64, offset = -30/64 }, 
+			{ ["keyPercent"] = 15/64, offset =   0/64 }, 
+			{ ["keyPercent"] = 32/64, offset =  -1/64 }, 
+			{ ["keyPercent"] = 50/64, offset =  -4/64 }, 
+			{ ["keyPercent"] = 64/64, offset = -27/64 }
 		}
 	},
 	["CritterCastTexture"] = GetMedia("hp_critter_bar"),
@@ -3471,17 +3472,17 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 	["CritterHealthSize"] = { 40, 36 },
 	["CritterHealthSparkMap"] = {
 		["top"] = {
-			{ keyPercent =  0/64, offset = -30/64 }, 
-			{ keyPercent = 14/64, offset =  -1/64 }, 
-			{ keyPercent = 49/64, offset =  -1/64 }, 
-			{ keyPercent = 64/64, offset = -34/64 }
+			{ ["keyPercent"] =  0/64, offset = -30/64 }, 
+			{ ["keyPercent"] = 14/64, offset =  -1/64 }, 
+			{ ["keyPercent"] = 49/64, offset =  -1/64 }, 
+			{ ["keyPercent"] = 64/64, offset = -34/64 }
 		},
 		["bottom"] = {
-			{ keyPercent =  0/64, offset = -30/64 }, 
-			{ keyPercent = 15/64, offset =   0/64 }, 
-			{ keyPercent = 32/64, offset =  -1/64 }, 
-			{ keyPercent = 50/64, offset =  -4/64 }, 
-			{ keyPercent = 64/64, offset = -27/64 }
+			{ ["keyPercent"] =  0/64, offset = -30/64 }, 
+			{ ["keyPercent"] = 15/64, offset =   0/64 }, 
+			{ ["keyPercent"] = 32/64, offset =  -1/64 }, 
+			{ ["keyPercent"] = 50/64, offset =  -4/64 }, 
+			{ ["keyPercent"] = 64/64, offset = -27/64 }
 		}
 	},
 	["CritterHealthTexture"] = GetMedia("hp_critter_bar"),
@@ -3496,13 +3497,13 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 	["HardenedCastPlace"] = { "TOPRIGHT", -27, -27 }, 
 	["HardenedCastSize"] = { 385, 37 },
 	["HardenedCastSparkMap"] = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		{ ["keyPercent"] =   0/512, ["topOffset"] = -24/64, ["bottomOffset"] = -39/64 }, 
+		{ ["keyPercent"] =   9/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 460/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 478/512, ["topOffset"] =   0/64, ["bottomOffset"] =   0/64 }, 
+		{ ["keyPercent"] = 483/512, ["topOffset"] =   0/64, ["bottomOffset"] =  -3/64 }, 
+		{ ["keyPercent"] = 507/512, ["topOffset"] =   0/64, ["bottomOffset"] = -46/64 }, 
+		{ ["keyPercent"] = 512/512, ["topOffset"] = -11/64, ["bottomOffset"] = -54/64 }  
 	},
 	["HardenedCastTexture"] = GetMedia("hp_lowmid_bar"),
 	["HardenedHealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
@@ -3513,13 +3514,13 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 	["HardenedHealthPlace"] = { "TOPRIGHT", -27, -27 }, 
 	["HardenedHealthSize"] = { 385, 37 },
 	["HardenedHealthSparkMap"] = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		{ ["keyPercent"] =   0/512, ["topOffset"] = -24/64, ["bottomOffset"] = -39/64 }, 
+		{ ["keyPercent"] =   9/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 460/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 478/512, ["topOffset"] =   0/64, ["bottomOffset"] =   0/64 }, 
+		{ ["keyPercent"] = 483/512, ["topOffset"] =   0/64, ["bottomOffset"] =  -3/64 }, 
+		{ ["keyPercent"] = 507/512, ["topOffset"] =   0/64, ["bottomOffset"] = -46/64 }, 
+		{ ["keyPercent"] = 512/512, ["topOffset"] = -11/64, ["bottomOffset"] = -54/64 }  
 	},
 	["HardenedHealthTexture"] = GetMedia("hp_lowmid_bar"),
 	["HardenedHealthThreatPlace"] = { "CENTER", 0, 1 },
@@ -3611,13 +3612,13 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 	["NoviceCastPlace"] = { "TOPRIGHT", -27, -27 }, 
 	["NoviceCastSize"] = { 385, 37 },
 	["NoviceCastSparkMap"] = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		{ ["keyPercent"] =   0/512, ["topOffset"] = -24/64, ["bottomOffset"] = -39/64 }, 
+		{ ["keyPercent"] =   9/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 460/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 478/512, ["topOffset"] =   0/64, ["bottomOffset"] =   0/64 }, 
+		{ ["keyPercent"] = 483/512, ["topOffset"] =   0/64, ["bottomOffset"] =  -3/64 }, 
+		{ ["keyPercent"] = 507/512, ["topOffset"] =   0/64, ["bottomOffset"] = -46/64 }, 
+		{ ["keyPercent"] = 512/512, ["topOffset"] = -11/64, ["bottomOffset"] = -54/64 }  
 	},
 	["NoviceCastTexture"] = GetMedia("hp_lowmid_bar"),
 	["NoviceHealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
@@ -3628,13 +3629,13 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 	["NoviceHealthPlace"] = { "TOPRIGHT", -27, -27 }, 
 	["NoviceHealthSize"] = { 385, 37 },
 	["NoviceHealthSparkMap"] = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		{ ["keyPercent"] =   0/512, ["topOffset"] = -24/64, ["bottomOffset"] = -39/64 }, 
+		{ ["keyPercent"] =   9/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 460/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 478/512, ["topOffset"] =   0/64, ["bottomOffset"] =   0/64 }, 
+		{ ["keyPercent"] = 483/512, ["topOffset"] =   0/64, ["bottomOffset"] =  -3/64 }, 
+		{ ["keyPercent"] = 507/512, ["topOffset"] =   0/64, ["bottomOffset"] = -46/64 }, 
+		{ ["keyPercent"] = 512/512, ["topOffset"] = -11/64, ["bottomOffset"] = -54/64 }  
 	},
 	["NoviceHealthTexture"] = GetMedia("hp_lowmid_bar"),
 	["NoviceHealthThreatPlace"] = { "CENTER", 0, 1 },
@@ -3699,13 +3700,13 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 	["SeasonedCastPlace"] = { "TOPRIGHT", -27, -27 }, 
 	["SeasonedCastSize"] = { 385, 40 },
 	["SeasonedCastSparkMap"] = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		{ ["keyPercent"] =   0/512, ["topOffset"] = -24/64, ["bottomOffset"] = -39/64 }, 
+		{ ["keyPercent"] =   9/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 460/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 478/512, ["topOffset"] =   0/64, ["bottomOffset"] =   0/64 }, 
+		{ ["keyPercent"] = 483/512, ["topOffset"] =   0/64, ["bottomOffset"] =  -3/64 }, 
+		{ ["keyPercent"] = 507/512, ["topOffset"] =   0/64, ["bottomOffset"] = -46/64 }, 
+		{ ["keyPercent"] = 512/512, ["topOffset"] = -11/64, ["bottomOffset"] = -54/64 }  
 	},
 	["SeasonedCastTexture"] = GetMedia("hp_cap_bar"),
 	["SeasonedHealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
@@ -3716,13 +3717,13 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 	["SeasonedHealthPlace"] = { "TOPRIGHT", -27, -27 }, 
 	["SeasonedHealthSize"] = { 385, 40 },
 	["SeasonedHealthSparkMap"] = {
-		{ keyPercent =   0/512, topOffset = -24/64, bottomOffset = -39/64 }, 
-		{ keyPercent =   9/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 460/512, topOffset =   0/64, bottomOffset = -16/64 }, 
-		{ keyPercent = 478/512, topOffset =   0/64, bottomOffset =   0/64 }, 
-		{ keyPercent = 483/512, topOffset =   0/64, bottomOffset =  -3/64 }, 
-		{ keyPercent = 507/512, topOffset =   0/64, bottomOffset = -46/64 }, 
-		{ keyPercent = 512/512, topOffset = -11/64, bottomOffset = -54/64 }  
+		{ ["keyPercent"] =   0/512, ["topOffset"] = -24/64, ["bottomOffset"] = -39/64 }, 
+		{ ["keyPercent"] =   9/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 460/512, ["topOffset"] =   0/64, ["bottomOffset"] = -16/64 }, 
+		{ ["keyPercent"] = 478/512, ["topOffset"] =   0/64, ["bottomOffset"] =   0/64 }, 
+		{ ["keyPercent"] = 483/512, ["topOffset"] =   0/64, ["bottomOffset"] =  -3/64 }, 
+		{ ["keyPercent"] = 507/512, ["topOffset"] =   0/64, ["bottomOffset"] = -46/64 }, 
+		{ ["keyPercent"] = 512/512, ["topOffset"] = -11/64, ["bottomOffset"] = -54/64 }  
 	},
 	["SeasonedHealthTexture"] = GetMedia("hp_cap_bar"),
 	["SeasonedHealthThreatPlace"] = { "CENTER", 0, 1 },
@@ -3810,18 +3811,19 @@ RegisterLayout("UnitFrameParty", "Azerite", setmetatable({
 	["HealthValueJustifyV"] = "MIDDLE", 
 	["HealthValueFont"] = GetFont(13, true),
 	["HealthValueColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
+	["HealthShowAFK"] = true, 
 	["HealthShowPercent"] = true, 
 
 	["PowerBackgroundColor"] = { 0, 0, 0, .75 },
 	["PowerBackgroundDrawLayer"] = { "BACKGROUND", -2 },
 	["PowerBackgroundSize"] = { 74, 3 },
 	["PowerBackgroundPlace"] = { "CENTER", 0, 0 },
-	["PowerBackgroundTexture"] = [[Interface\ChatFrame\ChatFrameBackground]], -- GetMedia("statusbar-dark"),
+	["PowerBackgroundTexture"] = BLANK_TEXTURE, -- GetMedia("statusbar-dark"),
 	["PowerBarOrientation"] = "RIGHT",
 	["PowerBarSmoothingFrequency"] = .45,
 	["PowerBarSmoothingMode"] = "bezier-fast-in-slow-out",
 	["PowerBarTexCoord"] = nil, --{ 14/256,(256-14)/256,14/64,(64-14)/64 },
-	["PowerBarTexture"] = [[Interface\ChatFrame\ChatFrameBackground]], --GetMedia("statusbar-dark"),
+	["PowerBarTexture"] = BLANK_TEXTURE, --GetMedia("statusbar-dark"),
 	["PowerPlace"] = { "BOTTOM", 0, -1.5 },
 	["PowerSize"] = { 72, 1 },
 	["PowerBarPostUpdate"] = TinyFrame_PowerBarPostUpdate,
@@ -4203,12 +4205,12 @@ RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 	["PowerBackgroundDrawLayer"] = { "BACKGROUND", -2 },
 	["PowerBackgroundSize"] = { 68, 3 },
 	["PowerBackgroundPlace"] = { "CENTER", 0, 0 },
-	["PowerBackgroundTexture"] = [[Interface\ChatFrame\ChatFrameBackground]], -- GetMedia("statusbar-dark"),
+	["PowerBackgroundTexture"] = BLANK_TEXTURE, -- GetMedia("statusbar-dark"),
 	["PowerBarOrientation"] = "RIGHT",
 	["PowerBarSmoothingFrequency"] = .45,
 	["PowerBarSmoothingMode"] = "bezier-fast-in-slow-out",
 	["PowerBarTexCoord"] = nil, --{ 14/256,(256-14)/256,14/64,(64-14)/64 },
-	["PowerBarTexture"] = [[Interface\ChatFrame\ChatFrameBackground]], --GetMedia("statusbar-dark"),
+	["PowerBarTexture"] = BLANK_TEXTURE, --GetMedia("statusbar-dark"),
 	["PowerPlace"] = { "BOTTOM", 0, -.5 },
 	["PowerSize"] = { 66, 1 },
 	["PowerBarPostUpdate"] = TinyFrame_PowerBarPostUpdate,

@@ -82,12 +82,10 @@ front-end\modules\custom\chatfilters.lua
 front-end\modules\custom\durability.lua
 front-end\modules\custom\explorermode.lua
 front-end\modules\custom\tooltips.lua
-front-end\modules\custom\unitframes.lua
+front-end\modules\custom\unitframes-azerite.lua
+front-end\modules\custom\unitframes-legacy.lua
 front-end\modules\custom\unitframes-grouptools.lua
 front-end\modules\custom\unitframes-nameplates.lua
-
-# These will be removed later.
-front-end\modules\deprecated\unitframes.lua
 
 # All addon- and module incompatibilities in one place.
 front-end\config\incompatibilities.lua
