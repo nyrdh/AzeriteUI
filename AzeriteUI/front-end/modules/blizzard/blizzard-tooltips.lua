@@ -302,9 +302,9 @@ local GetTooltipUnit = function(tooltip)
 end
 
 -- Bar post updates
--- Show health values for tooltip health bars, and hide others.
--- Will expand on this later to tailer all tooltips to our needs.  
 local StatusBar_UpdateValue = function(bar, value, max)
+	-- Show health values for tooltip health bars, and hide others.
+	-- Will expand on this later to tailer all tooltips to our needs.  
 	local isRealValue = (max ~= 100)
 	if (value) then 
 		if (isRealValue) then 
@@ -374,8 +374,8 @@ local StatusBar_OnShow = function(statusbar)
 	StatusBar_OnValueChanged(statusbar)
 end
 
--- Do a color and texture reset upon hiding, to make sure it looks right when next shown. 
 local StatusBar_OnHide = function(statusbar)
+	-- Do a color and texture reset upon hiding, to make sure it looks right when next shown. 
 	statusbar.color = Colors.quest.green
 	statusbar:GetStatusBarTexture():SetTexCoord(0, 1, 0, 1)
 	statusbar:SetStatusBarColor(unpack(statusbar.color))
@@ -395,17 +395,17 @@ local OnTooltipShow = function(tooltip)
 
 	-- Change the original font object and use inheritance, 
 	-- as changing line by line produced weird alignments.
-	local headerFontObject = GetFont(15,true)
-	if (GameTooltipHeader:GetFontObject() ~= headerFontObject) then 
-		GameTooltipHeader:SetFontObject(headerFontObject)
-	end
+	--local headerFontObject = GetFont(15,true)
+	--if (GameTooltipHeader:GetFontObject() ~= headerFontObject) then 
+	--	GameTooltipHeader:SetFontObject(headerFontObject)
+	--end
 
 	-- Some texts inherit from this, like the "!Quest Available" texts
 	-- in the follower selection frame in Nazjatar. Outline doesn't work there!
-	local lineFontObject = GetFont(13,true)
-	if (GameTooltipText:GetFontObject() ~= lineFontObject) then 
-		GameTooltipText:SetFontObject(lineFontObject)
-	end
+	--local lineFontObject = GetFont(13,true)
+	--if (GameTooltipText:GetFontObject() ~= lineFontObject) then 
+	--	GameTooltipText:SetFontObject(lineFontObject)
+	--end
 
 end
 
@@ -417,12 +417,17 @@ local OnTooltipHide = function(tooltip)
 	tooltip.vendorSellLineID = nil
 end
 
+-- This might be the cause of taint on the tracker.
+-- Should we ignore tracker buttons? Or?
 local OnTooltipSetItem = function(tooltip)
 	if (tooltip:IsForbidden()) then 
 		return
 	end
 	local frame = GetMouseFocus()
-	if (frame and frame.GetName and not frame:IsForbidden()) then
+	if (frame and frame:IsForbidden()) then
+		return
+	end
+	if (frame and frame.GetName) then
 		local name = frame:GetName()
 		local _,link = tooltip:GetItem()
 
@@ -758,43 +763,45 @@ Module.OnEnable = function(self)
 		self:SetBlizzardTooltipBackdropBorderColor(tooltip, unpack(self.layout.TooltipBackdropBorderColor))
 		self:SetBlizzardTooltipBackdropOffsets(tooltip, 10, 10, 10, 12)
 
-		-- These might be the only two we safely can hook like this,
-		-- as script hooking has a tendency to cause taint.
-		if (tooltip:HasScript("OnTooltipSetUnit")) then 
-			tooltip:HookScript("OnTooltipSetUnit", OnTooltipSetUnit)
-		end
-		if (tooltip:HasScript("OnTooltipSetItem")) then 
-			tooltip:HookScript("OnTooltipSetItem", OnTooltipSetItem)
-		end
+		if (tooltip == GameTooltip) then
+			-- These might be the only two we safely can hook like this,
+			-- as script hooking has a tendency to cause taint.
+			if (tooltip:HasScript("OnTooltipSetUnit")) then 
+				tooltip:HookScript("OnTooltipSetUnit", OnTooltipSetUnit)
+			end
+			--if (tooltip:HasScript("OnTooltipSetItem")) then 
+			--	tooltip:HookScript("OnTooltipSetItem", OnTooltipSetItem)
+			--end
 
-		-- This should be fine. Or?
-		hooksecurefunc(tooltip, "Hide", OnTooltipHide)
-		hooksecurefunc(tooltip, "Show", OnTooltipShow)
+			-- This should be fine. Or?
+			--hooksecurefunc(tooltip, "Hide", OnTooltipHide)
+			--hooksecurefunc(tooltip, "Show", OnTooltipShow)
 
-		--if (tooltip:HasScript("OnHide")) then 
-		--	tooltip:HookScript("OnHide", OnTooltipHide)
-		--end
-		--if (tooltip:HasScript("OnShow")) then 
-		--	tooltip:HookScript("OnShow", OnTooltipShow)
-		--end
+			--if (tooltip:HasScript("OnHide")) then 
+			--	tooltip:HookScript("OnHide", OnTooltipHide)
+			--end
+			--if (tooltip:HasScript("OnShow")) then 
+			--	tooltip:HookScript("OnShow", OnTooltipShow)
+			--end
 
-		local bar = _G[tooltip:GetName().."StatusBar"]
-		if (bar) then 
-			bar:ClearAllPoints()
-			bar:SetPoint("TOPLEFT", tooltip, "BOTTOMLEFT", 3, -1)
-			bar:SetPoint("TOPRIGHT", tooltip, "BOTTOMRIGHT", -3, -1)
-			bar:SetHeight(3)
-			bar._owner = tooltip
+			local bar = _G[tooltip:GetName().."StatusBar"]
+			if (bar) then 
+				bar:ClearAllPoints()
+				bar:SetPoint("TOPLEFT", tooltip, "BOTTOMLEFT", 3, -1)
+				bar:SetPoint("TOPRIGHT", tooltip, "BOTTOMRIGHT", -3, -1)
+				bar:SetHeight(3)
+				bar._owner = tooltip
 
-			bar.value = bar:CreateFontString()
-			bar.value:SetDrawLayer("OVERLAY")
-			bar.value:SetFontObject(Game13Font_o1)
-			bar.value:SetPoint("CENTER", 0, 0)
-			bar.value:SetTextColor(235/255, 235/255, 235/255, .75)
+				bar.value = bar:CreateFontString()
+				bar.value:SetDrawLayer("OVERLAY")
+				bar.value:SetFontObject(Game13Font_o1)
+				bar.value:SetPoint("CENTER", 0, 0)
+				bar.value:SetTextColor(235/255, 235/255, 235/255, .75)
 
-			bar:HookScript("OnShow", StatusBar_OnShow)
-			bar:HookScript("OnHide", StatusBar_OnHide)
-			bar:HookScript("OnValueChanged", StatusBar_OnValueChanged)
+				bar:HookScript("OnShow", StatusBar_OnShow)
+				bar:HookScript("OnHide", StatusBar_OnHide)
+				bar:HookScript("OnValueChanged", StatusBar_OnValueChanged)
+			end 
 		end 
 	end 
 end 

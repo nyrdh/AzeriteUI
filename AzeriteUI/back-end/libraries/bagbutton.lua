@@ -1,4 +1,4 @@
-local LibBagButton = Wheel:Set("LibBagButton", 50)
+local LibBagButton = Wheel:Set("LibBagButton", 51)
 if (not LibBagButton) then	
 	return
 end
@@ -996,7 +996,7 @@ Container.Update = function(self)
 	for i,bagID in ipairs(bagIDs) do
 		if (BagTypesFromID[bagID] == bagType) then
 			local container = LibBagButton:GetBlizzardContainerCache(bagID)
-			if (container) then
+			if (container) and (container.totalSlots) then
 				for slotID = 1,container.totalSlots do
 					local Item = LibBagButton:GetBlizzardContainerSlotCache(bagID,slotID)
 					if (Item) then

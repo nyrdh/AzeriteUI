@@ -4,11 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.459-Alpha] 2021-03-25
+## [3.2.459-Alpha] 2021-03-26
 - Restructuring continues. The goal is to take the user interface back into a fully table driven layout system again. Which will make tinkering slightly less powerful, but infinitely much easier. And the pro tinkerers tinker with any code anyway, so I kind of don't need to make advanced tinkering systems for their sake. 
 
 ### Changed
 - New event driven chat filter reporting for money gains and losses are in place, with constant tweaking going on. It delays output while visiting a merchant, and suppresses output while taking a taxi flight or visiting the Auction House. You really don't need to get your chat spammed with flight point- or deposit costs. 
+
+### Fixed
+- Fixed wrong upvalue in a raid unitframe callback.
 
 ## [3.2.458-Alpha] 2021-03-22
 - Restructuring. Before moving into the next phase of the UI, and the next group of standalone projects, I want to bring the UI code down to a much simpler level again. 

@@ -4302,7 +4302,7 @@ RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 
 			-- Colorize the border
 			if (element.filter == "HARMFUL") then 
-				local color = element.debuffType and colors.debuff[element.debuffType]
+				local color = element.debuffType and Colors.debuff[element.debuffType]
 				if color then 
 					element.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 				else
