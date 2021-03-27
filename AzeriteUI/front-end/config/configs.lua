@@ -114,21 +114,20 @@ local BACKDROPS = {
 
 	-- Tooltips and most standard frames
 	["Tooltips"] = {
-		["bgFile"] = BLANK_TEXTURE, tile = false,
-		["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 32, 
-		["insets"] = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
+		["bgFile"] = [[Interface\Tooltips\UI-Tooltip-Background]], tile = false,
+		["edgeFile"] = GetMedia("better-blizzard-border-small-alternate"), edgeSize = 32, 
+		["insets"] = { left = 25, right = 25, top = 25, bottom = 25 }
 	}, 
+	--["Tooltips"] = {
+	--	["bgFile"] = BLANK_TEXTURE, tile = false,
+	--	["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 32, 
+	--	["insets"] = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
+	--}, 
 
 	["GenericBorder"] = {
 		["bgFile"] = nil, tile = false, 
 		["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 32, 
 		["insets"] = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
-	}, 
-
-	["GenericRoundedBorder"] = {
-		["bgFile"] = nil, tile = false, 
-		["edgeFile"] = GetMedia("tooltip_border_rounded"), edgeSize = 32, 
-		["insets"] = { top = 15, bottom = 15, left = 15, right = 15 }
 	}
 
 }
@@ -688,7 +687,7 @@ local Tooltip_PostCreate = function(tooltip)
 
 	-- What items will be displayed automatically when available
 	tooltip.showHealthBar =  true
-	tooltip.showPowerBar =  true
+	tooltip.showPowerBar =  false -- let's not do this anymore.
 
 	-- Unit tooltips
 	tooltip.colorUnitClass = true -- color the unit class on the info line
@@ -2855,10 +2854,11 @@ RegisterLayout("Tooltips", "Azerite", {
 	["PostCreateLinePair"] = Tooltip_LinePair_PostCreate,
 	["PostCreateTooltip"] = Tooltip_PostCreate,
 	["TooltipBackdrop"] = BACKDROPS.Tooltips,
-	["TooltipBackdropBorderColor"] = { 1, 1, 1, 1 },
-	["TooltipBackdropColor"] = { .05, .05, .05, .85 },
+	["TooltipBackdropOffsets"] = { 25, 25, 25, 25 },
+	["TooltipBackdropBorderColor"] = { .35, .35, .35, 1 },
+	["TooltipBackdropColor"] = { 0, 0, 0, .95 },
 	["TooltipPlace"] = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -319, 166 }, 
-	["TooltipStatusBarTexture"] = GetMedia("statusbar-dark")
+	["TooltipStatusBarTexture"] = GetMedia("statusbar-normal")
 })
 
 ------------------------------------------------

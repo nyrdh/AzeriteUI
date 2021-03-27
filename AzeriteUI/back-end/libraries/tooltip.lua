@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 104)
+local LibTooltip = Wheel:Set("LibTooltip", 110)
 if (not LibTooltip) then
 	return
 end
@@ -135,56 +135,6 @@ local FACTION_HORDE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Horde:14:14:-
 
 -- Player constants
 local englishPlayerFaction, localizedPlayerFaction = UnitFactionGroup("player")
-
--- Blizzard tooltips
-local blizzardTips = {
-	"GameTooltip",
-	"ItemRefTooltip",
-	"ItemRefShoppingTooltip1",
-	"ItemRefShoppingTooltip2",
-	"ItemRefShoppingTooltip3",
-	"AutoCompleteBox",
-	"FriendsTooltip",
-	"ShoppingTooltip1",
-	"ShoppingTooltip2",
-	"ShoppingTooltip3",
-	--"WorldMapTooltip", -- Deprecated in 8.1.5 > GameTooltip
-	"WorldMapCompareTooltip1",
-	"WorldMapCompareTooltip2",
-	"WorldMapCompareTooltip3",
-	"ReputationParagonTooltip",
-	"StoryTooltip",
-	"EmbeddedItemTooltip",
-	"QueueStatusFrame" 
-} 
-
--- Textures in the combat pet tooltips
-local borderedFrameTextures = { 
-	"BorderTopLeft", 
-	"BorderTopRight", 
-	"BorderBottomRight", 
-	"BorderBottomLeft", 
-	"BorderTop", 
-	"BorderRight", 
-	"BorderBottom", 
-	"BorderLeft", 
-	"Background" 
-}
-
-local fakeBackdrop = {
-	bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-	edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
-	tile = false,
-	edgeSize = 16,
-	insets = { 
-		left = 5,
-		right = 4,
-		top = 5,
-		bottom = 4
-	}
-}
-local fakeBackdropColor = { 0, 0, 0, .95 }
-local fakeBackdropBorderColor = { .3, .3, .3, 1 }
 
 -- Utility Functions
 ---------------------------------------------------------
@@ -1642,8 +1592,12 @@ Tooltip.SetUnit = function(self, unit)
 			-- Add our health and power bars
 			-- These will be automatically updated thanks to 
 			-- their provided barTypes here. 
-			self:AddBar("health")
-			self:AddBar("power")
+			if (self.showHealthBar) then
+				self:AddBar("health")
+			end
+			if (self.showPowerBar) then
+				self:AddBar("power")
+			end
 
 			-- Add unit data
 			-- *Add support for totalRP3 if it's enabled? 
@@ -2309,7 +2263,7 @@ Tooltip.OnShow = function(self)
 	-- so we need to bump them back to where they belong.
 	self:SetFrameStrata("TOOLTIP")
 
-	-- Get rid of the Blizzard GameTooltip if possible
+	-- Get rid of the Blizzard tip if possible
 	if (not GameTooltip:IsForbidden()) and (GameTooltip:IsShown()) then 
 		GameTooltip:Hide()
 	end 
@@ -2603,9 +2557,9 @@ LibTooltip.SetDefaultTooltipPosition = function(self, ...)
 	-- I experienced a stack overflow with this one recently, which might be because  
 	-- of multiple versions of the function being registered, and a loop happening. 
 	-- So I am adding a unique identifier to make sure the hook is always the same.
-	LibTooltip:SetSecureHook("GameTooltip_SetDefaultAnchor", SetDefaultAnchor, "GP_LibTooltip_SetDefaultAnchor")
+	--LibTooltip:SetSecureHook("GameTooltip_SetDefaultAnchor", SetDefaultAnchor, "GP_LibTooltip_SetDefaultAnchor")
 
-	SetDefaultPosition(GameTooltip)
+	--SetDefaultPosition(GameTooltip)
 end 
 
 LibTooltip.SetDefaultTooltipBackdrop = function(self, backdropTable)
@@ -2782,75 +2736,6 @@ LibTooltip.GetTooltip = function(self, name)
 	return TooltipsByName[name]
 end 
 
-LibTooltip.KillBlizzardBorderedFrameTextures = function(self, tooltip)
-	if (not tooltip) then 
-		return 
-	end
-	local texture
-	for _,texName in ipairs(borderedFrameTextures) do
-		texture = tooltip[texName]
-		if (texture and texture.SetTexture) then 
-			texture:SetTexture(nil)
-		end
-	end
-end
-
-LibTooltip.KillBlizzardTooltipBackdrop = function(self, tooltip)
-	if (Backdrops[tooltip]) then 
-		return 
-	end 
-	if (tooltip.SetBackdrop) then
-		tooltip:SetBackdrop(nil) -- a reset is needed first, or we'll get weird bugs
-	end
-	tooltip.SetBackdrop = function() end -- kill off the original backdrop function
-	tooltip.GetBackdrop = function() return fakeBackdrop end
-	tooltip.GetBackdropColor = function() return unpack(fakeBackdropColor) end
-	tooltip.GetBackdropBorderColor = function() return unpack(fakeBackdropBorderColor) end
-end
-
-LibTooltip.SetBlizzardTooltipBackdropOffsets = function(self, tooltip, left, right, top, bottom)
-	if (not Backdrops[tooltip]) then 
-		return
-	end
-	Backdrops[tooltip]:ClearAllPoints()
-	Backdrops[tooltip]:SetPoint("LEFT", -left, 0)
-	Backdrops[tooltip]:SetPoint("RIGHT", right, 0)
-	Backdrops[tooltip]:SetPoint("TOP", 0, top)
-	Backdrops[tooltip]:SetPoint("BOTTOM", 0, -bottom)
-end 
-
-LibTooltip.SetBlizzardTooltipBackdrop = function(self, tooltip, backdrop)
-	if (not Backdrops[tooltip]) then
-		local backdrop = CreateFrame("Frame", nil, tooltip, BackdropTemplateMixin and "BackdropTemplate")
-		backdrop:SetFrameStrata(tooltip:GetFrameStrata())
-		backdrop:SetFrameLevel(tooltip:GetFrameLevel())
-		backdrop:SetPoint("LEFT", 0, 0)
-		backdrop:SetPoint("RIGHT", 0, 0)
-		backdrop:SetPoint("TOP", 0, 0)
-		backdrop:SetPoint("BOTTOM", 0, 0)
-		hooksecurefunc(tooltip, "SetFrameStrata", function() backdrop:SetFrameLevel(tooltip:GetFrameLevel()) end)
-		hooksecurefunc(tooltip, "SetFrameLevel", function() backdrop:SetFrameLevel(tooltip:GetFrameLevel()) end)
-		hooksecurefunc(tooltip, "SetParent", function() backdrop:SetFrameLevel(tooltip:GetFrameLevel()) end)
-		Backdrops[tooltip] = backdrop
-	end 
-	Backdrops[tooltip]:SetBackdrop(nil)
-	Backdrops[tooltip]:SetBackdrop(backdrop)
-end 
-
-LibTooltip.SetBlizzardTooltipBackdropColor = function(self, tooltip, ...)
-	if (not Backdrops[tooltip]) then 
-		return 
-	end 
-	Backdrops[tooltip]:SetBackdropColor(...)
-end 
-
-LibTooltip.SetBlizzardTooltipBackdropBorderColor = function(self, tooltip, ...)
-	if (not Backdrops[tooltip]) then 
-		return 
-	end 
-	Backdrops[tooltip]:SetBackdropBorderColor(...)
-end 
-
 LibTooltip.ForAllTooltips = function(self, method, ...)
 	check(method, 1, "string", "function")
 	for tooltip in pairs(Tooltips) do 
@@ -2862,43 +2747,6 @@ LibTooltip.ForAllTooltips = function(self, method, ...)
 			method(tooltip, ...)
 		end 
 	end 
-end 
-
-LibTooltip.GetAllBlizzardTooltips = function(self)
-	local counter = 0
-	local max = #blizzardTips
-	return function() 
-		local name, tooltip
-		while (counter <= max) do 
-			counter = counter + 1
-			name = blizzardTips[counter]
-			tooltip = name and _G[name]
-			if tooltip then 
-				break 
-			end 
-		end
-		if tooltip then 
-			return tooltip 
-		end 
-	end 
-end 
-
-LibTooltip.ForAllBlizzardTooltips = function(self, method, ...)
-	check(method, 1, "string", "function")
-	for i,tooltipName in ipairs(blizzardTips) do 
-		local tooltip = _G[tooltipName]
-		if tooltip then
-			if (type(method) == "string") then 
-				if self[method] then 
-					self[method](self, tooltip, ...)
-				elseif tooltip[method] then 
-					tooltip[method](tooltip, ...)
-				end 
-			else
-				method(tooltip, ...)
-			end 
-		end
-	end
 end 
 
 -- Module embedding
@@ -2915,16 +2763,8 @@ local embedMethods = {
 	SetDefaultTooltipStatusBarOffset = true, 
 	SetDefaultTooltipStatusBarTexture = true, 
 	SetDefaultTooltipStatusBarSpacing = true, 
-	SetDefaultTooltipStatusBarHeight = true, 
-	SetBlizzardTooltipBackdrop = true, 
-	SetBlizzardTooltipBackdropColor = true, 
-	SetBlizzardTooltipBackdropBorderColor = true, 
-	SetBlizzardTooltipBackdropOffsets = true, 
-	KillBlizzardTooltipBackdrop = true, 
-	KillBlizzardBorderedFrameTextures = true,
-	GetAllBlizzardTooltips = true, 
-	ForAllTooltips = true,
-	ForAllBlizzardTooltips = true,
+	SetDefaultTooltipStatusBarHeight = true,
+	ForAllTooltips = true
 }
 
 -- Iterate all embedded modules for the given method name or function

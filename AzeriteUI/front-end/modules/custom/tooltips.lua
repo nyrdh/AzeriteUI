@@ -6,13 +6,10 @@ end
 
 local Module = Core:NewModule("Tooltips", "LibMessage", "LibEvent", "LibDB", "LibTooltip")
 
--- Lua API
-
--- WoW API
-
 -- Private API
 local Colors = Private.Colors
 local GetLayout = Private.GetLayout
+local GetMedia = Private.GetMedia
 
 -- This will be called by the library upon creating new tooltips.
 Module.PostCreateTooltip = function(self, tooltip)
@@ -42,18 +39,18 @@ Module.StyleCustomTips = function(self)
 
 	-- Points the backdrop is offset outwards
 	-- (left, right, top, bottom)
-	self:SetDefaultTooltipBackdropOffset(10, 10, 10, 14)
+	self:SetDefaultTooltipBackdropOffset(unpack(self.layout.TooltipBackdropOffsets))
 
-	-- Points the bar is moved up towards the tooltip
-	self:SetDefaultTooltipStatusBarOffset(3)
+	-- Points the bar is moved away from the tooltip
+	self:SetDefaultTooltipStatusBarOffset(0)
 
 	-- Points the bar is shrunk inwards the left and right sides 
 	self:SetDefaultTooltipStatusBarInset(6, 6) -- 4,4
 
 	-- The height of the healthbar.
 	-- The bar grows from top to bottom.
-	self:SetDefaultTooltipStatusBarHeight(2) 
-	self:SetDefaultTooltipStatusBarHeight(5, "health") 
+	self:SetDefaultTooltipStatusBarHeight(4) 
+	self:SetDefaultTooltipStatusBarHeight(4, "health") 
 	self:SetDefaultTooltipStatusBarHeight(2, "power") 
 
 	-- Use our own texture for the bars
