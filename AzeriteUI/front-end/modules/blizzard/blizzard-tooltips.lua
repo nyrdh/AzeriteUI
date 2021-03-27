@@ -7,7 +7,7 @@ end
 local LibNumbers = Wheel("LibNumbers")
 assert(LibNumbers, ADDON..":BlizzardTooltips requires LibNumbers to be loaded.")
 
-local Module = Core:NewModule("BlizzardTooltips", "LibEvent", "LibDB", "LibClientBuild", "LibTooltipScanner", "LibPlayerData", "LibFrame")
+local Module = Core:NewModule("BlizzardTooltips", "LibMessage", "LibEvent", "LibDB", "LibClientBuild", "LibTooltipScanner", "LibPlayerData", "LibFrame")
 
 -- Lua API
 local math_abs = math.abs
@@ -396,23 +396,23 @@ Tooltip.SetBackdropBorderColor = function(self, ...)
 	backdrop:SetBackdropBorderColor(...)
 end
 
+Tooltip.Place = function(...)
+	if (not Tooltip.Anchor) then
+		local anchor = Module:CreateFrame("Frame", nil, "UICenter")
+		anchor:SetSize(2,2)
+		anchor:SetFrameStrata("TOOLTIP")
+		anchor:SetFrameLevel(20)
+		Tooltip.Anchor = anchor
+	end
+	Tooltip.Anchor:Place(...)
+end
+
 Tooltip.SetDefaultAnchor = function(self, parent)
 	if (self:IsForbidden()) then
 		return
 	end
 
 	Tooltip.AdjustScale(self)
-
-	if (not Tooltip.Anchor) then
-		local layout = GetLayout("Tooltips")
-		local place = layout and layout.TooltipPlace or { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", 40, 140 }
-		local anchor = Module:CreateFrame("Frame", nil, "UICenter")
-		anchor:SetSize(2,2)
-		anchor:SetFrameStrata("TOOLTIP")
-		anchor:SetFrameLevel(20)
-		anchor:Place(unpack(place))
-		Tooltip.Anchor = anchor
-	end
 
 	-- Mouseover tooltips
 	if (false) then
@@ -851,15 +851,36 @@ Module.SetTooltipHooks = function(self)
 	GameTooltip:HookScript("OnTooltipSetItem", Tooltip.OnTooltipSetItem)
 end
 
+Module.OnEvent = function(self, event, ...)
+	if (event == "GP_BAGS_SHOWN") then 
+		local bags = Wheel("LibModule"):GetModule("Backpacker", true)
+		if (bags) then
+			local containerFrame = bags:GetCointainerFrame()
+			if (containerFrame) then
+				Tooltip.Place("BOTTOMRIGHT", containerFrame, "BOTTOMLEFT", -20, 20)
+			end
+		end
+	elseif (event == "GP_BAGS_HIDDEN") or (event == "PLAYER_ENTERING_WORLD") then 
+		Tooltip.Place(unpack(GetLayout("Tooltips").TooltipPlace))
+	end 
+end
+
 Module.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
 	if (not self.layout) then
 		return self:SetUserDisabled(true)
 	end
+	-- Place our anchor.
+	-- This also triggers the anchor creation, 
+	-- well in advance of any method that needs it.
+	Tooltip.Place(unpack(GetLayout("Tooltips").TooltipPlace))
 end 
 
 Module.OnEnable = function(self)
 	self:SetTooltipHooks()
 	self:StyleHealthBar()
 	self:StyleTooltips()
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
+	self:RegisterMessage("GP_BAGS_HIDDEN", "OnEvent")
+	self:RegisterMessage("GP_BAGS_SHOWN", "OnEvent")
 end 

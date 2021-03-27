@@ -97,12 +97,12 @@ Module.OnInit = function(self)
 		return self:SetUserDisabled(true)
 	end
 	self:StyleCustomTips()
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
-	self:RegisterMessage("GP_BAGS_HIDDEN", "OnEvent")
-	self:RegisterMessage("GP_BAGS_SHOWN", "OnEvent")
 end 
 
 Module.OnEnable = function(self)
 	self:PostCreateCustomTips()
 	self:RegisterEvent("PLAYER_LOGIN", "OnEvent")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
+	self:RegisterMessage("GP_BAGS_HIDDEN", "OnEvent")
+	self:RegisterMessage("GP_BAGS_SHOWN", "OnEvent")
 end 
