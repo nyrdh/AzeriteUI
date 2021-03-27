@@ -761,16 +761,16 @@ Module.StyleHealthBar = function(self)
 	HealthBar:SetPoint("BOTTOMRIGHT", HealthBar:GetParent(), "BOTTOMRIGHT", -6, -4)
 	HealthBar:SetHeight(4)
 
-	Tooltip.SetBackdrop(HealthBar, HealthBarBackdropTemplate)
-	Tooltip.SetBackdropOffsets(HealthBar, 6, 6, 6, 6)
-	Tooltip.SetBackdropColor(HealthBar, 0, 0, 0, .75)
-	Tooltip.SetBackdropBorderColor(HealthBar, 0, 0, 0, .5)
+	--Tooltip.SetBackdrop(HealthBar, HealthBarBackdropTemplate)
+	--Tooltip.SetBackdropOffsets(HealthBar, 6, 6, 6, 6)
+	--Tooltip.SetBackdropColor(HealthBar, 0, 0, 0, .75)
+	--Tooltip.SetBackdropBorderColor(HealthBar, 0, 0, 0, .5)
 
 	HealthBar:HookScript("OnShow", function(self) 
 		local tooltip = self:GetParent()
 		if (tooltip) then
 			--Tooltip.SetBackdropOffsets(tooltip, 31, 31, 31, 41)
-			Tooltip.SetBackdropOffsets(tooltip, 25, 25, 25, 32)
+			Tooltip.SetBackdropOffsets(tooltip, 25, 25, 25, 31)
 		end
 	end)
 
