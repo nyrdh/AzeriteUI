@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.459-Alpha] 2021-03-26
+## [3.2.460-RC] 2021-03-27
+- As part of the ongoing fight against taints, I'm trimming down and simplifying a lot of modules, as well as moving a lot of modifications to central blizzard elements into the front-end. Part of this are the tooltips. No library will affect the Blizzard tooltips anymore, as this is all done through the front-end module now. 
+
+### Changed
+- Gave all the tooltips a facelift and got rid of some baggage. Run, tooltips! Run!
+
+## [3.2.459-RC] 2021-03-26
 - Restructuring continues. The goal is to take the user interface back into a fully table driven layout system again. Which will make tinkering slightly less powerful, but infinitely much easier. And the pro tinkerers tinker with any code anyway, so I kind of don't need to make advanced tinkering systems for their sake. 
 
 ### Changed
@@ -13,7 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Fixed wrong upvalue in a raid unitframe callback.
 
-## [3.2.458-Alpha] 2021-03-22
+## [3.2.458-RC] 2021-03-22
 - Restructuring. Before moving into the next phase of the UI, and the next group of standalone projects, I want to bring the UI code down to a much simpler level again. 
 
 ### Fixed
