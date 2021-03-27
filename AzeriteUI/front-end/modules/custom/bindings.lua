@@ -7,6 +7,12 @@ end
 -- Keybind Interface Styling
 local Module = Core:NewModule("Bindings", "PLUGIN", "LibBindTool")
 
+-- Private API
+local GetLayout = Private.GetLayout
+
+-- Addon localization
+local L = Wheel("LibLocale"):GetLocale(ADDON)
+
 -- Proxy the shit out of this
 -- This is because we don't want anything locally registered to this module, 
 -- we want the bind data to be globally registered in the back-end, 
@@ -20,7 +26,6 @@ end
 
 -- Replace library localization with our own, if it exists.
 Module.RegisterLocales = function(self)
-	local L = Wheel("LibLocale"):GetLocale(ADDON)
 	local locales = self:GetKeybindLocales()
 	for key,value in pairs(locales) do
 		-- Don't trigger our locale library's metatable,
@@ -35,9 +40,10 @@ end
 -- Register the actionbuttons with the keybind handler
 -- Todo: move this to the actionbar module instead. It belongs there. 
 Module.RegisterActionButtons = function(self)
-	if (self:IsModuleAvailable("ActionBarMain")) then 
+	if (Core:IsModuleAvailable("ActionBarMain")) then 
 		local ActionBarMain = Core:GetModule("ActionBarMain", true)
 		if (ActionBarMain) then 
+			local layout = self.layout
 			if (ActionBarMain.GetButtons) then
 				for id,button in ActionBarMain:GetButtons() do 
 					local bindFrame = self:RegisterButtonForBinding(button)
@@ -60,12 +66,10 @@ end
 
 -- Style the keybind interface
 Module.StyleKeybindInterface = function(self)
-	local layout = Private.GetLayout(self:GetName())
+	local layout = self.layout
 	if (not layout) then
 		return
-		--return self:SetUserDisabled(true)
 	end
-
 	for _,frame in ipairs({ self:GetKeybindFrame(), self:GetKeybindDiscardFrame() }) do
 
 		frame.ApplyButton:SetNormalTextureSize(unpack(layout.MenuButtonSize))
@@ -87,6 +91,7 @@ Module.StyleKeybindInterface = function(self)
 end
 
 Module.OnInit = function(self)
+	self.layout = GetLayout(self:GetName())
 	self:StyleKeybindInterface()
 	self:RegisterLocales()
 	self:RegisterActionButtons()
