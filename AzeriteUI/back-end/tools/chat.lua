@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 19)
+local LibChatTool = Wheel:Set("LibChatTool", 21)
 if (not LibChatTool) then
 	return
 end
@@ -856,8 +856,7 @@ LibChatTool.OnFrameHide = function(self, event, ...)
 		LibChatTool:OnEvent("PLAYER_ENTERING_WORLD")
 		return
 	end
-	-- This would be when the merchant frame closes.
-	-- Add mailframe!! 
+	-- This is when other frames are closing.
 	LibChatTool:OnEvent("PLAYER_MONEY")
 end
 
@@ -880,7 +879,8 @@ LibChatTool.OnEvent = function(self, event, ...)
 				LibChatTool.isMerchantFrameShown = true
 				LibChatTool:SetSecureHook(MerchantFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MerchantFrameHide")
 				return
-			else
+
+			elseif (LibChatTool.isMerchantFrameShown) then
 				LibChatTool.isMerchantFrameShown = nil
 				LibChatTool:ClearSecureHook(MerchantFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MerchantFrameHide")
 			end
@@ -889,7 +889,8 @@ LibChatTool.OnEvent = function(self, event, ...)
 				LibChatTool.isMailFrameShown = true
 				LibChatTool:SetSecureHook(MailFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MailFrameHide")
 				return
-			else
+
+			elseif (LibChatTool.isMailFrameShown) then
 				LibChatTool.isMailFrameShown = nil
 				LibChatTool:ClearSecureHook(MailFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MailFrameHide")
 			end
@@ -901,7 +902,8 @@ LibChatTool.OnEvent = function(self, event, ...)
 					LibChatTool.isAuctionHouseFrameShown = true
 					LibChatTool:SetSecureHook(AuctionHouseFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
 					return
-				else
+
+				elseif (LibChatTool.isAuctionHouseFrameShown) then
 					LibChatTool.isAuctionHouseFrameShown = nil
 					LibChatTool:ClearSecureHook(AuctionHouseFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
 				end
@@ -910,7 +912,8 @@ LibChatTool.OnEvent = function(self, event, ...)
 					LibChatTool.isAuctionHouseFrameShown = true
 					LibChatTool:SetSecureHook(AuctionFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
 					return
-				else
+
+				elseif (LibChatTool.isAuctionHouseFrameShown) then
 					LibChatTool.isAuctionHouseFrameShown = nil
 					LibChatTool:ClearSecureHook(AuctionFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
 				end
