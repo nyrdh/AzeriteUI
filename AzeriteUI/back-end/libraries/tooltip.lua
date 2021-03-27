@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 110)
+local LibTooltip = Wheel:Set("LibTooltip", 112)
 if (not LibTooltip) then
 	return
 end
@@ -2459,83 +2459,6 @@ LibTooltip.GetDefaultCValue = function(self, name)
 	return Defaults[name]
 end 
 
--- Our own secure hook to position tooltips using GameTooltip_SetDefaultAnchor. 
--- Note that we're borrowing some methods from GetFrame for this one.
--- This is to allow keyword parsing for objects like UICenter. 
-local SetDefaultAnchor = function(tooltip, parent)
-	-- On behalf of the whole community I would like to say
-	-- FUCK YOUR FORBIDDEN TOOLTIPS BLIZZARD! >:( 
-	if tooltip:IsForbidden() then 
-		return 
-	end
-	if (tooltip.isLockedBecauseOfAnchoring) then
-		return
-	end
-	tooltip.isLockedBecauseOfAnchoring = true
-
-	-- Set the tooltip to the same scale as our own. 
-	local targetScale = LibTooltip:GetFrame("UICenter"):GetEffectiveScale()
-	local tooltipParentScale = (tooltip:GetParent() or WorldFrame):GetEffectiveScale()
-	tooltip:SetScale(targetScale/tooltipParentScale)
-
-	-- We're only repositioning from the default position, 
-	-- and we shouldn't interfere with tooltips placed next to their owners.  
-	if (tooltip:GetAnchorType() ~= "ANCHOR_NONE") then 
-		return 
-	end
-
-	-- The GetFrame call here is to allow our keyword parsing, 
-	-- so even the default tooltips can be positioned relative to our special frames. 
-	tooltip:SetOwner(LibTooltip:GetFrame(parent), "ANCHOR_NONE")
-
-	-- Attempt to find our own defaults, or just go with normal blizzard defaults otherwise. 
-	-- Retrieve default anchor for this tooltip
-	local defaultAnchor = LibTooltip:GetDefaultCValue("defaultAnchor")
-	if defaultAnchor then 
-		local position
-		if (type(defaultAnchor) == "function") then 
-			position = { defaultAnchor(tooltip, parent) }
-		else 
-			position = { unpack(defaultAnchor) }
-		end
-		Tooltip.Place(tooltip, unpack(position))
-	else 
-		Tooltip.Place(tooltip, "BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -_G.CONTAINER_OFFSET_X - 13, _G.CONTAINER_OFFSET_Y)
-	end 
-	tooltip.isLockedBecauseOfAnchoring = nil
-end 
-
-local SetDefaultPosition = function(tooltip)
-	-- Previous statement applies.
-	if (tooltip:IsForbidden()) or (tooltip:GetAnchorType() ~= "ANCHOR_NONE") then -- (not tooltip:IsShown())
-		return 
-	end
-	if (tooltip.isLockedBecauseOfAnchoring) then
-		return
-	end
-	tooltip.isLockedBecauseOfAnchoring = true
-
-	-- Attempt to find our own defaults, or just go with normal blizzard defaults otherwise. 
-	-- Retrieve default anchor for this tooltip
-	local defaultAnchor = LibTooltip:GetDefaultCValue("defaultAnchor")
-	if defaultAnchor then 
-		local position
-		if (type(defaultAnchor) == "function") then 
-			local parent = tooltip:GetOwner()
-			if (not parent) then 
-				return
-			end
-			position = { defaultAnchor(tooltip, parent) }
-		else 
-			position = { unpack(defaultAnchor) }
-		end
-		Tooltip.Place(tooltip, unpack(position))
-	else 
-		Tooltip.Place(tooltip, "BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -_G.CONTAINER_OFFSET_X - 13, _G.CONTAINER_OFFSET_Y)
-	end 
-	tooltip.isLockedBecauseOfAnchoring = nil
-end
-
 -- Set a default position for all registered tooltips. 
 -- Also used as a fallback position for Blizzard / 3rd Party addons 
 -- that rely on GameTooltip_SetDefaultAnchor to position their tooltips. 
@@ -2553,13 +2476,6 @@ LibTooltip.SetDefaultTooltipPosition = function(self, ...)
 		LibTooltip:SetDefaultCValue("defaultAnchor", { ... })
 	end 
 	LibTooltip:ForAllTooltips("UpdatePosition")
-
-	-- I experienced a stack overflow with this one recently, which might be because  
-	-- of multiple versions of the function being registered, and a loop happening. 
-	-- So I am adding a unique identifier to make sure the hook is always the same.
-	--LibTooltip:SetSecureHook("GameTooltip_SetDefaultAnchor", SetDefaultAnchor, "GP_LibTooltip_SetDefaultAnchor")
-
-	--SetDefaultPosition(GameTooltip)
 end 
 
 LibTooltip.SetDefaultTooltipBackdrop = function(self, backdropTable)
