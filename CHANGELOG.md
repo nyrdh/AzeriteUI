@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.462-RC] 2021-03-27
+### Fixed
+- The hover keybind mode `/bind` now once more has actual bindable buttons in it!
+
 ## [3.2.461-RC] 2021-03-27
 - Updated the tooltip changes to also work with WoW Classic.
 - Updated the money report system to better work with WoW Classic.
