@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.461-RC] 2021-03-27
+- Updated the tooltip changes to also work with WoW Classic.
+- Updated the money report system to better work with WoW Classic.
+
 ## [3.2.460-RC] 2021-03-27
 - As part of the ongoing fight against taints, I'm trimming down and simplifying a lot of modules, as well as moving a lot of modifications to central blizzard elements into the front-end. Part of this are the tooltips. No library will affect the Blizzard tooltips anymore, as this is all done through the front-end module now. 
 

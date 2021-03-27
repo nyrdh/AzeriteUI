@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 18)
+local LibChatTool = Wheel:Set("LibChatTool", 19)
 if (not LibChatTool) then
 	return
 end
@@ -896,13 +896,24 @@ LibChatTool.OnEvent = function(self, event, ...)
 
 			-- The Auction house can be mega spammy too, 
 			-- we don't need to see every single deposit listed.
-			if ((AuctionHouseFrame) and (AuctionHouseFrame:IsShown())) then
-				LibChatTool.isAuctionHouseFrameShown = true
-				LibChatTool:SetSecureHook(AuctionHouseFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
-				return
-			else
-				LibChatTool.isAuctionHouseFrameShown = nil
-				LibChatTool:ClearSecureHook(AuctionHouseFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
+			if (IsRetail) then
+				if ((AuctionHouseFrame) and (AuctionHouseFrame:IsShown())) then
+					LibChatTool.isAuctionHouseFrameShown = true
+					LibChatTool:SetSecureHook(AuctionHouseFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
+					return
+				else
+					LibChatTool.isAuctionHouseFrameShown = nil
+					LibChatTool:ClearSecureHook(AuctionHouseFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
+				end
+			elseif (IsClassic) then
+				if ((AuctionFrame) and (AuctionFrame:IsShown())) then
+					LibChatTool.isAuctionHouseFrameShown = true
+					LibChatTool:SetSecureHook(AuctionFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
+					return
+				else
+					LibChatTool.isAuctionHouseFrameShown = nil
+					LibChatTool:ClearSecureHook(AuctionFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
+				end
 			end
 
 			-- Get the current money value.

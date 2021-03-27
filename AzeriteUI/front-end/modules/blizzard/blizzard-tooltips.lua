@@ -275,50 +275,59 @@ end
 local Tooltip = Module:CreateFrame("Frame")
 
 Tooltip.Style = function(self)
+	--if (not self) then
+	--	return
+	--end
 	if (self:IsForbidden()) then
 		return
 	end
 
 	HealthBar:Hide()
 
-	-- Textures in the combat pet tooltips
-	for _,texName in ipairs({ 
-		"BorderTopLeft", 
-		"BorderTopRight", 
-		"BorderBottomRight", 
-		"BorderBottomLeft", 
-		"BorderTop", 
-		"BorderRight", 
-		"BorderBottom", 
-		"BorderLeft", 
-		"Background" 
-	}) do
-		local region = self[texName]
-		if (region) then
-			local drawLayer, subLevel = region:GetDrawLayer()
-			if (drawLayer) then
-				self:DisableDrawLayer(drawLayer)
+	if (IsClassic) then
+		-- Oldschool backdrop killing.
+		self:DisableDrawLayer("BACKGROUND")
+		self:DisableDrawLayer("BORDER")
+	else
+		-- Textures in the combat pet tooltips
+		for _,texName in ipairs({ 
+			"BorderTopLeft", 
+			"BorderTopRight", 
+			"BorderBottomRight", 
+			"BorderBottomLeft", 
+			"BorderTop", 
+			"BorderRight", 
+			"BorderBottom", 
+			"BorderLeft", 
+			"Background" 
+		}) do
+			local region = self[texName]
+			if (region) then
+				local drawLayer, subLevel = region:GetDrawLayer()
+				if (drawLayer) then
+					self:DisableDrawLayer(drawLayer)
+				end
 			end
 		end
-	end
 
-	-- Region names sourced from SharedXML\NineSlice.lua
-	for _,pieceName in ipairs({  
-		"TopLeftCorner",
-		"TopRightCorner",
-		"BottomLeftCorner",
-		"BottomRightCorner",
-		"TopEdge",
-		"BottomEdge",
-		"LeftEdge",
-		"RightEdge",
-		"Center"
-	}) do
-		local region = self[pieceName]
-		if (region) then
-			local drawLayer, subLevel = region:GetDrawLayer()
-			if (drawLayer) then
-				self:DisableDrawLayer(drawLayer)
+		-- Region names sourced from SharedXML\NineSlice.lua
+		for _,pieceName in ipairs({  
+			"TopLeftCorner",
+			"TopRightCorner",
+			"BottomLeftCorner",
+			"BottomRightCorner",
+			"TopEdge",
+			"BottomEdge",
+			"LeftEdge",
+			"RightEdge",
+			"Center"
+		}) do
+			local region = self[pieceName]
+			if (region) then
+				local drawLayer, subLevel = region:GetDrawLayer()
+				if (drawLayer) then
+					self:DisableDrawLayer(drawLayer)
+				end
 			end
 		end
 	end
@@ -350,7 +359,7 @@ Tooltip.SetBackdrop = function(self, backdropInfo)
 	local backdrop = Backdrops[self]
 	if (backdropInfo) then
 		if (not backdrop) then
-			backdrop = CreateFrame("Frame", nil, self, "BackdropTemplate")
+			backdrop = CreateFrame("Frame", nil, self, BackdropTemplateMixin and "BackdropTemplate")
 			backdrop:SetAllPoints()
 			backdrop:SetFrameLevel(self:GetFrameLevel())
 			Backdrops[self] = backdrop
@@ -808,8 +817,10 @@ Module.StyleTooltips = function(self)
 		ShoppingTooltip1,
 		ShoppingTooltip2,
 		QuickKeybindTooltip,
-		QuestScrollFrame.StoryTooltip,
-		QuestScrollFrame.CampaignTooltip,
+
+		-- Only in Retail
+		QuestScrollFrame and QuestScrollFrame.StoryTooltip,
+		QuestScrollFrame and QuestScrollFrame.CampaignTooltip,
 
 		-- Battle Pet Tooltips
 		BattlePetTooltip,
@@ -824,7 +835,13 @@ Module.StyleTooltips = function(self)
 end
 
 Module.SetTooltipHooks = function(self)
-	hooksecurefunc("SharedTooltip_SetBackdropStyle", Tooltip.Style)
+
+	if (IsClassic) then
+		hooksecurefunc("GameTooltip_SetBackdropStyle", Tooltip.Style)
+	elseif (IsRetail) then	
+		hooksecurefunc("SharedTooltip_SetBackdropStyle", Tooltip.Style)
+	end
+
 	hooksecurefunc("GameTooltip_SetDefaultAnchor", Tooltip.SetDefaultAnchor)
 	hooksecurefunc("GameTooltip_ShowCompareItem", Tooltip.OnCompareItemShow)
 	hooksecurefunc("GameTooltip_UnitColor", Tooltip.SetUnitColor)
