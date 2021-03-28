@@ -1,4 +1,4 @@
-local LibLocale = Wheel:Set("LibLocale", 7)
+local LibLocale = Wheel:Set("LibLocale", 12)
 if (not LibLocale) then	
 	return
 end
@@ -54,12 +54,18 @@ local read = {
 		local defaultLocale = rawget(LibLocale.modules[module], "_defaultLocale") 
 		if (defaultLocale) then 
 			defaultValue = rawget(LibLocale.modules[module][defaultLocale], key)
+		else
+			print("missing",key,"no default locale found")
 		end 
 		rawset(tbl, key, defaultValue or key)
 
 		local LibModule = Wheel("LibModule")
 		if (LibModule and LibModule.AddDebugMessage) then 
-			LibModule:AddDebugMessageFormatted(("The locale '%s' is missing an entry for the key '%s'."):format(module, key))
+			if (defaultLocale) then
+				LibModule:AddDebugMessageFormatted(("The locale '%s'-'%s' is missing an entry for the key '%s'. An entry from the default locale '%s' was used instead."):format(module, rawget(tbl,"_locale"), key, defaultLocale))
+			else
+				LibModule:AddDebugMessageFormatted(("The locale '%s'-'%s' is missing an entry for the key '%s'."):format(module, rawget(tbl,"_locale"), key))
+			end
 		end
 
 		return key
@@ -120,11 +126,13 @@ LibLocale.NewLocale = function(self, module, locale, isDefault)
 	if (not LibLocale.modules[module]) then
 		LibLocale.modules[module] = {}
 	end
+	if (isDefault) then
+		LibLocale.modules[module]._defaultLocale = locale
+	end
 	local tbl = LibLocale.modules[module][locale]
 	if (not tbl) then 
 		tbl = { _owner = module, _locale = locale }
 		LibLocale.modules[module][locale] = tbl
-		LibLocale.modules[module]._defaultLocale = isDefault and locale or nil
 	end 
 
 	-- Return the module locale table with the correct metatable attached

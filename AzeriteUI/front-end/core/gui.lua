@@ -38,6 +38,11 @@ local IsForcingSlackAuraFilterMode = Private.IsForcingSlackAuraFilterMode
 local IsClassic = Module:IsClassic()
 local IsRetail = Module:IsRetail()
 
+-- Fixing Blizzard's shit.
+-- They bugged out FrameXML\RestrictedFrames.lua in build 37623.
+local Build = Module:GetCurrentClientBuild()
+local BlizzardFuckedUp = Build >= 37623 -- The culprit patch
+
 -- Menu callback frames
 local CallbackFrames = {}
 local CallbackFrameOwners = {}
@@ -103,6 +108,11 @@ local secureSnippets = {
 		self:CallMethod("ToggleAllBags"); 
 	]=],
 	windowToggle = [=[
+		-- Fake-disable buttons until Blizzard fix the restricted frames.
+		if (self:GetAttribute("blizzardFuckedUp") == "1") and (self:GetAttribute("userDisabled") == "1") then
+			return
+		end
+	
 		local window = self:GetFrameRef("Window"); 
 		if window:IsShown() then 
 			window:Hide(); 
@@ -126,6 +136,11 @@ local secureSnippets = {
 		local updateType = self:GetAttribute("updateType"); 
 		if (updateType == "SET_VALUE") then 
 
+			-- Fake-disable buttons until Blizzard fix the restricted frames.
+			if (self:GetAttribute("blizzardFuckedUp") == "1") and (self:GetAttribute("userDisabled") == "1") then
+				return
+			end
+		
 			-- Figure out the window's attribute name for this button's attached setting
 			local optionDB = self:GetAttribute("optionDB"); 
 			local optionName = self:GetAttribute("optionName"); 
@@ -187,9 +202,9 @@ local secureSnippets = {
 						end
 
 						if (enable) then
-							sibling:Enable()
+							sibling:RunAttribute("UserEnable");
 						else
-							sibling:Disable()
+							sibling:RunAttribute("UserDisable");
 							sibling:CallMethod("Update");
 
 							-- close child windows
@@ -212,6 +227,10 @@ local secureSnippets = {
 		elseif (updateType == "GET_VALUE") then 
 
 		elseif (updateType == "TOGGLE_VALUE") then 
+
+			local isSlave = self:GetAttribute("isSlave"); 
+			local isUserDisabled = (self:GetAttribute("blizzardFuckedUp") == "1") and (self:GetAttribute("userDisabled") == "1");
+	
 			-- Figure out the window's attribute name for this button's attached setting
 			local optionDB = self:GetAttribute("optionDB"); 
 			local optionName = self:GetAttribute("optionName"); 
@@ -236,14 +255,13 @@ local secureSnippets = {
 				proxyUpdater:SetAttribute("change-"..optionName, self:GetAttribute("optionValue")); 
 			end 
 
-			local isSlave = self:GetAttribute("isSlave"); 
 			if (isSlave) then
 				local slaveDB = self:GetAttribute("slaveDB"); 
 				local slaveKey = self:GetAttribute("slaveKey"); 
 				local slaveAttributeName = "DB_"..slaveDB.."_"..slaveKey; 
 				local slaveValue = window:GetAttribute(slaveAttributeName); 
 				if (not slaveValue) then
-					self:Disable()
+					self:RunAttribute("UserDisable");
 					-- close child windows
 					local window = self:GetFrameRef("Window");
 					if (window) then
@@ -251,7 +269,7 @@ local secureSnippets = {
 						window:CallMethod("OnHide");
 					end
 				else
-					self:Enable()
+					self:RunAttribute("UserEnable");
 				end
 			end
 
@@ -288,9 +306,9 @@ local secureSnippets = {
 						end
 
 						if (enable) then
-							sibling:Enable()
+							sibling:RunAttribute("UserEnable");
 						else
-							sibling:Disable()
+							sibling:RunAttribute("UserDisable");
 							sibling:CallMethod("Update");
 
 							-- close child windows
@@ -383,11 +401,17 @@ Button.OnHide = function(self)
 end 
 
 Button.OnMouseDown = function(self)
+	if (not self:IsReallyEnabled()) then
+		return
+	end
 	self.isDown = true
 	self:Update()
 end 
 
 Button.OnMouseUp = function(self)
+	if (not self:IsReallyEnabled()) then
+		return
+	end
 	self.isDown = false
 	self:Update()
 end 
@@ -397,6 +421,14 @@ Button.ToggleMode = function(self)
 	if Module and Module.OnModeToggle then 
 		Module:OnModeToggle(self.modeName)
 		self:Update()
+	end
+end
+
+Button.IsReallyEnabled = function(self)
+	if (BlizzardFuckedUp) then
+		return (self:GetAttribute("userDisabled") ~= "1") and self:IsEnabled()
+	else
+		return self:IsEnabled()
 	end
 end
 
@@ -411,7 +443,7 @@ Button.Update = function(self)
 		local option = db[self.optionName]
 		local checked = option == self.optionArg1
 
-		if (self:IsEnabled()) then
+		if (self:IsReallyEnabled()) then
 			if (checked) then 
 				self.Msg:SetText(self.enabledTitle or L["Enabled"])
 				self.isChecked = true
@@ -428,7 +460,7 @@ Button.Update = function(self)
 		local db = GetConfig(self.optionDB, self.optionProfile)
 		local option = db[self.optionName]
 
-		if (self:IsEnabled()) then
+		if (self:IsReallyEnabled()) then
 			if (option) then 
 				self.Msg:SetText(self.enabledTitle or L["Disable"])
 				self.isChecked = true
@@ -444,7 +476,7 @@ Button.Update = function(self)
 	elseif (self.updateType == "TOGGLE_MODE") then
 		local Module = self.proxyModule and Core:GetModule(self.proxyModule, true) or self.useCore and Core
 		if Module then 
-			if (self:IsEnabled()) then
+			if (self:IsReallyEnabled()) then
 				if (Module:IsModeEnabled(self.modeName)) then 
 					self.Msg:SetText(self.enabledTitle or L["Disable"])
 					self.isChecked = true
@@ -589,6 +621,24 @@ Window.AddButton = function(self, text, updateType, optionDB, optionProfile, opt
 	option:SetAttribute("optionProfile", optionProfile)
 	option:SetAttribute("optionName", optionName)
 
+	option:SetAttribute("blizzardFuckedUp", BlizzardFuckedUp and "1")
+	option:SetAttribute("UserDisable", [=[
+		if (self:GetAttribute("blizzardFuckedUp") == "1") then
+			self:SetAttribute("userDisabled", "1"); 
+			self:CallMethod("OnDisable");
+		else
+			self:Disable();
+		end
+	]=])
+	option:SetAttribute("UserEnable", [=[
+		if (self:GetAttribute("blizzardFuckedUp") == "1") then
+			self:SetAttribute("userDisabled", "0"); 
+			self:CallMethod("OnEnable");
+		else
+			self:Enable();
+		end
+	]=])
+
 	option:SetFrameRef("Owner", self)
 
 	for i = 1, select("#", ...) do 
@@ -603,9 +653,7 @@ Window.AddButton = function(self, text, updateType, optionDB, optionProfile, opt
 	option.optionProfile = optionProfile
 	option.optionName = optionName
 
-	--if (updateType == "SET_VALUE") or (updateType == "GET_VALUE") or (updateType == "TOGGLE_VALUE") or (updateType == "TOGGLE_MODE") then 
-		option:SetAttribute("_onclick", secureSnippets.buttonClick)
-	--end
+	option:SetAttribute("_onclick", secureSnippets.buttonClick)
 
 	if (not Module.optionCallbacks) then 
 		Module.optionCallbacks = {}
@@ -942,9 +990,19 @@ Module.PostUpdateOptions = function(self, event, ...)
 				end
 
 				if (enable) then 
-					option:Enable()
+					if (BlizzardFuckedUp) then
+						option:SetAttribute("userDisabled", "0")
+						option:OnEnable()
+					else
+						option:Enable()
+					end
 				else
-					option:Disable()
+					if (BlizzardFuckedUp) then
+						option:SetAttribute("userDisabled", "1")
+						option:OnDisable()
+					else
+						option:Disable()
+					end
 				end 
 
 				option:Update()
@@ -1680,14 +1738,14 @@ Module.CreateMenuTable = function(self)
 							type = "TOGGLE_VALUE", 
 							configDB = "ExplorerMode", configKey = "enableExplorer", 
 							proxyModule = "ExplorerMode"
-						},
+						}--[[,
 						{
 							enabledTitle = L_ENABLED:format(L["Tracker Fading"]),
 							disabledTitle = L_DISABLED:format(L["Tracker Fading"]),
 							type = "TOGGLE_VALUE", 
 							configDB = "ExplorerMode", configKey = "enableTrackerFading", 
 							proxyModule = "ExplorerMode"
-						}
+						}]]
 					}
 				})
 

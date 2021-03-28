@@ -219,11 +219,11 @@ local Core_MenuButton_PostUpdate = function(self)
 	hide:SetAlpha(0)
 	show:SetAlpha(1)
 
-	if isPushed then
+	if (isPushed) then
 		self.ArrowDown:SetShown(self.hasWindow)
 		self.ArrowUp:Hide()
 		self.Msg:SetPoint("CENTER", 0, -2)
-		if self:IsMouseOver() then
+		if (self:IsMouseOver()) and (self:GetAttribute("userDisabled") ~= "1") then
 			show:SetVertexColor(1, 1, 1)
 		elseif (self.isChecked or self.windowIsShown) then 
 			show:SetVertexColor(.9, .9, .9)
@@ -234,7 +234,7 @@ local Core_MenuButton_PostUpdate = function(self)
 		self.ArrowDown:Hide()
 		self.ArrowUp:SetShown(self.hasWindow)
 		self.Msg:SetPoint("CENTER", 0, 0)
-		if self:IsMouseOver() then
+		if (self:IsMouseOver()) and (self:GetAttribute("userDisabled") ~= "1") then
 			show:SetVertexColor(1, 1, 1)
 		else
 			show:SetVertexColor(.75, .75, .75)

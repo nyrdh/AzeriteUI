@@ -1,4 +1,4 @@
-local LibClientBuild = Wheel:Set("LibClientBuild", 41)
+local LibClientBuild = Wheel:Set("LibClientBuild", 42)
 if (not LibClientBuild) then
 	return
 end
@@ -50,6 +50,10 @@ builds["8.2.0"] 	= 30920
 builds["8.2.0"] 	= 31229
 builds["8.2.5"] 	= 31960
 builds["8.3.0"] 	= 34220
+builds["8.3.7"] 	= 35662
+builds["9.0.1"] 	= 36577
+builds["9.0.2"] 	= 37474
+builds["9.0.5"] 	= 37988
 
 -- Metas
 builds["Classic"] 	= builds["1.13.4"]
