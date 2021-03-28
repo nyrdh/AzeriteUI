@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 112)
+local LibTooltip = Wheel:Set("LibTooltip", 113)
 if (not LibTooltip) then
 	return
 end
@@ -425,6 +425,11 @@ Tooltip.UpdateLayout = function(self)
 			end 
 		else 
 			lineWidth = left:GetStringWidth()
+			if (not left._wordWrap) then
+				if (lineWidth > (overflowWidth or self.maximumWidth)) then 
+					overflowWidth = lineWidth
+				end 
+			end
 		end 
 
 		-- Increase the width if this line was larger
@@ -2024,12 +2029,14 @@ Tooltip.AddLine = function(self, msg, r, g, b, wrap)
 	left:SetText(msg)
 	left:SetTextColor(r, g, b)
 	left:SetWordWrap(wrap or false) -- just wrap by default?
+	left._wordWrap = wrap or false
 	left:Show()
 
 	local right = self.lines.right[self.numLines]
 	right:Hide()
 	right:SetText("")
 	right:SetWordWrap(false)
+	right._wordWrap = false
 
 	-- Align the line
 	alignLine(self, self.numLines)
@@ -2058,12 +2065,14 @@ Tooltip.AddDoubleLine = function(self, leftMsg, rightMsg, r, g, b, r2, g2, b2, l
 	left:SetText(leftMsg)
 	left:SetTextColor(r, g, b)
 	left:SetWordWrap(leftWrap or false)
+	left._wordWrap = leftWrap or false
 	left:Show()
 
 	local right = self.lines.right[self.numLines]
 	right:SetText(rightMsg)
 	right:SetTextColor(r2, g2, b2)
 	right:SetWordWrap(rightWrap or false)
+	right._wordWrap = rightWrap or false
 	right:Show()
 end
 
@@ -2581,7 +2590,7 @@ LibTooltip.CreateTooltip = function(self, name)
 	tooltip.numLines = 0 -- current number of visible lines
 	tooltip.numBars = 0 -- current number of visible bars
 	tooltip.numTextures = 0 -- current number of visible textures
-	tooltip.minimumWidth = 160 -- current minimum display width
+	tooltip.minimumWidth = 120 -- current minimum display width
 	tooltip.maximumWidth = 360 -- current maximum display width
 	tooltip.colors = Colors -- assign our color table, can be replaced by modules to override colors. 
 	tooltip.lines = { left = {}, right = {} } -- pool of all text lines

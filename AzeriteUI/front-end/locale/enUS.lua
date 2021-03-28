@@ -179,11 +179,57 @@ L["Tracker Fading"] = true
 L["Chat Positioning"] = true
 L["Healer Mode"] = "Healer Layout" -- it's a layout change, so let's reflect this!
 
--- Menu button tooltips, not actually used at the moment. 
+-- Config Menu Tooltips
+-- *please do not let the very 
+--  long texts here confuse you.
+--------------------------------------------
+-- Debug tools
+L["Various minor tools that may or may not help you in a time of crisis. Usually only useful to the developer of the user interface."] = true
+L["The debug console is a read-only used by the user interface to show status messages and debug output. Unless you are actively developing new features yourself and intentionally sends thing to the console, you do not need to enable this."] = true
+L["Reloads the user interface. This can be helpful if taints occur, blocking things like quest buttons or bag items from being used."] = true
+
+-- Aspect Ratio
+L["Here you can set how much width of the screen our custom user interface elements will take up. This is mostly useful for users with ultrawide screens, as it allows them to place the frames closer to the center of the screen, making the game easier to play.|n|n|cffcc0000This does NOT apply to Blizzard windows like the character frame, spellbook and similar, and currently that is not something that can easily be implemented!|r"] = true
+L["Limits the user interface to a regular 16:9 widescreen ratio. This is how the user interface was designed and intended to be, and thus the default setting."] = true
+L["Limits the user interface to a 21:9 ultrawide ratio.|n|n|cffcc0000This setting only holds meaning if you have a screen wider than this, and wish to lock the width of our user interface to a 21:9 ratio.|r"] = true
+L["Uses the full width of the screen, moving elements anchored to the sides of the screen all the way out.|n|n|cffcc0000This setting only holds meaning if you have a screen width a wider ratio than regular 16:9 widescreen.|r"] = true
+
+-- Aura Filters
+L["There are very many auras displayed in this game, and we have very limited space to show them in our user interface. So we filter and sort our auras to better use the space we have, and display what matters the most."] = true
+L["The Strict filter follows strict rules for what to show and what to hide. It will by default show important debuffs, boss debuffs, time based auras from the environment of NPCs, as well as any whitelisted auras for your class."] = true
+L["The Slack filter shows everything from the Strict filter, and also adds a lot of shorter auras or auras with stacks."] = true
+L["The Spam filter shows all that the other filters show, but also adds auras with a very long duration when not currently engaged in combat."] = true
+
+-- ActionBars
 L["Click to enable the Stance Bar."] = true
 L["Click to disable the Stance Bar."] = true
 L["Click to enable the Pet Action Bar."] = true
 L["Click to disable the Pet Action Bar."] = true
+
+-- Chat Windows
+L["This is a chat filter that reformats a lot of the game chat output to a much nicer format. This includes when you receive loot, earn currency or gold, when somebody gets and achievement, and so on.|n|nNote that this filter does not add or remove anything, it simply makes it easier on the eyes."] = true
+L["This filter hides most things NPCs or monsters say from that chat. Monster emotes and whispers are moved to the same place mid-screen as boss emotes and whispers are displayed.|n|nThis does not affect what is visible in chat bubbles above their heads, which is where we wish this kind of information to be available."] = true
+L["This filter hides most things boss monsters say from that chat. |n|nThis does not affect what is visible mid-screen during raid fights, nor what you'll see in chat bubbles above their heads, which is where we wish this kind of information to be available."] = true
+L["This filter hides a lot of messages related to group members in raids and especially battlegrounds, such as who joins, leaves, who loots something and so on.|n|nThe idea here is free up the chat and allow you to see what people are actually saying, and not just the constant spam of people coming and going."] = true
+L["Toggles outlined text in the chat windows.|n|nWe recommend leaving it on as the chat can be really hard to read in certain situations otherwise."] = true
+
+-- NamePlates
+L["This controls the visibility options of the Personal Resource Display, your personal nameplate located beneath your character."] = true
+L["Click to disable the Personal Resource Display."] = true
+L["Click to enable the Personal Resource Display."] = true
+L["Here you can choose whether NamePlates should react to mouse events and mouse clicks as normal, or set them to be click-trhough, meaning you can see them but not interact with them.|n|nIf you wish to be able to click on a nameplate to select that unit as your target, then you should NOT use click-through NamePlates."] = true
+
+-- HUD
+L["A head-up display, also known as a HUD, is any transparent display that presents data without requiring users to look away from their usual viewpoints. In our user interface, we use this to label elements appearing in the middle of the screen, then disappearing."] = true
+L["Toggles your own castbar, which appears in the bottom center part of the screen, beneath your character and above your actionbars."] = true
+L["Toggles the point based resource systems unique to your own class."] = true
+L["Toggles the TalkingHead frame. This is the frame you'll see appear in the top center part of the screen, with a portrait and a text. This will usually occur when reaching certain world quest areas, or when a forced quest from your faction leader appears."] = true
+L["The Objectives Tracker shows your quests, quest item buttons, world quests, campaign quests, mythic affixes, Torghast powers and so on.|n|nAnnoying as hell, but best left on unless you're very, very pro."] = true
+L["Raid Warnings are important raid messages appearing in the top center part of the screen. This is where messages sent by your raid leader and raid officers appear. It is recommended to leave these on for the most part.|n|nThe exception is when you get into WoW Classic battlegrounds where everybody is promoted, and some jokers keep spamming. Then it is good to disable."] = true
+L["Toggles the display of boss- and moster emotes. If you're a skilled player, it is not recommended to turn these on, as some world quests and most boss encounters send important messages here.|n|nSupport wheel users relying on Dumb Boss Mods can do whatever they please, it's not like they're looking at anything else than bars anyway."] = true
+L["This includes most mid-screen announcements like when you gain a level, you receive certain types of loot, and any banner shown when you complete a scenario, kill a boss and so forth."] = true
+L["Toggles the display of alert frames. These include the achievement popups, as well as multiple types of currency loot in some expansion content like the Legion zones."] = true
+
 
 -- Various Button Tooltips
 --------------------------------------------

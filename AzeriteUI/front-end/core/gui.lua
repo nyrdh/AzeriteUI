@@ -390,6 +390,51 @@ Button.OnDisable = function(self)
 	self:Update()
 end 
 
+Button.OnEnter = function(self)
+	self:Update()
+	if (self:IsReallyEnabled()) and (not self:IsWindowOpen()) then
+		if ((self.isChecked) and (self.enabledTooltipText or self.tooltipText))
+		or ((not self.isChecked) and (self.disabledTooltipText or self.tooltipText)) then
+
+			local titleColor, normalColor = self.layout.MenuButtonTitleColor,  self.layout.MenuButtonNormalColor
+			local tooltip = self:GetTooltip()
+			tooltip:Hide()
+			tooltip:SetSmartAnchor(self, 40, -(self.layout.MenuButtonSize[2]*self.layout.MenuButtonSizeMod - 2))
+
+			if (self.isChecked) then
+				tooltip:AddLine(self.enabledTooltipText or self.tooltipText, titleColor[1], titleColor[2], titleColor[3], false)
+				if (self.enabledNewbieText or self.newbieText) then
+					tooltip:AddLine(self.enabledNewbieText or self.newbieText, normalColor[1], normalColor[2], normalColor[3], true)
+				end
+			else
+				tooltip:AddLine(self.disabledTooltipText or self.tooltipText, titleColor[1], titleColor[2], titleColor[3], false)
+				if (self.disabledNewbieText or self.newbieText) then
+					tooltip:AddLine(self.disabledNewbieText or self.newbieText, normalColor[1], normalColor[2], normalColor[3], true)
+				end
+			end
+
+			tooltip:Show()
+		end
+	end
+end
+
+Button.PostClick = function(self)
+	local tooltip = self:GetTooltip()
+	if (tooltip:IsShown()) and (tooltip:GetOwner() == self) then
+		self:OnEnter()
+	end
+end
+
+Button.OnLeave = function(self)
+	local tooltip = self:GetTooltip()
+	tooltip:Hide()
+	self:Update()
+end
+
+Button.GetTooltip = function(self)
+	return Private:GetOptionsMenuTooltip()
+end
+
 Button.OnShow = function(self)
 	self.isDown = false
 	self:Update()
@@ -430,6 +475,14 @@ Button.IsReallyEnabled = function(self)
 	else
 		return self:IsEnabled()
 	end
+end
+
+Button.HasWindow = function(self)
+	return self.hasWindow
+end
+
+Button.IsWindowOpen = function(self)
+	return self.windowIsShown
 end
 
 Button.Update = function(self)
@@ -525,9 +578,11 @@ Button.CreateWindow = function(self, level)
 
 	window.OnHide = Window.OnHide
 	window.OnShow = Window.OnShow
+	window.hasButton = self
 
 	self:SetAttribute("_onclick", secureSnippets.windowToggle)
 	self:SetFrameRef("Window", window)
+	self.hasWindow = window
 
 	Module:AddFrameToAutoHide(window)
 
@@ -573,13 +628,13 @@ Toggle.OnEnter = function(self)
 	tooltip:SetDefaultAnchor(self)
 
 	if (self.leftButtonTooltip) then
-		tooltip:AddLine(self.leftButtonTooltip, r,g,b, true)
+		tooltip:AddLine(self.leftButtonTooltip, r,g,b, false)
 	end
 	if (self.middleButtonTooltip) then
-		tooltip:AddLine(self.middleButtonTooltip, r,g,b, true)
+		tooltip:AddLine(self.middleButtonTooltip, r,g,b, false)
 	end
 	if (self.rightButtonTooltip) then
-		tooltip:AddLine(self.rightButtonTooltip, r,g,b, true)
+		tooltip:AddLine(self.rightButtonTooltip, r,g,b, false)
 	end
 
 	tooltip:Show()
@@ -613,8 +668,9 @@ Window.AddButton = function(self, text, updateType, optionDB, optionProfile, opt
 	option:HookScript("OnHide", Button.OnHide)
 	option:HookScript("OnMouseDown", Button.OnMouseDown)
 	option:HookScript("OnMouseUp", Button.OnMouseUp)
-	option:HookScript("OnEnter", Button.Update)
-	option:HookScript("OnLeave", Button.Update)
+	option:HookScript("OnEnter", Button.OnEnter)
+	option:HookScript("OnLeave", Button.OnLeave)
+	option:SetScript("PostClick", Button.PostClick)
 
 	option:SetAttribute("updateType", updateType)
 	option:SetAttribute("optionDB", optionDB)
@@ -652,7 +708,6 @@ Window.AddButton = function(self, text, updateType, optionDB, optionProfile, opt
 	option.optionDB = optionDB
 	option.optionProfile = optionProfile
 	option.optionName = optionName
-
 	option:SetAttribute("_onclick", secureSnippets.buttonClick)
 
 	if (not Module.optionCallbacks) then 
@@ -678,6 +733,7 @@ Window.ParseOptionsTable = function(self, tbl, parentLevel)
 	local level = (parentLevel or 1) + 1
 	for id,data in ipairs(tbl) do
 		local button = self:AddButton(data.title, data.type, data.configDB, data.configProfile, data.configKey, data.optionArgs and unpack(data.optionArgs))
+		
 		button.title = data.title
 		button.enabledTitle = data.enabledTitle
 		button.disabledTitle = data.disabledTitle
@@ -685,9 +741,17 @@ Window.ParseOptionsTable = function(self, tbl, parentLevel)
 		button.useCore = data.useCore
 		button.modeName = data.modeName
 		button.hasWindow = data.hasWindow
+		button.tooltipText = data.tooltipText
+		button.enabledTooltipText = data.enabledTooltipText
+		button.disabledTooltipText = data.disabledTooltipText
+		button.newbieText = data.newbieText
+		button.enabledNewbieText = data.enabledNewbieText
+		button.disabledNewbieText = data.disabledNewbieText
+
 		if data.isSlave then 
 			button:SetAsSlave(data.slaveDB, data.slaveKey, data.slaveEnableValues)
 		end 
+
 		if data.hasWindow then 
 			local window = button:CreateWindow(level)
 			if data.buttons then 
@@ -721,13 +785,29 @@ Window.UpdateSiblings = function(self)
 end
 
 Window.OnHide = function(self)
-	self:GetParent().windowIsShown = nil
-	self:GetParent():Update()
+	local button = self:GetParent()
+	button.windowIsShown = nil
+
+	local tooltip = button:GetTooltip()
+	if (button:IsMouseOver(0,0,0,0) and ((not tooltip:IsShown()) or (tooltip:GetOwner() ~= button))) then 
+		button:OnEnter() -- this fires off the update
+		return
+	end 
+
+	button:Update()
 end
 
 Window.OnShow = function(self)
-	self:GetParent().windowIsShown = true
-	self:GetParent():Update()
+	local button = self:GetParent()
+	button.windowIsShown = true
+
+	local tooltip = button:GetTooltip()
+	if (tooltip:IsShown() and tooltip:GetOwner() == button) then
+		tooltip:Hide() -- this fires off the update
+		return
+	end
+
+	button:Update()
 end
 
 Window.PostUpdateSize = function(self)
@@ -1097,12 +1177,16 @@ Module.CreateMenuTable = function(self)
 	-- Debug Mode
 	local DebugMenu = {
 		title = L["Debug Mode"], type = nil, hasWindow = true, 
+		tooltipText = L["Debug Mode"],
+		newbieText = L["Various minor tools that may or may not help you in a time of crisis. Usually only useful to the developer of the user interface."],
 		buttons = {}
 	}
 	if self:GetOwner():IsDebugModeEnabled() then 
 		table_insert(DebugMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Debug Console"]),
 			disabledTitle = L_DISABLED:format(L["Debug Console"]),
+			tooltipText = L["Debug Console"],
+			newbieText = L["The debug console is a read-only used by the user interface to show status messages and debug output. Unless you are actively developing new features yourself and intentionally sends thing to the console, you do not need to enable this."],
 			type = "TOGGLE_MODE", hasWindow = false, 
 			configDB = ADDON, configProfile = "global", modeName = "enableDebugConsole", 
 			proxyModule = nil, useCore = true
@@ -1120,6 +1204,8 @@ Module.CreateMenuTable = function(self)
 	table_insert(DebugMenu.buttons, {
 		enabledTitle = L_ENABLED:format(L["Reload UI"]),
 		disabledTitle = L_DISABLED:format(L["Reload UI"]),
+		tooltipText = L["Reload UI"],
+		newbieText = L["Reloads the user interface. This can be helpful if taints occur, blocking things like quest buttons or bag items from being used."],
 		type = "TOGGLE_MODE", hasWindow = false, 
 		configDB = ADDON, configProfile = "global", modeName = "reloadUI", 
 		proxyModule = nil, useCore = true
@@ -1129,10 +1215,14 @@ Module.CreateMenuTable = function(self)
 	-- Aspect Ratio Options
 	table_insert(MenuTable, {
 		title = L["Aspect Ratio"], type = nil, hasWindow = true, 
+		tooltipText = L["Aspect Ratio"],
+		newbieText = L["Here you can set how much width of the screen our custom user interface elements will take up. This is mostly useful for users with ultrawide screens, as it allows them to place the frames closer to the center of the screen, making the game easier to play.|n|n|cffcc0000This does NOT apply to Blizzard windows like the character frame, spellbook and similar, and currently that is not something that can easily be implemented!|r"],
 		buttons = {
 			{
 				enabledTitle = L_ENABLED:format(L["Widescreen (16:9)"]),
 				disabledTitle = L["Widescreen (16:9)"],
+				tooltipText = L["Widescreen (16:9)"],
+				newbieText = L["Limits the user interface to a regular 16:9 widescreen ratio. This is how the user interface was designed and intended to be, and thus the default setting."],
 				type = "SET_VALUE", 
 				configDB = ADDON, configProfile = "global", configKey = "aspectRatio", optionArgs = { "wide" }, 
 				proxyModule = nil, useCore = true
@@ -1140,6 +1230,8 @@ Module.CreateMenuTable = function(self)
 			{
 				enabledTitle = L_ENABLED:format(L["Ultrawide (21:9)"]),
 				disabledTitle = L["Ultrawide (21:9)"],
+				tooltipText = L["Ultrawide (21:9)"],
+				newbieText = L["Limits the user interface to a 21:9 ultrawide ratio.|n|n|cffcc0000This setting only holds meaning if you have a screen wider than this, and wish to lock the width of our user interface to a 21:9 ratio.|r"],
 				type = "SET_VALUE", 
 				configDB = ADDON, configProfile = "global", configKey = "aspectRatio", optionArgs = { "ultrawide" }, 
 				proxyModule = nil, useCore = true
@@ -1147,6 +1239,8 @@ Module.CreateMenuTable = function(self)
 			{
 				enabledTitle = L_ENABLED:format(L["Unlimited"]),
 				disabledTitle = L["Unlimited"],
+				tooltipText = L["Unlimited"],
+				newbieText = L["Uses the full width of the screen, moving elements anchored to the sides of the screen all the way out.|n|n|cffcc0000This setting only holds meaning if you have a screen width a wider ratio than regular 16:9 widescreen.|r"],
 				type = "SET_VALUE", 
 				configDB = ADDON, configProfile = "global", configKey = "aspectRatio", optionArgs = { "full" }, 
 				proxyModule = nil, useCore = true
@@ -1158,10 +1252,15 @@ Module.CreateMenuTable = function(self)
 	-- *only added for select classes
 	table_insert(MenuTable, {
 		title = L["Aura Filters"], type = nil, hasWindow = true, 
+		tooltipText = L["Aura Filters"], 
+		newbieText = L["There are very many auras displayed in this game, and we have very limited space to show them in our user interface. So we filter and sort our auras to better use the space we have, and display what matters the most."],
+
 		buttons = clean({
 			(not IsForcingSlackAuraFilterMode()) and {
 				enabledTitle = L_ENABLED:format(L["Strict"]),
 				disabledTitle = L["Strict"],
+				tooltipText = L["Strict"],
+				newbieText = L["The Strict filter follows strict rules for what to show and what to hide. It will by default show important debuffs, boss debuffs, time based auras from the environment of NPCs, as well as any whitelisted auras for your class."],
 				type = "SET_VALUE", 
 				configDB = ADDON, configKey = "auraFilterLevel", optionArgs = { 0 }, 
 				proxyModule = nil, useCore = true
@@ -1169,6 +1268,8 @@ Module.CreateMenuTable = function(self)
 			{
 				enabledTitle = L_ENABLED:format(L["Slack"]),
 				disabledTitle = L["Slack"],
+				tooltipText = L["Slack"],
+				newbieText = L["The Slack filter shows everything from the Strict filter, and also adds a lot of shorter auras or auras with stacks."],
 				type = "SET_VALUE", 
 				configDB = ADDON, configKey = "auraFilterLevel", optionArgs = { 1 }, 
 				proxyModule = nil, useCore = true
@@ -1176,6 +1277,8 @@ Module.CreateMenuTable = function(self)
 			{
 				enabledTitle = L_ENABLED:format(L["Spam"]),
 				disabledTitle = L["Spam"],
+				tooltipText = L["Spam"],
+				newbieText = L["The Spam filter shows all that the other filters show, but also adds auras with a very long duration when not currently engaged in combat."],
 				type = "SET_VALUE", 
 				configDB = ADDON, configKey = "auraFilterLevel", optionArgs = { 2 }, 
 				proxyModule = nil, useCore = true
@@ -1187,6 +1290,8 @@ Module.CreateMenuTable = function(self)
 	if (Core:IsModuleAvailable("ActionBarMain")) then 
 		local ActionBarMenu = {
 			title = L["ActionBars"], type = nil, hasWindow = true, 
+			tooltipText = ACTIONBARS_LABEL,
+			newbieText = ACTIONBARS_SUBTEXT,
 			buttons = {}
 		}
 
@@ -1285,6 +1390,9 @@ Module.CreateMenuTable = function(self)
 					{
 						enabledTitle = L["Enabled"],
 						disabledTitle = L["Disabled"],
+						tooltipText = L["Pet Bar"],
+						enabledNewbieText = L["Click to disable the Pet Action Bar."],
+						disabledNewbieText = L["Click to enable the Pet Action Bar."],
 						type = "TOGGLE_VALUE", hasWindow = false, 
 						configDB = "ModuleForge::ActionBars", configKey = "Azerite::petBarEnabled", 
 						proxyModule = "ActionBarMain"
@@ -1327,6 +1435,9 @@ Module.CreateMenuTable = function(self)
 					{
 						enabledTitle = L["Enabled"],
 						disabledTitle = L["Disabled"],
+						tooltipText = L["Pet Bar"],
+						enabledNewbieText = L["Click to disable the Pet Action Bar."],
+						disabledNewbieText = L["Click to enable the Pet Action Bar."],
 						type = "TOGGLE_VALUE", hasWindow = false, 
 						configDB = "ModuleForge::ActionBars", configKey = "Legacy::enablePetBar", 
 						proxyModule = "ActionBarMain"
@@ -1428,6 +1539,8 @@ Module.CreateMenuTable = function(self)
 		table_insert(ActionBarMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Cast on Down"]),
 			disabledTitle = L_DISABLED:format(L["Cast on Down"]),
+			tooltipText = ACTION_BUTTON_USE_KEY_DOWN,
+			newbieText = OPTION_TOOLTIP_ACTION_BUTTON_USE_KEY_DOWN,
 			type = "TOGGLE_VALUE", hasWindow = false, 
 			configDB = "ModuleForge::ActionBars", configKey = "castOnDown", 
 			proxyModule = "ActionBarMain"
@@ -1436,6 +1549,7 @@ Module.CreateMenuTable = function(self)
 		table_insert(ActionBarMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Button Lock"]),
 			disabledTitle = L_DISABLED:format(L["Button Lock"]),
+			tooltipText = LOCK_ACTIONBAR_TEXT,
 			type = "TOGGLE_VALUE", hasWindow = false, 
 			configDB = "ModuleForge::ActionBars", configKey = "buttonLock", 
 			proxyModule = "ActionBarMain"
@@ -1454,6 +1568,8 @@ Module.CreateMenuTable = function(self)
 					{
 						enabledTitle = L_ENABLED:format(L["Chat Styling"]),
 						disabledTitle = L_DISABLED:format(L["Chat Styling"]),
+						tooltipText = L["Chat Styling"],
+						newbieText = L["This is a chat filter that reformats a lot of the game chat output to a much nicer format. This includes when you receive loot, earn currency or gold, when somebody gets and achievement, and so on.|n|nNote that this filter does not add or remove anything, it simply makes it easier on the eyes."],
 						type = "TOGGLE_VALUE", 
 						configDB = "ChatFilters", configKey = "enableChatStyling", 
 						proxyModule = "ChatFilters"
@@ -1461,6 +1577,8 @@ Module.CreateMenuTable = function(self)
 					{
 						enabledTitle = L_ENABLED:format(L["Hide Monster Messages"]),
 						disabledTitle = L_DISABLED:format(L["Hide Monster Messages"]),
+						tooltipText = L["Hide Monster Messages"],
+						newbieText = L["This filter hides most things NPCs or monsters say from that chat. Monster emotes and whispers are moved to the same place mid-screen as boss emotes and whispers are displayed.|n|nThis does not affect what is visible in chat bubbles above their heads, which is where we wish this kind of information to be available."],
 						type = "TOGGLE_VALUE", 
 						configDB = "ChatFilters", configKey = "enableMonsterFilter", 
 						proxyModule = "ChatFilters"
@@ -1468,6 +1586,8 @@ Module.CreateMenuTable = function(self)
 					{
 						enabledTitle = L_ENABLED:format(L["Hide Boss Messages"]),
 						disabledTitle = L_DISABLED:format(L["Hide Boss Messages"]),
+						tooltipText = L["Hide Boss Messages"],
+						newbieText = L["This filter hides most things boss monsters say from that chat. |n|nThis does not affect what is visible mid-screen during raid fights, nor what you'll see in chat bubbles above their heads, which is where we wish this kind of information to be available."],
 						type = "TOGGLE_VALUE", 
 						configDB = "ChatFilters", configKey = "enableBossFilter", 
 						proxyModule = "ChatFilters"
@@ -1475,6 +1595,8 @@ Module.CreateMenuTable = function(self)
 					{
 						enabledTitle = L_ENABLED:format(L["Hide Spam"]),
 						disabledTitle = L_DISABLED:format(L["Hide Spam"]),
+						tooltipText = L["Hide Spam"],
+						newbieText = L["This filter hides a lot of messages related to group members in raids and especially battlegrounds, such as who joins, leaves, who loots something and so on.|n|nThe idea here is free up the chat and allow you to see what people are actually saying, and not just the constant spam of people coming and going."],
 						type = "TOGGLE_VALUE", 
 						configDB = "ChatFilters", configKey = "enableSpamFilter", 
 						proxyModule = "ChatFilters"
@@ -1488,6 +1610,8 @@ Module.CreateMenuTable = function(self)
 		table_insert(ChatFrameMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Chat Outline"]),
 			disabledTitle = L_DISABLED:format(L["Chat Outline"]),
+			tooltipText = L["Chat Outline"],
+			newbieText = L["Toggles outlined text in the chat windows.|n|nWe recommend leaving it on as the chat can be really hard to read in certain situations otherwise."],
 			type = "TOGGLE_VALUE", 
 			configDB = "BlizzardChatFrames", configKey = "enableChatOutline", 
 			proxyModule = "BlizzardChatFrames"
@@ -1503,10 +1627,15 @@ Module.CreateMenuTable = function(self)
 		if (IsRetail) then
 			table_insert(NamePlateMenu.buttons, {
 				title = L["PRD"], type = nil, hasWindow = true, 
+				tooltipText = DISPLAY_PERSONAL_RESOURCE,
+				newbieText = L["This controls the visibility options of the Personal Resource Display, your personal nameplate located beneath your character."],
 				buttons = {
 					{
 						enabledTitle = L["Enabled"],
 						disabledTitle = L["Disabled"],
+						tooltipText = DISPLAY_PERSONAL_RESOURCE,
+						enabledNewbieText = L["Click to disable the Personal Resource Display."],
+						disabledNewbieText = L["Click to enable the Personal Resource Display."],
 						type = "TOGGLE_VALUE", 
 						configDB = "NamePlates", configKey = "nameplateShowSelf", 
 						proxyModule = "NamePlates"
@@ -1542,6 +1671,8 @@ Module.CreateMenuTable = function(self)
 		-- Click-through settings
 		table_insert(NamePlateMenu.buttons, {
 			title = MAKE_UNINTERACTABLE, type = nil, hasWindow = true, 
+			tooltipText = L["Click-Through NamePlates"],
+			newbieText = L["Here you can choose whether NamePlates should react to mouse events and mouse clicks as normal, or set them to be click-trhough, meaning you can see them but not interact with them.|n|nIf you wish to be able to click on a nameplate to select that unit as your target, then you should NOT use click-through NamePlates."],
 			buttons = {
 				{
 					enabledTitle = L_ENABLED:format(L["Enemies"]),
@@ -1630,10 +1761,14 @@ Module.CreateMenuTable = function(self)
 	if (Core:IsModuleAvailable("UnitFramePlayerHUD")) then 
 		local HUDMenu = {
 			title = L["HUD"], type = nil, hasWindow = true, 
+			tooltipText = L["HUD"],
+			newbieText = L["A head-up display, also known as a HUD, is any transparent display that presents data without requiring users to look away from their usual viewpoints. In our user interface, we use this to label elements appearing in the middle of the screen, then disappearing."],
 			buttons = clean({
 				IsAzerite and {
 					enabledTitle = L_ENABLED:format(L["CastBar"]),
 					disabledTitle = L_DISABLED:format(L["CastBar"]),
+					tooltipText = L["CastBar"],
+					newbieText = L["Toggles your own castbar, which appears in the bottom center part of the screen, beneath your character and above your actionbars."],
 					type = "TOGGLE_VALUE", 
 					configDB = "UnitFramePlayerHUD", configKey = "enableCast", 
 					proxyModule = "UnitFramePlayerHUD"
@@ -1646,6 +1781,8 @@ Module.CreateMenuTable = function(self)
 				table_insert(HUDMenu.buttons, {
 					enabledTitle = L_ENABLED:format(L["ClassPower"]),
 					disabledTitle = L_DISABLED:format(L["ClassPower"]),
+					tooltipText = L["ClassPower"],
+					newbieText = L["Toggles the point based resource systems unique to your own class."],
 					type = "TOGGLE_VALUE", 
 					configDB = "UnitFramePlayerHUD", configKey = "enableClassPower", 
 					proxyModule = "UnitFramePlayerHUD"
@@ -1658,6 +1795,8 @@ Module.CreateMenuTable = function(self)
 			table_insert(HUDMenu.buttons, {
 				enabledTitle = L_ENABLED:format(L["TalkingHead"]),
 				disabledTitle = L_DISABLED:format(L["TalkingHead"]),
+				tooltipText = L["TalkingHead"],
+				newbieText = L["Toggles the TalkingHead frame. This is the frame you'll see appear in the top center part of the screen, with a portrait and a text. This will usually occur when reaching certain world quest areas, or when a forced quest from your faction leader appears."],
 				type = "TOGGLE_VALUE", 
 				configDB = "BlizzardFloaterHUD", configKey = "enableTalkingHead", 
 				proxyModule = "BlizzardFloaterHUD"
@@ -1669,6 +1808,8 @@ Module.CreateMenuTable = function(self)
 			table_insert(HUDMenu.buttons, {
 				enabledTitle = L_ENABLED:format(L["Objectives Tracker"]),
 				disabledTitle = L_DISABLED:format(L["Objectives Tracker"]),
+				tooltipText = L["Objectives Tracker"],
+				newbieText = L["The Objectives Tracker shows your quests, quest item buttons, world quests, campaign quests, mythic affixes, Torghast powers and so on.|n|nAnnoying as hell, but best left on unless you're very, very pro."],
 				type = "TOGGLE_VALUE", 
 				configDB = "BlizzardFloaterHUD", configKey = "enableObjectivesTracker", 
 				proxyModule = "BlizzardFloaterHUD"
@@ -1679,6 +1820,8 @@ Module.CreateMenuTable = function(self)
 		table_insert(HUDMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Raid Warnings"]),
 			disabledTitle = L_DISABLED:format(L["Raid Warnings"]),
+			tooltipText = L["Raid Warnings"],
+			newbieText = L["Raid Warnings are important raid messages appearing in the top center part of the screen. This is where messages sent by your raid leader and raid officers appear. It is recommended to leave these on for the most part.|n|nThe exception is when you get into WoW Classic battlegrounds where everybody is promoted, and some jokers keep spamming. Then it is good to disable."],
 			type = "TOGGLE_VALUE", 
 			configDB = "BlizzardFloaterHUD", configKey = "enableRaidWarnings", 
 			proxyModule = "BlizzardFloaterHUD"
@@ -1688,6 +1831,8 @@ Module.CreateMenuTable = function(self)
 		table_insert(HUDMenu.buttons, {
 			enabledTitle = L_ENABLED:format(L["Monster Emotes"]),
 			disabledTitle = L_DISABLED:format(L["Monster Emotes"]),
+			tooltipText = L["Monster Emotes"],
+			newbieText = L["Toggles the display of boss- and moster emotes. If you're a skilled player, it is not recommended to turn these on, as some world quests and most boss encounters send important messages here.|n|nSupport wheel users relying on Dumb Boss Mods can do whatever they please, it's not like they're looking at anything else than bars anyway."],
 			type = "TOGGLE_VALUE", 
 			configDB = "BlizzardFloaterHUD", configKey = "enableRaidBossEmotes", 
 			proxyModule = "BlizzardFloaterHUD"
@@ -1698,6 +1843,8 @@ Module.CreateMenuTable = function(self)
 			table_insert(HUDMenu.buttons, {
 				enabledTitle = L_ENABLED:format(L["Kills, Levels, Loot"]),
 				disabledTitle = L_DISABLED:format(L["Kills, Levels, Loot"]),
+				tooltipText = L["Kills, Levels, Loot"],
+				newbieText = L["This includes most mid-screen announcements like when you gain a level, you receive certain types of loot, and any banner shown when you complete a scenario, kill a boss and so forth."],
 				type = "TOGGLE_VALUE", 
 				configDB = "BlizzardFloaterHUD", configKey = "enableAnnouncements", 
 				proxyModule = "BlizzardFloaterHUD"
@@ -1707,6 +1854,8 @@ Module.CreateMenuTable = function(self)
 			table_insert(HUDMenu.buttons, {
 				enabledTitle = L_ENABLED:format(L["Alerts"]),
 				disabledTitle = L_DISABLED:format(L["Alerts"]),
+				tooltipText = L["Alerts"],
+				newbieText = L["Toggles the display of alert frames. These include the achievement popups, as well as multiple types of currency loot in some expansion content like the Legion zones."],
 				type = "TOGGLE_VALUE", 
 				configDB = "BlizzardFloaterHUD", configKey = "enableAlerts", 
 				proxyModule = "BlizzardFloaterHUD"
