@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.463-RC] 2021-03-28
+### Added
+- Started adding a lot of descriptive tooltips to our options menu, making it easier for everybody to understand what certain options actually do. This is a work in progress, as I intend to add tooltips for the entire menu. The only reason I'm including any at all right now, is because I needed to get the options menu workaround (see the section below) out to the public, and decided to just include the tooltips that were ready. Because they are all upgrades to not having any at all.
+
+### Fixed
+- Worked around Blizzard's bugged code in WoW client patch 9.0.5.37623. They broke important code related to their restricted environment and restricted frames, which caused our options menu to produce a lot of bugs, and also being unable to toggle actionbars and unitframes in combat. I have worked around this bug until Blizzard gets around to fixing it.
+
 ## [3.2.462-RC] 2021-03-27
 ### Fixed
 - The hover keybind mode `/bind` now once more has actual bindable buttons in it!
