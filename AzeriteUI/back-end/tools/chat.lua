@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 21)
+local LibChatTool = Wheel:Set("LibChatTool", 22)
 if (not LibChatTool) then
 	return
 end
@@ -855,6 +855,12 @@ LibChatTool.OnFrameHide = function(self, event, ...)
 	if (event == "GP_LibChatTool_AuctionHouseFrameHide") then
 		LibChatTool:OnEvent("PLAYER_ENTERING_WORLD")
 		return
+	end
+	-- Don't show deficits when closing the mail frame, only gains.
+	if (event == "GP_LibChatTool_MailFrameHide") then
+		if (LibChatTool.playerMoney or 0) > GetMoney() then
+			return
+		end
 	end
 	-- This is when other frames are closing.
 	LibChatTool:OnEvent("PLAYER_MONEY")
