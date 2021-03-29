@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 83)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 84)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -101,6 +101,13 @@ local pvpRanks = {
 	[14] = { 	PVP_RANK_18_0, 	PVP_RANK_18_1, 	136779 },
 	[15] = { 	PVP_RANK_19_0, 	PVP_RANK_19_1, 	136780 },
 }
+
+-- Force creation of money lines.
+if (not Scanner.hasMoney) then
+	SetTooltipMoney(Scanner, 1, nil, "", "")
+	SetTooltipMoney(Scanner, 1, nil, "", "")
+	GameTooltip_ClearMoney(Scanner)
+end
 
 -- Scanning Constants & Patterns
 ---------------------------------------------------------
