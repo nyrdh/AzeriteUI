@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 113)
+local LibTooltip = Wheel:Set("LibTooltip", 115)
 if (not LibTooltip) then
 	return
 end
@@ -209,7 +209,9 @@ local alignLine = function(tooltip, lineIndex)
 	end 
 
 	-- If this is a single line, anchor it to the right side too, to allow wrapping.
-	if (not right:IsShown()) then 
+	if (right:IsShown()) then 
+		left:SetPoint("RIGHT", right, "LEFT", -RIGHT_PADDING, 0)
+	else
 		left:SetPoint("RIGHT", tooltip, "RIGHT", -TEXT_INSET, 0)
 	end 
 end 
@@ -418,11 +420,21 @@ Tooltip.UpdateLayout = function(self)
 		-- TODO: Add a system to make sure even overflow is controlled, 
 		-- by forcefully line-breaking the offending sides.
 		local right = self.lines.right[lineIndex]
-		if right:IsShown() then 
-			lineWidth = left:GetStringWidth() + RIGHT_PADDING + right:GetStringWidth()
-			if (lineWidth > (overflowWidth or self.maximumWidth)) then 
-				overflowWidth = lineWidth
-			end 
+		if (right:IsShown()) then 
+			local rightWidth = RIGHT_PADDING + right:GetStringWidth()
+			local leftWidth = left:GetStringWidth()
+			local freeSpace = self.maximumWidth - rightWidth
+			if (left._wordWrap) then
+				lineWidth = leftWidth + rightWidth
+				if (lineWidth > self.maximumWidth) and (self.maximumWidth > rightWidth + self.minimumWidth) then 
+					lineWidth = self.maximumWidth
+				end 
+			else
+				lineWidth = leftWidth + rightWidth
+				if (lineWidth > (overflowWidth or self.maximumWidth)) then 
+					overflowWidth = lineWidth
+				end 
+			end
 		else 
 			lineWidth = left:GetStringWidth()
 			if (not left._wordWrap) then
