@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.464-RC] 2021-03-29
+### Fixed
+- Fixed wrong upvalue in party frame group debuffs, which was causing a lot of bugs in parties.
+
 ## [3.2.463-RC] 2021-03-28
 ### Added
 - Started adding a lot of descriptive tooltips to our options menu, making it easier for everybody to understand what certain options actually do. This is a work in progress, as I intend to add tooltips for the entire menu. The only reason I'm including any at all right now, is because I needed to get the options menu workaround (see the section below) out to the public, and decided to just include the tooltips that were ready. Because they are all upgrades to not having any at all.
