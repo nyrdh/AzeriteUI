@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.465-RC] 2021-03-29
+### Changed
+- Tuned the chat message gold display a bit. When closing your mailbox, it will now only show gold gains, not losses from mailing costs or C.O.D transactions.
+
 ## [3.2.464-RC] 2021-03-29
 ### Fixed
 - Fixed wrong upvalue in party frame group debuffs, which was causing a lot of bugs in parties.
