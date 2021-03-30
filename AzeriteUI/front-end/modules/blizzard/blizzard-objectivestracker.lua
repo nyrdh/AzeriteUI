@@ -459,7 +459,7 @@ end
 local UIHider = CreateFrame("Frame")
 UIHider:Hide()
 
-Module.StyleRetailTracker = function(self)
+Module.StyleRetailTracker = function(self, ...)
 	local frame = ObjectiveTrackerFrame.MODULES
 	if (frame) then
 		for i = 1, #frame do
@@ -475,10 +475,61 @@ Module.StyleRetailTracker = function(self)
 	end
 end
 
+local secured = {}
+Module.SecureItemButton = function(self, ...)
+	--if InCombatLockdown() then 
+	--	return 
+	--end
+
+	local block = ...
+	if (not block) then 
+		return
+	end
+
+	-- These are used for the quest rewards tooltip, 
+	-- which is what apparently is tainted by the global variable 'text'
+	-- being used somewhere no searches of mine have yet discovered.
+	-- Trying to avoid calling these in combat for now, to see if that helps.
+	-- The alternative is to rewrite the entire script handler, 
+	-- create one not referencing any secure items at all, 
+	-- and even replace the tooltips with ours. Might be best?
+	if (not secured[block]) then
+		block:SetScript("OnEnter", function(block) 
+			if (not InCombatLockdown()) then
+				BonusObjectiveTracker_OnBlockEnter(block)
+			end
+		end)
+		secured[block] = true
+	end
+
+	-- These are the item button tooltips.
+	-- Not strictly certain if I need to hide these too. 
+	-- Taint tracking with no clear reference points isn't exactly an exact science.
+	--local item = block.itemButton
+	--if (not item) then 
+	--	return 
+	--end
+	--if (not secured[item]) then
+	--	item:SetScript("OnEnter", function(item) 
+	--		if (not InCombatLockdown()) then
+	--			QuestObjectiveItem_OnEnter(item)
+	--		end
+	--	end)
+	--	secured[item] = true
+	--end
+
+end
+
 Module.InitRetailTracker = function(self)
 	local layout = self.layout
+
 	if (ObjectiveTracker_Update) then
-		hooksecurefunc("ObjectiveTracker_Update", self.StyleRetailTracker)
+		hooksecurefunc("ObjectiveTracker_Update", function(...) self:StyleRetailTracker(...) end)
+	end
+
+	-- Let's attempt to work around the quest item taints.
+	if (QuestObjectiveSetupBlockButton_Item) then
+		hooksecurefunc("QuestObjectiveSetupBlockButton_Item", function(...) self:SecureItemButton(...) end)
 	end
 
 	-- kills this shit off. We use our keybind instead. 

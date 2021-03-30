@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 84)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 85)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -103,6 +103,19 @@ local pvpRanks = {
 }
 
 -- Force creation of money lines.
+--[[
+3/29 12:47:55.534  Execution tainted by AzeriteUI while reading GP_TooltipScannerMoneyFrame1 - Interface\FrameXML\MoneyFrame.lua:298 MoneyFrame_Update()
+3/29 12:47:55.534      Interface\FrameXML\MoneyFrame.lua:274 MoneyFrame_UpdateMoney()
+3/29 12:47:55.534      GP_TooltipScannerMoneyFrame1:OnShow()
+3/29 12:47:55.534      GP_TooltipScanner:SetBagItem()
+3/29 12:47:55.534      Interface\AddOns\AzeriteUI\back-end\libraries\tooltipscanner.lua:2134 GP_GameTooltip_1:GetTooltipDataForContainerSlot()
+3/29 12:47:55.534      Interface\AddOns\AzeriteUI\back-end\libraries\tooltip.lua:1548 GP_GameTooltip_1:SetBagItem()
+3/29 12:47:55.534      Interface\AddOns\AzeriteUI\back-end\libraries\bagbutton.lua:798 <unnamed>:UpdateTooltip()
+3/29 12:47:55.534      Interface\AddOns\AzeriteUI\back-end\libraries\tooltip.lua:2454
+3/29 12:47:55.534  An action was blocked because of taint from AzeriteUI - UseContainerItem()
+3/29 12:47:55.534      Interface\FrameXML\ContainerFrame.lua:1236 ContainerFrameItemButton_OnClick()
+3/29 12:47:55.534      <unnamed>:OnClick()
+]]
 if (not Scanner.hasMoney) then
 	SetTooltipMoney(Scanner, 1, nil, "", "")
 	SetTooltipMoney(Scanner, 1, nil, "", "")
