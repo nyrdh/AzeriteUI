@@ -799,6 +799,13 @@ end
 
 Module.StyleTooltips = function(self)
 
+	-- Force creation of money lines.
+	if (not GameTooltip.hasMoney) then
+		SetTooltipMoney(GameTooltip, 1, nil, "", "")
+		SetTooltipMoney(GameTooltip, 1, nil, "", "")
+		GameTooltip_ClearMoney(GameTooltip)
+	end
+
 	GameTooltipHeaderText:SetFontObject(GetFont(15))
 	GameTooltipTextSmall:SetFontObject(GetFont(13))
 	GameTooltipText:SetFontObject(GetFont(13))
@@ -823,6 +830,7 @@ Module.StyleTooltips = function(self)
 		QuestScrollFrame and QuestScrollFrame.CampaignTooltip,
 
 		-- Battle Pet Tooltips
+		-- *Might have to separate these out.
 		BattlePetTooltip,
 		PetBattlePrimaryAbilityTooltip,
 		PetBattlePrimaryUnitTooltip,

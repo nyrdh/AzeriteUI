@@ -5,13 +5,16 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 22)
+local LibChatTool = Wheel:Set("LibChatTool", 28)
 if (not LibChatTool) then
 	return
 end
 
 local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, "LibChatTool requires LibClientBuild to be loaded.")
+
+local LibHook = Wheel("LibHook")
+assert(LibHook, "LibChatTool requires LibHook to be loaded.")
 
 local LibSecureHook = Wheel("LibSecureHook")
 assert(LibSecureHook, "LibChatTool requires LibSecureHook to be loaded.")
@@ -23,6 +26,7 @@ local LibColorTool = Wheel("LibColorTool")
 assert(LibColorTool, "LibChatTool requires LibColorTool to be loaded.")
 
 LibEvent:Embed(LibChatTool)
+LibHook:Embed(LibChatTool)
 LibSecureHook:Embed(LibChatTool)
 
 -- Library registries
@@ -444,10 +448,6 @@ local AddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
 	return MethodCache[frame](frame, msg, r, g, b, chatID, ...)
 end
 
-local SendMonsterMessage = function(chatType, message, monster, ...)
-	RaidNotice_AddMessage(RaidBossEmoteFrame, string_format(message, monster), ChatTypeInfo[chatType])
-end
-
 -- Apply custom methods to the chat frames
 local CacheMessageMethod = function(frame)
 
@@ -609,18 +609,23 @@ local OnChatMessage = function(frame, event, message, author, ...)
 		return true
 
 	elseif (event == "CHAT_MSG_MONSTER_EMOTE") then
-		SendMonsterMessage("MONSTER_EMOTE", message, author, ...)
+		-- These returns a formatstring, which we need to paste the author/monster into.
+		RaidNotice_AddMessage(RaidBossEmoteFrame, string_format(message, author), ChatTypeInfo["MONSTER_EMOTE"])
 		return true
 
 	elseif (event == "CHAT_MSG_MONSTER_WHISPER") then
 		return true
 
 	elseif (event == "CHAT_MSG_RAID_BOSS_EMOTE") then
-		SendMonsterMessage("RAID_BOSS_EMOTE", message, author, ...)
+		-- Don't do this, the RaidBossEmoteFrame does this 
+		-- by default for boss emotes and boss whispers!
+		--RaidNotice_AddMessage(RaidBossEmoteFrame, message, ChatTypeInfo["RAID_BOSS_EMOTE"])
 		return true
 
 	elseif (event == "CHAT_MSG_RAID_BOSS_WHISPER") then
-		SendMonsterMessage("RAID_BOSS_WHISPER", message, author, ...)
+		-- Don't do this, the RaidBossEmoteFrame does this 
+		-- by default for boss emotes and boss whispers!
+		--RaidNotice_AddMessage(RaidBossEmoteFrame, message, ChatTypeInfo["RAID_BOSS_EMOTE"])
 		return true
 
 	elseif (event == "CHAT_MSG_ACHIEVEMENT") then
@@ -851,18 +856,17 @@ local SILVER_PER_GOLD = SILVER_PER_GOLD -- 100
 local COPPER_PER_GOLD = COPPER_PER_SILVER * SILVER_PER_GOLD
 
 LibChatTool.OnFrameHide = function(self, event, ...)
-	-- Just store the value and exit for auction house closing.
-	if (event == "GP_LibChatTool_AuctionHouseFrameHide") then
-		LibChatTool:OnEvent("PLAYER_ENTERING_WORLD")
+	if (not MailFrame:IsShown()) then
+		LibChatTool:ClearHook(MailFrame, "OnHide", "OnFrameHide", "GP_LibChatTool_FrameHide_Merchant")
+	end
+	if (not MerchantFrame:IsShown()) then
+		LibChatTool:ClearHook(MerchantFrame, "OnHide", "OnFrameHide", "GP_LibChatTool_FrameHide_Mail")
+	end
+	local money = GetMoney()
+	if ((LibChatTool.playerMoney or 0) > money) then
+		LibChatTool.playerMoney = money
 		return
 	end
-	-- Don't show deficits when closing the mail frame, only gains.
-	if (event == "GP_LibChatTool_MailFrameHide") then
-		if (LibChatTool.playerMoney or 0) > GetMoney() then
-			return
-		end
-	end
-	-- This is when other frames are closing.
 	LibChatTool:OnEvent("PLAYER_MONEY")
 end
 
@@ -870,63 +874,38 @@ LibChatTool.OnEvent = function(self, event, ...)
 
 	if (event == "PLAYER_ENTERING_WORLD") then
 		LibChatTool.playerMoney = GetMoney()
+		LibChatTool.isAuctionHouseFrameShown = nil
+		LibChatTool.isMailFrameShown = nil
+		LibChatTool.isMerchantFrameShown = nil
 
 	elseif (event == "PLAYER_MONEY") then
 		if (LibChatTool:IsUsingAlternateMoneyFilter()) then
 
-			-- Return and hide if it's a taxi cost.
-			if (UnitOnTaxi("player")) then
-				LibChatTool.playerMoney = GetMoney()
+			-- Get the current money value.
+			local currentMoney = GetMoney()
+
+			-- Store the value and don't report anything
+			-- if we're on a taxi or if the auction house is open.
+			if (UnitOnTaxi("player")) 
+			or (AuctionHouseFrame and AuctionHouseFrame:IsShown())
+			or (AuctionFrame and AuctionFrame:IsShown()) then 
+				LibChatTool.playerMoney = currentMoney
 				return
 			end
 
 			-- Check for spam frames, and wait for them to hide.
+			local shouldWait
 			if (MerchantFrame:IsShown()) then
-				LibChatTool.isMerchantFrameShown = true
-				LibChatTool:SetSecureHook(MerchantFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MerchantFrameHide")
-				return
-
-			elseif (LibChatTool.isMerchantFrameShown) then
-				LibChatTool.isMerchantFrameShown = nil
-				LibChatTool:ClearSecureHook(MerchantFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MerchantFrameHide")
+				shouldWait = true
+				LibChatTool:SetHook(MerchantFrame, "OnHide", "OnFrameHide", "GP_LibChatTool_FrameHide_Merchant")
 			end
-
 			if (MailFrame:IsShown()) then
-				LibChatTool.isMailFrameShown = true
-				LibChatTool:SetSecureHook(MailFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MailFrameHide")
+				shouldWait = true
+				LibChatTool:SetHook(MailFrame, "OnHide", "OnFrameHide", "GP_LibChatTool_FrameHide_Mail")
+			end
+			if (shouldWait) then
 				return
-
-			elseif (LibChatTool.isMailFrameShown) then
-				LibChatTool.isMailFrameShown = nil
-				LibChatTool:ClearSecureHook(MailFrame, "Hide", "OnFrameHide", "GP_LibChatTool_MailFrameHide")
 			end
-
-			-- The Auction house can be mega spammy too, 
-			-- we don't need to see every single deposit listed.
-			if (IsRetail) then
-				if ((AuctionHouseFrame) and (AuctionHouseFrame:IsShown())) then
-					LibChatTool.isAuctionHouseFrameShown = true
-					LibChatTool:SetSecureHook(AuctionHouseFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
-					return
-
-				elseif (LibChatTool.isAuctionHouseFrameShown) then
-					LibChatTool.isAuctionHouseFrameShown = nil
-					LibChatTool:ClearSecureHook(AuctionHouseFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
-				end
-			elseif (IsClassic) then
-				if ((AuctionFrame) and (AuctionFrame:IsShown())) then
-					LibChatTool.isAuctionHouseFrameShown = true
-					LibChatTool:SetSecureHook(AuctionFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
-					return
-
-				elseif (LibChatTool.isAuctionHouseFrameShown) then
-					LibChatTool.isAuctionHouseFrameShown = nil
-					LibChatTool:ClearSecureHook(AuctionFrame, "Hide", "OnFrameHide", "GP_LibChatTool_AuctionHouseFrameHide")
-				end
-			end
-
-			-- Get the current money value.
-			local currentMoney = GetMoney()
 
 			-- Check if the value has been cached up previously.
 			if (LibChatTool.playerMoney) then
