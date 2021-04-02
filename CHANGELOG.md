@@ -4,13 +4,20 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.467-RC] 2021-04-02
+### Added
+- Added a reload option to the popups appearing after too many lua errors, or when an action was blocked. The regular options are only to ignore, or disable the addon in question and reload. I have added the option to _only_ reload. 
+
+### Fixed
+- Trying an experimental workaround for the mega wide paragon rewards tooltips since WoW Retail Client Patch 9.0.5.
+
 ## [3.2.466-RC] 2021-04-01
 ### Changed
 - Tuned the chat message gold display a bit. When closing your mailbox, it will now only show gold gains, not losses from mailing costs or C.O.D transactions.
 
 ### Fixed
 - Fixed an issue that would cause bugs with spam filters enabled for boss chat messages in raids. 
-- Working on experimental workarounds for the tooltip related taint causing quest tracker item buttons spawned in combat to bug out. Have discovered a potential source for the taint, by following the taint reports and discovering a bug in the Blizzard code. Have not found anything triggering it in mine or other's addons, though. So trying various degrees of workarounds for now. 
+- Working on experimental workarounds for the tooltip related taint causing quest tracker item buttons spawned in combat to bug out. Have discovered a potential source for the (current) taint, by following the taint reports and discovering a bug in the Blizzard code. Have not found anything triggering it in mine or other's addons, though. So trying various degrees of workarounds for now. 
 
 ## [3.2.464-RC] 2021-03-29
 ### Fixed

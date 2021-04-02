@@ -18,6 +18,7 @@ for moduleName,list in pairs({
 		["TukUI"] = true
 	},
 	BlizzardBagButtons = {
+		["Backpacker"] = true,
 		["Bagnon"] = true
 	},
 	BlizzardChatFrames = {
@@ -45,9 +46,13 @@ for moduleName,list in pairs({
 	ChatBubbles = {
 		["Prat-3.0"] = true
 	},
+	ChatFilters = {
+		--["ChatCleaner"] = true
+	},
 	NamePlates = {
 		["Kui_Nameplates"] = true,
 		["NamePlateKAI"] = true,
+		--["NameTags"] = true,
 		["NeatPlates"] = true,
 		["Plater"] = true,
 		["SimplePlates"] = true,

@@ -475,6 +475,30 @@ Module.StyleRetailTracker = function(self, ...)
 	end
 end
 
+-- 
+-- 3/30 17:43:34.063  Global variable OBJECTIVE_TRACKER_UPDATE_REASON tainted by AzeriteUI - -- Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTracker.lua:1345
+-- 3/30 17:43:34.063      ObjectiveTracker_Update()
+-- 3/30 17:43:34.063      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_BonusObjectiveTracker.lua:917 callback()
+-- 3/30 17:43:34.063      Interface\SharedXML\C_TimerAugment.lua:16
+-- 3/30 17:43:34.063  Execution tainted by AzeriteUI while reading OBJECTIVE_TRACKER_UPDATE_REASON - -- Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTracker.lua:1368
+-- 3/30 17:43:34.063      ObjectiveTracker_Update()
+-- 3/30 17:43:34.063      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_BonusObjectiveTracker.lua:917 callback()
+-- 3/30 17:43:34.063      Interface\SharedXML\C_TimerAugment.lua:16
+-- 3/30 17:43:34.063  An action was blocked because of taint from AzeriteUI - UseQuestLogSpecialItem()
+-- 3/30 17:43:34.063      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTrackerShared.lua:95
+-- 3/30 17:44:04.016  Execution tainted by AzeriteUI while reading text - Interface\FrameXML\QuestUtils.lua:454 QuestUtils_AddQuestRewardsToTooltip()
+-- 3/30 17:44:04.016      Interface\FrameXML\GameTooltip.lua:197 GameTooltip_AddQuestRewardsToTooltip()
+-- 3/30 17:44:04.016      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_BonusObjectiveTracker.lua:504 BonusObjectiveTracker_ShowRewardsTooltip()
+-- 3/30 17:44:04.016      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_BonusObjectiveTracker.lua:140
+-- 3/30 17:44:04.016  An action was blocked because of taint from AzeriteUI - UseQuestLogSpecialItem()
+-- 3/30 17:44:04.016      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTrackerShared.lua:95
+-- 3/30 17:44:06.812  Execution tainted by AzeriteUI while reading text - Interface\FrameXML\QuestUtils.lua:454 QuestUtils_AddQuestRewardsToTooltip()
+-- 3/30 17:44:06.812      Interface\FrameXML\GameTooltip.lua:197 GameTooltip_AddQuestRewardsToTooltip()
+-- 3/30 17:44:06.812      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_BonusObjectiveTracker.lua:504 BonusObjectiveTracker_ShowRewardsTooltip()
+-- 3/30 17:44:06.812      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_BonusObjectiveTracker.lua:140
+-- 3/30 17:44:06.812  An action was blocked because of taint from AzeriteUI - UseQuestLogSpecialItem()
+-- 3/30 17:44:06.812      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTrackerShared.lua:95
+-- 
 local secured = {}
 Module.SecureItemButton = function(self, ...)
 	--if InCombatLockdown() then 

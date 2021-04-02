@@ -79,19 +79,7 @@ local FACTION_HORDE_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-Horde:14:14:-
 local short = LibNumbers:GetNumberAbbreviationShort()
 local large = LibNumbers:GetNumberAbbreviationLong()
 
-local Backdrops = {}
-
--- This one requires at least 4 lines of tooltip content.
--- Must make a smaller version.
-local TooltipBackdropTemplate = {
-	bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
-	edgeFile = GetMedia("better-blizzard-border-alternate"),
-	tile = false, 
-	tileEdge = false, 
-	tileSize = nil,
-	edgeSize = 40,
-	insets = { left = 10, right = 10, top = 10, bottom = 10 } -- 16*40/64
-}
+local Backdrops, Handled = {}, {}
 
 local SmallTooltipBackdropTemplate = {
 	bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
@@ -100,9 +88,7 @@ local SmallTooltipBackdropTemplate = {
 	tileEdge = false, 
 	tileSize = nil,
 	edgeSize = 32,
-	insets = { left = 25, right = 25, top = 25, bottom = 25 } -- 48*32/64 + 1
-	--edgeSize = 40,
-	--insets = { left = 31, right = 31, top = 31, bottom = 31 } -- 48*40/64  + 1
+	insets = { left = 25, right = 25, top = 25, bottom = 25 } 
 }
 
 local HealthBarBackdropTemplate = {
@@ -275,10 +261,7 @@ end
 local Tooltip = Module:CreateFrame("Frame")
 
 Tooltip.Style = function(self)
-	--if (not self) then
-	--	return
-	--end
-	if (self:IsForbidden()) then
+	if (not self) or (self:IsForbidden()) then
 		return
 	end
 
@@ -303,6 +286,7 @@ Tooltip.Style = function(self)
 		}) do
 			local region = self[texName]
 			if (region) then
+				region:SetTexture(nil)
 				local drawLayer, subLevel = region:GetDrawLayer()
 				if (drawLayer) then
 					self:DisableDrawLayer(drawLayer)
@@ -324,6 +308,7 @@ Tooltip.Style = function(self)
 		}) do
 			local region = self[pieceName]
 			if (region) then
+				region:SetTexture(nil)
 				local drawLayer, subLevel = region:GetDrawLayer()
 				if (drawLayer) then
 					self:DisableDrawLayer(drawLayer)
@@ -334,9 +319,10 @@ Tooltip.Style = function(self)
 
 	-- The GameTooltipTooltip is an embedded tooltip used to show item rewards
 	-- from world quests, paragon reputation and similar. Don't add backdrops!
-	if (self ~= GameTooltipTooltip) then
-		--Tooltip.SetBackdrop(self, TooltipBackdropTemplate)
-		--Tooltip.SetBackdropOffsets(self, 6, 6, 6, 6)
+	--if (self ~= GameTooltipTooltip)  then
+	if (self.IsEmbedded) then
+		Tooltip.SetBackdrop(nil)
+	else
 		Tooltip.SetBackdrop(self, SmallTooltipBackdropTemplate)
 		Tooltip.SetBackdropOffsets(self, 25, 25, 25, 25)
 		Tooltip.SetBackdropColor(self, 0, 0, 0, .95)
@@ -455,11 +441,6 @@ Tooltip.SetUnitColor = function(unit)
 	end
 	if (color) then
 		HealthBar:SetStatusBarColor(color[1], color[2], color[3])
-		if (unitIsPlayer) then
-			--Backdrops[GameTooltip]:SetBackdropBorderColor(color[1]*.75, color[2]*.7, color[3]*.75)
-		else
-			--Backdrops[GameTooltip]:SetBackdropBorderColor(color[1], color[2], color[3])
-		end
 	end
 end
 
@@ -485,30 +466,13 @@ Tooltip.OnTooltipSetUnit = function(self)
 		return
 	end
 
-	local tooltipName = self:GetName()
-	local numLines = self:NumLines()
-	
-	local lineIndex = 1
-	for i = numLines,1,-1 do 
-		local left = _G[tooltipName.."TextLeft"..i]
-		local right = _G[tooltipName.."TextRight"..i]
-		if (left) then
-			left:SetText("")
-		end
-		if (right) then
-			right:SetText("")
-		end
-	end
+	GameTooltip_ClearMoney(self)
+	SharedTooltip_ClearInsertedFrames(self)
+	self:SetPadding(0,0,0,0)
+	self:ClearLines()
 
-	-- Kill off textures
-	local textureID = 1
-	local texture = _G[tooltipName .. "Texture" .. textureID]
-	while (texture) and (texture:IsShown()) do
-		texture:SetTexture("")
-		texture:Hide()
-		textureID = textureID + 1
-		texture = _G[tooltipName .. "Texture" .. textureID]
-	end
+	local lineIndex = 1
+	local tooltipName = self:GetName()
 
 	-- name 
 	local displayName = data.name
@@ -666,30 +630,10 @@ Tooltip.OnTooltipSetUnit = function(self)
 
 	end 
 
+	-- Add player realm names.
 	if (data.realm) then
-		-- FRIENDS_LIST_REALM -- "Realm: "
 		lineIndex = AddIndexedLine(self, lineIndex, " ")
 		lineIndex = AddIndexedLine(self, lineIndex, FRIENDS_LIST_REALM..data.realm, Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3])
-	end
-
-	-- Doesn't look or feel right. 
-	if (false) and (UnitExists(unit .. "target")) then
-		local targetUnit = unit.."target"
-		local unitClass = select(2, UnitClass(targetUnit))
-		local unitReaction = UnitReaction(targetUnit, "player")
-		local color
-		if (UnitIsPlayer(targetUnit)) then
-			color = Colors.class[unitClass]
-		elseif (unitReaction) then
-			color = Colors.reaction[unitReaction]
-		else
-			color = Colors.offwhite
-		end
-		if (not data.realm) then
-			lineIndex = AddIndexedLine(self, lineIndex, " ")
-		end
-		local msg = TARGET..": "..color.colorCode..UnitName(unit.."target").."|r"
-		lineIndex = AddIndexedLine(self, lineIndex, msg, Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3])
 	end
 
 	Tooltip.AdjustScale(self)
@@ -702,6 +646,8 @@ Tooltip.OnTooltipSetItem = function(self)
 	end
 
 	Tooltip.AdjustScale(self)
+
+	-- /run local E=EmbeddedItemTooltip;E.ItemTooltip:Show();EmbeddedItemTooltip_UpdateSize(E.ItemTooltip)
 
 	-- Recolor items with our own item colors
 	local _,link = self:GetItem()
@@ -764,21 +710,13 @@ Module.StyleHealthBar = function(self)
 	HealthBar:SetScript("OnValueChanged", Tooltip.OnValueChanged)
 	HealthBar:SetStatusBarTexture(GetMedia("statusbar-normal")) 
 	HealthBar:ClearAllPoints()
-	--HealthBar:SetPoint("BOTTOMLEFT", HealthBar:GetParent(), "BOTTOMLEFT", 8, -4)
-	--HealthBar:SetPoint("BOTTOMRIGHT", HealthBar:GetParent(), "BOTTOMRIGHT", -8, -4)
 	HealthBar:SetPoint("BOTTOMLEFT", HealthBar:GetParent(), "BOTTOMLEFT", 6, -4)
 	HealthBar:SetPoint("BOTTOMRIGHT", HealthBar:GetParent(), "BOTTOMRIGHT", -6, -4)
 	HealthBar:SetHeight(4)
 
-	--Tooltip.SetBackdrop(HealthBar, HealthBarBackdropTemplate)
-	--Tooltip.SetBackdropOffsets(HealthBar, 6, 6, 6, 6)
-	--Tooltip.SetBackdropColor(HealthBar, 0, 0, 0, .75)
-	--Tooltip.SetBackdropBorderColor(HealthBar, 0, 0, 0, .5)
-
 	HealthBar:HookScript("OnShow", function(self) 
 		local tooltip = self:GetParent()
 		if (tooltip) then
-			--Tooltip.SetBackdropOffsets(tooltip, 31, 31, 31, 41)
 			Tooltip.SetBackdropOffsets(tooltip, 25, 25, 25, 31)
 		end
 	end)
@@ -786,7 +724,6 @@ Module.StyleHealthBar = function(self)
 	HealthBar:HookScript("OnHide", function(self) 
 		local tooltip = self:GetParent()
 		if (tooltip) then
-			--Tooltip.SetBackdropOffsets(tooltip, 31, 31, 31, 31)
 			Tooltip.SetBackdropOffsets(tooltip, 25, 25, 25, 25)
 		end
 	end)
@@ -813,14 +750,12 @@ Module.StyleTooltips = function(self)
 	for _,tooltip in pairs({
 
 		-- Regular tooltips
+		GameTooltip,
+		EmbeddedItemTooltip,
+		FriendsTooltip,
 		ItemRefTooltip,
 		ItemRefShoppingTooltip1,
 		ItemRefShoppingTooltip2,
-		FriendsTooltip,
-		WarCampaignTooltip,
-		EmbeddedItemTooltip,
-		ReputationParagonTooltip,
-		GameTooltip,
 		ShoppingTooltip1,
 		ShoppingTooltip2,
 		QuickKeybindTooltip,
@@ -854,6 +789,35 @@ Module.SetTooltipHooks = function(self)
 	hooksecurefunc("GameTooltip_ShowCompareItem", Tooltip.OnCompareItemShow)
 	hooksecurefunc("GameTooltip_UnitColor", Tooltip.SetUnitColor)
 	hooksecurefunc("GameTooltip_ClearMoney", Tooltip.ResetColor)
+
+	-- Workaround for the weird paragon faction reward tooltip width in 9.0.5.
+	if (EmbeddedItemTooltip_UpdateSize) then
+		Tooltip.UpdateSize = function(self)
+			local itemTooltipExtraBorderHeight = 22
+			if (self.Tooltip:IsShown()) then
+				-- Figure out the actual width of the embedded tooltip, 
+				-- as blizzard since 9.0.5 for some reason makes it super wide.
+				local realWidth,lineID = 0,1
+				while (self.Tooltip["TextLeft"..lineID]) do
+					realWidth = math.max(realWidth, self.Tooltip["TextLeft"..lineID]:GetWidth())
+					lineID = lineID + 1
+				end
+				self.Tooltip:SetWidth(realWidth) -- Set the newly calculated width.
+				self.Tooltip:Show() -- Re-show to trigger realignments.
+
+				local width = self.Tooltip:GetWidth() + self.Icon:GetWidth()
+				local height = math.max(self.Tooltip:GetHeight() - itemTooltipExtraBorderHeight, self.Icon:GetHeight())
+
+				self:SetSize(width, height)
+
+			elseif (self.FollowerTooltip:IsShown()) then
+				self:SetSize(self.FollowerTooltip:GetSize())
+			end
+		
+			GameTooltip_CalculatePadding(self:GetParent())
+		end
+		hooksecurefunc("EmbeddedItemTooltip_UpdateSize", Tooltip.UpdateSize)
+	end
 
 	GameTooltip:HookScript("OnTooltipSetUnit", Tooltip.OnTooltipSetUnit)
 	GameTooltip:HookScript("OnTooltipSetItem", Tooltip.OnTooltipSetItem)

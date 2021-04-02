@@ -701,6 +701,17 @@ Core.FixBlizzardBugs = function(self)
 		self.FixedBlizzardBugsQueue = {}
 	end
 
+	-- Add a reload button to addon action forbidden + too many lua errors popups
+	do
+		local popup = StaticPopupDialogs["ADDON_ACTION_FORBIDDEN"]
+		popup.OnAlt = function() ReloadUI() end
+		popup.Button3 = RELOADUI
+
+		popup = StaticPopupDialogs["TOO_MANY_LUA_ERRORS"]
+		popup.OnAlt = function() ReloadUI() end
+		popup.Button3 = RELOADUI
+	end
+
 	-- These things only exist in retail, no point checking in Classic.
 	if (IsRetail) then 
 

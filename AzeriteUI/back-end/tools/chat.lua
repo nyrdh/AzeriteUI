@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 28)
+local LibChatTool = Wheel:Set("LibChatTool", 29)
 if (not LibChatTool) then
 	return
 end
@@ -119,8 +119,6 @@ T.RESTED_ADDED = gain.."+ "..TUTORIAL_TITLE26.."|r"
 T.RESTED_CLEARED = busy.."- "..TUTORIAL_TITLE26.."|r"
 T.SKILL = gain.."+|r %s "..sign.."(%d)|r"
 
--- Get the current game client locale.
--- We're treating enGB on old clients as enUS, as it's the same in-game anyway.
 local getFilter = function(msg)
 	msg = string_gsub(msg, "%%d", "(%%d+)")
 	msg = string_gsub(msg, "%%s", "(.+)")
