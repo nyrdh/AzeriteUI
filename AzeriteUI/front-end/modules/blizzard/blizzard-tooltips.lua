@@ -790,7 +790,10 @@ Module.SetTooltipHooks = function(self)
 	hooksecurefunc("GameTooltip_UnitColor", Tooltip.SetUnitColor)
 	hooksecurefunc("GameTooltip_ClearMoney", Tooltip.ResetColor)
 
-	-- Workaround for the weird paragon faction reward tooltip width in 9.0.5.
+	-- 2021-04-02: Workaround for the weird paragon faction reward tooltip width in 9.0.5.
+	-- 2021-04-03: When hovering over, out and back over a bonus objective reward, 
+	--             most the text except level requirement will disappear on re-entering.
+	--             Seems to be because of self.Tooltip:Show(), so we're trying something else.
 	if (EmbeddedItemTooltip_UpdateSize) then
 		Tooltip.UpdateSize = function(self)
 			local itemTooltipExtraBorderHeight = 22
@@ -798,14 +801,17 @@ Module.SetTooltipHooks = function(self)
 				-- Figure out the actual width of the embedded tooltip, 
 				-- as blizzard since 9.0.5 for some reason makes it super wide.
 				local realWidth,lineID = 0,1
+				while (self["TextLeft"..lineID]) do
+					realWidth = math.max(realWidth, self["TextLeft"..lineID]:GetWidth())
+					lineID = lineID + 1
+				end
+				lineID = 1
 				while (self.Tooltip["TextLeft"..lineID]) do
 					realWidth = math.max(realWidth, self.Tooltip["TextLeft"..lineID]:GetWidth())
 					lineID = lineID + 1
 				end
-				self.Tooltip:SetWidth(realWidth) -- Set the newly calculated width.
-				self.Tooltip:Show() -- Re-show to trigger realignments.
 
-				local width = self.Tooltip:GetWidth() + self.Icon:GetWidth()
+				local width = realWidth + 20*4 + self.Icon:GetWidth()
 				local height = math.max(self.Tooltip:GetHeight() - itemTooltipExtraBorderHeight, self.Icon:GetHeight())
 
 				self:SetSize(width, height)
@@ -813,8 +819,9 @@ Module.SetTooltipHooks = function(self)
 			elseif (self.FollowerTooltip:IsShown()) then
 				self:SetSize(self.FollowerTooltip:GetSize())
 			end
-		
-			GameTooltip_CalculatePadding(self:GetParent())
+
+			-- Don't do this, it fucks it up.
+			--GameTooltip_CalculatePadding(self:GetParent())
 		end
 		hooksecurefunc("EmbeddedItemTooltip_UpdateSize", Tooltip.UpdateSize)
 	end

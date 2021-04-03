@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.467-RC] 2021-04-02
+## [3.2.467-RC] 2021-04-03
 ### Added
 - Added a reload option to the popups appearing after too many lua errors, or when an action was blocked. The regular options are only to ignore, or disable the addon in question and reload. I have added the option to _only_ reload. 
 
