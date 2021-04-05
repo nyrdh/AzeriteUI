@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 92)
+local LibBlizzard = Wheel:Set("LibBlizzard", 93)
 if (not LibBlizzard) then 
 	return
 end
@@ -349,7 +349,8 @@ or IsRetail and function(self)
 		SpellBookTooltip:SetScript("OnUpdate", nil)
 	end
 
-	-- let spell book buttons work without tainting by replacing this function
+	-- Let spell book button tooltips work without tainting,
+	-- by replacing the script handlers with safer methods.
 	for i = 1, SPELLS_PER_PAGE do
 		local button = _G["SpellButton"..i]
 		button:SetScript("OnEnter", SpellButtonOnEnter)
@@ -401,14 +402,14 @@ or IsRetail and function(self)
 		end
 	end
 	
-	-- MainMenuBar:ClearAllPoints taint during combat
+	-- MainMenuBar:ClearAllPoints taint during combat.
 	MainMenuBar.SetPositionForStatusBars = noop
 
-	-- Spellbook open in combat taint, only happens sometimes
+	-- Spellbook open in combat taint, only happens sometimes.
 	MultiActionBar_HideAllGrids = noop
 	MultiActionBar_ShowAllGrids = noop
 
-	-- Try to shutdown the container movement and taints
+	-- Try to shutdown the container movement and taints.
 	UIPARENT_MANAGED_FRAME_POSITIONS.ExtraAbilityContainer = nil
 	ExtraAbilityContainer.SetSize = noop
 	
@@ -416,19 +417,19 @@ or IsRetail and function(self)
 	MainMenuBarPerformanceBar:SetAlpha(0)
 	MainMenuBarPerformanceBar:SetScale(.00001)
 
-	-- shut down some events for things we dont use
+	-- Clear out crap we don't need.
 	noopthis(MainMenuBarArtFrame)
 	noopthis(MainMenuBarArtFrameBackground)
 	MainMenuBarArtFrame:UnregisterAllEvents()
 	StatusTrackingBarManager:UnregisterAllEvents()
 	ActionBarButtonEventsFrame:UnregisterAllEvents()
-	ActionBarButtonEventsFrame:RegisterEvent("ACTIONBAR_SLOT_CHANGED") -- these are needed to let the ExtraActionButton show
-	ActionBarButtonEventsFrame:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN") -- needed for ExtraActionBar cooldown
+	ActionBarButtonEventsFrame:RegisterEvent("ACTIONBAR_SLOT_CHANGED") -- This is needed for ExtraActionButton to show.
+	ActionBarButtonEventsFrame:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN") -- This is needed for ExtraActionBar cooldown.
 	ActionBarActionEventsFrame:UnregisterAllEvents()
 	ActionBarController:UnregisterAllEvents()
-	ActionBarController:RegisterEvent("UPDATE_EXTRA_ACTIONBAR") -- this is needed to let the ExtraActionBar show
+	ActionBarController:RegisterEvent("UPDATE_EXTRA_ACTIONBAR") -- This is needed for ExtraActionBar to show.
 
-	-- lets only keep ExtraActionButtons in here
+	-- Lets only keep ExtraActionButtons in here.
 	local ButtonEventsRegisterFrame = function(self, added)
 		local frames = ActionBarButtonEventsFrame.frames
 		for index = #frames,1,-1 do
