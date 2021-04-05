@@ -794,6 +794,7 @@ Module.SetTooltipHooks = function(self)
 	-- 2021-04-03: When hovering over, out and back over a bonus objective reward, 
 	--             most the text except level requirement will disappear on re-entering.
 	--             Seems to be because of self.Tooltip:Show(), so we're trying something else.
+	-- 2021-04-05: This fix ONLY works for embedded tooltips on the worldmap. Not the rep frame. Not the quest log. Fuck.
 	if (EmbeddedItemTooltip_UpdateSize) then
 		Tooltip.UpdateSize = function(self)
 			local itemTooltipExtraBorderHeight = 22

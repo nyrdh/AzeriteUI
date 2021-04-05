@@ -401,7 +401,7 @@ local AddMessageFiltered = function(frame, msg, r, g, b, chatID, ...)
 	if (FilterStatus.Styling) then
 		local count
 		for i,info in ipairs(Replacements) do
-			msg = string_gsub(msg, info[1], info[2])
+			msg = string_gsub(msg, unpack(info))
 			if (count) and (count > 0) then
 				filtered = true
 			end
