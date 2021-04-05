@@ -231,6 +231,17 @@ Core.ApplyExperimentalFeatures = function(self)
 		end
 	end
 
+	-- Add a reload button to addon action forbidden + too many lua errors popups.
+	-- 2021-04-05: This doesn't work...? I have to replace with my own dialogs?
+	--do
+	--	local popup = StaticPopupDialogs["ADDON_ACTION_FORBIDDEN"]
+	--	popup.OnAlt = function() ReloadUI() end
+	--	popup.Button3 = RELOADUI
+	--	popup = StaticPopupDialogs["TOO_MANY_LUA_ERRORS"]
+	--	popup.OnAlt = function() ReloadUI() end
+	--	popup.Button3 = RELOADUI
+	--end
+
 	-- Add a command to clear the main chat frame
 	-- I mainly use this to remove clutter before taking screenshots.
 	-- You could theoretically put this in a macro and clear chat then screenshot.
@@ -699,17 +710,6 @@ Core.FixBlizzardBugs = function(self)
 	end
 	if (not self.FixedBlizzardBugsQueue) then
 		self.FixedBlizzardBugsQueue = {}
-	end
-
-	-- Add a reload button to addon action forbidden + too many lua errors popups
-	do
-		local popup = StaticPopupDialogs["ADDON_ACTION_FORBIDDEN"]
-		popup.OnAlt = function() ReloadUI() end
-		popup.Button3 = RELOADUI
-
-		popup = StaticPopupDialogs["TOO_MANY_LUA_ERRORS"]
-		popup.OnAlt = function() ReloadUI() end
-		popup.Button3 = RELOADUI
 	end
 
 	-- These things only exist in retail, no point checking in Classic.
