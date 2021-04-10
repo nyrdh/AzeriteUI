@@ -5,12 +5,7 @@
 
 --]]--
 local ADDON, Private = ...
-
-local LibClientBuild = Wheel("LibClientBuild")
-assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded.")
-
--- Let's just assume this only exists in retail.
-if (not LibClientBuild:IsRetail()) then
+if (not Private.IsRetail) then
 	return
 end
 
@@ -31,6 +26,8 @@ local GetAuraFilter = Private.GetAuraFilter
 local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia
 local GetSchematic = Private.GetSchematic
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -- Callbacks
 -----------------------------------------------------------

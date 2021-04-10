@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("OptionsMenu", "HIGH", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibSound", "LibTooltip", "LibClientBuild")
+local Module = Core:NewModule("OptionsMenu", "HIGH", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibSound", "LibTooltip")
 local MenuTable
 
 -- Registries
@@ -33,15 +33,12 @@ local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 local IsForcingSlackAuraFilterMode = Private.IsForcingSlackAuraFilterMode
-
--- Constants for client version
-local IsClassic = Module:IsClassic()
-local IsRetail = Module:IsRetail()
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -- Fixing Blizzard's shit.
 -- They bugged out FrameXML\RestrictedFrames.lua in build 37623.
-local Build = Module:GetCurrentClientBuild()
-local BlizzardFuckedUp = Build >= 37623 -- The culprit patch
+local BlizzardFuckedUp = Private.ClientBuild >= 37623 -- The culprit patch
 
 -- Menu callback frames
 local CallbackFrames = {}

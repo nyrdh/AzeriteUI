@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 133)
+local LibSecureButton = Wheel:Set("LibSecureButton", 134)
 if (not LibSecureButton) then
 	return
 end
@@ -2365,7 +2365,6 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 
 		button:SetID(buttonID)
 		button:SetAttribute("type", "pet")
-		--button:SetAttribute("unit", "pettarget")
 		button:SetAttribute("action", buttonID)
 		button:SetAttribute("buttonLock", true)
 		button.id = buttonID
@@ -2449,12 +2448,6 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		
 		-- enable the visibility driver
 		RegisterAttributeDriver(visibility, "state-vis", visibilityDriver)
-
-	elseif (buttonType == "stance") then
-
-	elseif (buttonType == "petbattle") then
-
-	elseif (buttonType == "vehicle") then
 
 	elseif (buttonType == "exit") then
 

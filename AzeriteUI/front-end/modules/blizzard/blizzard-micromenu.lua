@@ -3,7 +3,7 @@ local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
-local Module = Core:NewModule("BlizzardMicroMenu", "LibEvent", "LibDB", "LibTooltip", "LibFrame", "LibClientBuild")
+local Module = Core:NewModule("BlizzardMicroMenu", "LibEvent", "LibDB", "LibTooltip", "LibFrame")
 
 -- Lua API
 local _G = _G
@@ -26,10 +26,8 @@ local GetNetStats = GetNetStats
 -- Private API
 local Colors = Private.Colors
 local GetLayout = Private.GetLayout
-
--- Constants for client version
-local IsClassic = Module:IsClassic()
-local IsRetail = Module:IsRetail()
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -- All this shit needs to go!!
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]

@@ -15,20 +15,6 @@ if (not Core) then
 	return 
 end
 
-local LibClientBuild = Wheel("LibClientBuild")
-assert(LibClientBuild, "UnitFrames requires LibClientBuild to be loaded.")
-
-local LibTime = Wheel("LibTime")
-assert(LibTime, "UnitFrames requires LibTime to be loaded.")
-
--- Constants for client version
-local IsClassic = LibClientBuild:IsClassic()
-local IsRetail = LibClientBuild:IsRetail()
-
--- Constants for calendar events
-local IsWinterVeil = LibTime:IsWinterVeil()
-local IsLoveFestival = LibTime:IsLoveFestival()
-
 -- Primary Units
 local UnitFramePlayer = Core:NewModule("UnitFramePlayer", "LibDB", "LibMessage", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge", "LibTime")
 local UnitFramePlayerHUD = Core:NewModule("UnitFramePlayerHUD", "LibDB", "LibMessage", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge")
@@ -75,7 +61,12 @@ local UnitLevel = UnitLevel
 local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetDefaults = Private.GetDefaults
+local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
+local IsWinterVeil = Private.IsWinterVeil
+local IsLoveFestival = Private.IsLoveFestival
 
 -- WoW Textures
 local EDGE_NORMAL_TEXTURE = [[Interface\Cooldown\edge]]
@@ -1594,7 +1585,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	-----------------------------------------------------------
 	if (IsClassic) then
 		local happiness = overlay:CreateFontString()
-		happiness:SetFontObject(Private.GetFont(12,true))
+		happiness:SetFontObject(GetFont(12,true))
 		happiness:Place("BOTTOM", "UICenter", "BOTTOM", 0, 10)
 		self.PetHappiness = happiness
 	end

@@ -46,6 +46,7 @@ front-end\locale\zhTW.lua
 # Addon API, configs and user defaults.
 front-end\config\api.lua
 front-end\config\colors.lua
+front-end\config\auras.lua
 front-end\config\configs.lua
 front-end\config\defaults.lua
 

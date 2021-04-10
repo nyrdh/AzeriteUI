@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 29)
+local LibChatTool = Wheel:Set("LibChatTool", 31)
 if (not LibChatTool) then
 	return
 end
@@ -929,20 +929,6 @@ LibChatTool.OnEvent = function(self, event, ...)
 				end
 				LibChatTool.playerMoney = currentMoney
 			end
-		end
-
-	elseif (event == "GP_LibChatTool_MerchantFrameUpdate") 
-		or (event == "GP_LibChatTool_MerchantFrameShow") 
-		or (event == "GP_LibChatTool_MerchantFrameHide") 
-	then
-		if (MerchantFrame:IsShown()) then
-			LibChatTool.isMerchantFrameShown = true
-		else
-			-- Check for delayed money messages
-			if (LibChatTool.isMerchantFrameShown) then
-				LibChatTool:OnEvent("PLAYER_MONEY")
-			end
-			LibChatTool.isMerchantFrameShown = nil
 		end
 	end
 end

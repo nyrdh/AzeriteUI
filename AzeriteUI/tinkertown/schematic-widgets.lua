@@ -7,9 +7,6 @@
 --]]--
 local ADDON, Private = ...
 
-local LibClientBuild = Wheel("LibClientBuild")
-assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded.")
-
 -- Lua API
 local pairs = pairs
 local setmetatable = setmetatable
@@ -18,16 +15,14 @@ local tonumber = tonumber
 -- WoW API
 local IsBindingForGamePad = IsBindingForGamePad
 
--- WoW client version constants
-local IsClassic = LibClientBuild:IsClassic()
-local IsRetail = LibClientBuild:IsRetail()
-
 -- Private API
 local Colors = Private.Colors
 local GetAuraFilter = Private.GetAuraFilter
 local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia
 local GetSchematic = Private.GetSchematic
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -- Keybind Graphics
 -----------------------------------------------------------
@@ -454,7 +449,7 @@ Private.RegisterSchematic("WidgetForge::AuraButton::Large", "Legacy", {
 				parent = nil, ownerKey = "Count", objectType = "FontString",
 				chain = {
 					"SetPosition", { "BOTTOMRIGHT", 2, -2 },
-					"SetFontObject", Private.GetFont(14, true),
+					"SetFontObject", GetFont(14, true),
 					"SetTextColor", { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 }
 				}
 			},
@@ -462,7 +457,7 @@ Private.RegisterSchematic("WidgetForge::AuraButton::Large", "Legacy", {
 				parent = nil, ownerKey = "Time", objectType = "FontString",
 				chain = {
 					"SetPosition", { "TOPLEFT", -2, 2 },
-					"SetFontObject", Private.GetFont(14, true)
+					"SetFontObject", GetFont(14, true)
 				}
 			}
 		}

@@ -8,7 +8,7 @@ local LibNumbers = Wheel("LibNumbers")
 assert(LibNumbers, ADDON..":Minimap requires LibNumbers to be loaded.")
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-local Module = Core:NewModule("Minimap", "LibEvent", "LibDB", "LibFrame", "LibMinimap", "LibTooltip", "LibTime", "LibSound", "LibPlayerData", "LibClientBuild")
+local Module = Core:NewModule("Minimap", "LibEvent", "LibDB", "LibFrame", "LibMinimap", "LibTooltip", "LibTime", "LibSound", "LibPlayerData")
 
 -- Lua API
 local _G = _G
@@ -53,6 +53,8 @@ local large = LibNumbers:GetNumberAbbreviationLong()
 local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -- WoW Strings
 local REPUTATION = REPUTATION 
@@ -70,10 +72,6 @@ local shortLevelString = "%s %.0f"
 
 -- Constant to track player level
 local LEVEL = UnitLevel("player")
-
--- Constants for client version
-local IsClassic = Module:IsClassic()
-local IsRetail = Module:IsRetail()
 
 ----------------------------------------------------
 -- Utility Functions

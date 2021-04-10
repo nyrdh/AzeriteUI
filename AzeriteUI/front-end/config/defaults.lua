@@ -1,14 +1,10 @@
 local ADDON, Private = ...
 
-local LibClientBuild = Wheel("LibClientBuild")
-assert(LibClientBuild, ADDON.." requires LibClientBuild to be loaded.")
-
 local LibDB = Wheel("LibDB")
 assert(LibDB, ADDON.." requires LibDB to be loaded.")
 
--- Constants for client version
-local IsClassic = LibClientBuild:IsClassic()
-local IsRetail = LibClientBuild:IsRetail()
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 ------------------------------------------------
 -- Module Defaults

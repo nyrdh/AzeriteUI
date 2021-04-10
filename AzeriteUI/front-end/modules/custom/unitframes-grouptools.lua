@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("GroupTools", "PLUGIN", "LibEvent", "LibDB", "LibFader", "LibFrame", "LibSound", "LibClientBuild")
+local Module = Core:NewModule("GroupTools", "PLUGIN", "LibEvent", "LibDB", "LibFader", "LibFrame", "LibSound")
 
 -- Lua API
 local _G = _G
@@ -49,10 +49,8 @@ local RAID_MEMBERS = RAID_MEMBERS
 local READY_CHECK = READY_CHECK
 local ROLE_POLL = ROLE_POLL
 local TANK = TANK
-
--- Client Constants
-local IsClassic = Module:IsClassic()
-local IsRetail = Module:IsRetail()
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -- Uncomment to show tools when solo 
 local DEV -- = true

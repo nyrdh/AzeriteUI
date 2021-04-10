@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("BlizzardFloaterHUD", "LOW", "LibMessage", "LibEvent", "LibFrame", "LibTooltip", "LibDB", "LibBlizzard", "LibClientBuild", "LibSound")
+local Module = Core:NewModule("BlizzardFloaterHUD", "LOW", "LibMessage", "LibEvent", "LibFrame", "LibTooltip", "LibDB", "LibBlizzard", "LibSound")
 
 -- Lua API
 local _G = _G
@@ -19,10 +19,8 @@ local InCombatLockdown = InCombatLockdown
 local GetConfig = Private.GetConfig
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
-
--- Constants for client version
-local IsClassic = Module:IsClassic()
-local IsRetail = Module:IsRetail()
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -- Local caches
 local HolderCache, FrameCache = {}, {}

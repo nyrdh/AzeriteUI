@@ -5,7 +5,7 @@ if (not Core) then
 end
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
-local Module = Core:NewModule("BlizzardObjectivesTracker", "LibMessage", "LibEvent", "LibFrame", "LibClientBuild", "LibBlizzard")
+local Module = Core:NewModule("BlizzardObjectivesTracker", "LibMessage", "LibEvent", "LibFrame", "LibBlizzard")
 
 -- Lua API
 local _G = _G
@@ -42,10 +42,8 @@ local SCENARIO_TRACKER_MODULE = SCENARIO_TRACKER_MODULE
 local Colors = Private.Colors
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
-
--- Constants for client version
-local IsClassic = Module:IsClassic()
-local IsRetail = Module:IsRetail()
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -----------------------------------------------------------------
 -- Utility

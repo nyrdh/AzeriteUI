@@ -3,6 +3,9 @@
 -- Used by front-end modules to retreive the same.
 local ADDON, Private = ...
 
+local LibClientBuild = Wheel("LibClientBuild")
+assert(LibClientBuild, ADDON.." requires LibClientBuild to be loaded.")
+
 local LibBagButton = Wheel("LibBagButton")
 assert(LibBagButton, ADDON.." requires LibBagButton to be loaded.")
 
@@ -18,14 +21,14 @@ assert(LibMover, ADDON.." requires LibMover to be loaded.")
 local LibSecureButton = Wheel("LibSecureButton")
 assert(LibSecureButton, ADDON.." requires LibSecureButton to be loaded.")
 
+local LibTime = Wheel("LibTime")
+assert(LibTime, ADDON.." requires LibTime to be loaded.")
+
 local LibTooltip = Wheel("LibTooltip")
 assert(LibTooltip, ADDON.." requires LibTooltip to be loaded.")
 
 local LibUnitFrame = Wheel("LibUnitFrame")
 assert(LibUnitFrame, ADDON.." requires LibUnitFrame to be loaded.")
-
-local LibAuraTool = Wheel("LibAuraTool")
-assert(LibAuraTool, ADDON.." requires LibAuraTool to be loaded.")
 
 local LibBindTool = Wheel("LibBindTool")
 assert(LibBindTool, ADDON.." requires LibBindTool to be loaded.")
@@ -82,16 +85,6 @@ Private.GetGlobalConfig = function(name)
 	return db or LibModule:GetModule(ADDON):NewConfig(name, Private.GetDefaults(name), "global")
 end 
 
--- Proxy this one
-Private.GetAuraFilter = function(...) 
-	return LibAuraTool:GetAuraFilter(...) 
-end
-
--- Whether or not aura filters are in forced slack mode.
--- This happens if aura data isn't available for the current class.
-Private.IsForcingSlackAuraFilterMode = function() 
-	return LibAuraTool:IsForcingSlackAuraFilterMode() 
-end
 
 ------------------------------------------------
 -- Private Theme API
@@ -238,8 +231,18 @@ Private.GetOptionsMenuTooltip = function(self) return GetTooltip("GP_OptionsMenu
 -- Private Media API
 ------------------------------------------------
 Private.Colors = LibColorTool:GetColorTable()
-Private.GetFont = function(...) return LibFontTool:GetFont(...) end
+Private.GetFont = function(size, outline, chat, prefix) return LibFontTool:GetFont(size, outline, chat, prefix or "AzeriteFont") end
 Private.GetMedia = function(name, type) return ([[Interface\AddOns\%s\front-end\media\%s.%s]]):format(ADDON, name, type or "tga") end
+
+------------------------------------------------
+-- Private Constants
+------------------------------------------------
+Private.ClientBuild = LibClientBuild:GetCurrentClientBuild()
+Private.IsClassic = LibClientBuild:IsClassic()
+Private.IsClassicTBC = LibClientBuild:IsClassicTBC()
+Private.IsRetail = LibClientBuild:IsRetail()
+Private.IsWinterVeil = LibTime:IsWinterVeil()
+Private.IsLoveFestival = LibTime:IsLoveFestival()
 
 ------------------------------------------------
 -- Private Sanity Filter

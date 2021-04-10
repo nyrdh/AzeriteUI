@@ -7,7 +7,7 @@ end
 local LibNumbers = Wheel("LibNumbers")
 assert(LibNumbers, ADDON..":BlizzardTooltips requires LibNumbers to be loaded.")
 
-local Module = Core:NewModule("BlizzardTooltips", "LibMessage", "LibEvent", "LibDB", "LibClientBuild", "LibTooltipScanner", "LibPlayerData", "LibFrame")
+local Module = Core:NewModule("BlizzardTooltips", "LibMessage", "LibEvent", "LibDB", "LibTooltipScanner", "LibPlayerData", "LibFrame")
 
 -- Lua API
 local math_abs = math.abs
@@ -42,6 +42,7 @@ local UnitReaction = UnitReaction
 local GameTooltip = GameTooltip
 local GetMouseFocus = GetMouseFocus
 local HealthBar = GameTooltipStatusBar
+local SharedTooltip_ClearInsertedFrames = SharedTooltip_ClearInsertedFrames or GameTooltip_ClearInsertedFrames
 local UnitClass = UnitClass
 local UnitExists = UnitExists
 local UnitHealth = UnitHealth
@@ -57,10 +58,8 @@ local Colors = Private.Colors
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
-
--- Constants for client version
-local IsClassic = Module:IsClassic()
-local IsRetail = Module:IsRetail()
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -- WoW Constants
 local DEAD = DEAD
@@ -467,7 +466,7 @@ Tooltip.OnTooltipSetUnit = function(self)
 	end
 
 	GameTooltip_ClearMoney(self)
-	SharedTooltip_ClearInsertedFrames(self)
+	SharedTooltip_ClearInsertedFrames(self) 
 	self:SetPadding(0,0,0,0)
 	self:ClearLines()
 

@@ -4,7 +4,7 @@ if (Private.EngineFailure) then
 end
 
 -- Wooh! 
-local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibAuraData", "LibAura", "LibClientBuild", "LibForge", "LibFader", "LibHook")
+local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibAuraData", "LibAura", "LibForge", "LibFader", "LibHook")
 
 -- Tell the back-end what addon to look for before 
 -- initializing this module and all its submodules. 
@@ -41,10 +41,8 @@ local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
 local Colors = Private.Colors
-
--- Constants for client version
-local IsClassic = Core:IsClassic()
-local IsRetail = Core:IsRetail()
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -- Addon localization
 local L = Wheel("LibLocale"):GetLocale(ADDON)

@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("NamePlates", "LibEvent", "LibNamePlate", "LibDB", "LibFrame", "LibClientBuild", "LibForge")
+local Module = Core:NewModule("NamePlates", "LibEvent", "LibNamePlate", "LibDB", "LibFrame", "LibForge")
 
 -- WoW API
 local GetQuestGreenRange = GetQuestGreenRange
@@ -22,10 +22,8 @@ local SetNamePlateSelfSize = C_NamePlate.SetNamePlateSelfSize
 local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
-
--- Constants for client version
-local IsClassic = Module:IsClassic()
-local IsRetail = Module:IsRetail()
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -- Local cache of the nameplates, for easy access to some methods
 local Plates = {} 

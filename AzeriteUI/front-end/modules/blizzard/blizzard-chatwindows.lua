@@ -4,7 +4,7 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("BlizzardChatFrames", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibHook", "LibSecureHook", "LibChatWindow", "LibFader", "LibClientBuild")
+local Module = Core:NewModule("BlizzardChatFrames", "LibMessage", "LibEvent", "LibDB", "LibFrame", "LibHook", "LibSecureHook", "LibChatWindow", "LibFader")
 
 -- Lua API
 local _G = _G
@@ -35,10 +35,8 @@ local VoiceChat_IsLoggedIn = C_VoiceChat and C_VoiceChat.IsLoggedIn
 local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
-
--- Constants for client version
-local IsClassic = Module:IsClassic()
-local IsRetail = Module:IsRetail()
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 local alphaLocks = {}
 local frameCache = {}

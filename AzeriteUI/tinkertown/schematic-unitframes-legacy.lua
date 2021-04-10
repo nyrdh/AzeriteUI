@@ -6,12 +6,6 @@
 --]]--
 local ADDON, Private = ...
 
-local LibClientBuild = Wheel("LibClientBuild")
-assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded.")
-
-local LibTime = Wheel("LibTime")
-assert(LibTime, "UnitFrames requires LibTime to be loaded.")
-
 -- Lua API
 local ipairs = ipairs
 local math_floor = math.floor
@@ -20,14 +14,6 @@ local string_format = string.format
 
 -- WoW API
 local UnitPowerMax = UnitPowerMax
-
--- WoW client version constants
-local IsClassic = LibClientBuild:IsClassic()
-local IsRetail = LibClientBuild:IsRetail()
-
--- Constants for calendar events
-local IsWinterVeil = LibTime:IsWinterVeil()
-local IsLoveFestival = LibTime:IsLoveFestival()
 
 -- Player Class Constant
 local PlayerClass = select(2, UnitClass("player"))
@@ -43,6 +29,10 @@ local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia
 local GetSchematic = Private.GetSchematic
 local HasSchematic = Private.HasSchematic
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
+local IsWinterVeil = Private.IsWinterVeil
+local IsLoveFestival = Private.IsLoveFestival
 
 -- Utility Functions
 -----------------------------------------------------------
@@ -2156,7 +2146,7 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 					"SetJustifyH", "RIGHT", 
 					"SetJustifyV", "BOTTOM",
 					"SetPosition", { "BOTTOMRIGHT", -2, 2 },
-					"SetFontObject", Private.GetFont(14, true),
+					"SetFontObject", GetFont(14, true),
 					"SetTextColor", { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
 					"SetParentToOwnerKey", "self,GroupAura,Border"
 				}
@@ -2170,7 +2160,7 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 					"SetJustifyH", "LEFT", 
 					"SetJustifyV", "TOP",
 					"SetPosition", { "TOPLEFT", 0, 0 },
-					"SetFontObject", Private.GetFont(12, true),
+					"SetFontObject", GetFont(12, true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .85 },
 					"SetParentToOwnerKey", "self,GroupAura,Border"
 				}
@@ -2500,7 +2490,7 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 					"SetJustifyH", "RIGHT", 
 					"SetJustifyV", "BOTTOM",
 					"SetPosition", { "BOTTOMRIGHT", -2, 2 },
-					"SetFontObject", Private.GetFont(14, true),
+					"SetFontObject", GetFont(14, true),
 					"SetTextColor", { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
 					"SetParentToOwnerKey", "self,GroupAura,Border"
 				}
@@ -2514,7 +2504,7 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 					"SetJustifyH", "LEFT", 
 					"SetJustifyV", "TOP",
 					"SetPosition", { "TOPLEFT", 0, 0 },
-					"SetFontObject", Private.GetFont(12, true),
+					"SetFontObject", GetFont(12, true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .85 },
 					"SetParentToOwnerKey", "self,GroupAura,Border"
 				}
@@ -2866,7 +2856,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 					"SetJustifyH", "RIGHT", 
 					"SetJustifyV", "BOTTOM",
 					"SetPosition", { "BOTTOMRIGHT", 4, -4 },
-					"SetFontObject", Private.GetFont(16, true),
+					"SetFontObject", GetFont(16, true),
 					"SetTextColor", { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
 					"SetParentToOwnerKey", "self,GroupAura,Border"
 				}
@@ -2880,7 +2870,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 					"SetJustifyH", "LEFT", 
 					"SetJustifyV", "TOP",
 					"SetPosition", { "TOPLEFT", -4, 4 },
-					"SetFontObject", Private.GetFont(16, true),
+					"SetFontObject", GetFont(16, true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .85 },
 					"SetParentToOwnerKey", "self,GroupAura,Border"
 				}
@@ -3284,7 +3274,7 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 					"SetJustifyH", "RIGHT", 
 					"SetJustifyV", "BOTTOM",
 					"SetPosition", { "BOTTOMRIGHT", -2, 2 },
-					"SetFontObject", Private.GetFont(14, true),
+					"SetFontObject", GetFont(14, true),
 					"SetTextColor", { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
 					"SetParentToOwnerKey", "self,GroupAura,Border"
 				}
@@ -3298,7 +3288,7 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 					"SetJustifyH", "LEFT", 
 					"SetJustifyV", "TOP",
 					"SetPosition", { "TOPLEFT", 0, 0 },
-					"SetFontObject", Private.GetFont(12, true),
+					"SetFontObject", GetFont(12, true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .85 },
 					"SetParentToOwnerKey", "self,GroupAura,Border"
 				}
@@ -3312,7 +3302,7 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 					"SetJustifyH", "LEFT", 
 					"SetJustifyV", "BOTTOM",
 					"SetPosition", { "BOTTOMLEFT", -4, -1 },
-					"SetFontObject", Private.GetFont(12, true),
+					"SetFontObject", GetFont(12, true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 }
 				}
 			},

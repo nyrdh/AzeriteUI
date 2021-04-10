@@ -3,7 +3,7 @@ local Core = Wheel("LibModule"):GetModule(ADDON)
 if (not Core) then 
 	return 
 end
-local Module = Core:NewModule("BlizzardTimers", "LibMessage", "LibEvent", "LibSecureHook", "LibFrame", "LibStatusBar", "LibClientBuild")
+local Module = Core:NewModule("BlizzardTimers", "LibMessage", "LibEvent", "LibSecureHook", "LibFrame", "LibStatusBar")
 
 -- Lua API
 local _G = _G
@@ -21,12 +21,10 @@ local GetUnitPowerBarInfoByID = GetUnitPowerBarInfoByID
 local GetUnitPowerBarStringsByID = GetUnitPowerBarStringsByID
 local UnitPowerBarTimerInfo = UnitPowerBarTimerInfo
 
--- Constants for client version
-local IsClassic = Module:IsClassic()
-local IsRetail = Module:IsRetail()
-
 -- Private API
 local GetLayout = Private.GetLayout
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -- WoW Constants
 local ALT_POWER_TYPE_COUNTER = ALT_POWER_TYPE_COUNTER or 4

@@ -7,10 +7,10 @@
 <Script file='tools\colors.lua'/>
 
 <!-- User tagged auras -->
-<Script file='tools\auras.lua'/>
+<!--<Script file='tools\auras.lua'/>-->
 
 <!-- Chat filters -->
-<Script file='tools\chat.lua'/>
+<!--<Script file='tools\chat.lua'/>-->
 
 <!-- Keybinds -->
 <Script file='tools\binds.lua'/>

@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.467-RC] 2021-04-03
+## [3.2.468-RC] 2021-04-10
 ### Added
-- Added a reload option to the popups appearing after too many lua errors, or when an action was blocked. The regular options are only to ignore, or disable the addon in question and reload. I have added the option to _only_ reload. 
+- Stuff coming here. 
 
-### Fixed
-- Trying an experimental workaround for the mega wide paragon rewards tooltips since WoW Retail Client Patch 9.0.5.
+### Changed
+- Moving anything chat filter related out of the back-end. This is part of an ongoing chat filter overhaul. 
+- Moving anything aura filter related out of the back-end. This is part of an upcoming aura filter overhaul.
 
 ## [3.2.466-RC] 2021-04-01
 ### Changed

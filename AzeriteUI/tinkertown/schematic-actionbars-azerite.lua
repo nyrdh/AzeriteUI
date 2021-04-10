@@ -8,9 +8,6 @@
 --]]--
 local ADDON, Private = ...
 
-local LibClientBuild = Wheel("LibClientBuild")
-assert(LibClientBuild, "Schematics::Widgets requires LibClientBuild to be loaded.")
-
 -- Lua API
 local _G = _G
 local ipairs = ipairs
@@ -26,16 +23,14 @@ local IsMounted = IsMounted
 local UnitExists = UnitExists
 local UnitOnTaxi = UnitOnTaxi
 
--- WoW client version constants
-local IsClassic = LibClientBuild:IsClassic()
-local IsRetail = LibClientBuild:IsRetail()
-
 -- Private API
 local Colors = Private.Colors
 local GetAuraFilter = Private.GetAuraFilter
 local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia
 local GetSchematic = Private.GetSchematic
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 -- Addon Localization
 local L = Wheel("LibLocale"):GetLocale(ADDON)

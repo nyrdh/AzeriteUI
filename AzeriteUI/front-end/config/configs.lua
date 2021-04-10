@@ -1,8 +1,5 @@
 local ADDON, Private = ...
 
-local LibClientBuild = Wheel("LibClientBuild")
-assert(LibClientBuild, ADDON.." requires LibClientBuild to be loaded.")
-
 local LibNumbers = Wheel("LibNumbers")
 assert(LibNumbers, ADDON.." requires LibNumbers to be loaded.")
 
@@ -47,10 +44,8 @@ local Colors = Private.Colors
 local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia 
 local GetAuraFilter = Private.GetAuraFilter
-
--- Constants for client version
-local IsClassic = LibClientBuild:IsClassic()
-local IsRetail = LibClientBuild:IsRetail()
+local IsClassic = Private.IsClassic
+local IsRetail = Private.IsRetail
 
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
 local NEW = "*"
@@ -2191,6 +2186,14 @@ RegisterLayout("Bindings", "Azerite", {
 	["MenuButtonTextShadowColor"] = { 1, 1, 1, .5 },
 	["MenuButtonTextShadowOffset"] = { 0, -.85 },
 	["MenuWindowGetBorder"] = function(self) return GetBorder(self) end
+})
+
+-- Chat Filters
+RegisterLayout("ChatFilters", "Azerite", {
+	["GoldCoinTexture"] = "|T"..GetMedia("coins")..":16:16:-2:0:64:64:0:32:0:32|t",
+	["SilverCoinTexture"] = "|T"..GetMedia("coins")..":16:16:-2:0:64:64:32:64:0:32|t",
+	["CopperCoinTexture"] = "|T"..GetMedia("coins")..":16:16:-2:0:64:64:0:32:32:64|t" 
+
 })
 
 -- Floaters. Durability only currently. 
@@ -4451,6 +4454,7 @@ RegisterLayoutVariation("BlizzardPopupStyling", "Legacy", "Azerite", {})
 RegisterLayoutVariation("BlizzardTimers", "Legacy", "Azerite", {})
 RegisterLayoutVariation("BlizzardTooltips", "Legacy", "Azerite", {})
 RegisterLayoutVariation("BlizzardWorldMap", "Legacy", "Azerite", {})
+RegisterLayoutVariation("ChatFilters", "Legacy", "Azerite", {})
 RegisterLayoutVariation("GroupTools", "Legacy", "Azerite", {})
 RegisterLayoutVariation("NamePlates", "Legacy", "Azerite", {})
 
