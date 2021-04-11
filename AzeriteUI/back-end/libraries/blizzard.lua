@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 94)
+local LibBlizzard = Wheel:Set("LibBlizzard", 95)
 if (not LibBlizzard) then 
 	return
 end
@@ -1948,6 +1948,7 @@ or IsRetail and function(self, ...)
 			self.cursor:SetFormattedText("%s:|r   |cfff0f0f0%s|r", L_MOUSE, L_NA)
 		end 
 
+		self.elapsed = 0
 	end)
 
 	-- Be gone, pest!

@@ -664,6 +664,19 @@ Tooltip.OnTooltipSetItem = function(self)
 	end
 end
 
+Tooltip.OnTooltipSetSpell = function(self)
+
+end
+
+-- This is amongst other times called
+-- when a tooltip changes contents while shown.
+-- Like when hovering from a unit, to an object. 
+Tooltip.OnTooltipCleared = function(self)
+	if (HealthBar:IsShown()) then
+		HealthBar:Hide()
+	end
+end
+
 Tooltip.SetHealthValue = function(self, unit)
 	if (UnitIsDeadOrGhost(unit)) then
 		if (self:IsShown()) then
@@ -700,6 +713,9 @@ Tooltip.OnValueChanged = function(self)
 		end
 	end
 	if (not unit) then
+		if (HealthBar:IsShown()) then
+			HealthBar:Hide()
+		end
 		return
 	end
 	Tooltip.SetHealthValue(HealthBar, unit)
@@ -825,7 +841,9 @@ Module.SetTooltipHooks = function(self)
 		end
 		hooksecurefunc("EmbeddedItemTooltip_UpdateSize", Tooltip.UpdateSize)
 	end
-
+	
+	GameTooltip:HookScript("OnTooltipCleared", Tooltip.OnTooltipCleared)
+	GameTooltip:HookScript("OnTooltipSetSpell", Tooltip.OnTooltipSetSpell)
 	GameTooltip:HookScript("OnTooltipSetUnit", Tooltip.OnTooltipSetUnit)
 	GameTooltip:HookScript("OnTooltipSetItem", Tooltip.OnTooltipSetItem)
 end

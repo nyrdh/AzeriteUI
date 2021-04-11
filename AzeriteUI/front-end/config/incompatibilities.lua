@@ -14,6 +14,7 @@ for moduleName,list in pairs({
 		["GoldpawUI"] = true,
 		["GoldpawUI7"] = true,
 		["KkthnxUI"] = true,
+		["Orbs"] = true,
 		["SpartanUI"] = true,
 		["TukUI"] = true
 	},
@@ -38,7 +39,8 @@ for moduleName,list in pairs({
 	},
 	BlizzardWorldMap = {
 		["ClassicWorldMapEnhanced"] = true,
-		["Leatrix_Maps"] = true
+		["Leatrix_Maps"] = true,
+		["MapShrinker"] = true
 	},
 	Bindings = {
 		["ConsolePort"] = true
