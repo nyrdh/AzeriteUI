@@ -43,6 +43,7 @@ These are some addons I feel go very well together with our user interface. They
 * Narcissus: [www.curseforge.com/wow/addons/narcissus](https://www.curseforge.com/wow/addons/narcissus)  
 * MaxDps: [www.curseforge.com/wow/addons/maxdps-rotation-helper](https://www.curseforge.com/wow/addons/maxdps-rotation-helper)
 * Minimap Button Bag: [www.curseforge.com/wow/addons/mbb](https://www.curseforge.com/wow/addons/mbb)  
+* World Map Shrinker: [www.curseforge.com/wow/addons/world-map-shrinker](https://www.curseforge.com/wow/addons/world-map-shrinker)
 
 ## **Frequently Asked Questions:**  
 ### **It's so big, how can I scale it down?**  
