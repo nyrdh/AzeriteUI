@@ -1555,66 +1555,74 @@ Module.CreateMenuTable = function(self)
 	end
 
 	-- ChatFrames
-	-- Always show chat filter choices.
-	local ChatFrameMenu = {
-		title = L["Chat Windows"], type = nil, hasWindow = true, 
-		buttons = {
-			{
-				title = L["Chat Filters"], type = nil, hasWindow = true, 
-				buttons = {
-					{
-						enabledTitle = L_ENABLED:format(L["Chat Styling"]),
-						disabledTitle = L_DISABLED:format(L["Chat Styling"]),
-						tooltipText = L["Chat Styling"],
-						newbieText = L["This is a chat filter that reformats a lot of the game chat output to a much nicer format. This includes when you receive loot, earn currency or gold, when somebody gets and achievement, and so on.|n|nNote that this filter does not add or remove anything, it simply makes it easier on the eyes."],
-						type = "TOGGLE_VALUE", 
-						configDB = "ChatFilters", configKey = "enableChatStyling", 
-						proxyModule = "ChatFilters"
-					},
-					{
-						enabledTitle = L_ENABLED:format(L["Hide Monster Messages"]),
-						disabledTitle = L_DISABLED:format(L["Hide Monster Messages"]),
-						tooltipText = L["Hide Monster Messages"],
-						newbieText = L["This filter hides most things NPCs or monsters say from that chat. Monster emotes and whispers are moved to the same place mid-screen as boss emotes and whispers are displayed.|n|nThis does not affect what is visible in chat bubbles above their heads, which is where we wish this kind of information to be available."],
-						type = "TOGGLE_VALUE", 
-						configDB = "ChatFilters", configKey = "enableMonsterFilter", 
-						proxyModule = "ChatFilters"
-					},
-					{
-						enabledTitle = L_ENABLED:format(L["Hide Boss Messages"]),
-						disabledTitle = L_DISABLED:format(L["Hide Boss Messages"]),
-						tooltipText = L["Hide Boss Messages"],
-						newbieText = L["This filter hides most things boss monsters say from that chat. |n|nThis does not affect what is visible mid-screen during raid fights, nor what you'll see in chat bubbles above their heads, which is where we wish this kind of information to be available."],
-						type = "TOGGLE_VALUE", 
-						configDB = "ChatFilters", configKey = "enableBossFilter", 
-						proxyModule = "ChatFilters"
-					},
-					{
-						enabledTitle = L_ENABLED:format(L["Hide Spam"]),
-						disabledTitle = L_DISABLED:format(L["Hide Spam"]),
-						tooltipText = L["Hide Spam"],
-						newbieText = L["This filter hides a lot of messages related to group members in raids and especially battlegrounds, such as who joins, leaves, who loots something and so on.|n|nThe idea here is free up the chat and allow you to see what people are actually saying, and not just the constant spam of people coming and going."],
-						type = "TOGGLE_VALUE", 
-						configDB = "ChatFilters", configKey = "enableSpamFilter", 
-						proxyModule = "ChatFilters"
+	if (Core:IsModuleAvailable("BlizzardChatFrames")) then 
+		-- Always show chat filter choices. Except when they're not there, like right now. /doh
+		local ChatFrameMenuDisabled = {
+			title = L["Chat Windows"], type = nil, hasWindow = true, 
+			buttons = {
+				{
+					title = L["Chat Filters"], type = nil, hasWindow = true, 
+					buttons = {
+						{
+							enabledTitle = L_ENABLED:format(L["Chat Styling"]),
+							disabledTitle = L_DISABLED:format(L["Chat Styling"]),
+							tooltipText = L["Chat Styling"],
+							newbieText = L["This is a chat filter that reformats a lot of the game chat output to a much nicer format. This includes when you receive loot, earn currency or gold, when somebody gets and achievement, and so on.|n|nNote that this filter does not add or remove anything, it simply makes it easier on the eyes."],
+							type = "TOGGLE_VALUE", 
+							configDB = "ChatFilters", configKey = "enableChatStyling", 
+							proxyModule = "ChatFilters"
+						},
+						{
+							enabledTitle = L_ENABLED:format(L["Hide Monster Messages"]),
+							disabledTitle = L_DISABLED:format(L["Hide Monster Messages"]),
+							tooltipText = L["Hide Monster Messages"],
+							newbieText = L["This filter hides most things NPCs or monsters say from that chat. Monster emotes and whispers are moved to the same place mid-screen as boss emotes and whispers are displayed.|n|nThis does not affect what is visible in chat bubbles above their heads, which is where we wish this kind of information to be available."],
+							type = "TOGGLE_VALUE", 
+							configDB = "ChatFilters", configKey = "enableMonsterFilter", 
+							proxyModule = "ChatFilters"
+						},
+						{
+							enabledTitle = L_ENABLED:format(L["Hide Boss Messages"]),
+							disabledTitle = L_DISABLED:format(L["Hide Boss Messages"]),
+							tooltipText = L["Hide Boss Messages"],
+							newbieText = L["This filter hides most things boss monsters say from that chat. |n|nThis does not affect what is visible mid-screen during raid fights, nor what you'll see in chat bubbles above their heads, which is where we wish this kind of information to be available."],
+							type = "TOGGLE_VALUE", 
+							configDB = "ChatFilters", configKey = "enableBossFilter", 
+							proxyModule = "ChatFilters"
+						},
+						{
+							enabledTitle = L_ENABLED:format(L["Hide Spam"]),
+							disabledTitle = L_DISABLED:format(L["Hide Spam"]),
+							tooltipText = L["Hide Spam"],
+							newbieText = L["This filter hides a lot of messages related to group members in raids and especially battlegrounds, such as who joins, leaves, who loots something and so on.|n|nThe idea here is free up the chat and allow you to see what people are actually saying, and not just the constant spam of people coming and going."],
+							type = "TOGGLE_VALUE", 
+							configDB = "ChatFilters", configKey = "enableSpamFilter", 
+							proxyModule = "ChatFilters"
+						}
 					}
 				}
 			}
 		}
-	}
-	-- Only apply these when no conflicting addon is loaded.
-	if (Core:IsModuleAvailable("BlizzardChatFrames")) then 
-		table_insert(ChatFrameMenu.buttons, {
-			enabledTitle = L_ENABLED:format(L["Chat Outline"]),
-			disabledTitle = L_DISABLED:format(L["Chat Outline"]),
-			tooltipText = L["Chat Outline"],
-			newbieText = L["Toggles outlined text in the chat windows.|n|nWe recommend leaving it on as the chat can be really hard to read in certain situations otherwise."],
-			type = "TOGGLE_VALUE", 
-			configDB = "BlizzardChatFrames", configKey = "enableChatOutline", 
-			proxyModule = "BlizzardChatFrames"
-		})
+
+		local ChatFrameMenu = {
+			title = L["Chat Windows"], type = nil, hasWindow = true, 
+			buttons = {}
+		}
+
+		-- Only apply these when no conflicting addon is loaded.
+		if (Core:IsModuleAvailable("BlizzardChatFrames")) then 
+			table_insert(ChatFrameMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["Chat Outline"]),
+				disabledTitle = L_DISABLED:format(L["Chat Outline"]),
+				tooltipText = L["Chat Outline"],
+				newbieText = L["Toggles outlined text in the chat windows.|n|nWe recommend leaving it on as the chat can be really hard to read in certain situations otherwise."],
+				type = "TOGGLE_VALUE", 
+				configDB = "BlizzardChatFrames", configKey = "enableChatOutline", 
+				proxyModule = "BlizzardChatFrames"
+			})
+		end
+		table_insert(MenuTable, ChatFrameMenu)
 	end
-	table_insert(MenuTable, ChatFrameMenu)
 
 	-- Nameplates
 	if (Core:IsModuleAvailable("NamePlates")) then 

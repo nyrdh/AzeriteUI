@@ -4,13 +4,16 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.468-RC] 2021-04-10
+## [3.2.469-RC] 2021-04-11
 ### Added
-- Stuff coming here. 
+- Added support for WorldMapShrinker!
 
 ### Changed
 - Moving anything chat filter related out of the back-end. This is part of an ongoing chat filter overhaul. 
 - Moving anything aura filter related out of the back-end. This is part of an upcoming aura filter overhaul.
+
+### Removed
+- Temporarily disabled the chat filter options, as the chat filters are temporarily out of order.
 
 ## [3.2.466-RC] 2021-04-01
 ### Changed
