@@ -1,4 +1,4 @@
-local LibInputMethod = Wheel:Set("LibInputMethod", 7)
+local LibInputMethod = Wheel:Set("LibInputMethod", 9)
 if (not LibInputMethod) then
 	return
 end
@@ -15,21 +15,6 @@ assert(LibMessage, "LibInputMethod requires LibMessage to be loaded.")
 LibMessage:Embed(LibInputMethod)
 LibEvent:Embed(LibInputMethod)
 
--- Lua API
-local _G = _G
-local assert = assert
-local debugstack = debugstack
-local error = error
-local ipairs = ipairs
-local pairs = pairs
-local select = select
-local string_format = string.format
-local string_join = string.join
-local string_match = string.match
-local table_insert = table.insert
-local table_remove = table.remove
-local type = type
-
 -- WoW API
 local GetActiveDeviceID = C_GamePad and C_GamePad.GetActiveDeviceID
 local GetDeviceMappedState = C_GamePad and C_GamePad.GetDeviceMappedState
@@ -45,22 +30,6 @@ LibInputMethod.isUsingGamepad = LibInputMethod.isUsingGamepad -- semantics. list
 
 -- Shortcuts!
 local Frame = LibInputMethod.frame
-
-----------------------------------------------------------------
--- Utility Functions
-----------------------------------------------------------------
--- Syntax check 
-local check = function(value, num, ...)
-	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
-	for i = 1,select("#", ...) do
-		if type(value) == select(i, ...) then 
-			return 
-		end
-	end
-	local types = string_join(", ", ...)
-	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
-end
 
 ----------------------------------------------------------------
 -- Listener Frame
