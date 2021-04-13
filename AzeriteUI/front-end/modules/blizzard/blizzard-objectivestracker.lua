@@ -572,16 +572,19 @@ Module.InitRetailTracker = function(self)
 	local screenHeight = UICenter:GetHeight() -- need to use our parenting frame's height instead.
 	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
 	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
-	local newScale = (layout.Scale or 1) / ((UIParent:GetScale() or 1)/(UICenter:GetScale() or 1))
+	--local newScale = (layout.Scale or 1) / ((UIParent:GetScale() or 1)/(UICenter:GetScale() or 1))
 
 	-- Might need to hook all this to uiscaling changes.
-	if (layout.Scale) then 
-		ObjectiveTrackerFrame:SetScale(newScale)
-		ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight / newScale)
-	else
-		ObjectiveTrackerFrame:SetScale(1)
-		ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight)
-	end	
+	ObjectiveTrackerFrame:SetIgnoreParentScale(true)
+	--if (layout.Scale) then 
+		ObjectiveTrackerFrame:SetScale(768/1080 * (layout.Scale or 1))
+		--ObjectiveTrackerFrame:SetScale(newScale)
+		ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight / (layout.Scale or 1))
+	--else
+		--ObjectiveTrackerFrame:SetScale(768/1080)
+		--ObjectiveTrackerFrame:SetScale(1)
+		--ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight)
+	--end	
 
 	-- This seems to prevent a lot of blizz crap from happening.
 	ObjectiveTrackerFrame.IsUserPlaced = function() return true end

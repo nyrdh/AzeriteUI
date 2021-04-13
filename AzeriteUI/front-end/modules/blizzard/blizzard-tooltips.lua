@@ -328,7 +328,10 @@ Tooltip.Style = function(self)
 		Tooltip.SetBackdropBorderColor(self, .35, .35, .35, 1)
 	end
 
-	Tooltip.AdjustScale(self)
+	self:SetIgnoreParentScale(true)
+	self:SetScale(768/1080)
+
+	--Tooltip.AdjustScale(self)
 end
 
 Tooltip.AdjustScale = function(self)
@@ -397,7 +400,7 @@ Tooltip.SetDefaultAnchor = function(self, parent)
 		return
 	end
 
-	Tooltip.AdjustScale(self)
+	--Tooltip.AdjustScale(self)
 
 	-- Mouseover tooltips
 	if (false) then
@@ -635,7 +638,7 @@ Tooltip.OnTooltipSetUnit = function(self)
 		lineIndex = AddIndexedLine(self, lineIndex, FRIENDS_LIST_REALM..data.realm, Colors.quest.gray[1], Colors.quest.gray[2], Colors.quest.gray[3])
 	end
 
-	Tooltip.AdjustScale(self)
+	--Tooltip.AdjustScale(self)
 	Tooltip.SetHealthValue(HealthBar, unit)
 end
 
@@ -644,7 +647,7 @@ Tooltip.OnTooltipSetItem = function(self)
 		return
 	end
 
-	Tooltip.AdjustScale(self)
+	--Tooltip.AdjustScale(self)
 
 	-- /run local E=EmbeddedItemTooltip;E.ItemTooltip:Show();EmbeddedItemTooltip_UpdateSize(E.ItemTooltip)
 
