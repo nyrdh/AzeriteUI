@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 134)
+local LibSecureButton = Wheel:Set("LibSecureButton", 135)
 if (not LibSecureButton) then
 	return
 end
@@ -1890,6 +1890,15 @@ PetButton.UpdateCooldown = function(self)
 	end
 end
 
+-- Strict true/false check for button content
+PetButton.HasContent = function(self)
+	if (self.hasAction) then
+		return true
+	else 
+		return false
+	end
+end
+
 PetButton.UpdateBinding = ActionButton.UpdateBinding
 
 -- Getters
@@ -3106,10 +3115,14 @@ LibSecureButton.HookMaxDps = function(self, event, ...)
 	
 	MaxDps.FetchAzeriteUI = function()
 		for button in LibSecureButton:GetAllActionButtonsByType("action") do 
-			MaxDps:AddStandardButton(button)
+			if (button:HasContent()) then
+				MaxDps:AddButton(button:GetSpellID(), button)
+			end
 		end
 		for button in LibSecureButton:GetAllActionButtonsByType("pet") do 
-			MaxDps:AddStandardButton(button)
+			if (button:HasContent()) then
+				MaxDps:AddButton(button:GetSpellID(), button)
+			end
 		end
 	end
 	
