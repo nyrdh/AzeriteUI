@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.470-RC] 2021-04-14
+### Changed
+- Updated the MaxDps integration, hopefully to the better. Keeping an eye on this.
+
+### Fixed
+- Fixed an issue in Classic that would leave an empty border around the class power element on some classes that didn't have a class power element. 
+
 ## [3.2.469-RC] 2021-04-11
 ### Added
 - Added support for WorldMapShrinker!
