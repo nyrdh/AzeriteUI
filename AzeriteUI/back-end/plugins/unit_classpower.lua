@@ -281,19 +281,22 @@ local Generic_MT = { __index = Generic }
 
 -- Specific powerTypes
 local ClassPower = {}
-ClassPower.None = {
+ClassPower.None = setmetatable({
 	EnablePower = function(self)
 		local element = self.ClassPower
-		for i = 1, #element do
-			element[i]:SetMinMaxValues(0,1)
-			element[i]:SetValue(0)
-			element[i]:Hide()
-		end 
+		if (element) then
+			for i = 1, #element do
+				element[i]:SetMinMaxValues(0,1)
+				element[i]:SetValue(0)
+				element[i]:Hide()
+			end
+			element:Hide()
+		end
 	end, 
 	DisablePower = function() end,
 	UpdatePower = function() end,
 	UpdateColor = function() end,
-}
+}, { __index = LibFrame:CreateFrame("Frame") })
 
 ClassPower.ComboPoints = setmetatable({ 
 	ShouldEnable = function(self)
@@ -1182,5 +1185,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 53)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 54)
 end 
