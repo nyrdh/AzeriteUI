@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
       
       - name: Create Classic Package
-        run: curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash -s -- -p 334593 -g classic -m pkgmeta-classic.yaml 
+        run: curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash -s -- -p 298648 -g classic -m pkgmeta-classic.yaml 
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
