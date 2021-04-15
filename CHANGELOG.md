@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.471-RC] 2021-04-15
+- Crazy changes.
+
 ## [3.2.470-RC] 2021-04-14
 ### Changed
 - Updated the MaxDps integration, hopefully to the better. Keeping an eye on this.
