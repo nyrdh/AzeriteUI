@@ -1,8 +1,8 @@
 [ ![Become a Patreon](http://larsnorbergofficial.com/img/social-media-buttons-patreon-small.jpg) ](https://www.patreon.com/goldpawsstuff) 
 
-This is a custom user interface suite for World of Warcraft, containing multiple full interfaces in a single addon. Coded and designed by Lars Norberg and Daniel Troconis. 
+This is a custom user interface suite for World of Warcraft, containing multiple full interfaces in a single addon. Coded and designed by Lars Norberg and Daniel Troconis. It works for both WoW Retail and WoW Classic, just choose the right version to download!  
 
-From the 3.1 beta phase and onwards, theme switching has been enabled with the commands `/go azerite` and `/go legacy`, where they each represent the themes of AzeriteUI and GoldpawUI. Menu options will be added for this later.
+To switch between interface theme, use the commands `/go azerite` and `/go legacy`. This is a per character setting.  
 
 ## **Motivate me!**  
 If you like this addon or others I have made, and wish to see more, consider supporting my work by sending a donation with PayPal or pledging monthly on Patreon. Your support is what motivates me to share my addons with the world, develop them further and keep them updated! 
@@ -11,39 +11,28 @@ If you like this addon or others I have made, and wish to see more, consider sup
 * PayPal: [www.paypal.me/goldpawsstuff](https://www.paypal.me/goldpawsstuff)  
 * Liberapay: [liberapay.com/goldpawsstuff/donate](https://liberapay.com/goldpawsstuff/donate)
 
-## **Join me on social media!**  
+### **Join me on social media!**  
 * Discord: [discord.gg/MUSfWXd](https://discord.gg/MUSfWXd)  
 * Twitter: [@GoldpawsStuff](https://twitter.com/goldpawsstuff)  
 
-## **Report a bug, suggest a feature:**
+### **Report a bug, suggest a feature:**
 All feature requests and bug reports for all game versions are done on the main project's github page. Please use _only_ our report system and the supplied template when reporting bugs.  
 * [github.com/GoldpawsStuff/AzeriteUI/issues](https://github.com/GoldpawsStuff/AzeriteUI/issues)
-
-## **Recommended download locations:**  
-Even though the most recent versions of AzeriteUI are available on GitHub, I strongly recommend using the tagged, public versions on CurseForge. Anything else is considered experimental or in the middle of development, and we'll simply ignore any questions or issue reports related to those untagged git versions.  
-
-### **CurseForge:**
-* Azerite UI Collection for Classic: [https://www.curseforge.com/wow/addons/azeriteui-classic](https://www.curseforge.com/wow/addons/azeriteui-classic)  
-* Azerite UI Collection for Retail: [https://www.curseforge.com/wow/addons/azeriteui-retail](https://www.curseforge.com/wow/addons/azeriteui-retail)  
-
-### **GitHub:**
-This is mostly meant for tinkerers and the very interested, and unless stated otherwise in a specific version, NOT meant to be downloaded by regular users. Also note that I do _not_ accept any bug reports related to untagged or outdated versions.  
-* Azerite UI Collection for Classic: [github.com/GoldpawsStuff/AzeriteUI](https://github.com/GoldpawsStuff/AzeriteUI)  
-* Azerite UI Collection for Retail: [github.com/GoldpawsStuff/AzeriteUI_Retail](https://github.com/GoldpawsStuff/AzeriteUI_Retail)  
 
 ## **Recommended addons:**  
 These are some addons I feel go very well together with our user interface. They are not required, but I recommend them as they further enhance the look and functionality in a non-intrusive manner.  
 
-### **Classic:**
-* Enhanced World Map for WoW Classic: [www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic](https://www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic)  
-* Immersion for WoW Classic: [www.curseforge.com/wow/addons/immersion](https://www.curseforge.com/wow/addons/immersion/files/all?filter-game-version=1738749986%3a67408)  
-
 ### **Retail:**
+* Big Input Box: [www.curseforge.com/wow/addons/big-input-box](https://www.curseforge.com/wow/addons/big-input-box)
 * Immersion: [www.curseforge.com/wow/addons/immersion](https://www.curseforge.com/wow/addons/immersion)  
 * Narcissus: [www.curseforge.com/wow/addons/narcissus](https://www.curseforge.com/wow/addons/narcissus)  
 * MaxDps: [www.curseforge.com/wow/addons/maxdps-rotation-helper](https://www.curseforge.com/wow/addons/maxdps-rotation-helper)
 * Minimap Button Bag: [www.curseforge.com/wow/addons/mbb](https://www.curseforge.com/wow/addons/mbb)  
 * World Map Shrinker: [www.curseforge.com/wow/addons/world-map-shrinker](https://www.curseforge.com/wow/addons/world-map-shrinker)
+
+### **Classic:**
+* Enhanced World Map for WoW Classic: [www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic](https://www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic)  
+* Immersion for WoW Classic: [www.curseforge.com/wow/addons/immersion](https://www.curseforge.com/wow/addons/immersion/files/all?filter-game-version=1738749986%3a67408)  
 
 ## **Frequently Asked Questions:**  
 ### **It's so big, how can I scale it down?**  
