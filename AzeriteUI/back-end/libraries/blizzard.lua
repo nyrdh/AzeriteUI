@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 95)
+local LibBlizzard = Wheel:Set("LibBlizzard", 96)
 if (not LibBlizzard) then 
 	return
 end
@@ -410,12 +410,14 @@ or IsRetail and function(self)
 		end
 	end
 	
-	-- MainMenuBar:ClearAllPoints taint during combat.
+	-- MainMenuBar:ClearAllPoints() taint during combat. *CHECK*
 	MainMenuBar.SetPositionForStatusBars = noop
 
 	-- Spellbook open in combat taint, only happens sometimes.
-	MultiActionBar_HideAllGrids = noop
-	MultiActionBar_ShowAllGrids = noop
+	-- This appears to CAUSE taint, rather than solve it.
+	-- Been getting multiple taints on this after adding it. 
+	--MultiActionBar_HideAllGrids = noop
+	--MultiActionBar_ShowAllGrids = noop
 
 	-- Try to shutdown the container movement and taints.
 	UIPARENT_MANAGED_FRAME_POSITIONS.ExtraAbilityContainer = nil
