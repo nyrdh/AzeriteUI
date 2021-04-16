@@ -2,17 +2,19 @@
 
 name: Packager
 
+# Controls when the action will run. Triggers the workflow on create
+# events for new branches or tags.
+on:
+  create:
+
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
-on:
-  push:
-    branches: [ master ]
-    tags:
-     - '![0-9]+.[0-9]+.[0-9]+-Release-[0-9]+'
-     - '![0-9]+.[0-9]+.[0-9]+-RC-[0-9]+'
-     - '![0-9]+.[0-9]+.[0-9]+-Beta-[0-9]+'
-     - '![0-9]+.[0-9]+.[0-9]+-Alpha-[0-9]+'
-     - '*'
+#on:
+#  create:
+#  push:
+#    branches: [ master ]
+#    tags:
+#     - '*'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -28,12 +30,14 @@ jobs:
         with:
           fetch-depth: 0
       
+      # Creates a package for the classic version.
       - name: Create Classic Package
         run: curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash -s -- -g classic -m .pkgmeta 
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
 
+      # Creates a package for the retail version.
       - name: Create Retail Package
         run: curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash -s -- -g retail -m .pkgmeta
         env:
