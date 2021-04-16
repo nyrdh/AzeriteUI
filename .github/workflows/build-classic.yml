@@ -19,9 +19,7 @@ jobs:
 
     steps:
       - name: Checkout addon
-        uses: actions/checkout@v1
-        with:
-          fetch-depth: 100
+        uses: actions/checkout@v2
 
       - name: Package Classic
         uses: BigWigsMods/packager@master
