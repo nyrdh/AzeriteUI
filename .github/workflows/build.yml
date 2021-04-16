@@ -1,4 +1,4 @@
-name: Package Retail
+name: Packager
 
 on:
   push:
@@ -6,8 +6,6 @@ on:
       - master
     tags:
       - '*'
-      - '!**-bc'
-      - '!**-classic'
     paths-ignore:
       - '.github/**'
 
@@ -27,3 +25,8 @@ jobs:
         uses: BigWigsMods/packager@master
         with:
           args: -g retail -m .pkgmeta
+
+      - name: Package Classic
+        uses: BigWigsMods/packager@master
+        with:
+          args: -g classic -m .pkgmeta
