@@ -8,7 +8,18 @@ on:
   push:
     branches: [ master ]
     tags:
-     - '[0-9]+.[0-9]+.[0-9]+-[a-zA-Z]+(-classic)*(-bc)*(-retail)*$'
+     - '[0-9]+.[0-9]+.[0-9]+-Release$'
+     - '[0-9]+.[0-9]+.[0-9]+-Release-classic$'
+     - '[0-9]+.[0-9]+.[0-9]+-Release-bc$'
+     - '[0-9]+.[0-9]+.[0-9]+-RC$'
+     - '[0-9]+.[0-9]+.[0-9]+-RC-classic$'
+     - '[0-9]+.[0-9]+.[0-9]+-RC-bc$'
+     - '[0-9]+.[0-9]+.[0-9]+-Beta$'
+     - '[0-9]+.[0-9]+.[0-9]+-Beta-classic$'
+     - '[0-9]+.[0-9]+.[0-9]+-Beta-bc$'
+     - '[0-9]+.[0-9]+.[0-9]+-Alpha$'
+     - '[0-9]+.[0-9]+.[0-9]+-Alpha-classic$'
+     - '[0-9]+.[0-9]+.[0-9]+-Alpha-bc$'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
