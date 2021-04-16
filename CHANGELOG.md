@@ -4,9 +4,6 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.474-Release] 2021-04-16
-- In progress.
-
 ## [3.2.473-RC] 2021-04-15
 - Crazy changes.
 
