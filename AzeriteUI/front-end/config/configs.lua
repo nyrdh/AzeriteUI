@@ -2134,7 +2134,7 @@ RegisterLayout("BlizzardPopupStyling", "Azerite", {
 
 	-- This is the thin border around the buttons.
 	["ButtonBorder"] = { 
-		edgeFile = [[Interface\AddOns\BigInputBox\media\rounded-border-small.tga]], 
+		edgeFile = GetMedia("rounded-border-small"), 
 		edgeSize = 24,
 	},
 	["ButtonBorderOffsets"] = { 20, 20, 20, 20 },
@@ -2145,7 +2145,7 @@ RegisterLayout("BlizzardPopupStyling", "Azerite", {
 	-- where both this backdrop and its border are part of the button's background only.
 	["ButtonBackdrop"] = { 
 		bgFile = BLANK_TEXTURE,
-		edgeFile = [[Interface\AddOns\BigInputBox\media\rounded-backdrop-small.tga]], 
+		edgeFile = GetMedia("rounded-backdrop-small"), 
 		edgeSize = 24,
 		insets = { left = 24, right = 24, top = 24, bottom = 24 }
 	},
