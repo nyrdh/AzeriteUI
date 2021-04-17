@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 115)
+local LibTooltip = Wheel:Set("LibTooltip", 119)
 if (not LibTooltip) then
 	return
 end
@@ -105,6 +105,7 @@ LibTooltip.blizzardBackdrops = LibTooltip.blizzardBackdrops or {}
 
 -- Inherit the template too, we override the older methods farther down anyway
 LibTooltip.tooltipTemplate = LibTooltip.tooltipTemplate or LibTooltip:CreateFrame("GameTooltip", "GP_TooltipTemplate", "UICenter")
+LibTooltip.tooltipTemplate2nd = LibTooltip.tooltipTemplate2nd or {}
 
 -- Shortcuts
 local Defaults = LibTooltip.defaults
@@ -112,7 +113,8 @@ local Tooltips = LibTooltip.tooltips
 local TooltipsByName = LibTooltip.tooltipsByName
 local TooltipSettings = LibTooltip.tooltipSettings
 local TooltipDefaults = LibTooltip.tooltipDefaults
-local Tooltip = LibTooltip.tooltipTemplate
+--local Tooltip = LibTooltip.tooltipTemplate
+local Tooltip = LibTooltip.tooltipTemplate2nd
 local Visible = LibTooltip.visibleTooltips
 local Backdrops = LibTooltip.blizzardBackdrops
 
@@ -923,8 +925,8 @@ Tooltip.SetDefaultBarHeight = function(self, barHeight, barType)
 	self:UpdateBackdropLayout()
 end 
 
-Tooltip.SetBackdrop = function(self, backdrop)
-	check(backdrop, 1, "table", "nil")
+Tooltip.SetBackdrop = function(self, backdropTable)
+	check(backdropTable, 1, "table", "nil")
 	self:SetCValue("backdrop", backdropTable)
 	self:UpdateBackdropLayout()
 	self:UpdateBarLayout()
@@ -2592,7 +2594,13 @@ LibTooltip.CreateTooltip = function(self, name)
 	-- Note that the global frame name is unrelated to the tooltip name requested by the modules.
 	local tooltipName = "GP_GameTooltip_"..LibTooltip.numTooltips
 
-	local tooltip = setmetatable(LibTooltip:CreateFrame("Frame", tooltipName, "UICenter"), Tooltip_MT)
+	--local tooltip = setmetatable(LibTooltip:CreateFrame("Frame", tooltipName, "UICenter"), Tooltip_MT)
+	local tooltip = LibTooltip:CreateFrame("Frame", tooltipName, "UICenter")
+	for method,func in pairs(Tooltip) do
+		if (type(func) == "function") then
+			tooltip[method] = func
+		end
+	end
 	tooltip:Hide() -- keep it hidden while setting it up
 	tooltip:SetSize(160 + TEXT_INSET*2, TEXT_INSET*2) -- minimums
 	tooltip.needsReset = true -- flag indicating tooltip must be reset
