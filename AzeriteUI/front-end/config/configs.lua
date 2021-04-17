@@ -86,38 +86,12 @@ local BACKDROPS = {
 		["insets"] = { top = 17.25, bottom = 17.25, left = 17.25, right = 17.25 }
 	},
 
-	-- Popup window background
-	["Popup"] = {
-		["bgFile"] = BLANK_TEXTURE, tile = false, 
-		["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 23,  
-		["insets"] = { top = 7.5, bottom = 7.5, left = 7.5, right = 7.5 }
-	},
-
-	-- Popup window buttons
-	["PopupButton"] = {
-		["bgFile"] = BLANK_TEXTURE, tile = false, 
-		["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 18,
-		["insets"] = { left = 6, right = 6, top = 6, bottom = 6 }
-	},
-
-	-- Popup window input boxes
-	["PopupEditBox"] = {
-		["bgFile"] = BLANK_TEXTURE, tile = false, 
-		["edgeFile"] = BLANK_TEXTURE, edgeSize = 1,
-		["insets"] = { left = -6, right = -6, top = 0, bottom = 0 }
-	},
-
 	-- Tooltips and most standard frames
 	["Tooltips"] = {
 		["bgFile"] = [[Interface\Tooltips\UI-Tooltip-Background]], tile = false,
 		["edgeFile"] = GetMedia("better-blizzard-border-small-alternate"), edgeSize = 32, 
 		["insets"] = { left = 25, right = 25, top = 25, bottom = 25 }
 	}, 
-	--["Tooltips"] = {
-	--	["bgFile"] = BLANK_TEXTURE, tile = false,
-	--	["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 32, 
-	--	["insets"] = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
-	--}, 
 
 	["GenericBorder"] = {
 		["bgFile"] = nil, tile = false, 
@@ -2137,20 +2111,45 @@ RegisterLayoutVariation("BlizzardObjectivesTracker", "Legacy", "Azerite", (IsCla
 
 -- Blizzard Popup Styling
 RegisterLayout("BlizzardPopupStyling", "Azerite", {
-	["EditBoxBackdrop"] = BACKDROPS.PopupEditBox,
+	["EditBoxBackdrop"] = {
+		["bgFile"] = BLANK_TEXTURE, tile = false, 
+		["edgeFile"] = BLANK_TEXTURE, edgeSize = 1,
+		["insets"] = { left = -6, right = -6, top = 0, bottom = 0 }
+	},
 	["EditBoxBackdropColor"] = { 0, 0, 0, 0 },
 	["EditBoxBackdropBorderColor"] = { .15, .1, .05, 1 },
 	["EditBoxInsets"] = { 6, 6, 0, 0 },
-	["PopupBackdrop"] = BACKDROPS.Popup,
-	["PopupBackdropOffsets"] = { 4, 4, 4, 4 },
-	["PopupBackdropColor"] = { .05, .05, .05, .85 },
-	["PopupBackdropBorderColor"] = { 1, 1, 1, 1 },
-	["PopupButtonBackdrop"] = BACKDROPS.PopupButton,
-	["PopupButtonBackdropOffsets"] = { 20/3, 20/3, 20/3-2, 20/3-2 },
-	["PopupButtonBackdropColor"] = { .05, .05, .05, .75 },
-	["PopupButtonBackdropBorderColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] },
-	["PopupButtonBackdropHoverColor"] = { .1, .1, .1, .75 },
-	["PopupButtonBackdropHoverBorderColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3] },
+	["PopupBackdrop"] = {
+		bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
+		edgeFile = GetMedia("better-blizzard-border-small-alternate"),
+		tile = false, 
+		tileEdge = false, 
+		tileSize = nil,
+		edgeSize = 32,
+		insets = { left = 25, right = 25, top = 25, bottom = 25 } 
+	},
+	["PopupBackdropOffsets"] = { 25, 25, 25, 25 },
+	["PopupBackdropColor"] = { 0, 0, 0, .95 },
+	["PopupBackdropBorderColor"] = { .35, .35, .35, 1 },
+
+	["PopupButtonBorder"] = { 
+		edgeFile = [[Interface\AddOns\BigInputBox\media\rounded-border-small.tga]], 
+		edgeSize = 24,
+	},
+	["PopupButtonBackdropOffsets"] = { 20, 20, 20, 20 },
+	["PopupButtonBackdropColor"] = { .05, .05, .05, 1 },
+	["PopupButtonBackdropHoverColor"] = { .1, .1, .1, 1 },
+
+	["PopupButtonBackdrop"] = { 
+		bgFile = BLANK_TEXTURE,
+		edgeFile = [[Interface\AddOns\BigInputBox\media\rounded-backdrop-small.tga]], 
+		edgeSize = 24,
+		insets = { left = 20, right = 20, top = 20, bottom = 20 }
+	},
+	["PopupButtonBorderOffsets"] = { 20, 20, 20, 20 },
+	["PopupButtonBackdropBorderColor"] = { .25, .25, .25, 1 },
+	["PopupButtonBackdropHoverBorderColor"] = { .35, .35, .35, 1 },
+
 	["PopupVerticalOffset"] = 32
 })
 
