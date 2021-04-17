@@ -2120,7 +2120,7 @@ RegisterLayout("BlizzardPopupStyling", "Azerite", {
 	["EditBoxBackdropBorderColor"] = { .15, .1, .05, 1 },
 	["EditBoxInsets"] = { 6, 6, 0, 0 },
 	["PopupBackdrop"] = {
-		bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
+		bgFile = BLANK_TEXTURE,
 		edgeFile = GetMedia("better-blizzard-border-small-alternate"),
 		tile = false, 
 		tileEdge = false, 
@@ -2129,26 +2129,29 @@ RegisterLayout("BlizzardPopupStyling", "Azerite", {
 		insets = { left = 25, right = 25, top = 25, bottom = 25 } 
 	},
 	["PopupBackdropOffsets"] = { 25, 25, 25, 25 },
-	["PopupBackdropColor"] = { 0, 0, 0, .95 },
-	["PopupBackdropBorderColor"] = { .35, .35, .35, 1 },
+	["PopupBackdropColor"] = { 0, 0, 0, .85 },
+	["PopupBorderColor"] = { .25, .25, .25, 1 },
 
-	["PopupButtonBorder"] = { 
+	-- This is the thin border around the buttons.
+	["ButtonBorder"] = { 
 		edgeFile = [[Interface\AddOns\BigInputBox\media\rounded-border-small.tga]], 
 		edgeSize = 24,
 	},
-	["PopupButtonBackdropOffsets"] = { 20, 20, 20, 20 },
-	["PopupButtonBackdropColor"] = { .05, .05, .05, 1 },
-	["PopupButtonBackdropHoverColor"] = { .1, .1, .1, 1 },
+	["ButtonBorderOffsets"] = { 20, 20, 20, 20 },
+	["ButtonBorderColor"] = { .15, .15, .15, 1 },
+	["ButtonBorderColorHover"] = { .25, .25, .25, 1 },
 
-	["PopupButtonBackdrop"] = { 
+	-- This is a rounded backdrop fitting inside the button, 
+	-- where both this backdrop and its border are part of the button's background only.
+	["ButtonBackdrop"] = { 
 		bgFile = BLANK_TEXTURE,
 		edgeFile = [[Interface\AddOns\BigInputBox\media\rounded-backdrop-small.tga]], 
 		edgeSize = 24,
-		insets = { left = 20, right = 20, top = 20, bottom = 20 }
+		insets = { left = 24, right = 24, top = 24, bottom = 24 }
 	},
-	["PopupButtonBorderOffsets"] = { 20, 20, 20, 20 },
-	["PopupButtonBackdropBorderColor"] = { .25, .25, .25, 1 },
-	["PopupButtonBackdropHoverBorderColor"] = { .35, .35, .35, 1 },
+	["ButtonBackdropOffsets"] = { 20, 20, 20, 20 },
+	["ButtonBackdropColor"] = { .15, .15, .15, .1 },
+	["ButtonBackdropColorHover"] = { .35, .35, .35, .1 },
 
 	["PopupVerticalOffset"] = 32
 })
