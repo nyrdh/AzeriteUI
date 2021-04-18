@@ -23,28 +23,33 @@ local IsClassic = Private.IsClassic
 local IsRetail = Private.IsRetail
 
 -- Registries
-local Backdrops, Borders, Handled, Styled = {}, {}, {}, {}
+local Backdrops, Borders, HookedFrames, StyledFrames = {}, {}, {}, {}
 
 -- Utility Functions
 -----------------------------------------------------------
-local GetBackdrop = function(popup)
-	local backdrop = Backdrops[popup]
-	if (not backdrop) then
-		backdrop = CreateFrame("Frame", nil, popup, BackdropTemplateMixin and "BackdropTemplate")
-		backdrop:SetFrameLevel(popup:GetFrameLevel() - 1)
-		Backdrops[popup] = backdrop
-	end	
-	return backdrop
+local Place = function(frame, ...)
+	local offset, left, right, top, bottom = ...
+	frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + (offset or 0))
+	frame:ClearAllPoints()
+	frame:SetPoint("TOP", 0, top or 0)
+	frame:SetPoint("BOTTOM", 0, -bottom or 0)
+	frame:SetPoint("LEFT", -left or 0)
+	frame:SetPoint("RIGHT", right or 0)
+	return frame
 end
 
-local GetBorder = function(popup)
-	local backdrop = Borders[popup]
-	if (not backdrop) then
-		backdrop = CreateFrame("Frame", nil, popup, BackdropTemplateMixin and "BackdropTemplate")
-		backdrop:SetFrameLevel(popup:GetFrameLevel())
-		Borders[popup] = backdrop
+local GetBackdrop = function(frame, ...)
+	if (not Backdrops[frame]) then
+		Backdrops[frame] = Place(CreateFrame("Frame", nil, frame, BackdropTemplateMixin and "BackdropTemplate"), 0, ...)
 	end	
-	return backdrop
+	return Backdrops[frame]
+end
+
+local GetBorder = function(frame, ...)
+	if (not Borders[frame]) then
+		Borders[frame] = Place(CreateFrame("Frame", nil, frame, BackdropTemplateMixin and "BackdropTemplate"), 1, ...)
+	end	
+	return Borders[frame]
 end
 
 local DisableBlizzard = function(popup)
@@ -114,39 +119,32 @@ Module.StylePopup = function(self, popup)
 	if (not name) then
 		return
 	end
-	if (Styled[popup]) then
-		return
-	end
 
 	local layout = self.layout
 
-	-- Clear the blizzard content
-	DisableBlizzard(popup)
+	if (not StyledFrames[popup]) then
 
-	-- User styled backdrops
-	local backdrop = GetBackdrop(popup)
-	backdrop:SetBackdrop(layout.PopupBackdrop)
-	backdrop:SetBackdropColor(unpack(layout.PopupBackdropColor ))
-	backdrop:SetBackdropBorderColor(unpack(layout.PopupBorderColor))
-	backdrop:SetPoint("TOPLEFT", -layout.PopupBackdropOffsets[1], layout.PopupBackdropOffsets[3])
-	backdrop:SetPoint("BOTTOMRIGHT", layout.PopupBackdropOffsets[2], -layout.PopupBackdropOffsets[4])
+		DisableBlizzard(popup)
 
-	-- User styled buttons
+		local backdrop = GetBackdrop(popup, unpack(layout.PopupBackdropOffsets))
+		backdrop:SetBackdrop(layout.PopupBackdrop)
+		backdrop:SetBackdropColor(unpack(layout.PopupBackdropColor ))
+		backdrop:SetBackdropBorderColor(unpack(layout.PopupBorderColor))
+
+		StyledFrames[popup] = true
+	end
+
 	for _,buttonName in pairs({ "Button1", "Button2", "Button3", "Button4", "ExtraButton" }) do
+
 		local button = _G[name..buttonName]
-		if (button) then
-			local backdrop = GetBackdrop(button)
-			backdrop:SetFrameLevel(button:GetFrameLevel())
-			backdrop:SetPoint("TOPLEFT", -layout.ButtonBackdropOffsets[1], layout.ButtonBackdropOffsets[3])
-			backdrop:SetPoint("BOTTOMRIGHT", layout.ButtonBackdropOffsets[2], -layout.ButtonBackdropOffsets[4])
+		if (button) and (not StyledFrames[button]) then
+
+			local backdrop = GetBackdrop(button, unpack(layout.ButtonBackdropOffsets))
 			backdrop:SetBackdrop(layout.ButtonBackdrop)
 			backdrop:SetBackdropColor(unpack(layout.ButtonBackdropColor))
 			backdrop:SetBackdropBorderColor(unpack(layout.ButtonBackdropColor))
 			
-			local border = GetBorder(button)
-			border:SetFrameLevel(button:GetFrameLevel() + 1)
-			border:SetPoint("TOPLEFT", -layout.ButtonBorderOffsets[1], layout.ButtonBorderOffsets[3])
-			border:SetPoint("BOTTOMRIGHT", layout.ButtonBorderOffsets[2], -layout.ButtonBorderOffsets[4])
+			local border = GetBorder(button, unpack(layout.ButtonBorderOffsets))
 			border:SetBackdrop(layout.ButtonBorder)
 			border:SetBackdropBorderColor(unpack(layout.ButtonBorderColor))
 
@@ -161,6 +159,8 @@ Module.StylePopup = function(self, popup)
 				backdrop:SetBackdropBorderColor(unpack(layout.ButtonBackdropColor))
 				border:SetBackdropBorderColor(unpack(layout.ButtonBorderColor))
 			end)
+
+			StyledFrames[button] = true
 		end
 	end
 
@@ -173,16 +173,14 @@ Module.StylePopup = function(self, popup)
 		end
 		editbox:SetTextInsets(unpack(layout.EditBoxInsets))
 	end
-
-	Styled[popup] = true
 end
 
 Module.StylePopups = function(self)
 	for i = 1, STATICPOPUP_NUMDIALOGS do 
 		local popup = _G["StaticPopup"..i]
-		if (popup) and (not Handled[popup]) then
+		if (popup) and (not HookedFrames[popup]) then
 			self:SetHook(popup, "OnShow", function() self:StylePopup(popup) end, "GP_POPUP"..i.."_ONSHOW")
-			Handled[popup] = true
+			HookedFrames[popup] = true
 		end
 	end
 end
@@ -230,8 +228,8 @@ end
 
 Module.OnEnable = function(self)
 	self:StylePopups()
-	self:UpdatePopupAnchors()
 
 	-- The popups are re-anchored by blizzard, so we need to re-adjust them when they do.
 	self:SetSecureHook("StaticPopup_SetUpPosition", "UpdatePopupAnchors", "GP_POPUP_SET_ANCHORS")
+	self:UpdatePopupAnchors()
 end
