@@ -1,3 +1,6 @@
+local LibNumbers = Wheel("LibNumbers")
+assert(LibNumbers, "Money requires LibNumbers to be loaded.")
+
 -- Lua API
 local math_floor = math.floor
 local math_mod = math.fmod
@@ -6,6 +9,9 @@ local string_format = string.format
 -- WoW API
 local GetMoney = GetMoney
 local GetMoneyString = GetMoneyString
+
+-- Library API
+local prettify = LibNumbers:GetNumberPrettified()
 
 local Update = function(self, event, ...)
 	local element = self.Money
@@ -28,22 +34,7 @@ local Update = function(self, event, ...)
 	if (element.coinStringGold) and (element.coinStringSilver) and (element.coinStringCopper) then 
 		local gold = math_floor(money / (1e4))
 		if (gold > 0) then 
-			local goldString
-			if (gold >= 1e6) then
-				local millions =  math_floor(gold / 1e6)
-				local thousands = math_floor(gold - millions)
-				local remainder = math_mod(gold, 1e3)
-				goldString = string_format("%d %03d %03d", millions, thousands, remainder)
-			elseif (gold >= 1e3) then
-				local thousands = math_floor(gold / 1e3)
-				local remainder = math_mod(gold, 1e3)
-				goldString = string_format("%d %03d", thousands, remainder)
-			end
-			if (goldString) then
-				moneyString = string_format("%s%s", goldString, element.coinStringGold)
-			else
-				moneyString = string_format("%d%s", gold, element.coinStringGold)
-			end
+			moneyString = string_format("%s%s", prettify(gold), element.coinStringGold)
 		end
 
 		local silver = math_floor((money - (gold * 1e4)) / 100)

@@ -1,45 +1,21 @@
-local LibNumbers = Wheel:Set("LibNumbers", 1)
+local LibNumbers = Wheel:Set("LibNumbers", 3)
 if (not LibNumbers) then	
 	return
 end
 
 -- Lua API
-local _G = _G
-local assert = assert
-local date = date
-local debugstack = debugstack
-local error = error
 local math_floor = math.floor
+local math_mod = math.fmod
 local pairs = pairs
-local select = select
 local string_format = string.format
-local string_gsub = string.gsub
-local string_join = string.join
-local string_match = string.match
 local tonumber = tonumber
 local tostring = tostring
-local type = type
 
 -- Game locale constant
 local gameLocale = GetLocale()
 
 -- Library registries
 LibNumbers.embeds = LibNumbers.embeds or {}
-
--- Utility functions
----------------------------------------------------------------------	
--- Syntax check 
-local check = function(value, num, ...)
-	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
-	for i = 1,select("#", ...) do
-		if type(value) == select(i, ...) then 
-			return 
-		end
-	end
-	local types = string_join(", ", ...)
-	local name = string_match(debugstack(2, 2, 0), ": in function [`<](.-)['>]")
-	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
-end
 
 -- Number abbreviations
 ---------------------------------------------------------------------	
@@ -97,6 +73,37 @@ if (gameLocale == "zhCN") then
 	end
 end 
 
+-- Number formatting
+---------------------------------------------------------------------	
+local prettify = function(value)
+	value = tonumber(value) or 0
+	if (value > 0) then 
+		local valueString
+		if (value >= 1e9) then
+			local billions =  math_floor(value / 1e9)
+			local millions =  math_floor((value - billions*1e9) / 1e6)
+			local thousands = math_floor((value - billions*1e9 - millions*1e6) / 1e3)
+			local remainder = math_mod(value, 1e3)
+			valueString = string_format("%d %03d %03d %03d", billions, millions, thousands, remainder)
+		elseif (value >= 1e6) then
+			local millions =  math_floor(value / 1e6)
+			local thousands = math_floor((value - millions*1e6) / 1e3)
+			local remainder = math_mod(value, 1e3)
+			valueString = string_format("%d %03d %03d", millions, thousands, remainder)
+		elseif (value >= 1e3) then
+			local thousands = math_floor(value / 1e3)
+			local remainder = math_mod(value, 1e3)
+			valueString = string_format("%d %03d", thousands, remainder)
+		else
+			return value..""
+		end
+		return valueString
+	end
+	return value..""
+end
+
+-- Public API
+---------------------------------------------------------------------	
 LibNumbers.GetNumberAbbreviationShort = function(self)
 	return short
 end
@@ -105,9 +112,14 @@ LibNumbers.GetNumberAbbreviationLong = function(self)
 	return large
 end
 
+LibNumbers.GetNumberPrettified = function(self)
+	return prettify
+end
+
 local embedMethods = {
 	GetNumberAbbreviationShort = true,
-	GetNumberAbbreviationLong = true
+	GetNumberAbbreviationLong = true,
+	GetNumberPrettified = true
 }
 
 LibNumbers.Embed = function(self, target)
