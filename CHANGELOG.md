@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [3.2.474-RC] 2021-04-18
+### Added
+- Added menu options to toggle the Legacy theme's party- and raid frames! Now you can use Legacy with your favorite group frame addon!
+
 ### Changed
 - Gave the Blizzard popups a slight facelift. They are now darker and more transparent, and just allround more beautiful. Like me. 
 
