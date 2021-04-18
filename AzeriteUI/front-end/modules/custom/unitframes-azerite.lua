@@ -63,6 +63,7 @@ local GetConfig = Private.GetConfig
 local GetDefaults = Private.GetDefaults
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
+local GetLayoutID = Private.GetLayoutID
 local IsClassic = Private.IsClassic
 local IsRetail = Private.IsRetail
 local IsWinterVeil = Private.IsWinterVeil
@@ -2279,62 +2280,52 @@ end
 -- Player
 -----------------------------------------------------------
 UnitFramePlayer.OnInit = function(self)
-	-- This is our new system. 
-	-- If it's present in the current theme,
-	-- bail out and process no further. 
-	if (Private.HasSchematic("ModuleForge::UnitFrames")) then
+	local theme = GetLayoutID()
+	if (theme ~= "Azerite") then
 		return self:SetUserDisabled(true)
 	end
 
-	if (Private.HasSchematic("UnitForge::Player")) then
-		self.db = GetConfig(self:GetName())
-		self.frame = self:SpawnUnitFrame("player", "UICenter", function(self, unit) 
-			self:Forge(Private.GetSchematic("UnitForge::Player")) 
-		end) 
-		return
-	else
-		self.db = GetConfig(self:GetName())
-		self.layout = GetLayout(self:GetName())
-		if (not self.layout) then
-			return self:SetUserDisabled(true)
-		end
+	self.db = GetConfig(self:GetName())
+	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
+	end
 
-		-- How this is called:
-		-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
-		self.frame = self:SpawnUnitFrame("player", "UICenter", UnitStyles.StylePlayerFrame, self.layout, self) 
+	-- How this is called:
+	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
+	self.frame = self:SpawnUnitFrame("player", "UICenter", UnitStyles.StylePlayerFrame, self.layout, self) 
 
-		-- Apply the aura filter
-		local auras = self.frame.Auras
-		if (auras) then
-			--local filterMode = Core.db.auraFilter
-			--auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
-			--auras.enableSpamMode = filterMode == "spam"
-			local auraFilterLevel = Core.db.auraFilterLevel
-			auras.enableSlackMode = Private.IsForcingSlackAuraFilterMode() or (auraFilterLevel == 1) or (auraFilterLevel == 2) 
-			auras.enableSpamMode = (auraFilterLevel == 2)
-			auras:ForceUpdate()
-		end
+	-- Apply the aura filter
+	local auras = self.frame.Auras
+	if (auras) then
+		--local filterMode = Core.db.auraFilter
+		--auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
+		--auras.enableSpamMode = filterMode == "spam"
+		local auraFilterLevel = Core.db.auraFilterLevel
+		auras.enableSlackMode = Private.IsForcingSlackAuraFilterMode() or (auraFilterLevel == 1) or (auraFilterLevel == 2) 
+		auras.enableSpamMode = (auraFilterLevel == 2)
+		auras:ForceUpdate()
+	end
 
-		self.frame.EnableManaOrb = function()
-			if (self.frame.ExtraPower) and (self.frame.Power) then
-				self.frame.Power.ignoredResource = self.layout.PowerIgnoredResource
-				self.frame.Power:ForceUpdate()
-				self.frame:EnableElement("ExtraPower")
-				self.frame.ExtraPower:ForceUpdate()
-			end
+	self.frame.EnableManaOrb = function()
+		if (self.frame.ExtraPower) and (self.frame.Power) then
+			self.frame.Power.ignoredResource = self.layout.PowerIgnoredResource
+			self.frame.Power:ForceUpdate()
+			self.frame:EnableElement("ExtraPower")
+			self.frame.ExtraPower:ForceUpdate()
 		end
+	end
 
-		self.frame.DisableManaOrb = function()
-			if (self.frame.ExtraPower) and (self.frame.Power) then
-				self.frame.Power.ignoredResource = nil
-				self.frame.Power:ForceUpdate()
-				self.frame:DisableElement("ExtraPower")
-			end
+	self.frame.DisableManaOrb = function()
+		if (self.frame.ExtraPower) and (self.frame.Power) then
+			self.frame.Power.ignoredResource = nil
+			self.frame.Power:ForceUpdate()
+			self.frame:DisableElement("ExtraPower")
 		end
+	end
 
-		if (not self.db.enablePlayerManaOrb) then
-			self.frame:DisableManaOrb()
-		end
+	if (not self.db.enablePlayerManaOrb) then
+		self.frame:DisableManaOrb()
 	end
 
 	-- Create a secure proxy updater for the menu system

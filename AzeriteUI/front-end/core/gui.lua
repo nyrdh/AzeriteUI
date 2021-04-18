@@ -1740,6 +1740,28 @@ Module.CreateMenuTable = function(self)
 				proxyModule = "UnitFrameRaid"
 			})
 		end
+	elseif (IsLegacy) then
+		if (Core:IsModuleAvailable("ModuleForge::UnitFrames")) then 
+			hasUnits = true
+			table_insert(UnitFrameMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["Party Frames"]),
+				disabledTitle = L_DISABLED:format(L["Party Frames"]),
+				type = "TOGGLE_VALUE", 
+				configDB = "ModuleForge::UnitFrames", configKey = "Legacy::EnablePartyFrames", 
+				proxyModule = "ModuleForge::UnitFrames"
+			})
+		end
+
+		if (Core:IsModuleAvailable("ModuleForge::UnitFrames")) then 
+			hasUnits = true
+			table_insert(UnitFrameMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["Raid Frames"]),
+				disabledTitle = L_DISABLED:format(L["Raid Frames"]),
+				type = "TOGGLE_VALUE", 
+				configDB = "ModuleForge::UnitFrames", configKey = "Legacy::EnableRaidFrames", 
+				proxyModule = "ModuleForge::UnitFrames"
+			})
+		end
 	end
 
 	if (IsAzerite) then

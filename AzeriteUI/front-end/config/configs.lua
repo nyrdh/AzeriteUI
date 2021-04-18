@@ -47,9 +47,6 @@ local GetAuraFilter = Private.GetAuraFilter
 local IsClassic = Private.IsClassic
 local IsRetail = Private.IsRetail
 
-local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
-local NEW = "*"
-
 ------------------------------------------------
 -- Utility Functions
 ------------------------------------------------
@@ -58,48 +55,6 @@ local deg2rad = math_pi / 180
 local degreesToRadians = function(degrees)
 	return degrees*deg2rad
 end 
-
-local getTimeStrings = function(h, m, suffix, useStandardTime, abbreviateSuffix)
-	if (useStandardTime) then 
-		return "%.0f:%02.0f |cff888888%s|r", h, m, abbreviateSuffix and string_match(suffix, "^.") or suffix
-	else 
-		return "%02.0f:%02.0f", h, m
-	end 
-end 
-
-------------------------------------------------
--- Backdrops
-------------------------------------------------
--- Just all the backdrops gathered in one place
-local BACKDROPS = {
-
-	-- Most unit frame auras
-	["AuraBorder"] = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
-
-	-- Nameplate auras and other small frames
-	["AuraBorderSmall"] = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
-
-	-- Blizzard micro menu
-	["ConfigWindow"] = {
-		["bgFile"] = BLANK_TEXTURE,
-		["edgeFile"] = GetMedia("tooltip_border"), edgeSize = 23, 
-		["insets"] = { top = 17.25, bottom = 17.25, left = 17.25, right = 17.25 }
-	},
-
-	-- Tooltips and most standard frames
-	["Tooltips"] = {
-		["bgFile"] = [[Interface\Tooltips\UI-Tooltip-Background]], tile = false,
-		["edgeFile"] = GetMedia("better-blizzard-border-small-alternate"), edgeSize = 32, 
-		["insets"] = { left = 25, right = 25, top = 25, bottom = 25 }
-	}, 
-
-	["GenericBorder"] = {
-		["bgFile"] = nil, tile = false, 
-		["edgeFile"] = GetMedia("tooltip_border_hex"), edgeSize = 32, 
-		["insets"] = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
-	}
-
-}
 
 ------------------------------------------------
 -- Module Callbacks
@@ -111,7 +66,7 @@ local GetBorder = function(self, edgeFile, edgeSize, bgFile, bgInsets, offsetX, 
 	border:SetPoint("TOPLEFT", -(offsetX or 6), (offsetY or 8))
 	border:SetPoint("BOTTOMRIGHT", (offsetX or 6), -(offsetY or 8))
 	border:SetBackdrop({
-		["bgFile"] = bgFile or BLANK_TEXTURE,
+		["bgFile"] = bgFile or [[Interface\ChatFrame\ChatFrameBackground]],
 		["edgeFile"] = edgeFile or GetMedia("tooltip_border_hex"),
 		["edgeSize"] = 32, 
 		["tile"] = false, 
@@ -212,7 +167,11 @@ local Core_MenuButton_PostUpdate = function(self)
 end
 
 local Minimap_Clock_OverrideValue = function(element, h, m, suffix)
-	element:SetFormattedText(getTimeStrings(h, m, suffix, element.useStandardTime, true))
+	if (element.useStandardTime) then 
+		element:SetFormattedText("%.0f:%02.0f |cff888888%s|r", h, m, string_match(suffix, "^."))
+	else
+		element:SetFormattedText("%02.0f:%02.0f", h, m)
+	end
 end 
 
 local Minimap_Coordinates_OverrideValue = function(element, x, y)
@@ -263,7 +222,7 @@ local Minimap_AP_OverrideValue = function(element, min, max, level)
 				-- removing the percentage sign
 				percent:SetFormattedText("%.0f", percValue)
 			else 
-				percent:SetText(NEW) 
+				percent:SetText("*") 
 			end 
 		else 
 			percent:SetText("ap") 
@@ -299,10 +258,10 @@ local Minimap_Rep_OverrideValue = function(element, current, min, max, factionNa
 				-- removing the percentage sign
 				percent:SetFormattedText("%.0f", percValue)
 			else 
-				percent:SetText(NEW) 
+				percent:SetText("*") 
 			end 
 		else 
-			percent:SetText(NEW) 
+			percent:SetText("*") 
 		end 
 	end 
 	if element.colorValue then 
@@ -331,10 +290,10 @@ local Minimap_XP_OverrideValue = function(element, min, max, restedLeft, restedT
 				-- removing the percentage sign
 				percent:SetFormattedText("%.0f", percValue)
 			else 
-				percent:SetText(NEW)
+				percent:SetText("*")
 			end 
 		else 
-			percent:SetText(NEW)
+			percent:SetText("*")
 		end 
 	end 
 	if (element.colorValue) then 
@@ -1513,18 +1472,6 @@ end
 ------------------------------------------------------------------
 -- UnitFrame Config Templates
 ------------------------------------------------------------------
--- Table containing common values for the unit frame templates.
-local Constant = {
-	["SmallAuraSize"] = 30, 
-	["SmallBar"] = { 112, 11 }, 
-	["SmallBarTexture"] = GetMedia("cast_bar"),
-	["SmallFrame"] = { 136, 47 },
-	["RaidBar"] = { 80 *.94, 14  *.94}, 
-	["RaidFrame"] = { 110 *.94, 30 *.94 }, 
-	["TinyBar"] = { 80, 14 }, 
-	["TinyBarTexture"] = GetMedia("cast_bar"),
-	["TinyFrame"] = { 130, 30 }
-}
 
 -- Used for Pet, also the base for the variants below.
 local Template_SmallFrame = {
@@ -1537,11 +1484,11 @@ local Template_SmallFrame = {
 	["CastBarNameJustifyV"] = "MIDDLE",
 	["CastBarNameParent"] = "Health",
 	["CastBarNamePlace"] = { "CENTER", 0, 1 },
-	["CastBarNameSize"] = { Constant.SmallBar[1] - 20, Constant.SmallBar[2] }, 
+	["CastBarNameSize"] = { 92, 11 }, 
 	["CastBarOrientation"] = "RIGHT", 
 	["CastBarPlace"] = { "CENTER", 0, 0 },
 	CastBarPostUpdate =	SmallFrame_BarTextPostUpdate,
-	["CastBarSize"] = Constant.SmallBar,
+	["CastBarSize"] = { 112, 11 },
 	["CastBarSmoothingFrequency"] = .15,
 	["CastBarSmoothingMode"] = "bezier-fast-in-slow-out", 
 	["CastBarSparkMap"] = {
@@ -1562,14 +1509,14 @@ local Template_SmallFrame = {
 			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
-	["CastBarTexture"] = Constant.SmallBarTexture, 
+	["CastBarTexture"] = GetMedia("cast_bar"), 
 	["FrameLevel"] = 20, 
 	["HealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
 	["HealthBackdropDrawLayer"] = { "BACKGROUND", -1 },
 	["HealthBackdropPlace"] = { "CENTER", 1, -2 },
 	["HealthBackdropSize"] = { 193,93 },
 	["HealthBackdropTexture"] = GetMedia("cast_back"), 
-	["HealthBarTexture"] = Constant.SmallBarTexture, 
+	["HealthBarTexture"] = GetMedia("cast_bar"), 
 	["HealthBarOrientation"] = "RIGHT", 
 	["HealthBarPostUpdate"] = SmallFrame_BarTextPostUpdate, 
 	["HealthBarSetFlippedHorizontally"] = false, 
@@ -1598,10 +1545,10 @@ local Template_SmallFrame = {
 	["HealthPercentJustifyV"] = "MIDDLE", 
 	["HealthPercentPlace"] = { "CENTER", 0, 0 },
 	["HealthPlace"] = { "CENTER", 0, 0 }, 
-	["HealthSize"] = Constant.SmallBar,
+	["HealthSize"] = { 112, 11 },
 	["HealthSmoothingFrequency"] = .2, 
 	["HealthSmoothingMode"] = "bezier-fast-in-slow-out", 
-	["Size"] = Constant.SmallFrame,
+	["Size"] = { 136, 47 },
 	["TargetHighlightDrawLayer"] = { "BACKGROUND", 0 },
 	["TargetHighlightParent"] = "Health", 
 	["TargetHighlightPlace"] = { "CENTER", 1, -2 },
@@ -1615,22 +1562,22 @@ local Template_SmallFrame = {
 local Template_SmallFrame_Auras = setmetatable({
 	["Aura_PostCreateButton"] = UnitFrame_Aura_PostCreateButton,
 	["Aura_PostUpdateButton"] = UnitFrame_Aura_PostUpdateButton,
-	["AuraBorderBackdrop"] = BACKDROPS.AuraBorder,
+	["AuraBorderBackdrop"] = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
 	["AuraBorderBackdropColor"] = { 0, 0, 0, 0 },
 	["AuraBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
 	["AuraBorderFramePlace"] = { "CENTER", 0, 0 }, 
-	["AuraBorderFrameSize"] = { Constant.SmallAuraSize + 14, Constant.SmallAuraSize + 14 },
+	["AuraBorderFrameSize"] = { 44, 44 },
 	["AuraCountColor"] = { Colors.normal[1], Colors.normal[2], Colors.normal[3], .85 },
 	["AuraCountFont"] = GetFont(12, true),
 	["AuraCountPlace"] = { "BOTTOMRIGHT", 9, -6 },
-	["AuraFramePlace"] = { "LEFT", Constant.SmallFrame[1] + 13, -1 },
-	["AuraFrameSize"] = { Constant.SmallAuraSize*6 + 4*5, Constant.SmallAuraSize },
+	["AuraFramePlace"] = { "LEFT", 149, -1 },
+	["AuraFrameSize"] = { 200, 30 },
 	["AuraIconPlace"] = { "CENTER", 0, 0 },
-	["AuraIconSize"] = { Constant.SmallAuraSize - 6, Constant.SmallAuraSize - 6 },
+	["AuraIconSize"] = { 24, 24 },
 	["AuraIconTexCoord"] = { 5/64, 59/64, 5/64, 59/64 },
 	["AuraProperties"] = {
 		["auraHeight"] = nil, 
-		["auraSize"] = Constant.SmallAuraSize, 
+		["auraSize"] = 30, 
 		["auraWidth"] = nil, 
 		["debuffsFirst"] = false, 
 		["disableMouse"] = false, 
@@ -1663,10 +1610,10 @@ local Template_SmallFrameReversed = setmetatable({
 
 -- Used for Boss.
 local Template_SmallFrameReversed_Auras = setmetatable({
-	["AuraFramePlace"] = { "RIGHT", -(Constant.SmallFrame[1] + 13), -1 },
+	["AuraFramePlace"] = { "RIGHT", -149, -1 },
 	["AuraProperties"] = {
 		["auraHeight"] = nil, 
-		["auraSize"] = Constant.SmallAuraSize, 
+		["auraSize"] = 30, 
 		["auraWidth"] = nil, 
 		["debuffsFirst"] = false, 
 		["disableMouse"] = false, 
@@ -1694,13 +1641,13 @@ local Template_SmallFrameReversed_Auras = setmetatable({
 
 -- Used for Raid and Party frames.
 local Template_TinyFrame = {
-	["Size"] = Constant.TinyFrame,
+	["Size"] = { 130, 30 },
 
 	["RangeOutsideAlpha"] = .6, -- was .35, but that's too hard to see
 
 	["HealthPlace"] = { "BOTTOM", 0, 0 }, 
-	["HealthSize"] = Constant.TinyBar,  -- health size
-	["HealthBarTexture"] = Constant.TinyBarTexture, 
+	["HealthSize"] = { 80, 14 },  -- health size
+	["HealthBarTexture"] = GetMedia("cast_bar"), 
 	["HealthBarOrientation"] = "RIGHT", -- bar orientation
 	["HealthBarSetFlippedHorizontally"] = false, 
 	["HealthBarSparkMap"] = {
@@ -1727,7 +1674,7 @@ local Template_TinyFrame = {
 	["HealthBackdropColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
 
 	["CastBarPlace"] = { "BOTTOM", 0, 0 },
-	["CastBarSize"] = Constant.TinyBar,
+	["CastBarSize"] = { 80, 14 },
 	["CastBarOrientation"] = "RIGHT", 
 	["CastBarSmoothingMode"] = "bezier-fast-in-slow-out", 
 	["CastBarSmoothingFrequency"] = .15,
@@ -1745,7 +1692,7 @@ local Template_TinyFrame = {
 			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
-	["CastBarTexture"] = Constant.TinyBarTexture, 
+	["CastBarTexture"] = GetMedia("cast_bar"), 
 	["CastBarColor"] = { 1, 1, 1, .15 },
 
 	["TargetHighlightParent"] = "Health", 
@@ -1755,20 +1702,6 @@ local Template_TinyFrame = {
 	["TargetHighlightDrawLayer"] = { "BACKGROUND", 0 },
 	["TargetHighlightShowTarget"] = true, TargetHighlightTargetColor = { 255/255, 229/255, 109/255, 1 }, 
 	["TargetHighlightShowFocus"] = true, TargetHighlightFocusColor = { 44/255, 165/255, 255/255, 1 }, 
-}
-
--- Because it's chaotic having these all over the place.
-local FloaterSlots = {
-	-- Bottomright floaters
-	-- These used to be center right, but was ultimately in the way of gameplay.
-	["VehicleSeatSelector"] = { "CENTER", "UICenter", "BOTTOMRIGHT", -480, 210 }, -- "CENTER", "UICenter", "CENTER", 424, 0
-	["Durability"] = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 }, -- "CENTER", "UICenter", "CENTER", 190, 0
-
-	-- Bottom center floaters
-	-- Below these you'll find 2 potentional rows of actionbuttons, and the petbar.
-	["Archeology"] = { "BOTTOM", "UICenter", "BOTTOM", 0, 390 },
-	["AltPower"] = { "BOTTOM", "UICenter", "BOTTOM", 0, 340 }, -- "CENTER", "UICenter", "CENTER", 0, -(133 + 56)
-	["CastBar"] = { "BOTTOM", "UICenter", "BOTTOM", 0, 290 }, -- CENTER, 0, -133
 }
 
 ------------------------------------------------
@@ -1870,7 +1803,6 @@ RegisterLayout("BlizzardFloaterHUD", "Azerite", {
 	["ExtraActionButtonCountJustifyH"] = "CENTER",
 	["ExtraActionButtonCountJustifyV"] = "BOTTOM",
 	["ExtraActionButtonCountPlace"] = { "BOTTOMRIGHT", -3, 3 },
-	["ExtraActionButtonFramePlace"] = FloaterSlots.ExtraButton,
 	["ExtraActionButtonIconSize"] = { 44, 44 },
 	["ExtraActionButtonIconMaskTexture"] = GetMedia("actionbutton-mask-circular"),  
 	["ExtraActionButtonIconPlace"] = { "CENTER", 0, 0 },
@@ -1887,9 +1819,9 @@ RegisterLayout("BlizzardFloaterHUD", "Azerite", {
 	["ExtraActionButtonSize"] = { 64, 64 },
 	["QuestTimerFramePlace"] = { "CENTER", UIParent, "CENTER", 0, 220 },
 	["TalkingHeadFramePlace"] = { "TOP", "UICenter", "TOP", 0, -(60 + 40) },
-	["ArcheologyDigsiteProgressBarPlace"] = FloaterSlots.Archeology,
+	["ArcheologyDigsiteProgressBarPlace"] = { "BOTTOM", "UICenter", "BOTTOM", 0, 390 },
 
-	["VehicleSeatIndicatorPlace"] = FloaterSlots.VehicleSeatSelector,
+	["VehicleSeatIndicatorPlace"] = { "CENTER", "UICenter", "BOTTOMRIGHT", -480, 210 },
 	["ZoneAbilityButtonBorderColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
 	["ZoneAbilityButtonBorderDrawLayer"] = { "BORDER", 1 },
 	["ZoneAbilityButtonBorderPlace"] = { "CENTER", 0, 0 },
@@ -1905,7 +1837,6 @@ RegisterLayout("BlizzardFloaterHUD", "Azerite", {
 	["ZoneAbilityButtonCountPlace"] = { "BOTTOMRIGHT", -3, 3 },
 	["ZoneAbilityButtonCountJustifyH"] = "CENTER",
 	["ZoneAbilityButtonCountJustifyV"] = "BOTTOM",
-	["ZoneAbilityButtonFramePlace"] = FloaterSlots.ExtraButton,
 	["ZoneAbilityButtonIconMaskTexture"] = GetMedia("actionbutton-mask-circular"),
 	["ZoneAbilityButtonIconPlace"] = { "CENTER", 0, 0 },
 	["ZoneAbilityButtonIconSize"] = { 44, 44 },
@@ -1941,7 +1872,11 @@ RegisterLayout("BlizzardMicroMenu", "Azerite", {
 	["ButtonFontColor"] = { 0, 0, 0 }, 
 	["ButtonFontShadowColor"] = { 1, 1, 1, .5 },
 	["ButtonFontShadowOffset"] = { 0, -.85 },
-	["ConfigWindowBackdrop"] = BACKDROPS.ConfigWindow,
+	["ConfigWindowBackdrop"] = {
+		["bgFile"] = [[Interface\ChatFrame\ChatFrameBackground]],
+		["edgeFile"] = GetMedia("tooltip_border"), edgeSize = 23, 
+		["insets"] = { top = 17.25, bottom = 17.25, left = 17.25, right = 17.25 }
+	},
 	["MenuButton_PostCreate"] = Core_MenuButton_PostCreate,
 	["MenuButton_PostUpdate"] = Core_MenuButton_PostUpdate, 
 	["MenuButtonNormalColor"] = { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3] }, 
@@ -2040,15 +1975,15 @@ RegisterLayoutVariation("BlizzardObjectivesTracker", "Legacy", "Azerite", (IsCla
 -- Blizzard Popup Styling
 RegisterLayout("BlizzardPopupStyling", "Azerite", {
 	["EditBoxBackdrop"] = {
-		["bgFile"] = BLANK_TEXTURE, tile = false, 
-		["edgeFile"] = BLANK_TEXTURE, edgeSize = 1,
+		["bgFile"] = [[Interface\ChatFrame\ChatFrameBackground]], tile = false, 
+		["edgeFile"] = [[Interface\ChatFrame\ChatFrameBackground]], edgeSize = 1,
 		["insets"] = { left = -6, right = -6, top = 0, bottom = 0 }
 	},
 	["EditBoxBackdropColor"] = { 0, 0, 0, 0 },
 	["EditBoxBackdropBorderColor"] = { .15, .1, .05, 1 },
 	["EditBoxInsets"] = { 6, 6, 0, 0 },
 	["PopupBackdrop"] = {
-		bgFile = BLANK_TEXTURE,
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
 		edgeFile = GetMedia("better-blizzard-border-small-alternate"),
 		tile = false, 
 		tileEdge = false, 
@@ -2072,7 +2007,7 @@ RegisterLayout("BlizzardPopupStyling", "Azerite", {
 	-- This is a rounded backdrop fitting inside the button, 
 	-- where both this backdrop and its border are part of the button's background only.
 	["ButtonBackdrop"] = { 
-		bgFile = BLANK_TEXTURE,
+		bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
 		edgeFile = GetMedia("rounded-backdrop-small"), 
 		edgeSize = 24,
 		insets = { left = 24, right = 24, top = 24, bottom = 24 }
@@ -2086,7 +2021,11 @@ RegisterLayout("BlizzardPopupStyling", "Azerite", {
 
 -- Blizzard Tooltips
 RegisterLayout("BlizzardTooltips", "Azerite", {
-	["TooltipBackdrop"] = BACKDROPS.Tooltips,
+	["TooltipBackdrop"] = {
+		["bgFile"] = [[Interface\Tooltips\UI-Tooltip-Background]], tile = false,
+		["edgeFile"] = GetMedia("better-blizzard-border-small-alternate"), edgeSize = 32, 
+		["insets"] = { left = 25, right = 25, top = 25, bottom = 25 }
+	},
 	["TooltipBackdropBorderColor"] = { 1, 1, 1, 1 },
 	["TooltipBackdropColor"] = { .05, .05, .05, .85 },
 	["TooltipStatusBarTexture"] = GetMedia("statusbar-dark")
@@ -2128,7 +2067,7 @@ RegisterLayout("ChatFilters", "Azerite", {
 
 -- Floaters. Durability only currently. 
 RegisterLayout("Durability", "Azerite", {
-	["Place"] = FloaterSlots.Durability
+	["Place"] = { "CENTER", "UICenter", "BOTTOMRIGHT", -360, 190 }
 })
 
 -- Group Leader Tools
@@ -2500,7 +2439,7 @@ RegisterLayout("NamePlates", "Azerite", {
 	["PostCreateAuraButton"] = NamePlates_Auras_PostCreateButton,
 	["PostUpdateAuraButton"] = NamePlates_Auras_PostUpdateButton,
 	["AuraAnchor"] = "Health", 
-	["AuraBorderBackdrop"] = BACKDROPS.AuraBorderSmall,
+	["AuraBorderBackdrop"] = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
 	["AuraBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
 	["AuraBorderBackdropColor"] = { 0, 0, 0, 0 },
 	["AuraBorderFramePlace"] = { "CENTER", 0, 0 }, 
@@ -2785,7 +2724,11 @@ RegisterLayout("NamePlates", "Azerite", {
 
 -- Custom Tooltips
 RegisterLayout("Tooltips", "Azerite", {
-	["TooltipBackdrop"] = BACKDROPS.Tooltips,
+	["TooltipBackdrop"] = {
+		["bgFile"] = [[Interface\Tooltips\UI-Tooltip-Background]], tile = false,
+		["edgeFile"] = GetMedia("better-blizzard-border-small-alternate"), edgeSize = 32, 
+		["insets"] = { left = 25, right = 25, top = 25, bottom = 25 }
+	},
 	["TooltipBackdropOffsets"] = { 25, 25, 25, 25 },
 	["TooltipBackdropBorderColor"] = { .35, .35, .35, 1 },
 	["TooltipBackdropColor"] = { 0, 0, 0, .95 },
@@ -2816,7 +2759,7 @@ RegisterLayout("Tooltips", "Azerite", {
 RegisterLayout("UnitFramePlayer", "Azerite", { 
 	["Aura_PostCreateButton"] = UnitFrame_Aura_PostCreateButton,
 	["Aura_PostUpdateButton"] = UnitFrame_Aura_PostUpdateButton,
-	["AuraBorderBackdrop"] = BACKDROPS.AuraBorder,
+	["AuraBorderBackdrop"] = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
 	["AuraBorderBackdropColor"] = { 0, 0, 0, 0 },
 	["AuraBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
 	["AuraBorderFramePlace"] = { "CENTER", 0, 0 }, 
@@ -3156,8 +3099,8 @@ RegisterLayout("UnitFramePlayerHUD", "Azerite", {
 	["CastBarNameJustifyH"] = "CENTER",
 	["CastBarNameJustifyV"] = "MIDDLE",
 	["CastBarNamePlace"] = { "TOP", 0, -(12 + 14) },
-	["CastBarPlace"] = FloaterSlots.CastBar,
-	["CastBarSize"] = Constant.SmallBar,
+	["CastBarPlace"] = { "BOTTOM", "UICenter", "BOTTOM", 0, 290 },
+	["CastBarSize"] = { 112, 11 },
 	["CastBarShieldColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
 	["CastBarShieldDrawLayer"] = { "BACKGROUND", 1 }, 
 	["CastBarShieldPlace"] = { "CENTER", 1, -2 }, 
@@ -3177,9 +3120,9 @@ RegisterLayout("UnitFramePlayerHUD", "Azerite", {
 			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
-	["CastBarSpellQueuePlace"] = FloaterSlots.CastBar, 
-	["CastBarSpellQueueSize"] = Constant.SmallBar,
-	["CastBarSpellQueueTexture"] = Constant.SmallBarTexture, 
+	["CastBarSpellQueuePlace"] = { "BOTTOM", "UICenter", "BOTTOM", 0, 290 }, 
+	["CastBarSpellQueueSize"] = { 112, 11 },
+	["CastBarSpellQueueTexture"] = GetMedia("cast_bar"), 
 	["CastBarSpellQueueColor"] = { 1, 1, 1, .5 },
 	["CastBarSpellQueueOrientation"] = "LEFT",
 	["CastBarSpellQueueSparkMap"] = {
@@ -3196,7 +3139,7 @@ RegisterLayout("UnitFramePlayerHUD", "Azerite", {
 			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
-	["CastBarTexture"] = Constant.SmallBarTexture, 
+	["CastBarTexture"] = GetMedia("cast_bar"), 
 	["ClassPowerAlphaWhenEmpty"] = .25, -- .5 
 	["ClassPowerAlphaWhenOutOfCombat"] = 1,
 	["ClassPowerAlphaWhenOutOfCombatRunes"] = .75, -- .5,  
@@ -3225,8 +3168,8 @@ RegisterLayout("UnitFramePlayerHUD", "Azerite", {
 	["PlayerAltPowerBarNameJustifyV"] = "MIDDLE",
 	["PlayerAltPowerBarNamePlace"] = { "TOP", 0, -(12 + 14) },
 	["PlayerAltPowerBarOrientation"] = "RIGHT",
-	["PlayerAltPowerBarPlace"] = FloaterSlots.AltPower,
-	["PlayerAltPowerBarSize"] = Constant.SmallBar,
+	["PlayerAltPowerBarPlace"] = { "BOTTOM", "UICenter", "BOTTOM", 0, 340 },
+	["PlayerAltPowerBarSize"] = { 112, 11 },
 	["PlayerAltPowerBarSparkMap"] = {
 		["top"] = {
 			{ ["keyPercent"] =   0/128, offset = -16/32 },
@@ -3241,7 +3184,7 @@ RegisterLayout("UnitFramePlayerHUD", "Azerite", {
 			{ ["keyPercent"] = 128/128, offset = -16/32 }
 		}
 	},
-	["PlayerAltPowerBarTexture"] = Constant.SmallBarTexture,
+	["PlayerAltPowerBarTexture"] = GetMedia("cast_bar"),
 	["PlayerAltPowerBarValueColor"] = { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
 	["PlayerAltPowerBarValueDrawLayer"] = { "OVERLAY", 1 },
 	["PlayerAltPowerBarValueFont"] = GetFont(14, true),
@@ -3255,7 +3198,7 @@ RegisterLayout("UnitFramePlayerHUD", "Azerite", {
 RegisterLayout("UnitFrameTarget", "Azerite", { 
 	["Aura_PostCreateButton"] = UnitFrame_Aura_PostCreateButton,
 	["Aura_PostUpdateButton"] = UnitFrame_Aura_PostUpdateButton,
-	["AuraBorderBackdrop"] = BACKDROPS.AuraBorder,
+	["AuraBorderBackdrop"] = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
 	["AuraBorderBackdropColor"] = { 0, 0, 0, 0 },
 	["AuraBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 }, 
 	["AuraBorderFramePlace"] = { "CENTER", 0, 0 }, 
@@ -3718,8 +3661,8 @@ RegisterLayout("UnitFrameBoss", "Azerite", setmetatable({
 	["NameDrawLayer"] = { "OVERLAY", 1 },
 	["NameFont"] = GetFont(14, true),
 	["NameJustifyH"] = "CENTER",
-	["NameJustifyV"] = "TOP",
-	["NamePlace"] = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 }, 
+	["NameJustifyV"] = "TOP", 
+	["NamePlace"] = { "BOTTOMRIGHT", -12, 52 }, 
 	["HealthColorClass"] = false, -- color players by class 
 	["HealthColorDisconnected"] = false, -- color disconnected units
 	["HealthColorHealth"] = true, -- color anything else in the default health color
@@ -3766,12 +3709,12 @@ RegisterLayout("UnitFrameParty", "Azerite", setmetatable({
 	["PowerBackgroundDrawLayer"] = { "BACKGROUND", -2 },
 	["PowerBackgroundSize"] = { 74, 3 },
 	["PowerBackgroundPlace"] = { "CENTER", 0, 0 },
-	["PowerBackgroundTexture"] = BLANK_TEXTURE, -- GetMedia("statusbar-dark"),
+	["PowerBackgroundTexture"] = [[Interface\ChatFrame\ChatFrameBackground]], -- GetMedia("statusbar-dark"),
 	["PowerBarOrientation"] = "RIGHT",
 	["PowerBarSmoothingFrequency"] = .45,
 	["PowerBarSmoothingMode"] = "bezier-fast-in-slow-out",
 	["PowerBarTexCoord"] = nil, --{ 14/256,(256-14)/256,14/64,(64-14)/64 },
-	["PowerBarTexture"] = BLANK_TEXTURE, --GetMedia("statusbar-dark"),
+	["PowerBarTexture"] = [[Interface\ChatFrame\ChatFrameBackground]], --GetMedia("statusbar-dark"),
 	["PowerPlace"] = { "BOTTOM", 0, -1.5 },
 	["PowerSize"] = { 72, 1 },
 	["PowerBarPostUpdate"] = TinyFrame_PowerBarPostUpdate,
@@ -3833,7 +3776,7 @@ RegisterLayout("UnitFrameParty", "Azerite", setmetatable({
 	["AuraTimeFont"] = GetFont(11, true),
 	["AuraBorderFramePlace"] = { "CENTER", 0, 0 }, 
 	["AuraBorderFrameSize"] = { 30 + 10, 30 + 10 },
-	["AuraBorderBackdrop"] = BACKDROPS.AuraBorderSmall,
+	["AuraBorderBackdrop"] = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
 	["AuraBorderBackdropColor"] = { 0, 0, 0, 0 },
 	["AuraBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
 	["Size"] = { 130, 130 }, 
@@ -3870,7 +3813,7 @@ RegisterLayout("UnitFrameParty", "Azerite", setmetatable({
 
 	-- Prio #1
 	["GroupAuraSize"] = { 36, 36 },
-	["GroupAuraPlace"] = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 36/2 -1 }, 
+	["GroupAuraPlace"] = { "BOTTOM", 0, -12 }, 
 	["GroupAuraButtonIconPlace"] = { "CENTER", 0, 0 },
 	["GroupAuraButtonIconSize"] = { 36 - 6, 36 - 6 },
 	["GroupAuraButtonIconTexCoord"] = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
@@ -3882,7 +3825,7 @@ RegisterLayout("UnitFrameParty", "Azerite", setmetatable({
 	["GroupAuraButtonTimeColor"] = { 250/255, 250/255, 250/255, .85 },
 	["GroupAuraButtonBorderFramePlace"] = { "CENTER", 0, 0 }, 
 	["GroupAuraButtonBorderFrameSize"] = { 36 + 16, 36 + 16 },
-	["GroupAuraButtonBorderBackdrop"] = BACKDROPS.AuraBorder,
+	["GroupAuraButtonBorderBackdrop"] = { edgeFile = GetMedia("aura_border"), edgeSize = 16 },
 	["GroupAuraButtonBorderBackdropColor"] = { 0, 0, 0, 0 },
 	["GroupAuraButtonBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
 	["GroupAuraButtonDisableMouse"] = true, 
@@ -4065,7 +4008,7 @@ if (IsRetail) then
 			["growthY"] = "UP", 
 			["spacingH"] = 4, 
 			["spacingV"] = 4, 
-			["auraSize"] = Constant.SmallAuraSize, 
+			["auraSize"] = 30, 
 			["customFilter"] = GetAuraFilter("focus"), 
 			["debuffsFirst"] = false, 
 			["disableMouse"] = false, 
@@ -4088,8 +4031,8 @@ if (IsRetail) then
 		["HealthColorThreat"] = true, -- threat coloring on non-friendly health bars
 		["HealthFrequentUpdates"] = true, 
 		["HideWhenUnitIsPlayer"] = false, -- hide the frame when the unit is the player, or the target
-		["HideWhenTargetIsCritter"] = false, -- hide the frame when unit is a critter
-		["NamePlace"] = { "BOTTOMLEFT", (Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 10 }, 
+		["HideWhenTargetIsCritter"] = false, -- hide the frame when unit is a critter 
+		["NamePlace"] = { "BOTTOMLEFT", 12, 46 }, 
 		["NameDrawLayer"] = { "OVERLAY", 1 },
 		["NameJustifyH"] = "LEFT",
 		["NameJustifyV"] = "TOP",
@@ -4104,30 +4047,30 @@ end
 -- 6-40 player groups
 RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 
-	["TargetHighlightSize"] = { 140 * .94, 90 *.94 },
+	["TargetHighlightSize"] = { 132, 85 },
 	["HitRectInsets"] = { 0, 0, 0, -10 },
-	["Size"] = Constant.RaidFrame, 
+	["Size"] = { 103, 28 }, 
 	["Place"] = { "TOPLEFT", "UICenter", "TOPLEFT", 64, -42 }, -- Position of the initial frame
-	["AlternatePlace"] = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 64, 360 - 10 }, -- Position of the initial frame
+	["AlternatePlace"] = { "BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 64, 350 }, -- Position of the initial frame
 
 	["GroupSizeNormal"] = 5,
 	["GrowthXNormal"] = 0, -- Horizontal growth per new unit within a group
 	["GrowthYNormal"] = -38 - 4, -- Vertical growth per new unit within a group
-	["GrowthYNormalHealerMode"] = -(-38 - 4), -- Vertical growth per new unit within a group
+	["GrowthYNormalHealerMode"] = 42, -- Vertical growth per new unit within a group
 	["GroupGrowthXNormal"] = 110, 
-	["GroupGrowthYNormal"] = -(38 + 8)*5 - 10,
-	["GroupGrowthYNormalHealerMode"] = -(-(38 + 8)*5 - 10),
+	["GroupGrowthYNormal"] = -240,
+	["GroupGrowthYNormalHealerMode"] = 240,
 	["GroupColsNormal"] = 5, 
 	["GroupRowsNormal"] = 1, 
 	["GroupAnchorNormal"] = "TOPLEFT", 
 	["GroupAnchorNormalHealerMode"] = "BOTTOMLEFT", 
 	["GroupSizeEpic"] = 8,
 	["GrowthXEpic"] = 0, 
-	["GrowthYEpic"] = -38 - 4,
-	["GrowthYEpicHealerMode"] = -(-38 - 4),
+	["GrowthYEpic"] = -42,
+	["GrowthYEpicHealerMode"] = 42,
 	["GroupGrowthXEpic"] = 110, 
-	["GroupGrowthYEpic"] = -(38 + 8)*8 - 10,
-	["GroupGrowthYEpicHealerMode"] = -(-(38 + 8)*8 - 10),
+	["GroupGrowthYEpic"] = -378,
+	["GroupGrowthYEpicHealerMode"] = 378,
 	["GroupColsEpic"] = 5, 
 	["GroupRowsEpic"] = 1, 
 	["GroupAnchorEpic"] = "TOPLEFT", 
@@ -4140,8 +4083,8 @@ RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 	["GroupNumberJustifyV"] = "BOTTOM",
 	["GroupNumberPlace"] = { "BOTTOMLEFT", 2, -6 },
 
-	["HealthSize"] = Constant.RaidBar, 
-	["HealthBackdropSize"] = { 140 *.94, 90 *.94 },
+	["HealthSize"] = { 75, 13 }, 
+	["HealthBackdropSize"] = { 132, 85 },
 	["HealthColorTapped"] = false, -- color tap denied units 
 	["HealthColorDisconnected"] = true, -- color disconnected units
 	["HealthColorClass"] = true, -- color players by class
@@ -4153,12 +4096,12 @@ RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 	["PowerBackgroundDrawLayer"] = { "BACKGROUND", -2 },
 	["PowerBackgroundSize"] = { 68, 3 },
 	["PowerBackgroundPlace"] = { "CENTER", 0, 0 },
-	["PowerBackgroundTexture"] = BLANK_TEXTURE, -- GetMedia("statusbar-dark"),
+	["PowerBackgroundTexture"] = [[Interface\ChatFrame\ChatFrameBackground]], -- GetMedia("statusbar-dark"),
 	["PowerBarOrientation"] = "RIGHT",
 	["PowerBarSmoothingFrequency"] = .45,
 	["PowerBarSmoothingMode"] = "bezier-fast-in-slow-out",
 	["PowerBarTexCoord"] = nil, --{ 14/256,(256-14)/256,14/64,(64-14)/64 },
-	["PowerBarTexture"] = BLANK_TEXTURE, --GetMedia("statusbar-dark"),
+	["PowerBarTexture"] = [[Interface\ChatFrame\ChatFrameBackground]], --GetMedia("statusbar-dark"),
 	["PowerPlace"] = { "BOTTOM", 0, -.5 },
 	["PowerSize"] = { 66, 1 },
 	["PowerBarPostUpdate"] = TinyFrame_PowerBarPostUpdate,
@@ -4218,9 +4161,9 @@ RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 
 	-- Prio #1
 	["GroupAuraSize"] = { 24, 24 },
-	["GroupAuraPlace"] = { "BOTTOM", 0, Constant.TinyBar[2]/2 - 24/2 -(1 + 2) }, 
+	["GroupAuraPlace"] = { "BOTTOM", 0, -8 }, 
 	["GroupAuraButtonIconPlace"] = { "CENTER", 0, 0 },
-	["GroupAuraButtonIconSize"] = { 24 - 6, 24 - 6 },
+	["GroupAuraButtonIconSize"] = { 18, 18 },
 	["GroupAuraButtonIconTexCoord"] = { 5/64, 59/64, 5/64, 59/64 }, -- aura icon tex coords
 	["GroupAuraButtonCountPlace"] = { "BOTTOMRIGHT", 9, -6 },
 	["GroupAuraButtonCountFont"] = GetFont(12, true),
@@ -4229,8 +4172,8 @@ RegisterLayout("UnitFrameRaid", "Azerite", setmetatable({
 	["GroupAuraButtonTimeFont"] = GetFont(11, true),
 	["GroupAuraButtonTimeColor"] = { 250/255, 250/255, 250/255, .85 },
 	["GroupAuraButtonBorderFramePlace"] = { "CENTER", 0, 0 }, 
-	["GroupAuraButtonBorderFrameSize"] = { 24 + 12, 24 + 12 },
-	["GroupAuraButtonBorderBackdrop"] = BACKDROPS.AuraBorderSmall,
+	["GroupAuraButtonBorderFrameSize"] = { 36, 36 },
+	["GroupAuraButtonBorderBackdrop"] = { edgeFile = GetMedia("aura_border"), edgeSize = 12 },
 	["GroupAuraButtonBorderBackdropColor"] = { 0, 0, 0, 0 },
 	["GroupAuraButtonBorderBackdropBorderColor"] = { Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3 },
 	["GroupAuraButtonDisableMouse"] = true, 
@@ -4379,9 +4322,9 @@ RegisterLayout("UnitFrameToT", "Azerite", setmetatable({
 	["NameDrawLayer"] = { "OVERLAY", 1 },
 	["NameFont"] = GetFont(14, true),
 	["NameJustifyH"] = "RIGHT",
-	["NameJustifyV"] = "TOP",
-	["NamePlace"] = { "BOTTOMRIGHT", -(Constant.SmallFrame[1] - Constant.SmallBar[1])/2, Constant.SmallFrame[2] - Constant.SmallBar[2] + 16 - 4 }, 
-	["Place"] = { "RIGHT", "UICenter", "TOPRIGHT", -492, -96 + 6 }
+	["NameJustifyV"] = "TOP", 
+	["NamePlace"] = { "BOTTOMRIGHT", -12, 48 }, 
+	["Place"] = { "RIGHT", "UICenter", "TOPRIGHT", -492, -90 }
 }, { __index = Template_SmallFrameReversed }))
 
 ------------------------------------------------

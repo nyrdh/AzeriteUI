@@ -139,5 +139,7 @@ RegisterDefaults("ModuleForge::ActionBars", {
 RegisterDefaults("ModuleForge::UnitFrames", {
 	-- Legacy specific settings
 	["Legacy::EnableCastBar"] = true,
-	["Legacy::EnableClassPower"] = true
+	["Legacy::EnableClassPower"] = true,
+	["Legacy::EnablePartyFrames"] = true,
+	["Legacy::EnableRaidFrames"] = true
 })
