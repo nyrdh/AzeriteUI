@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 119)
+local LibTooltip = Wheel:Set("LibTooltip", 121)
 if (not LibTooltip) then
 	return
 end
@@ -105,6 +105,8 @@ LibTooltip.blizzardBackdrops = LibTooltip.blizzardBackdrops or {}
 
 -- Inherit the template too, we override the older methods farther down anyway
 LibTooltip.tooltipTemplate = LibTooltip.tooltipTemplate or LibTooltip:CreateFrame("GameTooltip", "GP_TooltipTemplate", "UICenter")
+
+-- Switching to an alternate system, but leaving the above for now.
 LibTooltip.tooltipTemplate2nd = LibTooltip.tooltipTemplate2nd or {}
 
 -- Shortcuts
@@ -113,7 +115,6 @@ local Tooltips = LibTooltip.tooltips
 local TooltipsByName = LibTooltip.tooltipsByName
 local TooltipSettings = LibTooltip.tooltipSettings
 local TooltipDefaults = LibTooltip.tooltipDefaults
---local Tooltip = LibTooltip.tooltipTemplate
 local Tooltip = LibTooltip.tooltipTemplate2nd
 local Visible = LibTooltip.visibleTooltips
 local Backdrops = LibTooltip.blizzardBackdrops
@@ -125,7 +126,7 @@ local LINE_PADDING = 2 -- padding between lines of text
 
 -- Fonts
 local FONT_TITLE = Game15Font_o1 
-local FONT_NORMAL = Game13Font_o1 -- Game12Font_o1
+local FONT_NORMAL = Game13Font_o1
 local FONT_VALUE = Game13Font_o1
 
 -- Blizzard textures we use 
@@ -2593,14 +2594,16 @@ LibTooltip.CreateTooltip = function(self, name)
 
 	-- Note that the global frame name is unrelated to the tooltip name requested by the modules.
 	local tooltipName = "GP_GameTooltip_"..LibTooltip.numTooltips
-
-	--local tooltip = setmetatable(LibTooltip:CreateFrame("Frame", tooltipName, "UICenter"), Tooltip_MT)
 	local tooltip = LibTooltip:CreateFrame("Frame", tooltipName, "UICenter")
+
+	-- We're going to hard embed methods from now on, 
+	-- as we need our template to override any similarly named methods in the template tip.
 	for method,func in pairs(Tooltip) do
 		if (type(func) == "function") then
 			tooltip[method] = func
 		end
 	end
+
 	tooltip:Hide() -- keep it hidden while setting it up
 	tooltip:SetSize(160 + TEXT_INSET*2, TEXT_INSET*2) -- minimums
 	tooltip.needsReset = true -- flag indicating tooltip must be reset
@@ -2671,6 +2674,9 @@ LibTooltip.CreateTooltip = function(self, name)
 	-- modules to retrieve each other's tooltips.
 	TooltipsByName[name] = tooltip
 
+	-- This is where modules embedding this can add their own magic.
+	-- Use this with caution, though, don't let multiple modules do the same.
+	-- I recommend only adding this module method to full UI addons, not standalones.
 	LibTooltip:ForAllEmbeds("PostCreateTooltip", tooltip)
 	
 	return tooltip
