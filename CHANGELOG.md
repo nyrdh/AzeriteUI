@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.474-RC] 2021-04-17
+## [3.2.474-RC] 2021-04-18
 ### Changed
 - Gave the Blizzard popups a slight facelift. They are now darker and more transparent, and just allround more beautiful. Like me. 
 

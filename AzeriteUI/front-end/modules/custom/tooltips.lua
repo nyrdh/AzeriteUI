@@ -4,29 +4,99 @@ if (not Core) then
 	return 
 end
 
-local Module = Core:NewModule("Tooltips", "LibMessage", "LibEvent", "LibDB", "LibTooltip")
+local Module = Core:NewModule("Tooltips", "LibMessage", "LibEvent", "LibDB", "LibNumbers", "LibTooltip")
 
 -- Private API
 local Colors = Private.Colors
 local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
 
--- This will be called by the library upon creating new tooltips.
-Module.PostCreateTooltip = function(self, tooltip)
-	if (not self.layout) then 
+-- Number Abbreviation
+local short = Module:GetNumberAbbreviationShort()
+local large = Module:GetNumberAbbreviationLong()
+
+local Tooltip_Bar_PostCreate = function(tooltip, bar)
+	if bar.Value then 
+		bar.Value:SetFontObject(Module.layout.TooltipFontBar)
+	end
+end
+
+local Tooltip_StatusBar_PostUpdate = function(tooltip, bar, value, min, max, isRealValue)
+	if (bar.barType == "health") then 
+		if (isRealValue) then 
+			bar.Value:SetText(large(value))
+		else 
+			if (value > 0) then 
+				bar.Value:SetFormattedText("%.0f%%", value)
+			else 
+				bar.Value:SetText("")
+			end
+		end
+		if (not bar.Value:IsShown()) then 
+			bar.Value:Show()
+		end
+	else 
+		if (bar.Value:IsShown()) then 
+			bar.Value:Hide()
+			bar.Value:SetText("")
+		end
+	end 
+end 
+
+local Tooltip_LinePair_PostCreate = function(tooltip, lineIndex, left, right)
+	local layout = Module.layout
+	local oldLeftObject = left:GetFontObject()
+	local oldRightObject = right:GetFontObject()
+	local leftObject = (lineIndex == 1) and layout.TooltipFontHeader or layout.TooltipFontNormal
+	local rightObject = (lineIndex == 1) and layout.TooltipFontHeader or layout.TooltipFontNormal
+	if (leftObject ~= oldLeftObject) then 
+		left:SetFontObject(leftObject)
+	end
+	if (rightObject ~= oldRightObject) then 
+		right:SetFontObject(rightObject)
+	end
+end
+
+local Tooltip_PostCreate = function(tooltip)
+	local layout = Module.layout
+	if (not layout) then
 		return
 	end
-	tooltip.PostCreateLinePair = self.layout.PostCreateLinePair
-	tooltip.PostCreateBar = self.layout.PostCreateBar
-	self.layout.PostCreateTooltip(tooltip)
+
+	-- Going to enforce our smart scaling here.
+	tooltip:SetCValue("autoCorrectScale", false)
+	tooltip:SetIgnoreParentScale(true)
+	tooltip:SetScale(768/1080)
+
+	tooltip.colors = Colors
+	tooltip.colorUnitClass = layout.TooltipSettingColorUnitClass 
+	tooltip.colorUnitPetRarity = layout.TooltipSettingColorUnitPetRarity
+	tooltip.colorUnitNameClass = layout.TooltipSettingColorUnitNameClass
+	tooltip.colorUnitNameReaction = layout.TooltipSettingColorUnitNameReaction
+	tooltip.colorHealthClass = layout.TooltipSettingColorHealthClass
+	tooltip.colorHealthPetRarity = layout.TooltipSettingColorHealthPetRarity
+	tooltip.colorHealthReaction = layout.TooltipSettingColorHealthReaction
+	tooltip.colorHealthTapped = layout.TooltipSettingColorHealthTapped
+	tooltip.colorPower = layout.TooltipSettingColorPower
+	tooltip.colorPowerTapped = layout.TooltipSettingColorPowerTapped
+	tooltip.showHealthBar = layout.TooltipSettingShowHealthBar
+	tooltip.showPowerBar = layout.TooltipSettingShowPowerBar 
+	tooltip.showLevelWithName = layout.TooltipSettingShowLevelWithName
+
+	tooltip.PostCreateLinePair = Tooltip_LinePair_PostCreate
+	tooltip.PostCreateBar = Tooltip_Bar_PostCreate
+	tooltip.PostUpdateStatusBar = Tooltip_StatusBar_PostUpdate
+end
+
+-- This is called by the library back-end.
+Module.PostCreateTooltip = function(self, tooltip)
+	Tooltip_PostCreate(tooltip)
 end
 
 -- Add some of our own stuff to our tooltips.
 -- Making this a proxy of the standard post creation method.
 Module.PostCreateCustomTips = function(self)
-	self:ForAllTooltips(function(tooltip) 
-		self:PostCreateTooltip(tooltip)
-	end) 
+	self:ForAllTooltips(Tooltip_PostCreate) 
 end 
 
 -- Set defalut values for all our tooltips

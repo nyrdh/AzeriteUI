@@ -606,78 +606,6 @@ local NamePlates_PostUpdate_ElementProxy = function(element, unit)
 	end
 end
 
--- Tooltip Bar post updates
--- Show health values for tooltip health bars, and hide others.
--- Will expand on this later to tailor all tooltips to our needs.  
-local Tooltip_StatusBar_PostUpdate = function(tooltip, bar, value, min, max, isRealValue)
-	if (bar.barType == "health") then 
-		if (isRealValue) then 
-			bar.Value:SetText(large(value))
-		else 
-			if (value > 0) then 
-				bar.Value:SetFormattedText("%.0f%%", value)
-			else 
-				bar.Value:SetText("")
-			end
-		end
-		if (not bar.Value:IsShown()) then 
-			bar.Value:Show()
-		end
-	else 
-		if (bar.Value:IsShown()) then 
-			bar.Value:Hide()
-			bar.Value:SetText("")
-		end
-	end 
-end 
-
-local Tooltip_LinePair_PostCreate = function(tooltip, lineIndex, left, right)
-	local oldLeftObject = left:GetFontObject()
-	local oldRightObject = right:GetFontObject()
-	local leftObject = (lineIndex == 1) and GetFont(15, true) or GetFont(13, true)
-	local rightObject = (lineIndex == 1) and GetFont(15, true) or GetFont(13, true)
-	if (leftObject ~= oldLeftObject) then 
-		left:SetFontObject(leftObject)
-	end
-	if (rightObject ~= oldRightObject) then 
-		right:SetFontObject(rightObject)
-	end
-end
-
-local Tooltip_Bar_PostCreate = function(tooltip, bar)
-	if bar.Value then 
-		bar.Value:SetFontObject(GetFont(13, true))
-	end
-end
-
-local Tooltip_PostCreate = function(tooltip)
-	-- Turn off UIParent scale matching
-	tooltip:SetCValue("autoCorrectScale", false)
-
-	-- What items will be displayed automatically when available
-	tooltip.showHealthBar =  true
-	tooltip.showPowerBar =  false -- let's not do this anymore.
-
-	-- Unit tooltips
-	tooltip.colorUnitClass = true -- color the unit class on the info line
-	tooltip.colorUnitPetRarity = true -- color unit names by combat pet rarity
-	tooltip.colorUnitNameClass = true -- color unit names by player class
-	tooltip.colorUnitNameReaction = true -- color unit names by NPC standing
-	tooltip.colorHealthClass = true -- color health bars by player class
-	tooltip.colorHealthPetRarity = true -- color health by combat pet rarity
-	tooltip.colorHealthReaction = true -- color health bars by NPC standing 
-	tooltip.colorHealthTapped = true -- color health bars if unit is tap denied
-	tooltip.colorPower = true -- color power bars by power type
-	tooltip.colorPowerTapped = true -- color power bars if unit is tap denied
-	tooltip.showLevelWithName = true
-
-	-- Force our colors into all tooltips created so far
-	tooltip.colors = Colors
-
-	-- Add our post updates for statusbars
-	tooltip.PostUpdateStatusBar = Tooltip_StatusBar_PostUpdate
-end
-
 local PlayerFrame_CastBarPostUpdate = function(element, unit)
 	local self = element._owner
 	local cast = self.Cast
@@ -2857,14 +2785,27 @@ RegisterLayout("NamePlates", "Azerite", {
 
 -- Custom Tooltips
 RegisterLayout("Tooltips", "Azerite", {
-	["PostCreateBar"] = Tooltip_Bar_PostCreate,
-	["PostCreateLinePair"] = Tooltip_LinePair_PostCreate,
-	["PostCreateTooltip"] = Tooltip_PostCreate,
 	["TooltipBackdrop"] = BACKDROPS.Tooltips,
 	["TooltipBackdropOffsets"] = { 25, 25, 25, 25 },
 	["TooltipBackdropBorderColor"] = { .35, .35, .35, 1 },
 	["TooltipBackdropColor"] = { 0, 0, 0, .95 },
+	["TooltipFontHeader"] = GetFont(15, true),
+	["TooltipFontNormal"] = GetFont(13, true),
+	["TooltipFontBar"] = GetFont(13, true),
 	["TooltipPlace"] = { "BOTTOMRIGHT", "UICenter", "BOTTOMRIGHT", -319, 166 }, 
+	["TooltipSettingColorHealthClass"] = true, -- color health bars by player class
+	["TooltipSettingColorHealthReaction"] = true, -- color health bars by NPC standing 
+	["TooltipSettingColorHealthPetRarity"] = true, -- color health by combat pet rarity
+	["TooltipSettingColorHealthTapped"] = true, -- color health bars if unit is tap denied
+	["TooltipSettingColorPower"] = true, -- color power bars by power type
+	["TooltipSettingColorPowerTapped"] = true, -- color power bars if unit is tap denied
+	["TooltipSettingColorUnitClass"] = true, -- color the unit class on the info line
+	["TooltipSettingColorUnitNameClass"] = true, -- color unit names by player class
+	["TooltipSettingColorUnitNameReaction"] = true, -- color unit names by NPC standing
+	["TooltipSettingColorUnitPetRarity"] = true, -- color unit names by combat pet rarity
+	["TooltipSettingShowHealthBar"] = true, -- unit health bars.
+	["TooltipSettingShowLevelWithName"] = true, -- integrates unit levels into the unit name
+	["TooltipSettingShowPowerBar"] = false, -- unit powerbars. 
 	["TooltipStatusBarTexture"] = GetMedia("statusbar-normal")
 })
 
