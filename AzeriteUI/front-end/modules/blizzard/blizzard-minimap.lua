@@ -557,7 +557,7 @@ local Toggle_OnLeave = function(toggle)
 
 	Toggle_UpdateFrame(toggle)
 	
-	if (not toggle.Frame.isMouseOver) then 
+	if not((toggle.Frame.isMouseOver) and (toggle.Frame:IsShown())) then 
 		Private:GetMinimapTooltip():Hide()
 	end 
 end
@@ -570,16 +570,17 @@ end
 
 local RingFrame_OnEnter = function(frame)
 	local toggle = frame._owner
+	local isShown = frame:IsShown()
 
 	frame.UpdateTooltip = RingFrame_UpdateTooltip
-	frame.isMouseOver = true
+	frame.isMouseOver = isShown and true
 
 	Toggle_UpdateFrame(toggle)
 
 	-- The above method can actually hide this frame, 
 	-- trigger the OnLeave handler, and remove UpdateTooltip. 
 	-- We need to check if it still exists before running it.
-	if (frame.UpdateTooltip) then
+	if (isShown) and (frame.UpdateTooltip) then
 		frame:UpdateTooltip()
 	end
 end
