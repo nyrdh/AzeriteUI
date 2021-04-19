@@ -405,6 +405,21 @@ local Toggle_UpdateFrame = function(toggle)
 	local frame = toggle.Frame
 	local frameIsShown = frame:IsShown()
 
+	-- This happens when we've quickly left the toggle button,
+	-- like when the mouse accidentally passes it on its way somewhere else. 
+	if (not db.stickyBars) and ((not toggle.isMouseOver) and (toggle.fading) and (toggle.fadeDelay > 0) and (frameIsShown and frame.isMouseOver)) then
+		frame:Hide()
+		frame:SetAlpha(0)
+		frame.isMouseOver = nil
+		toggle:SetScript("OnUpdate", nil)
+		toggle.fading = nil 
+		toggle.fadeDirection = nil
+		toggle.fadeDuration = 0
+		toggle.fadeDelay = 0
+		toggle.timeFading = 0
+		return
+	end
+
 	-- If sticky bars is enabled, we should only fade in, and keep it there, 
 	-- and then just remove the whole update handler until the sticky setting is changed. 
 	if db.stickyBars then 
@@ -461,7 +476,7 @@ local Toggle_UpdateFrame = function(toggle)
 				frame:Show()
 				toggle.fadeDirection = "IN"
 				toggle.fadeDuration = .25
-				toggle.fadeDelay = 0
+				toggle.fadeDelay = .5
 				toggle.timeFading = 0
 				toggle.fading = true
 
@@ -537,7 +552,7 @@ local Toggle_OnLeave = function(toggle)
 	toggle.UpdateTooltip = nil
 
 	-- Update this to avoid a flicker or delay 
-	-- when moving directly from the toggle button to the ringframe.  
+	-- when moving directly from the toggle button to the ringframe.
 	toggle.Frame.isMouseOver = MouseIsOver(toggle.Frame)
 
 	Toggle_UpdateFrame(toggle)
@@ -561,7 +576,12 @@ local RingFrame_OnEnter = function(frame)
 
 	Toggle_UpdateFrame(toggle)
 
-	frame:UpdateTooltip()
+	-- The above method can actually hide this frame, 
+	-- trigger the OnLeave handler, and remove UpdateTooltip. 
+	-- We need to check if it still exists before running it.
+	if (frame.UpdateTooltip) then
+		frame:UpdateTooltip()
+	end
 end
 
 local RingFrame_OnLeave = function(frame)
