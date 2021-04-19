@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.474-RC] 2021-04-18
+## [3.2.474-RC] 2021-04-19
 ### Added
 - Added menu options to toggle the Legacy theme's party- and raid frames! Now you can use Legacy with your favorite group frame addon!
 
 ### Changed
 - Gave the Blizzard popups a slight facelift. They are now darker and more transparent, and just allround more beautiful. Like me. 
+- There should now be a short delay from entering the Minimap's number badge until the ring frames showing the full XP/Rep/Azerite bars appear. This should help avoid that annoying situation where you accidentally touch the badge on your way to the minimap only to get the map covered by bars while you were trying to hover above an object or player on the map.   
 
 ## [3.2.473-RC] 2021-04-15
 - Crazy changes.
