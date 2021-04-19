@@ -5,7 +5,7 @@ if (not Core) then
 end
 
 -- Blizzard PopUp Styling
-local Module = Core:NewModule("BlizzardPopupStyling", "LibHook", "LibSecureHook")
+local Module = Core:NewModule("BlizzardPopupStyling", "OnEvent", "LibHook", "LibSecureHook")
 
 -- Lua API
 local pairs = pairs
