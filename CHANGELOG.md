@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.474-RC] 2021-04-19
+## [3.2.474-Release] 2021-04-19
 ### Added
 - Added menu options to toggle the Legacy theme's party- and raid frames! Now you can use Legacy with your favorite group frame addon!
 
