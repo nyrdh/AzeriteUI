@@ -23,18 +23,19 @@ local IsClassic = Private.IsClassic
 local IsRetail = Private.IsRetail
 
 -- Registries
-local Backdrops, Borders, HookedFrames, StyledFrames = {}, {}, {}, {}
+local Backdrops, Borders, Offsets, HookedFrames, StyledFrames = {}, {}, {}, {}, {}
 
 -- Utility Functions
 -----------------------------------------------------------
 local Place = function(frame, ...)
 	local offset, left, right, top, bottom = ...
-	frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + (offset or 0))
+	local parent = frame:GetParent()
+	frame:SetFrameLevel(parent:GetFrameLevel() + (offset or 0))
 	frame:ClearAllPoints()
-	frame:SetPoint("TOP", 0, top or 0)
-	frame:SetPoint("BOTTOM", 0, -bottom or 0)
-	frame:SetPoint("LEFT", -left or 0)
-	frame:SetPoint("RIGHT", right or 0)
+	frame:SetPoint("LEFT", parent, "LEFT", -left or 0, 0)
+	frame:SetPoint("RIGHT", parent, "RIGHT", right or 0, 0)
+	frame:SetPoint("TOP", parent, "TOP", 0, top or 0)
+	frame:SetPoint("BOTTOM", parent, "BOTTOM", 0, -bottom or 0)
 	return frame
 end
 
@@ -116,29 +117,22 @@ end
 -----------------------------------------------------------
 Module.StylePopup = function(self, popup)
 	local name = popup and popup:GetName()
-	if (not name) then
+	if (not name) or (StyledFrames[popup]) then
 		return
 	end
-
 	local layout = self.layout
 
-	if (not StyledFrames[popup]) then
+	DisableBlizzard(popup)
 
-		DisableBlizzard(popup)
-
-		local backdrop = GetBackdrop(popup, unpack(layout.PopupBackdropOffsets))
-		backdrop:SetBackdrop(layout.PopupBackdrop)
-		backdrop:SetBackdropColor(unpack(layout.PopupBackdropColor ))
-		backdrop:SetBackdropBorderColor(unpack(layout.PopupBorderColor))
-
-		StyledFrames[popup] = true
-	end
+	local backdrop = GetBackdrop(popup, unpack(layout.PopupBackdropOffsets))
+	backdrop:SetBackdrop(layout.PopupBackdrop)
+	backdrop:SetBackdropColor(unpack(layout.PopupBackdropColor ))
+	backdrop:SetBackdropBorderColor(unpack(layout.PopupBorderColor))
 
 	for _,buttonName in pairs({ "Button1", "Button2", "Button3", "Button4", "ExtraButton" }) do
 
 		local button = _G[name..buttonName]
-		if (button) and (not StyledFrames[button]) then
-
+		if (button) then
 			local backdrop = GetBackdrop(button, unpack(layout.ButtonBackdropOffsets))
 			backdrop:SetBackdrop(layout.ButtonBackdrop)
 			backdrop:SetBackdropColor(unpack(layout.ButtonBackdropColor))
@@ -159,8 +153,6 @@ Module.StylePopup = function(self, popup)
 				backdrop:SetBackdropBorderColor(unpack(layout.ButtonBackdropColor))
 				border:SetBackdropBorderColor(unpack(layout.ButtonBorderColor))
 			end)
-
-			StyledFrames[button] = true
 		end
 	end
 
@@ -173,6 +165,8 @@ Module.StylePopup = function(self, popup)
 		end
 		editbox:SetTextInsets(unpack(layout.EditBoxInsets))
 	end
+
+	StyledFrames[popup] = true
 end
 
 Module.StylePopups = function(self)
