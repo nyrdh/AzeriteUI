@@ -351,17 +351,28 @@ local Toggle_UpdateTooltip = function(toggle)
 	tooltip:Show()
 end 
 
-local Toggle_OnUpdate = function(toggle, elapsed)
+-- Full clear of any cancelled fade-ins
+local Toggle_Clear = function(toggle)
+	toggle.Frame:Hide()
+	toggle.Frame:SetAlpha(0)
+	toggle.Frame.isMouseOver = nil
+	toggle:SetScript("OnUpdate", nil)
+	toggle.fading = nil 
+	toggle.fadeDirection = nil
+	toggle.fadeDuration = 0
+	toggle.fadeDelay = 0
+	toggle.timeFading = 0
+end
 
+local Toggle_OnUpdate = function(toggle, elapsed)
 	if (toggle.fadeDelay > 0) then 
 		local fadeDelay = toggle.fadeDelay - elapsed
-		if fadeDelay > 0 then 
+		if (fadeDelay > 0) then 
 			toggle.fadeDelay = fadeDelay
 			return 
-		else 
-			toggle.fadeDelay = 0
-			toggle.timeFading = 0
-		end 
+		end
+		toggle.fadeDelay = 0
+		toggle.timeFading = 0
 	end 
 
 	toggle.timeFading = toggle.timeFading + elapsed
@@ -393,7 +404,6 @@ local Toggle_OnUpdate = function(toggle, elapsed)
 			toggle.timeFading = 0
 		end 
 	end 
-
 end 
 
 -- This method is called upon entering or leaving 
@@ -405,24 +415,9 @@ local Toggle_UpdateFrame = function(toggle)
 	local frame = toggle.Frame
 	local frameIsShown = frame:IsShown()
 
-	-- This happens when we've quickly left the toggle button,
-	-- like when the mouse accidentally passes it on its way somewhere else. 
-	if (not db.stickyBars) and ((not toggle.isMouseOver) and (toggle.fading) and (toggle.fadeDelay > 0) and (frameIsShown and frame.isMouseOver)) then
-		frame:Hide()
-		frame:SetAlpha(0)
-		frame.isMouseOver = nil
-		toggle:SetScript("OnUpdate", nil)
-		toggle.fading = nil 
-		toggle.fadeDirection = nil
-		toggle.fadeDuration = 0
-		toggle.fadeDelay = 0
-		toggle.timeFading = 0
-		return
-	end
-
 	-- If sticky bars is enabled, we should only fade in, and keep it there, 
 	-- and then just remove the whole update handler until the sticky setting is changed. 
-	if db.stickyBars then 
+	if (db.stickyBars) then 
 
 		-- if the frame isn't shown, 
 		-- reset the alpha and initiate fade-in
@@ -449,29 +444,29 @@ local Toggle_UpdateFrame = function(toggle)
 		end
 
 	-- Move towards full visibility if we're over the toggle or the visible frame
-	elseif toggle.isMouseOver or frame.isMouseOver then 
+	elseif (toggle.isMouseOver) then 
 
 		-- If we entered while fading, it's most likely a fade-out that needs to be reversed.
-		if toggle.fading then 
-			if toggle.fadeDirection == "OUT" then 
+		if (toggle.fading) then 
+
+			-- Reverse the fade-out.
+			if (toggle.fadeDirection == "OUT") then 
 				toggle.fadeDirection = "IN"
 				toggle.fadeDuration = .25
 				toggle.fadeDelay = 0
 				toggle.timeFading = 0
-
-				if not toggle:GetScript("OnUpdate") then 
+				if (not toggle:GetScript("OnUpdate")) then 
 					toggle:SetScript("OnUpdate", Toggle_OnUpdate)
 				end
-			else 
-				-- Can't see this happening?
-			end 
+			else
+				-- this is a fade-in we wish to keep running.
+			end
 
 		-- If it's not fading it's either because it's hidden, at full alpha,  
 		-- or because sticky bars just got disabled and it's still fully visible. 
 		else 
-			if frameIsShown then 
-				-- Sticky bars? 
-			else 
+			-- Inititate a fade-in delay, but only if the frame is hidden.
+			if (not frameIsShown) then
 				frame:SetAlpha(0)
 				frame:Show()
 				toggle.fadeDirection = "IN"
@@ -479,42 +474,55 @@ local Toggle_UpdateFrame = function(toggle)
 				toggle.fadeDelay = .5
 				toggle.timeFading = 0
 				toggle.fading = true
-
 				if not toggle:GetScript("OnUpdate") then 
 					toggle:SetScript("OnUpdate", Toggle_OnUpdate)
 				end
-			end 
+			else
+				-- The frame is shown, just keep showing it and do nothing.
+			end
 		end  
-
+		
+	elseif (frame.isMouseOver) then
+		-- This happens when we've quickly left the toggle button,
+		-- like when the mouse accidentally passes it on its way somewhere else. 
+		if (not toggle.isMouseOver) and (toggle.fading) and (toggle.fadeDelay > 0) and (frameIsShown and frame.isMouseOver) then
+			return Toggle_Clear(toggle)
+		end
 
 	-- We're not above the toggle or a visible frame, 
-	-- so we should initiate a fade-out. 
+	-- so we should initiate a fade-out or cancel pending fade-ins. 
 	else 
-
 		-- if the frame is visible, this should be a fade-out.
-		if frameIsShown then 
-
-			toggle.fadeDirection = "OUT"
-
+		if (frameIsShown) then 
 			-- Only initiate the fade delay if the frame previously was fully shown,
 			-- do not start a delay if we moved back into a fading frame then out again 
 			-- before it could reach its full alpha, or the frame will appear to be "stuck"
 			-- in a semi-transparent state for a few seconds. Ewwww. 
-			if toggle.fading then 
-				toggle.fadeDelay = 0
-				toggle.fadeDuration = (.25 - (toggle.timeFading or 0))
-				toggle.timeFading = toggle.timeFading or 0
+			if (toggle.fading) then 
+				-- This was a queued fade-in that now will be cancelled, 
+				-- because the mouse is not above the toggle button anymore.
+				if (toggle.fadeDirection == "IN") and (toggle.fadeDelay > 0) then
+					return Toggle_Clear(toggle)
+				else
+					-- This is a semi-visible frame,
+					-- that needs to get its fade-out initiated or updated.
+					toggle.fadeDirection = "OUT"
+					toggle.fadeDelay = 0
+					toggle.fadeDuration = (.25 - (toggle.timeFading or 0))
+					toggle.timeFading = toggle.timeFading or 0
+				end
 			else 
+				-- Most likely a fully visible frame we just left.
+				-- Now we initiate the delay and a following fade-out.
+				toggle.fadeDirection = "OUT"
 				toggle.fadeDelay = .5
 				toggle.fadeDuration = .25
 				toggle.timeFading = 0
 				toggle.fading = true
 			end 
-
-			if not toggle:GetScript("OnUpdate") then 
+			if (not toggle:GetScript("OnUpdate")) then 
 				toggle:SetScript("OnUpdate", Toggle_OnUpdate)
 			end
-	
 		end
 	end
 end
@@ -576,6 +584,16 @@ local RingFrame_OnEnter = function(frame)
 	frame.isMouseOver = isShown and true
 
 	Toggle_UpdateFrame(toggle)
+	isShown = frame:IsShown()
+
+	local toggle = frame._owner
+	if (not isShown) then
+		toggle.fading = nil 
+		toggle.fadeDirection = nil
+		toggle.fadeDuration = 0
+		toggle.fadeDelay = 0
+		toggle.timeFading = 0
+	end
 
 	-- The above method can actually hide this frame, 
 	-- trigger the OnLeave handler, and remove UpdateTooltip. 
