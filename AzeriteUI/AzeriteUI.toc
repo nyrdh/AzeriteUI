@@ -11,6 +11,7 @@
 ## X-Discord: https://discord.gg/MUSfWXd
 ## X-Website: https://www.patreon.com/goldpawsstuff
 ## X-Curse-Project-ID: 298648
+## X-Wago-ID: R4N2PZKL
 ## X-License: Custom
 
 ## SavedVariables: AzeriteUI_DB
@@ -85,6 +86,7 @@ front-end\modules\blizzard\blizzard-worldmap.lua
 # These are made from scratch, and fully ours.
 front-end\modules\custom\actionbars.lua
 front-end\modules\custom\bindings.lua
+front-end\modules\custom\bugs.lua
 front-end\modules\custom\chatfilters.lua
 front-end\modules\custom\durability.lua
 front-end\modules\custom\explorermode.lua
