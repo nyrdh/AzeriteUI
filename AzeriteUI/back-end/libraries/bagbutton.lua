@@ -1,4 +1,4 @@
-local LibBagButton = Wheel:Set("LibBagButton", 51)
+local LibBagButton = Wheel:Set("LibBagButton", 56)
 if (not LibBagButton) then	
 	return
 end
@@ -783,24 +783,31 @@ end
 -- Used only with OnUpdate, OnEnter and OnLeave.
 Button.OnUpdate = function(self)
 	-- Avoid nil bugs. 
-	if (not self.bagID) or (not self.bagID) then
-		return
-	end
+	local hasSlot = self.bagID and self.slotID and self.hasItem
 
 	-- Is it a classic keyring? Add code. 
 
-	local Item = LibBagButton:GetBlizzardContainerSlotCache(self.bagID, self.slotID)
-	if (Item) and (Item.itemName) then
-		-- Note that we are not using our available cache here, 
-		-- this is to avoid display bugs related to the repair cost of newly repaired items.
-		local tooltip = self:GetTooltip()
-		tooltip:SetSmartItemAnchor(self, tooltip.tooltipAnchorX or 4, tooltip.tooltipAnchorY or 0) 
-		tooltip:SetBagItem(self.bagID, self.slotID) 
-	else
-		local tooltip = self:GetTooltip()
+	-- If an item is transformed while hovering, 
+	-- there will be a short moment when the button has no points it seems.
+	-- A better workaround with flags can be made, this is a hotfix.
+	local tooltip = self:GetTooltip()
+	if (hasSlot) then
+		local Item = LibBagButton:GetBlizzardContainerSlotCache(self.bagID, self.slotID)
+		if (Item) and (Item.itemName) and (self.UpdateTooltip) then -- (self:GetPoint()) not needed now?
+			-- Note that we are not using our available cache here, 
+			-- this is to avoid display bugs related to the repair cost of newly repaired items.
+			tooltip:SetSmartItemAnchor(self, tooltip.tooltipAnchorX or 4, tooltip.tooltipAnchorY or 0) 
+			tooltip:SetBagItem(self.bagID, self.slotID) 
+		else
+			hasSlot = nil
+		end
+	end
+
+	if (not hasSlot) then
 		if (tooltip:IsShown()) and (tooltip:GetOwner() == self) then
 			tooltip:Hide()
 		end
+		return
 	end
 
 	-- check for modified clicks, show compare tips if need be.
@@ -821,13 +828,10 @@ Button.OnUpdate = function(self)
 	if (not SpellIsTargeting()) then
 		if (IsModifiedClick("DRESSUP")) and ((Item) or (self.hasItem)) then
 			ShowInspectCursor()
-
 		elseif (showSell) then
 			ShowContainerSellCursor(self.bagID, self.slotID)
-
 		elseif (self.readable) then
 			ShowInspectCursor()
-
 		else
 			ResetCursor()
 		end
@@ -836,13 +840,13 @@ Button.OnUpdate = function(self)
 end
 
 Button.OnEnter = function(self)
-	self:OnUpdate()
 	self.UpdateTooltip = self.OnUpdate
+	self:OnUpdate()
 end
 
 Button.OnLeave = function(self)
-	self:OnUpdate()
 	self.UpdateTooltip = nil
+	self:OnUpdate()
 
 	local tooltip = self:GetTooltip()
 	if (tooltip:IsShown()) and (tooltip:GetOwner() == self) then
@@ -1157,10 +1161,6 @@ LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID, forceUpd
 		-- or create an empty cache table if none exist.
 		local Item = self:GetBlizzardContainerSlotCache(bagID, slotID)
 
-		-- This is implicit by the existence of all the other values, 
-		-- but for the sake of semantics and simplicity, we use a separate value for this.
-		Item.hasItem = true
-
 		-- Compare the cache's itemlink to the blizzard itemlink, 
 		-- and update or retrieve the contents to our cache if need be.
 		if (Item.itemLink ~= itemLink) or (forceUpdate) then
@@ -1205,6 +1205,11 @@ LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID, forceUpd
 
 			end
 		end
+
+		-- This is implicit by the existence of all the other values, 
+		-- but for the sake of semantics and simplicity, we use a separate value for this.
+		-- We need to do this AFTER the tooltip parsing, as that clears all entries. 
+		Item.hasItem = true
 
 	else
 		-- The blizzard slot has no item, so we clear our cache if it exists.
@@ -1499,7 +1504,8 @@ LibBagButton.OnEvent = function(self, event, ...)
 
 		-- This is where the actual magic happens. 
 		self.parsingRequired = true
-		self:ParseSingleBlizzardContainer(bagID, true)
+		--self:ParseSingleBlizzardContainer(bagID, true)
+		self:ParseSingleBlizzardContainer(bagID)
 		self:SendMessage("GP_BAG_UPDATE", bagID)
 
 	elseif (event == "GET_ITEM_INFO_RECEIVED") then
@@ -1700,7 +1706,7 @@ hidden:Hide()
 
 LibBagButton.GetBlizzardSlotButton = function(self, bagID, slotID)
 	if (bagID) and (slotID) then
-		local button = _G[string_format("ContainerFrame%dItem%d", bagID, slotID)]
+		local button = _G[string_format("ContainerFrame%dItem%d", bagID + 1, slotID)]
 		if (button) then
 			button:ClearAllPoints()
 			return self:PrepareBlizzardSlotButton(button)
@@ -1762,9 +1768,9 @@ LibBagButton.SpawnItemButton = function(self, ...)
 
 	-- Need to clear away blizzard layers from this one, 
 	-- as they interfere with anything we do.
-	--slot = self:GetBlizzardSlotButton(bagID, slotID) or parent:CreateFrame(BUTTON_TYPE, nil, ButtonTemplates[bagType])
-	--slot:SetParent(parent) -- in case it's a blizz button. need to grab it.
-	slot = parent:CreateFrame(BUTTON_TYPE, nil, ButtonTemplates[bagType])
+	slot = self:GetBlizzardSlotButton(bagID, slotID) or parent:CreateFrame(BUTTON_TYPE, nil, ButtonTemplates[bagType])
+	slot:SetParent(parent) -- in case it's a blizz button. need to grab it.
+	--slot = parent:CreateFrame(BUTTON_TYPE, nil, ButtonTemplates[bagType])
 	slot:SetAllPoints(button) -- bypass the parent/fakebag object
 	slot:SetPoint("CENTER", button, "CENTER", 0, 0)
 	slot:EnableMouse(true)
