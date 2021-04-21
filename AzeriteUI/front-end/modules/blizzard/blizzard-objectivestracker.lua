@@ -521,6 +521,17 @@ Module.SecureItemButton = function(self, ...)
 				BonusObjectiveTracker_OnBlockEnter(block)
 			end
 		end)
+		-- For reasons unknown, setting OnEnter appears to clear out OnLeave?
+		-- This is a modified BonusObjectiveTracker_OnBlockLeave
+		block:SetScript("OnLeave", function(block)
+			block.module:OnBlockHeaderLeave(block)
+			if (not GameTooltip:IsForbidden()) then
+				GameTooltip:Hide()
+			end
+			block.module.tooltipBlock = nil
+		end
+		)
+		-- Don't do this again.
 		secured[block] = true
 	end
 
