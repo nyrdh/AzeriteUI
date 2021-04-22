@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 98)
+local LibBlizzard = Wheel:Set("LibBlizzard", 99)
 if (not LibBlizzard) then 
 	return
 end
@@ -997,7 +997,11 @@ UIWidgetsDisable["Tutorials"] = function(self)
 				kill("Tutorial_PointerLeft", false, true)
 				kill("Tutorial_PointerRight", false, true)
 				KillPointerFrames()
-				Class_Hide_Minimap.OnBegin = nil
+				-- This seems to have been removed, 
+				-- or possibly only exists for select classes. 
+				if (Class_Hide_Minimap) then
+					Class_Hide_Minimap.OnBegin = nil
+				end
 				Minimap:Show()
 				MinimapCluster:Show()
 			end

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.476-Release] 2021-04-22
+### Fixed
+- Fixed an issue that would break the UI for multiple classes when a tutorial was shown during the Exile's Reach intro campaign.
+
 ## [3.2.475-Release] 2021-04-20
 - Minor bug fixes and workarounds.
 

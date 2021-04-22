@@ -532,18 +532,26 @@ Module.SecureItemButton = function(self, ...)
 	-- These are the item button tooltips.
 	-- Not strictly certain if I need to hide these too. 
 	-- Taint tracking with no clear reference points isn't exactly an exact science.
-	--local item = block.itemButton
-	--if (not item) then 
-	--	return 
-	--end
-	--if (not secured[item]) then
-	--	item:SetScript("OnEnter", function(item) 
-	--		if (not InCombatLockdown()) then
-	--			QuestObjectiveItem_OnEnter(item)
-	--		end
-	--	end)
-	--	secured[item] = true
-	--end
+	-- The below is probably NOT caused by the listed addon, 
+	-- as the method listed is called by the same scripts we're trying to untaint below.
+	-- 
+	-- 4/21 10:48:29.010  An action was blocked because of taint from MapShrinker - UseQuestLogSpecialItem()
+	-- 4/21 10:48:29.010      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTrackerShared.lua:95
+	-- 4/21 10:48:33.892  An action was blocked because of taint from MapShrinker - UseQuestLogSpecialItem()
+	-- 4/21 10:48:33.892      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTrackerShared.lua:95
+	-- 
+	local item = block.itemButton
+	if (not item) then 
+		return 
+	end
+	if (not secured[item]) then
+		item:SetScript("OnEnter", function(item) 
+			if (not InCombatLockdown()) then
+				QuestObjectiveItem_OnEnter(item)
+			end
+		end)
+		secured[item] = true
+	end
 
 end
 
