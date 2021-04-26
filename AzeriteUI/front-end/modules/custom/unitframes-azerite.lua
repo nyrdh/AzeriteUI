@@ -2455,7 +2455,7 @@ UnitFramePlayer.UpdateTempEnchantFrames = function(self)
 		button.Icon:SetTexture(GetInventoryItemTexture("player", button:GetID()))
 		button:SetAlpha(1)
 	else
-		self.self.tempEnchantButtons[1]:SetAlpha(0)
+		self.tempEnchantButtons[1]:SetAlpha(0)
 	end
 
 	if (hasOffHandEnchant) then

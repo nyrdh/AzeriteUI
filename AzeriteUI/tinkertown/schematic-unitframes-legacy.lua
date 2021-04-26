@@ -156,6 +156,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 				},
 				values = {
 					"colors", Colors,
+					"isPlayerFrame", true,
 
 					-- hides when the unit has a vehicleui
 					"hideInVehicles", true, 
