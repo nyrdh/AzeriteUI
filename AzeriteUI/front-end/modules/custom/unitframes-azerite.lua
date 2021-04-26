@@ -15,22 +15,6 @@ if (not Core) then
 	return 
 end
 
--- Primary Units
-local UnitFramePlayer = Core:NewModule("UnitFramePlayer", "LibDB", "LibMessage", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge", "LibTime")
-local UnitFramePlayerHUD = Core:NewModule("UnitFramePlayerHUD", "LibDB", "LibMessage", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge")
-local UnitFrameTarget = Core:NewModule("UnitFrameTarget", "LibMessage", "LibEvent", "LibUnitFrame", "LibSound", "LibForge")
-
--- Secondary Units
-local UnitFramePet = Core:NewModule("UnitFramePet", "LibUnitFrame", "LibFrame", "LibForge")
-local UnitFrameToT = Core:NewModule("UnitFrameToT", "LibUnitFrame", "LibForge")
-local UnitFrameFocus = (IsRetail) and Core:NewModule("UnitFrameFocus", "LibMessage", "LibUnitFrame", "LibForge")
-
--- Grouped Units
-local UnitFrameArena = (IsRetail) and Core:NewModule("UnitFrameArena", "LibDB", "LibMessage", "LibUnitFrame", "LibFrame", "LibForge")
-local UnitFrameBoss = Core:NewModule("UnitFrameBoss", "LibUnitFrame", "LibMessage", "LibForge")
-local UnitFrameParty = Core:NewModule("UnitFrameParty", "LibDB", "LibMessage", "LibFrame", "LibUnitFrame", "LibForge")
-local UnitFrameRaid = Core:NewModule("UnitFrameRaid", "LibDB", "LibFrame", "LibUnitFrame", "LibBlizzard", "LibForge")
-
 -- Keep these local
 local UnitStyles = {} 
 
@@ -76,6 +60,25 @@ local BLING_TEXTURE = [[Interface\Cooldown\star4]]
 -- Player data
 local _,PlayerClass = UnitClass("player")
 local _,PlayerLevel = UnitLevel("player")
+
+-----------------------------------------------------------
+-- Define Modules
+-----------------------------------------------------------
+-- Primary Units
+local UnitFramePlayer = Core:NewModule("UnitFramePlayer", "LibDB", "LibMessage", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge", "LibTime")
+local UnitFramePlayerHUD = Core:NewModule("UnitFramePlayerHUD", "LibDB", "LibMessage", "LibEvent", "LibUnitFrame", "LibFrame", "LibForge")
+local UnitFrameTarget = Core:NewModule("UnitFrameTarget", "LibMessage", "LibEvent", "LibUnitFrame", "LibSound", "LibForge")
+
+-- Secondary Units
+local UnitFramePet = Core:NewModule("UnitFramePet", "LibUnitFrame", "LibFrame", "LibForge")
+local UnitFrameToT = Core:NewModule("UnitFrameToT", "LibUnitFrame", "LibForge")
+local UnitFrameFocus = (IsRetail) and Core:NewModule("UnitFrameFocus", "LibMessage", "LibUnitFrame", "LibForge")
+
+-- Grouped Units
+local UnitFrameArena = (IsRetail) and Core:NewModule("UnitFrameArena", "LibDB", "LibMessage", "LibUnitFrame", "LibFrame", "LibForge")
+local UnitFrameBoss = Core:NewModule("UnitFrameBoss", "LibUnitFrame", "LibMessage", "LibForge")
+local UnitFrameParty = Core:NewModule("UnitFrameParty", "LibDB", "LibMessage", "LibFrame", "LibUnitFrame", "LibForge")
+local UnitFrameRaid = Core:NewModule("UnitFrameRaid", "LibDB", "LibFrame", "LibUnitFrame", "LibBlizzard", "LibForge")
 
 -----------------------------------------------------------
 -- Secure Stuff

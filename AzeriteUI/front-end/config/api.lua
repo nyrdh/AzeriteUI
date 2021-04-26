@@ -6,9 +6,6 @@ local ADDON, Private = ...
 local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, ADDON.." requires LibClientBuild to be loaded.")
 
-local LibBagButton = Wheel("LibBagButton")
-assert(LibBagButton, ADDON.." requires LibBagButton to be loaded.")
-
 local LibModule = Wheel("LibModule")
 assert(LibModule, ADDON.." requires LibModule to be loaded.")
 
@@ -215,7 +212,6 @@ end
 -- This way the modules can access all of them, 
 -- without having to embed or reference libraries.
 Private.GetActionButtonTooltip = function(self) return LibSecureButton:GetActionButtonTooltip() end
-Private.GetBagButtonTooltip = function(self) return LibBagButton:GetBagButtonTooltip() end
 Private.GetBindingsTooltip = function(self) return LibBindTool:GetBindingsTooltip() end
 Private.GetMinimapTooltip = function(self) return LibMinimap:GetMinimapTooltip() end
 Private.GetMoverTooltip = function(self) return LibMover:GetMoverTooltip() end
