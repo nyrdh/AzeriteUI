@@ -20,6 +20,7 @@ local UnitStyles = {}
 
 -- Lua API
 local date = date
+local ipairs = ipairs
 local math_floor = math.floor
 local math_pi = math.pi
 local select = select
@@ -34,6 +35,8 @@ local unpack = unpack
 
 -- WoW API
 local GetCVarBool = GetCVarBool
+local GetInventoryItemTexture = GetInventoryItemTexture
+local GetWeaponEnchantInfo = GetWeaponEnchantInfo
 local RegisterAttributeDriver = RegisterAttributeDriver
 local UnitClass = UnitClass
 local UnitExists = UnitExists
@@ -48,6 +51,7 @@ local GetDefaults = Private.GetDefaults
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 local GetLayoutID = Private.GetLayoutID
+local GetMedia = Private.GetMedia
 local IsClassic = Private.IsClassic
 local IsRetail = Private.IsRetail
 local IsWinterVeil = Private.IsWinterVeil
@@ -2297,6 +2301,7 @@ UnitFramePlayer.OnInit = function(self)
 	-- How this is called:
 	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
 	self.frame = self:SpawnUnitFrame("player", "UICenter", UnitStyles.StylePlayerFrame, self.layout, self) 
+	self:SpawnTempEnchantFrames()
 
 	-- Apply the aura filter
 	local auras = self.frame.Auras
@@ -2383,6 +2388,90 @@ UnitFramePlayer.OnEvent = function(self, event, ...)
 	end
 	if (self.frame.PostUpdateTextures) then
 		self.frame:PostUpdateTextures(PlayerLevel)
+	end
+end
+
+-- Temporary Weapon Enchants!
+-- These exist in both Retail and Classic
+UnitFramePlayer.SpawnTempEnchantFrames = function(self)
+	self.tempEnchantButtons = {
+		self.frame:CreateFrame("Button", nil, "SecureActionButtonTemplate"),
+		self.frame:CreateFrame("Button", nil, "SecureActionButtonTemplate"),
+		self.frame:CreateFrame("Button", nil, "SecureActionButtonTemplate")
+	}
+
+	-- Style them
+	for i,button in ipairs(self.tempEnchantButtons) do
+		
+		button:SetSize(30,30)
+		button:Place("BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 20, 115 + (40*(i-1)))
+		button:SetAttribute("type", "cancelaura")
+		button:SetAttribute("target-slot", i+15)
+		button:RegisterForClicks("RightButtonUp")
+
+		local border = button:CreateFrame("Frame")
+		border:SetSize(30+10, 30+10)
+		border:SetPoint("CENTER", 0, 0)
+		border:SetBackdrop({ edgeFile = GetMedia("aura_border"), edgeSize = 12 })
+		border:SetBackdropColor(0,0,0,0)
+		border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
+		button.Border = border
+
+		local icon = button:CreateTexture()
+		icon:SetDrawLayer("BACKGROUND")
+		icon:ClearAllPoints()
+		icon:SetPoint("CENTER",0,0)
+		icon:SetSize(30-6, 30-6)
+		icon:SetTexCoord(5/64, 59/64, 5/64, 59/64)
+		button.Icon = icon
+
+		local count = border:CreateFontString()
+		count:ClearAllPoints()
+		count:SetPoint("BOTTOMRIGHT", 9, -6)
+		count:SetFontObject(GetFont(12, true))
+		count:SetTextColor(Colors.normal[1], Colors.normal[2], Colors.normal[3], .85)
+		button.Count = count
+
+		local time = border:CreateFontString()
+		time:ClearAllPoints()
+		time:SetPoint("TOPLEFT", -6, 6)
+		time:SetFontObject(GetFont(11, true))
+		time:SetTextColor(Colors.normal[1], Colors.normal[2], Colors.normal[3], .85)
+		button.Time = time
+
+		-- MainHand, OffHand, Ranged = 16,17,18
+		button:SetID(i+15)
+	end
+
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateTempEnchantFrames")
+	self:RegisterEvent("UNIT_INVENTORY_CHANGED", "UpdateTempEnchantFrames")
+end
+
+UnitFramePlayer.UpdateTempEnchantFrames = function(self)
+	local hasMainHandEnchant, mainHandExpiration, mainHandCharges, mainHandEnchantID, hasOffHandEnchant, offHandExpiration, offHandCharges, offHandEnchantId, hasRangedEnchant, rangedEnchantExpiration, rangedCharges, rangedEnchantID = GetWeaponEnchantInfo()
+
+	if (hasMainHandEnchant) then
+		local button = self.tempEnchantButtons[1]
+		button.Icon:SetTexture(GetInventoryItemTexture("player", button:GetID()))
+		button:SetAlpha(1)
+	else
+		self.self.tempEnchantButtons[1]:SetAlpha(0)
+	end
+
+	if (hasOffHandEnchant) then
+		local button = self.tempEnchantButtons[2]
+		button.Icon:SetTexture(GetInventoryItemTexture("player", button:GetID()))
+		button:SetAlpha(1)
+	else
+		self.tempEnchantButtons[2]:SetAlpha(0)
+	end
+
+	if (hasRangedEnchant) then
+		local button = self.tempEnchantButtons[3]
+		button.Icon:SetTexture(GetInventoryItemTexture("player", button:GetID()))
+		button:SetAlpha(1)
+	else
+		self.tempEnchantButtons[3]:SetAlpha(0)
 	end
 end
 
