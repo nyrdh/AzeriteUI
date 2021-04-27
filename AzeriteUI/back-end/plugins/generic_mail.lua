@@ -50,6 +50,10 @@ local OnLeave = function(element)
 	tooltip:Hide()
 end 
 
+local UpdateTooltip = function(element)
+	OnEnter(element)
+end
+
 local Update = function(self, event, ...)
 	local element = self.Mail
 	if (element.PreUpdate) then 
@@ -106,5 +110,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)), (Wheel("LibMinimap", true)) }) do 
-	Lib:RegisterElement("Mail", Enable, Disable, Proxy, 6)
+	Lib:RegisterElement("Mail", Enable, Disable, Proxy, 7)
 end 
