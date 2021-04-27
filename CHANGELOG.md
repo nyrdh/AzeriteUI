@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.479-Release] 2021-04-28
+### Fixed
+- Certain toybox items with a sellprice even though they're not actually sellable will no longer cause a bug if you hover the mouse cursor above them on the action bar while holding down the shift key. 
+
 ## [3.2.478-Release] 2021-04-27
 ### Changed
 - The temporary weapon enchant buttons (shaman weapon buffs, classic fishing lures, etc) will now follow the opacity of the player unit frame. It also has a new place to live up at the minimap in the legacy theme.

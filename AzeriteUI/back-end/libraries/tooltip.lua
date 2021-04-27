@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 122)
+local LibTooltip = Wheel:Set("LibTooltip", 124)
 if (not LibTooltip) then
 	return
 end
@@ -1430,7 +1430,7 @@ local SetItemInfo = function(self, data, useSimplified)
 		end
 	else
 		-- Sell value. Only shown on garbage, or for all sellable items when at a merchant.
-		if (data.itemSellPrice) and ((data.itemRarity == 0) or (MerchantFrame:IsShown()) or (IsShiftKeyDown())) then 
+		if (data.itemSellPrice) and (data.itemCount) and ((data.itemRarity == 0) or (MerchantFrame:IsShown()) or (IsShiftKeyDown())) then 
 			local money = data.itemSellPrice * data.itemCount
 			local moneyString
 			if (self.coinStringGold) and (self.coinStringSilver) and (self.coinStringCopper) then 
