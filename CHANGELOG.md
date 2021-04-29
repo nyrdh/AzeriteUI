@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.479-Release] 2021-04-28
+## [3.2.479-Release] 2021-04-29
+### Added
+- Added blip icons for WoW client patch 9.0.5.
+
 ### Fixed
 - Certain toybox items with a sellprice even though they're not actually sellable will no longer cause a bug if you hover the mouse cursor above them on the action bar while holding down the shift key. 
 
