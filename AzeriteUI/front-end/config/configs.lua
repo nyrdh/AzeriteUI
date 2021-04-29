@@ -2212,11 +2212,11 @@ RegisterLayout("Minimap", "Azerite", {
 			}, { __index = function(t,k) return GetMedia("Blip-Nandini-New-113_2") end }) or
 		(IsRetail) and 
 			setmetatable({
-				["8.3.0"] = GetMedia("Blip-Nandini-New-830"),
-				["8.3.7"] = GetMedia("Blip-Nandini-New-830"), -- no changes from main 8.3.0 patch.
-				["9.0.1"] = GetMedia("Blip-Nandini-New-901"),
-				["9.0.2"] = GetMedia("Blip-Nandini-New-902"),
-				-- 9.0.5 is changed again. fuck. fuck you blizzard. fuck you very much. 
+				["8.3.0"] = GetMedia("Blip-Nandini-Extended-830"),
+				["8.3.7"] = GetMedia("Blip-Nandini-Extended-830"), 
+				["9.0.1"] = GetMedia("Blip-Nandini-Extended-901"),
+				["9.0.2"] = GetMedia("Blip-Nandini-Extended-902"),
+				["9.0.5"] = GetMedia("Blip-Nandini-Extended-905")
 			}, { __index = function(t,k) return [[Interface\Minimap\ObjectIconsAtlas.blp]] end }),
 	["BlobAlpha"] = { 0, 96, 0, 0 }, -- blobInside, blobOutside, ringOutside, ringInside
 	["Clock_OverrideValue"] = Minimap_Clock_OverrideValue,

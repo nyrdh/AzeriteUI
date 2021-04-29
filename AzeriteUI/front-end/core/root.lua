@@ -594,20 +594,25 @@ Core.ApplyExperimentalFeatures = function(self)
 	-- whenever blizzard decide to update those. 
 	-- This works in both Retail and Classic
 	do
-		-- Change this rather than comment/uncomment
-		if (false) then
-			-- By setting a single point, but not any sizes, 
-			-- the texture is shown in its original size and dimensions!
-			local f = self:GetFrame("UICenter"):CreateTexture()
-			f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]])
-			f:SetPoint("CENTER")
+		-- By setting a single point, but not any sizes, 
+		-- the texture is shown in its original size and dimensions!
+		local f = self:GetFrame("UICenter"):CreateTexture()
+		f:Hide()
+		f:SetTexture([[Interface\MiniMap\ObjectIconsAtlas.blp]])
+		f:SetPoint("CENTER")
 
-			-- Add a little backdrop for easy
-			-- copy & paste from screenshots!
-			local g = self:GetFrame("UICenter"):CreateTexture()
-			g:SetColorTexture(0,.7,0,.25)
-			g:SetAllPoints(f)
-		end
+		-- Add a little backdrop for easy
+		-- copy & paste from screenshots!
+		local g = self:GetFrame("UICenter"):CreateTexture()
+		g:Hide()
+		g:SetColorTexture(0,.7,0,.25)
+		g:SetAllPoints(f)
+
+		self:RegisterChatCommand("blipicons", function() 
+			local show = not f:IsShown()
+			f:SetShown(show)
+			g:SetShown(show)
+		end)
 	end
 
 	hooksecurefunc("SetCVar", function(cvar,value) 
