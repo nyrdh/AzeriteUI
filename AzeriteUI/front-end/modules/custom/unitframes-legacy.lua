@@ -425,7 +425,7 @@ UnitFrames.OnInit = function(self)
 	-- Header frame for 2-5 player group frames
 	self.partyHeader = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.partyHeader:SetAttribute("_onattributechanged", SECURE.Party_OnAttribute)
-	self.partyHeader:SetShown(self:GetDB("EnablepartyFrames"))
+	self.partyHeader:SetShown(self:GetDB("EnablePartyFrames"))
 
 	-- Header frame for 6-40 player group frames
 	self.raidHeader = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
