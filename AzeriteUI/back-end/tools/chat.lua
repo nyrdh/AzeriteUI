@@ -207,39 +207,7 @@ table_insert(Replacements, { "<"..DND..">", "|cffE7E716<"..DND..">|r " })
 --table_insert(Replacements, { "You gained", "Stuff appeared" })
 
 local OnChatMessage = function(frame, event, message, author, ...)
-	if (message == ERR_NOT_IN_RAID) then
-		return true
-	
 
-	elseif (event == "CHAT_MSG_MONSTER_SAY") then
-		return true
-
-	elseif (event == "CHAT_MSG_MONSTER_YELL") then
-		return true
-
-	elseif (event == "CHAT_MSG_MONSTER_EMOTE") then
-		-- These returns a formatstring, which we need to paste the author/monster into.
-		RaidNotice_AddMessage(RaidBossEmoteFrame, string_format(message, author), ChatTypeInfo["MONSTER_EMOTE"])
-		return true
-
-	elseif (event == "CHAT_MSG_MONSTER_WHISPER") then
-		return true
-
-	elseif (event == "CHAT_MSG_RAID_BOSS_EMOTE") then
-		-- Don't do this, the RaidBossEmoteFrame does this 
-		-- by default for boss emotes and boss whispers!
-		--RaidNotice_AddMessage(RaidBossEmoteFrame, message, ChatTypeInfo["RAID_BOSS_EMOTE"])
-		return true
-
-	elseif (event == "CHAT_MSG_RAID_BOSS_WHISPER") then
-		-- Don't do this, the RaidBossEmoteFrame does this 
-		-- by default for boss emotes and boss whispers!
-		--RaidNotice_AddMessage(RaidBossEmoteFrame, message, ChatTypeInfo["RAID_BOSS_EMOTE"])
-		return true
-
-
-
-	else
 
 		-- TODO:
 		-- Make a system that pairs patterns with solutions,
@@ -248,42 +216,6 @@ local OnChatMessage = function(frame, event, message, author, ...)
 		if (FilterStatus.Styling) then
 
 
-			-- AFK
-			if (message == MARKED_AFK) then -- "You are now AFK."
-				return false, T.AFK_ADDED, author, ...
-			end
-			if (message == CLEARED_AFK) then -- "You are no longer AFK."
-				return false, T.AFK_CLEARED, author, ...
-			end
-			local afk_pattern = P[MARKED_AFK_MESSAGE] -- "You are now AFK: %s"
-			local afk_message = string_match(message, afk_pattern)
-			if (afk_message) then
-				if (afk_message == DEFAULT_AFK_MESSAGE) then -- "Away from Keyboard"
-					return false, T.AFK_ADDED, author, ...
-				end
-				return false, string_format(T.AFK_ADDED_MESSAGE, afk_message), author, ...
-			end
-
-			-- DND
-			if (message == CLEARED_DND) then -- "You are no longer marked DND."
-				return false, T.DND_CLEARED, author, ...
-			end
-			local dnd_pattern = P[MARKED_DND] -- "You are now DND: %s."
-			local dnd_message = string_match(message, dnd_pattern)
-			if (dnd_message) then
-				if (dnd_message == DEFAULT_DND_MESSAGE) then -- "Do not Disturb"
-					return false, T.DND_ADDED, author, ...
-				end
-				return false, string_format(T.DND_ADDED_MESSAGE, dnd_message), author, ...
-			end
-
-			-- Rested
-			if (message == ERR_EXHAUSTION_WELLRESTED) then -- "You feel well rested."
-				return false, T.RESTED_ADDED, author, ...
-			end
-			if (message == ERR_EXHAUSTION_NORMAL) then -- "You feel normal."
-				return false, T.RESTED_CLEARED, author, ...
-			end
 
 			-- Artifact Power?
 			if (IsRetail) then
@@ -362,31 +294,5 @@ Filters.Spam = {
 
 		-- Used by both styling and spam filters.
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", OnChatMessage)
-	end
-}
-
-Filters.Boss = {
-	Enable = function(module)
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_BOSS_EMOTE", OnChatMessage)
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_BOSS_WHISPER", OnChatMessage)
-	end,
-	Disable = function(module)
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_RAID_BOSS_EMOTE", OnChatMessage)
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_RAID_BOSS_WHISPER", OnChatMessage)
-	end
-}
-
-Filters.Monster = {
-	Enable = function(module)
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_SAY", OnChatMessage)
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_YELL", OnChatMessage)
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_EMOTE", OnChatMessage)
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_MONSTER_WHISPER", OnChatMessage)
-	end,
-	Disable = function(module)
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_SAY", OnChatMessage)
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_YELL", OnChatMessage)
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_EMOTE", OnChatMessage)
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_MONSTER_WHISPER", OnChatMessage)
 	end
 }
