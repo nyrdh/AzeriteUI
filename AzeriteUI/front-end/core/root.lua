@@ -18,6 +18,10 @@ Core:RegisterSavedVariablesGlobal(ADDON.."_DB")
 BINDING_HEADER_AZERITEUI = GetAddOnMetadata(ADDON, "Title")
 BINDING_NAME_AZERITEUI_OPTIONS_MENU = OPTIONS_MENU or "Options Menu"
 
+-- Doing this.
+NPE_LoadUI = function() end
+NPE_CheckTutorials = function() end
+
 -- Lua API
 local _G = _G
 local ipairs = ipairs
