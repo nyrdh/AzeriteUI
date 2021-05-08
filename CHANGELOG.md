@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.481-RC] 2021-05-08
+- First batch of fixes for BC compatibility.
+
 ## [3.2.480-Release] 2021-05-01
 ### Fixed
 - Fixed a typo in the legacy theme unitframe module that would cause party frames to be hidden on startup and reloads until manually toggled through the menu. 
