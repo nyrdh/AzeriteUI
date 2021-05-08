@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 135)
+local LibSecureButton = Wheel:Set("LibSecureButton", 137)
 if (not LibSecureButton) then
 	return
 end
@@ -105,6 +105,7 @@ local UnitClass = UnitClass
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Doing it this way to make the transition to library later on easier
@@ -162,7 +163,7 @@ local RIGHT_ACTIONBAR_PAGE = RIGHT_ACTIONBAR_PAGE
 local DAY, HOUR, MINUTE = 86400, 3600, 60
 
 local SECURE = {}
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	SECURE.Page_OnAttributeChanged = [=[ 
 		if (name == "state-page") then 
 			local page; 
@@ -1036,7 +1037,7 @@ ActionButton.Update = function(self)
 	self:UpdateFlyout()
 	self:UpdateSpellHighlight()
 
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		self:UpdateRank()
 	end
 
@@ -1217,7 +1218,7 @@ ActionButton.UpdateCount = function(self)
 		local count
 		local action = self.buttonAction
 		local actionType, actionID = GetActionInfo(action)
-		if (IsClassic) then
+		if (IsClassic or IsTBC) then
 			if (actionType == "spell") or (actionType == "macro") then
 				if (actionType == "macro") then
 					actionID = GetMacroSpell(actionID)
@@ -1470,7 +1471,7 @@ ActionButton.UpdateRank = function(self)
 	end
 end
 
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	ActionButton.ShowOverlayGlow = function(self, overlayType)
 		if (not self.SpellHighlight) then
 			return
@@ -1706,7 +1707,7 @@ ActionButton.OnEnable = function(self)
 	self:RegisterEvent("UPDATE_MACROS", UpdateActionButton)
 	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM", UpdateActionButton)
 
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", UpdateActionButton)
 		self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", UpdateActionButton)
 	end
@@ -2432,7 +2433,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		]])
 
 		local visibilityDriver
-		if (IsClassic) then
+		if (IsClassic or IsTBC) then
 			visibilityDriver = "[@pet,exists]show;hide"
 			
 		elseif (IsRetail) then
@@ -2470,7 +2471,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		button._owner = visibility
 
 		local visibilityDriver, macroText
-		if (IsClassic) then
+		if (IsClassic or IsTBC) then
 			macroText = "/dismount [mounted]"
 			visibilityDriver = "[mounted]show;hide"
 		
@@ -2520,7 +2521,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		LibSecureButton:CreateButtonAutoCast(button)
 		LibSecureButton:CreateButtonSpellHighlight(button)
 		LibSecureButton:CreateFlyoutArrow(button)
-		if (IsClassic) then
+		if (IsClassic or IsTBC) then
 			LibSecureButton:CreateButtonRank(button)
 		end
 
@@ -2627,7 +2628,7 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 		]])
 
 		local driver, visibilityDriver
-		if (IsClassic) then
+		if (IsClassic or IsTBC) then
 			if (barID == 1) then 
 				driver = "[form,noform] 0; [bar:2]2; [bar:3]3; [bar:4]4; [bar:5]5; [bar:6]6"
 

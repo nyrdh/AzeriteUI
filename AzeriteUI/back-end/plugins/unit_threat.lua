@@ -1,6 +1,3 @@
-local LibClientBuild = Wheel("LibClientBuild")
-assert(LibClientBuild, "UnitThreat requires LibClientBuild to be loaded.")
-
 -- WoW API
 local CreateFrame = CreateFrame
 local IsInGroup = IsInGroup
@@ -8,10 +5,6 @@ local IsInInstance = IsInInstance
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 local UnitExists = UnitExists
 local UnitThreatSituation = UnitThreatSituation
-
--- Constants for client version
-local IsClassic = LibClientBuild:IsClassic()
-local IsRetail = LibClientBuild:IsRetail()
 
 local UpdateColor = function(element, unit, status, r, g, b)
 	if (element.OverrideColor) then
@@ -110,5 +103,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Threat", Enable, Disable, Proxy, 18)
+	Lib:RegisterElement("Threat", Enable, Disable, Proxy, 20)
 end 

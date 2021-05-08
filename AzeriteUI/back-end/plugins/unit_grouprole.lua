@@ -6,11 +6,12 @@ local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- WoW Dummy API for now.
 -- We will find a way to figure this out better later on. Maybe. 
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	UnitGroupRolesAssigned = function(unit)
 		return "DAMAGER"
 	end
@@ -108,5 +109,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupRole", Enable, Disable, Proxy, 17)
+	Lib:RegisterElement("GroupRole", Enable, Disable, Proxy, 18)
 end 

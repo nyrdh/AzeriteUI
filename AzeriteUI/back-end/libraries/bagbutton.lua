@@ -74,6 +74,7 @@ local SpellIsTargeting = SpellIsTargeting
 
 -- Constants
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Library registries
@@ -229,7 +230,7 @@ local BANK_SLOT_CONTAINER = -4
 local BAG_SLOT_CONTAINER = -100
 
 -- Frame type of slot buttons.
-local BUTTON_TYPE = (IsClassic) and "Button" or "ItemButton" 
+local BUTTON_TYPE = (IsClassic or IsTBC) and "Button" or "ItemButton" 
 
 -- Frame template of itembuttons in each bagType.
 -- This table will have both the bagTypes and all bagIDs as keys, 
@@ -283,7 +284,7 @@ ButtonTemplates[BANK_CONTAINER] = ButtonTemplates.Bank
 -- The keyring only exists in classic, 
 -- but we leave the empty tables for a simpler API.
 local isKeyRingID = {} -- hashed
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	isBagID[KEYRING_CONTAINER] = true
 	isKeyRingID[KEYRING_CONTAINER] = true
 	bagIDs[#bagIDs + 1] = KEYRING_CONTAINER

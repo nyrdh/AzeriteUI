@@ -46,6 +46,7 @@ local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
 local Colors = Private.Colors
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 
 -- Addon localization

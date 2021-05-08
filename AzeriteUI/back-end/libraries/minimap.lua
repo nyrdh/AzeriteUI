@@ -1,4 +1,4 @@
-local Version = 60
+local Version = 61
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -63,6 +63,7 @@ local WorldFrame = WorldFrame
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Localized Torghast instance name
@@ -643,7 +644,7 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 				ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, self)
 				LibMinimap:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "SFX")
 
-			elseif (IsClassic) then
+			elseif (IsClassic or IsTBC) then
 				LibMinimap:ShowMinimapTrackingMenu()
 				LibMinimap:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "SFX")
 			end
@@ -829,7 +830,7 @@ LibMinimap.SetMinimapMaskTexture = function(self, path)
 	return self:SyncMinimap(true) and Library.MapContent:SetMaskTexture(path)
 end
 
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	local trackingMenuFrame = LibMinimap:CreateFrame("Frame", "GP_MinimapTrackingButtonMenu", tracking, "UIDropDownMenuTemplate")
 
 	LibMinimap.ShowMinimapTrackingMenu = function(self)
@@ -1397,7 +1398,7 @@ local embedMethods = {
 	SetMinimapBlipScale = true,
 	SetMinimapScale = true,
 	SetMinimapSize = true,
-	ShowMinimapTrackingMenu = IsClassic and true or nil,
+	ShowMinimapTrackingMenu = (IsClassic or IsTBC) and true or nil,
 	SyncMinimap = true,
 	UpdateAllMinimapElements = true
 }

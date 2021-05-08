@@ -19,6 +19,7 @@ local UnitIsCharmed = UnitIsCharmed
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Player Constants
@@ -38,6 +39,16 @@ local baseFilter = {
 -- https://wow.gamepedia.com/Dispel
 local classFilter
 if (IsClassic) then
+	classFilter = ({
+		-- CLASS 	= { FILTER_TYPE = { School = Level } }
+		DRUID 		= { HARMFUL = { Curse = 1, Poison = 1 } },
+		MAGE 		= { HARMFUL = { Curse = 1 } },
+		PALADIN 	= { HARMFUL = { Magic = 1, Poison = 1, Disease = 1 } },
+		PRIEST 		= { HARMFUL = { Magic = 1, Disease = 1 } },
+		SHAMAN 		= { HARMFUL = { Poison = 1, Disease = 1 } },
+		WARLOCK 	= { HARMFUL = { Magic = 1 } } 
+	})[playerClass]
+elseif (IsTBC) then
 	classFilter = ({
 		-- CLASS 	= { FILTER_TYPE = { School = Level } }
 		DRUID 		= { HARMFUL = { Curse = 1, Poison = 1 } },
@@ -492,5 +503,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 31)
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 32)
 end 

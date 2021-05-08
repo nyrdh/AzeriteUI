@@ -1,4 +1,4 @@
-local LibCast = Wheel:Set("LibCast", 11)
+local LibCast = Wheel:Set("LibCast", 13)
 if (not LibCast) then
 	return
 end
@@ -67,6 +67,7 @@ local playerGUID = UnitGUID("player")
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Utility Functions
@@ -463,7 +464,7 @@ if (IsClassic) then
 
 end
 
-if (IsRetail) then
+if (IsRetail or IsTBC) then
 
 	-- @return spellName, spellText, spellIcon, castStart, castEnd, isTradeSkill, notInterruptible, spellID
 	LibCast.UnitCastingInfo = function(self, unit)
@@ -546,7 +547,7 @@ if (IsClassic) then
 	end
 end
 
-if (IsRetail) then
+if (IsRetail or IsTBC) then
 	LibCast.OnInit = function(self)
 		self:UnregisterEvent("PLAYER_LOGIN", "OnInit")
 
@@ -556,8 +557,10 @@ if (IsRetail) then
 		self:RegisterEvent("UNIT_SPELLCAST_FAILED_QUIET", "OnEvent")
 		self:RegisterEvent("UNIT_SPELLCAST_STOP", "OnEvent")
 		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED", "OnEvent")
-		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE", "OnEvent")
-		self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", "OnEvent")
+		if (IsRetail) then
+			self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE", "OnEvent")
+			self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", "OnEvent")
+		end
 		self:RegisterEvent("UNIT_SPELLCAST_DELAYED", "OnEvent")
 		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START", "OnEvent")
 		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", "OnEvent")

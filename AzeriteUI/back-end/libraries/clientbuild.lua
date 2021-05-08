@@ -19,7 +19,7 @@ currentClientBuild = tonumber(currentClientBuild)
 -- Let's create some constants for faster lookups
 local MAJOR,MINOR,PATCH = string_split(".", currentClientPatch)
 
-local IsClassic, IsClassicTBC
+local IsClassic, IsTBC
 local IsRetail, IsRetailBFA, IsRetailShadowlands
 
 -- These are defined in FrameXML/BNet.lua
@@ -33,7 +33,7 @@ else
 	IsRetail = tonumber(MAJOR) >= 9
 end
 
-IsClassicTBC = tonumber(MAJOR) == 2
+IsTBC = tonumber(MAJOR) == 2
 IsRetailBFA = tonumber(MAJOR) == 8
 IsRetailShadowlands = tonumber(MAJOR) == 9
 
@@ -65,8 +65,8 @@ LibClientBuild.IsClassic = function(self)
 end
 
 -- Returns true if we're on a classic TBC patch
-LibClientBuild.IsClassicTBC = function(self)
-	return IsClassicTBC
+LibClientBuild.IsTBC = function(self)
+	return IsTBC
 end
 
 -- Returns true if we're on a retail patch
@@ -98,7 +98,7 @@ end
 -- Module embedding
 local embedMethods = {
 	IsClassic = true,
-	IsClassicTBC = true,
+	IsTBC = true,
 	IsRetail = true,
 	IsRetailBFA = true,
 	IsRetailShadowlands = true,

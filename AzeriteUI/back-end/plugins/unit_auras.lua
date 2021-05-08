@@ -30,7 +30,6 @@ local UnitIsFriend = UnitIsFriend
 local UnitIsUnit = UnitIsUnit
 
 -- Constants for client version
-local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Blizzard Textures
@@ -1132,5 +1131,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 73)
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 74)
 end 

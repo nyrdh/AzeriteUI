@@ -35,6 +35,7 @@ local UnitStagger = UnitStagger
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- WoW Constants
@@ -971,7 +972,7 @@ end
 -- related to player specialization, talents or level.
 -- This is also where we toggle the current element,
 -- disable the old and enable the new. 
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	UpdatePowerType = function(self, event, unit, ...)
 		local element = self.ClassPower
 
@@ -1185,5 +1186,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 54)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 55)
 end 

@@ -20,6 +20,7 @@ local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 
 -- Registries

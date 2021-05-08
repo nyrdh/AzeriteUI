@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 87)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 88)
 if (not LibUnitFrame) then	
 	return
 end
@@ -59,6 +59,7 @@ local UnitIsFriend = UnitIsFriend
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Library Registries
@@ -365,7 +366,7 @@ end
 LibUnitFrame.GetUnitFrameVisibilityDriver = function(self, unit, hideInVehicles)
 	local visDriver
 	if (unit == "player") then
-		if (IsClassic) then
+		if (IsClassic or IsTBC) then
 			visDriver = "[@player,exists][mounted]show;hide"
 		elseif (IsRetail) then
 			-- Might seem stupid, but I want the player frame to disappear along with the actionbars 

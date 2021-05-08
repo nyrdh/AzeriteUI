@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 50)
+local LibFader = Wheel:Set("LibFader", 51)
 if (not LibFader) then	
 	return
 end
@@ -60,6 +60,7 @@ local UnregisterAttributeDriver = UnregisterAttributeDriver
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Sourced from FrameXML/BuffFrame.lua
@@ -88,7 +89,7 @@ local Objects = LibFader.objects
 -- These are debuffs which are ignored, 
 -- allowing the interface to fade out even though they are present. 
 local safeDebuffs
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	safeDebuffs = {
 		-- deserters
 		[ 26013] = true, -- PvP Deserter 

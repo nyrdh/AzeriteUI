@@ -59,6 +59,7 @@ local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 
 -- WoW Constants
@@ -104,7 +105,7 @@ local HealthBarBackdropTemplate = {
 -- Using this as a tooltip method to access our custom colors.
 -- *Sourced from /back-end/tooltip.lua
 local GetDifficultyColorByLevel
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	GetDifficultyColorByLevel = function(level, isScaling)
 		local colors = Colors.quest
 		local levelDiff = level - UnitLevel("player")
@@ -266,7 +267,7 @@ Tooltip.Style = function(self)
 
 	HealthBar:Hide()
 
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		-- Oldschool backdrop killing.
 		self:DisableDrawLayer("BACKGROUND")
 		self:DisableDrawLayer("BORDER")
@@ -787,7 +788,7 @@ end
 
 Module.SetTooltipHooks = function(self)
 
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		hooksecurefunc("GameTooltip_SetBackdropStyle", Tooltip.Style)
 	elseif (IsRetail) then	
 		hooksecurefunc("SharedTooltip_SetBackdropStyle", Tooltip.Style)

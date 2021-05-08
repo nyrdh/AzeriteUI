@@ -45,6 +45,7 @@ local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia 
 local GetAuraFilter = Private.GetAuraFilter
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 
 ------------------------------------------------
@@ -1925,7 +1926,7 @@ RegisterLayout("BlizzardTimers", "Azerite", {
 })
 
 -- Blizzard Objectives Tracker
-RegisterLayout("BlizzardObjectivesTracker", "Azerite", (IsClassic) and {
+RegisterLayout("BlizzardObjectivesTracker", "Azerite", (IsClassic or IsTBC) and {
 	["FontObject"] = GetFont(13, true),
 	["FontObjectTitle"] = GetFont(15, true),
 	["HideInBossFights"] = true,
@@ -1948,7 +1949,7 @@ RegisterLayout("BlizzardObjectivesTracker", "Azerite", (IsClassic) and {
 	["HideInVehicles"] = false,
 	["HideInArena"] = true
 })
-RegisterLayoutVariation("BlizzardObjectivesTracker", "Legacy", "Azerite", (IsClassic) and {
+RegisterLayoutVariation("BlizzardObjectivesTracker", "Legacy", "Azerite", (IsClassic or IsTBC) and {
 	["FontObject"] = GetFont(13, true),
 	["FontObjectTitle"] = GetFont(15, true),
 	["HideInBossFights"] = true,
@@ -2071,7 +2072,7 @@ RegisterLayout("Durability", "Azerite", {
 })
 
 -- Group Leader Tools
-RegisterLayout("GroupTools", "Azerite", IsClassic and {
+RegisterLayout("GroupTools", "Azerite", (IsClassic or IsTBC) and {
 	["ConvertButtonPlace"] = { "TOP", 0, -360 + 140 }, 
 	["ConvertButtonSize"] = { 300*.75, 50*.75 },
 	["ConvertButtonTextColor"] = { 0, 0, 0 }, 
@@ -2207,7 +2208,7 @@ RegisterLayout("Minimap", "Azerite", {
 	["BattleGroundEyeSize"] = { 64, 64 }, 
 	["BattleGroundEyeTexture"] = GetMedia("group-finder-eye-green"),
 	["BlipTextures"] = 
-		(IsClassic) and 
+		(IsClassic or IsTBC) and 
 			setmetatable({
 			}, { __index = function(t,k) return GetMedia("Blip-Nandini-New-113_2") end }) or
 		(IsRetail) and 
@@ -2863,7 +2864,7 @@ RegisterLayout("UnitFramePlayer", "Azerite", {
 	},
 	["HardenedHealthTexture"] = GetMedia("hp_lowmid_bar"),
 	["HardenedHealthThreatTexture"] = GetMedia("hp_mid_case_glow"),
-	["HardenedLevel"] = IsClassic and 40 or 30,
+	["HardenedLevel"] = (IsClassic or IsTBC) and 40 or 30,
 	["HardenedManaOrbColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
 	["HardenedManaOrbTexture"] = GetMedia("orb_case_hi"),
 	["HardenedPowerForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },
@@ -3418,7 +3419,7 @@ RegisterLayout("UnitFrameTarget", "Azerite", {
 	["HardenedHealthThreatSize"] = { 716, 188 },
 	["HardenedHealthThreatTexture"] = GetMedia("hp_mid_case_glow"),
 	["HardenedHealthValueVisible"] = true,
-	["HardenedLevel"] = IsClassic and 40 or 30,
+	["HardenedLevel"] = (IsClassic or IsTBC) and 40 or 30,
 	["HardenedPortraitForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] }, 
 	["HardenedPortraitForegroundTexture"] = GetMedia("portrait_frame_hi"),
 	["HardenedPowerForegroundColor"] = { Colors.ui[1], Colors.ui[2], Colors.ui[3] },

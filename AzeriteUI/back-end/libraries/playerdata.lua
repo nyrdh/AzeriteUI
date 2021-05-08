@@ -1,4 +1,4 @@
-local LibPlayerData = Wheel:Set("LibPlayerData", 23)
+local LibPlayerData = Wheel:Set("LibPlayerData", 24)
 if (not LibPlayerData) then
 	return
 end
@@ -40,6 +40,7 @@ local UnitLevel = UnitLevel
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Library registries
@@ -74,6 +75,19 @@ if (IsClassic) then
 	-- Just in case I slip up and use the wrong API.
 	LibPlayerData.PlayerHasAP = function() end
 
+elseif (IsTBC) then
+
+	-- Return whether the player currently can gain XP
+	LibPlayerData.PlayerHasXP = function() return (UnitLevel("player") < 70) end
+
+	-- Returns whether the player is  tracking a reputation
+	LibPlayerData.PlayerHasRep = function()
+		return GetWatchedFactionInfo() and true or false 
+	end
+
+	-- Just in case I slip up and use the wrong API.
+	LibPlayerData.PlayerHasAP = function() end
+	
 elseif (IsRetail) then
 
 	-- Return whether the player currently can gain XP

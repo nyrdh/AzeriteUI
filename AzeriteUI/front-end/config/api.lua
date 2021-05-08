@@ -235,7 +235,7 @@ Private.GetMedia = function(name, type) return ([[Interface\AddOns\%s\front-end\
 ------------------------------------------------
 Private.ClientBuild = LibClientBuild:GetCurrentClientBuild()
 Private.IsClassic = LibClientBuild:IsClassic()
-Private.IsClassicTBC = LibClientBuild:IsClassicTBC()
+Private.IsTBC = LibClientBuild:IsTBC()
 Private.IsRetail = LibClientBuild:IsRetail()
 Private.IsWinterVeil = LibTime:IsWinterVeil()
 Private.IsLoveFestival = LibTime:IsLoveFestival()

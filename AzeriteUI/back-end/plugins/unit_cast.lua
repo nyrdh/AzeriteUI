@@ -39,6 +39,7 @@ local DAY, HOUR, MINUTE = 86400, 3600, 60
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 local playerGUID = UnitGUID("player")
@@ -663,5 +664,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 53)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 54)
 end 

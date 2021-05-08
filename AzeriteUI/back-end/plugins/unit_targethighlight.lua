@@ -8,7 +8,6 @@ local string_match = string.match
 local UnitIsUnit = UnitIsUnit
 
 -- Constants for client version
-local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 
 local Update = function(self, event, unit, ...)
@@ -88,5 +87,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("TargetHighlight", Enable, Disable, Proxy, 12)
+	Lib:RegisterElement("TargetHighlight", Enable, Disable, Proxy, 14)
 end 

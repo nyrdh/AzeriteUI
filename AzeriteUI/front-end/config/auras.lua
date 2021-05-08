@@ -25,28 +25,34 @@ local UnitLevel = UnitLevel
 
 -- Private API
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 
 -- Library Databases
 local BitFilters = LibAuraData:GetAllAuraInfoBitFilters() -- Aura bit filters
 local InfoFlags = LibAuraData:GetAllAuraInfoFlags() -- Aura info flags
-local UserFlags -- populated and created farther down
+local UserFlags = {} -- populated and created farther down
 
 -- Forcing this for classes still lacking strict filter lists,
 -- or we'd end up with nothing being shown at all.
 local playerClass = select(2, UnitClass("player"))
-local SLACKMODE = (playerClass == "DEATHKNIGHT")
-			   or (playerClass == "DEMONHUNTER")
-			   --or (playerClass == "DRUID")
-			   or (IsClassic and (playerClass == "HUNTER"))
-			   --or (playerClass == "MAGE")
-			   or (playerClass == "MONK")
-			   or (playerClass == "PALADIN")
-			   or (playerClass == "PRIEST")
-			   or (playerClass == "ROGUE")
-			   or (playerClass == "SHAMAN")
-			   or (playerClass == "WARLOCK")
-			   --or (playerClass == "WARRIOR")
+local SLACKMODE = true
+
+if (IsClassic) then
+	if (playerClass == "DRUID") 
+	or (playerClass == "HUNTER") 
+	or (playerClass == "MAGE")
+	or (playerClass == "WARRIOR") then 
+		SLACKMODE = true
+	end
+elseif (IsTBC) then
+elseif (IsRetail) then
+	if (playerClass == "DRUID") 
+	or (playerClass == "MAGE")
+	or (playerClass == "WARRIOR") then 
+		SLACKMODE = true
+	end
+end
 
 
  -- Speed APIs
@@ -816,6 +822,12 @@ if (IsClassic) then
 		-- Nefarian
 		DefineAura(23402, IsBoss) -- Corrupted Healing
 
+end
+
+-- TBC Aura Lists!
+-----------------------------------------------------------------
+if (IsTBC) then
+	-- Not happening. Deal with it.
 end
 
 -- Retail Aura Lists!

@@ -27,6 +27,7 @@ local GetNetStats = GetNetStats
 local Colors = Private.Colors
 local GetLayout = Private.GetLayout
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 
 -- All this shit needs to go!!
@@ -68,7 +69,7 @@ local getMicroButtonTooltipText = function(text, action)
 end
 
 local microButtons = {}
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	table_insert(microButtons, "CharacterMicroButton")
 	table_insert(microButtons, "SpellbookMicroButton")
 	table_insert(microButtons, "TalentMicroButton")
@@ -93,7 +94,7 @@ if (IsRetail) then
 end
 
 local microButtonTexts = {}
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	microButtonTexts.CharacterMicroButton = CHARACTER_BUTTON
 	microButtonTexts.SpellbookMicroButton = SPELLBOOK_ABILITIES_BUTTON
 	microButtonTexts.TalentMicroButton = TALENTS_BUTTON
@@ -125,7 +126,7 @@ local PrepareTooltip = function(self)
 end
 
 local microButtonScripts = {}
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	microButtonScripts.CharacterMicroButton_OnEnter = function(self)
 		self.tooltipText = getMicroButtonTooltipText(CHARACTER_BUTTON, "TOGGLECHARACTER0")
 		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor

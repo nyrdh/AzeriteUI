@@ -33,6 +33,7 @@ local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 -- Private API
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
+local IsRetail = Private.IsRetail
 
 -- WoW Constants
 local MAX_PARTY_MEMBERS = MAX_PARTY_MEMBERS
@@ -49,8 +50,6 @@ local RAID_MEMBERS = RAID_MEMBERS
 local READY_CHECK = READY_CHECK
 local ROLE_POLL = ROLE_POLL
 local TANK = TANK
-local IsClassic = Private.IsClassic
-local IsRetail = Private.IsRetail
 
 -- Uncomment to show tools when solo 
 local DEV -- = true
@@ -276,7 +275,7 @@ Module.UpdateCounts = (IsRetail) and function(self)
 	end 
 
 end 
-or (IsClassic) and function(self)
+or function(self)
 	local alive, dead = 0, 0 
 
 	if IsInRaid() then

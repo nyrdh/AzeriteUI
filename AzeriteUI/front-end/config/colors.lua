@@ -16,8 +16,8 @@ local fast = Colors:CreateColor(0/255, 208/255, 176/255)
 local slow = Colors:CreateColor(116/255, 156/255, 255/255)
 local angry = Colors:CreateColor(156/255, 116/255, 255/255)
 
-Colors.power.ENERGY_CRYSTAL = fast -- Rogues, Druids
-Colors.power.FOCUS_CRYSTAL = slow -- Hunter Pets (?)
+Colors.power.ENERGY_CRYSTAL = fast -- Rogues, Druids, Monks
+Colors.power.FOCUS_CRYSTAL = slow -- Hunters
 Colors.power.FURY_CRYSTAL = angry -- Havoc Demon Hunter 
 Colors.power.INSANITY_CRYSTAL = angry -- Shadow Priests
 Colors.power.LUNAR_POWER_CRYSTAL = slow -- Balance Druid Astral Power 

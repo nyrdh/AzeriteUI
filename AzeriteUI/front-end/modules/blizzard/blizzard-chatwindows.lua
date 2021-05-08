@@ -36,6 +36,7 @@ local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 
 local alphaLocks = {}
@@ -166,7 +167,7 @@ end
 
 Module.UpdateChatWindowButtons = function(self, frame)
 
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		return
 	end
 

@@ -43,6 +43,7 @@ local Colors = Private.Colors
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 
 -----------------------------------------------------------------
@@ -235,7 +236,7 @@ end
 -- Classic
 -----------------------------------------------------------------
 Module.StyleClassicLog = function(self)
-	if (not IsClassic) then
+	if not(IsClassic or IsTBC) then
 		return
 	end
 	-- Just hook the global functions as far as possible
@@ -250,7 +251,7 @@ Module.StyleClassicLog = function(self)
 end
 
 Module.StyleClassicTracker = function(self)
-	if (not IsClassic) then
+	if not(IsClassic or IsTBC) then
 		return
 	end
 	local layout = self.layout
@@ -708,7 +709,7 @@ Module.OnInit = function(self)
 		self.queueImmersionHook = true
 	end
 
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		self.frame = self:CreateFrame("Frame", nil, "UICenter")
 		self.frame:SetFrameStrata("LOW")
 		self:StyleClassicLog()

@@ -1,4 +1,4 @@
-local LibBindTool = Wheel:Set("LibBindTool", 3)
+local LibBindTool = Wheel:Set("LibBindTool", 4)
 if (not LibBindTool) then
 	return
 end
@@ -74,7 +74,6 @@ local SetBinding = SetBinding
 local Colors = LibColorTool:GetColorTable()
 
 -- Constants for client version
-local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Library registries

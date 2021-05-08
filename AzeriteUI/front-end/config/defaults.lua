@@ -4,6 +4,7 @@ local LibDB = Wheel("LibDB")
 assert(LibDB, ADDON.." requires LibDB to be loaded.")
 
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 
 ------------------------------------------------
@@ -45,7 +46,7 @@ RegisterDefaults("BlizzardChatFrames", {
 	enableChatOutline = true -- enable outlined chat for readability
 })
 
-RegisterDefaults("BlizzardFloaterHUD", (IsClassic) and {
+RegisterDefaults("BlizzardFloaterHUD", (IsClassic or IsTBC) and {
 	enableRaidWarnings = true -- not yet implemented!
 
 } or (IsRetail) and {

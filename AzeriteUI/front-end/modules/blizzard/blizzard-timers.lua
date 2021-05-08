@@ -24,6 +24,7 @@ local UnitPowerBarTimerInfo = UnitPowerBarTimerInfo
 -- Private API
 local GetLayout = Private.GetLayout
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 
 -- WoW Constants

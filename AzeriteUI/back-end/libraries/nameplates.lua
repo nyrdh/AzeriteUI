@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 67)
+local LibNamePlate = Wheel:Set("LibNamePlate", 68)
 if (not LibNamePlate) then	
 	return
 end
@@ -76,6 +76,7 @@ local WorldFrame = WorldFrame
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Plate Registries
@@ -201,7 +202,7 @@ local ENFORCED_CVARS = {
 	nameplateMinAlpha = .4, -- .6
 	nameplateOccludedAlphaMult = .15, -- .4
 	nameplateSelectedAlpha = 1, -- 1
-	nameplateMaxAlphaDistance = IsClassic and 20 or IsRetail and 30, -- 40
+	nameplateMaxAlphaDistance = (IsClassic or IsTBC) and 20 or (IsRetail) and 30, -- 40
 	nameplateMinAlphaDistance = 10 -- 10
 }
 

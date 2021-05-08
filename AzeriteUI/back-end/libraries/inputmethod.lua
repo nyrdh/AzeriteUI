@@ -1,4 +1,4 @@
-local LibInputMethod = Wheel:Set("LibInputMethod", 9)
+local LibInputMethod = Wheel:Set("LibInputMethod", 10)
 if (not LibInputMethod) then
 	return
 end
@@ -21,6 +21,7 @@ local GetDeviceMappedState = C_GamePad and C_GamePad.GetDeviceMappedState
 
 -- WoW Client Constants
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Library registries

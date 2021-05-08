@@ -4,7 +4,7 @@ if (not LibClientBuild) or (not LibClientBuild:IsClassic()) then
 	return
 end
 
-local LibSpellData = Wheel:Set("LibSpellData", 2)
+local LibSpellData = Wheel:Set("LibSpellData", 4)
 if (not LibSpellData) then
 	return
 end

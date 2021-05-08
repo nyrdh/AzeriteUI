@@ -53,6 +53,7 @@ local UIParent = UIParent
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 LibBlizzard.embeds = LibBlizzard.embeds or {}
@@ -174,7 +175,7 @@ end
 -- Widget Pool
 -----------------------------------------------------------------
 -- ActionBars (Classic)
-UIWidgetsDisable["ActionBars"] = IsClassic and function(self)
+UIWidgetsDisable["ActionBars"] = (IsClassic or IsTBC) and function(self)
 
 	for _,object in pairs({
 		"MainMenuBarVehicleLeaveButton",
@@ -1031,7 +1032,7 @@ UIWidgetsDisable["UnitFramePlayer"] = function(self)
 end
 
 UIWidgetsDisable["UnitFramePet"] = function(self)
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		killUnitFrame("PetFrame")
 	else
 		-- The retail totem bar relies on this
@@ -1197,13 +1198,13 @@ end
 UIWidgetStyling["GameMenu"] = function(self, ...)
 end
 
-UIWidgetStyling["ObjectiveTracker"] = IsClassic and function(self, ...)
+UIWidgetStyling["ObjectiveTracker"] = (IsClassic or IsTBC) and function(self, ...)
 end
 or IsRetail and function(self, ...)
 end
 
 UIWidgetDependency["WorldMap"] = "Blizzard_WorldMap"
-UIWidgetStyling["WorldMap"] = IsClassic and function(self, ...)
+UIWidgetStyling["WorldMap"] = (IsClassic or IsTBC) and function(self, ...)
 	local Canvas = WorldMapFrame
 	Canvas.BlackoutFrame:Hide()
 	Canvas:SetIgnoreParentScale(false)

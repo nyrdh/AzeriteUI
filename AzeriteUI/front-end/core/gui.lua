@@ -34,6 +34,7 @@ local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 local IsForcingSlackAuraFilterMode = Private.IsForcingSlackAuraFilterMode
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 
 -- Fixing Blizzard's shit.

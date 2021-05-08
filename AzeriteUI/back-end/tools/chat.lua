@@ -73,7 +73,6 @@ local CHAT_FRAMES = CHAT_FRAMES
 
 -- Constants
 local Colors = LibColorTool:GetColorTable()
-local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 local PlayerFaction, PlayerFactionLabel = UnitFactionGroup("player")
 

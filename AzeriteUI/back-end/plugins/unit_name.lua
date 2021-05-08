@@ -17,6 +17,7 @@ local UnitQuestTrivialLevelRangeScaling = UnitQuestTrivialLevelRangeScaling or G
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 local utf8sub = function(str, i, dots)
@@ -52,7 +53,7 @@ end
 -- Using this as a tooltip method to access our custom colors.
 -- *Sourced from /back-end/tooltip.lua
 local GetDifficultyColorByLevel
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	GetDifficultyColorByLevel = function(self, level, isScaling)
 		local colors = self.colors.quest
 		local levelDiff = level - UnitLevel("player")
@@ -221,5 +222,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Name", Enable, Disable, Proxy, 13)
+	Lib:RegisterElement("Name", Enable, Disable, Proxy, 14)
 end 

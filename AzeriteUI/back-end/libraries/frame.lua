@@ -1,4 +1,4 @@
-local LibFrame = Wheel:Set("LibFrame", 70)
+local LibFrame = Wheel:Set("LibFrame", 71)
 if (not LibFrame) then	
 	return
 end
@@ -53,6 +53,7 @@ local WorldFrame = WorldFrame
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Default keyword used as a fallback. this will not be user editable.
@@ -130,7 +131,7 @@ local SetDisplaySize = function(ratio, altRatio, useSmallestRatio)
 end
 SetDisplaySize()
 
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	-- Forcefully re-show this in combat if somebody has hidden it.
 	RegisterAttributeDriver(LibFrame.frame, "state-visibility", "[combat]show;show")
 

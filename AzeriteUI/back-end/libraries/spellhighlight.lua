@@ -1,4 +1,4 @@
-local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 8)
+local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 9)
 if (not LibSpellHighlight) then
 	return
 end
@@ -104,6 +104,7 @@ local playerGUID = UnitGUID("player")
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Sourced from BlizzardInterfaceResources/Resources/EnumerationTables.lua
@@ -694,7 +695,7 @@ LibSpellHighlight.UpdateClassicEvents = function(self, event, ...)
 end
 
 local PopulateClassicDatabase = function(self)
-	if (not IsClassic) then
+	if not(IsClassic or IsTBC) then
 		return
 	end
 
@@ -851,7 +852,7 @@ LibSpellHighlight.Embed = function(self, target)
 	return target
 end
 
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	-- Register initialization events
 	if (playerClass == "DRUID") then
 		LibSpellHighlight:RegisterEvent("SPELLS_CHANGED", "UpdateClassicEvents")

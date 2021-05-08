@@ -57,6 +57,7 @@ local UnitIsUnit = UnitIsUnit
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Shortcuts

@@ -53,6 +53,7 @@ local GetLayout = Private.GetLayout
 local GetLayoutID = Private.GetLayoutID
 local GetMedia = Private.GetMedia
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 local IsWinterVeil = Private.IsWinterVeil
 local IsLoveFestival = Private.IsLoveFestival
@@ -1729,7 +1730,7 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 	classPower.runeSortOrder = layout.ClassPowerRuneSortOrder 
 
 	-- We show all 6 runes in retail, but stick to 5 otherwise.
-	local numPoints = IsRetail and 6 or IsClassic and 5
+	local numPoints = (IsRetail) and 6 or (IsClassic or IsTBC) and 5
 	for i = 1,numPoints do
 
 		-- Main point object

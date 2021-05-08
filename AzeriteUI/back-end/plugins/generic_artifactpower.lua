@@ -1,8 +1,8 @@
 local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, "GenericAzeritePower requires LibClientBuild to be loaded.")
 
--- This library is for Classic only!
-if (LibClientBuild:IsClassic()) then
+-- This library is for Retail only!
+if (not LibClientBuild:IsRetail()) then
 	return
 end
 
@@ -176,5 +176,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)), (Wheel("LibMinimap", true)) }) do 
-	Lib:RegisterElement("ArtifactPower", Enable, Disable, Proxy, 20)
+	Lib:RegisterElement("ArtifactPower", Enable, Disable, Proxy, 21)
 end 

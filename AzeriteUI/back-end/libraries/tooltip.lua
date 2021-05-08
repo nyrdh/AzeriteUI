@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 124)
+local LibTooltip = Wheel:Set("LibTooltip", 125)
 if (not LibTooltip) then
 	return
 end
@@ -88,6 +88,7 @@ local UnitReaction = UnitReaction
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Library Registries
@@ -697,7 +698,7 @@ end
 
 -- Returns the correct difficulty color compared to the player.
 -- Using this as a tooltip method to access our custom colors.
-if (IsClassic) then
+if (IsClassic or IsTBC) then
 	Tooltip.GetDifficultyColorByLevel = function(self, level, isScaling)
 		local colors = self.colors.quest
 		local levelDiff = level - UnitLevel("player")
@@ -1318,7 +1319,7 @@ local SetItemInfo = function(self, data, useSimplified)
 		end
 
 		-- for multiple primary stats. classic thing?
-		if (IsClassic) then
+		if (IsClassic or IsTBC) then
 			if data.primaryStats then 
 				for key,value in pairs(data.primaryStats) do 
 					self:AddLine(string_format("%s %s", (value > 0) and ("+"..tostring(value)) or tostring(value), _G[key]), statR, statG, statB)

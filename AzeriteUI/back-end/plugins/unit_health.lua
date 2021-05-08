@@ -48,7 +48,6 @@ local S_DEAD = DEAD
 local S_PLAYER_OFFLINE = PLAYER_OFFLINE
 
 -- Constants for client version
-local IsClassic = LibClientBuild:IsClassic()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Constants
@@ -675,5 +674,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 68)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 69)
 end 

@@ -5,7 +5,7 @@ which the requesting module can edit or add to later.
 
 --]]--
 
-local LibColorTool = Wheel:Set("LibColorTool", 5)
+local LibColorTool = Wheel:Set("LibColorTool", 6)
 if (not LibColorTool) then
 	return
 end
@@ -26,10 +26,6 @@ local type = type
 
 -- WoW API
 local CreateFont = CreateFont
-
--- Constants for client version
-local IsClassic = LibClientBuild:IsClassic()
-local IsRetail = LibClientBuild:IsRetail()
 
 -- Library registries
 LibColorTool.embeds = LibColorTool.embeds or {}
