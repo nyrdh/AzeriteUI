@@ -1,4 +1,4 @@
-local LibModule = Wheel:Set("LibModule", 42)
+local LibModule = Wheel:Set("LibModule", 44)
 if (not LibModule) then	
 	return
 end
@@ -455,20 +455,23 @@ local ModuleProtoType = {
 		end
 	end,
 
-	-- Check if an addon is enabled	in the addon listing
+	-- Check if an addon is enabled	and will be or have been loaded.
 	IsAddOnEnabled = function(self, target)
 		local target = string_lower(target)
 		for i = 1,GetNumAddOns() do
 			local name, title, notes, enabled, loadable, reason, security = self:GetAddOnInfo(i)
 			if string_lower(name) == target then
-				if enabled then
+				-- Has to check for both enabled and loadable, 
+				-- as an addon can be enabled in the addon listing, 
+				-- yet disasbled from a missing dependancy.
+				if enabled and loadable then
 					return true
 				end
 			end
 		end
 	end,
 
-	-- Check if an addon exists	in the addon listing
+	-- Check if an addon exists	in the addon listing.
 	IsAddOnAvailable = function(self, target)
 		local target = string_lower(target)
 		for i = 1,GetNumAddOns() do
