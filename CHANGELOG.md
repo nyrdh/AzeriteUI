@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.485-RC] 2021-05-17
+- Extra push needed because the bigwigs packager changed its API from using "bc" to calling it "bcc". 
+
 ## [3.2.484-RC] 2021-05-17
 ### Fixed
 - You should no longer get two identical target frames in legacy mode.
