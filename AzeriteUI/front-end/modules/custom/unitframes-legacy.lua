@@ -389,6 +389,7 @@ UnitFrames.SpawnUnitFrames = function(self)
 			end
 		end
 	end
+	self.SpawnUnitFrames = function() end
 end
 
 UnitFrames.GetExplorerModeFrameAnchors = function(self)

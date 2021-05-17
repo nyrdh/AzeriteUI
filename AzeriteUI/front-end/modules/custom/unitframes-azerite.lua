@@ -1803,10 +1803,6 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 end
 
 UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
-	if (self:Forge(Private.GetSchematic("UnitForge::Target"))) then
-		return 
-	end
-
 	self.layout = layout
 	self.colors = Colors
 
@@ -2342,10 +2338,6 @@ UnitFramePlayer.OnInit = function(self)
 end 
 
 UnitFramePlayer.OnEnable = function(self)
-	if (Private.HasSchematic("UnitForge::Player")) then
-		self:RegisterMessage("GP_AURA_FILTER_MODE_CHANGED", "OnEvent")
-		return
-	end
 	if (not self.frame) then
 		return
 	end
@@ -2477,30 +2469,20 @@ UnitFramePlayer.UpdateTempEnchantFrames = function(self)
 end
 
 UnitFramePlayerHUD.OnInit = function(self)
-	-- This is our new system. 
-	-- If it's present in the current theme,
-	-- bail out and process no further. 
-	if (Private.HasSchematic("ModuleForge::UnitFrames")) then
+	local theme = GetLayoutID()
+	if (theme ~= "Azerite") then
 		return self:SetUserDisabled(true)
 	end
 
-	if (Private.HasSchematic("UnitForge::PlayerHUD")) then
-		self.db = GetConfig(self:GetName())
-		self.frame = self:SpawnUnitFrame("player", "UICenter", function(self, unit) 
-			self:Forge(Private.GetSchematic("UnitForge::PlayerHUD")) 
-		end) 
-		return
-	else
-		self.db = GetConfig(self:GetName())
-		self.layout = GetLayout(self:GetName())
-		if (not self.layout) then
-			return self:SetUserDisabled(true)
-		end
-
-		self.frame = self:SpawnUnitFrame("player", "UICenter", function(frame, unit, id, _, ...)
-			return UnitStyles.StylePlayerHUDFrame(frame, unit, id, self.layout, ...)
-		end)
+	self.db = GetConfig(self:GetName())
+	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
+		return self:SetUserDisabled(true)
 	end
+
+	self.frame = self:SpawnUnitFrame("player", "UICenter", function(frame, unit, id, _, ...)
+		return UnitStyles.StylePlayerHUDFrame(frame, unit, id, self.layout, ...)
+	end)
 
 	-- Create a secure proxy updater for the menu system
 	local callbackFrame = CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.HUD_SecureCallback)
@@ -2585,29 +2567,20 @@ end
 -- Target
 -----------------------------------------------------------
 UnitFrameTarget.OnInit = function(self)
-	-- This is our new system. 
-	-- If it's present in the current theme,
-	-- bail out and process no further. 
-	if (Private.HasSchematic("ModuleForge::UnitFrames")) then
+	local theme = GetLayoutID()
+	if (theme ~= "Azerite") then
+		return self:SetUserDisabled(true)
+	end
+	
+	self.db = GetConfig(self:GetName())
+	self.layout = GetLayout(self:GetName())
+	if (not self.layout) then
 		return self:SetUserDisabled(true)
 	end
 
-	if (Private.HasSchematic("UnitForge::Target")) then
-		self.db = GetConfig(self:GetName())
-		self.frame = self:SpawnUnitFrame("target", "UICenter", function(self, unit) 
-			self:Forge(Private.GetSchematic("UnitForge::Target")) 
-		end) 
-		return
-	else
-		self.layout = GetLayout(self:GetName())
-		if (not self.layout) then
-			return self:SetUserDisabled(true)
-		end
-
-		-- How this is called:
-		-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
-		self.frame = self:SpawnUnitFrame("target", "UICenter", UnitStyles.StyleTargetFrame, self.layout, self) 
-	end
+	-- How this is called:
+	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
+	self.frame = self:SpawnUnitFrame("target", "UICenter", UnitStyles.StyleTargetFrame, self.layout, self) 
 
 	-- Apply the aura filter
 	local auras = self.frame.Auras
@@ -2623,10 +2596,6 @@ UnitFrameTarget.OnInit = function(self)
 end 
 
 UnitFrameTarget.OnEnable = function(self)
-	if (Private.HasSchematic("UnitForge::Target")) then
-		self:RegisterMessage("GP_AURA_FILTER_MODE_CHANGED", "OnEvent")
-		return
-	end
 	if (not self.frame) then
 		return
 	end
@@ -2660,10 +2629,8 @@ end
 -----------------------------------------------------------
 if (UnitFrameFocus) then
 	UnitFrameFocus.OnInit = function(self)
-		-- This is our new system. 
-		-- If it's present in the current theme,
-		-- bail out and process no further. 
-		if (Private.HasSchematic("ModuleForge::UnitFrames")) then
+		local theme = GetLayoutID()
+		if (theme ~= "Azerite") then
 			return self:SetUserDisabled(true)
 		end
 
@@ -2682,10 +2649,8 @@ end
 -- Pet
 -----------------------------------------------------------
 UnitFramePet.OnInit = function(self)
-	-- This is our new system. 
-	-- If it's present in the current theme,
-	-- bail out and process no further. 
-	if (Private.HasSchematic("ModuleForge::UnitFrames")) then
+	local theme = GetLayoutID()
+	if (theme ~= "Azerite") then
 		return self:SetUserDisabled(true)
 	end
 
@@ -2703,10 +2668,8 @@ end
 -- Target of Target
 -----------------------------------------------------------
 UnitFrameToT.OnInit = function(self)
-	-- This is our new system. 
-	-- If it's present in the current theme,
-	-- bail out and process no further. 
-	if (Private.HasSchematic("ModuleForge::UnitFrames")) then
+	local theme = GetLayoutID()
+	if (theme ~= "Azerite") then
 		return self:SetUserDisabled(true)
 	end
 
@@ -2729,10 +2692,8 @@ end
 -- Party
 -----------------------------------------------------------
 UnitFrameParty.OnInit = function(self)
-	-- This is our new system. 
-	-- If it's present in the current theme,
-	-- bail out and process no further. 
-	if (Private.HasSchematic("ModuleForge::GroupFrames")) then
+	local theme = GetLayoutID()
+	if (theme ~= "Azerite") then
 		return self:SetUserDisabled(true)
 	end
 
@@ -2743,7 +2704,6 @@ UnitFrameParty.OnInit = function(self)
 	if (not self.layout) then
 		return self:SetUserDisabled(true)
 	end
-
 
 	self.frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame:SetSize(unpack(self.layout.Size))
@@ -2795,10 +2755,8 @@ end
 -- Raid
 -----------------------------------------------------------
 UnitFrameRaid.OnInit = function(self)
-	-- This is our new system. 
-	-- If it's present in the current theme,
-	-- bail out and process no further. 
-	if (Private.HasSchematic("ModuleForge::GroupFrames")) then
+	local theme = GetLayoutID()
+	if (theme ~= "Azerite") then
 		return self:SetUserDisabled(true)
 	end
 
@@ -2877,10 +2835,8 @@ end
 -----------------------------------------------------------
 -- These don't really exist in classic, right?
 UnitFrameBoss.OnInit = function(self)
-	-- This is our new system. 
-	-- If it's present in the current theme,
-	-- bail out and process no further. 
-	if (Private.HasSchematic("ModuleForge::EnemyFrames")) then
+	local theme = GetLayoutID()
+	if (theme ~= "Azerite") then
 		return self:SetUserDisabled(true)
 	end
 
