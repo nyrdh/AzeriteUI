@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.484-RC] 2021-05-17
+### Fixed
+- You should no longer get two identical target frames in legacy mode.
+
 ## [3.2.483-RC] 2021-05-13
 ### Changed
 - WorldFrame unit tooltips no longer get their content modified by this addon if totalRP3 currently is enabled. 
