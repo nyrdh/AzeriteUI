@@ -1,4 +1,4 @@
-local Version = 61
+local Version = 63
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -743,13 +743,20 @@ LibMinimap.SetMinimapBlips = function(self, path, patchMin, patchMax)
 	check(patchMin, 2, "string")
 	check(patchMax, 3, "string", "nil")
 
-	local build = LibMinimap:GetCurrentClientBuild()
-	local buildMin = LibMinimap:GetClientBuildByPatch(patchMin)
-	local buildMax = LibMinimap:GetClientBuildByPatch(patchMax or patchMin)
+	if (patchMin and patchMax) then
+		local build = LibMinimap:GetCurrentClientBuild()
+		local buildMin = LibMinimap:GetClientBuildByPatch(patchMin)
+		local buildMax = LibMinimap:GetClientBuildByPatch(patchMax or patchMin)
 
-	-- Only apply the blips if the match the given client interval
-	if (buildMin and buildMax) and (build >= buildMin) and (build <= buildMax) then
-		return self:SyncMinimap(true) and Library.MapContent:SetBlipTexture(path)
+		if (buildMin and buildMax) and (build >= buildMin) and (build <= buildMax) then
+			return self:SyncMinimap(true) and Library.MapContent:SetBlipTexture(path)
+		end
+
+	else
+		local patch = LibMinimap:GetCurrentClientPatch()
+		if (patch == patchMin) then
+			return self:SyncMinimap(true) and Library.MapContent:SetBlipTexture(path)
+		end
 	end
 end
 

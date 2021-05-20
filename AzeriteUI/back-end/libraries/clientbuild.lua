@@ -1,4 +1,4 @@
-local LibClientBuild = Wheel:Set("LibClientBuild", 42)
+local LibClientBuild = Wheel:Set("LibClientBuild", 44)
 if (not LibClientBuild) then
 	return
 end
@@ -22,18 +22,9 @@ local MAJOR,MINOR,PATCH = string_split(".", currentClientPatch)
 local IsClassic, IsTBC
 local IsRetail, IsRetailBFA, IsRetailShadowlands
 
--- These are defined in FrameXML/BNet.lua
--- *Using blizzard constants if they exist,
--- using string parsing as a fallback.
-if (WOW_PROJECT_ID ~= nil) then
-	IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-	IsRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
-else
-	IsClassic = tonumber(MAJOR) == 1
-	IsRetail = tonumber(MAJOR) >= 9
-end
-
+IsClassic = tonumber(MAJOR) == 1
 IsTBC = tonumber(MAJOR) == 2
+IsRetail = tonumber(MAJOR) >= 9
 IsRetailBFA = tonumber(MAJOR) == 8
 IsRetailShadowlands = tonumber(MAJOR) == 9
 
@@ -43,6 +34,7 @@ local builds = {}
 builds["1.13.2"] 	= 31446
 builds["1.13.3"] 	= 33526
 builds["1.13.4"] 	= 34219
+builds["2.5.1"] 	= 38707
 builds["8.0.1"] 	= 27101
 builds["8.1.0"] 	= 29600
 builds["8.1.5"] 	= 29704
@@ -56,7 +48,8 @@ builds["9.0.2"] 	= 37474
 builds["9.0.5"] 	= 37988
 
 -- Metas
-builds["Classic"] 	= builds["1.13.4"]
+builds["Classic"] 	= builds["1.13.7"]
+builds["TBC"] 	= builds["2.5.1"]
 builds["Retail"] 	= builds["8.3.0"]
 
 -- Returns true if we're on a classic patch
@@ -90,6 +83,10 @@ LibClientBuild.GetClientBuildByPatch = function(self, patch)
 	return (currentClientPatch == patch) and currentClientBuild or builds[patch]
 end 
 
+LibClientBuild.GetCurrentClientPatch = function(self)
+	return currentClientPatch
+end
+
 -- Return the current WoW client build
 LibClientBuild.GetCurrentClientBuild = function(self)
 	return currentClientBuild
@@ -103,7 +100,8 @@ local embedMethods = {
 	IsRetailBFA = true,
 	IsRetailShadowlands = true,
 	GetClientBuildByPatch = true,
-	GetCurrentClientBuild = true
+	GetCurrentClientBuild = true,
+	GetCurrentClientPatch = true
 }
 
 LibClientBuild.Embed = function(self, target)

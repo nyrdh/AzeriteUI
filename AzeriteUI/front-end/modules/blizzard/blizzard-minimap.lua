@@ -218,7 +218,7 @@ local Toggle_UpdateTooltip = function(toggle)
 		local min, max = UnitXP("player"), UnitXPMax("player")
 
 		tooltip:AddDoubleLine(POWER_TYPE_EXPERIENCE, LEVEL or UnitLevel("player"), rt, gt, bt, rt, gt, bt)
-		tooltip:AddDoubleLine(L["Current XP: "], fullXPString:format(normal..short(min)..NC, normal..short(max)..NC, highlight..math_floor(min/max*100).."%"..NC), rh, gh, bh, rgg, ggg, bgg)
+		tooltip:AddDoubleLine(L["Current XP: "], fullXPString:format(normal..(min > 0 and short(min) or min)..NC, normal..short(max)..NC, highlight..math_floor(min/max*100).."%"..NC), rh, gh, bh, rgg, ggg, bgg)
 
 		-- add rested bonus if it exists
 		if (restedLeft and (restedLeft > 0)) then
@@ -1383,7 +1383,7 @@ Module.UpdateBars = function(self, event, ...)
 	local hasAP = IsRetail and self:PlayerHasAP()
 
 	local first, second
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		if (hasXP) then 
 			first = "XP"
 			second = hasRep and "Reputation"
