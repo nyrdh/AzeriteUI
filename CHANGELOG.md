@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.487-RC] 2021-05-22
+### Fixed
+- Added the same workaround for the tainted blizzard battleground popups in Burning Crusade as we used in Classic.
+
 ## [3.2.486-RC] 2021-05-20
 ### Fixed
 - The experience bar should now be visible on Burning Crusade realms.

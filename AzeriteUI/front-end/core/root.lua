@@ -333,7 +333,7 @@ Core.ApplyExperimentalFeatures = function(self)
 	-- and instead will show a red warning message on the top of the screen,
 	-- directing the player to either join the bg or leave the queue
 	-- using the bg finder eye located at the border of the minimap.
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		local battleground = self:CreateFrame("Frame", nil, "UICenter")
 		battleground:SetSize(574, 40)
 		battleground:Place("TOP", 0, -29)

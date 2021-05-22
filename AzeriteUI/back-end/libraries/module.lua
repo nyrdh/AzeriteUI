@@ -1,4 +1,4 @@
-local LibModule = Wheel:Set("LibModule", 44)
+local LibModule = Wheel:Set("LibModule", 45)
 if (not LibModule) then	
 	return
 end
@@ -791,7 +791,7 @@ LibModule.IsAddOnEnabled = function(self, target)
 	for i = 1,GetNumAddOns() do
 		local name, title, notes, enabled, loadable, reason, security = _GetAddOnInfo(i)
 		if string_lower(name) == target then
-			if enabled then
+			if enabled and loadable then
 				return true
 			end
 		end
