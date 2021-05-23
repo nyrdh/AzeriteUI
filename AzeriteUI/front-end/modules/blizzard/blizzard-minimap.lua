@@ -1077,7 +1077,7 @@ Module.SetUpMinimap = function(self)
 	end
 
 	-- Classic Tracking button
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		local tracking = Handler:CreateOverlayFrame("Button")
 		tracking:SetFrameLevel(tracking:GetFrameLevel() + 10) -- need this above the ring frame and the rings
 		tracking:SetPoint(unpack(layout.TrackingButtonPlace))
@@ -1126,7 +1126,7 @@ Module.SetUpMinimap = function(self)
 	end
 
 	-- Classic battleground eye
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		local BGFrame = MiniMapBattlefieldFrame
 		local BGFrameBorder = MiniMapBattlefieldBorder
 		local BGIcon = MiniMapBattlefieldIcon
