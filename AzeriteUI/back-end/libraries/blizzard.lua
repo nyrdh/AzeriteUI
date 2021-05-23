@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 102)
+local LibBlizzard = Wheel:Set("LibBlizzard", 103)
 if (not LibBlizzard) then 
 	return
 end
@@ -172,33 +172,6 @@ local killUnitFrame = function(baseName, keepParent, keepEvents, keepVisible)
 	end
 end
 
-local handleActionBar = function(frame, clearEvents, reanchor, noAnchorChanges)
-	if (frame) then
-		if (clearEvents) then
-			frame:UnregisterAllEvents()
-		end
-
-		frame:Hide()
-		frame:SetParent(UIHider)
-
-		-- Setup faux anchors so the frame position data returns valid
-		if (reanchor) and (not noAnchorChanges) then
-			local left, right, top, bottom = frame:GetLeft(), frame:GetRight(), frame:GetTop(), frame:GetBottom()
-			frame:ClearAllPoints()
-			if (left) and (right) and (top) and (bottom) then
-				frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, top)
-				frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", right, bottom)
-			else
-				frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", 10, 10)
-				frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", 20, 20)
-			end
-		elseif (not noAnchorChanges) then
-			frame:ClearAllPoints()
-		end
-	end
-end
-
-
 -- Widget Pool
 -----------------------------------------------------------------
 -- ActionBars (Classic)
@@ -306,94 +279,197 @@ end
 -- ActionBars (Retail)
 or IsRetail and function(self)
 
-	MultiBarBottomLeft:SetParent(UIHider)
-	MultiBarBottomRight:SetParent(UIHider)
-	MultiBarLeft:SetParent(UIHider)
-	MultiBarRight:SetParent(UIHider)
+	local SpellBookTooltipOnUpdate, SpellButtonOnEnter, SpellButtonOnLeave, UpdateSpellBookTooltip
+	local SpellBookTooltip = GP_SpellBookTooltip or CreateFrame("GameTooltip", "GP_SpellBookTooltip", UIParent, "GameTooltipTemplate, BackdropTemplate")
 
-	-- Hide MultiBar Buttons, but keep the bars alive
-	for i=1,12 do
-		_G["ActionButton" .. i]:Hide()
-		_G["ActionButton" .. i]:UnregisterAllEvents()
-		_G["ActionButton" .. i]:SetAttribute("statehidden", true)
-
-		_G["MultiBarBottomLeftButton" .. i]:Hide()
-		_G["MultiBarBottomLeftButton" .. i]:UnregisterAllEvents()
-		_G["MultiBarBottomLeftButton" .. i]:SetAttribute("statehidden", true)
-
-		_G["MultiBarBottomRightButton" .. i]:Hide()
-		_G["MultiBarBottomRightButton" .. i]:UnregisterAllEvents()
-		_G["MultiBarBottomRightButton" .. i]:SetAttribute("statehidden", true)
-
-		_G["MultiBarRightButton" .. i]:Hide()
-		_G["MultiBarRightButton" .. i]:UnregisterAllEvents()
-		_G["MultiBarRightButton" .. i]:SetAttribute("statehidden", true)
-
-		_G["MultiBarLeftButton" .. i]:Hide()
-		_G["MultiBarLeftButton" .. i]:UnregisterAllEvents()
-		_G["MultiBarLeftButton" .. i]:SetAttribute("statehidden", true)
+	SpellBookTooltipOnUpdate = function(self, elapsed)
+		self.elapsed = (self.elapsed or 0) + elapsed
+		if (self.elapsed < TOOLTIP_UPDATE_TIME) then 
+			return 
+		end
+		self.elapsed = 0
+		local owner = self:GetOwner()
+		if (owner) then 
+			SpellButtonOnEnter(owner) 
+		end
 	end
-	UIPARENT_MANAGED_FRAME_POSITIONS["MainMenuBar"] = nil
-	UIPARENT_MANAGED_FRAME_POSITIONS["StanceBarFrame"] = nil
-	UIPARENT_MANAGED_FRAME_POSITIONS["PossessBarFrame"] = nil
-	UIPARENT_MANAGED_FRAME_POSITIONS["MultiCastActionBarFrame"] = nil
-	UIPARENT_MANAGED_FRAME_POSITIONS["PETACTIONBAR_YPOS"] = nil
-	UIPARENT_MANAGED_FRAME_POSITIONS["ExtraAbilityContainer"] = nil
 
-	--MainMenuBar:UnregisterAllEvents()
-	--MainMenuBar:SetParent(UIHider)
-	--MainMenuBar:Hide()
-	MainMenuBar:EnableMouse(false)
-	MainMenuBar:UnregisterEvent("DISPLAY_SIZE_CHANGED")
-	MainMenuBar:UnregisterEvent("UI_SCALE_CHANGED")
+	SpellButtonOnEnter = function(self, _, tooltip)
+		-- Copied from SpellBookFrame to remove:
+		--- ActionBarController_UpdateAll, PetActionHighlightMarks, and BarHighlightMarks
+		if (not tt) then 
+			tooltip = SpellBookTooltip 
+		end
+		if (tooltip:IsForbidden()) then 
+			return 
+		end
+		tooltip:SetOwner(self, "ANCHOR_RIGHT")
 
+		local slot = SpellBook_GetSpellBookSlot(self)
+		local needsUpdate = tooltip:SetSpellBookItem(slot, SpellBookFrame.bookType)
 
-	local animations = {MainMenuBar.slideOut:GetAnimations()}
-	animations[1]:SetOffset(0,0)
+		ClearOnBarHighlightMarks()
+		ClearPetActionHighlightMarks()
 
-	if OverrideActionBar then -- classic doesn't have this
-		animations = {OverrideActionBar.slideOut:GetAnimations()}
-		animations[1]:SetOffset(0,0)
+		local slotType, actionID = GetSpellBookItemInfo(slot, SpellBookFrame.bookType)
+		if (slotType == "SPELL") then
+			UpdateOnBarHighlightMarksBySpell(actionID)
 
-		-- when blizzard vehicle is turned off, we need to manually fix the state since the OverrideActionBar animation wont run
-		hooksecurefunc("BeginActionBarTransition", function(bar, animIn)
-			if bar == OverrideActionBar and not self.db.profile.blizzardVehicle then
-				OverrideActionBar.slideOut:Stop()
-				MainMenuBar:Show()
+		elseif (slotType == "FLYOUT") then
+			UpdateOnBarHighlightMarksByFlyout(actionID)
+
+		elseif (slotType == "PETACTION") then
+			UpdateOnBarHighlightMarksByPetAction(actionID)
+			UpdatePetActionHighlightMarks(actionID)
+		end
+
+		local highlight = self.SpellHighlightTexture
+		if ((highlight) and (highlight:IsShown())) then
+			local color = LIGHTBLUE_FONT_COLOR
+			tooltip:AddLine(SPELLBOOK_SPELL_NOT_ON_ACTION_BAR, color.r, color.g, color.b)
+		end
+
+		if (tooltip == SpellBookTooltip) then
+			tooltip:SetScript("OnUpdate", (needsUpdate and SpellBookTooltipOnUpdate) or nil)
+		end
+
+		tooltip:Show()
+	end
+
+	UpdateSpellBookTooltip = function(self, event)
+		-- only need to check the shown state when its not called from TT:MODIFIER_STATE_CHANGED which already checks the shown state
+		local button = (not event or SpellBookTooltip:IsShown()) and SpellBookTooltip:GetOwner()
+		if button then SpellButtonOnEnter(button) end
+	end
+
+	SpellButtonOnLeave = function()
+		ClearOnBarHighlightMarks()
+		ClearPetActionHighlightMarks()
+
+		SpellBookTooltip:Hide()
+		SpellBookTooltip:SetScript("OnUpdate", nil)
+	end
+
+	-- Let spell book button tooltips work without tainting,
+	-- by replacing the script handlers with safer methods.
+	for i = 1, SPELLS_PER_PAGE do
+		local button = _G["SpellButton"..i]
+		button:SetScript("OnEnter", SpellButtonOnEnter)
+		button:SetScript("OnLeave", SpellButtonOnLeave)
+	end
+
+	-- These calls are tainted when accessed by ValidateActionBarTransition.
+	-- Thank you ElvUI!
+	local noop = function() end
+	local noops = { "ClearAllPoints", "SetPoint", "SetScale", "SetShown" }
+	local noopthis = function(frame)
+		for _,method in ipairs(noops) do
+			if (frame[method] ~= noop) then
+				frame[method] = noop
 			end
-		end)
+		end
 	end
-
-	handleActionBar(MainMenuBarArtFrame, false, true)
-	handleActionBar(MainMenuBarArtFrameBackground)
-	handleActionBar(MicroButtonAndBagsBar, false, false, true)
-
-	if StatusTrackingBarManager then
-		StatusTrackingBarManager:Hide()
-		--StatusTrackingBarManager:SetParent(UIHider)
+	for i,object in ipairs({
+		"OverrideActionBar", 
+		"StanceBarFrame", 
+		"PossessBarFrame", 
+		"PetActionBarFrame", 
+		"MultiCastActionBarFrame"
+	}) do
+		local frame = _G[object]
+		if (frame) then
+			frame:UnregisterAllEvents()
+		else
+			if (self.AddDebugMessageFormatted) then
+				self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			end
+		end
 	end
+	for i,object in ipairs({
+		"OverrideActionBar", 
+		"StanceBarFrame", 
+		"PossessBarFrame", 
+		"PetActionBarFrame", 
+		"MultiCastActionBarFrame",
+		"MainMenuBar", 
+		"MainMenuBarArtFrame",
+		"MainMenuBarArtFrameBackground",
+		"MicroButtonAndBagsBar", 
+		"MultiBarBottomLeft", 
+		"MultiBarBottomRight", 
+		"MultiBarLeft", 
+		"MultiBarRight"
+	}) do
+		local frame = _G[object]
+		if (frame) then
+			frame:SetParent(UIHider)
+			noopthis(frame)
+		else			
+			if (self.AddDebugMessageFormatted) then
+				self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
+			end
+		end
+	end
+	
+	-- MainMenuBar:ClearAllPoints() taint during combat. *CHECK*
+	MainMenuBar.SetPositionForStatusBars = noop
 
-	handleActionBar(StanceBarFrame, true, true)
-	handleActionBar(PossessBarFrame, false, true)
-	handleActionBar(MultiCastActionBarFrame, true, true)
-	handleActionBar(PetActionBarFrame, true, true)
-	ShowPetActionBar = function() end
+	-- Spellbook open in combat taint, only happens sometimes.
+	-- This appears to CAUSE taint, rather than solve it.
+	-- Been getting multiple taints on this after adding it. 
+	--MultiActionBar_HideAllGrids = noop
+	--MultiActionBar_ShowAllGrids = noop
 
-	--BonusActionBarFrame:UnregisterAllEvents()
-	--BonusActionBarFrame:Hide()
-	--BonusActionBarFrame:SetParent(UIHider)
+	-- Try to shutdown the container movement and taints.
+	UIPARENT_MANAGED_FRAME_POSITIONS.ExtraAbilityContainer = nil
+	ExtraAbilityContainer.SetSize = noop
+	
+	-- With this method we might don't taint anything. 
+	MainMenuBarPerformanceBar:SetAlpha(0)
+	MainMenuBarPerformanceBar:SetScale(.00001)
 
-	if PlayerTalentFrame then
+	-- Clear out crap we don't need.
+	noopthis(MainMenuBarArtFrame)
+	noopthis(MainMenuBarArtFrameBackground)
+	MainMenuBarArtFrame:UnregisterAllEvents()
+	StatusTrackingBarManager:UnregisterAllEvents()
+	ActionBarButtonEventsFrame:UnregisterAllEvents()
+	ActionBarButtonEventsFrame:RegisterEvent("ACTIONBAR_SLOT_CHANGED") -- This is needed for ExtraActionButton to show.
+	ActionBarButtonEventsFrame:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN") -- This is needed for ExtraActionBar cooldown.
+	ActionBarActionEventsFrame:UnregisterAllEvents()
+	ActionBarController:UnregisterAllEvents()
+	ActionBarController:RegisterEvent("UPDATE_EXTRA_ACTIONBAR") -- This is needed for ExtraActionBar to show.
+
+	-- Lets only keep ExtraActionButtons in here.
+	local ButtonEventsRegisterFrame = function(self, added)
+		local frames = ActionBarButtonEventsFrame.frames
+		for index = #frames,1,-1 do
+			local frame = frames[index]
+			local wasAdded = frame == added
+			if (not added) or (wasAdded) then
+				if (not string_match(frame:GetName(), "ExtraActionButton%d")) then
+					ActionBarButtonEventsFrame.frames[index] = nil
+				end
+				if (wasAdded) then
+					break
+				end
+			end
+		end
+	end
+	hooksecurefunc(ActionBarButtonEventsFrame, "RegisterFrame", ButtonEventsRegisterFrame)
+	ButtonEventsRegisterFrame()
+
+	-- This would taint along with the same path as the SetNoopers: ValidateActionBarTransition
+	VerticalMultiBarsContainer:SetSize(10,10) -- dummy values so GetTop etc doesnt fail without replacing
+	noopthis(VerticalMultiBarsContainer)
+
+	if (PlayerTalentFrame) then
 		PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 	else
-		hooksecurefunc("TalentFrame_LoadUI", function() PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED") end)
+		hooksecurefunc("TalentFrame_LoadUI", function()
+			PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+		end)
 	end
-
-	handleActionBar(MainMenuBarPerformanceBarFrame, false, false, true)
-	handleActionBar(MainMenuExpBar, false, false, true)
-	handleActionBar(ReputationWatchBar, false, false, true)
-	handleActionBar(MainMenuBarMaxLevelBar, false, false, true)
-
 end
 
 UIWidgetsDisable["Alerts"] = function(self)
@@ -863,6 +939,7 @@ UIWidgetsDisable["Tutorials"] = function(self)
 		TutorialFrame:Hide()
 		TutorialFrame.Show = TutorialFrame.Hide
 	end
+	-- Might still need this very early.
 	NPE_LoadUI = function() end
 	NPE_CheckTutorials = function() end
 end

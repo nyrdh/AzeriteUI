@@ -534,6 +534,16 @@ Module.OnInit = function(self)
 	tooltip:SetMinimumWidth(40)
 	tooltip:SetMaximumWidth(260)
 
+	local HideAlerts = function()
+		if (HelpTip) then
+			HelpTip:HideAllSystem("MicroButtons")
+		end
+	end
+	
+	if (MainMenuMicroButton_ShowAlert) then
+		hooksecurefunc("MainMenuMicroButton_ShowAlert", HideAlerts)
+	end
+
 	if self:IsAddOnEnabled("Bartender4") then 
 		self:AddDebugMessageFormatted("[Bartender4] detected.")
 		if IsAddOnLoaded("Bartender4") then 
