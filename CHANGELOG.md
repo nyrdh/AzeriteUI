@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.489-RC] 2021-05-23
+### Fixed
+- The collections journal should no longer cause an addon action blocked when opened during combat.
+
 ## [3.2.488-RC] 2021-05-23
 ### Added
 - Attempted to add the same battleground finder eye to the BC minimap as we used in Classic. Untested.
