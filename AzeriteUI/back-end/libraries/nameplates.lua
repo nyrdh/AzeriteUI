@@ -1,4 +1,4 @@
-local LibNamePlate = Wheel:Set("LibNamePlate", 68)
+local LibNamePlate = Wheel:Set("LibNamePlate", 69)
 if (not LibNamePlate) then	
 	return
 end
@@ -202,7 +202,7 @@ local ENFORCED_CVARS = {
 	nameplateMinAlpha = .4, -- .6
 	nameplateOccludedAlphaMult = .15, -- .4
 	nameplateSelectedAlpha = 1, -- 1
-	nameplateMaxAlphaDistance = (IsClassic or IsTBC) and 20 or (IsRetail) and 30, -- 40
+	nameplateMaxAlphaDistance = (IsClassic) and 20 or (IsRetail or IsTBC) and 30, -- 40
 	nameplateMinAlphaDistance = 10 -- 10
 }
 

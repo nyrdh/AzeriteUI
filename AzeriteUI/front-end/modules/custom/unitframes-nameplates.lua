@@ -23,6 +23,7 @@ local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
 local IsRetail = Private.IsRetail
 
 -- Local cache of the nameplates, for easy access to some methods
@@ -41,6 +42,14 @@ Module.PreUpdateNamePlateOptions = function(self)
 			SetCVar("nameplateMaxDistance", 30)
 		else
 			SetCVar("nameplateMaxDistance", 45)
+		end
+
+	elseif (IsTBC) then 
+		local _, instanceType = IsInInstance()
+		if (instanceType == "none") then
+			SetCVar("nameplateMaxDistance", 30)
+		else
+			SetCVar("nameplateMaxDistance", 41)
 		end
 	end
 
