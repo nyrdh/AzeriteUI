@@ -1590,7 +1590,7 @@ Module.UpdateBars = function(self, event, ...)
 end
 
 Module.UpdateTracking = function(self)
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		local Handler = self:GetMinimapHandler()
 		local icon = GetTrackingTexture()
 		if (icon) then

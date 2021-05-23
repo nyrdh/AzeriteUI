@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 88)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 89)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -2009,7 +2009,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 		end
 
 		-- Check for Questie data
-		if (IsClassic) and (Questie) then
+		if (IsClassic or IsTBC) and (Questie) then
 
 			-- Only do this if the Questie
 			-- tooltip option is enabled(?)

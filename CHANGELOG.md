@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.488-RC] 2021-05-23
+### Added
+- Attempted to add the same battleground finder eye to the BC minimap as we used in Classic. Untested.
+- Added Questie information to BC tooltips and nameplates.
+
 ## [3.2.487-RC] 2021-05-22
 ### Fixed
 - Added the same workaround for the tainted blizzard battleground popups in Burning Crusade as we used in Classic.
