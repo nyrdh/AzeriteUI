@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2021-05-23
+### Changed
+- Increased max nameplate distance in BC to 30 yards outdoors, and 41 yards in instances. 
+
 ## [3.2.490-RC] 2021-05-23
 ### Fixed
 - Various annoying micro menu alerts should now longer cause randomly hovering alert windows.
