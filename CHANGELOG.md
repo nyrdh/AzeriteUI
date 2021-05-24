@@ -4,9 +4,12 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2021-05-23
+## [3.2.491-RC] 2021-05-24
 ### Changed
 - Increased max nameplate distance in BC to 30 yards outdoors, and 41 yards in instances. 
+
+## Fixed
+- Hovering over an NPC with no questie global options yet saved should no longer cause a bug in bc or classic.
 
 ## [3.2.490-RC] 2021-05-23
 ### Fixed
