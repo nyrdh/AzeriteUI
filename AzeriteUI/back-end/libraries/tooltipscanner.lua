@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 89)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 90)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -2013,7 +2013,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 
 			-- Only do this if the Questie
 			-- tooltip option is enabled(?)
-			if (Questie.db.global.enableTooltips) then
+			if (Questie.db and Questie.db.global and Questie.db.global.enableTooltips) then
 				local guid = UnitGUID(unit)
 				if (guid) then
 					local type, zero, server_id, instance_id, zone_uid, npc_id, spawn_uid = string_split("-", guid or "")
