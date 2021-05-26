@@ -90,12 +90,17 @@ RegisterDefaults("NamePlates", {
 })
 
 RegisterDefaults("UnitFramePlayer", {
+	enableAuras = true,
 	enablePlayerManaOrb = true
 })
 
 RegisterDefaults("UnitFramePlayerHUD", {
 	enableCast = true,
 	enableClassPower = true
+})
+
+RegisterDefaults("UnitFrameTarget", {
+	enableAuras = true
 })
 
 RegisterDefaults("UnitFrameParty", {

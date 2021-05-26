@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.492-RC] 2021-05-26
+### Added
+- Added the option to completely disable player- and target auras when using the standard Azerite theme. 
+
 ## [3.2.491-RC] 2021-05-24
 ### Changed
 - Increased max nameplate distance in BC to 30 yards outdoors, and 41 yards in instances. 

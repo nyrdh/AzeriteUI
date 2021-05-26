@@ -1714,11 +1714,10 @@ Module.CreateMenuTable = function(self)
 	local hasUnits
 	local UnitFrameMenu = {
 		title = L["UnitFrames"], type = nil, hasWindow = true, 
-		buttons = {
-			-- Player options
-		}
+		buttons = {}
 	}
 
+	-- Group Frames
 	if (IsAzerite) then
 		if (Core:IsModuleAvailable("UnitFrameParty")) then 
 			hasUnits = true
@@ -1767,11 +1766,29 @@ Module.CreateMenuTable = function(self)
 
 	if (IsAzerite) then
 		if (Core:IsModuleAvailable("UnitFramePlayer")) then 
+			hasUnits = true
+
+			-- Player options
+			local PlayerMenu = {
+				title = PLAYER, type = nil, hasWindow = true, 
+				buttons = {}
+			}
+			
+			-- Player Auras
+			table_insert(PlayerMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["Auras"]),
+				disabledTitle = L_DISABLED:format(L["Auras"]),
+				type = "TOGGLE_VALUE", 
+				configDB = "UnitFramePlayer", configKey = "enableAuras", 
+				proxyModule = "UnitFramePlayer"
+			})
+
+			-- Mana orb
 			if (PlayerClass == "DRUID") or (PlayerClass == "HUNTER") 
 			or (PlayerClass == "PALADIN") or (PlayerClass == "SHAMAN")
 			or (PlayerClass == "MAGE") or (PlayerClass == "PRIEST") or (PlayerClass == "WARLOCK") then
 				hasUnits = true
-				table_insert(UnitFrameMenu.buttons, {
+				table_insert(PlayerMenu.buttons, {
 					enabledTitle = L_ENABLED:format(L["Use Mana Orb"]),
 					disabledTitle = L_DISABLED:format(L["Use Mana Orb"]),
 					type = "TOGGLE_VALUE", 
@@ -1779,6 +1796,30 @@ Module.CreateMenuTable = function(self)
 					proxyModule = "UnitFramePlayer"
 				})
 			end
+
+			table_insert(UnitFrameMenu.buttons, PlayerMenu)
+		end
+
+		-- Target options
+		if (Core:IsModuleAvailable("UnitFrameTarget")) then 
+			hasUnits = true
+
+			-- Target options
+			local TargetMenu = {
+				title = TARGET, type = nil, hasWindow = true, 
+				buttons = {}
+			}
+			
+			-- Target Auras
+			table_insert(TargetMenu.buttons, {
+				enabledTitle = L_ENABLED:format(L["Auras"]),
+				disabledTitle = L_DISABLED:format(L["Auras"]),
+				type = "TOGGLE_VALUE", 
+				configDB = "UnitFrameTarget", configKey = "enableAuras", 
+				proxyModule = "UnitFrameTarget"
+			})
+
+			table_insert(UnitFrameMenu.buttons, TargetMenu)
 		end
 	end
 	if (hasUnits) then

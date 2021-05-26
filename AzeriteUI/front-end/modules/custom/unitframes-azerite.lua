@@ -113,6 +113,29 @@ local SECURE = {
 			else 
 				owner:CallMethod("DisableManaOrb"); 
 			end 
+		elseif (name == "change-enableauras") then 
+			local owner = self:GetFrameRef("Owner"); 
+			self:SetAttribute("enableAuras", value); 
+			if (value) then 
+				owner:CallMethod("EnableAuras"); 
+			else 
+				owner:CallMethod("DisableAuras"); 
+			end 
+		end
+	]=],
+
+	Target_SecureCallback = [=[
+		if name then 
+			name = string.lower(name); 
+		end 
+		if (name == "change-enableauras") then 
+			local owner = self:GetFrameRef("Owner"); 
+			self:SetAttribute("enableAuras", value); 
+			if (value) then 
+				owner:CallMethod("EnableAuras"); 
+			else 
+				owner:CallMethod("DisableAuras"); 
+			end 
 		end
 	]=],
 
@@ -348,7 +371,7 @@ local SECURE = {
 -- to alter unitframe setting while engaged in combat.
 -- TODO: Make this globally accessible to the entire addon, 
 -- and move all these little creation methods away from the modules.
-local CreateSecureCallbackFrame = function(module, owner, db, script)
+local CreateSecureCallbackFrame = function(module, owner, db, script, ...)
 
 	local OptionsMenu = Core:GetModule("OptionsMenu", true)
 	if (not OptionsMenu) then
@@ -2309,7 +2332,9 @@ UnitFramePlayer.OnInit = function(self)
 		local auraFilterLevel = Core.db.auraFilterLevel
 		auras.enableSlackMode = Private.IsForcingSlackAuraFilterMode() or (auraFilterLevel == 1) or (auraFilterLevel == 2) 
 		auras.enableSpamMode = (auraFilterLevel == 2)
-		auras:ForceUpdate()
+		if (self.db.enableAuras) then
+			auras:ForceUpdate()
+		end
 	end
 
 	self.frame.EnableManaOrb = function()
@@ -2331,6 +2356,23 @@ UnitFramePlayer.OnInit = function(self)
 
 	if (not self.db.enablePlayerManaOrb) then
 		self.frame:DisableManaOrb()
+	end
+
+	self.frame.EnableAuras = function()
+		if (self.frame.Auras) then
+			self.frame:EnableElement("Auras")
+			self.frame.Auras:ForceUpdate()
+		end
+	end
+
+	self.frame.DisableAuras = function()
+		if (self.frame.Auras) then
+			self.frame:DisableElement("Auras")
+		end
+	end
+
+	if (not self.db.enableAuras) then
+		self.frame:DisableAuras()
 	end
 
 	-- Create a secure proxy updater for the menu system
@@ -2360,6 +2402,11 @@ UnitFramePlayer.OnEvent = function(self, event, ...)
 		else
 			self.frame:DisableManaOrb()
 		end
+		if (self.db.enableAuras) then
+			self.frame:EnableAuras()
+		else
+			self.frame:DisableAuras()
+		end
 	elseif (event == "PLAYER_LEVEL_UP") then 
 		local level = ...
 		if (level and (level ~= PlayerLevel)) then
@@ -2376,7 +2423,9 @@ UnitFramePlayer.OnEvent = function(self, event, ...)
 			local filterMode = ...
 			auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
 			auras.enableSpamMode = filterMode == "spam"
-			auras:ForceUpdate()
+			if (self.db.enableAuras) then
+				auras:ForceUpdate()
+			end
 		end
 	end
 	if (self.frame.PostUpdateTextures) then
@@ -2591,14 +2640,38 @@ UnitFrameTarget.OnInit = function(self)
 		local auraFilterLevel = Core.db.auraFilterLevel
 		auras.enableSlackMode = Private.IsForcingSlackAuraFilterMode() or (auraFilterLevel == 1) or (auraFilterLevel == 2) 
 		auras.enableSpamMode = (auraFilterLevel == 2)
-		auras:ForceUpdate()
+		if (self.db.enableAuras) then
+			auras:ForceUpdate()
+		end
 	end
+
+	self.frame.EnableAuras = function()
+		if (self.frame.Auras) then
+			self.frame:EnableElement("Auras")
+			self.frame.Auras:ForceUpdate()
+		end
+	end
+
+	self.frame.DisableAuras = function()
+		if (self.frame.Auras) then
+			self.frame:DisableElement("Auras")
+		end
+	end
+
+	if (not self.db.enableAuras) then
+		self.frame:DisableAuras()
+	end
+
+	-- Create a secure proxy updater for the menu system
+	local callbackFrame = CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.Target_SecureCallback)
+
 end 
 
 UnitFrameTarget.OnEnable = function(self)
 	if (not self.frame) then
 		return
 	end
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", "OnEvent")
 	self:RegisterMessage("GP_AURA_FILTER_MODE_CHANGED", "OnEvent")
 end
@@ -2612,6 +2685,12 @@ UnitFrameTarget.OnEvent = function(self, event, ...)
 			if (self.frame.PostUpdateTextures) then
 				self.frame:PostUpdateTextures()
 			end
+		end
+	elseif (event == "PLAYER_ENTERING_WORLD") then
+		if (self.db.enableAuras) then
+			self.frame:EnableAuras()
+		else
+			self.frame:DisableAuras()
 		end
 	elseif (event == "GP_AURA_FILTER_MODE_CHANGED") then
 		local auras = self.frame.Auras
