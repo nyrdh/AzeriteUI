@@ -1750,10 +1750,6 @@ Module.CreateMenuTable = function(self)
 				configDB = "ModuleForge::UnitFrames", configKey = "Legacy::EnablePartyFrames", 
 				proxyModule = "ModuleForge::UnitFrames"
 			})
-		end
-
-		if (Core:IsModuleAvailable("ModuleForge::UnitFrames")) then 
-			hasUnits = true
 			table_insert(UnitFrameMenu.buttons, {
 				enabledTitle = L_ENABLED:format(L["Raid Frames"]),
 				disabledTitle = L_DISABLED:format(L["Raid Frames"]),
@@ -1764,6 +1760,7 @@ Module.CreateMenuTable = function(self)
 		end
 	end
 
+	-- Player & Target frames
 	if (IsAzerite) then
 		if (Core:IsModuleAvailable("UnitFramePlayer")) then 
 			hasUnits = true
@@ -1819,6 +1816,42 @@ Module.CreateMenuTable = function(self)
 				proxyModule = "UnitFrameTarget"
 			})
 
+			table_insert(UnitFrameMenu.buttons, TargetMenu)
+		end
+	elseif (IsLegacy) then
+		if (Core:IsModuleAvailable("ModuleForge::UnitFrames")) then 
+			hasUnits = true
+
+			-- Player options
+			local PlayerMenu = {
+				title = PLAYER, type = nil, hasWindow = true, 
+				buttons = {
+					-- Player Auras
+					{
+						enabledTitle = L_ENABLED:format(L["Auras"]),
+						disabledTitle = L_DISABLED:format(L["Auras"]),
+						type = "TOGGLE_VALUE", 
+						configDB = "ModuleForge::UnitFrames", configKey = "Legacy::EnablePlayerAuras", 
+						proxyModule = "ModuleForge::UnitFrames"
+					}
+				}
+			}
+			table_insert(UnitFrameMenu.buttons, PlayerMenu)
+			
+			-- Target options
+			local TargetMenu = {
+				title = TARGET, type = nil, hasWindow = true, 
+				buttons = {
+					-- Target Auras
+					{
+						enabledTitle = L_ENABLED:format(L["Auras"]),
+						disabledTitle = L_DISABLED:format(L["Auras"]),
+						type = "TOGGLE_VALUE", 
+						configDB = "ModuleForge::UnitFrames", configKey = "Legacy::EnableTargetAuras", 
+						proxyModule = "ModuleForge::UnitFrames"
+					}
+				}
+			}
 			table_insert(UnitFrameMenu.buttons, TargetMenu)
 		end
 	end
@@ -1901,7 +1934,7 @@ Module.CreateMenuTable = function(self)
 			enabledTitle = L_ENABLED:format(L["Monster Emotes"]),
 			disabledTitle = L_DISABLED:format(L["Monster Emotes"]),
 			tooltipText = L["Monster Emotes"],
-			newbieText = L["Toggles the display of boss- and moster emotes. If you're a skilled player, it is not recommended to turn these on, as some world quests and most boss encounters send important messages here.|n|nSupport wheel users relying on Dumb Boss Mods can do whatever they please, it's not like they're looking at anything else than bars anyway."],
+			newbieText = L["Toggles the display of boss- and monster emotes. If you're a skilled player, it is not recommended to turn these on, as some world quests and most boss encounters send important messages here.|n|nSupport wheel users relying on Dumb Boss Mods can do whatever they please, it's not like they're looking at anything else than bars anyway."],
 			type = "TOGGLE_VALUE", 
 			configDB = "BlizzardFloaterHUD", configKey = "enableRaidBossEmotes", 
 			proxyModule = "BlizzardFloaterHUD"

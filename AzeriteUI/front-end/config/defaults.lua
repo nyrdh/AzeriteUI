@@ -146,6 +146,8 @@ RegisterDefaults("ModuleForge::UnitFrames", {
 	-- Legacy specific settings
 	["Legacy::EnableCastBar"] = true,
 	["Legacy::EnableClassPower"] = true,
+	["Legacy::EnablePlayerAuras"] = true,
+	["Legacy::EnableTargetAuras"] = true,
 	["Legacy::EnablePartyFrames"] = true,
 	["Legacy::EnableRaidFrames"] = true
 })

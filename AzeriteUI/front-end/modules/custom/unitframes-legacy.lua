@@ -81,6 +81,25 @@ local SECURE = {
 			else 
 				RegisterAttributeDriver(RaidHeader, "state-vis", "hide"); 
 			end 
+
+		elseif (name == "change-enableplayerauras") then 
+			self:SetAttribute(prefix.."EnablePlayerAuras", value); -- store the setting
+			local owner = self:GetFrameRef("PlayerFrame");
+			if (value) then 
+				owner:CallMethod("EnableAuras"); 
+			else 
+				owner:CallMethod("DisableAuras"); 
+			end 
+
+		elseif (name == "change-enabletargetauras") then 
+			self:SetAttribute(prefix.."EnableTargetAuras", value); -- store the setting
+			local owner = self:GetFrameRef("TargetFrame");
+			if (value) then 
+				owner:CallMethod("EnableAuras"); 
+			else 
+				owner:CallMethod("DisableAuras"); 
+			end 
+
 		end
 	]=], 
 
@@ -383,6 +402,31 @@ UnitFrames.SpawnUnitFrames = function(self)
 			local frame = self:SpawnUnitFrame(unit, parent or "UICenter", function(self, unit)
 				self:Forge(GetSchematic("UnitForge::"..schematicID))
 			end)
+			if (schematicID == "Player") then
+				self.PlayerFrame = frame
+				frame.EnableAuras = function()
+					frame:EnableElement("Auras")
+					frame.Auras:ForceUpdate()
+				end
+				frame.DisableAuras = function()
+					frame:DisableElement("Auras")
+				end
+				if (not self:GetDB("EnablePlayerAuras")) then
+					frame:DisableAuras()
+				end
+			elseif (schematicID == "Target") then
+				self.TargetFrame = frame
+				frame.EnableAuras = function()
+					frame:EnableElement("Auras")
+					frame.Auras:ForceUpdate()
+				end
+				frame.DisableAuras = function()
+					frame:DisableElement("Auras")
+				end
+				if (not self:GetDB("EnableTargetAuras")) then
+					frame:DisableAuras()
+				end
+			end
 			self.Frames[frame] = unit
 			if (not frame.ignoreExplorerMode) then
 				self.ExplorerModeFrameAnchors[#self.ExplorerModeFrameAnchors + 1] = frame
@@ -406,8 +450,31 @@ UnitFrames.OnEvent = function(self, event, ...)
 				local filterMode = ...
 				auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
 				auras.enableSpamMode = filterMode == "spam"
-				auras:ForceUpdate()
+				if (frame.EnableAuras) then
+					if (frame == self.PlayerFrame) then
+						if (self:GetDB("EnablePlayerAuras")) then
+							auras:ForceUpdate()
+						end
+					elseif (frame == self.TargetFrame) then
+						if (self:GetDB("EnableTargetAuras")) then
+							auras:ForceUpdate()
+						end
+					end
+				else
+					auras:ForceUpdate()
+				end
 			end
+		end
+	elseif (event == "PLAYER_ENTERING_WORLD") then
+		if (self:GetDB("EnablePlayerAuras")) then
+			self.PlayerFrame:EnableAuras()
+		else
+			self.PlayerFrame:DisableAuras()
+		end
+		if (self:GetDB("EnableTargetAuras")) then
+			self.TargetFrame:EnableAuras()
+		else
+			self.TargetFrame:DisableAuras()
 		end
 	end
 end
@@ -445,8 +512,11 @@ UnitFrames.OnInit = function(self)
 	local proxy = CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.MenuCallback)
 	proxy:SetFrameRef("PartyHeader", self.partyHeader)
 	proxy:SetFrameRef("RaidHeader", self.raidHeader)
+	proxy:SetFrameRef("PlayerFrame", self.PlayerFrame)
+	proxy:SetFrameRef("TargetFrame", self.TargetFrame)
 end
 
 UnitFrames.OnEnable = function(self)
 	self:RegisterMessage("GP_AURA_FILTER_MODE_CHANGED", "OnEvent")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 end
