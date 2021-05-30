@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 137)
+local LibSecureButton = Wheel:Set("LibSecureButton", 138)
 if (not LibSecureButton) then
 	return
 end
@@ -660,6 +660,10 @@ local UpdateActionButton = function(self, event, ...)
 
 		self:UpdateFlash()
 		--self:UpdateCheckedState()
+
+		-- Try to fix the problem of vehicle changes not reflecting cooldown changes.
+		-- Just guessing at events right now, but will test at appropriate quests later.
+		self:UpdateCooldown()
 
 	elseif (event == "CURSOR_UPDATE") 
 		or (event == "ACTIONBAR_SHOWGRID") or (event == "ACTIONBAR_HIDEGRID") 

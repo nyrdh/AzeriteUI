@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.494-RC] 2021-05-30
+### Added
+- Added the nicely styled chatframe to bottom button to BC clients.
+- Attempted to add the pet happiness element to BC clients. Untested, as I have no hunter with pet there yet.
+
+### Changed
+- Moved the quest timer frame used in classic quests such as Iverron's Antidote to the same annoying place in BC clients as in classic.
+
 ## [3.2.493-RC] 2021-05-28
 ### Added
 - Added the option to completely disable player- and target auras when using the Legacy theme. 

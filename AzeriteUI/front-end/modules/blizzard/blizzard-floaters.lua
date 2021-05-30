@@ -597,7 +597,7 @@ end
 Module.OnEnable = function(self)
 	self:HandleErrorFrame()
 	self:HandleWarningFrames()
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		self:HandleQuestTimerFrame()
 	end
 	if (IsRetail) then

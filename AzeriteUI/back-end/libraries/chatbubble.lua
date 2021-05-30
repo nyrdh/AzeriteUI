@@ -1,4 +1,4 @@
-local LibChatBubble = Wheel:Set("LibChatBubble", 27)
+local LibChatBubble = Wheel:Set("LibChatBubble", 28)
 if (not LibChatBubble) then	
 	return
 end
@@ -37,6 +37,7 @@ local UnitAffectingCombat = UnitAffectingCombat
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Textures
@@ -212,7 +213,7 @@ LibChatBubble.DisableBlizzard = function(self, bubble)
 	-- Remove all the default textures
 	for region, texture in pairs(customBubbles[bubble].blizzardRegions) do
 		-- Needed in classic, as the game keeps resetting the alpha.
-		if (IsClassic) then
+		if (IsClassic or IsTBC) then
 			region:SetTexture(nil)
 		end
 		region:SetAlpha(0)

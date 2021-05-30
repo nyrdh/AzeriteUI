@@ -1615,7 +1615,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 
 	-- Classic Pet Happiness (Hardcoded)
 	-----------------------------------------------------------
-	if (IsClassic) then
+	if (IsClassic or IsTBC) then
 		local happiness = overlay:CreateFontString()
 		happiness:SetFontObject(GetFont(12,true))
 		happiness:Place("BOTTOM", "UICenter", "BOTTOM", 0, 10)

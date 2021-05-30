@@ -1,4 +1,4 @@
-local LibChatWindow, version = Wheel:Set("LibChatWindow", 33)
+local LibChatWindow, version = Wheel:Set("LibChatWindow", 35)
 if (not LibChatWindow) then	
 	return
 end
@@ -52,6 +52,7 @@ local CHAT_FRAME_TEXTURES = CHAT_FRAME_TEXTURES
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Create or retrieve our registries
@@ -376,7 +377,7 @@ end
 LibChatWindow.GetChatWindowScrollToBottomButton = function(self, frame)
 	if (IsRetail) then
 		return frame.ScrollToBottomButton
-	elseif (IsClassic) then
+	elseif (IsClassic or IsTBC) then
 		return _G[frame:GetName().."ButtonFrameBottomButton"]
 	end
 end 

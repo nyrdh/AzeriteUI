@@ -3,6 +3,7 @@ assert(LibClientBuild, "UnitPetHappiness requires LibClientBuild to be loaded.")
 
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
 
 -- WoW API
 local GetPetHappiness = GetPetHappiness
@@ -103,7 +104,7 @@ local Enable = function(self)
 		element.ForceUpdate = ForceUpdate
 
 		-- Forcefully hide this when not in Classic
-		if not(IsClassic) then
+		if not(IsClassic or IsTBC) then
 			element:Hide()
 			return
 		end
@@ -139,5 +140,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("PetHappiness", Enable, Disable, Proxy, 3)
+	Lib:RegisterElement("PetHappiness", Enable, Disable, Proxy, 4)
 end 
