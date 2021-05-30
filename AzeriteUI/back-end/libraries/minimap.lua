@@ -1,4 +1,4 @@
-local Version = 63
+local Version = 65
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -640,14 +640,7 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 
 	Library.MapContent:SetScript("OnMouseUp", function(self, button)
 		if (button == "RightButton") then
-			if (IsRetail) then
-				ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, self)
-				LibMinimap:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "SFX")
-
-			elseif (IsClassic or IsTBC) then
-				LibMinimap:ShowMinimapTrackingMenu()
-				LibMinimap:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "SFX")
-			end
+			LibMinimap:ShowMinimapTrackingMenu()
 		else
 			local effectiveScale = self:GetEffectiveScale()
 	
@@ -837,7 +830,7 @@ LibMinimap.SetMinimapMaskTexture = function(self, path)
 	return self:SyncMinimap(true) and Library.MapContent:SetMaskTexture(path)
 end
 
-if (IsClassic or IsTBC) then
+if (IsClassic) then
 	local trackingMenuFrame = LibMinimap:CreateFrame("Frame", "GP_MinimapTrackingButtonMenu", tracking, "UIDropDownMenuTemplate")
 
 	LibMinimap.ShowMinimapTrackingMenu = function(self)
@@ -872,7 +865,13 @@ if (IsClassic or IsTBC) then
 		end
 		if (hasTracking) then 
 			EasyMenu(trackingMenu, trackingMenuFrame, "cursor", 0 , 0, "MENU")
+			LibMinimap:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "SFX")
 		end 
+	end
+else
+	LibMinimap.ShowMinimapTrackingMenu = function(self)
+		ToggleDropDownMenu(1, nil, MiniMapTrackingDropDown, Library.MapContent)
+		LibMinimap:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "SFX")
 	end
 end
 
@@ -1405,7 +1404,7 @@ local embedMethods = {
 	SetMinimapBlipScale = true,
 	SetMinimapScale = true,
 	SetMinimapSize = true,
-	ShowMinimapTrackingMenu = (IsClassic or IsTBC) and true or nil,
+	ShowMinimapTrackingMenu = true,
 	SyncMinimap = true,
 	UpdateAllMinimapElements = true
 }

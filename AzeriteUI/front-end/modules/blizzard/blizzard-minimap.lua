@@ -89,6 +89,20 @@ local MouseIsOver = function(frame)
 	return (frame == GetMouseFocus())
 end
 
+if (IsTBC) then
+	GetTrackingTexture = function()
+		local count = GetNumTrackingTypes()
+		for id = 1, count do
+			local texture, active, category = select(2, GetTrackingInfo(id))
+			if (active) then
+				if (category == "spell") then 
+					return texture
+				end
+			end
+		end
+	end
+end
+
 ----------------------------------------------------
 -- Callbacks
 ----------------------------------------------------
@@ -162,10 +176,14 @@ local Performance_OnLeave = function(self)
 end 
 
 local Tracking_OnClick = function(self, button)
-	if (button == "LeftButton") then
+	if (IsClassic) then
+		if (button == "LeftButton") then
+			Module:ShowMinimapTrackingMenu()
+		elseif (button == "RightButton") then
+			CancelTrackingBuff()
+		end
+	else
 		Module:ShowMinimapTrackingMenu()
-	elseif (button == "RightButton") then
-		CancelTrackingBuff()
 	end
 end
 
@@ -1077,6 +1095,7 @@ Module.SetUpMinimap = function(self)
 	end
 
 	-- Classic Tracking button
+	-- BC seems to use the dropdown with multiple tracking types...?
 	if (IsClassic or IsTBC) then
 		local tracking = Handler:CreateOverlayFrame("Button")
 		tracking:SetFrameLevel(tracking:GetFrameLevel() + 10) -- need this above the ring frame and the rings
@@ -1154,16 +1173,19 @@ Module.SetUpMinimap = function(self)
 			eye:SetVertexColor(unpack(layout.BattleGroundEyeColor))
 			eye:SetShown(BGFrame:IsShown())
 
+			-- This is there in Classic, not BC.
 			local tracking = Handler.Tracking
-			tracking:Place(unpack(BGFrame:IsShown() and layout.TrackingButtonPlaceAlternate or layout.TrackingButtonPlace))
-			BGFrame:HookScript("OnShow", function() 
-				eye:Show()
-				tracking:Place(unpack(layout.TrackingButtonPlaceAlternate))
-			end)
-			BGFrame:HookScript("OnHide", function() 
-				eye:Hide()
-				tracking:Place(unpack(layout.TrackingButtonPlace))
-			end)
+			if (tracking) then
+				tracking:Place(unpack(BGFrame:IsShown() and layout.TrackingButtonPlaceAlternate or layout.TrackingButtonPlace))
+				BGFrame:HookScript("OnShow", function() 
+					eye:Show()
+					tracking:Place(unpack(layout.TrackingButtonPlaceAlternate))
+				end)
+				BGFrame:HookScript("OnHide", function() 
+					eye:Hide()
+					tracking:Place(unpack(layout.TrackingButtonPlace))
+				end)
+			end
 		end
 	end
 

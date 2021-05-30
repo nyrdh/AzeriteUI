@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [3.2.494-RC] 2021-05-30
 ### Added
-- Added the nicely styled chatframe to bottom button to BC clients.
+- Added the minimap tracking button to BC clients, and also the minimap right-click functionality as an additional way to bring up the BC client tracking menu.
+- Added the nicely styled bottom button to the chat frame in BC clients.
 - Attempted to add the pet happiness element to BC clients. Untested, as I have no hunter with pet there yet.
 
 ### Changed
