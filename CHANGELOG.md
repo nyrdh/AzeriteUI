@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.494-RC] 2021-05-30
+## [3.2.495-RC] 2021-05-31
+- New tag to re-trigger GitHub actions and get builds uploaded to the now functioning CurseForge. 
+
 ### Added
 - Added the minimap tracking button to BC clients, and also the minimap right-click functionality as an additional way to bring up the BC client tracking menu.
 - Added the nicely styled bottom button to the chat frame in BC clients.
