@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.496-RC] 2021-06-09
+### Added
+- There should be a focus frame in BC clients now. 
+
 ## [3.2.495-RC] 2021-05-31
 - New tag to re-trigger GitHub actions and get builds uploaded to the now functioning CurseForge. 
 
