@@ -9,6 +9,7 @@ local UnitIsUnit = UnitIsUnit
 
 -- Constants for client version
 local IsRetail = LibClientBuild:IsRetail()
+local IsTBC = LibClientBuild:IsTBC()
 
 local Update = function(self, event, unit, ...)
 	if (not unit) or (unit ~= self.unit) then 
@@ -65,7 +66,7 @@ local Enable = function(self)
 			self:RegisterEvent("GROUP_ROSTER_UPDATE", Proxy, true)
 		end
 
-		if (IsRetail) then
+		if (IsRetail or IsTBC) then
 			self:RegisterEvent("PLAYER_FOCUS_CHANGED", Proxy, true)
 		end
 

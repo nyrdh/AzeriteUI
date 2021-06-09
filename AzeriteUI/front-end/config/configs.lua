@@ -4002,7 +4002,7 @@ RegisterLayout("UnitFramePet", "Azerite", setmetatable({
 }, { __index = Template_SmallFrame }))
 
 -- Focus
-if (IsRetail) then
+if (IsRetail or IsTBC) then
 	RegisterLayout("UnitFrameFocus", "Azerite", setmetatable({
 		["AuraProperties"] = {
 			["growthX"] = "RIGHT", 

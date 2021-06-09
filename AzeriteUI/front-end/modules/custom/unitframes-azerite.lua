@@ -77,10 +77,10 @@ local UnitFrameTarget = Core:NewModule("UnitFrameTarget", "LibMessage", "LibEven
 -- Secondary Units
 local UnitFramePet = Core:NewModule("UnitFramePet", "LibUnitFrame", "LibFrame", "LibForge")
 local UnitFrameToT = Core:NewModule("UnitFrameToT", "LibUnitFrame", "LibForge")
-local UnitFrameFocus = (IsRetail) and Core:NewModule("UnitFrameFocus", "LibMessage", "LibUnitFrame", "LibForge")
+local UnitFrameFocus = (IsRetail or IsTBC) and Core:NewModule("UnitFrameFocus", "LibMessage", "LibUnitFrame", "LibForge")
 
 -- Grouped Units
-local UnitFrameArena = (IsRetail) and Core:NewModule("UnitFrameArena", "LibDB", "LibMessage", "LibUnitFrame", "LibFrame", "LibForge")
+local UnitFrameArena = (IsRetail or IsTBC) and Core:NewModule("UnitFrameArena", "LibDB", "LibMessage", "LibUnitFrame", "LibFrame", "LibForge")
 local UnitFrameBoss = Core:NewModule("UnitFrameBoss", "LibUnitFrame", "LibMessage", "LibForge")
 local UnitFrameParty = Core:NewModule("UnitFrameParty", "LibDB", "LibMessage", "LibFrame", "LibUnitFrame", "LibForge")
 local UnitFrameRaid = Core:NewModule("UnitFrameRaid", "LibDB", "LibFrame", "LibUnitFrame", "LibBlizzard", "LibForge")

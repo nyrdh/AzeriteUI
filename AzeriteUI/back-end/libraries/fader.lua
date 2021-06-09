@@ -1,4 +1,4 @@
-local LibFader = Wheel:Set("LibFader", 51)
+local LibFader = Wheel:Set("LibFader", 52)
 if (not LibFader) then	
 	return
 end
@@ -471,8 +471,11 @@ LibFader.OnEvent = function(self, event, ...)
 		self:CheckGroup()
 		self:CheckTarget()
 		
-		if (IsRetail) then
+		if (IsRetail or IsTBC) then
 			self:CheckFocus()
+		end
+
+		if (IsRetail) then
 			self:CheckVehicle()
 			self:CheckOverride()
 			self:CheckPossess()

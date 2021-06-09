@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 88)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 89)
 if (not LibUnitFrame) then	
 	return
 end
@@ -481,7 +481,7 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 		frame.ignoredEvents["PLAYER_TARGET_CHANGED"] = true
 
 	elseif (unit == "focus") then
-		if (IsRetail) then
+		if (IsRetail or IsTBC) then
 			frame:RegisterEvent("PLAYER_FOCUS_CHANGED", OverrideAllElements, true)
 			frame.ignoredEvents["PLAYER_FOCUS_CHANGED"] = true
 		end
