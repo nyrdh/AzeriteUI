@@ -30,9 +30,16 @@ These are some addons I feel go very well together with our user interface. They
 * Minimap Button Bag: [www.curseforge.com/wow/addons/mbb](https://www.curseforge.com/wow/addons/mbb)  
 * World Map Shrinker: [www.curseforge.com/wow/addons/world-map-shrinker](https://www.curseforge.com/wow/addons/world-map-shrinker)
 
-### **Classic:**
+### **Classic Era:**
+* Big Input Box: [www.curseforge.com/wow/addons/big-input-box](https://www.curseforge.com/wow/addons/big-input-box)
 * Enhanced World Map for WoW Classic: [www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic](https://www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic)  
 * Immersion for WoW Classic: [www.curseforge.com/wow/addons/immersion](https://www.curseforge.com/wow/addons/immersion/files/all?filter-game-version=1738749986%3a67408)  
+
+### **Burning Crusade Classic:**
+* Big Input Box: [www.curseforge.com/wow/addons/big-input-box](https://www.curseforge.com/wow/addons/big-input-box)
+* Enhanced World Map for WoW Classic: [www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic](https://www.curseforge.com/wow/addons/enhanced-world-map-for-wow-classic)  
+* Immersion for WoW Classic: [www.curseforge.com/wow/addons/immersion](https://www.curseforge.com/wow/addons/immersion/files/all?filter-game-version=1738749986%3a67408)  
+* TotemTimers Classic: [www.curseforge.com/wow/addons/totemtimers-classic](https://www.curseforge.com/wow/addons/totemtimers-classic)  
 
 ## **Frequently Asked Questions:**  
 ### **It's so big, how can I scale it down?**  
