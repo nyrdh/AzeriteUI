@@ -22,13 +22,14 @@ And remember, this is _not_ a place to ask questions. For questions, go to [our 
 
 ### What game version(s) does it happen in? Choose your version and the highest expansion you own. 
 <!--The game uses different addon APIs in different versions, so this matters a lot.-->
-- [ ] Classic 
-- [ ] Retail 
-	- [ ] Battle for Azeroth
+- Live Realms
+	- [ ] Classic Era 
+	- [ ] Burning Crusade Classic 
 	- [ ] Shadowlands 
-- [ ] Public Test Realm 
-	- [ ] Classic 
-	- [ ] Retail 
+- Public Test Realm 
+	- [ ] Classic Era 
+	- [ ] Burning Crusade Classic 
+	- [ ] Shadowlands 
 
 ### What addon theme(s) does it happen in?  
 <!--The addon uses different code in different themes, so this matters a lot.-->
@@ -42,7 +43,7 @@ And remember, this is _not_ a place to ask questions. For questions, go to [our 
 - [ ] No 
 
 ### Does this happen with absolutely all addons (this included) disabled?  
-<!--This tells us something about where the error is happening.-->
+<!--This tells us something about where the error is happening. Sometimes a bug is caused by Blizzard!-->
 - [ ] Yes 
 - [ ] No 
 

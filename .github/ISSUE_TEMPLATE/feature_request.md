@@ -8,8 +8,9 @@ assignees: goldpaw
 ---
 
 **What WoW version do you wish to see this feature in?**
-- [ ] Classic
-- [ ] Battle for Azeroth
+- [ ] Classic Era
+- [ ] Burning Crusade Classic
+- [ ] Shadowlands
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
