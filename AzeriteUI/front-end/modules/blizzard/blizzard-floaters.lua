@@ -426,8 +426,22 @@ Module.HandleErrorFrame = function(self)
 end 
 
 Module.HandleQuestTimerFrame = function(self)
-	GetHolder(QuestTimerFrame, unpack(self.layout.QuestTimerFramePlace))
-	CreatePointHook(QuestTimerFrame)
+
+	local QuestTimerFrameHolder = GetHolder(QuestTimerFrame, unpack(self.layout.QuestTimerFramePlace))
+	QuestTimerFrameHolder:SetSize(QuestTimerFrame:GetSize())
+
+	QuestTimerFrame:SetMovable(true)
+	QuestTimerFrame:SetUserPlaced(true)
+	QuestTimerFrame:SetIgnoreParentScale(true)
+	QuestTimerFrame:SetScale(768/1080)
+	QuestTimerFrame:SetPoint("TOPRIGHT", QuestTimerFrameHolder, "TOPRIGHT", 0, 0)
+	
+	hooksecurefunc(QuestTimerFrame, "SetPoint", function(self, point, anchor)
+		if (anchor ~= QuestTimerFrameHolder) then
+			QuestTimerFrame:ClearAllPoints()
+			QuestTimerFrame:SetPoint("TOPRIGHT", QuestTimerFrameHolder, "TOPRIGHT", 0, 0)
+		end
+	end)
 end
 
 Module.HandleTalkingHeadFrame = function(self)

@@ -255,11 +255,13 @@ Module.StyleClassicTracker = function(self)
 		return
 	end
 	local layout = self.layout
-	local scaffold = self:CreateFrame("Frame", nil, "UICenter")
+	local scaffold = self:CreateFrame("Frame", nil, MinimapCluster) -- "UICenter"
 	scaffold:SetWidth(layout.Width)
 	scaffold:SetHeight(22)
 	scaffold:Place(unpack(layout.Place))
 	
+	QuestWatchFrame:SetMovable(true)
+	QuestWatchFrame:SetUserPlaced(true)
 	QuestWatchFrame:SetParent(self.frame)
 	QuestWatchFrame:ClearAllPoints()
 	QuestWatchFrame:SetPoint("BOTTOMRIGHT", scaffold, "BOTTOMRIGHT")
