@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.498-RC] 2021-06-12
+### Changed
+- Modified how the backdrops are attached to Blizzard tooltips, in an effort to solve some incompatibilities with certain other addons like Silverdragon and Raider.io. 
+
+### Fixed
+- We'll hopefully not have such random quest tracker positions in Classic anymore. 
+
 ## [3.2.497-RC] 2021-06-10
 ### Fixed
 - Fixed the weird and sudden issue with the QuestTimerFrame in BC and Classic. 

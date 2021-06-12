@@ -349,6 +349,12 @@ Tooltip.SetBackdrop = function(self, backdropInfo)
 			backdrop = CreateFrame("Frame", nil, self, BackdropTemplateMixin and "BackdropTemplate")
 			backdrop:SetAllPoints()
 			backdrop:SetFrameLevel(self:GetFrameLevel())
+			-- Hook into tooltip framelevel changes. 
+			-- Might help with some of the conflicts 
+			-- experienced with Silverdragon and Raider.IO
+			hooksecurefunc(self, "SetFrameLevel", function(self) 
+				backdrop:SetFrameLevel(self:GetFrameLevel())
+			end)
 			Backdrops[self] = backdrop
 		end
 		backdrop:SetBackdrop(backdropInfo)		
