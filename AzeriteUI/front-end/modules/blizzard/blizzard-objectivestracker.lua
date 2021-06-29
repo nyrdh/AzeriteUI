@@ -568,9 +568,10 @@ Module.InitRetailTracker = function(self)
 	end
 
 	-- Let's attempt to work around the quest item taints.
-	if (QuestObjectiveSetupBlockButton_Item) then
-		hooksecurefunc("QuestObjectiveSetupBlockButton_Item", function(...) self:SecureItemButton(...) end)
-	end
+	-- Removing it as it might be causing it too. Blergh.
+	--if (QuestObjectiveSetupBlockButton_Item) then
+	--	hooksecurefunc("QuestObjectiveSetupBlockButton_Item", function(...) self:SecureItemButton(...) end)
+	--end
 
 	-- kills this shit off. We use our keybind instead. 
 	ObjectiveTrackerFrame.HeaderMenu.MinimizeButton:Hide()

@@ -5,7 +5,7 @@ basic filters for chat output.
 
 --]]--
 
-local LibChatTool = Wheel:Set("LibChatTool", 31)
+local LibChatTool = Wheel:Set("LibChatTool", 32)
 if (not LibChatTool) then
 	return
 end
@@ -41,11 +41,7 @@ local Filters = {}
 local FilterStatus = LibChatTool.filterStatus
 
 -- Lua API
-local hooksecurefunc = hooksecurefunc
 local ipairs = ipairs
-local math_abs = math.abs
-local math_floor = math.floor
-local math_mod = math.fmod
 local pairs = pairs
 local string_find = string.find
 local string_format = string.format
@@ -54,18 +50,11 @@ local string_match = string.match
 local string_sub = string.sub
 local table_insert = table.insert
 local tonumber = tonumber
-local type = type
 
 -- WoW API
 local ChatFrame_AddMessageEventFilter = ChatFrame_AddMessageEventFilter
 local ChatFrame_RemoveMessageEventFilter = ChatFrame_RemoveMessageEventFilter
 local FCF_GetCurrentChatFrame = FCF_GetCurrentChatFrame
-local GetFactionInfo = GetFactionInfo
-local GetMoney = GetMoney
-local GetNumFactions = GetNumFactions
-local ExpandFactionHeader = ExpandFactionHeader
-local UnitFactionGroup = UnitFactionGroup
-local UnitOnTaxi = UnitOnTaxi
 local RaidNotice_AddMessage = RaidNotice_AddMessage
 
 -- WoW Objects

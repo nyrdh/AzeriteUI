@@ -13,7 +13,6 @@ local ipairs = ipairs
 -- WoW API
 local InCombatLockdown = InCombatLockdown
 local IsAddOnLoaded = IsAddOnLoaded
-local hooksecurefunc = hooksecurefunc
 
 Module.UpdateDisplayedMessages = function(self, event, ...)
 	if (InCombatLockdown()) then 

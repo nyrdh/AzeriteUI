@@ -1,4 +1,4 @@
-local LibChatWindow, version = Wheel:Set("LibChatWindow", 35)
+local LibChatWindow, version = Wheel:Set("LibChatWindow", 36)
 if (not LibChatWindow) then	
 	return
 end
@@ -43,8 +43,6 @@ local unpack = unpack
 -- WoW API
 local FCF_GetCurrentChatFrame = FCF_GetCurrentChatFrame
 local GetCVar = GetCVar
-local hooksecurefunc = hooksecurefunc
-local UIFrameFadeRemoveFrame = UIFrameFadeRemoveFrame
 
 -- WoW Objects
 local CHAT_FRAMES = CHAT_FRAMES
