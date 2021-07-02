@@ -21,6 +21,7 @@ local UnitStyles = {}
 -- Lua API
 local date = date
 local ipairs = ipairs
+local math_ceil = math.ceil
 local math_floor = math.floor
 local math_pi = math.pi
 local select = select
@@ -2433,9 +2434,29 @@ UnitFramePlayer.OnEvent = function(self, event, ...)
 	end
 end
 
+local DAY, HOUR, MINUTE = 86400, 3600, 60
+local formatTime = function(time)
+	if (time > DAY) then -- more than a day
+		return "%.0f%s", math_ceil(time / DAY), "d"
+	elseif (time > HOUR) then -- more than an hour
+		return "%.0f%s", math_ceil(time / HOUR), "h"
+	elseif (time > MINUTE) then -- more than a minute
+		return "%.0f%s", math_ceil(time / MINUTE), "m"
+	elseif (time > 5) then 
+		return "%.0f", math_ceil(time)
+	elseif (time > .9) then 
+		return "|cffff8800%.0f|r", math_ceil(time)
+	elseif (time > .05) then
+		return "|cffff0000%.0f|r", time*10 - time*10%1
+	else
+		return ""
+	end	
+end
+
 -- Temporary Weapon Enchants!
 -- These exist in both Retail and Classic
 UnitFramePlayer.SpawnTempEnchantFrames = function(self)
+
 	self.tempEnchantButtons = {
 		self.frame:CreateFrame("Button", nil, "SecureActionButtonTemplate"),
 		self.frame:CreateFrame("Button", nil, "SecureActionButtonTemplate"),
@@ -2476,17 +2497,57 @@ UnitFramePlayer.SpawnTempEnchantFrames = function(self)
 
 		local time = border:CreateFontString()
 		time:ClearAllPoints()
-		time:SetPoint("TOPLEFT", -6, 6)
+		time:SetPoint("BOTTOM", 0, -3)
 		time:SetFontObject(GetFont(11, true))
 		time:SetTextColor(Colors.normal[1], Colors.normal[2], Colors.normal[3], .85)
 		button.Time = time
 
 		-- MainHand, OffHand, Ranged = 16,17,18
 		button:SetID(i+15)
+
+		button.OnEnter = function(self) 
+			if (GameTooltip:IsForbidden()) then
+				return
+			end
+			GameTooltip_SetDefaultAnchor(GameTooltip, self)
+			--GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
+			GameTooltip:SetInventoryItem("player", self:GetID())
+		end
+
+		button.OnLeave = function(self) 
+			if (GameTooltip:IsForbidden()) then
+				return
+			end
+			GameTooltip:Hide()
+		end
+
+		button.OnUpdate = function(self) 
+			if (GameTooltip:IsForbidden()) then
+				return
+			end
+			if (GameTooltip:IsOwned(self)) then
+				self:OnEnter()
+			end
+		end
+
+		button:SetScript("OnEnter", button.OnEnter)
+		button:SetScript("OnLeave", button.OnLeave)
+		button:SetScript("OnUpdate", button.OnUpdate)
+
 	end
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateTempEnchantFrames")
 	self:RegisterEvent("UNIT_INVENTORY_CHANGED", "UpdateTempEnchantFrames")
+
+	local updateFrame = CreateFrame("Frame", nil, self.frame)
+	updateFrame:SetScript("OnUpdate", function(this, elapsed) 
+		this.elapsed = (this.elapsed or 0) - elapsed
+		if (this.elapsed < 0) then
+			this.elapsed = 0.1
+			self:UpdateTempEnchantFrames()
+		end
+	end)
+
 end
 
 UnitFramePlayer.UpdateTempEnchantFrames = function(self)
@@ -2496,24 +2557,48 @@ UnitFramePlayer.UpdateTempEnchantFrames = function(self)
 		local button = self.tempEnchantButtons[1]
 		button.Icon:SetTexture(GetInventoryItemTexture("player", button:GetID()))
 		button:SetAlpha(1)
+
+		if (mainHandExpiration) then
+			self.tempEnchantButtons[1].Time:SetFormattedText(formatTime(mainHandExpiration/1000))
+		else
+			self.tempEnchantButtons[1].Time:SetText("")
+		end
+
 	else
 		self.tempEnchantButtons[1]:SetAlpha(0)
+		self.tempEnchantButtons[1].Time:SetText("")
 	end
 
 	if (hasOffHandEnchant) then
 		local button = self.tempEnchantButtons[2]
 		button.Icon:SetTexture(GetInventoryItemTexture("player", button:GetID()))
 		button:SetAlpha(1)
+
+		if (offHandExpiration) then
+			self.tempEnchantButtons[2].Time:SetFormattedText(formatTime(offHandExpiration/1000))
+		else
+			self.tempEnchantButtons[2].Time:SetText("")
+		end
+
 	else
 		self.tempEnchantButtons[2]:SetAlpha(0)
+		self.tempEnchantButtons[2].Time:SetText("")
 	end
 
 	if (hasRangedEnchant) then
 		local button = self.tempEnchantButtons[3]
 		button.Icon:SetTexture(GetInventoryItemTexture("player", button:GetID()))
 		button:SetAlpha(1)
+
+		if (rangedEnchantExpiration) then
+			self.tempEnchantButtons[3].Time:SetFormattedText(formatTime(rangedEnchantExpiration/1000))
+		else
+			self.tempEnchantButtons[3].Time:SetText("")
+		end
+
 	else
 		self.tempEnchantButtons[3]:SetAlpha(0)
+		self.tempEnchantButtons[3].Time:SetText("")
 	end
 end
 

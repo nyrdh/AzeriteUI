@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.500-Release] 2021-07-02
+### Changed
+- Added duration and tooltips to the temporary enchant frames (weapon buffs, fishing lures, etc) in both the Azerite and Legacy themes.
+
 ## [3.2.499-Release] 2021-06-29
 - Bump toc for 9.1.0.
 
