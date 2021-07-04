@@ -18,7 +18,8 @@
 ## SavedVariables: AzeriteUI_DB
 ## OptionalDeps: Clique
 
-# Townlong-Yak TaintLess
+# General taint fixes
+FixingThings.xml
 TaintLess.xml
 
 # Global Fonts

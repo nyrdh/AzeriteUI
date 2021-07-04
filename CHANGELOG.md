@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.501-Release] 2021-07-04
+- Added FixingThings to help prevent quest tracker related item button taint.
+
 ## [3.2.500-Release] 2021-07-02
 ### Changed
 - Added duration and tooltips to the temporary enchant frames (weapon buffs, fishing lures, etc) in both the Azerite and Legacy themes.
