@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.503-Release] 2021-07-18
+### Fixed
+- Fixed the problem where certain zone abilities would be missing their icons on relogs and reloads. 
+
 ## [3.2.502-Release] 2021-07-18
 ### Changed
 - Updated FixingThings to latest build.

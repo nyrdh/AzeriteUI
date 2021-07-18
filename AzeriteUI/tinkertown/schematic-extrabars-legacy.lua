@@ -68,7 +68,7 @@ local StripNStyle = function(button)
 		button.style:SetAlpha(0) -- Extra
 	end
 
-	-- Original Extra and >one icons. 
+	-- Original Extra and zone icons. 
 	if (button.icon or button.Icon) then
 		(button.icon or button.Icon):SetAlpha(0)
 	end
@@ -151,13 +151,17 @@ local StripNStyle = function(button)
 	-- to set a mask at all on the Extra buttons. 
 	-- I honestly have no idea why. Somebody tell me?
 	if (not button.GPIcon) then
+		local blizzicon = button.icon or button.Icon
 		local icon = button:CreateTexture()
 		icon:SetPoint("TOPLEFT", button, 6, -6)
 		icon:SetPoint("BOTTOMRIGHT", button, -6, 6)
 		icon:SetMask(GetMedia("actionbutton-mask-square-rounded"))
 		button.GPIcon = icon
+		button.UpdateGPIcon = function() button.GPIcon:SetTexture(blizzicon:GetTexture()) end
+		button:UpdateGPIcon() -- Fix the empty border on reload problem.
 
-		hooksecurefunc((button.icon or button.Icon), "SetTexture", function(_,...) button.GPIcon:SetTexture(...) end)
+		hooksecurefunc(blizzicon, "SetTexture", button.UpdateGPIcon)
+		hooksecurefunc(blizzicon, "Show", button.UpdateGPIcon)
 	end
 
 	if (not button.GPHighlight) then 

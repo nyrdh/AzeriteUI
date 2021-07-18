@@ -151,13 +151,16 @@ local StripNStyle = function(button)
 	-- to set a mask at all on the Extra buttons. 
 	-- I honestly have no idea why. Somebody tell me?
 	if (not button.GPIcon) then
+		local blizzicon = button.icon or button.Icon
 		local icon = button:CreateTexture()
 		icon:SetPoint("TOPLEFT", button, 8, -8)
 		icon:SetPoint("BOTTOMRIGHT", button, -8, 8)
 		icon:SetMask(GetMedia("actionbutton-mask-circular"))
 		button.GPIcon = icon
+		button.UpdateGPIcon = function() button.GPIcon:SetTexture(blizzicon:GetTexture()) end
+		button:UpdateGPIcon()
 
-		hooksecurefunc((button.icon or button.Icon), "SetTexture", function(_,...) button.GPIcon:SetTexture(...) end)
+		hooksecurefunc(blizzicon, "SetTexture", button.UpdateGPIcon)
 	end
 
 	if (not button.GPHighlight) then 
