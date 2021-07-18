@@ -158,7 +158,7 @@ local StripNStyle = function(button)
 		icon:SetMask(GetMedia("actionbutton-mask-circular"))
 		button.GPIcon = icon
 		button.UpdateGPIcon = function() button.GPIcon:SetTexture(blizzicon:GetTexture()) end
-		button:UpdateGPIcon()
+		button:UpdateGPIcon() -- Fix the empty border on reload problem.
 
 		hooksecurefunc(blizzicon, "SetTexture", button.UpdateGPIcon)
 	end
