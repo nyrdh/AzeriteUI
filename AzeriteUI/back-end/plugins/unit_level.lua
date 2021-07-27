@@ -3,12 +3,12 @@
 local _G = _G
 
 -- WoW API
-local GetExpansionLevel = GetExpansionLevel
 local UnitCanAttack = UnitCanAttack
 local UnitLevel = UnitEffectiveLevel or UnitLevel
 
--- WoW Objects
-local MAX_PLAYER_LEVEL_TABLE = MAX_PLAYER_LEVEL_TABLE
+-- Constants
+local Client = tonumber((string.split(".", (GetBuildInfo()))))
+local MAX_LEVEL = (Client == 2) and 70 or 60
 
 local Update = function(self, event, unit)
 	if (not unit) or (unit ~= self.unit) then 
@@ -64,7 +64,7 @@ local Update = function(self, event, unit)
 		end 
 
 	-- Hide capped and above, if so chosen ny the module
-	elseif (element.hideCapped and (unitLevel >= MAX_PLAYER_LEVEL_TABLE[GetExpansionLevel()])) then 
+	elseif (element.hideCapped) and (unitLevel >= MAX_LEVEL) then 
 		element:SetText("")
 		if badge then 
 			badge:Hide()
@@ -77,7 +77,7 @@ local Update = function(self, event, unit)
 		end
 
 	-- Hide floored units (level 1 mobs and criters)
-	elseif (element.hideFloored and (unitLevel == 1)) then 
+	elseif (element.hideFloored) and (unitLevel == 1) then 
 		element:SetText("")
 		if badge then 
 			badge:Hide()
@@ -177,5 +177,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Level", Enable, Disable, Proxy, 9)
+	Lib:RegisterElement("Level", Enable, Disable, Proxy, 11)
 end 

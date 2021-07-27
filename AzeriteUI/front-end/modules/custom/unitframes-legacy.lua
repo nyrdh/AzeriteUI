@@ -494,6 +494,16 @@ UnitFrames.SpawnUnitFrames = function(self)
 				if (not self:GetDB("EnablePlayerAuras")) then
 					frame:DisableAuras()
 				end
+			elseif (schematicID == "PlayerHUD") then 
+				self.PlayerHUDFrame = frame
+				frame.EnableClassPower = function()
+					frame:EnableElement("ClassPower")
+					frame.ClassPower:ForceUpdate()
+				end
+				frame.DisableClassPower = function()
+					frame:DisableElement("ClassPower")
+				end
+
 			elseif (schematicID == "Target") then
 				self.TargetFrame = frame
 				frame.EnableAuras = function()
@@ -556,6 +566,9 @@ UnitFrames.OnEvent = function(self, event, ...)
 		else
 			self.TargetFrame:DisableAuras()
 		end
+		if (self:IsAddOnEnabled("SimpleClassPower")) then
+			self.PlayerHUDFrame:DisableClassPower()
+		end
 	end
 end
 
@@ -593,7 +606,12 @@ UnitFrames.OnInit = function(self)
 	proxy:SetFrameRef("PartyHeader", self.partyHeader)
 	proxy:SetFrameRef("RaidHeader", self.raidHeader)
 	proxy:SetFrameRef("PlayerFrame", self.PlayerFrame)
+	proxy:SetFrameRef("PlayerHUDFrame", self.PlayerHUDFrame)
 	proxy:SetFrameRef("TargetFrame", self.TargetFrame)
+
+	if (self:IsAddOnEnabled("SimpleClassPower")) then
+		self.PlayerHUDFrame:DisableClassPower()
+	end
 end
 
 UnitFrames.OnEnable = function(self)

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.504-Release] 2021-07-27
+### Changed
+- The Legacy classpower element is now force disabled if the addon SimpleClassPower is loaded.
+
 ## [3.2.503-Release] 2021-07-18
 ### Fixed
 - Fixed the problem where certain zone abilities would be missing their icons on relogs and reloads. 

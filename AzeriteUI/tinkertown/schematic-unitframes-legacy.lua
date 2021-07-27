@@ -1022,9 +1022,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"SetStatusBarColor", { 1, 1, 1, .5 },
 					"DisableSmoothing", true
 				}
-			}
-
-			,
+			},
 
 			-- Class Power
 			{
@@ -1087,6 +1085,9 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 
 							element[i] = pill
 						end
+
+						-- Initial hiding to avoid the backdrop texture hovering.
+						element:Hide()
 					end,
 
 					-- Called by the back-end on updates.
