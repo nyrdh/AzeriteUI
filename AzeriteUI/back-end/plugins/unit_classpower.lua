@@ -18,6 +18,7 @@ local HasOverrideActionBar = HasOverrideActionBar
 local HasTempShapeshiftActionBar = HasTempShapeshiftActionBar
 local IsPlayerSpell = IsPlayerSpell
 local IsPossessBarVisible = IsPossessBarVisible
+local PlayerVehicleHasComboPoints = PlayerVehicleHasComboPoints
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitAura = UnitAura
 local UnitCanAttack = UnitCanAttack
@@ -52,6 +53,7 @@ local SPEC_PALADIN_HOLY = SPEC_PALADIN_HOLY or 2 -- we made this up
 local SPEC_PALADIN_RETRIBUTION = SPEC_PALADIN_RETRIBUTION or 3
 local SPEC_MAGE_ARCANE = SPEC_MAGE_ARCANE or 1
 local SPEC_SHAMAN_RESTORATION = SPEC_SHAMAN_RESTORATION or 3
+local SPEC_DEMONHUNTER_VENGEANCE = SPEC_DEMONHUNTER_VENGEANCE or 2 -- made this on up too
 
 -- Sourced from BlizzardInterfaceCode/AddOns/Blizzard_APIDocumentation/UnitDocumentation.lua
 local SPELL_POWER_HEALTH_COST = Enum.PowerType.HealthCost or -2
@@ -1044,7 +1046,7 @@ if (IsRetail) then
 			or (event == "UNIT_EXITED_VEHICLE")
 		then
 			element.inVehicle = UnitInVehicle("player")
-			element.hasVehicleUI = UnitHasVehiclePlayerFrameUI("player")
+			element.hasVehicleUI = UnitHasVehiclePlayerFrameUI("player") and PlayerVehicleHasComboPoints()
 		end 
 
 		local newType 
@@ -1068,10 +1070,10 @@ if (IsRetail) then
 			newType = "ComboPoints"
 		elseif ((PLAYERCLASS == "WARLOCK") and (level >= SHARDBAR_SHOW_LEVEL)) and (not element.ignoreSoulShards) then 
 			newType = "SoulShards"
-		elseif (PLAYERCLASS == "DEMONHUNTER") and (not element.ignoreSoulFragments) then 
+		elseif (PLAYERCLASS == "DEMONHUNTER") and (spec == SPEC_DEMONHUNTER_VENGEANCE) and (not element.ignoreSoulFragments) then 
 			newType = "SoulFragments"
-		elseif (not element.ignoreComboPoints) then 
-			newType = "ComboPoints"
+		--elseif (not element.ignoreComboPoints) then 
+		--	newType = "ComboPoints"
 		else 
 			newType = "None"
 		end 
@@ -1133,7 +1135,7 @@ local Enable = function(self)
 
 			-- We'll handle spec specific powers from here, 
 			-- but will leave level checking to the sub-elements.
-			if (PLAYERCLASS == "MONK") or (PLAYERCLASS == "MAGE") or (PLAYERCLASS == "PALADIN") then 
+			if (PLAYERCLASS == "MONK") or (PLAYERCLASS == "MAGE") or (PLAYERCLASS == "PALADIN") or (PLAYERCLASS == "DEMONHUNTER") then 
 				self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", Proxy, true) 
 			end 
 			if (PLAYERCLASS == "MONK") then
@@ -1186,5 +1188,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 55)
+	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 58)
 end 
