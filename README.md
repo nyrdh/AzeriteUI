@@ -1,19 +1,12 @@
-[ ![Become a Patreon](http://larsnorbergofficial.com/img/social-media-buttons-patreon-small.jpg) ](https://www.patreon.com/goldpawsstuff) 
-
 This is a custom user interface suite for World of Warcraft, containing multiple full interfaces in a single addon. Coded and designed by Lars Norberg and Daniel Troconis. It works for both WoW Retail and WoW Classic, just choose the right version to download!  
 
 To switch between interface theme, use the commands `/go azerite` and `/go legacy`. This is a per character setting.  
 
-## **Motivate me!**  
-If you like this addon or others I have made, and wish to see more, consider supporting my work by sending a donation with PayPal or pledging monthly on Patreon. Your support is what motivates me to share my addons with the world, develop them further and keep them updated! 
-
-* Patreon: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)  
+## **Support & Connect**
 * PayPal: [www.paypal.me/goldpawsstuff](https://www.paypal.me/goldpawsstuff)  
-* Liberapay: [liberapay.com/goldpawsstuff/donate](https://liberapay.com/goldpawsstuff/donate)
-
-### **Join me on social media!**  
-* Discord: [discord.gg/MUSfWXd](https://discord.gg/MUSfWXd)  
+* Patreon: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)  
 * Twitter: [@GoldpawsStuff](https://twitter.com/goldpawsstuff)  
+* Discord: [discord.gg/MUSfWXd](https://discord.gg/MUSfWXd)  
 
 ### **Report a bug, suggest a feature:**
 All feature requests and bug reports for all game versions are done on the main project's github page. Please use _only_ our report system and the supplied template when reporting bugs.  
