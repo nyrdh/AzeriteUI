@@ -27,6 +27,7 @@ for moduleName,list in pairs({
 		["Prat-3.0"] = true
 	},
 	BlizzardGameMenu = {
+		["BigGameMenu"] = true,
 		["ConsolePort"] = true
 	},
 	BlizzardObjectivesTracker = {

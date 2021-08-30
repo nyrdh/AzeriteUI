@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.506-Release] 2021-08-30
+### Changed
+- Added better compatibility for some upcoming standalone addons. 
+
 ## [3.2.505-Release] 2021-08-17
 ### Changed
 - Added a check to see if vehicles actually have combopoints before displaying the classpower element while in vehicles. Note that a lot of vehicles give a false positive test result on this, so the WoW API seems a bit lacking here?
