@@ -1,4 +1,4 @@
-local LibStatusBar = Wheel:Set("LibStatusBar", 57)
+local LibStatusBar = Wheel:Set("LibStatusBar", 59)
 if (not LibStatusBar) then
 	return
 end
@@ -561,7 +561,15 @@ end
 StatusBar.SetStatusBarTexture = function(self, ...)
 	local arg = ...
 	if (type(arg) == "number") then
-		Bars[self].bar:SetColorTexture(...)
+		-- For some reason after 2.5.2 in WoW BCC, 
+		-- we can get a single number (textureID?) here. 
+		-- So we need an extra check. Seems to fix it.
+		local r,g,b = ...
+		if (r and g and b) then
+			Bars[self].bar:SetColorTexture(...)
+		else
+			Bars[self].bar:SetTexture(...)
+		end
 	else
 		Bars[self].bar:SetTexture(...)
 	end
