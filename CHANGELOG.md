@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.508-Release] 2021-09-02
+### Fixed
+- Fixed the strange statusbar bug that would occur in WoW BCC 2.5.2 every time you killed something that awarded experience points. 
+
 ## [3.2.507-Release] 2021-09-01
 - Bump TOC for BCC 2.5.2.
 
