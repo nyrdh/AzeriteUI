@@ -75,6 +75,9 @@ if (IsClassic or IsTBC) then
 	table_insert(microButtons, "TalentMicroButton")
 	table_insert(microButtons, "QuestLogMicroButton")
 	table_insert(microButtons, "SocialsMicroButton")
+	if (IsTBC) then
+		table_insert(microButtons, "LFGMicroButton")
+	end
 	table_insert(microButtons, "WorldMapMicroButton")
 	table_insert(microButtons, "MainMenuMicroButton")
 	table_insert(microButtons, "HelpMicroButton")
@@ -100,6 +103,9 @@ if (IsClassic or IsTBC) then
 	microButtonTexts.TalentMicroButton = TALENTS_BUTTON
 	microButtonTexts.QuestLogMicroButton = QUESTLOG_BUTTON
 	microButtonTexts.SocialsMicroButton = SOCIALS
+	if (IsTBC) then
+		microButtonTexts.LFGMicroButton = DUNGEONS_BUTTON
+	end
 	microButtonTexts.WorldMapMicroButton = WORLD_MAP
 	microButtonTexts.MainMenuMicroButton = MAINMENU_BUTTON
 	microButtonTexts.HelpMicroButton = HELP_BUTTON
