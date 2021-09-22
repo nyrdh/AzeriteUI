@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.510-Release] 2021-09-22
+### Fixed
+- Worked around a bug that would occur with more recent versions of Narcissus.
+
 ## [3.2.509-Release] 2021-09-21
 ### Added
 - Added the Looking For Group micro button to our micro menu in Burning Crusade Classic. 

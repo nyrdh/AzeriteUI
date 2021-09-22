@@ -1316,11 +1316,15 @@ Module.SetUpNarcissus = function(self)
 
 	MinimapButton:SetScript("OnDragStart", nil)
 	MinimapButton:SetScript("OnDragStop", nil)
-	MinimapButton.DraggingFrame:SetScript("OnUpdate", nil)
-	MinimapButton.DraggingFrame:SetScript("OnHide", nil)
-	MinimapButton.DraggingFrame:Hide()
-	MinimapButton_UpdateAngle = function() end
 
+	local dragFrame = MinimapButton.DraggingFrame or Narci_MinimapButton_DraggingFrame
+	if (dragFrame) then
+		dragFrame:SetScript("OnUpdate", nil)
+		dragFrame:SetScript("OnHide", nil)
+		dragFrame:Hide()
+	end
+
+	MinimapButton_UpdateAngle = function() end
 	Narci_MinimapButton_OnLoad = function() end
 	Narci_MinimapButton_DraggingFrame_OnUpdate = function() end
 
