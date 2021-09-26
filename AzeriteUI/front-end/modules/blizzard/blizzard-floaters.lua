@@ -372,22 +372,36 @@ Module.HandleBelowMinimapWidgets = function(self)
 	bmHolder:SetFrameLevel(10)
 	bmHolder:SetSize(128, 40)
 
-	-- Not sure where I can test this.
-	-- Hellfire Peninsula Capture Bars maybe?
-	-- 
-	-- 2021-01-26: 
-	-- In some Shadowlands raid fights, 
-	-- this will be visible at the same time as the boss frames. 
-	-- So we can't have it appear at the same spot AS the boss frames. 
-	-- 
+	-- *Test this with Hellfire Peninsula Capture Bars
 	if (layoutID == "Azerite") then
-		bmHolder:Place("BOTTOM", "Minimap", "TOP", 4, 60)
+		bmHolder:Place("BOTTOM", Minimap, "TOP", 4, 60)
 	elseif (layoutID == "Legacy") then
-		--bmHolder:Place("TOP", "Minimap", "BOTTOM", 4, -60)
-		
-		-- This hardcoded position should make the bottom center of this widget, 
-		-- be placed roughly at a position matching the horizontal center of the legacy Minimap.
-		bmHolder:Place("BOTTOM", "UICenter", "BOTTOMRIGHT", -(210/2 + 60 + 4), 60)
+
+		-- 2021-01-26: 
+		-- In some Shadowlands raid fights, 
+		-- this will be visible at the same time as the boss frames. 
+		-- So we can't have it appear at the same spot AS the boss frames. 
+		local posDriver = CreateFrame("Frame", nil, UIParent, "SecureHandlerAttributeTemplate")
+		posDriver.EnableBoss = function(self) 
+			-- This hardcoded position should make the bottom center of this widget, 
+			-- be placed roughly at a position matching the horizontal center of the legacy Minimap.
+			bmHolder:Place("BOTTOM", "UICenter", "BOTTOMRIGHT", -(210/2 + 60 + 4), 60)
+		end
+		posDriver.DisableBoss = function(self) 
+			bmHolder:Place("TOP", Minimap, "BOTTOM", 0, -70)
+		end
+		posDriver:SetAttribute("_onattributechanged", [=[
+			if (name == "state-pos") then
+				if (value == "boss") then
+					self:CallMethod("EnableBoss");
+				elseif (value == "normal") then
+					self:CallMethod("DisableBoss");
+				end
+			end
+		]=])
+		local driver = "[@boss1,exists][@boss2,exists][@boss3,exists][@boss4,exists]boss;normal"
+		RegisterAttributeDriver(posDriver, "state-pos", driver)
+
 	end
 
 	-- Note: Hide quest tracker when this is visible!
@@ -396,8 +410,8 @@ Module.HandleBelowMinimapWidgets = function(self)
 	if (layoutID == "Azerite") then
 		bmContainer:SetPoint("BOTTOM", bmHolder, "BOTTOM")
 	elseif (layoutID == "Legacy") then
-		--bmContainer:SetPoint("TOP", bmHolder, "TOP")
-		bmContainer:SetPoint("BOTTOM", bmHolder, "BOTTOM")
+		bmContainer:SetPoint("TOP", bmHolder, "TOP")
+		--bmContainer:SetPoint("BOTTOM", bmHolder, "BOTTOM")
 	end
 
 	hooksecurefunc(bmContainer, "SetPoint", function(self, _, anchor)
