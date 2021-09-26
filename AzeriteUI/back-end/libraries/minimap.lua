@@ -1,4 +1,4 @@
-local Version = 65
+local Version = 66
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -533,8 +533,8 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 	Library.OldCluster:SetMovable(true)
 	Library.OldCluster:SetUserPlaced(true)
 	Library.OldCluster:ClearAllPoints()
-	Library.OldCluster:EnableMouse(false)
 	Library.OldCluster:SetAllPoints(Library.MapHolder)
+	Library.OldCluster:EnableMouse(false)
 
 	-- Parent the actual minimap to our dummy,
 	-- and let the user decide minimap visibility
@@ -1238,11 +1238,19 @@ LibMinimap.OnEvent = function(self, event, ...)
 		-- Update the compass
 		self:UpdateCompass()
 
+		-- Update Cluster position
+		Library.OldCluster:ClearAllPoints()
+		Library.OldCluster:SetAllPoints(Library.MapHolder)
+	
 	elseif (event == "PLAYER_ENTERING_WORLD") then
 		-- In Torghast, map is always locked. Weird.
 		-- *Note that this is only in the tower, not the antechamber.
 		-- *We're resting in the antechamber, and it's a sanctuary. Good indicators.
 		IN_TORGHAST = (not IsResting()) and (GetRealZoneText() == L_TORGHAST)
+
+		-- Update Cluster position
+		Library.OldCluster:ClearAllPoints()
+		Library.OldCluster:SetAllPoints(Library.MapHolder)
 	end
 end
 
