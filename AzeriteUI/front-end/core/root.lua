@@ -782,12 +782,7 @@ Core.SetTheme = function(self, editBox, theme)
 		goldpaw = "Legacy",
 		goldpawui = "Legacy",
 		blakmane = "Azerite",
-		blakmaneui = "Azerite",
-		dui = "Diabolic",
-		diablo = "Diabolic",
-		diabloui = "Diabolic",
-		diabolic = "Diabolic",
-		diabolicui = "Diabolic"
+		blakmaneui = "Azerite"
 	})[theme] 
 	-- Only actually do something if a matching theme was found, 
 	-- and that theme is different from what we're currently using.	
@@ -808,6 +803,7 @@ Core.OnInit = function(self)
 	  
 	-- This sets the current layout. 
 	-- This will be moved to a user setting when implemented.
+	self.db.theme = (self.db.theme == "Azerite" or self.db.theme == "Legacy") and self.db.theme or "Azerite"
 	Private.SetLayout(self.db.theme)
 
 	-- Mini theme switcher. Sticking to the "go" command.

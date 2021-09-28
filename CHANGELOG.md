@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.512-Release] 2021-09-28
+### Changed
+- Removed redundant theme names from the theme switcher. 
+
 ## [3.2.511-Release] 2021-09-26
 ### Changed
 - The various blizzard widgets hooked to below the minimap should now update their position based on whether or not there currently are boss frames visible.
