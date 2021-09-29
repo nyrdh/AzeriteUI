@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.513-Release] 2021-09-29
+### Changed
+- Added a "hidden" developer feature. My patrons know about it.
+
 ## [3.2.512-Release] 2021-09-28
 ### Changed
 - Removed redundant theme names from the theme switcher. 

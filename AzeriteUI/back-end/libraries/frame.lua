@@ -1,4 +1,4 @@
-local LibFrame = Wheel:Set("LibFrame", 71)
+local LibFrame = Wheel:Set("LibFrame", 72)
 if (not LibFrame) then	
 	return
 end
@@ -91,13 +91,20 @@ end
 
 -- This doesn't check for parameter validity or combat status,
 -- so take care to only call this when it is safe to do so.
-local SetDisplaySize = function(ratio, altRatio, useSmallestRatio)
+local SetDisplaySize = function(relativeScale, ratio, altRatio, useSmallestRatio)
 	local width, height = WorldFrame:GetSize()
 	width = math_round(width)
 	height = math_round(height)
 
+	if (not relativeScale) then
+		relativeScale = LibFrame.relativeScale
+	end
+	if (relativeScale) then
+		relativeScale = math_min(1.25, math_max(.75, relativeScale))
+	end
+
 	-- Set up default fullwidth values. Somewhat supportive of EyeFinity.
-	local scale = height/1080
+	local scale = height/1080 * (relativeScale or 1)
 	local displayWidth = math_round((((width/height) >= (16/10)*3) and width/3 or width)/scale)
 	local displayHeight = math_round(height/scale)
 	local displayRatio = displayWidth/displayHeight
@@ -409,6 +416,16 @@ LibFrame.CreateTextureCache = function(self, texturePath)
 	end
 end
 
+LibFrame.SetRelativeScale = function(self, scale)
+	check(scale, 1, "number", "nil")
+
+	-- Store the values in the library
+	LibFrame.relativeScale = scale
+
+	-- Attempt to apply, or queue up to combat end.
+	LibFrame:UpdateDisplaySize()
+end
+
 LibFrame.SetAspectRatio = function(self, ratio, altRatio, useSmallestRatio)
 	check(ratio, 1, "number", "nil")
 	check(altRatio, 2, "number", "nil")
@@ -468,7 +485,8 @@ local embedMethods = {
 	CreateTextureCache = true,
 	GetFrame = true,
 	RegisterKeyword = true,
-	SetAspectRatio = true
+	SetAspectRatio = true,
+	SetRelativeScale = true
 }
 
 LibFrame.Embed = function(self, target)

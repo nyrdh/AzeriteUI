@@ -40,6 +40,7 @@ local SCENARIO_TRACKER_MODULE = SCENARIO_TRACKER_MODULE
 
 -- Private API
 local Colors = Private.Colors
+local GetConfig = Private.GetConfig
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 local IsClassic = Private.IsClassic
@@ -560,6 +561,27 @@ Module.SecureItemButton = function(self, ...)
 
 end
 
+Module.UpdateTrackerSizeAndScale = function(self)
+	if (not ObjectiveTrackerFrame) then
+		return
+	end
+	local layout = self.layout
+
+	-- We have limited room, let's find out how much!
+	local UICenter = self:GetFrame("UICenter")
+	local top = ObjectiveTrackerFrame:GetTop() or 0
+	local screenHeight = UICenter:GetHeight() -- need to use our parenting frame's height instead.
+	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
+	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
+	local scale = tonumber(GetConfig(ADDON, "global").relativeScale) or 1
+
+	-- Might need to hook all this to uiscaling changes.
+	ObjectiveTrackerFrame:SetIgnoreParentScale(true)
+	ObjectiveTrackerFrame:SetScale(768/1080 * (layout.Scale or 1) * scale)
+	ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight / (layout.Scale or 1) * scale)
+
+end
+
 Module.InitRetailTracker = function(self)
 	local layout = self.layout
 
@@ -585,29 +607,12 @@ Module.InitRetailTracker = function(self)
 	ObjectiveTrackerFrame:ClearAllPoints()
 	ObjectiveTrackerFrame:SetPoint("TOP", ObjectiveFrameHolder)
 
-	-- We have limited room, let's find out how much!
-	local UICenter = self:GetFrame("UICenter")
-	local top = ObjectiveTrackerFrame:GetTop() or 0
-	local screenHeight = UICenter:GetHeight() -- need to use our parenting frame's height instead.
-	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
-	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
-	--local newScale = (layout.Scale or 1) / ((UIParent:GetScale() or 1)/(UICenter:GetScale() or 1))
-
-	-- Might need to hook all this to uiscaling changes.
-	ObjectiveTrackerFrame:SetIgnoreParentScale(true)
-	--if (layout.Scale) then 
-		ObjectiveTrackerFrame:SetScale(768/1080 * (layout.Scale or 1))
-		--ObjectiveTrackerFrame:SetScale(newScale)
-		ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight / (layout.Scale or 1))
-	--else
-		--ObjectiveTrackerFrame:SetScale(768/1080)
-		--ObjectiveTrackerFrame:SetScale(1)
-		--ObjectiveTrackerFrame:SetHeight(objectiveFrameHeight)
-	--end	
-
 	-- This seems to prevent a lot of blizz crap from happening.
 	ObjectiveTrackerFrame.IsUserPlaced = function() return true end
-	
+
+	-- Update scale and height.
+	self:UpdateTrackerSizeAndScale()
+
 	-- Add a keybind for toggling the tracker, thanks Tukz! (SHIFT-O)
 	local toggleButton = self:CreateFrame("Button", "AzeriteUI_ObjectiveTrackerToggleButton", "UICenter", "SecureActionButtonTemplate")
 	toggleButton:SetScript("OnClick", function()
@@ -701,6 +706,8 @@ Module.OnEvent = function(self, event, ...)
 	elseif (event == "GP_BAGS_SHOWN") then
 		ObjectiveAlphaDriver:Update()
 
+	elseif (event == "GP_RELATIVE_SCALE_UPDATED") then
+		self:UpdateTrackerSizeAndScale()
 	end 
 end
 
@@ -734,4 +741,6 @@ Module.OnInit = function(self)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterMessage("GP_BAGS_HIDDEN", "OnEvent")
 	self:RegisterMessage("GP_BAGS_SHOWN", "OnEvent")
+	self:RegisterMessage("GP_RELATIVE_SCALE_UPDATED", "OnEvent")
+
 end 

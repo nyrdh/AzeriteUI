@@ -25,6 +25,8 @@ NPE_CheckTutorials = function() end
 -- Lua API
 local _G = _G
 local ipairs = ipairs
+local math_min = math.min
+local math_max = math.max
 local string_find = string.find
 local string_format = string.format
 local string_lower = string.lower
@@ -206,6 +208,32 @@ Core.UpdateAspectRatio = function(self)
 		-- as the emergency fallback.
 		self:SetAspectRatio(16/9, nil, false)
 	end
+end
+
+Core.UpdateRelativeScale = function(self)
+	if (InCombatLockdown()) then
+		return
+	end
+	local db = GetConfig(ADDON, "global")
+	scale = tonumber(db.relativeScale)
+	if (scale) then
+		scale = math_min(1.25, math_max(.75, scale))
+	end
+	self:SetRelativeScale(scale)
+	self:SendMessage("GP_RELATIVE_SCALE_UPDATED", scale or 1)
+end
+
+Core.SetScale = function(self, _, scale)
+	if (InCombatLockdown()) then
+		return
+	end
+	scale = tonumber(scale)
+	if (scale) then
+		scale = math_min(1.25, math_max(.75, scale))
+	end
+	local db = GetConfig(ADDON, "global")
+	db.relativeScale = scale
+	self:UpdateRelativeScale()
 end
 
 Core.LoadDebugConsole = function(self)
@@ -811,6 +839,8 @@ Core.OnInit = function(self)
 
 	self.layout = GetLayout(ADDON)
 
+	self:RegisterChatCommand("setscale", "SetScale")
+
 	-- In case some other jokers have disabled these, we add them back to avoid a World of Bugs.
 	-- RothUI used to remove the two first, and a lot of people missed his documentation on how to get them back. 
 	-- I personally removed the objective's tracker for a while in DiabolicUI, which led to pain. Lots of pain.
@@ -929,6 +959,7 @@ Core.OnEnable = function(self)
 	------------------------------------------------------------------------------------
 	self:UpdateSecureUpdater()
 	self:UpdateAspectRatio()
+	self:UpdateRelativeScale()
 
 	-- Listen for when the user closes the debugframe directly
 	------------------------------------------------------------------------------------

@@ -8,6 +8,7 @@ local Module = Core:NewModule("Tooltips", "LibMessage", "LibEvent", "LibDB", "Li
 
 -- Private API
 local Colors = Private.Colors
+local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
 
