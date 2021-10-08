@@ -9,6 +9,7 @@ for moduleName,list in pairs({
 	[ADDON] = {
 		--["AzeriteUI"] = true,
 		["DiabolicUI"] = true,
+		["DiabolicUI2"] = true,
 		["ElvUI"] = true,
 		["GoldieSix"] = true,
 		["GoldpawUI"] = true,

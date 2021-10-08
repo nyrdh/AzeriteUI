@@ -810,11 +810,18 @@ Core.SetTheme = function(self, editBox, theme)
 		goldpaw = "Legacy",
 		goldpawui = "Legacy",
 		blakmane = "Azerite",
-		blakmaneui = "Azerite"
+		blakmaneui = "Azerite",
+		diabolic = "Diabolic",
+		
 	})[theme] 
 	-- Only actually do something if a matching theme was found, 
 	-- and that theme is different from what we're currently using.	
-	if (new) and (new ~= self.db.theme) then
+	if (new == "Diabolic") then
+		if (self:IsAddOnAvailable("DiabolicUI2")) then
+			EnableAddOn("DiabolicUI2")
+			ReloadUI()
+		end
+	elseif (new) and (new ~= self.db.theme) then
 		-- Only apply the changed setting and 
 		-- force a reload upon actual changes.
 		self.db.theme = new
