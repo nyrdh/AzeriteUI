@@ -1,4 +1,4 @@
-local Version = 66
+local Version = 67
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -530,8 +530,14 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 	-- position of the MinimapCluster.
 	-- Unless the MinimapCluster is set to movable and user placed, it will be assumed
 	-- that it's still in its default position, and the end result will be.... bad.
-	Library.OldCluster:SetMovable(true)
-	Library.OldCluster:SetUserPlaced(true)
+	-- The cluster is the parent to everything.
+	-- This prevents the default zone text from being updated,
+	-- as well as disables its tooltip. 
+	Library.OldCluster:SetParent(UIParent)
+	Library.OldCluster:UnregisterAllEvents()
+	Library.OldCluster:SetScript("OnEvent", noop)
+	--Library.OldCluster:SetMovable(true)
+	--Library.OldCluster:SetUserPlaced(true)
 	Library.OldCluster:ClearAllPoints()
 	Library.OldCluster:SetAllPoints(Library.MapHolder)
 	Library.OldCluster:EnableMouse(false)

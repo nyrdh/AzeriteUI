@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.514-RC] 2021-10-18
+- Bump Classic Era toc to cleint patch 1.14.
+
+### Fixed
+- Fixed another weird and sudden SetPoint anchor issue with the QuestTimerFrame in Classic Era 1.14. 
+
 ## [3.2.513-Release] 2021-09-29
 ### Changed
 - Added a "hidden" developer feature. My patrons know about it.

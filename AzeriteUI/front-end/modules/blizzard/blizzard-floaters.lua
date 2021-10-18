@@ -444,8 +444,10 @@ Module.HandleQuestTimerFrame = function(self)
 	local QuestTimerFrameHolder = GetHolder(QuestTimerFrame, unpack(self.layout.QuestTimerFramePlace))
 	QuestTimerFrameHolder:SetSize(QuestTimerFrame:GetSize())
 
-	QuestTimerFrame:SetMovable(true)
-	QuestTimerFrame:SetUserPlaced(true)
+	-- Bug out in Classic Era 1.14
+	--QuestTimerFrame:SetMovable(true)
+	--QuestTimerFrame:SetUserPlaced(true)
+
 	QuestTimerFrame:SetIgnoreParentScale(true)
 	QuestTimerFrame:SetScale(768/1080)
 	QuestTimerFrame:SetPoint("TOPRIGHT", QuestTimerFrameHolder, "TOPRIGHT", 0, 0)
