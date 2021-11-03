@@ -259,6 +259,7 @@ end
 -- Tooltip Template
 -------------------------------------------------------
 local Tooltip = Module:CreateFrame("Frame")
+Tooltip:Hide()
 
 Tooltip.Style = function(self)
 	if (not self) or (self:IsForbidden()) then
@@ -267,11 +268,12 @@ Tooltip.Style = function(self)
 
 	HealthBar:Hide()
 
-	if (IsClassic or IsTBC) then
-		-- Oldschool backdrop killing.
-		self:DisableDrawLayer("BACKGROUND")
-		self:DisableDrawLayer("BORDER")
-	else
+	-- Oldschool backdrop killing.
+	self:DisableDrawLayer("BACKGROUND")
+	self:DisableDrawLayer("BORDER")
+
+	if (IsRetail) then
+
 		-- Textures in the combat pet tooltips
 		for _,texName in ipairs({ 
 			"BorderTopLeft", 
@@ -294,24 +296,29 @@ Tooltip.Style = function(self)
 			end
 		end
 
-		-- Region names sourced from SharedXML\NineSlice.lua
-		for _,pieceName in ipairs({  
-			"TopLeftCorner",
-			"TopRightCorner",
-			"BottomLeftCorner",
-			"BottomRightCorner",
-			"TopEdge",
-			"BottomEdge",
-			"LeftEdge",
-			"RightEdge",
-			"Center"
-		}) do
-			local region = self[pieceName]
-			if (region) then
-				region:SetTexture(nil)
-				local drawLayer, subLevel = region:GetDrawLayer()
-				if (drawLayer) then
-					self:DisableDrawLayer(drawLayer)
+		-- This shit is in its own frame in 9.1.5.
+		if (self.NineSlice) then
+			self.NineSlice:SetParent(Tooltip)
+		else
+			-- Region names sourced from SharedXML\NineSlice.lua
+			for _,pieceName in ipairs({  
+				"TopLeftCorner",
+				"TopRightCorner",
+				"BottomLeftCorner",
+				"BottomRightCorner",
+				"TopEdge",
+				"BottomEdge",
+				"LeftEdge",
+				"RightEdge",
+				"Center"
+			}) do
+				local region = self[pieceName]
+				if (region) then
+					region:SetTexture(nil)
+					local drawLayer, subLevel = region:GetDrawLayer()
+					if (drawLayer) then
+						self:DisableDrawLayer(drawLayer)
+					end
 				end
 			end
 		end
@@ -324,13 +331,25 @@ Tooltip.Style = function(self)
 		Tooltip.SetBackdrop(nil)
 	else
 		Tooltip.SetBackdrop(self, SmallTooltipBackdropTemplate)
-		Tooltip.SetBackdropOffsets(self, 25, 25, 25, 25)
+
+		if (self == NarciGameTooltip) then
+			Tooltip.SetBackdropOffsets(self, 18, 18, 18, 18)
+		else
+			Tooltip.SetBackdropOffsets(self, 25, 25, 25, 25)
+		end
+
 		Tooltip.SetBackdropColor(self, 0, 0, 0, .95)
 		Tooltip.SetBackdropBorderColor(self, .35, .35, .35, 1)
 	end
 
 	self:SetIgnoreParentScale(true)
 	self:SetScale(768/1080)
+
+	-- I don't THINK this taints, but one never knows.
+	-- We do this to easily avoid certain addons changing the scale. 
+	self.SetIgnoreParentScale = function() end
+	self.SetScale = function() end
+
 end
 
 Tooltip.AdjustScale = function(self)
@@ -732,14 +751,22 @@ Module.StyleHealthBar = function(self)
 	HealthBar:HookScript("OnShow", function(self) 
 		local tooltip = self:GetParent()
 		if (tooltip) then
-			Tooltip.SetBackdropOffsets(tooltip, 25, 25, 25, 31)
+			if (tooltip == NarciGameTooltip) then
+				Tooltip.SetBackdropOffsets(tooltip, 18, 18, 18, 24)
+			else
+				Tooltip.SetBackdropOffsets(tooltip, 25, 25, 25, 31)
+			end
 		end
 	end)
 
 	HealthBar:HookScript("OnHide", function(self) 
 		local tooltip = self:GetParent()
 		if (tooltip) then
-			Tooltip.SetBackdropOffsets(tooltip, 25, 25, 25, 25)
+			if (tooltip == NarciGameTooltip) then
+				Tooltip.SetBackdropOffsets(tooltip, 18, 18, 18, 18)
+			else
+				Tooltip.SetBackdropOffsets(tooltip, 25, 25, 25, 25)
+			end
 		end
 	end)
 
@@ -749,7 +776,12 @@ Module.StyleHealthBar = function(self)
 	HealthBar.Text:SetPoint("CENTER", HealthBar, "CENTER", 0, 0)
 end
 
-Module.StyleTooltips = function(self)
+Module.StyleTooltips = function(self, event, ...)
+
+	-- Only want this on the first run.
+	if (event == "PLAYER_ENTERING_WORLD") then
+		self:UnregisterEvent("PLAYER_ENTERING_WORLD", "StyleTooltips")
+	end 
 
 	-- Force creation of money lines.
 	if (not GameTooltip.hasMoney) then
@@ -785,7 +817,10 @@ Module.StyleTooltips = function(self)
 		PetBattlePrimaryAbilityTooltip,
 		PetBattlePrimaryUnitTooltip,
 		FloatingBattlePetTooltip,
-		FloatingPetBattleAbilityTooltip
+		FloatingPetBattleAbilityTooltip,
+
+		-- Addons
+		NarciGameTooltip
 
 	}) do 
 		Tooltip.Style(tooltip)
@@ -883,6 +918,7 @@ Module.OnEnable = function(self)
 	self:SetTooltipHooks()
 	self:StyleHealthBar()
 	self:StyleTooltips()
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "StyleTooltips")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterMessage("GP_BAGS_HIDDEN", "OnEvent")
 	self:RegisterMessage("GP_BAGS_SHOWN", "OnEvent")
