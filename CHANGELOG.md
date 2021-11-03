@@ -4,8 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.515-Release] 2021-11-03
+- Bump Retail toc to client patch 9.1.5.
+
+### Fixed
+- Fixed most tooltip issues introduced in the latest patch.
+
 ## [3.2.514-RC] 2021-10-18
-- Bump Classic Era toc to cleint patch 1.14.
+- Bump Classic Era toc to client patch 1.14.
 
 ### Fixed
 - Fixed another weird and sudden SetPoint anchor issue with the QuestTimerFrame in Classic Era 1.14. 
