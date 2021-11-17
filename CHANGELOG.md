@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.516-Release] 2021-11-17
+- Bump Classic Era toc to client patch 1.14.1: Season of Dumb.
+
+### Fixed
+- Fixed GameTooltip issues in the classic clients.
+
 ## [3.2.515-Release] 2021-11-03
 - Bump Retail toc to client patch 9.1.5.
 

@@ -80,6 +80,7 @@ local short = LibNumbers:GetNumberAbbreviationShort()
 local large = LibNumbers:GetNumberAbbreviationLong()
 
 local Backdrops, Handled = {}, {}
+local UIHider = CreateFrame("Frame"); UIHider:Hide()
 
 local SmallTooltipBackdropTemplate = {
 	bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
@@ -272,6 +273,13 @@ Tooltip.Style = function(self)
 	self:DisableDrawLayer("BACKGROUND")
 	self:DisableDrawLayer("BORDER")
 
+	-- Glorious 9.1.5 / 1.14.1 crap
+	-- They decided to move the entire backdrop into its own hashed frame.
+	-- We like this, because it makes it easier to kill. Kill. Kill. Kill. Kill.
+	if (self.NineSlice) then
+		self.NineSlice:SetParent(UIHider)
+	end
+
 	if (IsRetail) then
 
 		-- Textures in the combat pet tooltips
@@ -296,11 +304,12 @@ Tooltip.Style = function(self)
 			end
 		end
 
-		-- This shit is in its own frame in 9.1.5.
+		-- This shit is in its own frame in 9.1.5 / 1.14.1
 		if (self.NineSlice) then
 			self.NineSlice:SetParent(Tooltip)
 		else
 			-- Region names sourced from SharedXML\NineSlice.lua
+			-- *Majority of this, if not all, was moved into frame.NineSlice in 9.1.5 / 1.14.1
 			for _,pieceName in ipairs({  
 				"TopLeftCorner",
 				"TopRightCorner",
@@ -829,9 +838,10 @@ end
 
 Module.SetTooltipHooks = function(self)
 
-	if (IsClassic or IsTBC) then
+	if (_G.GameTooltip_SetBackdropStyle) then
+		-- Blizzard removed this in 1.14.1, changed it to the same as retail below.
 		hooksecurefunc("GameTooltip_SetBackdropStyle", Tooltip.Style)
-	elseif (IsRetail) then	
+	elseif (_G.SharedTooltip_SetBackdropStyle) then	
 		hooksecurefunc("SharedTooltip_SetBackdropStyle", Tooltip.Style)
 	end
 
