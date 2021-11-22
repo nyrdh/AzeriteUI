@@ -4,9 +4,7 @@ To switch between interface theme, use the commands `/go azerite` and `/go legac
 
 ## **Support & Connect**
 * PayPal: [www.paypal.me/goldpawsstuff](https://www.paypal.me/goldpawsstuff)  
-* Patreon: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)  
 * Twitter: [@GoldpawsStuff](https://twitter.com/goldpawsstuff)  
-* Discord: [discord.gg/MUSfWXd](https://discord.gg/MUSfWXd)  
 
 ### **Report a bug, suggest a feature:**
 All feature requests and bug reports for all game versions are done on the main project's github page. Please use _only_ our report system and the supplied template when reporting bugs.  

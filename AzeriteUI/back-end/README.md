@@ -3,6 +3,4 @@ Kindly stay the fuck out of this folder, you do not know how it works, how to up
 
 ## **Support & Connect**
 * PayPal: [www.paypal.me/goldpawsstuff](https://www.paypal.me/goldpawsstuff)  
-* Patreon: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)  
 * Twitter: [@GoldpawsStuff](https://twitter.com/goldpawsstuff)  
-* Discord: [discord.gg/MUSfWXd](https://discord.gg/MUSfWXd)  

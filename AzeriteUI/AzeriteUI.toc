@@ -9,8 +9,6 @@
 ## Author: Daniel Troko, Lars Norberg
 
 ## X-Category: Interface Enhancements
-## X-Discord: https://discord.gg/MUSfWXd
-## X-Website: https://www.patreon.com/goldpawsstuff
 ## X-Curse-Project-ID: 298648
 ## X-Wago-ID: R4N2PZKL
 ## X-License: Custom
