@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.517-Release] 2021-12-23
+- The yearly time function fix. Please teach me to count. And logic. 
+
 ## [3.2.516-Release] 2021-11-17
 - Bump Classic Era toc to client patch 1.14.1: Season of Dumb.
 
