@@ -34,6 +34,10 @@ local IsRetail = Private.IsRetail
 local IsWinterVeil = Private.IsWinterVeil
 local IsLoveFestival = Private.IsLoveFestival
 
+-- Dev Switch
+-----------------------------------------------------------
+--local UsePrecisionMode = true
+
 -- Utility Functions
 -----------------------------------------------------------
 -- General aura button post creating forge
@@ -630,6 +634,7 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"SetParentToOwnerKey", "OverlayScaffold"
 				},
 				values = {
+					"setPrecision", UsePrecisionMode and 1 or 0,
 					"useSmartValue", true
 				}
 			},
@@ -3410,6 +3415,7 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 					"SetParentToOwnerKey", "OverlayScaffold"
 				},
 				values = {
+					"setPrecision", UsePrecisionMode and 1 or 0,
 					"useSmartValue", true
 				}
 			},

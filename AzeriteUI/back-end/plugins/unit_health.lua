@@ -101,10 +101,18 @@ local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 						if (min == max) then
 							healthValue:SetFormattedText("%s", large(min))
 						else
-							healthValue:SetFormattedText("%.0f%%", min/max*100 - (min/max*100)%1)
+							if (healthValue.setPrecision) then
+								healthValue:SetFormattedText("%."..healthValue.setPrecision.."f%%", min/max*100)
+							else
+								healthValue:SetFormattedText("%.0f%%", min/max*100 - (min/max*100)%1)
+							end
 						end
 					elseif (healthValue.showPercent) and (min < max) then
-						healthValue:SetFormattedText("%.0f%%", min/max*100 - (min/max*100)%1)
+						if (healthValue.setPrecision) then
+							healthValue:SetFormattedText("%."..healthValue.setPrecision.."f%%", min/max*100)
+						else
+							healthValue:SetFormattedText("%.0f%%", min/max*100 - (min/max*100)%1)
+						end
 					elseif (healthValue.showMaxValue) then
 						healthValue:SetFormattedText("%s / %s", large(min), large(max))
 					else
@@ -127,7 +135,11 @@ local UpdateValues = function(health, unit, min, max, minPerc, maxPerc)
 				if (health.disconnected or health.dead) then 
 					healthPercent:SetText("")
 				else 
-					healthPercent:SetFormattedText("%.0f", min/max*100 - (min/max*100)%1)
+					if (healthPercent.setPrecision) then
+						healthPercent:SetFormattedText("%."..healthPercent.setPrecision.."f%%", min/max*100)
+					else
+						healthPercent:SetFormattedText("%.0f%%", min/max*100 - (min/max*100)%1)
+					end
 				end 
 				if (healthPercent.PostUpdate) then 
 					healthPercent:PostUpdate(unit, min, max)
@@ -674,5 +686,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Health", Enable, Disable, Proxy, 69)
+	Lib:RegisterElement("Health", Enable, Disable, Proxy, 72)
 end 
