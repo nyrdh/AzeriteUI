@@ -3,6 +3,7 @@ This is a custom user interface suite for World of Warcraft, containing multiple
 To switch between interface theme, use the commands `/go azerite` and `/go legacy`. This is a per character setting.  
 
 ## **Support & Connect**
+* Patreon: [www.patreon.com/goldpawsstuff](https://www.patreon.com/goldpawsstuff)  
 * PayPal: [www.paypal.me/goldpawsstuff](https://www.paypal.me/goldpawsstuff)  
 * Twitter: [@GoldpawsStuff](https://twitter.com/goldpawsstuff)  
 
