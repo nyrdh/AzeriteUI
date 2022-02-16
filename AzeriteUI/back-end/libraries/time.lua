@@ -1,4 +1,4 @@
-local LibTime = Wheel:Set("LibTime", 11)
+local LibTime = Wheel:Set("LibTime", 12)
 if (not LibTime) then	
 	return
 end
@@ -120,9 +120,9 @@ LibTime.GetTime = function(self, useStandardTime, useServerTime)
 	return self[useServerTime and "GetServerTime" or "GetLocalTime"](self, useStandardTime)
 end
 
--- 2021 Retail Winter Veil.
+-- 2022 Retail Winter Veil.
 LibTime.IsWinterVeil = function(self)
-	return dateInRange(16,12,2021,2,1,2022)
+	return dateInRange(16,12,2022,2,1,2023)
 end
 
 -- 2022 Retail Love is in the Air.
