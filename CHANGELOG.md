@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.520-Release] 2022-03-17
+### Changed
+- Slight change in how tooltip unit levels are determined in BCC. Not expected to fix the issues reported on this, this is just the first step.
+
 ## [3.2.519-Release] 2022-02-23
 - ToC bump.
 

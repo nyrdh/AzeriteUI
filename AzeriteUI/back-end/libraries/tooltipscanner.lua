@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 90)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 91)
 if (not LibTooltipScanner) then	
 	return
 end
@@ -1788,7 +1788,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 		-- Retrieve generic data
 		local isPlayer = UnitIsPlayer(unit)
 		local unitLevel = UnitLevel(unit)
-		local UnitEffectiveLevel = UnitEffectiveLevel(unit)
+		local unitEffectiveLevel = UnitEffectiveLevel(unit)
 		local unitName, unitRealm = UnitName(unit)
 		local isDead = UnitIsDead(unit)
 		local isGhost = UnitIsGhost(unit)
@@ -1837,7 +1837,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			tbl.englishFaction = englishFaction
 			tbl.localizedFaction = localizedFaction
 			tbl.level = unitLevel
-			tbl.effectiveLevel = UnitEffectiveLevel
+			tbl.effectiveLevel = unitEffectiveLevel
 			tbl.guild = guildName
 			tbl.classDisplayName = classDisplayName
 			tbl.class = class
@@ -1871,7 +1871,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			tbl.englishFaction = englishFaction
 			tbl.localizedFaction = localizedFaction
 			tbl.level = unitLevel
-			tbl.effectiveLevel = unitLevel
+			tbl.effectiveLevel = unitEffectiveLevel
 			tbl.classification = classification
 			tbl.creatureFamily = UnitCreatureFamily(unit)
 			tbl.creatureType = UnitCreatureType(unit)
