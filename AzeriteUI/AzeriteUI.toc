@@ -17,7 +17,6 @@
 ## OptionalDeps: Clique
 
 # General taint fixes
-FixingThings.xml
 TaintLess.xml
 
 # Global Fonts

@@ -107,7 +107,7 @@ ObjectiveAlphaDriver.Update = function()
 end
 
 -----------------------------------------------------------------
--- Callbacks
+-- Classic
 -----------------------------------------------------------------
 local QuestLogTitleButton_OnEnter = function(self)
 	self.Text:SetTextColor(Colors.highlight[1], Colors.highlight[2], Colors.highlight[3])
@@ -233,9 +233,6 @@ local QuestLog_Update = function(self)
 	end
 end
 
------------------------------------------------------------------
--- Classic
------------------------------------------------------------------
 Module.StyleClassicLog = function(self)
 	if not(IsClassic or IsTBC) then
 		return
@@ -479,88 +476,6 @@ Module.StyleRetailTracker = function(self, ...)
 	end
 end
 
--- 
--- 3/30 17:43:34.063  Global variable OBJECTIVE_TRACKER_UPDATE_REASON tainted by AzeriteUI - -- Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTracker.lua:1345
--- 3/30 17:43:34.063      ObjectiveTracker_Update()
--- 3/30 17:43:34.063      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_BonusObjectiveTracker.lua:917 callback()
--- 3/30 17:43:34.063      Interface\SharedXML\C_TimerAugment.lua:16
--- 3/30 17:43:34.063  Execution tainted by AzeriteUI while reading OBJECTIVE_TRACKER_UPDATE_REASON - -- Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTracker.lua:1368
--- 3/30 17:43:34.063      ObjectiveTracker_Update()
--- 3/30 17:43:34.063      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_BonusObjectiveTracker.lua:917 callback()
--- 3/30 17:43:34.063      Interface\SharedXML\C_TimerAugment.lua:16
--- 3/30 17:43:34.063  An action was blocked because of taint from AzeriteUI - UseQuestLogSpecialItem()
--- 3/30 17:43:34.063      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTrackerShared.lua:95
--- 3/30 17:44:04.016  Execution tainted by AzeriteUI while reading text - Interface\FrameXML\QuestUtils.lua:454 QuestUtils_AddQuestRewardsToTooltip()
--- 3/30 17:44:04.016      Interface\FrameXML\GameTooltip.lua:197 GameTooltip_AddQuestRewardsToTooltip()
--- 3/30 17:44:04.016      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_BonusObjectiveTracker.lua:504 BonusObjectiveTracker_ShowRewardsTooltip()
--- 3/30 17:44:04.016      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_BonusObjectiveTracker.lua:140
--- 3/30 17:44:04.016  An action was blocked because of taint from AzeriteUI - UseQuestLogSpecialItem()
--- 3/30 17:44:04.016      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTrackerShared.lua:95
--- 3/30 17:44:06.812  Execution tainted by AzeriteUI while reading text - Interface\FrameXML\QuestUtils.lua:454 QuestUtils_AddQuestRewardsToTooltip()
--- 3/30 17:44:06.812      Interface\FrameXML\GameTooltip.lua:197 GameTooltip_AddQuestRewardsToTooltip()
--- 3/30 17:44:06.812      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_BonusObjectiveTracker.lua:504 BonusObjectiveTracker_ShowRewardsTooltip()
--- 3/30 17:44:06.812      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_BonusObjectiveTracker.lua:140
--- 3/30 17:44:06.812  An action was blocked because of taint from AzeriteUI - UseQuestLogSpecialItem()
--- 3/30 17:44:06.812      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTrackerShared.lua:95
--- 
-local secured = {}
-Module.SecureItemButton = function(self, ...)
-	--if InCombatLockdown() then 
-	--	return 
-	--end
-
-	local block = ...
-	if (not block) then 
-		return
-	end
-
-	-- These are used for the quest rewards tooltip, 
-	-- which is what apparently is tainted by the global variable 'text'
-	-- being used somewhere no searches of mine have yet discovered.
-	-- Trying to avoid calling these in combat for now, to see if that helps.
-	-- The alternative is to rewrite the entire script handler, 
-	-- create one not referencing any secure items at all, 
-	-- and even replace the tooltips with ours. Might be best?
-	if (not secured[block]) then
-		block:SetScript("OnEnter", function(block) 
-			if (not InCombatLockdown()) then
-				BonusObjectiveTracker_OnBlockEnter(block)
-			end
-		end)
-
-		-- For reasons unknown, setting OnEnter appears to clear out OnLeave?
-		block:SetScript("OnLeave", BonusObjectiveTracker_OnBlockLeave)
-
-		-- Don't do this again.
-		secured[block] = true
-	end
-
-	-- These are the item button tooltips.
-	-- Not strictly certain if I need to hide these too. 
-	-- Taint tracking with no clear reference points isn't exactly an exact science.
-	-- The below is probably NOT caused by the listed addon, 
-	-- as the method listed is called by the same scripts we're trying to untaint below.
-	-- 
-	-- 4/21 10:48:29.010  An action was blocked because of taint from MapShrinker - UseQuestLogSpecialItem()
-	-- 4/21 10:48:29.010      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTrackerShared.lua:95
-	-- 4/21 10:48:33.892  An action was blocked because of taint from MapShrinker - UseQuestLogSpecialItem()
-	-- 4/21 10:48:33.892      Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTrackerShared.lua:95
-	-- 
-	local item = block.itemButton
-	if (not item) then 
-		return 
-	end
-	if (not secured[item]) then
-		item:SetScript("OnEnter", function(item) 
-			if (not InCombatLockdown()) then
-				QuestObjectiveItem_OnEnter(item)
-			end
-		end)
-		secured[item] = true
-	end
-
-end
-
 Module.UpdateTrackerSizeAndScale = function(self)
 	if (not ObjectiveTrackerFrame) then
 		return
@@ -588,12 +503,6 @@ Module.InitRetailTracker = function(self)
 	if (ObjectiveTracker_Update) then
 		hooksecurefunc("ObjectiveTracker_Update", function(...) self:StyleRetailTracker(...) end)
 	end
-
-	-- Let's attempt to work around the quest item taints.
-	-- Removing it as it might be causing it too. Blergh.
-	--if (QuestObjectiveSetupBlockButton_Item) then
-	--	hooksecurefunc("QuestObjectiveSetupBlockButton_Item", function(...) self:SecureItemButton(...) end)
-	--end
 
 	-- kills this shit off. We use our keybind instead. 
 	ObjectiveTrackerFrame.HeaderMenu.MinimizeButton:Hide()
