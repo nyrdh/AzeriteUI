@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.523-Release] 2022-04-07
+- Bump for BCC client patch 2.5.4.
+
 ## [3.2.522-Release] 2022-04-06
 ### Changed
 - Cleaning up the Retail tracker code a bit.
