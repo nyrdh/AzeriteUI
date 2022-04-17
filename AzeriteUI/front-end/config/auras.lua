@@ -229,7 +229,11 @@ local checkWhitelistConditionals = function(...)
 	-- User whitelisted
 	if (UserFlags[spellID]) then
 		if (HasAuraUserFlags(Private, spellID, Always)) then
-			return true
+			if (HasAuraUserFlags(Private, spellID, ByPlayer)) then
+				return isCastByPlayer
+			else
+				return true
+			end
 		end
 	end
 	
@@ -1233,7 +1237,7 @@ if (IsRetail) then
 	-- Warlock
 	------------------------------------------------------------------------
 		-- Will look this up later, just needed it added!
-		SetFilter(146739, ByPlayer) 					-- Corruption
+		SetFilter(146739, ByPlayer + Always) 			-- Corruption
 		SetFilter(317031, ByPlayer) 					-- Corruption (Instant)
 
 	-- Warrior (Abilities)
