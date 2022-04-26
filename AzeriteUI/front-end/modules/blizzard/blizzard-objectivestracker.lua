@@ -253,19 +253,11 @@ Module.StyleClassicTracker = function(self)
 		return
 	end
 	local layout = self.layout
-	local scaffold = self:CreateFrame("Frame", nil, MinimapCluster) -- "UICenter"
+	local scaffold = self:CreateFrame("Frame", nil, MinimapCluster)
 	scaffold:SetWidth(layout.Width)
 	scaffold:SetHeight(22)
 	scaffold:Place(unpack(layout.Place))
 	
-	--QuestWatchFrame:SetMovable(true)
-	--QuestWatchFrame:SetUserPlaced(true)
-	QuestWatchFrame:SetMovable(true)
-	QuestWatchFrame:SetUserPlaced(false)
-	QuestWatchFrame:SetParent(self.frame)
-	QuestWatchFrame:ClearAllPoints()
-	QuestWatchFrame:SetPoint("BOTTOMRIGHT", scaffold, "BOTTOMRIGHT")
-
 	-- Create a dummy frame to cover the tracker  
 	-- to block mouse input when it's faded out. 
 	local mouseKiller = self:CreateFrame("Frame", nil, "UICenter")
@@ -288,11 +280,16 @@ Module.StyleClassicTracker = function(self)
 	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
 	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
 
+	--QuestWatchFrame:SetMovable(true)
+	--QuestWatchFrame:SetUserPlaced(false)
+	QuestWatchFrame:SetParent(self.frame)
 	QuestWatchFrame:SetScale(layout.Scale or 1)
 	QuestWatchFrame:SetWidth(layout.Width / (layout.Scale or 1))
 	QuestWatchFrame:SetHeight(objectiveFrameHeight / (layout.Scale or 1))
 	QuestWatchFrame:SetClampedToScreen(false)
 	QuestWatchFrame:SetAlpha(.9)
+	QuestWatchFrame:ClearAllPoints()
+	QuestWatchFrame:SetPoint("BOTTOMRIGHT", scaffold, "BOTTOMRIGHT")
 
 	local QuestWatchFrame_SetPosition = function(_,_, parent)
 		if (parent ~= scaffold) then
@@ -301,6 +298,7 @@ Module.StyleClassicTracker = function(self)
 		end
 	end
 	hooksecurefunc(QuestWatchFrame,"SetPoint", QuestWatchFrame_SetPosition)
+	hooksecurefunc(QuestWatchFrame,"SetAllPoints", QuestWatchFrame_SetPosition)
 
 	local dummyLine = QuestWatchFrame:CreateFontString()
 	dummyLine:SetFontObject(layout.FontObject)

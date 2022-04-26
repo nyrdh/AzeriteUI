@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2022-04-26
+### Changed
+- Slightly changed how the classic quest tracker is positioned.
+
 ## [3.2.524-Release] 2022-04-17
 ### Changed
 - Added Corruption (auraID 146739) to the aura whitelist when cast by the player. 
