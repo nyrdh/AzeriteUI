@@ -894,7 +894,7 @@ Module.SetTooltipHooks = function(self)
 	-- Rather then attempt to hook into totalRP3's information system,
 	-- we just choose to NOT modify unit tooltips when the addon is enabled. 
 	-- People using it want this info, not ours.
-	if (not self:IsAddOnEnabled("totalRP3")) then
+	if (not self:IsAddOnEnabled("totalRP3") then
 		GameTooltip:HookScript("OnTooltipSetUnit", Tooltip.OnTooltipSetUnit)
 	end
 end
