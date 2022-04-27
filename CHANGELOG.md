@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.526-Alpha] 2022-04-27
+### Changed
+- Added callbacks to override classic quest tracker frame position cache.
+
 ## [3.2.525-Alpha] 2022-04-26
 ### Changed
 - Slightly changed how the classic quest tracker is positioned.
