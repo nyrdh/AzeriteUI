@@ -26,7 +26,6 @@ local GetQuestIndexForWatch = GetQuestIndexForWatch
 local GetQuestLogLeaderBoard = GetQuestLogLeaderBoard
 local GetQuestLogSelection = GetQuestLogSelection
 local GetQuestLogTitle = GetQuestLogTitle
-local GetScreenHeight = GetScreenHeight
 local IsQuestWatched = IsQuestWatched
 local IsUnitOnQuest = IsUnitOnQuest
 
@@ -273,15 +272,12 @@ Module.StyleClassicTracker = function(self)
 	self.frame.holder = scaffold
 	self.frame.cover = mouseKiller
 
-	-- GetScreenHeight() -- this is relative to uiscale: screenHeight * uiScale = 768
 	local top = QuestWatchFrame:GetTop() or 0
 	local bottom = QuestWatchFrame:GetBottom() or 0
-	local screenHeight = self:GetFrame("UICenter"):GetHeight() -- need to use our parenting frame's height instead.
+	local screenHeight = self:GetFrame("UICenter"):GetHeight() 
 	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
 	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
 
-	--QuestWatchFrame:SetMovable(true)
-	--QuestWatchFrame:SetUserPlaced(false)
 	QuestWatchFrame:SetParent(self.frame)
 	QuestWatchFrame:SetScale(layout.Scale or 1)
 	QuestWatchFrame:SetWidth(layout.Width / (layout.Scale or 1))
@@ -290,9 +286,9 @@ Module.StyleClassicTracker = function(self)
 	QuestWatchFrame:SetAlpha(.9)
 	QuestWatchFrame:ClearAllPoints()
 	QuestWatchFrame:SetPoint("BOTTOMRIGHT", scaffold, "BOTTOMRIGHT")
-
-	local QuestWatchFrame_SetPosition = function(_,_, parent)
-		if (parent ~= scaffold) then
+	
+	local QuestWatchFrame_SetPosition = function(_,_, anchor)
+		if (anchor ~= scaffold) then
 			QuestWatchFrame:ClearAllPoints()
 			QuestWatchFrame:SetPoint("BOTTOMRIGHT", scaffold, "BOTTOMRIGHT")
 		end
@@ -450,6 +446,18 @@ Module.StyleClassicTracker = function(self)
 		end
 
 	end)
+
+	-- Try to bypass the frame cache
+	self:RegisterEvent("VARIABLES_LOADED", UpdateClassicTrackerPosition)
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", UpdateClassicTrackerPosition)
+end
+
+Module.UpdateClassicTrackerPosition = function(self)
+	if not(QuestWatchFrame and self.frame and self.frame.holder) then
+		return
+	end
+	QuestWatchFrame:ClearAllPoints()
+	QuestWatchFrame:SetPoint("BOTTOMRIGHT", self.frame.holder, "BOTTOMRIGHT")
 end
 
 -----------------------------------------------------------------
@@ -606,6 +614,9 @@ Module.OnEvent = function(self, event, ...)
 		if (IsRetail) then
 			self:StyleRetailTracker()
 		end
+
+	elseif (event == "VARIABLES_LOADED") then
+		self:UpdateTrackerPosition()
 
 	elseif (event == "GP_BAGS_HIDDEN") then
 		ObjectiveAlphaDriver:Update()
