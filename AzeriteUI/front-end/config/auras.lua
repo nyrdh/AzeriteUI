@@ -86,6 +86,7 @@ end
 local IsDeathKnight = BitFilters.IsPlayerSpell + BitFilters.DEATHKNIGHT
 local IsDemonHunter = BitFilters.IsPlayerSpell + BitFilters.DEMONHUNTER
 local IsDruid = BitFilters.IsPlayerSpell + BitFilters.DRUID
+local IsEvoker = BitFilters.IsPlayerSpell + BitFilters.EVOKER
 local IsHunter = BitFilters.IsPlayerSpell + BitFilters.HUNTER
 local IsMage = BitFilters.IsPlayerSpell + BitFilters.MAGE
 local IsMonk = BitFilters.IsPlayerSpell + BitFilters.MONK

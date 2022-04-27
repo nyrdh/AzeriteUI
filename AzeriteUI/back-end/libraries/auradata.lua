@@ -1,4 +1,4 @@
-local LibAuraData = Wheel:Set("LibAuraData", 29)
+local LibAuraData = Wheel:Set("LibAuraData", 30)
 if (not LibAuraData) then
 	return
 end
@@ -46,6 +46,7 @@ BitFilters.IsRacialSpell 		= 2^1
 BitFilters.DEATHKNIGHT 			= 2^2
 BitFilters.DEMONHUNTER 			= 2^3
 BitFilters.DRUID 				= 2^4
+BitFilters.EVOKER 				= 2^31
 BitFilters.HUNTER 				= 2^5
 BitFilters.MAGE 				= 2^6
 BitFilters.MONK 				= 2^7

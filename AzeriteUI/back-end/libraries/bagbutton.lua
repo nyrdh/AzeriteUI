@@ -1,4 +1,4 @@
-local LibBagButton = Wheel:Set("LibBagButton", 56)
+local LibBagButton = Wheel:Set("LibBagButton", 57)
 if (not LibBagButton) then	
 	return
 end
@@ -209,7 +209,8 @@ Colors.class = {}
 Colors.class.DEATHKNIGHT = createColor(176/255, 31/255, 79/255)
 Colors.class.DEMONHUNTER = createColor(163/255, 48/255, 201/255)
 Colors.class.DRUID = createColor(225/255, 125/255, 35/255)
-Colors.class.HUNTER = createColor(191/255, 232/255, 115/255) 
+Colors.class.EVOKER = createColor(51/255, 147/255, 127/255)
+Colors.class.HUNTER = createColor(191/255, 232/255, 115/255)
 Colors.class.MAGE = createColor(105/255, 204/255, 240/255)
 Colors.class.MONK = createColor(0/255, 255/255, 150/255)
 Colors.class.PALADIN = createColor(225/255, 160/255, 226/255)
