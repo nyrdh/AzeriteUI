@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 91)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 92)
 if (not LibUnitFrame) then	
 	return
 end
@@ -31,6 +31,7 @@ local _G = _G
 local assert = assert
 local debugstack = debugstack
 local error = error
+local ipairs = ipairs
 local math_floor = math.floor
 local pairs = pairs
 local select = select
@@ -649,4 +650,16 @@ end
 -- Upgrade existing embeds, if any
 for target in pairs(LibUnitFrame.embeds) do
 	LibUnitFrame:Embed(target)
+end
+
+-- Upgrade existing frame script handlers, if any
+for frame in pairs(frames) do
+	for _,handler in ipairs({ "OnEnter", "OnLeave", "Hide" }) do
+		local method = frame[handler]
+		local script = frame:GetScript(handler)
+		if (method and script) and (method == script) then
+			frame[handler] = UnitFrame[method]
+			frame:SetScript(handler, UnitFrame[method])
+		end
+	end
 end
