@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 92)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 93)
 if (not LibUnitFrame) then	
 	return
 end
@@ -219,7 +219,7 @@ local IsAddOnEnabled = function(target)
 end
 
 -- Create a constant for this
-local IS_TOTALRP3_ENABLED = IsAddOnEnabled("totalRP3"))
+local IS_TOTALRP3_ENABLED = IsAddOnEnabled("totalRP3")
 
 -- Library Updates
 --------------------------------------------------------------------------
