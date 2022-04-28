@@ -289,7 +289,14 @@ UnitFrames.SpawnTempEnchantFrames = function(self)
 	-- Style them
 	for i,button in ipairs(self.tempEnchantButtons) do
 		
-		button:SetFrameStrata("HIGH") -- don't let much cover this
+		-- This is above the bag slots in this theme. 
+		--button:SetFrameStrata("HIGH") -- don't let much cover this
+
+		-- The minimap is at LOW, from 1-50, let's be above that.
+		-- The containers are MEDIUM, 1-2, let's be below that.
+		button:SetFrameStrata("LOW")
+		button:SetFrameLevel(100)
+
 		button:SetIgnoreParentAlpha(true) -- can't have them disappearing in this theme
 		button:SetSize(size,size)
 		button:Place("TOPRIGHT", "UICenter", "TOPRIGHT", -10, -(60 +((size+6)*(i-1))) )
