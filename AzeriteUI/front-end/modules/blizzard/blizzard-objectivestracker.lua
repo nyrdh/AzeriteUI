@@ -251,11 +251,13 @@ Module.StyleClassicTracker = function(self)
 	if not(IsClassic or IsTBC) then
 		return
 	end
+
 	local layout = self.layout
 	local scaffold = self:CreateFrame("Frame", nil, MinimapCluster)
 	scaffold:SetWidth(layout.Width)
 	scaffold:SetHeight(22)
 	scaffold:Place(unpack(layout.Place))
+	self.frame.holder = scaffold
 	
 	-- Create a dummy frame to cover the tracker  
 	-- to block mouse input when it's faded out. 
@@ -265,37 +267,28 @@ Module.StyleClassicTracker = function(self)
 	mouseKiller:SetAllPoints()
 	mouseKiller:EnableMouse(true)
 	mouseKiller:Hide()
-
-	-- Minihack to fix mouseover fading
-	self.frame:ClearAllPoints()
-	self.frame:SetAllPoints(QuestWatchFrame)
-	self.frame.holder = scaffold
 	self.frame.cover = mouseKiller
 
-	local top = QuestWatchFrame:GetTop() or 0
-	local bottom = QuestWatchFrame:GetBottom() or 0
-	local screenHeight = self:GetFrame("UICenter"):GetHeight() 
-	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
-	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
+	-- Minihack to fix mouseover fading (we still have this?)
+	self.frame:ClearAllPoints()
+	self.frame:SetAllPoints(QuestWatchFrame)
 
-	QuestWatchFrame:SetParent(self.frame)
-	QuestWatchFrame:SetScale(layout.Scale or 1)
-	QuestWatchFrame:SetWidth(layout.Width / (layout.Scale or 1))
-	QuestWatchFrame:SetHeight(objectiveFrameHeight / (layout.Scale or 1))
-	QuestWatchFrame:SetClampedToScreen(false)
-	QuestWatchFrame:SetAlpha(.9)
-	QuestWatchFrame:ClearAllPoints()
-	QuestWatchFrame:SetPoint("BOTTOMRIGHT", scaffold, "BOTTOMRIGHT")
-	
-	local QuestWatchFrame_SetPosition = function(_,_, anchor)
+	-- Re-position after UIParent messes with it.
+	hooksecurefunc(QuestWatchFrame,"SetPoint", function(_,_, anchor)
 		if (anchor ~= scaffold) then
-			QuestWatchFrame:ClearAllPoints()
-			QuestWatchFrame:SetPoint("BOTTOMRIGHT", scaffold, "BOTTOMRIGHT")
+			self:UpdateClassicTrackerPosition()
 		end
-	end
-	hooksecurefunc(QuestWatchFrame,"SetPoint", QuestWatchFrame_SetPosition)
-	hooksecurefunc(QuestWatchFrame,"SetAllPoints", QuestWatchFrame_SetPosition)
+	end)
 
+	-- Just in case some random addon messes with it.
+	hooksecurefunc(QuestWatchFrame,"SetAllPoints", function()
+		self:UpdateClassicTrackerPosition()
+	end)
+
+	-- Try to bypass the frame cache
+	self:RegisterEvent("VARIABLES_LOADED", "UpdateClassicTrackerPosition")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateClassicTrackerPosition")
+	
 	local dummyLine = QuestWatchFrame:CreateFontString()
 	dummyLine:SetFontObject(layout.FontObject)
 	dummyLine:SetWidth(layout.Width)
@@ -447,17 +440,25 @@ Module.StyleClassicTracker = function(self)
 
 	end)
 
-	-- Try to bypass the frame cache
-	self:RegisterEvent("VARIABLES_LOADED", UpdateClassicTrackerPosition)
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", UpdateClassicTrackerPosition)
 end
 
 Module.UpdateClassicTrackerPosition = function(self)
 	if not(QuestWatchFrame and self.frame and self.frame.holder) then
 		return
 	end
+
+	local screenHeight = self:GetFrame("UICenter"):GetHeight() 
+	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
+	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
+
+	QuestWatchFrame:SetParent(self.frame)
+	QuestWatchFrame:SetScale(layout.Scale or 1)
+	QuestWatchFrame:SetWidth(layout.Width / (layout.Scale or 1))
+	QuestWatchFrame:SetHeight(objectiveFrameHeight / (layout.Scale or 1))
+	QuestWatchFrame:SetClampedToScreen(false)
+	QuestWatchFrame:SetAlpha(.9)
 	QuestWatchFrame:ClearAllPoints()
-	QuestWatchFrame:SetPoint("BOTTOMRIGHT", self.frame.holder, "BOTTOMRIGHT")
+	QuestWatchFrame:SetPoint("BOTTOMRIGHT", self.frame.holder, "BOTTOMRIGHT", 0, 0)
 end
 
 -----------------------------------------------------------------
@@ -614,9 +615,6 @@ Module.OnEvent = function(self, event, ...)
 		if (IsRetail) then
 			self:StyleRetailTracker()
 		end
-
-	elseif (event == "VARIABLES_LOADED") then
-		self:UpdateTrackerPosition()
 
 	elseif (event == "GP_BAGS_HIDDEN") then
 		ObjectiveAlphaDriver:Update()
