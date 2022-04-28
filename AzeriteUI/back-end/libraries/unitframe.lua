@@ -260,11 +260,7 @@ local UnitFrame_MT = { __index = UnitFrame }
 -- This is shared by all unitframes, unless these methods 
 -- are specifically overwritten by the modules.
 UnitFrame.GetTooltip = function(self)
-	if (IS_TOTALRP3_ENABLED) then
-		return GameTooltip
-	else
-		return LibUnitFrame:GetUnitFrameTooltip()
-	end
+	return LibUnitFrame:GetUnitFrameTooltip()
 end 
 
 UnitFrame.OnEnter = function(self)
@@ -385,11 +381,7 @@ end
 --------------------------------------------------------------------------
 -- Return or create the library default tooltip
 LibUnitFrame.GetUnitFrameTooltip = function(self)
-	if (IS_TOTALRP3_ENABLED) then
-		return GameTooltip
-	else
-		return LibUnitFrame:GetTooltip("GP_UnitFrameTooltip") or LibUnitFrame:CreateTooltip("GP_UnitFrameTooltip")
-	end
+	return LibUnitFrame:GetTooltip("GP_UnitFrameTooltip") or LibUnitFrame:CreateTooltip("GP_UnitFrameTooltip")
 end
 
 LibUnitFrame.SetScript = function(self, scriptHandler, script)
