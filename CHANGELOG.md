@@ -4,14 +4,14 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.531-Release] 2022-04-28
+## [3.2.532-Release] 2022-04-28
 ### Added
 - Added class color and aura bit filter entries for EVOKER.
 
 ### Changed
 - Slightly changed how the classic quest tracker is positioned.
 - Added callbacks to override classic quest tracker frame position cache.
-- When the addon totalRP3 is enabled, our unitframe library will fallback to using regular game tooltips instead of our own.
+- When the addon totalRP3 is enabled, our unitframe library will fallback to using regular game tooltips for hover events instead of our own.
 - Update unitframe backend to update unitframe script handlers on library update.
 
 ### Fixed
