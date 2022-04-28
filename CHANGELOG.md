@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.533-Release] 2022-04-28
+### Changed
+- Lowered the strata and level of the temporary enchant buttons in Legacy theme, to avoid them conflicting with the upper slots in the blizzard bag containers.
+
 ## [3.2.532-Release] 2022-04-28
 ### Added
 - Added class color and aura bit filter entries for EVOKER.
