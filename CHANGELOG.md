@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.534-Beta] 2022-04-28
+## [3.2.534-Release] 2022-04-30
 ### Changed
 - Fixed some issues with how the classic tracker updated its position upon entering the world. Issues being that it didn't.
 
