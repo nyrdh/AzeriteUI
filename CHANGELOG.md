@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.535-Release] 2022-05-02
+### Added
+- Added `/switchto` as an alias for th `/go` theme-switcher command. Did you know you can type `/go azerite` and `/go diabolic` to switch between AzeriteUI and DiabolicUI when you have both installed?
+
 ## [3.2.534-Release] 2022-04-30
 ### Changed
 - Fixed some issues with how the classic tracker updated its position upon entering the world. Issues being that it didn't.
