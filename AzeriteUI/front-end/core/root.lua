@@ -843,6 +843,7 @@ Core.OnInit = function(self)
 
 	-- Mini theme switcher. Sticking to the "go" command.
 	self:RegisterChatCommand("go", "SetTheme")
+	self:RegisterChatCommand("switchto", "SetTheme")
 
 	self.layout = GetLayout(ADDON)
 
