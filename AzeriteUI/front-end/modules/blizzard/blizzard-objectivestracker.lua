@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
-if (not Core) then 
-	return 
+if (not Core) then
+	return
 end
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
@@ -88,7 +88,7 @@ ObjectiveAlphaDriver.Update = function()
 	if (shouldHide) then
 		tracker:SetIgnoreParentAlpha(false)
 		tracker:SetAlpha(0)
-		
+
 		ObjectiveCover:SetFrameStrata(tracker:GetFrameStrata())
 		ObjectiveCover:SetFrameLevel(tracker:GetFrameLevel() + 5)
 		ObjectiveCover:ClearAllPoints()
@@ -137,11 +137,11 @@ local QuestLog_Update = function(self)
 		if (questIndex <= numEntries) then
 			local questLogTitleText, level, questTag, isHeader, isCollapsed, isComplete, frequency, questID, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isBounty, isStory, isHidden, isScaling = GetQuestLogTitle(questIndex)
 
-			if (not isHeader) then 
+			if (not isHeader) then
 				local msg = " "..questLogTitleText
-				if (level) then 
+				if (level) then
 					msg = "[" .. level .. "]" .. msg
-				end 
+				end
 				questLogTitle:SetText(msg)
 
 				--Set Dummy text to get text width *SUPER HACK*
@@ -171,15 +171,15 @@ local QuestLog_Update = function(self)
 				questTitleTag:SetText("("..questTag..")")
 				-- Shrink text to accomdate quest tags without wrapping
 				tempWidth = 275 - 15 - questTitleTag:GetWidth()
-				
+
 				if ( QuestLogDummyText:GetWidth() > tempWidth ) then
 					textWidth = tempWidth
 				else
 					textWidth = QuestLogDummyText:GetWidth()
 				end
-				
+
 				questNormalText:SetWidth(tempWidth)
-				
+
 				-- If there's quest tag position check accordingly
 				questCheck:Hide()
 				if ( IsQuestWatched(questIndex) ) then
@@ -240,8 +240,8 @@ Module.StyleClassicLog = function(self)
 	hooksecurefunc("QuestLog_Update", QuestLog_Update)
 	hooksecurefunc("QuestLogTitleButton_OnEnter", QuestLogTitleButton_OnEnter)
 	-- These are defined directly in FrameXML
-	local i = 1 
-	while (_G["QuestLogTitle"..i]) do 
+	local i = 1
+	while (_G["QuestLogTitle"..i]) do
 		_G["QuestLogTitle"..i]:HookScript("OnLeave", QuestLogTitleButton_OnLeave)
 		i = i + 1
 	end
@@ -258,9 +258,9 @@ Module.StyleClassicTracker = function(self)
 	scaffold:SetHeight(22)
 	scaffold:Place(unpack(layout.Place))
 	self.frame.holder = scaffold
-	
-	-- Create a dummy frame to cover the tracker  
-	-- to block mouse input when it's faded out. 
+
+	-- Create a dummy frame to cover the tracker
+	-- to block mouse input when it's faded out.
 	local mouseKiller = self:CreateFrame("Frame", nil, "UICenter")
 	mouseKiller:SetParent(scaffold)
 	mouseKiller:SetFrameLevel(QuestWatchFrame:GetFrameLevel() + 5)
@@ -288,12 +288,12 @@ Module.StyleClassicTracker = function(self)
 	-- Try to bypass the frame cache
 	self:RegisterEvent("VARIABLES_LOADED", "UpdateClassicTrackerPosition")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateClassicTrackerPosition")
-	
+
 	local dummyLine = QuestWatchFrame:CreateFontString()
 	dummyLine:SetFontObject(layout.FontObject)
 	dummyLine:SetWidth(layout.Width)
 	dummyLine:SetJustifyH("RIGHT")
-	dummyLine:SetJustifyV("BOTTOM") 
+	dummyLine:SetJustifyV("BOTTOM")
 	dummyLine:SetIndentedWordWrap(false)
 	dummyLine:SetWordWrap(true)
 	dummyLine:SetNonSpaceWrap(false)
@@ -303,7 +303,7 @@ Module.StyleClassicTracker = function(self)
 	QuestWatchQuestName:SetPoint("TOPRIGHT", QuestWatchFrame, "TOPRIGHT", 0, 0)
 
 	-- Hook line styling
-	hooksecurefunc("QuestWatch_Update", function() 
+	hooksecurefunc("QuestWatch_Update", function()
 		local questIndex
 		local numObjectives
 		local watchText
@@ -322,11 +322,11 @@ Module.StyleClassicTracker = function(self)
 
 					-- Kill trailing nonsense
 					text = watchText:GetText() or ""
-					text = string_gsub(text, "%.$", "") 
-					text = string_gsub(text, "%?$", "") 
-					text = string_gsub(text, "%!$", "") 
+					text = string_gsub(text, "%.$", "")
+					text = string_gsub(text, "%?$", "")
+					text = string_gsub(text, "%!$", "")
 					watchText:SetText(text)
-					
+
 					-- Align the quest title better
 					if (watchTextIndex == 1) then
 						watchText:ClearAllPoints()
@@ -347,26 +347,26 @@ Module.StyleClassicTracker = function(self)
 						watchText.isTitle = nil
 
 						-- Kill trailing nonsense
-						text = string_gsub(text, "%.$", "") 
-						text = string_gsub(text, "%?$", "") 
-						text = string_gsub(text, "%!$", "") 
+						text = string_gsub(text, "%.$", "")
+						text = string_gsub(text, "%?$", "")
+						text = string_gsub(text, "%!$", "")
 
 						local objectiveText, minCount, maxCount = string_match(text, "(.+): (%d+)/(%d+)")
-						if (objectiveText and minCount and maxCount) then 
+						if (objectiveText and minCount and maxCount) then
 							minCount = tonumber(minCount)
 							maxCount = tonumber(maxCount)
-							if (minCount and maxCount) then 
-								if (minCount == maxCount) then 
+							if (minCount and maxCount) then
+								if (minCount == maxCount) then
 									text = Colors.quest.green.colorCode .. minCount .. "/" .. maxCount .. "|r " .. objectiveText
-								elseif (maxCount > 0) and (minCount/maxCount >= 2/3 ) then 
+								elseif (maxCount > 0) and (minCount/maxCount >= 2/3 ) then
 									text = Colors.quest.yellow.colorCode .. minCount .. "/" .. maxCount .. "|r " .. objectiveText
-								elseif (maxCount > 0) and (minCount/maxCount >= 1/3 ) then 
+								elseif (maxCount > 0) and (minCount/maxCount >= 1/3 ) then
 									text = Colors.quest.orange.colorCode .. minCount .. "/" .. maxCount .. "|r " .. objectiveText
-								else 
+								else
 									text = Colors.quest.red.colorCode .. minCount .. "/" .. maxCount .. "|r " .. objectiveText
-								end 
-							end 
-						end 
+								end
+							end
+						end
 						watchText:SetText(text)
 
 						-- Color the objectives
@@ -393,9 +393,9 @@ Module.StyleClassicTracker = function(self)
 						watchText:SetTextColor(Colors.title[1]*.75, Colors.title[2]*.75, Colors.title[3]*.75)
 					end
 
-				end 
-			end 
-		end 
+				end
+			end
+		end
 
 		local top, bottom
 
@@ -403,8 +403,8 @@ Module.StyleClassicTracker = function(self)
 		local line = _G["QuestWatchLine"..lineID]
 		top = line:GetTop()
 
-		while line do 
-			if (line:IsShown()) then 
+		while line do
+			if (line:IsShown()) then
 				line:SetShadowOffset(0,0)
 				line:SetShadowColor(0,0,0,0)
 				line:SetFontObject(line.isTitle and layout.FontObjectTitle or layout.FontObject)
@@ -412,7 +412,7 @@ Module.StyleClassicTracker = function(self)
 				local spacing = size*.2 - size*.2%1
 
 				line:SetJustifyH("RIGHT")
-				line:SetJustifyV("BOTTOM") 
+				line:SetJustifyV("BOTTOM")
 				line:SetIndentedWordWrap(false)
 				line:SetWordWrap(true)
 				line:SetNonSpaceWrap(false)
@@ -426,15 +426,15 @@ Module.StyleClassicTracker = function(self)
 				line:SetHeight(dummyLine:GetHeight())
 
 				bottom = line:GetBottom()
-			end 
+			end
 
 			lineID = lineID + 1
 			line = _G["QuestWatchLine"..lineID]
 		end
 
-		-- Avoid a nil bug that sometimes can happen with no objectives tracked, 
-		-- in weird circumstances I have been unable to reproduce. 
-		if (top and bottom) then 
+		-- Avoid a nil bug that sometimes can happen with no objectives tracked,
+		-- in weird circumstances I have been unable to reproduce.
+		if (top and bottom) then
 			QuestWatchFrame:SetHeight(top - bottom)
 		end
 
@@ -447,7 +447,12 @@ Module.UpdateClassicTrackerPosition = function(self)
 		return
 	end
 
-	local screenHeight = self:GetFrame("UICenter"):GetHeight() 
+	local layout = self.layout
+	if (not layout) then
+		return
+	end
+
+	local screenHeight = self:GetFrame("UICenter"):GetHeight()
 	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
 	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
 
@@ -511,14 +516,14 @@ Module.InitRetailTracker = function(self)
 		hooksecurefunc("ObjectiveTracker_Update", function(...) self:StyleRetailTracker(...) end)
 	end
 
-	-- kills this shit off. We use our keybind instead. 
+	-- kills this shit off. We use our keybind instead.
 	ObjectiveTrackerFrame.HeaderMenu.MinimizeButton:Hide()
 
 	local ObjectiveFrameHolder = self:CreateFrame("Frame", "AzeriteUI_ObjectiveTracker", "UICenter")
 	ObjectiveFrameHolder:SetSize(235,22) -- Blizzard default width
 	ObjectiveFrameHolder:Place(unpack(layout.Place))
 
-	-- Need to use the same anchor points as blizz, or there will be taint. 
+	-- Need to use the same anchor points as blizz, or there will be taint.
 	-- Note that I am not yet certain we're using taint-free methods.
 	ObjectiveTrackerFrame:ClearAllPoints()
 	ObjectiveTrackerFrame:SetPoint("TOP", ObjectiveFrameHolder)
@@ -544,10 +549,10 @@ end
 -----------------------------------------------------------------
 -- Startup
 -----------------------------------------------------------------
--- This creates a driver frames that toggles 
+-- This creates a driver frames that toggles
 -- the displayed alpha of the tracker,
--- and also covers it with a mouse enabled overlay. 
--- The driver frame does NOT toggle the actual tracker. 
+-- and also covers it with a mouse enabled overlay.
+-- The driver frame does NOT toggle the actual tracker.
 Module.InitAlphaDriver = function(self)
 
 	if (not ObjectiveAlphaDriver.isHooked) then
@@ -555,14 +560,14 @@ Module.InitAlphaDriver = function(self)
 		--ObjectiveAlphaDriver:HookScript("OnHide", ObjectiveAlphaDriver.Update)
 		ObjectiveAlphaDriver:SetAttribute("_onattributechanged", [=[
 			if (name == "state-vis") then
-				if (value == "show") then 
-					self:Show(); 
+				if (value == "show") then
+					self:Show();
 					self:CallMethod("Update");
 
-				elseif (value == "hide") then 
-					self:Hide(); 
+				elseif (value == "hide") then
+					self:Hide();
 					self:CallMethod("Update");
-				end 
+				end
 			end
 		]=])
 	end
@@ -571,20 +576,20 @@ Module.InitAlphaDriver = function(self)
 		UnregisterAttributeDriver(ObjectiveAlphaDriver, "state-vis")
 	end
 	local driver = "hide;show"
-	if (IsRetail) then 
+	if (IsRetail) then
 		if (self.layout.HideInVehicles) then
 			driver = "[overridebar][possessbar][shapeshift][vehicleui]"  .. driver
-		end 
-		if (self.layout.HideInArena) then 
+		end
+		if (self.layout.HideInArena) then
 			driver = "[@arena1,exists][@arena2,exists][@arena3,exists][@arena4,exists][@arena5,exists]" .. driver
 		end
 	end
 	if (self.layout.HideInBossFights) then
 		driver = "[@boss1,exists][@boss2,exists][@boss3,exists][@boss4,exists]" .. driver
-	end 
+	end
 	if (self.layout.HideInCombat) then
 		driver = "[combat]" .. driver
-	end 
+	end
 	RegisterAttributeDriver(ObjectiveAlphaDriver, "state-vis", driver)
 
 	ObjectiveAlphaDriver.isHooked = true
@@ -593,13 +598,13 @@ end
 Module.OnEvent = function(self, event, ...)
 	if (event == "ADDON_LOADED") then
 		local addon = ...
-		if (addon == "Blizzard_ObjectiveTracker") then 
+		if (addon == "Blizzard_ObjectiveTracker") then
 			self:UnregisterEvent("ADDON_LOADED", "OnEvent")
 			self:InitRetailTracker()
 			self:StyleRetailTracker()
 		end
 
-	elseif (event == "PLAYER_ENTERING_WORLD") then 
+	elseif (event == "PLAYER_ENTERING_WORLD") then
 
 		if (self.queueImmersionHook) then
 			local frame = ImmersionFrame
@@ -624,7 +629,7 @@ Module.OnEvent = function(self, event, ...)
 
 	elseif (event == "GP_RELATIVE_SCALE_UPDATED") then
 		self:UpdateTrackerSizeAndScale()
-	end 
+	end
 end
 
 Module.OnInit = function(self)
@@ -645,7 +650,7 @@ Module.OnInit = function(self)
 	end
 
 	if (IsRetail) then
-		if (ObjectiveTrackerFrame) then 
+		if (ObjectiveTrackerFrame) then
 			self:InitRetailTracker()
 			self:StyleRetailTracker()
 		else
@@ -659,4 +664,4 @@ Module.OnInit = function(self)
 	self:RegisterMessage("GP_BAGS_SHOWN", "OnEvent")
 	self:RegisterMessage("GP_RELATIVE_SCALE_UPDATED", "OnEvent")
 
-end 
+end
