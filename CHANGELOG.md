@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.537-Release] 2022-05-05
+### Fixed
+- Added checks upon entering world to see if SimpleClassPower is loaded while using the default theme, and disable our own classpower element if it is. Hope this fixes issue #8.
+
 ## [3.2.536-Release] 2022-05-04
 ### Fixed
 - Fixed the missing layout upvalue in the classic objectives tracker that broke the addon upon loading.
