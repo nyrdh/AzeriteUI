@@ -3,20 +3,20 @@
 The purpose of this file is to create general but
 addon specific styling methods for all the unitframes.
 
-This file is loaded after other general user databases, 
+This file is loaded after other general user databases,
 but prior to loading any of the module config files.
-Meaning we can reference the general databases with certainty, 
+Meaning we can reference the general databases with certainty,
 but any layout data will have to be passed as function arguments.
 
 --]]--
 local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
-if (not Core) then 
-	return 
+if (not Core) then
+	return
 end
 
 -- Keep these local
-local UnitStyles = {} 
+local UnitStyles = {}
 
 -- Lua API
 local date = date
@@ -90,226 +90,226 @@ local UnitFrameRaid = Core:NewModule("UnitFrameRaid", "LibDB", "LibFrame", "LibU
 -- Secure Stuff
 -----------------------------------------------------------
 -- All secure code snippets
--- TODO: Move to stylesheet. 
+-- TODO: Move to stylesheet.
 local SECURE = {
 
 	-- Called on the group headers
-	FrameTable_Create = [=[ 
-		Frames = table.new(); 
+	FrameTable_Create = [=[
+		Frames = table.new();
 	]=],
-	FrameTable_InsertCurrentFrame = [=[ 
-		local frame = self:GetFrameRef("CurrentFrame"); 
-		table.insert(Frames, frame); 
+	FrameTable_InsertCurrentFrame = [=[
+		local frame = self:GetFrameRef("CurrentFrame");
+		table.insert(Frames, frame);
 	]=],
 
 	Player_SecureCallback = [=[
-		if name then 
-			name = string.lower(name); 
-		end 
-		if (name == "change-enableplayermanaorb") then 
-			local owner = self:GetFrameRef("Owner"); 
-			self:SetAttribute("enablePlayerManaOrb", value); 
-			if (value) then 
-				owner:CallMethod("EnableManaOrb"); 
-			else 
-				owner:CallMethod("DisableManaOrb"); 
-			end 
-		elseif (name == "change-enableauras") then 
-			local owner = self:GetFrameRef("Owner"); 
-			self:SetAttribute("enableAuras", value); 
-			if (value) then 
-				owner:CallMethod("EnableAuras"); 
-			else 
-				owner:CallMethod("DisableAuras"); 
-			end 
+		if name then
+			name = string.lower(name);
+		end
+		if (name == "change-enableplayermanaorb") then
+			local owner = self:GetFrameRef("Owner");
+			self:SetAttribute("enablePlayerManaOrb", value);
+			if (value) then
+				owner:CallMethod("EnableManaOrb");
+			else
+				owner:CallMethod("DisableManaOrb");
+			end
+		elseif (name == "change-enableauras") then
+			local owner = self:GetFrameRef("Owner");
+			self:SetAttribute("enableAuras", value);
+			if (value) then
+				owner:CallMethod("EnableAuras");
+			else
+				owner:CallMethod("DisableAuras");
+			end
 		end
 	]=],
 
 	Target_SecureCallback = [=[
-		if name then 
-			name = string.lower(name); 
-		end 
-		if (name == "change-enableauras") then 
-			local owner = self:GetFrameRef("Owner"); 
-			self:SetAttribute("enableAuras", value); 
-			if (value) then 
-				owner:CallMethod("EnableAuras"); 
-			else 
-				owner:CallMethod("DisableAuras"); 
-			end 
+		if name then
+			name = string.lower(name);
+		end
+		if (name == "change-enableauras") then
+			local owner = self:GetFrameRef("Owner");
+			self:SetAttribute("enableAuras", value);
+			if (value) then
+				owner:CallMethod("EnableAuras");
+			else
+				owner:CallMethod("DisableAuras");
+			end
 		end
 	]=],
 
 	-- Called on the HUD callback frame
 	HUD_SecureCallback = [=[
-		if name then 
-			name = string.lower(name); 
-		end 
-		if (name == "change-enablecast") then 
-			local owner = self:GetFrameRef("Owner"); 
-			self:SetAttribute("enableCast", value); 
-			self:CallMethod("UpdateCastBar"); 
+		if name then
+			name = string.lower(name);
+		end
+		if (name == "change-enablecast") then
+			local owner = self:GetFrameRef("Owner");
+			self:SetAttribute("enableCast", value);
+			self:CallMethod("UpdateCastBar");
 
-		elseif (name == "change-enableclasspower") then 
-			local owner = self:GetFrameRef("Owner"); 
-			self:SetAttribute("enableClassPower", value); 
-			local forceDisable = self:GetAttribute("forceDisableClassPower"); 
+		elseif (name == "change-enableclasspower") then
+			local owner = self:GetFrameRef("Owner");
+			self:SetAttribute("enableClassPower", value);
+			local forceDisable = self:GetAttribute("forceDisableClassPower");
 
-			if (value) and (not forceDisable) then 
-				owner:CallMethod("EnableElement", "ClassPower"); 
-				owner:CallMethod("UpdateAllElements"); 
-			else 
-				owner:CallMethod("DisableElement", "ClassPower"); 
-			end 
-		end 
+			if (forceDisable) or (not value) then
+				owner:CallMethod("DisableElement", "ClassPower");
+			else
+				owner:CallMethod("EnableElement", "ClassPower");
+				owner:CallMethod("UpdateAllElements");
+			end
+		end
 	]=],
-	
+
 	-- Called on the party group header
 	Party_OnAttribute = [=[
 		if (name == "state-vis") then
-			if (value == "show") then 
-				if (not self:IsShown()) then 
-					self:Show(); 
-				end 
-			elseif (value == "hide") then 
-				if (self:IsShown()) then 
-					self:Hide(); 
-				end 
-			end 
+			if (value == "show") then
+				if (not self:IsShown()) then
+					self:Show();
+				end
+			elseif (value == "hide") then
+				if (self:IsShown()) then
+					self:Hide();
+				end
+			end
 		end
-	]=], 
+	]=],
 
 	-- Called on the party callback frame
 	Party_SecureCallback = [=[
-		if name then 
-			name = string.lower(name); 
-		end 
-		if (name == "change-enablepartyframes") then 
-			self:SetAttribute("enablePartyFrames", value); 
+		if name then
+			name = string.lower(name);
+		end
+		if (name == "change-enablepartyframes") then
+			self:SetAttribute("enablePartyFrames", value);
 			local Owner = self:GetFrameRef("Owner");
-			UnregisterAttributeDriver(Owner, "state-vis"); 
-			if (value) then 
+			UnregisterAttributeDriver(Owner, "state-vis");
+			if (value) then
 				local visDriver = self:GetAttribute("visDriver"); -- get the correct visibility driver
-				RegisterAttributeDriver(Owner, "state-vis", visDriver); 
-				Owner:RunAttribute("sortFrames"); -- Update the layout 
-			else 
-				RegisterAttributeDriver(Owner, "state-vis", "hide"); 
-			end 
-		elseif (name == "change-enablehealermode") then 
+				RegisterAttributeDriver(Owner, "state-vis", visDriver);
+				Owner:RunAttribute("sortFrames"); -- Update the layout
+			else
+				RegisterAttributeDriver(Owner, "state-vis", "hide");
+			end
+		elseif (name == "change-enablehealermode") then
 
-			local Owner = self:GetFrameRef("Owner"); 
+			local Owner = self:GetFrameRef("Owner");
 
-			-- set flag for healer mode 
-			Owner:SetAttribute("useAlternateLayout", value); 
+			-- set flag for healer mode
+			Owner:SetAttribute("useAlternateLayout", value);
 
-			-- Update the layout 
-			Owner:RunAttribute("sortFrames"); 
-		end 
+			-- Update the layout
+			Owner:RunAttribute("sortFrames");
+		end
 	]=],
 
 	-- Called on the party frame group header
 	Party_SortFrames = [=[
-		local useAlternateLayout = self:GetAttribute("useAlternateLayout"); 
+		local useAlternateLayout = self:GetAttribute("useAlternateLayout");
 
-		local anchorPoint; 
-		local anchorFrame; 
-		local growthX; 
-		local growthY; 
+		local anchorPoint;
+		local anchorFrame;
+		local growthX;
+		local growthY;
 
-		if (not useAlternateLayout) then 
-			anchorPoint = "%s"; 
-			anchorFrame = self; 
+		if (not useAlternateLayout) then
+			anchorPoint = "%s";
+			anchorFrame = self;
 			growthX = %.0f;
-			growthY = %.0f; 
+			growthY = %.0f;
 		else
-			anchorPoint = "%s"; 
-			anchorFrame = self:GetFrameRef("HealerModeAnchor"); 
+			anchorPoint = "%s";
+			anchorFrame = self:GetFrameRef("HealerModeAnchor");
 			growthX = %.0f;
-			growthY = %.0f; 
+			growthY = %.0f;
 		end
 
 		-- Iterate the frames
-		for id,frame in ipairs(Frames) do 
-			frame:ClearAllPoints(); 
-			frame:SetPoint(anchorPoint, anchorFrame, anchorPoint, growthX*(id-1), growthY*(id-1)); 
-		end 
+		for id,frame in ipairs(Frames) do
+			frame:ClearAllPoints();
+			frame:SetPoint(anchorPoint, anchorFrame, anchorPoint, growthX*(id-1), growthY*(id-1));
+		end
 
 	]=],
 
 	-- Called on the raid frame group header
 	Raid_OnAttribute = [=[
 		if (name == "state-vis") then
-			if (value == "show") then 
-				if (not self:IsShown()) then 
-					self:Show(); 
-				end 
-			elseif (value == "hide") then 
-				if (self:IsShown()) then 
-					self:Hide(); 
-				end 
-			end 
+			if (value == "show") then
+				if (not self:IsShown()) then
+					self:Show();
+				end
+			elseif (value == "hide") then
+				if (self:IsShown()) then
+					self:Hide();
+				end
+			end
 
 		elseif (name == "state-layout") then
-			local groupLayout = self:GetAttribute("groupLayout"); 
-			if (groupLayout ~= value) then 
+			local groupLayout = self:GetAttribute("groupLayout");
+			if (groupLayout ~= value) then
 
 				-- Store the new layout setting
 				self:SetAttribute("groupLayout", value);
 
-				-- Update the layout 
-				self:RunAttribute("sortFrames"); 
-			end 
+				-- Update the layout
+				self:RunAttribute("sortFrames");
+			end
 		end
 	]=],
 
-	-- Called on the secure updater 
+	-- Called on the secure updater
 	Raid_SecureCallback = [=[
-		if name then 
-			name = string.lower(name); 
-		end 
-		if (name == "change-enableraidframes") then 
+		if name then
+			name = string.lower(name);
+		end
+		if (name == "change-enableraidframes") then
 			self:SetAttribute("enableRaidFrames", value); -- store the setting
 
 			-- retrieve the raid header frame
-			local Owner = self:GetFrameRef("Owner"); 
+			local Owner = self:GetFrameRef("Owner");
 			Owner:SetAttribute("enableRaidFrames", value); -- store the setting on the header too
 
 			UnregisterAttributeDriver(Owner, "state-vis"); -- kill off the old visibility driver
-			if (value) then 
+			if (value) then
 				local visDriver = self:GetAttribute("visDriver"); -- get the correct visibility driver
 				RegisterAttributeDriver(Owner, "state-vis", visDriver); -- apply it!
-				Owner:RunAttribute("sortFrames"); -- Update the layout 
-			else 
-				RegisterAttributeDriver(Owner, "state-vis", "hide"); 
-			end 
+				Owner:RunAttribute("sortFrames"); -- Update the layout
+			else
+				RegisterAttributeDriver(Owner, "state-vis", "hide");
+			end
 
-		elseif (name == "change-enablehealermode") then 
+		elseif (name == "change-enablehealermode") then
 			self:SetAttribute("enableHealerMode", value); -- store the setting(?)
 			local Owner = self:GetFrameRef("Owner"); -- retrieve the raid header frame
 			Owner:SetAttribute("useAlternateLayout", value); -- set flag for healer mode
-			Owner:RunAttribute("sortFrames"); -- Update the layout 
-		end 
-	]=], 
+			Owner:RunAttribute("sortFrames"); -- Update the layout
+		end
+	]=],
 
 	-- Called on the raid frame group header
 	Raid_SortFrames = [=[
-		local groupLayout = self:GetAttribute("groupLayout"); 
-		local useAlternateLayout = self:GetAttribute("useAlternateLayout"); 
+		local groupLayout = self:GetAttribute("groupLayout");
+		local useAlternateLayout = self:GetAttribute("useAlternateLayout");
 
-		local anchor; 
-		local colSize; 
+		local anchor;
+		local colSize;
 		local growthX;
 		local growthY;
 		local growthYHealerMode;
 		local groupGrowthX;
-		local groupGrowthY; 
-		local groupGrowthYHealerMode; 
+		local groupGrowthY;
+		local groupGrowthYHealerMode;
 		local groupCols;
 		local groupRows;
-		local groupAnchor; 
-		local groupAnchorHealerMode; 
+		local groupAnchor;
+		local groupAnchorHealerMode;
 
-		if (groupLayout == "normal") then 
+		if (groupLayout == "normal") then
 			colSize = %.0f;
 			growthX = %.0f;
 			growthY = %.0f;
@@ -320,9 +320,9 @@ local SECURE = {
 			groupCols = %.0f;
 			groupRows = %.0f;
 			groupAnchor = "%s";
-			groupAnchorHealerMode = "%s"; 
+			groupAnchorHealerMode = "%s";
 
-		elseif (groupLayout == "epic") then 
+		elseif (groupLayout == "epic") then
 			colSize = %.0f;
 			growthX = %.0f;
 			growthY = %.0f;
@@ -333,44 +333,44 @@ local SECURE = {
 			groupCols = %.0f;
 			groupRows = %.0f;
 			groupAnchor = "%s";
-			groupAnchorHealerMode = "%s"; 
+			groupAnchorHealerMode = "%s";
 		end
 
 		-- This should never happen: it does!
-		if (not colSize) then 
-			return 
-		end 
+		if (not colSize) then
+			return
+		end
 
-		if useAlternateLayout then 
-			anchor = self:GetFrameRef("HealerModeAnchor"); 
-			growthY = growthYHealerMode; 
-			groupAnchor = groupAnchorHealerMode; 
+		if useAlternateLayout then
+			anchor = self:GetFrameRef("HealerModeAnchor");
+			growthY = growthYHealerMode;
+			groupAnchor = groupAnchorHealerMode;
 			groupGrowthY = groupGrowthYHealerMode;
 		else
-			anchor = self; 
+			anchor = self;
 		end
 
 		-- Iterate the frames
-		for id,frame in ipairs(Frames) do 
+		for id,frame in ipairs(Frames) do
 
-			local groupID = floor((id-1)/colSize) + 1; 
-			local groupX = mod(groupID-1,groupCols) * groupGrowthX; 
-			local groupY = floor((groupID-1)/groupCols) * groupGrowthY; 
+			local groupID = floor((id-1)/colSize) + 1;
+			local groupX = mod(groupID-1,groupCols) * groupGrowthX;
+			local groupY = floor((groupID-1)/groupCols) * groupGrowthY;
 
 			local modID = mod(id-1,colSize) + 1;
 			local unitX = growthX*(modID-1) + groupX;
 			local unitY = growthY*(modID-1) + groupY;
 
-			frame:ClearAllPoints(); 
-			frame:SetPoint(groupAnchor, anchor, groupAnchor, unitX, unitY); 
-		end 
+			frame:ClearAllPoints();
+			frame:SetPoint(groupAnchor, anchor, groupAnchor, unitX, unitY);
+		end
 
 	]=]
 }
 
 -- Create a secure callback frame our menu system can use
 -- to alter unitframe setting while engaged in combat.
--- TODO: Make this globally accessible to the entire addon, 
+-- TODO: Make this globally accessible to the entire addon,
 -- and move all these little creation methods away from the modules.
 local CreateSecureCallbackFrame = function(module, owner, db, script, ...)
 
@@ -396,33 +396,33 @@ local StyleSmallFrame = function(self, unit, id, layout, ...)
 	self.colors = Colors
 	self.layout = layout
 
-	self:SetSize(unpack(layout.Size)) 
+	self:SetSize(unpack(layout.Size))
 	self:SetFrameLevel(self:GetFrameLevel() + layout.FrameLevel)
 
-	if (unit:match("^boss(%d+)")) then 
+	if (unit:match("^boss(%d+)")) then
 		-- Todo: iterate on this for a grid layout
 		local id = tonumber(id)
-		if id then 
+		if id then
 			local place = { unpack(layout.Place) }
 			local growthX = layout.GrowthX
 			local growthY = layout.GrowthY
 
-			if (growthX and growthY) then 
-				if (type(place[#place]) == "number") then 
+			if (growthX and growthY) then
+				if (type(place[#place]) == "number") then
 					place[#place - 1] = place[#place - 1] + growthX*(id-1)
 					place[#place] = place[#place] + growthY*(id-1)
-				else 
+				else
 					place[#place + 1] = growthX
 					place[#place + 1] = growthY
-				end 
-			end 
+				end
+			end
 			self:Place(unpack(place))
-		else 
-			self:Place(unpack(layout.Place)) 
+		else
+			self:Place(unpack(layout.Place))
 		end
 	else
-		self:Place(unpack(layout.Place)) 
-	end 
+		self:Place(unpack(layout.Place))
+	end
 
 	-- Scaffolds
 	-----------------------------------------------------------
@@ -430,7 +430,7 @@ local StyleSmallFrame = function(self, unit, id, layout, ...)
 	local backdrop = self:CreateFrame("Frame")
 	backdrop:SetAllPoints()
 	backdrop:SetFrameLevel(self:GetFrameLevel())
-	
+
 	-- frame to contain bars, icons, etc
 	local content = self:CreateFrame("Frame")
 	content:SetAllPoints()
@@ -442,28 +442,28 @@ local StyleSmallFrame = function(self, unit, id, layout, ...)
 	overlay:SetFrameLevel(self:GetFrameLevel() + 30)
 
 	-- Health Bar
-	-----------------------------------------------------------	
+	-----------------------------------------------------------
 	local health = content:CreateStatusBar()
-	health:SetOrientation(layout.HealthBarOrientation or "RIGHT") 
+	health:SetOrientation(layout.HealthBarOrientation or "RIGHT")
 	health:SetFlippedHorizontally(layout.HealthBarSetFlippedHorizontally)
-	health:SetSparkMap(layout.HealthBarSparkMap) 
+	health:SetSparkMap(layout.HealthBarSparkMap)
 	health:SetStatusBarTexture(layout.HealthBarTexture)
 	health:SetSize(unpack(layout.HealthSize))
 	health:Place(unpack(layout.HealthPlace))
-	health:SetSmoothingMode(layout.HealthSmoothingMode or "bezier-fast-in-slow-out") 
-	health:SetSmoothingFrequency(layout.HealthSmoothingFrequency or .5) 
+	health:SetSmoothingMode(layout.HealthSmoothingMode or "bezier-fast-in-slow-out")
+	health:SetSmoothingFrequency(layout.HealthSmoothingFrequency or .5)
 	health.threatFeedbackUnit = "player"
 	health.colorThreat = layout.HealthColorThreat -- color non-friendly by threat
-	health.colorTapped = layout.HealthColorTapped  -- color tap denied units 
+	health.colorTapped = layout.HealthColorTapped  -- color tap denied units
 	health.colorDisconnected = layout.HealthColorDisconnected -- color disconnected units
-	health.colorClass = layout.HealthColorClass -- color players by class 
+	health.colorClass = layout.HealthColorClass -- color players by class
 	health.colorPetAsPlayer = layout.HealthColorPetAsPlayer -- color your pet as you
 	health.colorReaction = layout.HealthColorReaction -- color NPCs by their reaction standing with us
 	health.colorHealth = layout.HealthColorHealth -- color anything else in the default health color
 	health.frequent = layout.HealthFrequentUpdates -- listen to frequent health events for more accurate updates
 	self.Health = health
 	self.Health.PostUpdate = layout.HealthBarPostUpdate
-	
+
 	local healthBg = health:CreateTexture()
 	healthBg:SetDrawLayer(unpack(layout.HealthBackdropDrawLayer))
 	healthBg:SetSize(unpack(layout.HealthBackdropSize))
@@ -481,20 +481,20 @@ local StyleSmallFrame = function(self, unit, id, layout, ...)
 	healthPerc:SetFontObject(layout.HealthPercentFont)
 	healthPerc:SetTextColor(unpack(layout.HealthPercentColor))
 	self.Health.ValuePercent = healthPerc
-	
+
 	-- Cast Bar
 	-----------------------------------------------------------
-	if (layout.CastBarSize) then 
+	if (layout.CastBarSize) then
 		local cast = content:CreateStatusBar()
 		cast:SetSize(unpack(layout.CastBarSize))
 		cast:SetFrameLevel(health:GetFrameLevel() + 1)
 		cast:Place(unpack(layout.CastBarPlace))
-		cast:SetOrientation(layout.CastBarOrientation) 
-		cast:SetSmoothingMode(layout.CastBarSmoothingMode) 
+		cast:SetOrientation(layout.CastBarOrientation)
+		cast:SetSmoothingMode(layout.CastBarSmoothingMode)
 		cast:SetSmoothingFrequency(layout.CastBarSmoothingFrequency)
-		cast:SetStatusBarColor(unpack(layout.CastBarColor)) 
+		cast:SetStatusBarColor(unpack(layout.CastBarColor))
 		cast:SetStatusBarTexture(layout.CastBarTexture)
-		cast:SetSparkMap(layout.CastBarSparkMap) 
+		cast:SetSparkMap(layout.CastBarSparkMap)
 		self.Cast = cast
 		self.Cast.PostUpdate = layout.CastBarPostUpdate
 
@@ -517,7 +517,7 @@ local StyleSmallFrame = function(self, unit, id, layout, ...)
 	name:SetTextColor(unpack(layout.CastBarNameColor))
 	name:SetSize(unpack(layout.CastBarNameSize))
 	self.Cast.Name = name
-	
+
 	-- Target Highlighting
 	-----------------------------------------------------------
 	local owner = layout.TargetHighlightParent and self[layout.TargetHighlightParent] or self
@@ -536,20 +536,20 @@ local StyleSmallFrame = function(self, unit, id, layout, ...)
 
 	-- Auras
 	-----------------------------------------------------------
-	if (layout.AuraProperties) then 
+	if (layout.AuraProperties) then
 		local auras = content:CreateFrame("Frame")
 		auras:Place(unpack(layout.AuraFramePlace))
 		auras:SetSize(unpack(layout.AuraFrameSize))
-		for property,value in pairs(layout.AuraProperties) do 
+		for property,value in pairs(layout.AuraProperties) do
 			auras[property] = value
 		end
 		self.Auras = auras
 		self.Auras.PostCreateButton = layout.Aura_PostCreateButton -- post creation styling
 		self.Auras.PostUpdateButton = layout.Aura_PostUpdateButton -- post updates when something changes (even timers)
-	end 
+	end
 
 	-- Unit Name
-	if layout.NamePlace then 
+	if layout.NamePlace then
 		local name = overlay:CreateFontString()
 		name:SetPoint(unpack(layout.NamePlace))
 		name:SetDrawLayer(unpack(layout.NameDrawLayer))
@@ -558,15 +558,15 @@ local StyleSmallFrame = function(self, unit, id, layout, ...)
 		name:SetFontObject(layout.NameFont)
 		name:SetTextColor(unpack(layout.NameColor))
 		self.Name = name
-	end 
+	end
 
-	if (unit == "targettarget") and (layout.HideWhenUnitIsPlayer or layout.HideWhenTargetIsCritter or layout.HideWhenUnitIsTarget) then 
+	if (unit == "targettarget") and (layout.HideWhenUnitIsPlayer or layout.HideWhenTargetIsCritter or layout.HideWhenUnitIsTarget) then
 		self.hideWhenUnitIsPlayer = layout.HideWhenUnitIsPlayer
 		self.hideWhenUnitIsTarget = layout.HideWhenUnitIsTarget
 		self.hideWhenTargetIsCritter = layout.HideWhenTargetIsCritter
-		self.PostUpdate = layout.AlphaPostUpdate, 
+		self.PostUpdate = layout.AlphaPostUpdate,
 		self:RegisterEvent("PLAYER_TARGET_CHANGED", layout.AlphaPostUpdate, true)
-	end 
+	end
 end
 
 -- Party
@@ -585,7 +585,7 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	local backdrop = self:CreateFrame("Frame")
 	backdrop:SetAllPoints()
 	backdrop:SetFrameLevel(self:GetFrameLevel())
-	
+
 	-- frame to contain bars, icons, etc
 	local content = self:CreateFrame("Frame")
 	content:SetAllPoints()
@@ -597,21 +597,21 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	overlay:SetFrameLevel(self:GetFrameLevel() + 30)
 
 	-- Health Bar
-	-----------------------------------------------------------	
+	-----------------------------------------------------------
 	local health = content:CreateStatusBar()
 	health:SetFrameLevel(health:GetFrameLevel() + 2)
 	health:Place(unpack(layout.HealthPlace))
 	health:SetSize(unpack(layout.HealthSize))
-	health:SetOrientation(layout.HealthBarOrientation or "RIGHT") 
+	health:SetOrientation(layout.HealthBarOrientation or "RIGHT")
 	health:SetFlippedHorizontally(layout.HealthBarSetFlippedHorizontally)
-	health:SetSparkMap(layout.HealthBarSparkMap) 
+	health:SetSparkMap(layout.HealthBarSparkMap)
 	health:SetStatusBarTexture(layout.HealthBarTexture)
 	health:SetSmartSmoothing(true)
 	health.threatFeedbackUnit = "player"
 	health.colorThreat = layout.HealthColorThreat -- color non-friendly by threat
-	health.colorTapped = layout.HealthColorTapped  -- color tap denied units 
+	health.colorTapped = layout.HealthColorTapped  -- color tap denied units
 	health.colorDisconnected = layout.HealthColorDisconnected -- color disconnected units
-	health.colorClass = layout.HealthColorClass -- color players by class 
+	health.colorClass = layout.HealthColorClass -- color players by class
 	health.colorPetAsPlayer = layout.HealthColorPetAsPlayer -- color your pet as you
 	health.colorReaction = layout.HealthColorReaction -- color NPCs by their reaction standing with us
 	health.colorHealth = layout.HealthColorHealth -- color anything else in the default health color
@@ -639,8 +639,8 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	healthVal.showPercent = layout.HealthShowPercent
 	healthVal.ShowAFK = layout.HealthShowAFK
 	self.Health.Value = healthVal
-	
-	-- Power 
+
+	-- Power
 	-----------------------------------------------------------
 	local power = content:CreateStatusBar()
 	power:SetFrameLevel(power:GetFrameLevel() + 5)
@@ -661,7 +661,7 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	powerBg:SetSize(unpack(layout.PowerBackgroundSize))
 	powerBg:SetPoint(unpack(layout.PowerBackgroundPlace))
 	powerBg:SetTexture(layout.PowerBackgroundTexture)
-	powerBg:SetVertexColor(unpack(layout.PowerBackgroundColor)) 
+	powerBg:SetVertexColor(unpack(layout.PowerBackgroundColor))
 	self.Power.Bg = powerBg
 
 	-- Range
@@ -672,7 +672,7 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	-----------------------------------------------------------
 	local portrait = backdrop:CreateFrame("PlayerModel")
 	portrait:SetPoint(unpack(layout.PortraitPlace))
-	portrait:SetSize(unpack(layout.PortraitSize)) 
+	portrait:SetSize(unpack(layout.PortraitSize))
 	portrait:SetAlpha(layout.PortraitAlpha)
 	portrait.distanceScale = layout.PortraitDistanceScale
 	portrait.positionX = layout.PortraitPositionX
@@ -681,10 +681,10 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	portrait.rotation = layout.PortraitRotation -- in degrees
 	portrait.showFallback2D = layout.PortraitShowFallback2D -- display 2D portraits when unit is out of range of 3D models
 	self.Portrait = portrait
-		
-	-- To allow the backdrop and overlay to remain 
-	-- visible even with no visible player model, 
-	-- we add them to our backdrop and overlay frames, 
+
+	-- To allow the backdrop and overlay to remain
+	-- visible even with no visible player model,
+	-- we add them to our backdrop and overlay frames,
 	-- not to the portrait frame itself.
 	local portraitBg = backdrop:CreateTexture()
 	portraitBg:SetPoint(unpack(layout.PortraitBackgroundPlace))
@@ -696,7 +696,7 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 
 	local portraitShade = content:CreateTexture()
 	portraitShade:SetPoint(unpack(layout.PortraitShadePlace))
-	portraitShade:SetSize(unpack(layout.PortraitShadeSize)) 
+	portraitShade:SetSize(unpack(layout.PortraitShadeSize))
 	portraitShade:SetTexture(layout.PortraitShadeTexture)
 	portraitShade:SetDrawLayer(unpack(layout.PortraitShadeDrawLayer))
 	self.Portrait.Shade = portraitShade
@@ -718,7 +718,7 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	cast:SetOrientation(layout.CastBarOrientation) -- set the bar to grow towards the right.
 	cast:SetSmoothingMode(layout.CastBarSmoothingMode) -- set the smoothing mode.
 	cast:SetSmoothingFrequency(layout.CastBarSmoothingFrequency)
-	cast:SetStatusBarColor(unpack(layout.CastBarColor)) -- the alpha won't be overwritten. 
+	cast:SetStatusBarColor(unpack(layout.CastBarColor)) -- the alpha won't be overwritten.
 	cast:SetStatusBarTexture(layout.CastBarTexture)
 	cast:SetSparkMap(layout.CastBarSparkMap) -- set the map the spark follows along the bar.
 	self.Cast = cast
@@ -729,7 +729,7 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	local auras = content:CreateFrame("Frame")
 	auras:Place(unpack(layout.AuraFramePlace))
 	auras:SetSize(unpack(layout.AuraFrameSize))
-	for property,value in pairs(layout.AuraProperties) do 
+	for property,value in pairs(layout.AuraProperties) do
 		auras[property] = value
 	end
 	self.Auras = auras
@@ -753,13 +753,13 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 
 	-- Group Role
 	-----------------------------------------------------------
-	if layout.UseGroupRole then 
+	if layout.UseGroupRole then
 		local groupRole = overlay:CreateFrame()
 		groupRole:SetPoint(unpack(layout.GroupRolePlace))
 		groupRole:SetSize(unpack(layout.GroupRoleSize))
 		self.GroupRole = groupRole
 
-		if layout.UseGroupRoleBackground then 
+		if layout.UseGroupRoleBackground then
 			local groupRoleBg = groupRole:CreateTexture()
 			groupRoleBg:SetDrawLayer(unpack(layout.GroupRoleBackgroundDrawLayer))
 			groupRoleBg:SetTexture(layout.GroupRoleBackgroundTexture)
@@ -767,34 +767,34 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 			groupRoleBg:SetSize(unpack(layout.GroupRoleBackgroundSize))
 			groupRoleBg:SetPoint(unpack(layout.GroupRoleBackgroundPlace))
 			self.GroupRole.Bg = groupRoleBg
-		end 
+		end
 
-		if layout.UseGroupRoleHealer then 
+		if layout.UseGroupRoleHealer then
 			local roleHealer = groupRole:CreateTexture()
 			roleHealer:SetPoint(unpack(layout.GroupRoleHealerPlace))
 			roleHealer:SetSize(unpack(layout.GroupRoleHealerSize))
 			roleHealer:SetDrawLayer(unpack(layout.GroupRoleHealerDrawLayer))
 			roleHealer:SetTexture(layout.GroupRoleHealerTexture)
-			self.GroupRole.Healer = roleHealer 
-		end 
+			self.GroupRole.Healer = roleHealer
+		end
 
-		if layout.UseGroupRoleTank then 
+		if layout.UseGroupRoleTank then
 			local roleTank = groupRole:CreateTexture()
 			roleTank:SetPoint(unpack(layout.GroupRoleTankPlace))
 			roleTank:SetSize(unpack(layout.GroupRoleTankSize))
 			roleTank:SetDrawLayer(unpack(layout.GroupRoleTankDrawLayer))
 			roleTank:SetTexture(layout.GroupRoleTankTexture)
-			self.GroupRole.Tank = roleTank 
-		end 
+			self.GroupRole.Tank = roleTank
+		end
 
-		if layout.UseGroupRoleDPS then 
+		if layout.UseGroupRoleDPS then
 			local roleDPS = groupRole:CreateTexture()
 			roleDPS:SetPoint(unpack(layout.GroupRoleDPSPlace))
 			roleDPS:SetSize(unpack(layout.GroupRoleDPSSize))
 			roleDPS:SetDrawLayer(unpack(layout.GroupRoleDPSDrawLayer))
 			roleDPS:SetTexture(layout.GroupRoleDPSTexture)
-			self.GroupRole.Damager = roleDPS 
-		end 
+			self.GroupRole.Damager = roleDPS
+		end
 	end
 
 	-- Group Debuff (#1)
@@ -831,12 +831,12 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	groupAuraCooldown:SetFrameLevel(groupAura:GetFrameLevel() + 1)
 	groupAuraCooldown:SetReverse(false)
 	groupAuraCooldown:SetSwipeColor(0, 0, 0, .75)
-	groupAuraCooldown:SetBlingTexture(BLING_TEXTURE, .3, .6, 1, .75) 
+	groupAuraCooldown:SetBlingTexture(BLING_TEXTURE, .3, .6, 1, .75)
 	groupAuraCooldown:SetEdgeTexture(EDGE_NORMAL_TEXTURE)
 	groupAuraCooldown:SetDrawSwipe(true)
 	groupAuraCooldown:SetDrawBling(true)
 	groupAuraCooldown:SetDrawEdge(false)
-	groupAuraCooldown:SetHideCountdownNumbers(true) 
+	groupAuraCooldown:SetHideCountdownNumbers(true)
 	groupAura.Cooldown = groupAuraCooldown
 
 	local groupAuraTime = overlay:CreateFontString()
@@ -864,7 +864,7 @@ local StylePartyFrame = function(self, unit, id, layout, ...)
 	groupAuraBorder:SetBackdrop(layout.GroupAuraButtonBorderBackdrop)
 	groupAuraBorder:SetBackdropColor(unpack(layout.GroupAuraButtonBorderBackdropColor))
 	groupAuraBorder:SetBackdropBorderColor(unpack(layout.GroupAuraButtonBorderBackdropBorderColor))
-	groupAura.Border = groupAuraBorder 
+	groupAura.Border = groupAuraBorder
 
 	self.GroupAura = groupAura
 	self.GroupAura.PostUpdate = layout.GroupAuraPostUpdate
@@ -913,7 +913,7 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 
 	self.layout = layout
 	self.colors = Colors
-	self:SetSize(unpack(layout.Size)) 
+	self:SetSize(unpack(layout.Size))
 	self:SetHitRectInsets(unpack(layout.HitRectInsets))
 
 	-- Scaffolds
@@ -922,7 +922,7 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	local backdrop = self:CreateFrame("Frame")
 	backdrop:SetAllPoints()
 	backdrop:SetFrameLevel(self:GetFrameLevel())
-	
+
 	-- frame to contain bars, icons, etc
 	local content = self:CreateFrame("Frame")
 	content:SetAllPoints()
@@ -934,9 +934,9 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	overlay:SetFrameLevel(self:GetFrameLevel() + 20)
 
 	-- Health Bar
-	-----------------------------------------------------------	
+	-----------------------------------------------------------
 	local health = content:CreateStatusBar()
-	health:SetOrientation(layout.HealthBarOrientation or "RIGHT") 
+	health:SetOrientation(layout.HealthBarOrientation or "RIGHT")
 	health:SetFlippedHorizontally(layout.HealthBarSetFlippedHorizontally)
 	health:SetSparkMap(layout.HealthBarSparkMap) -- set the map the spark follows along the bar.
 	health:SetStatusBarTexture(layout.HealthBarTexture)
@@ -946,16 +946,16 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	health:SetSmartSmoothing(true)
 	health.threatFeedbackUnit = "player"
 	health.colorThreat = layout.HealthColorThreat -- color non-friendly by threat
-	health.colorTapped = layout.HealthColorTapped  -- color tap denied units 
+	health.colorTapped = layout.HealthColorTapped  -- color tap denied units
 	health.colorDisconnected = layout.HealthColorDisconnected -- color disconnected units
-	health.colorClass = layout.HealthColorClass -- color players by class 
+	health.colorClass = layout.HealthColorClass -- color players by class
 	health.colorPetAsPlayer = layout.HealthColorPetAsPlayer -- color your pet as you
 	health.colorReaction = layout.HealthColorReaction -- color NPCs by their reaction standing with us
 	health.colorHealth = layout.HealthColorHealth -- color anything else in the default health color
 	health.frequent = layout.HealthFrequentUpdates -- listen to frequent health events for more accurate updates
 	self.Health = health
 	self.Health.PostUpdate = layout.HealthBarPostUpdate
-	
+
 	local healthBg = health:CreateTexture()
 	healthBg:SetDrawLayer(unpack(layout.HealthBackdropDrawLayer))
 	healthBg:SetSize(unpack(layout.HealthBackdropSize))
@@ -964,7 +964,7 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	healthBg:SetVertexColor(unpack(layout.HealthBackdropColor))
 	self.Health.Bg = healthBg
 
-	-- Power 
+	-- Power
 	-----------------------------------------------------------
 	local power = overlay:CreateStatusBar()
 	power:SetSize(unpack(layout.PowerSize))
@@ -984,7 +984,7 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	powerBg:SetSize(unpack(layout.PowerBackgroundSize))
 	powerBg:SetPoint(unpack(layout.PowerBackgroundPlace))
 	powerBg:SetTexture(layout.PowerBackgroundTexture)
-	powerBg:SetVertexColor(unpack(layout.PowerBackgroundColor)) 
+	powerBg:SetVertexColor(unpack(layout.PowerBackgroundColor))
 	self.Power.Bg = powerBg
 
 	-- Cast Bar
@@ -996,7 +996,7 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	cast:SetOrientation(layout.CastBarOrientation) -- set the bar to grow towards the right.
 	cast:SetSmoothingMode(layout.CastBarSmoothingMode) -- set the smoothing mode.
 	cast:SetSmoothingFrequency(layout.CastBarSmoothingFrequency)
-	cast:SetStatusBarColor(unpack(layout.CastBarColor)) -- the alpha won't be overwritten. 
+	cast:SetStatusBarColor(unpack(layout.CastBarColor)) -- the alpha won't be overwritten.
 	cast:SetStatusBarTexture(layout.CastBarTexture)
 	cast:SetSparkMap(layout.CastBarSparkMap) -- set the map the spark follows along the bar.
 	self.Cast = cast
@@ -1053,14 +1053,14 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 
 		-- Group Role
 	-----------------------------------------------------------
-	if layout.UseGroupRole then 
+	if layout.UseGroupRole then
 		local groupRole = overlay:CreateFrame()
 		groupRole:SetPoint(unpack(layout.GroupRolePlace))
 		groupRole:SetSize(unpack(layout.GroupRoleSize))
 		self.GroupRole = groupRole
 		self.GroupRole.PostUpdate = layout.GroupRolePostUpdate
 
-		if layout.UseGroupRoleBackground then 
+		if layout.UseGroupRoleBackground then
 			local groupRoleBg = groupRole:CreateTexture()
 			groupRoleBg:SetDrawLayer(unpack(layout.GroupRoleBackgroundDrawLayer))
 			groupRoleBg:SetTexture(layout.GroupRoleBackgroundTexture)
@@ -1068,36 +1068,36 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 			groupRoleBg:SetSize(unpack(layout.GroupRoleBackgroundSize))
 			groupRoleBg:SetPoint(unpack(layout.GroupRoleBackgroundPlace))
 			self.GroupRole.Bg = groupRoleBg
-		end 
+		end
 
-		if layout.UseGroupRoleHealer then 
+		if layout.UseGroupRoleHealer then
 			local roleHealer = groupRole:CreateTexture()
 			roleHealer:SetPoint(unpack(layout.GroupRoleHealerPlace))
 			roleHealer:SetSize(unpack(layout.GroupRoleHealerSize))
 			roleHealer:SetDrawLayer(unpack(layout.GroupRoleHealerDrawLayer))
 			roleHealer:SetTexture(layout.GroupRoleHealerTexture)
-			self.GroupRole.Healer = roleHealer 
-		end 
+			self.GroupRole.Healer = roleHealer
+		end
 
-		if layout.UseGroupRoleTank then 
+		if layout.UseGroupRoleTank then
 			local roleTank = groupRole:CreateTexture()
 			roleTank:SetPoint(unpack(layout.GroupRoleTankPlace))
 			roleTank:SetSize(unpack(layout.GroupRoleTankSize))
 			roleTank:SetDrawLayer(unpack(layout.GroupRoleTankDrawLayer))
 			roleTank:SetTexture(layout.GroupRoleTankTexture)
-			self.GroupRole.Tank = roleTank 
-		end 
+			self.GroupRole.Tank = roleTank
+		end
 
-		if layout.UseGroupRoleDPS then 
+		if layout.UseGroupRoleDPS then
 			local roleDPS = groupRole:CreateTexture()
 			roleDPS:SetPoint(unpack(layout.GroupRoleDPSPlace))
 			roleDPS:SetSize(unpack(layout.GroupRoleDPSSize))
 			roleDPS:SetDrawLayer(unpack(layout.GroupRoleDPSDrawLayer))
 			roleDPS:SetTexture(layout.GroupRoleDPSTexture)
-			self.GroupRole.Damager = roleDPS 
-		end 
+			self.GroupRole.Damager = roleDPS
+		end
 	end
-	
+
 	-- Group Debuff (#1)
 	-----------------------------------------------------------
 	local groupAura = overlay:CreateFrame("Button")
@@ -1133,14 +1133,14 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	groupAuraCooldown:SetFrameLevel(groupAura:GetFrameLevel() + 1)
 	groupAuraCooldown:SetReverse(false)
 	groupAuraCooldown:SetSwipeColor(0, 0, 0, .75)
-	groupAuraCooldown:SetBlingTexture(BLING_TEXTURE, .3, .6, 1, .75) 
+	groupAuraCooldown:SetBlingTexture(BLING_TEXTURE, .3, .6, 1, .75)
 	groupAuraCooldown:SetEdgeTexture(EDGE_NORMAL_TEXTURE)
 	groupAuraCooldown:SetDrawSwipe(true)
 	groupAuraCooldown:SetDrawBling(true)
 	groupAuraCooldown:SetDrawEdge(false)
-	groupAuraCooldown:SetHideCountdownNumbers(true) 
+	groupAuraCooldown:SetHideCountdownNumbers(true)
 	groupAura.Cooldown = groupAuraCooldown
-	
+
 	local groupAuraTime = overlay:CreateFontString()
 	groupAuraTime:SetDrawLayer("ARTWORK", 1)
 	groupAuraTime:SetPoint(unpack(layout.GroupAuraButtonTimePlace))
@@ -1166,7 +1166,7 @@ local StyleRaidFrame = function(self, unit, id, layout, ...)
 	groupAuraBorder:SetBackdrop(layout.GroupAuraButtonBorderBackdrop)
 	groupAuraBorder:SetBackdropColor(unpack(layout.GroupAuraButtonBorderBackdropColor))
 	groupAuraBorder:SetBackdropBorderColor(unpack(layout.GroupAuraButtonBorderBackdropBorderColor))
-	groupAura.Border = groupAuraBorder 
+	groupAura.Border = groupAuraBorder
 	self.GroupAura = groupAura
 	self.GroupAura.PostUpdate = layout.GroupAuraPostUpdate
 
@@ -1217,15 +1217,15 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	-----------------------------------------------------------
 	self.colors = Colors
 	self.layout = layout
-	self:SetSize(unpack(layout.Size)) 
-	self:Place(unpack(layout.Place)) 
+	self:SetSize(unpack(layout.Size))
+	self:Place(unpack(layout.Place))
 	self:SetHitRectInsets(unpack(layout.HitRectInsets))
 
 	local topOffset, bottomOffset, leftOffset, rightOffset = unpack(layout.ExplorerHitRects)
 
 	self.GetExplorerHitRects = function(self)
 		return topOffset, bottomOffset, leftOffset, rightOffset
-	end 
+	end
 
 	-- Scaffolds
 	-----------------------------------------------------------
@@ -1233,7 +1233,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	local backdrop = self:CreateFrame("Frame")
 	backdrop:SetAllPoints()
 	backdrop:SetFrameLevel(self:GetFrameLevel())
-	
+
 	-- frame to contain bars, icons, etc
 	local content = self:CreateFrame("Frame")
 	content:SetAllPoints()
@@ -1245,24 +1245,24 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	overlay:SetFrameLevel(self:GetFrameLevel() + 20)
 
 	-- Health Bar
-	-----------------------------------------------------------	
+	-----------------------------------------------------------
 	local health = content:CreateStatusBar()
-	health:SetOrientation(layout.HealthBarOrientation or "RIGHT") 
+	health:SetOrientation(layout.HealthBarOrientation or "RIGHT")
 	health:SetSparkMap(layout.HealthBarSparkMap)
 	health:SetFrameLevel(health:GetFrameLevel() + 2)
 	health:Place(unpack(layout.HealthPlace))
 	health:SetSmartSmoothing(true)
 	health.colorThreat = layout.HealthColorThreat -- color non-friendly by threat
-	health.colorTapped = layout.HealthColorTapped  -- color tap denied units 
+	health.colorTapped = layout.HealthColorTapped  -- color tap denied units
 	health.colorDisconnected = layout.HealthColorDisconnected -- color disconnected units
-	health.colorClass = layout.HealthColorClass -- color players by class 
+	health.colorClass = layout.HealthColorClass -- color players by class
 	health.colorReaction = layout.HealthColorReaction -- color NPCs by their reaction standing with us
 	health.colorHealth = layout.HealthColorHealth -- color anything else in the default health color
 	health.frequent = layout.HealthFrequentUpdates -- listen to frequent health events for more accurate updates
 	health.predictThreshold = .01
 	self.Health = health
 	self.Health.PostUpdate = layout.CastBarPostUpdate
-	
+
 	local healthBgHolder = health:CreateFrame("Frame")
 	healthBgHolder:SetAllPoints()
 	healthBgHolder:SetFrameLevel(health:GetFrameLevel()-2)
@@ -1288,17 +1288,17 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 
 	if (IsRetail) then
 		local absorbVal = overlay:CreateFontString()
-		if layout.HealthAbsorbValuePlaceFunction then 
+		if layout.HealthAbsorbValuePlaceFunction then
 			absorbVal:SetPoint(layout.HealthAbsorbValuePlaceFunction(self))
-		else 
+		else
 			absorbVal:SetPoint(unpack(layout.HealthAbsorbValuePlace))
-		end 
+		end
 		absorbVal:SetDrawLayer(unpack(layout.HealthAbsorbValueDrawLayer))
 		absorbVal:SetJustifyH(layout.HealthAbsorbValueJustifyH)
 		absorbVal:SetJustifyV(layout.HealthAbsorbValueJustifyV)
 		absorbVal:SetFontObject(layout.HealthAbsorbValueFont)
 		absorbVal:SetTextColor(unpack(layout.HealthAbsorbValueColor))
-		self.Health.ValueAbsorb = absorbVal 
+		self.Health.ValueAbsorb = absorbVal
 	end
 
 	-- Combat Feedback
@@ -1318,9 +1318,9 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 
 	self.CombatFeedback = feedback
 	self.CombatFeedback.feedbackText = feedbackText
-	
 
-	-- Power 
+
+	-- Power
 	-----------------------------------------------------------
 	local power = backdrop:CreateStatusBar()
 	power:SetSize(unpack(layout.PowerSize))
@@ -1332,7 +1332,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	power:SetSmoothingFrequency(layout.PowerBarSmoothingFrequency or .5) -- set the duration of the smoothing.
 	power:SetSparkMap(layout.PowerBarSparkMap) -- set the map the spark follows along the bar.
 	power.frequent = true
-	power.ignoredResource = layout.PowerIgnoredResource -- make the bar hide when MANA is the primary resource. 
+	power.ignoredResource = layout.PowerIgnoredResource -- make the bar hide when MANA is the primary resource.
 	self.Power = power
 	self.Power.OverrideColor = layout.PowerOverrideColor
 
@@ -1341,7 +1341,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	powerBg:SetSize(unpack(layout.PowerBackgroundSize))
 	powerBg:SetPoint(unpack(layout.PowerBackgroundPlace))
 	powerBg:SetTexture(layout.PowerBackgroundTexture)
-	powerBg:SetVertexColor(unpack(layout.PowerBackgroundColor)) 
+	powerBg:SetVertexColor(unpack(layout.PowerBackgroundColor))
 	self.Power.Bg = powerBg
 
 	local powerFg = power:CreateTexture()
@@ -1361,7 +1361,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	powerVal:SetTextColor(unpack(layout.PowerValueColor))
 	self.Power.Value = powerVal
 
-	if (IsWinterVeil) then 
+	if (IsWinterVeil) then
 		local winterVeilPower = power:CreateTexture()
 		winterVeilPower:SetSize(unpack(layout.WinterVeilPowerSize))
 		winterVeilPower:SetPoint(unpack(layout.WinterVeilPowerPlace))
@@ -1374,11 +1374,11 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	-- Mana Orb
 	-----------------------------------------------------------
 	local extraPower = backdrop:CreateOrb()
-	extraPower:SetStatusBarTexture(unpack(layout.ManaOrbTextures)) 
-	extraPower:Place(unpack(layout.ManaPlace))  
-	extraPower:SetSize(unpack(layout.ManaSize)) 
+	extraPower:SetStatusBarTexture(unpack(layout.ManaOrbTextures))
+	extraPower:Place(unpack(layout.ManaPlace))
+	extraPower:SetSize(unpack(layout.ManaSize))
 	extraPower.frequent = true
-	extraPower.exclusiveResource = layout.ManaExclusiveResource or "MANA" 
+	extraPower.exclusiveResource = layout.ManaExclusiveResource or "MANA"
 	self.ExtraPower = extraPower
 	self.ExtraPower.OverrideColor = layout.ManaOverridePowerColor
 
@@ -1387,15 +1387,15 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	extraPowerBg:SetSize(unpack(layout.ManaBackgroundSize))
 	extraPowerBg:SetTexture(layout.ManaBackgroundTexture)
 	extraPowerBg:SetDrawLayer(unpack(layout.ManaBackgroundDrawLayer))
-	extraPowerBg:SetVertexColor(unpack(layout.ManaBackgroundColor)) 
+	extraPowerBg:SetVertexColor(unpack(layout.ManaBackgroundColor))
 	self.ExtraPower.bg = extraPowerBg
 
 	local extraPowerShade = extraPower:CreateTexture()
 	extraPowerShade:SetPoint(unpack(layout.ManaShadePlace))
-	extraPowerShade:SetSize(unpack(layout.ManaShadeSize)) 
+	extraPowerShade:SetSize(unpack(layout.ManaShadeSize))
 	extraPowerShade:SetTexture(layout.ManaShadeTexture)
 	extraPowerShade:SetDrawLayer(unpack(layout.ManaShadeDrawLayer))
-	extraPowerShade:SetVertexColor(unpack(layout.ManaShadeColor)) 
+	extraPowerShade:SetVertexColor(unpack(layout.ManaShadeColor))
 	self.ExtraPower.Shade = extraPowerShade
 
 	local extraPowerFg = extraPower:CreateTexture()
@@ -1413,8 +1413,8 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	extraPowerVal:SetFontObject(layout.ManaValueFont)
 	extraPowerVal:SetTextColor(unpack(layout.ManaValueColor))
 	self.ExtraPower.Value = extraPowerVal
-	
-	if (IsWinterVeil) then 
+
+	if (IsWinterVeil) then
 		local winterVeilMana = extraPower:CreateTexture()
 		winterVeilMana:SetSize(unpack(layout.WinterVeilManaSize))
 		winterVeilMana:SetPoint(unpack(layout.WinterVeilManaPlace))
@@ -1422,10 +1422,10 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 		winterVeilMana:SetTexture(layout.WinterVeilManaTexture)
 		winterVeilMana:SetVertexColor(unpack(layout.WinterVeilManaColor))
 		self.ExtraPower.WinterVeil = winterVeilMana
-	end 
+	end
 
 	-- Threat
-	-----------------------------------------------------------	
+	-----------------------------------------------------------
 	local threat = {
 		fadeOut = layout.ThreatFadeOut,
 		hideSolo = layout.ThreatHideSolo,
@@ -1472,7 +1472,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	threatPowerFrame:SetFrameLevel(backdrop:GetFrameLevel())
 	threatPowerFrame:SetAllPoints(self.Power)
 	threatPowerFrame:SetShown(self.Power:IsShown())
-	
+
 	-- Hook the power threat frame visibility to the power crystal
 	--self.Power:HookScript("OnShow", function() threatPowerFrame:Show() end)
 	--self.Power:HookScript("OnHide", function() threatPowerFrame:Hide() end)
@@ -1497,7 +1497,7 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	threatPowerBg:SetTexture(layout.ThreatPowerBgTexture)
 	threatPowerBg._owner = self.Power
 	threat.powerBg = threatPowerBg
-		
+
 	local threatManaFrame = backdrop:CreateFrame("Frame")
 	threatManaFrame:SetFrameLevel(backdrop:GetFrameLevel())
 	threatManaFrame:SetAllPoints(self.ExtraPower)
@@ -1529,8 +1529,8 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	cast:Place(unpack(layout.CastBarPlace))
 	cast:SetOrientation(layout.CastBarOrientation)
 	cast:DisableSmoothing()
-	cast:SetStatusBarColor(unpack(layout.CastBarColor))  
-	cast:SetSparkMap(layout.CastBarSparkMap) 
+	cast:SetStatusBarColor(unpack(layout.CastBarColor))
+	cast:SetSparkMap(layout.CastBarSparkMap)
 
 	local name = (layout.CastBarNameParent and self[layout.CastBarNameParent] or overlay):CreateFontString()
 	name:SetPoint(unpack(layout.CastBarNamePlace))
@@ -1559,11 +1559,11 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	local combat = overlay:CreateTexture()
 
 	local prefix = "CombatIndicator"
-	if (IsLoveFestival) then 
+	if (IsLoveFestival) then
 		prefix = "Love"..prefix
 	end
 	combat:SetSize(unpack(layout[prefix.."Size"]))
-	combat:SetPoint(unpack(layout[prefix.."Place"])) 
+	combat:SetPoint(unpack(layout[prefix.."Place"]))
 	combat:SetTexture(layout[prefix.."Texture"])
 	combat:SetDrawLayer(unpack(layout[prefix.."DrawLayer"]))
 	self.Combat = combat
@@ -1594,14 +1594,14 @@ UnitStyles.StylePlayerFrame = function(self, unit, id, layout, ...)
 	local auras = content:CreateFrame("Frame")
 	auras:Place(unpack(layout.AuraFramePlace))
 	auras:SetSize(unpack(layout.AuraFrameSize)) -- auras will be aligned in the available space, this size gives us 8x1 auras
-	for property,value in pairs(layout.AuraProperties) do 
+	for property,value in pairs(layout.AuraProperties) do
 		auras[property] = value
 	end
 	self.Auras = auras
 	self.Auras.PostCreateButton = layout.Aura_PostCreateButton -- post creation styling
 	self.Auras.PostUpdateButton = layout.Aura_PostUpdateButton -- post updates when something changes (even timers)
 
-	-- Mana Value when Mana isn't visible  
+	-- Mana Value when Mana isn't visible
 	local parent = self[layout.ManaTextParent or self.Power and "Power" or "Health"]
 	local manaText = parent:CreateFontString()
 	manaText:SetPoint(unpack(layout.ManaTextPlace))
@@ -1630,10 +1630,10 @@ end
 
 UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 
-	self:SetSize(unpack(layout.Size)) 
-	self:Place(unpack(layout.Place)) 
+	self:SetSize(unpack(layout.Size))
+	self:Place(unpack(layout.Place))
 
-	-- We Don't want this clickable, 
+	-- We Don't want this clickable,
 	-- it's in the middle of the screen!
 	self.ignoreMouseOver = layout.IgnoreMouseOver
 
@@ -1647,7 +1647,7 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 	local backdrop = self:CreateFrame("Frame")
 	backdrop:SetAllPoints()
 	backdrop:SetFrameLevel(self:GetFrameLevel())
-	
+
 	-- frame to contain bars, icons, etc
 	local content = self:CreateFrame("Frame")
 	content:SetAllPoints()
@@ -1663,12 +1663,12 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 	cast:Place(unpack(layout.CastBarPlace))
 	cast:SetSize(unpack(layout.CastBarSize))
 	cast:SetStatusBarTexture(layout.CastBarTexture)
-	cast:SetStatusBarColor(unpack(layout.CastBarColor)) 
+	cast:SetStatusBarColor(unpack(layout.CastBarColor))
 	cast:SetOrientation(layout.CastBarOrientation) -- set the bar to grow towards the top.
 	cast:DisableSmoothing(true) -- don't smoothe castbars, it'll make it inaccurate
 	cast.timeToHold = layout.CastTimeToHoldFailed
 	self.Cast = cast
-	
+
 	local castBg = cast:CreateTexture()
 	castBg:SetPoint(unpack(layout.CastBarBackgroundPlace))
 	castBg:SetSize(unpack(layout.CastBarBackgroundSize))
@@ -1711,9 +1711,9 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 	--spellQueue:SetFrameLevel(self.Cast:GetFrameLevel() + 1)
 	spellQueue:Place(unpack(layout.CastBarSpellQueuePlace))
 	spellQueue:SetSize(unpack(layout.CastBarSpellQueueSize))
-	spellQueue:SetOrientation(layout.CastBarSpellQueueOrientation) 
-	spellQueue:SetStatusBarTexture(layout.CastBarSpellQueueTexture) 
-	spellQueue:SetStatusBarColor(unpack(layout.CastBarSpellQueueColor)) 
+	spellQueue:SetOrientation(layout.CastBarSpellQueueOrientation)
+	spellQueue:SetStatusBarTexture(layout.CastBarSpellQueueTexture)
+	spellQueue:SetStatusBarColor(unpack(layout.CastBarSpellQueueColor))
 	spellQueue:DisableSmoothing(true)
 	self.Cast.SpellQueue = spellQueue
 
@@ -1725,20 +1725,20 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 	-- Only show it on hostile targets
 	classPower.hideWhenUnattackable = layout.ClassPowerHideWhenUnattackable
 
-	-- Maximum points displayed regardless 
+	-- Maximum points displayed regardless
 	-- of max value and available point frames.
 	-- This does not affect runes, which still require 6 frames.
 	classPower.maxComboPoints = layout.ClassPowerMaxComboPoints
 
 	-- Set the point alpha to 0 when no target is selected
-	-- This does not affect runes 
-	classPower.hideWhenNoTarget = layout.ClassPowerHideWhenNoTarget 
+	-- This does not affect runes
+	classPower.hideWhenNoTarget = layout.ClassPowerHideWhenNoTarget
 
 	-- Set all point alpha to 0 when we have no active points
-	classPower.hideWhenEmpty = layout.ClassPowerHideWhenNoTarget -- This does not affect runes 
+	classPower.hideWhenEmpty = layout.ClassPowerHideWhenNoTarget -- This does not affect runes
 
 	-- Alpha modifier of inactive/not ready points
-	classPower.alphaEmpty = layout.ClassPowerAlphaWhenEmpty 
+	classPower.alphaEmpty = layout.ClassPowerAlphaWhenEmpty
 
 	-- Alpha modifier when not engaged in combat
 	-- This is applied on top of the inactive modifier above
@@ -1748,10 +1748,10 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 
 	-- Set to true to flip the classPower horizontally
 	-- Intended to be used alongside actioncam
-	classPower.flipSide = layout.ClassPowerReverseSides 
+	classPower.flipSide = layout.ClassPowerReverseSides
 
 	-- Sort order of the runes
-	classPower.runeSortOrder = layout.ClassPowerRuneSortOrder 
+	classPower.runeSortOrder = layout.ClassPowerRuneSortOrder
 
 	-- We show all 6 runes in retail, but stick to 5 otherwise.
 	local numPoints = (IsRetail) and 6 or (IsClassic or IsTBC) and 5
@@ -1764,8 +1764,8 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 		point:SetValue(1)
 
 		-- Empty slot texture
-		-- Make it slightly larger than the point textures, 
-		-- to give a nice darker edge around the points. 
+		-- Make it slightly larger than the point textures,
+		-- to give a nice darker edge around the points.
 		point.slotTexture = point:CreateTexture()
 		point.slotTexture:SetDrawLayer("BACKGROUND", -1)
 		point.slotTexture:SetAllPoints(point)
@@ -1790,13 +1790,13 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 		cast:Place(unpack(layout.PlayerAltPowerBarPlace))
 		cast:SetSize(unpack(layout.PlayerAltPowerBarSize))
 		cast:SetStatusBarTexture(layout.PlayerAltPowerBarTexture)
-		cast:SetStatusBarColor(unpack(layout.PlayerAltPowerBarColor)) 
+		cast:SetStatusBarColor(unpack(layout.PlayerAltPowerBarColor))
 		cast:SetOrientation(layout.PlayerAltPowerBarOrientation) -- set the bar to grow towards the top.
 		--cast:DisableSmoothing(true) -- don't smoothe castbars, it'll make it inaccurate
 		cast:EnableMouse(true)
 		self.AltPower = cast
 		self.AltPower.OverrideValue = layout.PlayerAltPowerBarValueOverride
-				
+
 		local castBg = cast:CreateTexture()
 		castBg:SetPoint(unpack(layout.PlayerAltPowerBarBackgroundPlace))
 		castBg:SetSize(unpack(layout.PlayerAltPowerBarBackgroundSize))
@@ -1804,7 +1804,7 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 		castBg:SetDrawLayer(unpack(layout.PlayerAltPowerBarBackgroundDrawLayer))
 		castBg:SetVertexColor(unpack(layout.PlayerAltPowerBarBackgroundColor))
 		self.AltPower.Bg = castBg
-		
+
 		local castValue = cast:CreateFontString()
 		castValue:SetPoint(unpack(layout.PlayerAltPowerBarValuePlace))
 		castValue:SetFontObject(layout.PlayerAltPowerBarValueFont)
@@ -1813,7 +1813,7 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 		castValue:SetJustifyV(layout.PlayerAltPowerBarValueJustifyV)
 		castValue:SetTextColor(unpack(layout.PlayerAltPowerBarValueColor))
 		self.AltPower.Value = castValue
-		
+
 		local castName = cast:CreateFontString()
 		castName:SetPoint(unpack(layout.PlayerAltPowerBarNamePlace))
 		castName:SetFontObject(layout.PlayerAltPowerBarNameFont)
@@ -1823,22 +1823,22 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 		castName:SetTextColor(unpack(layout.PlayerAltPowerBarNameColor))
 		self.AltPower.Name = castName
 	end
-	
+
 end
 
 UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	self.layout = layout
 	self.colors = Colors
 
-	self:SetSize(unpack(layout.Size)) 
-	self:Place(unpack(layout.Place)) 
+	self:SetSize(unpack(layout.Size))
+	self:Place(unpack(layout.Place))
 	self:SetHitRectInsets(unpack(layout.HitRectInsets))
 
 	-- frame to contain art backdrops, shadows, etc
 	local backdrop = self:CreateFrame("Frame")
 	backdrop:SetAllPoints()
 	backdrop:SetFrameLevel(self:GetFrameLevel())
-	
+
 	-- frame to contain bars, icons, etc
 	local content = self:CreateFrame("Frame")
 	content:SetAllPoints()
@@ -1849,24 +1849,24 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	overlay:SetAllPoints()
 	overlay:SetFrameLevel(self:GetFrameLevel() + 20)
 
-	-- Health 
+	-- Health
 	local health = content:CreateStatusBar()
-	health:SetOrientation(layout.HealthBarOrientation or "RIGHT") 
+	health:SetOrientation(layout.HealthBarOrientation or "RIGHT")
 	health:SetFlippedHorizontally(layout.HealthBarSetFlippedHorizontally)
 	health:SetFrameLevel(health:GetFrameLevel() + 2)
 	health:Place(unpack(layout.HealthPlace))
 	health:SetSmartSmoothing(true)
 	health.threatFeedbackUnit = "player"
 	health.colorThreat = layout.HealthColorThreat -- color non-friendly by threat
-	health.colorTapped = layout.HealthColorTapped  -- color tap denied units 
+	health.colorTapped = layout.HealthColorTapped  -- color tap denied units
 	health.colorDisconnected = layout.HealthColorDisconnected -- color disconnected units
-	health.colorClass = layout.HealthColorClass -- color players by class 
+	health.colorClass = layout.HealthColorClass -- color players by class
 	health.colorReaction = layout.HealthColorReaction -- color NPCs by their reaction standing with us
 	health.colorHealth = layout.HealthColorHealth -- color anything else in the default health color
 	health.frequent = layout.HealthFrequentUpdates -- listen to frequent health events for more accurate updates
 	self.Health = health
 	self.Health.PostUpdate = layout.CastBarPostUpdate
-	
+
 	local healthBgHolder = health:CreateFrame("Frame")
 	healthBgHolder:SetAllPoints()
 	healthBgHolder:SetFrameLevel(health:GetFrameLevel()-2)
@@ -1881,20 +1881,20 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 
 	if (IsRetail) then
 		local absorbVal = overlay:CreateFontString()
-		if layout.HealthAbsorbValuePlaceFunction then 
+		if layout.HealthAbsorbValuePlaceFunction then
 			absorbVal:SetPoint(layout.HealthAbsorbValuePlaceFunction(self))
-		else 
+		else
 			absorbVal:SetPoint(unpack(layout.HealthAbsorbValuePlace))
-		end 
+		end
 		absorbVal:SetDrawLayer(unpack(layout.HealthAbsorbValueDrawLayer))
 		absorbVal:SetJustifyH(layout.HealthAbsorbValueJustifyH)
 		absorbVal:SetJustifyV(layout.HealthAbsorbValueJustifyV)
 		absorbVal:SetFontObject(layout.HealthAbsorbValueFont)
 		absorbVal:SetTextColor(unpack(layout.HealthAbsorbValueColor))
-		self.Health.ValueAbsorb = absorbVal 
+		self.Health.ValueAbsorb = absorbVal
 	end
-	
-	-- Power 
+
+	-- Power
 	local power = overlay:CreateStatusBar()
 	power:SetSize(unpack(layout.PowerSize))
 	power:Place(unpack(layout.PowerPlace))
@@ -1905,11 +1905,11 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	power:SetSmoothingFrequency(layout.PowerBarSmoothingFrequency or .5) -- set the duration of the smoothing.
 	power:SetFlippedHorizontally(layout.PowerBarSetFlippedHorizontally)
 	power:SetSparkTexture(layout.PowerBarSparkTexture)
-	power.ignoredResource = layout.PowerIgnoredResource -- make the bar hide when MANA is the primary resource. 
+	power.ignoredResource = layout.PowerIgnoredResource -- make the bar hide when MANA is the primary resource.
 	power.showAlternate = layout.PowerShowAlternate -- use this bar for alt power as well
 	power.hideWhenEmpty = layout.PowerHideWhenEmpty -- hide the bar when it's empty
 	power.hideWhenDead = layout.PowerHideWhenDead -- hide the bar when the unit is dead
-	power.visibilityFilter = layout.PowerVisibilityFilter -- Use filters to decide what units to show for 
+	power.visibilityFilter = layout.PowerVisibilityFilter -- Use filters to decide what units to show for
 	power:SetAlpha(.75)
 	self.Power = power
 
@@ -1918,7 +1918,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	powerBg:SetSize(unpack(layout.PowerBackgroundSize))
 	powerBg:SetPoint(unpack(layout.PowerBackgroundPlace))
 	powerBg:SetTexture(layout.PowerBackgroundTexture)
-	powerBg:SetVertexColor(unpack(layout.PowerBackgroundColor)) 
+	powerBg:SetVertexColor(unpack(layout.PowerBackgroundColor))
 	powerBg:SetTexCoord(unpack(layout.PowerBackgroundTexCoord))
 	powerBg:SetIgnoreParentAlpha(true)
 	self.Power.Bg = powerBg
@@ -1938,11 +1938,11 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	cast:SetSize(unpack(layout.CastBarSize))
 	cast:SetFrameLevel(health:GetFrameLevel() + 1)
 	cast:Place(unpack(layout.CastBarPlace))
-	cast:SetOrientation(layout.CastBarOrientation) 
+	cast:SetOrientation(layout.CastBarOrientation)
 	cast:SetFlippedHorizontally(layout.CastBarSetFlippedHorizontally)
-	cast:SetSmoothingMode(layout.CastBarSmoothingMode) 
+	cast:SetSmoothingMode(layout.CastBarSmoothingMode)
 	cast:SetSmoothingFrequency(layout.CastBarSmoothingFrequency)
-	cast:SetStatusBarColor(unpack(layout.CastBarColor)) 
+	cast:SetStatusBarColor(unpack(layout.CastBarColor))
 	cast:SetSparkMap(layout.CastBarSparkMap) -- set the map the spark follows along the bar.
 	self.Cast = cast
 	self.Cast.PostUpdate = layout.CastBarPostUpdate
@@ -1969,7 +1969,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	-- Portrait
 	local portrait = backdrop:CreateFrame("PlayerModel")
 	portrait:SetPoint(unpack(layout.PortraitPlace))
-	portrait:SetSize(unpack(layout.PortraitSize)) 
+	portrait:SetSize(unpack(layout.PortraitSize))
 	portrait:SetAlpha(layout.PortraitAlpha)
 	portrait.distanceScale = layout.PortraitDistanceScale
 	portrait.positionX = layout.PortraitPositionX
@@ -1978,11 +1978,11 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	portrait.rotation = layout.PortraitRotation -- in degrees
 	portrait.showFallback2D = layout.PortraitShowFallback2D -- display 2D portraits when unit is out of range of 3D models
 	self.Portrait = portrait
-		
-	-- To allow the backdrop and overlay to remain 
-	-- visible even with no visible player model, 
-	-- we add them to our backdrop and overlay frames, 
-	-- not to the portrait frame itself.  
+
+	-- To allow the backdrop and overlay to remain
+	-- visible even with no visible player model,
+	-- we add them to our backdrop and overlay frames,
+	-- not to the portrait frame itself.
 	local portraitBg = backdrop:CreateTexture()
 	portraitBg:SetPoint(unpack(layout.PortraitBackgroundPlace))
 	portraitBg:SetSize(unpack(layout.PortraitBackgroundSize))
@@ -1993,7 +1993,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 
 	local portraitShade = content:CreateTexture()
 	portraitShade:SetPoint(unpack(layout.PortraitShadePlace))
-	portraitShade:SetSize(unpack(layout.PortraitShadeSize)) 
+	portraitShade:SetSize(unpack(layout.PortraitShadeSize))
 	portraitShade:SetTexture(layout.PortraitShadeTexture)
 	portraitShade:SetDrawLayer(unpack(layout.PortraitShadeDrawLayer))
 	self.Portrait.Shade = portraitShade
@@ -2005,12 +2005,12 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	self.Portrait.Fg = portraitFg
 
 	-- Threat
-	-----------------------------------------------------------	
+	-----------------------------------------------------------
 	local threat = {
 		fadeOut = layout.ThreatFadeOut,
 		feedbackUnit = "player",
 		hideSolo = layout.ThreatHideSolo,
-	
+
 		IsObjectType = function() end,
 		IsShown = function(element)
 			return element.health:IsShown()
@@ -2038,7 +2038,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	threatHealth:SetTexCoord(unpack(layout.ThreatHealthTexCoord))
 	threatHealth._owner = self.Health
 	threat.health = threatHealth
-		
+
 	local threatPortraitFrame = backdrop:CreateFrame("Frame")
 	threatPortraitFrame:SetFrameLevel(backdrop:GetFrameLevel())
 	threatPortraitFrame:SetAllPoints(self.Portrait)
@@ -2055,7 +2055,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	threatPortrait:SetAlpha(layout.ThreatPortraitAlpha)
 	threatPortrait._owner = self.Power
 	threat.portrait = threatPortrait
-	
+
 	self.Threat = threat
 
 	-- Unit Level
@@ -2068,9 +2068,9 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	level:SetFontObject(layout.LevelFont)
 	self.Level = level
 
-	-- Hide the level of capped (or higher) players and NPcs 
+	-- Hide the level of capped (or higher) players and NPcs
 	-- Doesn't affect high/unreadable level (??) creatures, as they will still get a skull.
-	level.hideCapped = layout.LevelHideCapped 
+	level.hideCapped = layout.LevelHideCapped
 
 	-- Hide the level of level 1's
 	level.hideFloored = layout.LevelHideFloored
@@ -2157,7 +2157,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	self.Targeted = {}
 
 	local prefix = "TargetIndicator"
-	if (IsLoveFestival) then 
+	if (IsLoveFestival) then
 		prefix = "Love"..prefix
 	end
 
@@ -2186,7 +2186,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	local auras = content:CreateFrame("Frame")
 	auras:Place(unpack(layout.AuraFramePlace))
 	auras:SetSize(unpack(layout.AuraFrameSize))
-	for property,value in pairs(layout.AuraProperties) do 
+	for property,value in pairs(layout.AuraProperties) do
 		auras[property] = value
 	end
 	self.Auras = auras
@@ -2218,7 +2218,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	healthVal:SetTextColor(unpack(layout.HealthValueColor))
 	self.Health.Value = healthVal
 
-	-- Health Percentage 
+	-- Health Percentage
 	local healthPerc = health:CreateFontString()
 	healthPerc:SetPoint(unpack(layout.HealthPercentPlace))
 	healthPerc:SetDrawLayer(unpack(layout.HealthPercentDrawLayer))
@@ -2248,7 +2248,7 @@ UnitStyles.StyleTargetFrame = function(self, unit, id, layout, ...)
 	self.PostUpdateTextures = layout.PostUpdateTextures
 	self:PostUpdateTextures()
 
-	if (layout.NamePostUpdateBecauseOfToT) then 
+	if (layout.NamePostUpdateBecauseOfToT) then
 		self:RegisterMessage("GP_UNITFRAME_TOT_VISIBLE", layout.NamePostUpdateBecauseOfToT)
 		self:RegisterMessage("GP_UNITFRAME_TOT_INVISIBLE", layout.NamePostUpdateBecauseOfToT)
 		self:RegisterMessage("GP_UNITFRAME_TOT_SHOWN", layout.NamePostUpdateBecauseOfToT)
@@ -2275,26 +2275,26 @@ end
 local fakeBossId, fakePartyId, fakeRaidId = 0, 0, 0, 0
 
 UnitStyles.StyleBossFrames = function(self, unit, id, layout, ...)
-	if (not id) then 
+	if (not id) then
 		fakeBossId = fakeBossId + 1
 		id = fakeBossId
-	end 
+	end
 	return StyleSmallFrame(self, unit, id, layout, ...)
 end
 
 UnitStyles.StylePartyFrames = function(self, unit, id, layout, ...)
-	if (not id) then 
+	if (not id) then
 		fakePartyId = fakePartyId + 1
 		id = fakePartyId
-	end 
+	end
 	return StylePartyFrame(self, unit, id, layout, ...)
 end
 
 UnitStyles.StyleRaidFrames = function(self, unit, id, layout, ...)
-	if (not id) then 
+	if (not id) then
 		fakeRaidId = fakeRaidId + 1
 		id = fakeRaidId
-	end 
+	end
 	return StyleRaidFrame(self, unit, id, layout, ...)
 end
 
@@ -2320,8 +2320,8 @@ UnitFramePlayer.OnInit = function(self)
 	end
 
 	-- How this is called:
-	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
-	self.frame = self:SpawnUnitFrame("player", "UICenter", UnitStyles.StylePlayerFrame, self.layout, self) 
+	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...)
+	self.frame = self:SpawnUnitFrame("player", "UICenter", UnitStyles.StylePlayerFrame, self.layout, self)
 	self:SpawnTempEnchantFrames()
 
 	-- Apply the aura filter
@@ -2331,7 +2331,7 @@ UnitFramePlayer.OnInit = function(self)
 		--auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
 		--auras.enableSpamMode = filterMode == "spam"
 		local auraFilterLevel = Core.db.auraFilterLevel
-		auras.enableSlackMode = Private.IsForcingSlackAuraFilterMode() or (auraFilterLevel == 1) or (auraFilterLevel == 2) 
+		auras.enableSlackMode = Private.IsForcingSlackAuraFilterMode() or (auraFilterLevel == 1) or (auraFilterLevel == 2)
 		auras.enableSpamMode = (auraFilterLevel == 2)
 		if (self.db.enableAuras) then
 			auras:ForceUpdate()
@@ -2378,7 +2378,7 @@ UnitFramePlayer.OnInit = function(self)
 
 	-- Create a secure proxy updater for the menu system
 	local callbackFrame = CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.Player_SecureCallback)
-end 
+end
 
 UnitFramePlayer.OnEnable = function(self)
 	if (not self.frame) then
@@ -2408,7 +2408,7 @@ UnitFramePlayer.OnEvent = function(self, event, ...)
 		else
 			self.frame:DisableAuras()
 		end
-	elseif (event == "PLAYER_LEVEL_UP") then 
+	elseif (event == "PLAYER_LEVEL_UP") then
 		local level = ...
 		if (level and (level ~= PlayerLevel)) then
 			PlayerLevel = level
@@ -2442,15 +2442,15 @@ local formatTime = function(time)
 		return "%.0f%s", math_ceil(time / HOUR), "h"
 	elseif (time > MINUTE) then -- more than a minute
 		return "%.0f%s", math_ceil(time / MINUTE), "m"
-	elseif (time > 5) then 
+	elseif (time > 5) then
 		return "%.0f", math_ceil(time)
-	elseif (time > .9) then 
+	elseif (time > .9) then
 		return "|cffff8800%.0f|r", math_ceil(time)
 	elseif (time > .05) then
 		return "|cffff0000%.0f|r", time*10 - time*10%1
 	else
 		return ""
-	end	
+	end
 end
 
 -- Temporary Weapon Enchants!
@@ -2465,7 +2465,7 @@ UnitFramePlayer.SpawnTempEnchantFrames = function(self)
 
 	-- Style them
 	for i,button in ipairs(self.tempEnchantButtons) do
-		
+
 		button:SetSize(30,30)
 		button:Place("BOTTOMLEFT", "UICenter", "BOTTOMLEFT", 20, 115 + (40*(i-1)))
 		button:SetAttribute("type", "cancelaura")
@@ -2505,7 +2505,7 @@ UnitFramePlayer.SpawnTempEnchantFrames = function(self)
 		-- MainHand, OffHand, Ranged = 16,17,18
 		button:SetID(i+15)
 
-		button.OnEnter = function(self) 
+		button.OnEnter = function(self)
 			if (GameTooltip:IsForbidden()) then
 				return
 			end
@@ -2514,14 +2514,14 @@ UnitFramePlayer.SpawnTempEnchantFrames = function(self)
 			GameTooltip:SetInventoryItem("player", self:GetID())
 		end
 
-		button.OnLeave = function(self) 
+		button.OnLeave = function(self)
 			if (GameTooltip:IsForbidden()) then
 				return
 			end
 			GameTooltip:Hide()
 		end
 
-		button.OnUpdate = function(self) 
+		button.OnUpdate = function(self)
 			if (GameTooltip:IsForbidden()) then
 				return
 			end
@@ -2540,7 +2540,7 @@ UnitFramePlayer.SpawnTempEnchantFrames = function(self)
 	self:RegisterEvent("UNIT_INVENTORY_CHANGED", "UpdateTempEnchantFrames")
 
 	local updateFrame = CreateFrame("Frame", nil, self.frame)
-	updateFrame:SetScript("OnUpdate", function(this, elapsed) 
+	updateFrame:SetScript("OnUpdate", function(this, elapsed)
 		this.elapsed = (this.elapsed or 0) - elapsed
 		if (this.elapsed < 0) then
 			this.elapsed = 0.1
@@ -2622,7 +2622,7 @@ UnitFramePlayerHUD.OnInit = function(self)
 	local callbackFrame = CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.HUD_SecureCallback)
 	callbackFrame.UpdateCastBar = function() self:UpdateCastBarVisibility(self:GetCastBarVisibility()) end
 	callbackFrame:SetAttribute("forceDisableClassPower", self:IsAddOnEnabled("SimpleClassPower"))
-end 
+end
 
 UnitFramePlayerHUD.OnEnable = function(self)
 	if (not self.frame) then
@@ -2637,8 +2637,9 @@ UnitFramePlayerHUD.OnEnable = function(self)
 	self:UpdateCastBarVisibility(self:GetCastBarVisibility())
 
 	-- Handle classpower visibility
+	-- *Why is this failing? 2022-05-05 issue #8
 	if (self.frame.ClassPower) then
-		if (not self.db.enableClassPower) or (self:IsAddOnEnabled("SimpleClassPower")) then 
+		if (not self.db.enableClassPower) or (self:IsAddOnEnabled("SimpleClassPower")) then
 			self.frame:DisableElement("ClassPower")
 		end
 	end
@@ -2657,20 +2658,29 @@ UnitFramePlayerHUD.OnEvent = function(self, event, ...)
 		end
 		shouldEnable = ((self.db.enableCast) and ((arg2 == "0") or (arg2 == 0) or (not arg2)))
 
-	elseif (event == "CVAR_UPDATE") then 
+	elseif (event == "CVAR_UPDATE") then
 		local arg1, arg2 = ...
 
 		-- Bail out for irrelevant cvar changes.
 		if (arg1 ~= "DISPLAY_PERSONAL_RESOURCE") then
 			return
-		end	
+		end
 
 		-- Check for event args, as the real CVar isn't updated yet.
 		shouldEnable = ((arg2 == "0") and (self.db.enableCast))
-	else 
+
+	else
+
+		-- Shouldn't in theory be needing this down here, yet...
+		if (event == "PLAYER_ENTERING_WORLD") then
+			if (self:IsAddOnEnabled("SimpleClassPower")) then
+				self.frame:DisableElement("ClassPower")
+			end
+		end
+
 		-- Use the standard check for other events.
 		shouldEnable = self:GetCastBarVisibility()
-	end 
+	end
 
 	-- Toggle the element.
 	self:UpdateCastBarVisibility(shouldEnable)
@@ -2705,7 +2715,7 @@ UnitFrameTarget.OnInit = function(self)
 	if (theme ~= "Azerite") then
 		return self:SetUserDisabled(true)
 	end
-	
+
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
 	if (not self.layout) then
@@ -2713,8 +2723,8 @@ UnitFrameTarget.OnInit = function(self)
 	end
 
 	-- How this is called:
-	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
-	self.frame = self:SpawnUnitFrame("target", "UICenter", UnitStyles.StyleTargetFrame, self.layout, self) 
+	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...)
+	self.frame = self:SpawnUnitFrame("target", "UICenter", UnitStyles.StyleTargetFrame, self.layout, self)
 
 	-- Apply the aura filter
 	local auras = self.frame.Auras
@@ -2723,7 +2733,7 @@ UnitFrameTarget.OnInit = function(self)
 		--auras.enableSlackMode = filterMode == "slack" or filterMode == "spam"
 		--auras.enableSpamMode = filterMode == "spam"
 		local auraFilterLevel = Core.db.auraFilterLevel
-		auras.enableSlackMode = Private.IsForcingSlackAuraFilterMode() or (auraFilterLevel == 1) or (auraFilterLevel == 2) 
+		auras.enableSlackMode = Private.IsForcingSlackAuraFilterMode() or (auraFilterLevel == 1) or (auraFilterLevel == 2)
 		auras.enableSpamMode = (auraFilterLevel == 2)
 		if (self.db.enableAuras) then
 			auras:ForceUpdate()
@@ -2750,7 +2760,7 @@ UnitFrameTarget.OnInit = function(self)
 	-- Create a secure proxy updater for the menu system
 	local callbackFrame = CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.Target_SecureCallback)
 
-end 
+end
 
 UnitFrameTarget.OnEnable = function(self)
 	if (not self.frame) then
@@ -2804,8 +2814,8 @@ if (UnitFrameFocus) then
 		end
 
 		-- How this is called:
-		-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
-		self.frame = self:SpawnUnitFrame("focus", "UICenter", UnitStyles.StyleFocusFrame, self.layout, self) 
+		-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...)
+		self.frame = self:SpawnUnitFrame("focus", "UICenter", UnitStyles.StyleFocusFrame, self.layout, self)
 	end
 end
 
@@ -2824,9 +2834,9 @@ UnitFramePet.OnInit = function(self)
 	end
 
 	-- How this is called:
-	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
-	self.frame = self:SpawnUnitFrame("pet", "UICenter", UnitStyles.StylePetFrame, self.layout, self) 
-end 
+	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...)
+	self.frame = self:SpawnUnitFrame("pet", "UICenter", UnitStyles.StylePetFrame, self.layout, self)
+end
 
 -----------------------------------------------------------
 -- Target of Target
@@ -2843,14 +2853,14 @@ UnitFrameToT.OnInit = function(self)
 	end
 
 	-- How this is called:
-	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...) 
-	self.frame = self:SpawnUnitFrame("targettarget", "UICenter", UnitStyles.StyleToTFrame, self.layout, self) 
+	-- local frame = self:SpawnUnitFrame(unit, parent, styleFunc, ...) -- styleFunc(frame, unit, id, ...)
+	self.frame = self:SpawnUnitFrame("targettarget", "UICenter", UnitStyles.StyleToTFrame, self.layout, self)
 
-	-- Our frame is sometimes hidden when the unit exists, 
+	-- Our frame is sometimes hidden when the unit exists,
 	-- so we're using this system to let other modules piggyback on this one's decisions.
 	self.frame:HookScript("OnShow", function(self) self:SendMessage("GP_UNITFRAME_TOT_SHOWN") end)
 	self.frame:HookScript("OnHide", function(self) self:SendMessage("GP_UNITFRAME_TOT_HIDDEN") end)
-end 
+end
 
 -----------------------------------------------------------
 -- Party
@@ -2872,25 +2882,25 @@ UnitFrameParty.OnInit = function(self)
 	self.frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame:SetSize(unpack(self.layout.Size))
 	self.frame:Place(unpack(self.layout.Place))
-	
+
 	self.frame.healerAnchor = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame.healerAnchor:SetSize(unpack(self.layout.Size))
-	self.frame.healerAnchor:Place(unpack(self.layout.AlternatePlace)) 
+	self.frame.healerAnchor:Place(unpack(self.layout.AlternatePlace))
 	self.frame:SetFrameRef("HealerModeAnchor", self.frame.healerAnchor)
 
 	self.frame:Execute(SECURE.FrameTable_Create)
 	self.frame:SetAttribute("useAlternateLayout", GetConfig(ADDON).enableHealerMode)
 	self.frame:SetAttribute("sortFrames", SECURE.Party_SortFrames:format(
-		self.layout.GroupAnchor, 
-		self.layout.GrowthX, 
-		self.layout.GrowthY, 
-		self.layout.AlternateGroupAnchor, 
-		self.layout.AlternateGrowthX, 
-		self.layout.AlternateGrowthY 
+		self.layout.GroupAnchor,
+		self.layout.GrowthX,
+		self.layout.GrowthY,
+		self.layout.AlternateGroupAnchor,
+		self.layout.AlternateGrowthX,
+		self.layout.AlternateGrowthY
 	))
 	self.frame:SetAttribute("_onattributechanged", SECURE.Party_OnAttribute)
 
-	-- Hide it in raids of 6 or more players 
+	-- Hide it in raids of 6 or more players
 	-- Use an attribute driver to do it so the normal unitframe visibility handler can remain unchanged
 	self.frame:SetAttribute("visDriver", dev and "[@player,exists]show;hide" or "[@raid6,exists]hide;[group]show;hide")
 	RegisterAttributeDriver(self.frame, "state-vis", self.db.enablePartyFrames and self.frame:GetAttribute("visDriver") or "hide")
@@ -2898,7 +2908,7 @@ UnitFrameParty.OnInit = function(self)
 	local style = function(frame, unit, id, _, ...)
 		return UnitStyles.StylePartyFrames(frame, unit, id, self.layout, ...)
 	end
-	for i = 1,4 do 
+	for i = 1,4 do
 		local frame = self:SpawnUnitFrame(dev and "player" or "party"..i, self.frame, style)
 
 		-- Reference the frame in Lua
@@ -2907,13 +2917,13 @@ UnitFrameParty.OnInit = function(self)
 		-- Reference the frame in the secure environment
 		self.frame:SetFrameRef("CurrentFrame", frame)
 		self.frame:Execute(SECURE.FrameTable_InsertCurrentFrame)
-	end 
+	end
 
 	self.frame:Execute(self.frame:GetAttribute("sortFrames"))
 
 	-- Create a secure proxy updater for the menu system
 	CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.Party_SecureCallback:format(visDriver))
-end 
+end
 
 -----------------------------------------------------------
 -- Raid
@@ -2924,7 +2934,7 @@ UnitFrameRaid.OnInit = function(self)
 		return self:SetUserDisabled(true)
 	end
 
-	local dev --= true 
+	local dev --= true
 
 	self.db = GetConfig(self:GetName())
 	self.layout = GetLayout(self:GetName())
@@ -2934,16 +2944,16 @@ UnitFrameRaid.OnInit = function(self)
 
 	self.frame = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame:SetSize(1,1)
-	self.frame:Place(unpack(self.layout.Place)) 
+	self.frame:Place(unpack(self.layout.Place))
 	self.frame.healerAnchor = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.frame.healerAnchor:SetSize(1,1)
-	self.frame.healerAnchor:Place(unpack(self.layout.AlternatePlace)) 
+	self.frame.healerAnchor:Place(unpack(self.layout.AlternatePlace))
 	self.frame:SetFrameRef("HealerModeAnchor", self.frame.healerAnchor)
 	self.frame:Execute(SECURE.FrameTable_Create)
 	self.frame:SetAttribute("useAlternateLayout", GetConfig(ADDON).enableHealerMode)
 	self.frame:SetAttribute("enableRaidFrames", self.db.enableRaidFrames)
 	self.frame:SetAttribute("sortFrames", SECURE.Raid_SortFrames:format(
-		self.layout.GroupSizeNormal, 
+		self.layout.GroupSizeNormal,
 		self.layout.GrowthXNormal,
 		self.layout.GrowthYNormal,
 		self.layout.GrowthYNormalHealerMode,
@@ -2952,8 +2962,8 @@ UnitFrameRaid.OnInit = function(self)
 		self.layout.GroupGrowthYNormalHealerMode,
 		self.layout.GroupColsNormal,
 		self.layout.GroupRowsNormal,
-		self.layout.GroupAnchorNormal, 
-		self.layout.GroupAnchorNormalHealerMode, 
+		self.layout.GroupAnchorNormal,
+		self.layout.GroupAnchorNormalHealerMode,
 
 		self.layout.GroupSizeEpic,
 		self.layout.GrowthXEpic,
@@ -2977,12 +2987,12 @@ UnitFrameRaid.OnInit = function(self)
 	local style = function(frame, unit, id, _, ...)
 		return UnitStyles.StyleRaidFrames(frame, unit, id, self.layout, ...)
 	end
-	for i = 1,40 do 
+	for i = 1,40 do
 		local frame = self:SpawnUnitFrame(dev and "player" or "raid"..i, self.frame, style)
 		self.frame[tostring(i)] = frame
 		self.frame:SetFrameRef("CurrentFrame", frame)
 		self.frame:Execute(SECURE.FrameTable_InsertCurrentFrame)
-	end 
+	end
 
 	-- Register the layout driver
 	RegisterAttributeDriver(self.frame, "state-layout", dev and "[@target,exists]epic;normal" or "[@raid26,exists]epic;normal")
@@ -2992,7 +3002,7 @@ UnitFrameRaid.OnInit = function(self)
 
 	-- Create a secure proxy updater for the menu system
 	CreateSecureCallbackFrame(self, self.frame, self.db, SECURE.Raid_SecureCallback)
-end 
+end
 
 -----------------------------------------------------------
 -- Boss
@@ -3014,7 +3024,7 @@ UnitFrameBoss.OnInit = function(self)
 	local style = function(frame, unit, id, _, ...)
 		return UnitStyles.StyleBossFrames(frame, unit, id, self.layout, ...)
 	end
-	for i = 1,5 do 
+	for i = 1,5 do
 		self.frame[tostring(i)] = self:SpawnUnitFrame("boss"..i, "UICenter", style)
-	end 
-end 
+	end
+end
