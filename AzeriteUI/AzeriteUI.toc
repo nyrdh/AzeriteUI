@@ -1,5 +1,5 @@
-## Interface: 90200
-## Interface-Retail: 90200
+## Interface: 90205
+## Interface-Retail: 90205
 ## Interface-Classic: 11402
 ## Interface-BCC: 20504
 
@@ -47,7 +47,7 @@ front-end\locale\ptBR.lua
 front-end\locale\ptPT.lua
 front-end\locale\ruRU.lua
 front-end\locale\zhCN.lua
-front-end\locale\zhTW.lua  
+front-end\locale\zhTW.lua
 
 # Addon API, configs and user defaults.
 front-end\config\api.lua
@@ -59,13 +59,13 @@ front-end\config\defaults.lua
 # A dying town.
 tinkertown\tinkertown.xml
 
-# Core module and addon menu. 
+# Core module and addon menu.
 front-end\core\root.lua
 front-end\core\gui.lua
 
 # Blizzard Modules.
-# These are modifications, not additions, 
-# as the game most commonly won't allow us to replace them. 
+# These are modifications, not additions,
+# as the game most commonly won't allow us to replace them.
 front-end\modules\blizzard\blizzard-bags.lua
 front-end\modules\blizzard\blizzard-chatbubbles.lua
 front-end\modules\blizzard\blizzard-chatwindows.lua
