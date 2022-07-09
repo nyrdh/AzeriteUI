@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.539-Release] 2022-07-09
+- Bump for Classic Era client patch 1.14.3.
+
 ## [3.2.538-Release] 2022-05-31
 - Bump toc to WoW client patch 9.2.5.
 
