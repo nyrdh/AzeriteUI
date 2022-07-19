@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
-if (not Core) then 
-	return 
+if (not Core) then
+	return
 end
 
 local Module = Core:NewModule("BlizzardFloaterHUD", "LOW", "LibMessage", "LibEvent", "LibFrame", "LibTooltip", "LibDB", "LibBlizzard", "LibSound")
@@ -47,17 +47,17 @@ local blackList = {
 		[LE_GAME_ERR_OUT_OF_ENERGY] = true
 	},
 	[ ERR_ABILITY_COOLDOWN ] = true, 						-- Ability is not ready yet.
-	[ ERR_ATTACK_CHARMED ] = true, 							-- Can't attack while charmed. 
+	[ ERR_ATTACK_CHARMED ] = true, 							-- Can't attack while charmed.
 	[ ERR_ATTACK_CONFUSED ] = true, 						-- Can't attack while confused.
-	[ ERR_ATTACK_DEAD ] = true, 							-- Can't attack while dead. 
-	[ ERR_ATTACK_FLEEING ] = true, 							-- Can't attack while fleeing. 
-	[ ERR_ATTACK_PACIFIED ] = true, 						-- Can't attack while pacified. 
+	[ ERR_ATTACK_DEAD ] = true, 							-- Can't attack while dead.
+	[ ERR_ATTACK_FLEEING ] = true, 							-- Can't attack while fleeing.
+	[ ERR_ATTACK_PACIFIED ] = true, 						-- Can't attack while pacified.
 	[ ERR_ATTACK_STUNNED ] = true, 							-- Can't attack while stunned.
 	[ ERR_AUTOFOLLOW_TOO_FAR ] = true, 						-- Target is too far away.
 	[ ERR_BADATTACKFACING ] = true, 						-- You are facing the wrong way!
 	[ ERR_BADATTACKPOS ] = true, 							-- You are too far away!
 	[ ERR_CLIENT_LOCKED_OUT ] = true, 						-- You can't do that right now.
-	[ ERR_ITEM_COOLDOWN ] = true, 							-- Item is not ready yet. 
+	[ ERR_ITEM_COOLDOWN ] = true, 							-- Item is not ready yet.
 	[ ERR_OUT_OF_ENERGY ] = true, 							-- Not enough energy
 	[ ERR_OUT_OF_FOCUS ] = true, 							-- Not enough focus
 	[ ERR_OUT_OF_HEALTH ] = true, 							-- Not enough health
@@ -97,15 +97,15 @@ local DisableTexture = function(texture, _, loop)
 	texture:SetAlpha(0)
 end
 
-local ResetPoint = function(object, _, anchor) 
+local ResetPoint = function(object, _, anchor)
 	local holder = object and HolderCache[object]
-	if (holder) then 
+	if (holder) then
 		if (anchor ~= holder) then
 			Frame_SetParent(object, holder)
 			Frame_ClearAllPoints(object)
 			Frame_SetPoint(object, "CENTER", holder, "CENTER", 0, 0)
 		end
-	end 
+	end
 end
 
 local GetHolder = function(object, ...)
@@ -130,11 +130,11 @@ local CreatePointHook = function(object)
 	ResetPoint(object)
 
 	-- Don't create multiple hooks
-	if (not FrameCache[object]) then 
+	if (not FrameCache[object]) then
 		hooksecurefunc(object, "SetPoint", ResetPoint)
 		FrameCache[object] = true
 	end
-end 
+end
 
 -- Callbacks
 ----------------------------------------------------
@@ -206,9 +206,9 @@ end
 local AlertFrame_PostUpdateAnchors = function()
 	local layout = Module.layout
 	local holder
-	if (TalkingHeadFrame and Frame_IsShown(TalkingHeadFrame)) then 
+	if (TalkingHeadFrame and Frame_IsShown(TalkingHeadFrame)) then
 		holder = GetHolder(AlertFrame, unpack(layout.AlertFramesPlaceTalkingHead))
-	else 
+	else
 		holder = GetHolder(AlertFrame, unpack(layout.AlertFramesPlace))
 	end
 	AlertFrame:ClearAllPoints()
@@ -223,7 +223,7 @@ end
 -- Updates
 ----------------------------------------------------
 Module.UpdateAlertFrames = function(self)
-	if (self.db.enableAlerts) then 
+	if (self.db.enableAlerts) then
 		self:EnableUIWidget("Alerts")
 		self:HandleAlertFrames()
 	else
@@ -238,10 +238,10 @@ Module.UpdateTalkingHead = function(self, event, ...)
 			return
 		end
 		self:UnregisterEvent("ADDON_LOADED", "UpdateTalkingHead")
-	end 
+	end
 	local frame = TalkingHeadFrame
-	if (self.db.enableTalkingHead) then 
-		if (frame) then 
+	if (self.db.enableTalkingHead) then
+		if (frame) then
 			self:EnableUIWidget("TalkingHead")
 			self:HandleTalkingHeadFrame()
 		else
@@ -249,7 +249,7 @@ Module.UpdateTalkingHead = function(self, event, ...)
 			return self:RegisterEvent("ADDON_LOADED", "UpdateTalkingHead")
 		end
 	else
-		if (frame) then 
+		if (frame) then
 			self:DisableUIWidget("TalkingHead")
 		else
 			-- If no frame is found, the addon hasn't been loaded yet,
@@ -329,14 +329,16 @@ Module.HandleAlertFrames = function(self)
 	lootFrame.ignoreFramePositionManager = true
 	alertFrame.ignoreFramePositionManager = true
 
-	UIPARENT_MANAGED_FRAME_POSITIONS["GroupLootContainer"] = nil
+	if (UIPARENT_MANAGED_FRAME_POSITIONS) then
+		UIPARENT_MANAGED_FRAME_POSITIONS["GroupLootContainer"] = nil
+	end
 
 	for _,subSystem in ipairs(alertFrame.alertFrameSubSystems) do
 		AlertSubSystem_AdjustPosition(alertFrame, subSystem)
 	end
 
 	-- Only ever do this once
-	if (not FrameCache[alertFrame]) then 
+	if (not FrameCache[alertFrame]) then
 		hooksecurefunc(alertFrame, "AddAlertFrameSubSystem", AlertSubSystem_AdjustPosition) -- catch stuff made by other addons too.
 		hooksecurefunc(alertFrame, "UpdateAnchors", AlertFrame_PostUpdateAnchors)
 		hooksecurefunc("GroupLootContainer_Update", GroupLootContainer_PostUpdate)
@@ -377,17 +379,17 @@ Module.HandleBelowMinimapWidgets = function(self)
 		bmHolder:Place("BOTTOM", Minimap, "TOP", 4, 60)
 	elseif (layoutID == "Legacy") then
 
-		-- 2021-01-26: 
-		-- In some Shadowlands raid fights, 
-		-- this will be visible at the same time as the boss frames. 
-		-- So we can't have it appear at the same spot AS the boss frames. 
+		-- 2021-01-26:
+		-- In some Shadowlands raid fights,
+		-- this will be visible at the same time as the boss frames.
+		-- So we can't have it appear at the same spot AS the boss frames.
 		local posDriver = CreateFrame("Frame", nil, UIParent, "SecureHandlerAttributeTemplate")
-		posDriver.EnableBoss = function(self) 
-			-- This hardcoded position should make the bottom center of this widget, 
+		posDriver.EnableBoss = function(self)
+			-- This hardcoded position should make the bottom center of this widget,
 			-- be placed roughly at a position matching the horizontal center of the legacy Minimap.
 			bmHolder:Place("BOTTOM", "UICenter", "BOTTOMRIGHT", -(210/2 + 60 + 4), 60)
 		end
-		posDriver.DisableBoss = function(self) 
+		posDriver.DisableBoss = function(self)
 			bmHolder:Place("TOP", Minimap, "BOTTOM", 0, -70)
 		end
 		posDriver:SetAttribute("_onattributechanged", [=[
@@ -416,7 +418,7 @@ Module.HandleBelowMinimapWidgets = function(self)
 
 	hooksecurefunc(bmContainer, "SetPoint", function(self, _, anchor)
 		if (anchor) and (anchor ~= bmHolder) then
-			local point = (layoutID == "Azerite") and "BOTTOM" or "TOP" 
+			local point = (layoutID == "Azerite") and "BOTTOM" or "TOP"
 			self:SetParent(bmHolder)
 			self:ClearAllPoints()
 			self:SetPoint(point, bmHolder, point)
@@ -437,7 +439,7 @@ Module.HandleErrorFrame = function(self)
 
 	self:RegisterEvent("UI_ERROR_MESSAGE", "OnEvent")
 	self:RegisterEvent("UI_INFO_MESSAGE", "OnEvent")
-end 
+end
 
 Module.HandleQuestTimerFrame = function(self)
 
@@ -451,7 +453,7 @@ Module.HandleQuestTimerFrame = function(self)
 	QuestTimerFrame:SetIgnoreParentScale(true)
 	QuestTimerFrame:SetScale(768/1080)
 	QuestTimerFrame:SetPoint("TOPRIGHT", QuestTimerFrameHolder, "TOPRIGHT", 0, 0)
-	
+
 	hooksecurefunc(QuestTimerFrame, "SetPoint", function(self, point, anchor)
 		if (anchor ~= QuestTimerFrameHolder) then
 			QuestTimerFrame:ClearAllPoints()
@@ -481,7 +483,7 @@ Module.HandleTalkingHeadFrame = function(self)
 		end
 	end
 	-- Only ever do this once
-	if (not FrameCache[frame]) then 
+	if (not FrameCache[frame]) then
 		frame:HookScript("OnShow", AlertFrame_PostUpdateAnchors)
 		frame:HookScript("OnHide", AlertFrame_PostUpdateAnchors)
 		FrameCache[frame] = true
@@ -495,21 +497,23 @@ Module.HandleArcheologyDigsiteProgressBar = function(self)
 		GetHolder(ArcheologyDigsiteProgressBar, unpack(layout.ArcheologyDigsiteProgressBarPlace))
 		CreatePointHook(ArcheologyDigsiteProgressBar)
 
-		UIPARENT_MANAGED_FRAME_POSITIONS.ArcheologyDigsiteProgressBar = nil
+		if (UIPARENT_MANAGED_FRAME_POSITIONS) then
+			UIPARENT_MANAGED_FRAME_POSITIONS.ArcheologyDigsiteProgressBar = nil
+		end
 	end
 end
 
 Module.HandleVehicleSeatIndicator = function(self)
 	local layout = self.layout
 
-	if (self:IsAddOnEnabled("Mappy")) then 
+	if (self:IsAddOnEnabled("Mappy")) then
 		VehicleSeatIndicator.Mappy_DidHook = true -- set the flag indicating its already been set up for Mappy
 		VehicleSeatIndicator.Mappy_SetPoint = function() end -- kill the IsVisible reference Mappy makes
 		VehicleSeatIndicator.Mappy_HookedSetPoint = function() end -- kill this too
 		VehicleSeatIndicator.SetPoint = nil -- return the SetPoint method to its original metamethod
 		VehicleSeatIndicator.ClearAllPoints = nil -- return the SetPoint method to its original metamethod
-	end 
-	
+	end
+
 	GetHolder(VehicleSeatIndicator, unpack(layout.VehicleSeatIndicatorPlace))
 	CreatePointHook(VehicleSeatIndicator)
 
@@ -556,11 +560,11 @@ end
 -- Startup & Init
 ----------------------------------------------------
 Module.OnEvent = function(self, event, ...)
-	if (event == "UI_ERROR_MESSAGE") then 
+	if (event == "UI_ERROR_MESSAGE") then
 		local messageType, msg = ...
-		if (not msg) or (blackList.msgTypes[messageType]) or (blackList[msg]) then 
-			return 
-		end 
+		if (not msg) or (blackList.msgTypes[messageType]) or (blackList[msg]) then
+			return
+		end
 		self.UIErrorsFrame:AddMessage(msg, 1, 0, 0, 1)
 
 		-- Play an error sound if the appropriate cvars allows it.
@@ -568,11 +572,11 @@ Module.OnEvent = function(self, event, ...)
 			self:PlayVocalErrorByMessageType(messageType)
 		end
 
-	elseif (event == "UI_INFO_MESSAGE") then 
+	elseif (event == "UI_INFO_MESSAGE") then
 		local messageType, msg = ...
-		if (not msg) then 
-			return 
-		end 
+		if (not msg) then
+			return
+		end
 		self.UIErrorsFrame:AddMessage(msg, 1, .82, 0, 1)
 	end
 end
@@ -592,37 +596,37 @@ Module.OnInit = function(self)
 		callbackFrame:AssignProxyMethods("UpdateAlertFrames", "UpdateAnnouncements", "UpdateObjectivesTracker", "UpdateTalkingHead", "UpdateWarnings")
 		callbackFrame:AssignSettings(self.db)
 		callbackFrame:AssignCallback([=[
-			if (name) then 
-				name = string.lower(name); 
-				if (name == "change-enabletalkinghead") then 
-					self:SetAttribute("enableTalkingHead", value); 
-					self:CallMethod("UpdateTalkingHead"); 
+			if (name) then
+				name = string.lower(name);
+				if (name == "change-enabletalkinghead") then
+					self:SetAttribute("enableTalkingHead", value);
+					self:CallMethod("UpdateTalkingHead");
 
-				elseif (name == "change-enablealerts") then 
-					self:SetAttribute("enableAlerts", value); 
-					self:CallMethod("UpdateAlertFrames"); 
+				elseif (name == "change-enablealerts") then
+					self:SetAttribute("enableAlerts", value);
+					self:CallMethod("UpdateAlertFrames");
 
-				elseif (name == "change-enableannouncements") then 
-					self:SetAttribute("enableAnnouncements", value); 
-					self:CallMethod("UpdateAnnouncements"); 
+				elseif (name == "change-enableannouncements") then
+					self:SetAttribute("enableAnnouncements", value);
+					self:CallMethod("UpdateAnnouncements");
 
-				elseif (name == "change-enableraidwarnings") then 
-					self:SetAttribute("enableRaidWarnings", value); 
-					self:CallMethod("UpdateWarnings"); 
+				elseif (name == "change-enableraidwarnings") then
+					self:SetAttribute("enableRaidWarnings", value);
+					self:CallMethod("UpdateWarnings");
 
-				elseif (name == "change-enableraidbossemotes") then 
-					self:SetAttribute("enableRaidBossEmotes", value); 
-					self:CallMethod("UpdateWarnings"); 
+				elseif (name == "change-enableraidbossemotes") then
+					self:SetAttribute("enableRaidBossEmotes", value);
+					self:CallMethod("UpdateWarnings");
 
-				elseif (name == "change-enableobjectivestracker") then 
-					self:SetAttribute("enableObjectivesTracker", value); 
-					self:CallMethod("UpdateObjectivesTracker"); 
-				end 
-			end 
+				elseif (name == "change-enableobjectivestracker") then
+					self:SetAttribute("enableObjectivesTracker", value);
+					self:CallMethod("UpdateObjectivesTracker");
+				end
+			end
 		]=])
 	end
 
-end 
+end
 
 Module.OnEnable = function(self)
 	self:HandleErrorFrame()
@@ -635,9 +639,9 @@ Module.OnEnable = function(self)
 			self:HandleArcheologyDigsiteProgressBar()
 		else
 			local fix
-			fix = function(self, event, addon) 
+			fix = function(self, event, addon)
 				if (addon == "Blizzard_ArchaeologyUI") then
-					self:UnregisterEvent("ADDON_LOADED", fix)	
+					self:UnregisterEvent("ADDON_LOADED", fix)
 					self:HandleArcheologyDigsiteProgressBar()
 				end
 			end

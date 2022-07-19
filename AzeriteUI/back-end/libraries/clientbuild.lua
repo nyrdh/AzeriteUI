@@ -1,4 +1,4 @@
-local LibClientBuild = Wheel:Set("LibClientBuild", 44)
+local LibClientBuild = Wheel:Set("LibClientBuild", 45)
 if (not LibClientBuild) then
 	return
 end
@@ -27,6 +27,7 @@ IsTBC = tonumber(MAJOR) == 2
 IsRetail = tonumber(MAJOR) >= 9
 IsRetailBFA = tonumber(MAJOR) == 8
 IsRetailShadowlands = tonumber(MAJOR) == 9
+IsRetailDragonflight = tonumber(MAJOR) == 10
 
 local builds = {}
 
@@ -49,7 +50,7 @@ builds["9.0.5"] 	= 37988
 
 -- Metas
 builds["Classic"] 	= builds["1.13.7"]
-builds["TBC"] 	= builds["2.5.1"]
+builds["TBC"] 		= builds["2.5.1"]
 builds["Retail"] 	= builds["8.3.0"]
 
 -- Returns true if we're on a classic patch
@@ -77,11 +78,16 @@ LibClientBuild.IsRetailShadowlands = function(self)
 	return IsRetailShadowlands
 end
 
+-- Returns true if we're on a retail Dragonflight patch
+LibClientBuild.IsRetailDragonflight = function(self)
+	return IsRetailDragonflight
+end
+
 -- Return the build number for a given patch.
 -- Return current build if the given patch is the current. EXPERIMENTAL!
 LibClientBuild.GetClientBuildByPatch = function(self, patch)
 	return (currentClientPatch == patch) and currentClientBuild or builds[patch]
-end 
+end
 
 LibClientBuild.GetCurrentClientPatch = function(self)
 	return currentClientPatch
@@ -90,7 +96,7 @@ end
 -- Return the current WoW client build
 LibClientBuild.GetCurrentClientBuild = function(self)
 	return currentClientBuild
-end 
+end
 
 -- Module embedding
 local embedMethods = {
@@ -99,6 +105,7 @@ local embedMethods = {
 	IsRetail = true,
 	IsRetailBFA = true,
 	IsRetailShadowlands = true,
+	IsRetailDragonflight = true,
 	GetClientBuildByPatch = true,
 	GetCurrentClientBuild = true,
 	GetCurrentClientPatch = true

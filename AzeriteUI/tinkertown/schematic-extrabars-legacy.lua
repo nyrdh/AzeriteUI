@@ -33,17 +33,17 @@ local IsRetail = Private.IsRetail
 -----------------------------------------------------------
 local OnUpdate = function(button)
 	local spellID = button.currentSpellID or button.spellID or button.baseSpellID
-	if (spellID) then 
+	if (spellID) then
 		local tooltip = Private:GetFloaterTooltip()
 		tooltip:SetDefaultAnchor(button)
 		tooltip:SetSpellByID(spellID)
 	else
-		if (button.action) and (HasAction(button.action)) then 
+		if (button.action) and (HasAction(button.action)) then
 			local tooltip = Private:GetFloaterTooltip()
 			tooltip:SetDefaultAnchor(button)
 			tooltip:SetAction(button.action)
-		end 
-	end 
+		end
+	end
 end
 
 local OnEnter = function(button)
@@ -56,7 +56,7 @@ local OnLeave = function(button)
 	Private:GetFloaterTooltip():Hide()
 end
 
--- Write this in a manner so that it checks for exisiting elements, 
+-- Write this in a manner so that it checks for exisiting elements,
 -- and thus can be run multiple times without creating cloned elements.
 local StripNStyle = function(button)
 
@@ -68,18 +68,18 @@ local StripNStyle = function(button)
 		button.style:SetAlpha(0) -- Extra
 	end
 
-	-- Original Extra and zone icons. 
+	-- Original Extra and zone icons.
 	if (button.icon or button.Icon) then
 		(button.icon or button.Icon):SetAlpha(0)
 	end
 
 	-- Zone Ability Border
 	if (button.NormalTexture) then
-		button.NormalTexture:SetAlpha(0) 
+		button.NormalTexture:SetAlpha(0)
 	end
 
 	-- Different names, but both have it.
-	local cooldown = button.cooldown or button.Cooldown 
+	local cooldown = button.cooldown or button.Cooldown
 	if (cooldown) then
 		cooldown:SetSize(40,40)
 		cooldown:ClearAllPoints()
@@ -87,15 +87,15 @@ local StripNStyle = function(button)
 		cooldown:SetSwipeTexture(GetMedia("actionbutton-mask-square-rounded"))
 		cooldown:SetSwipeColor(0, 0, 0, .75)
 		cooldown:SetDrawSwipe(true)
-		cooldown:SetBlingTexture(GetMedia("blank"), 0, 0, 0 , 0) 
+		cooldown:SetBlingTexture(GetMedia("blank"), 0, 0, 0 , 0)
 		cooldown:SetDrawBling(true)
 
 		-- Attempting to fix the issue with too opaque swipe textures
 		if (not cooldown.GPSwipe) then
-			cooldown.GPSwipe = function() 
+			cooldown.GPSwipe = function()
 				cooldown:SetSwipeColor(0, 0, 0, .75)
 				cooldown:SetDrawSwipe(true)
-				cooldown:SetBlingTexture(GetMedia("blank"), 0, 0, 0 , 0) 
+				cooldown:SetBlingTexture(GetMedia("blank"), 0, 0, 0 , 0)
 				cooldown:SetDrawBling(true)
 			end
 			cooldown:HookScript("OnShow", cooldown.GPSwipe)
@@ -103,7 +103,7 @@ local StripNStyle = function(button)
 	end
 
 	-- Spell charges.
-	local count = button.Count 
+	local count = button.Count
 	if (count) then
 		count:ClearAllPoints()
 		count:SetPoint("BOTTOMRIGHT", -6, 6)
@@ -111,15 +111,15 @@ local StripNStyle = function(button)
 		count:SetJustifyH("RIGHT")
 		count:SetJustifyV("BOTTOM")
 	end
-	
+
 	-- Only the ExtraButtons have this
-	local flash = button.Flash 
+	local flash = button.Flash
 	if (flash) then
 		flash:SetTexture(nil)
 	end
 
 	-- Only the first ExtraButton have this
-	local keybind = button.HotKey 
+	local keybind = button.HotKey
 	if (keybind) then
 		keybind:ClearAllPoints()
 		keybind:SetPoint("TOPLEFT", 5, -5)
@@ -132,7 +132,7 @@ local StripNStyle = function(button)
 		keybind:SetText(GetBindingKey(button:GetName()))
 	end
 
-	-- Only the ExtraButtons are checkbuttons, 
+	-- Only the ExtraButtons are checkbuttons,
 	if (button:GetObjectType() == "CheckButton") then
 		if (not button.GPChecked) then
 			button:GetCheckedTexture():SetTexture(nil)
@@ -147,8 +147,8 @@ local StripNStyle = function(button)
 		end
 	end
 
-	-- This crazy stunt is needed to be able  
-	-- to set a mask at all on the Extra buttons. 
+	-- This crazy stunt is needed to be able
+	-- to set a mask at all on the Extra buttons.
 	-- I honestly have no idea why. Somebody tell me?
 	if (not button.GPIcon) then
 		local blizzicon = button.icon or button.Icon
@@ -164,7 +164,7 @@ local StripNStyle = function(button)
 		hooksecurefunc(blizzicon, "Show", button.UpdateGPIcon)
 	end
 
-	if (not button.GPHighlight) then 
+	if (not button.GPHighlight) then
 		button:GetHighlightTexture():SetTexture(nil)
 
 		local highlightTexture = button:CreateTexture()
@@ -177,7 +177,7 @@ local StripNStyle = function(button)
 		button:SetHighlightTexture(highlightTexture)
 	end
 
-	if (not button.GPBorder) then 
+	if (not button.GPBorder) then
 		local border = button.scaffold:CreateFrame("Frame")
 		border:SetBackdrop({ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 24 })
 		border:SetBackdropBorderColor(Colors.ui[1], Colors.ui[2], Colors.ui[3], 1)
@@ -199,23 +199,23 @@ local StripNStyle = function(button)
 				icon:SetDrawLayer("BACKGROUND", -1)
 			end
 
-			local cooldown = button.cooldown or button.Cooldown  
+			local cooldown = button.cooldown or button.Cooldown
 			if (cooldown) then
 				cooldown:SetFrameStrata(button:GetFrameStrata())
 				cooldown:SetFrameLevel(button:GetFrameLevel() + 5)
 				cooldown:SetSwipeColor(0, 0, 0, .75)
 				cooldown:SetDrawSwipe(true)
-				cooldown:SetBlingTexture(GetMedia("blank"), 0, 0, 0 , 0) 
+				cooldown:SetBlingTexture(GetMedia("blank"), 0, 0, 0 , 0)
 				cooldown:SetDrawBling(true)
 			end
 
-			local keybind = button.HotKey 
+			local keybind = button.HotKey
 			if (keybind) then
 				keybind:SetParent(border)
 				keybind:SetDrawLayer("OVERLAY", 3)
 			end
 
-			local count = button.Count 
+			local count = button.Count
 			if (count) then
 				count:SetParent(border)
 				count:SetDrawLayer("OVERLAY", 4)
@@ -245,7 +245,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 				{
 					-- The 'values' sections assigns values and methods
 					-- to the self object, which in this case is the module.
-					-- Nothing actually happens here, but this is where 
+					-- Nothing actually happens here, but this is where
 					-- we define everything the module needs in advance.
 					values = {
 						"ExtraButtons", {},
@@ -260,13 +260,13 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 							extraScaffold:Place("BOTTOM", -150, 300)
 							extraScaffold:SetSize(64,64)
 							self.extraScaffold = extraScaffold
-						
+
 							local zoneScaffold = self:CreateFrame("Frame", nil, "UICenter")
 							zoneScaffold:SetFrameStrata("LOW")
 							zoneScaffold:Place("BOTTOM", 150, 300)
 							zoneScaffold:SetSize(64,64)
 							self.zoneScaffold = zoneScaffold
-						
+
 						end,
 
 						-- One-time method to take control of the buttons,
@@ -276,7 +276,10 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 							local ExtraActionBarFrame = ExtraActionBarFrame
 							local ZoneAbilityFrame = ZoneAbilityFrame
 
-							UIPARENT_MANAGED_FRAME_POSITIONS.ExtraAbilityContainer = nil
+							if (UIPARENT_MANAGED_FRAME_POSITIONS) then
+								UIPARENT_MANAGED_FRAME_POSITIONS.ExtraAbilityContainer = nil
+							end
+
 							ExtraAbilityContainer.SetSize = function() end
 							ExtraAbilityContainer:SetFrameStrata("LOW")
 							ExtraActionBarFrame:SetParent(self.extraScaffold)
@@ -285,7 +288,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 							ExtraActionBarFrame:EnableMouse(false)
 							ExtraActionBarFrame.ignoreInLayout = true
 							ExtraActionBarFrame.ignoreFramePositionManager = true
-						
+
 							ZoneAbilityFrame.SpellButtonContainer.holder = self.zoneScaffold
 							ZoneAbilityFrame.SpellButtonContainer:SetFrameStrata("LOW")
 							ZoneAbilityFrame:SetParent(self.zoneScaffold)
@@ -312,14 +315,14 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 
 								-- Give the button access to its scaffold
 								button.scaffold = self.extraScaffold
-								
-								-- Unified styling method for the buttons 
+
+								-- Unified styling method for the buttons
 								StripNStyle(button)
 
 								-- Cache it
 								self.StyleCache[button] = true
 								self.ExtraButtons[#self.ExtraButtons + 1] = button
-								
+
 								-- Keep looking for more buttons.
 								i = i + 1
 								button = _G["ExtraActionButton"..i]
@@ -340,7 +343,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 									-- Give the button access to its scaffold
 									button.scaffold = self.zoneScaffold
 
-									-- Unified styling method for the buttons 
+									-- Unified styling method for the buttons
 									StripNStyle(button)
 								end
 							end
@@ -353,10 +356,10 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 								end
 							end
 						end
-						
+
 					},
 					-- The 'chain' sections performs methods on the module,
-					-- and passes the unpacked arguments in the tables 
+					-- and passes the unpacked arguments in the tables
 					-- to those methods. An empty table means no arguments.
 					-- Here we can call methods created in previously defined
 					-- 'values' sections.
@@ -374,7 +377,7 @@ Private.RegisterSchematic("ModuleForge::ExtraBars", "Legacy", {
 			methods = {
 				{
 					-- The 'chain' sections performs methods on the module,
-					-- and passes the unpacked arguments in the tables 
+					-- and passes the unpacked arguments in the tables
 					-- to those methods. An empty table means no arguments.
 					-- Here we can call methods created in previously defined
 					-- 'values' sections.

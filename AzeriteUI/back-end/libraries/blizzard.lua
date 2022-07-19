@@ -1,5 +1,5 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 103)
-if (not LibBlizzard) then 
+local LibBlizzard = Wheel:Set("LibBlizzard", 106)
+if (not LibBlizzard) then
 	return
 end
 
@@ -55,6 +55,7 @@ local UIParent = UIParent
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
+local IsDragonflight = LibClientBuild:IsRetailDragonflight()
 
 LibBlizzard.embeds = LibBlizzard.embeds or {}
 LibBlizzard.queue = LibBlizzard.queue or {}
@@ -82,12 +83,12 @@ local UIWidgetDependency = {} -- Dependencies, applies to all
 
 -- Utility Functions
 -----------------------------------------------------------------
--- Syntax check 
+-- Syntax check
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if type(value) == select(i, ...) then 
-			return 
+		if type(value) == select(i, ...) then
+			return
 		end
 	end
 	local types = string_join(", ", ...)
@@ -95,8 +96,8 @@ local check = function(value, num, ...)
 	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
--- Proxy function to retrieve the actual frame whether 
--- the input is a frame or a global frame name 
+-- Proxy function to retrieve the actual frame whether
+-- the input is a frame or a global frame name
 local getFrame = function(baseName)
 	if (type(baseName) == "string") then
 		return _G[baseName]
@@ -172,6 +173,42 @@ local killUnitFrame = function(baseName, keepParent, keepEvents, keepVisible)
 	end
 end
 
+local handleActionBar = function(frame, clearEvents, reanchor, noAnchorChanges)
+	if (frame) then
+		if (clearEvents) then
+			frame:UnregisterAllEvents()
+		end
+		frame:Hide()
+		frame:SetParent(UIHider)
+
+		-- Setup faux anchors so the frame position data returns valid
+		if (reanchor) and (not noAnchorChanges) then
+			local left, right, top, bottom = frame:GetLeft(), frame:GetRight(), frame:GetTop(), frame:GetBottom()
+			frame:ClearAllPoints()
+			if (left) and (right) and (top) and (bottom) then
+				frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, top)
+				frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", right, bottom)
+			else
+				frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", 10, 10)
+				frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", 20, 20)
+			end
+		elseif (not noAnchorChanges) then
+			frame:ClearAllPoints()
+		end
+	end
+end
+
+-- Removes a frame from the Dragonflight layout system
+local handleManagedFrame = function(frame)
+	if (frame and frame.layoutParent) then
+		frame:SetScript("OnShow", nil) -- prevents the frame from being added
+		frame:OnHide() -- calls the script to remove the frame
+		-- The following is called by the method above,
+		-- with a little luck, this will be true for all managed frames.
+		--frame.layoutParent:RemoveManagedFrame(frame)
+	end
+end
+
 -- Widget Pool
 -----------------------------------------------------------------
 -- ActionBars (Classic)
@@ -193,15 +230,15 @@ UIWidgetsDisable["ActionBars"] = (IsClassic or IsTBC) and function(self)
 		"TutorialFrameAlertButton8",
 		"TutorialFrameAlertButton9",
 		"TutorialFrameAlertButton10",
-	}) do 
-		if (_G[object]) then 
+	}) do
+		if (_G[object] and _G[object].UnregisterAllEvents) then
 			_G[object]:UnregisterAllEvents()
-		else 
+		else
 			if (self.AddDebugMessageFormatted) then
 				self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
 			end
 		end
-	end 
+	end
 	for _,object in pairs({
 		"FramerateLabel",
 		"FramerateText",
@@ -217,42 +254,42 @@ UIWidgetsDisable["ActionBars"] = (IsClassic or IsTBC) and function(self)
 		"ReputationWatchBar",
 		"StanceBarFrame",
 		"StreamingIcon"
-	}) do 
-		if (_G[object]) then 
+	}) do
+		if (_G[object] and _G[object].SetParent) then
 			_G[object]:SetParent(UIHider)
-		else 
+		else
 			if (self.AddDebugMessageFormatted) then
 				self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
 			end
 		end
-	end 
+	end
 	for _,object in pairs({
 		"MainMenuBarArtFrame",
 		"PetActionBarFrame",
 		"StanceBarFrame"
-	}) do 
-		if (_G[object]) then 
+	}) do
+		if (_G[object]) then
 			_G[object]:Hide()
-		else 
+		else
 			if (self.AddDebugMessageFormatted) then
 				self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
 			end
 		end
-	end 
+	end
 	for _,object in pairs({
-		"ActionButton", 
-		"MultiBarBottomLeftButton", 
-		"MultiBarBottomRightButton", 
+		"ActionButton",
+		"MultiBarBottomLeftButton",
+		"MultiBarBottomRightButton",
 		"MultiBarRightButton",
 		"MultiBarLeftButton"
-	}) do 
+	}) do
 		for i = 1,NUM_ACTIONBAR_BUTTONS do
 			local button = _G[object..i]
 			button:Hide()
 			button:UnregisterAllEvents()
 			button:SetAttribute("statehidden", true)
 		end
-	end 
+	end
 
 	MainMenuBar:EnableMouse(false)
 	MainMenuBar:SetAlpha(0)
@@ -261,9 +298,9 @@ UIWidgetsDisable["ActionBars"] = (IsClassic or IsTBC) and function(self)
 	MainMenuBar.slideOut:GetAnimations():SetOffset(0,0)
 
 	-- Gets rid of the loot anims
-	MainMenuBarBackpackButton:UnregisterEvent("ITEM_PUSH") 
+	MainMenuBarBackpackButton:UnregisterEvent("ITEM_PUSH")
 	for slot = 0,3 do
-		_G["CharacterBag"..slot.."Slot"]:UnregisterEvent("ITEM_PUSH") 
+		_G["CharacterBag"..slot.."Slot"]:UnregisterEvent("ITEM_PUSH")
 	end
 
 	UIPARENT_MANAGED_FRAME_POSITIONS["MainMenuBar"] = nil
@@ -276,32 +313,138 @@ UIWidgetsDisable["ActionBars"] = (IsClassic or IsTBC) and function(self)
 	--UIWidgetsDisable["ActionBarsBagBarAnims"](self)
 end
 
--- ActionBars (Retail)
+-- ActionBars (Retail + Dragonflight)
 or IsRetail and function(self)
+
+	local bar
+	for _,global in ipairs({
+		"MultiBarBottomLeft",
+		"MultiBarBottomRight",
+		"MultiBarRight",
+		"MultiBarRight"
+	}) do
+		bar = _G[global]
+		if (bar) then
+			bar:SetParent(UIHider)
+		end
+	end
+
+	local button
+	for _,global in ipairs({
+		"ActionButton",
+		"MultiBarBottomLeftButton",
+		"MultiBarBottomRightButton",
+		"MultiBarRightButton",
+		"MultiBarRightButton"
+	}) do
+		for i = 1,12 do
+			button = _G[global..i]
+			if (button) then
+				button:Hide()
+				button:UnregisterAllEvents()
+				button:SetAttribute("statehidden", true)
+			end
+		end
+	end
+
+	-- Spanking new layout system in Dragonflight
+	handleManagedFrame(ExtraAbilityContainer) -- >= 10.0.0
+	handleManagedFrame(MainMenuBarVehicleLeaveButton) -- >= 10.0.0
+	handleManagedFrame(MultiCastActionBarFrame) -- >= 10.0.0
+	handleManagedFrame(PetActionBarFrame) -- >= 10.0.0
+	handleManagedFrame(PossessBarFrame) -- >= 10.0.0
+	handleManagedFrame(StanceBarFrame) -- >= 10.0.0
+	handleManagedFrame(TutorialFrameAlertButton) -- >= 10.0.0
+
+	-- Removed in Dragonflight.
+	if (UIPARENT_MANAGED_FRAME_POSITIONS) then
+		UIPARENT_MANAGED_FRAME_POSITIONS["MainMenuBar"] = nil -- < 10.0.0
+		UIPARENT_MANAGED_FRAME_POSITIONS["StanceBarFrame"] = nil -- < 10.0.0
+		UIPARENT_MANAGED_FRAME_POSITIONS["PossessBarFrame"] = nil -- < 10.0.0
+		UIPARENT_MANAGED_FRAME_POSITIONS["MultiCastActionBarFrame"] = nil -- < 10.0.0
+		UIPARENT_MANAGED_FRAME_POSITIONS["PETACTIONBAR_YPOS"] = nil -- < 10.0.0
+		UIPARENT_MANAGED_FRAME_POSITIONS["ExtraAbilityContainer"] = nil -- < 10.0.0
+	end
+
+	MainMenuBar:EnableMouse(false)
+	MainMenuBar:UnregisterEvent("DISPLAY_SIZE_CHANGED")
+	MainMenuBar:UnregisterEvent("UI_SCALE_CHANGED")
+
+	local animations = { MainMenuBar.slideOut:GetAnimations() }
+	animations[1]:SetOffset(0,0)
+
+	handleActionBar(MainMenuBarVehicleLeaveButton, true, false, true)
+	handleActionBar(OverrideActionBar, true, false, true)
+
+	StatusTrackingBarManager:Hide()
+	StatusTrackingBarManager:UnregisterAllEvents()
+
+	local animations = { OverrideActionBar.slideOut:GetAnimations() }
+	if (animations[1] and animations[1].SetOffset) then
+		animations[1]:SetOffset(0,0)
+	end
+
+	handleActionBar(MicroButtonAndBagsBar, false, false, true)
+	handleActionBar(StanceBarFrame, true, true)
+	handleActionBar(PossessBarFrame, false, true)
+	handleActionBar(MultiCastActionBarFrame, true, true)
+	handleActionBar(PetActionBarFrame, true, true)
+
+	ShowPetActionBar = function() end
+
+	handleActionBar(MainMenuBar.BorderArt) -- >= 10.0.0
+	handleActionBar(MainMenuBar.Background) -- >= 10.0.0
+	handleActionBar(MainMenuBar.EndCaps) -- >= 10.0.0
+	handleActionBar(MainMenuBar.ActionBarPageNumber) -- >= 10.0.0
+	handleActionBar(MainMenuBarArtFrame, false, true) -- < 10.0.0
+	handleActionBar(MainMenuBarArtFrameBackground) -- < 10.0.0
+
+	-- Is this actually still needed?
+	if (PlayerTalentFrame) then
+		PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+	elseif (TalentFrame_LoadUI) then
+		hooksecurefunc("TalentFrame_LoadUI", function()
+			PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+		end)
+	end
+
+	-- Disable annoying yellow popup alerts.
+	local HideAlerts = function()
+		if (HelpTip) then
+			HelpTip:HideAllSystem("MicroButtons")
+		end
+	end
+	hooksecurefunc("MainMenuMicroButton_ShowAlert", HideAlerts)
+
+end
+
+-- Old method, used in Shadowlands and prior.
+-- Keeping it for reference.
+local oldActionbarFunction = function(self)
 
 	local SpellBookTooltipOnUpdate, SpellButtonOnEnter, SpellButtonOnLeave, UpdateSpellBookTooltip
 	local SpellBookTooltip = GP_SpellBookTooltip or CreateFrame("GameTooltip", "GP_SpellBookTooltip", UIParent, "GameTooltipTemplate, BackdropTemplate")
 
 	SpellBookTooltipOnUpdate = function(self, elapsed)
 		self.elapsed = (self.elapsed or 0) + elapsed
-		if (self.elapsed < TOOLTIP_UPDATE_TIME) then 
-			return 
+		if (self.elapsed < TOOLTIP_UPDATE_TIME) then
+			return
 		end
 		self.elapsed = 0
 		local owner = self:GetOwner()
-		if (owner) then 
-			SpellButtonOnEnter(owner) 
+		if (owner) then
+			SpellButtonOnEnter(owner)
 		end
 	end
 
 	SpellButtonOnEnter = function(self, _, tooltip)
 		-- Copied from SpellBookFrame to remove:
 		--- ActionBarController_UpdateAll, PetActionHighlightMarks, and BarHighlightMarks
-		if (not tt) then 
-			tooltip = SpellBookTooltip 
+		if (not tt) then
+			tooltip = SpellBookTooltip
 		end
-		if (tooltip:IsForbidden()) then 
-			return 
+		if (tooltip:IsForbidden()) then
+			return
 		end
 		tooltip:SetOwner(self, "ANCHOR_RIGHT")
 
@@ -363,17 +506,20 @@ or IsRetail and function(self)
 	local noop = function() end
 	local noops = { "ClearAllPoints", "SetPoint", "SetScale", "SetShown" }
 	local noopthis = function(frame)
-		for _,method in ipairs(noops) do
-			if (frame[method] ~= noop) then
-				frame[method] = noop
+		if (frame) then
+			for _,method in ipairs(noops) do
+				if (frame[method] ~= noop) then
+					frame[method] = noop
+				end
 			end
 		end
 	end
+
 	for i,object in ipairs({
-		"OverrideActionBar", 
-		"StanceBarFrame", 
-		"PossessBarFrame", 
-		"PetActionBarFrame", 
+		"OverrideActionBar",
+		"StanceBarFrame",
+		"PossessBarFrame",
+		"PetActionBarFrame",
 		"MultiCastActionBarFrame"
 	}) do
 		local frame = _G[object]
@@ -386,82 +532,106 @@ or IsRetail and function(self)
 		end
 	end
 	for i,object in ipairs({
-		"OverrideActionBar", 
-		"StanceBarFrame", 
-		"PossessBarFrame", 
-		"PetActionBarFrame", 
+		"OverrideActionBar",
+		"StanceBarFrame",
+		"PossessBarFrame",
+		"PetActionBarFrame",
 		"MultiCastActionBarFrame",
-		"MainMenuBar", 
+		"MainMenuBar",
 		"MainMenuBarArtFrame",
 		"MainMenuBarArtFrameBackground",
-		"MicroButtonAndBagsBar", 
-		"MultiBarBottomLeft", 
-		"MultiBarBottomRight", 
-		"MultiBarLeft", 
+		"MicroButtonAndBagsBar",
+		"MultiBarBottomLeft",
+		"MultiBarBottomRight",
+		"MultiBarLeft",
 		"MultiBarRight"
 	}) do
 		local frame = _G[object]
 		if (frame) then
 			frame:SetParent(UIHider)
 			noopthis(frame)
-		else			
+		else
 			if (self.AddDebugMessageFormatted) then
 				self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
 			end
 		end
 	end
-	
-	-- MainMenuBar:ClearAllPoints() taint during combat. *CHECK*
-	MainMenuBar.SetPositionForStatusBars = noop
+
+	if (MainMenuBar) then
+		-- MainMenuBar:ClearAllPoints() taint during combat. *CHECK*
+		MainMenuBar.SetPositionForStatusBars = noop
+
+		-- With this method we might don't taint anything.
+		if (MainMenuBarPerformanceBar) then
+			MainMenuBarPerformanceBar:SetAlpha(0)
+			MainMenuBarPerformanceBar:SetScale(.00001)
+		end
+
+		-- Clear out crap we don't need.
+		noopthis(MainMenuBarArtFrame)
+		noopthis(MainMenuBarArtFrameBackground)
+
+		if (MainMenuBarArtFrame) then
+			MainMenuBarArtFrame:UnregisterAllEvents()
+		end
+	end
 
 	-- Spellbook open in combat taint, only happens sometimes.
 	-- This appears to CAUSE taint, rather than solve it.
-	-- Been getting multiple taints on this after adding it. 
+	-- Been getting multiple taints on this after adding it.
 	--MultiActionBar_HideAllGrids = noop
 	--MultiActionBar_ShowAllGrids = noop
 
 	-- Try to shutdown the container movement and taints.
-	UIPARENT_MANAGED_FRAME_POSITIONS.ExtraAbilityContainer = nil
-	ExtraAbilityContainer.SetSize = noop
-	
-	-- With this method we might don't taint anything. 
-	MainMenuBarPerformanceBar:SetAlpha(0)
-	MainMenuBarPerformanceBar:SetScale(.00001)
+	if (ExtraAbilityContainer) then
+		if (UIPARENT_MANAGED_FRAME_POSITIONS) then
+			UIPARENT_MANAGED_FRAME_POSITIONS.ExtraAbilityContainer = nil
+		end
+		ExtraAbilityContainer.SetSize = noop
+	end
 
-	-- Clear out crap we don't need.
-	noopthis(MainMenuBarArtFrame)
-	noopthis(MainMenuBarArtFrameBackground)
-	MainMenuBarArtFrame:UnregisterAllEvents()
-	StatusTrackingBarManager:UnregisterAllEvents()
-	ActionBarButtonEventsFrame:UnregisterAllEvents()
-	ActionBarButtonEventsFrame:RegisterEvent("ACTIONBAR_SLOT_CHANGED") -- This is needed for ExtraActionButton to show.
-	ActionBarButtonEventsFrame:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN") -- This is needed for ExtraActionBar cooldown.
-	ActionBarActionEventsFrame:UnregisterAllEvents()
-	ActionBarController:UnregisterAllEvents()
-	ActionBarController:RegisterEvent("UPDATE_EXTRA_ACTIONBAR") -- This is needed for ExtraActionBar to show.
+	if (StatusTrackingBarManager) then
+		StatusTrackingBarManager:UnregisterAllEvents()
+	end
+
+	if (ActionBarButtonEventsFrame) then
+		ActionBarButtonEventsFrame:UnregisterAllEvents()
+		ActionBarButtonEventsFrame:RegisterEvent("ACTIONBAR_SLOT_CHANGED") -- This is needed for ExtraActionButton to show.
+		ActionBarButtonEventsFrame:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN") -- This is needed for ExtraActionBar cooldown.
+		ActionBarActionEventsFrame:UnregisterAllEvents()
+	end
+
+	if (ActionBarController) then
+		ActionBarController:UnregisterAllEvents()
+		ActionBarController:RegisterEvent("UPDATE_EXTRA_ACTIONBAR") -- This is needed for ExtraActionBar to show.
+	end
 
 	-- Lets only keep ExtraActionButtons in here.
-	local ButtonEventsRegisterFrame = function(self, added)
-		local frames = ActionBarButtonEventsFrame.frames
-		for index = #frames,1,-1 do
-			local frame = frames[index]
-			local wasAdded = frame == added
-			if (not added) or (wasAdded) then
-				if (not string_match(frame:GetName(), "ExtraActionButton%d")) then
-					ActionBarButtonEventsFrame.frames[index] = nil
-				end
-				if (wasAdded) then
-					break
+	if (ActionBarButtonEventsFrame) then
+		local ButtonEventsRegisterFrame = function(self, added)
+			local frames = ActionBarButtonEventsFrame.frames
+			for index = #frames,1,-1 do
+				local frame = frames[index]
+				local wasAdded = frame == added
+				if (not added) or (wasAdded) then
+					if (not string_match(frame:GetName(), "ExtraActionButton%d")) then
+						ActionBarButtonEventsFrame.frames[index] = nil
+					end
+					if (wasAdded) then
+						break
+					end
 				end
 			end
 		end
+		hooksecurefunc(ActionBarButtonEventsFrame, "RegisterFrame", ButtonEventsRegisterFrame)
+		ButtonEventsRegisterFrame()
 	end
-	hooksecurefunc(ActionBarButtonEventsFrame, "RegisterFrame", ButtonEventsRegisterFrame)
-	ButtonEventsRegisterFrame()
 
 	-- This would taint along with the same path as the SetNoopers: ValidateActionBarTransition
-	VerticalMultiBarsContainer:SetSize(10,10) -- dummy values so GetTop etc doesnt fail without replacing
-	noopthis(VerticalMultiBarsContainer)
+	if (VerticalMultiBarsContainer) then
+		VerticalMultiBarsContainer:SetSize(10,10) -- dummy values so GetTop etc doesnt fail without replacing
+		noopthis(VerticalMultiBarsContainer)
+	end
 
 	if (PlayerTalentFrame) then
 		PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
@@ -479,18 +649,18 @@ UIWidgetsDisable["Alerts"] = function(self)
 	AlertFrame:UnregisterAllEvents()
 	AlertFrame:SetScript("OnEvent", nil)
 	AlertFrame:SetParent(UIHider)
-end 
+end
 
 UIWidgetsEnable["Alerts"] = function(self)
 	if (not AlertFrame) then
 		return
 	end
-	if (AlertFrame:GetParent() ~= UIParent) then 
+	if (AlertFrame:GetParent() ~= UIParent) then
 		AlertFrame:SetParent(UIParent)
 		AlertFrame:SetScript("OnEvent", AlertFrame.OnEvent)
 		AlertFrame:OnLoad()
 	end
-end 
+end
 
 UIWidgetsDisable["Auras"] = function(self)
 	BuffFrame:SetScript("OnLoad", nil)
@@ -498,11 +668,11 @@ UIWidgetsDisable["Auras"] = function(self)
 	BuffFrame:SetScript("OnEvent", nil)
 	BuffFrame:SetParent(UIHider)
 	BuffFrame:UnregisterAllEvents()
-	if (TemporaryEnchantFrame) then 
+	if (TemporaryEnchantFrame) then
 		TemporaryEnchantFrame:SetScript("OnUpdate", nil)
 		TemporaryEnchantFrame:SetParent(UIHider)
-	end 
-end 
+	end
+end
 
 UIWidgetsDisable["BuffTimer"] = function(self)
 	if (not PlayerBuffTimerManager) then
@@ -519,13 +689,13 @@ UIWidgetsDisable["CastBars"] = function(self)
 	CastingBarFrame:SetScript("OnUpdate", nil)
 	CastingBarFrame:SetParent(UIHider)
 	CastingBarFrame:UnregisterAllEvents()
-	
+
 	-- player's pet's castbar
 	PetCastingBarFrame:SetScript("OnEvent", nil)
 	PetCastingBarFrame:SetScript("OnUpdate", nil)
 	PetCastingBarFrame:SetParent(UIHider)
 	PetCastingBarFrame:UnregisterAllEvents()
-end 
+end
 
 UIWidgetDependency["CaptureBar"] = "Blizzard_UIWidgets"
 UIWidgetsDisable["CaptureBar"] = function(self)
@@ -538,7 +708,7 @@ UIWidgetsDisable["CaptureBar"] = function(self)
 end
 
 -- This isn't the actual chat, just the toast button.
--- To make backwards compatibility easier, 
+-- To make backwards compatibility easier,
 -- I'm keeping this old name on this widget.
 UIWidgetsDisable["Chat"] = function(self)
 	if (not QuickJoinToastButton) then
@@ -552,14 +722,14 @@ UIWidgetsDisable["Chat"] = function(self)
 		QuickJoinToastButton:SetAlpha(0)
 		QuickJoinToastButton:EnableMouse(false)
 		QuickJoinToastButton:SetParent(UIHider)
-	end 
+	end
 	killQuickToast()
 
 	-- This pops back up on zoning sometimes, so keep removing it
 	LibBlizzard:RegisterEvent("PLAYER_ENTERING_WORLD", killQuickToast)
-end 
+end
 
--- This will kill off the chat system. Dangerous! 
+-- This will kill off the chat system. Dangerous!
 UIWidgetsDisable["ChatWindows"] = function(self)
 
 	local nuke = function(method, frame)
@@ -572,9 +742,9 @@ UIWidgetsDisable["ChatWindows"] = function(self)
 	end
 
 	local antisocial = function()
-		for _,frameName in LibBlizzard:GetAllChatWindows() do 
+		for _,frameName in LibBlizzard:GetAllChatWindows() do
 			local frame = _G[frameName]
-			if (frame) then 
+			if (frame) then
 				frame:SetParent(UIHider)
 				for i,method in ipairs({
 					"GetChatWindowButtonFrame",
@@ -589,7 +759,7 @@ UIWidgetsDisable["ChatWindows"] = function(self)
 				}) do
 					nuke(method, frame)
 				end
-				
+
 				print("hiding",frameName)
 			end
 		end
@@ -623,8 +793,8 @@ UIWidgetsDisable["Durability"] = function(self)
 	DurabilityFrame:SetScript("OnShow", nil)
 	DurabilityFrame:SetScript("OnHide", nil)
 
-	-- Will this taint? 
-	-- This is to prevent the durability frame size 
+	-- Will this taint?
+	-- This is to prevent the durability frame size
 	-- affecting other anchors
 	DurabilityFrame:SetParent(UIHider)
 	DurabilityFrame:Hide()
@@ -669,7 +839,7 @@ end
 
 UIWidgetsDisable["BossBanners"] = function(self)
 	local frame = BossBanner
-	BossBanner_Stop(frame)	
+	BossBanner_Stop(frame)
 	--frame.PlayBanner = nil
 	--frame.StopBanner = nil
 	frame:UnregisterAllEvents()
@@ -689,16 +859,16 @@ UIWidgetsDisable["Minimap"] = function(self)
 	for _,object in pairs({
 		"GameTimeFrame",
 		"GarrisonLandingPageMinimapButton"
-	}) do 
-		if (_G[object]) then 
+	}) do
+		if (_G[object]) then
 			_G[object]:UnregisterAllEvents()
 		else
 			-- Spammy, it's too many expansion differences(?)
 			--if (self.AddDebugMessageFormatted) then
 			--	self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
 			--end
-		end 
-	end 
+		end
+	end
 	for _,object in pairs({
 		"GameTimeFrame",
 		"GarrisonLandingPageMinimapButton",
@@ -709,7 +879,7 @@ UIWidgetsDisable["Minimap"] = function(self)
 		"MinimapCluster",
 		"MiniMapMailBorder",
 		"MiniMapMailFrame",
-		"MinimapBackdrop", 
+		"MinimapBackdrop",
 		"MinimapNorthTag",
 		"MiniMapTracking",
 		"MiniMapTrackingButton",
@@ -718,15 +888,15 @@ UIWidgetsDisable["Minimap"] = function(self)
 		"MinimapZoomIn",
 		"MinimapZoomOut",
 		"MinimapZoneTextButton"
-	}) do 
-		if (_G[object]) then 
+	}) do
+		if (_G[object]) then
 			_G[object]:SetParent(UIHider)
 		else
 			--if (self.AddDebugMessageFormatted) then
 			--	self:AddDebugMessageFormatted(string_format("LibBlizzard: The object '%s' wasn't found, tell Goldpaw!", object))
 			--end
-		end 
-	end 
+		end
+	end
 
 	-- Ugly hack to keep the keybind functioning
 	if (GarrisonLandingPageMinimapButton) then
@@ -736,7 +906,7 @@ UIWidgetsDisable["Minimap"] = function(self)
 
 	-- Can't really be destroyed safely, just hiding it instead.
 	if (QueueStatusMinimapButton) then
-		QueueStatusMinimapButton:SetHighlightTexture("") 
+		QueueStatusMinimapButton:SetHighlightTexture("")
 		QueueStatusMinimapButtonBorder:SetAlpha(0)
 		QueueStatusMinimapButtonBorder:SetTexture(nil)
 		QueueStatusMinimapButton.Highlight:SetAlpha(0)
@@ -745,7 +915,7 @@ UIWidgetsDisable["Minimap"] = function(self)
 
 	-- Classic Battleground Queue Button
 	-- Killing fully now prevents it from being remade(?)
-	if (MiniMapBattlefieldFrame) then 
+	if (MiniMapBattlefieldFrame) then
 		MiniMapBattlefieldIcon:SetAlpha(0)
 		MiniMapBattlefieldIcon:SetTexture(nil)
 		MiniMapBattlefieldBorder:SetAlpha(0)
@@ -760,10 +930,10 @@ end
 
 UIWidgetDependency["MinimapClock"] = "Blizzard_TimeManager"
 UIWidgetsDisable["MinimapClock"] = function(self)
-	if TimeManagerClockButton then 
+	if TimeManagerClockButton then
 		TimeManagerClockButton:SetParent(UIHider)
 		TimeManagerClockButton:UnregisterAllEvents()
-	end 
+	end
 end
 
 UIWidgetsDisable["MirrorTimer"] = function(self)
@@ -774,7 +944,7 @@ UIWidgetsDisable["MirrorTimer"] = function(self)
 		timer:SetParent(UIHider)
 		timer:UnregisterAllEvents()
 	end
-end 
+end
 
 UIWidgetDependency["ObjectiveTracker"] = "Blizzard_ObjectiveTracker"
 UIWidgetsDisable["ObjectiveTracker"] = function(self)
@@ -948,7 +1118,7 @@ UIWidgetsDisable["UnitFramePlayer"] = function(self)
 	killUnitFrame("PlayerFrame")
 
 	-- A lot of blizz modules relies on PlayerFrame.unit
-	-- This includes the aura frame and several others. 
+	-- This includes the aura frame and several others.
 	_G.PlayerFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 	-- User placed frames don't animate
@@ -980,7 +1150,7 @@ end
 UIWidgetsDisable["UnitFrameFocus"] = function(self)
 	killUnitFrame("FocusFrame")
 	killUnitFrame("TargetofFocusFrame")
-end 
+end
 
 UIWidgetsDisable["UnitFrameParty"] = function(self)
 	for i = 1,5 do
@@ -992,11 +1162,11 @@ UIWidgetsDisable["UnitFrameParty"] = function(self)
 	_G.PartyMemberBackground:Hide()
 	_G.PartyMemberBackground:SetAlpha(0)
 
-	--hooksecurefunc("CompactPartyFrame_Generate", function() 
+	--hooksecurefunc("CompactPartyFrame_Generate", function()
 	--	killUnitFrame(_G.CompactPartyFrame)
 	--	for i=1, _G.MEMBERS_PER_RAID_GROUP do
 	--		killUnitFrame(_G["CompactPartyFrameMember" .. i])
-	--	end	
+	--	end
 	--end)
 end
 
@@ -1041,17 +1211,17 @@ UIWidgetsDisable["ZoneText"] = function(self)
 	ZoneTextFrame:UnregisterAllEvents()
 	ZoneTextFrame:SetScript("OnUpdate", nil)
 	-- ZoneTextFrame:Hide()
-	
+
 	SubZoneTextFrame:SetParent(UIHider)
 	SubZoneTextFrame:UnregisterAllEvents()
 	SubZoneTextFrame:SetScript("OnUpdate", nil)
 	-- SubZoneTextFrame:Hide()
-	
+
 	AutoFollowStatus:SetParent(UIHider)
 	AutoFollowStatus:UnregisterAllEvents()
 	AutoFollowStatus:SetScript("OnUpdate", nil)
 	-- AutoFollowStatus:Hide()
-end 
+end
 
 -- Widget Styling Pool
 -----------------------------------------------------------------
@@ -1060,64 +1230,76 @@ UIWidgetStyling["BagButtons"] = function(self, ...)
 	-- Retrieve the first slot button and the backpack
 	local firstSlot = CharacterBag0Slot
 	local backpack = ContainerFrame1
+	local reagentSlot = CharacterReagentBag0Slot -- >= 10.0.0
 
-	-- Try to avoid the potential error with anima deposit animations. 
-	-- Just give it a simplified version of the default position it is given, 
+	-- Try to avoid the potential error with anima deposit animations.
+	-- Just give it a simplified version of the default position it is given,
 	-- it will be replaced by UpdateContainerFrameAnchors() later on anyway.
 	if (not backpack:GetPoint()) then
 		backpack:SetPoint("BOTTOMRIGHT", backpack:GetParent(), "BOTTOMRIGHT", -14, 93 )
 	end
 
 	-- These should always exist, but Blizz do have a way of changing things,
-	-- and I prefer having functionality not be applied in a future update 
-	-- rather than having the UI break from nil bugs. 
-	if (firstSlot and backpack) then 
+	-- and I prefer having functionality not be applied in a future update
+	-- rather than having the UI break from nil bugs.
+	if (firstSlot and backpack) then
 		firstSlot:ClearAllPoints()
 		firstSlot:SetPoint("TOPRIGHT", backpack, "BOTTOMRIGHT", -6, 0)
+
 		local strata = backpack:GetFrameStrata()
 		local level = backpack:GetFrameLevel()
-		local slotSize = 30
+
+		-- Rearrange slots
+		-- *Dragonflight features a reagent bag slot
+		local slotSize = reagentSlot and 24 or 30
 		local previous
-		for i = 0,3 do 
-			-- Always check for existence, 
-			-- because nothing is ever guaranteed. 
-			local slot = _G["CharacterBag"..i.."Slot"]
-			local tex = _G["CharacterBag"..i.."SlotNormalTexture"]
-			if slot then 
+		for _,slotName in ipairs({
+			"CharacterBag0Slot",
+			"CharacterBag1Slot",
+			"CharacterBag2Slot",
+			"CharacterBag3Slot",
+			"CharacterReagentBag0Slot" -- >= 10.0.0
+		}) do
+
+			-- Always check for existence,
+			-- because nothing is ever guaranteed.
+			local slot = _G[slotName]
+			if slot then
 				slot:SetParent(backpack)
-				slot:SetSize(slotSize,slotSize) 
+				slot:SetSize(slotSize,slotSize)
 				slot:SetFrameStrata(strata)
 				slot:SetFrameLevel(level)
 
 				-- Remove that fugly outer border
-				if tex then 
+				local tex = _G[slotName.."NormalTexture"]
+				if tex then
 					tex:SetTexture("")
 					tex:SetAlpha(0)
 				end
-				
+
 				-- Re-anchor the slots to remove space
 				if (i == 0) then
 					slot:ClearAllPoints()
 					slot:SetPoint("TOPRIGHT", backpack, "BOTTOMRIGHT", -6, 4)
-				else 
+				else
 					slot:ClearAllPoints()
 					slot:SetPoint("RIGHT", previous, "LEFT", 0, 0)
 				end
 				previous = slot
-			end 
-		end 
+			end
+		end
 
 		local keyring = KeyRingButton
-		if (keyring) then 
+		if (keyring) then
 			keyring:SetParent(backpack)
-			keyring:SetHeight(slotSize) 
+			keyring:SetHeight(slotSize)
 			keyring:SetFrameStrata(strata)
 			keyring:SetFrameLevel(level)
 			keyring:ClearAllPoints()
 			keyring:SetPoint("RIGHT", previous, "LEFT", 0, 0)
 			previous = keyring
 		end
-	end 
+	end
 end
 
 UIWidgetStyling["GameMenu"] = function(self, ...)
@@ -1135,7 +1317,7 @@ UIWidgetStyling["WorldMap"] = (IsClassic or IsTBC) and function(self, ...)
 	Canvas:SetIgnoreParentScale(false)
 	Canvas:RefreshDetailLayers()
 
-	-- Contains the actual map. 
+	-- Contains the actual map.
 	local Container = WorldMapFrame.ScrollContainer
 	Container.GetCanvasScale = function(self)
 		return self:GetScale()
@@ -1150,9 +1332,9 @@ UIWidgetStyling["WorldMap"] = (IsClassic or IsTBC) and function(self, ...)
 	Container.GetCursorPosition = function(self)
 		local currentX, currentY = GetCursorPosition()
 		local scale = UIParent:GetScale()
-		if not(currentX and currentY and scale) then 
+		if not(currentX and currentY and scale) then
 			return 0,0
-		end 
+		end
 		local scaledX, scaledY = currentX/scale, currentY/scale
 		return scaledX, scaledY
 	end
@@ -1169,49 +1351,49 @@ UIWidgetStyling["WorldMap"] = (IsClassic or IsTBC) and function(self, ...)
 	frame.stepIn = .05
 	frame.stepOut = .05
 	frame.throttle = .02
-	frame:SetScript("OnEvent", function(selv, event) 
-		if (event == "PLAYER_STARTED_MOVING") then 
+	frame:SetScript("OnEvent", function(selv, event)
+		if (event == "PLAYER_STARTED_MOVING") then
 			frame.alpha = Canvas:GetAlpha()
 			frame:SetScript("OnUpdate", frame.Starting)
 
-		elseif (event == "PLAYER_STOPPED_MOVING") or (event == "PLAYER_ENTERING_WORLD") then 
+		elseif (event == "PLAYER_STOPPED_MOVING") or (event == "PLAYER_ENTERING_WORLD") then
 			frame.alpha = Canvas:GetAlpha()
 			frame:SetScript("OnUpdate", frame.Stopping)
 		end
 	end)
 
-	frame.Stopping = function(self, elapsed) 
+	frame.Stopping = function(self, elapsed)
 		self.elapsed = self.elapsed + elapsed
 		if (self.elapsed < frame.throttle) then
-			return 
-		end 
-		if (frame.alpha + frame.stepIn < frame.stopAlpha) then 
+			return
+		end
+		if (frame.alpha + frame.stepIn < frame.stopAlpha) then
 			frame.alpha = frame.alpha + frame.stepIn
-		else 
+		else
 			frame.alpha = frame.stopAlpha
 			frame:SetScript("OnUpdate", nil)
-		end 
+		end
 		Canvas:SetAlpha(frame.alpha)
 	end
 
-	frame.Starting = function(self, elapsed) 
+	frame.Starting = function(self, elapsed)
 		self.elapsed = self.elapsed + elapsed
 		if (self.elapsed < frame.throttle) then
-			return 
-		end 
-		if (frame.alpha - frame.stepOut > frame.moveAlpha) then 
+			return
+		end
+		if (frame.alpha - frame.stepOut > frame.moveAlpha) then
 			frame.alpha = frame.alpha - frame.stepOut
-		else 
+		else
 			frame.alpha = frame.moveAlpha
 			frame:SetScript("OnUpdate", nil)
-		end 
+		end
 		Canvas:SetAlpha(frame.alpha)
 	end
 
 	frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	frame:RegisterEvent("PLAYER_STARTED_MOVING")
 	frame:RegisterEvent("PLAYER_STOPPED_MOVING")
-end 
+end
 
 or IsRetail and function(self, ...)
 
@@ -1245,8 +1427,8 @@ or IsRetail and function(self, ...)
 	local GetFormattedCoordinates = function(x, y)
 		return 	string_gsub(string_format("|cfff0f0f0%.2f|r", x*100), "%.(.+)", "|cffa0a0a0.%1|r"),
 				string_gsub(string_format("|cfff0f0f0%.2f|r", y*100), "%.(.+)", "|cffa0a0a0.%1|r")
-	end 
-	
+	end
+
 	-- Coordinate frame
 	local coords = CreateFrame("Frame", nil, WorldMapFrame)
 	coords:SetFrameStrata(WorldMapFrame.BorderFrame:GetFrameStrata())
@@ -1255,7 +1437,7 @@ or IsRetail and function(self, ...)
 
 	-- Player coordinates
 	local player = coords:CreateFontString()
-	player:SetFontObject(Game13Font_o1) 
+	player:SetFontObject(Game13Font_o1)
 	player:SetTextColor(255/255, 234/255, 137/255)
 	player:SetAlpha(.85)
 	player:SetDrawLayer("OVERLAY")
@@ -1273,11 +1455,11 @@ or IsRetail and function(self, ...)
 	cursor:SetJustifyV("BOTTOM")
 	coords.cursor = cursor
 
-	-- Please note that this is NOT supposed to be a list of all zones, 
+	-- Please note that this is NOT supposed to be a list of all zones,
 	-- so don't dig into this code and assume anything is missing.
-	-- This is a list for the custom styling element, 
+	-- This is a list for the custom styling element,
 	-- telling which zone maps have a free bottom left corner.
-	-- 
+	--
 	-- /dump WorldMapFrame.mapID
 	coords.bottomLeft = {
 
@@ -1362,276 +1544,276 @@ or IsRetail and function(self, ...)
 
 		-- Shadowlands Zones
 		-- https://wow.gamepedia.com/UiMapID
-		[1643] = true, 
-		[1645] = true, 
-		[1647] = true, 
-		[1658] = true, 
-		[1666] = true, 
-		[1705] = true, 
-		[1726] = true, 
-		[1727] = true, 
-		[1728] = true, 
-		[1762] = true, 
-		[1525] = true, 
-		[1533] = true, 
-		[1536] = true, 
-		[1543] = true, 
-		[1565] = true, 
-		[1569] = true, 
-		[1603] = true, 
-		[1648] = true, 
-		[1656] = true, 
-		[1659] = true, 
-		[1661] = true, 
-		[1670] = true, 
-		[1671] = true, 
-		[1672] = true, 
-		[1673] = true, 
-		[1688] = true, 
-		[1689] = true, 
-		[1734] = true, 
-		[1738] = true, 
-		[1739] = true, 
-		[1740] = true, 
-		[1741] = true, 
-		[1742] = true, 
-		[1813] = true, 
-		[1814] = true, 
-		[1615] = true, 
-		[1616] = true, 
-		[1617] = true, 
-		[1618] = true, 
-		[1619] = true, 
-		[1620] = true, 
-		[1621] = true, 
-		[1623] = true, 
-		[1624] = true, 
-		[1627] = true, 
-		[1628] = true, 
-		[1629] = true, 
-		[1630] = true, 
-		[1631] = true, 
-		[1632] = true, 
-		[1635] = true, 
-		[1636] = true, 
-		[1641] = true, 
-		[1712] = true, 
-		[1716] = true, 
-		[1720] = true, 
-		[1721] = true, 
-		[1736] = true, 
-		[1749] = true, 
-		[1751] = true, 
-		[1752] = true, 
-		[1753] = true, 
-		[1754] = true, 
-		[1756] = true, 
-		[1757] = true, 
-		[1758] = true, 
-		[1759] = true, 
-		[1760] = true, 
-		[1761] = true, 
-		[1763] = true, 
-		[1764] = true, 
-		[1765] = true, 
-		[1766] = true, 
-		[1767] = true, 
-		[1768] = true, 
-		[1769] = true, 
-		[1770] = true, 
-		[1771] = true, 
-		[1772] = true, 
-		[1773] = true, 
-		[1774] = true, 
-		[1776] = true, 
-		[1777] = true, 
-		[1778] = true, 
-		[1779] = true, 
-		[1780] = true, 
-		[1781] = true, 
-		[1782] = true, 
-		[1783] = true, 
-		[1784] = true, 
-		[1785] = true, 
-		[1786] = true, 
-		[1787] = true, 
-		[1788] = true, 
-		[1789] = true, 
-		[1791] = true, 
-		[1792] = true, 
-		[1793] = true, 
-		[1794] = true, 
-		[1795] = true, 
-		[1796] = true, 
-		[1797] = true, 
-		[1798] = true, 
-		[1799] = true, 
-		[1800] = true, 
-		[1801] = true, 
-		[1802] = true, 
-		[1803] = true, 
-		[1804] = true, 
-		[1805] = true, 
-		[1806] = true, 
-		[1807] = true, 
-		[1808] = true, 
-		[1809] = true, 
-		[1810] = true, 
-		[1811] = true, 
-		[1812] = true, 
-		[1820] = true, 
-		[1821] = true, 
-		[1822] = true, 
-		[1823] = true, 
-		[1833] = true, 
-		[1834] = true, 
-		[1835] = true, 
-		[1836] = true, 
-		[1837] = true, 
-		[1838] = true, 
-		[1839] = true, 
-		[1840] = true, 
-		[1841] = true, 
-		[1842] = true, 
-		[1843] = true, 
-		[1844] = true, 
-		[1845] = true, 
-		[1846] = true, 
-		[1847] = true, 
-		[1848] = true, 
-		[1849] = true, 
-		[1850] = true, 
-		[1851] = true, 
-		[1852] = true, 
-		[1853] = true, 
-		[1854] = true, 
-		[1855] = true, 
-		[1856] = true, 
-		[1857] = true, 
-		[1858] = true, 
-		[1859] = true, 
-		[1860] = true, 
-		[1861] = true, 
-		[1862] = true, 
-		[1863] = true, 
-		[1864] = true, 
-		[1865] = true, 
-		[1867] = true, 
-		[1868] = true, 
-		[1869] = true, 
-		[1870] = true, 
-		[1871] = true, 
-		[1872] = true, 
-		[1873] = true, 
-		[1874] = true, 
-		[1875] = true, 
-		[1876] = true, 
-		[1877] = true, 
-		[1878] = true, 
-		[1879] = true, 
-		[1880] = true, 
-		[1881] = true, 
-		[1882] = true, 
-		[1883] = true, 
-		[1884] = true, 
-		[1885] = true, 
-		[1886] = true, 
-		[1887] = true, 
-		[1888] = true, 
-		[1889] = true, 
-		[1890] = true, 
-		[1891] = true, 
-		[1892] = true, 
-		[1893] = true, 
-		[1894] = true, 
-		[1895] = true, 
-		[1896] = true, 
-		[1897] = true, 
-		[1898] = true, 
-		[1899] = true, 
-		[1900] = true, 
-		[1901] = true, 
-		[1902] = true, 
-		[1903] = true, 
-		[1904] = true, 
-		[1905] = true, 
-		[1907] = true, 
-		[1908] = true, 
-		[1909] = true, 
-		[1910] = true, 
-		[1911] = true, 
-		[1912] = true, 
-		[1913] = true, 
-		[1914] = true, 
-		[1920] = true, 
-		[1921] = true, 
-		[1663] = true, 
-		[1664] = true, 
-		[1665] = true, 
-		[1675] = true, 
-		[1676] = true, 
-		[1699] = true, 
-		[1700] = true, 
-		[1735] = true, 
-		[1744] = true, 
-		[1745] = true, 
-		[1746] = true, 
-		[1747] = true, 
-		[1748] = true, 
-		[1750] = true, 
-		[1755] = true, 
-		[1649] = true, 
-		[1650] = true, 
-		[1651] = true, 
-		[1652] = true, 
-		[1674] = true, 
-		[1683] = true, 
-		[1684] = true, 
-		[1685] = true, 
-		[1686] = true, 
-		[1687] = true, 
-		[1697] = true, 
-		[1698] = true, 
-		[1724] = true, 
-		[1725] = true, 
-		[1667] = true, 
-		[1668] = true, 
-		[1690] = true, 
-		[1692] = true, 
-		[1693] = true, 
-		[1694] = true, 
-		[1695] = true, 
-		[1707] = true, 
-		[1708] = true, 
-		[1711] = true, 
-		[1713] = true, 
-		[1714] = true, 
-		[1662] = true, 
-		[1669] = true, 
-		[1677] = true, 
-		[1678] = true, 
-		[1679] = true, 
-		[1680] = true, 
-		[1701] = true, 
-		[1702] = true, 
-		[1703] = true, 
-		[1709] = true, 
-		[1816] = true, 
-		[1818] = true, 
-		[1819] = true, 
-		[1824] = true, 
-		[1825] = true, 
-		[1826] = true, 
-		[1827] = true, 
-		[1829] = true, 
-		[1917] = true 
+		[1643] = true,
+		[1645] = true,
+		[1647] = true,
+		[1658] = true,
+		[1666] = true,
+		[1705] = true,
+		[1726] = true,
+		[1727] = true,
+		[1728] = true,
+		[1762] = true,
+		[1525] = true,
+		[1533] = true,
+		[1536] = true,
+		[1543] = true,
+		[1565] = true,
+		[1569] = true,
+		[1603] = true,
+		[1648] = true,
+		[1656] = true,
+		[1659] = true,
+		[1661] = true,
+		[1670] = true,
+		[1671] = true,
+		[1672] = true,
+		[1673] = true,
+		[1688] = true,
+		[1689] = true,
+		[1734] = true,
+		[1738] = true,
+		[1739] = true,
+		[1740] = true,
+		[1741] = true,
+		[1742] = true,
+		[1813] = true,
+		[1814] = true,
+		[1615] = true,
+		[1616] = true,
+		[1617] = true,
+		[1618] = true,
+		[1619] = true,
+		[1620] = true,
+		[1621] = true,
+		[1623] = true,
+		[1624] = true,
+		[1627] = true,
+		[1628] = true,
+		[1629] = true,
+		[1630] = true,
+		[1631] = true,
+		[1632] = true,
+		[1635] = true,
+		[1636] = true,
+		[1641] = true,
+		[1712] = true,
+		[1716] = true,
+		[1720] = true,
+		[1721] = true,
+		[1736] = true,
+		[1749] = true,
+		[1751] = true,
+		[1752] = true,
+		[1753] = true,
+		[1754] = true,
+		[1756] = true,
+		[1757] = true,
+		[1758] = true,
+		[1759] = true,
+		[1760] = true,
+		[1761] = true,
+		[1763] = true,
+		[1764] = true,
+		[1765] = true,
+		[1766] = true,
+		[1767] = true,
+		[1768] = true,
+		[1769] = true,
+		[1770] = true,
+		[1771] = true,
+		[1772] = true,
+		[1773] = true,
+		[1774] = true,
+		[1776] = true,
+		[1777] = true,
+		[1778] = true,
+		[1779] = true,
+		[1780] = true,
+		[1781] = true,
+		[1782] = true,
+		[1783] = true,
+		[1784] = true,
+		[1785] = true,
+		[1786] = true,
+		[1787] = true,
+		[1788] = true,
+		[1789] = true,
+		[1791] = true,
+		[1792] = true,
+		[1793] = true,
+		[1794] = true,
+		[1795] = true,
+		[1796] = true,
+		[1797] = true,
+		[1798] = true,
+		[1799] = true,
+		[1800] = true,
+		[1801] = true,
+		[1802] = true,
+		[1803] = true,
+		[1804] = true,
+		[1805] = true,
+		[1806] = true,
+		[1807] = true,
+		[1808] = true,
+		[1809] = true,
+		[1810] = true,
+		[1811] = true,
+		[1812] = true,
+		[1820] = true,
+		[1821] = true,
+		[1822] = true,
+		[1823] = true,
+		[1833] = true,
+		[1834] = true,
+		[1835] = true,
+		[1836] = true,
+		[1837] = true,
+		[1838] = true,
+		[1839] = true,
+		[1840] = true,
+		[1841] = true,
+		[1842] = true,
+		[1843] = true,
+		[1844] = true,
+		[1845] = true,
+		[1846] = true,
+		[1847] = true,
+		[1848] = true,
+		[1849] = true,
+		[1850] = true,
+		[1851] = true,
+		[1852] = true,
+		[1853] = true,
+		[1854] = true,
+		[1855] = true,
+		[1856] = true,
+		[1857] = true,
+		[1858] = true,
+		[1859] = true,
+		[1860] = true,
+		[1861] = true,
+		[1862] = true,
+		[1863] = true,
+		[1864] = true,
+		[1865] = true,
+		[1867] = true,
+		[1868] = true,
+		[1869] = true,
+		[1870] = true,
+		[1871] = true,
+		[1872] = true,
+		[1873] = true,
+		[1874] = true,
+		[1875] = true,
+		[1876] = true,
+		[1877] = true,
+		[1878] = true,
+		[1879] = true,
+		[1880] = true,
+		[1881] = true,
+		[1882] = true,
+		[1883] = true,
+		[1884] = true,
+		[1885] = true,
+		[1886] = true,
+		[1887] = true,
+		[1888] = true,
+		[1889] = true,
+		[1890] = true,
+		[1891] = true,
+		[1892] = true,
+		[1893] = true,
+		[1894] = true,
+		[1895] = true,
+		[1896] = true,
+		[1897] = true,
+		[1898] = true,
+		[1899] = true,
+		[1900] = true,
+		[1901] = true,
+		[1902] = true,
+		[1903] = true,
+		[1904] = true,
+		[1905] = true,
+		[1907] = true,
+		[1908] = true,
+		[1909] = true,
+		[1910] = true,
+		[1911] = true,
+		[1912] = true,
+		[1913] = true,
+		[1914] = true,
+		[1920] = true,
+		[1921] = true,
+		[1663] = true,
+		[1664] = true,
+		[1665] = true,
+		[1675] = true,
+		[1676] = true,
+		[1699] = true,
+		[1700] = true,
+		[1735] = true,
+		[1744] = true,
+		[1745] = true,
+		[1746] = true,
+		[1747] = true,
+		[1748] = true,
+		[1750] = true,
+		[1755] = true,
+		[1649] = true,
+		[1650] = true,
+		[1651] = true,
+		[1652] = true,
+		[1674] = true,
+		[1683] = true,
+		[1684] = true,
+		[1685] = true,
+		[1686] = true,
+		[1687] = true,
+		[1697] = true,
+		[1698] = true,
+		[1724] = true,
+		[1725] = true,
+		[1667] = true,
+		[1668] = true,
+		[1690] = true,
+		[1692] = true,
+		[1693] = true,
+		[1694] = true,
+		[1695] = true,
+		[1707] = true,
+		[1708] = true,
+		[1711] = true,
+		[1713] = true,
+		[1714] = true,
+		[1662] = true,
+		[1669] = true,
+		[1677] = true,
+		[1678] = true,
+		[1679] = true,
+		[1680] = true,
+		[1701] = true,
+		[1702] = true,
+		[1703] = true,
+		[1709] = true,
+		[1816] = true,
+		[1818] = true,
+		[1819] = true,
+		[1824] = true,
+		[1825] = true,
+		[1826] = true,
+		[1827] = true,
+		[1829] = true,
+		[1917] = true
 	}
 
 	coords:SetScript("OnUpdate", function(self, elapsed)
 		self.elapsed = self.elapsed + elapsed
-		if (self.elapsed < .1) then 
-			return 
-		end 
+		if (self.elapsed < .1) then
+			return
+		end
 
 		if (not self.mapID) or (self.mapID ~= WorldMapFrame.mapID) then
 			self.player:ClearAllPoints()
@@ -1640,7 +1822,7 @@ or IsRetail and function(self, ...)
 			local mapID = WorldMapFrame.mapID
 			if (mapID) and (self.bottomLeft[mapID]) then
 
-				-- This is fine in Shadowlands, but fully fails in BfA of Legion. 
+				-- This is fine in Shadowlands, but fully fails in BfA of Legion.
 				self.player:SetPoint("BOTTOMLEFT", WorldMapFrame.ScrollContainer, "BOTTOMLEFT", 16, 12)
 				self.cursor:SetPoint("BOTTOMLEFT", self.player, "TOPLEFT", 0, 1)
 
@@ -1664,28 +1846,28 @@ or IsRetail and function(self, ...)
 
 		local pX, pY, cX, cY
 		local mapID = GetBestMapForUnit("player")
-		if (mapID) then 
+		if (mapID) then
 			local mapPosObject = GetPlayerMapPosition(mapID, "player")
-			if (mapPosObject) then 
+			if (mapPosObject) then
 				pX, pY = mapPosObject:GetXY()
-			end 
-		end 
+			end
+		end
 
-		if (WorldMapFrame.ScrollContainer:IsMouseOver()) then 
+		if (WorldMapFrame.ScrollContainer:IsMouseOver()) then
 			cX, cY = WorldMapFrame.ScrollContainer:GetNormalizedCursorPosition()
 		end
 
-		if (pX and pY) then 
+		if (pX and pY) then
 			self.player:SetFormattedText("%s:|r   %s, %s", L_PLAYER, GetFormattedCoordinates(pX, pY))
-		else 
+		else
 			self.player:SetFormattedText("%s:|r   |cfff0f0f0%s|r", L_PLAYER, L_NA)
-		end 
+		end
 
-		if (cX and cY) then 
+		if (cX and cY) then
 			self.cursor:SetFormattedText("%s:|r   %s, %s", L_MOUSE, GetFormattedCoordinates(cX, cY))
 		else
 			self.cursor:SetFormattedText("%s:|r   |cfff0f0f0%s|r", L_MOUSE, L_NA)
-		end 
+		end
 
 		self.elapsed = 0
 	end)
@@ -1706,7 +1888,7 @@ or IsRetail and function(self, ...)
 
 	-- WorldMap Size
 	-----------------------------------------------------------------
-	local getScale = function() 
+	local getScale = function()
 		local min, max = 0.65, 0.95 -- our own scale limits
 		local uiMin, uiMax = 0.65, 1.15 -- blizzard uiScale slider limits
 		local uiScale = UIParent:GetEffectiveScale() -- current blizzard uiScale
@@ -1765,17 +1947,17 @@ or IsRetail and function(self, ...)
 		WorldMapFrame:SetSize((width * scale) - (magicNumber + 2), (height * scale) - 2)
 		WorldMapFrame:OnCanvasSizeChanged()
 	end
-	
+
 	-- Old fashioned way.
 	hooksecurefunc(WorldMapFrame, "Maximize", Maximize)
 	hooksecurefunc(WorldMapFrame, "Minimize", Minimize)
 	hooksecurefunc(WorldMapFrame, "SynchronizeDisplayState", SyncState)
 	hooksecurefunc(WorldMapFrame, "UpdateMaximizedSize", UpdateSize)
 
-	-- Do NOT use HookScript on the WorldMapFrame, 
+	-- Do NOT use HookScript on the WorldMapFrame,
 	-- as it WILL taint it after the 3rd opening in combat.
 	-- Super weird, but super important. Do it this way instead.
-	-- *Note that this even though seemingly identical, 
+	-- *Note that this even though seemingly identical,
 	--  is in fact NOT the same taint as that occurring when
 	--  a new quest item button is spawned in the tracker in combat.
 	local OnShow
@@ -1801,127 +1983,127 @@ LibBlizzard.OnEvent = function(self, event, ...)
 	if (event == "ADDON_LOADED") then
 		local found, hasQueued
 
-		-- Iterate widgets queued for disabling after their loading 
-		for widgetName,widgetData in pairs(self.queue) do 
-			if (widgetData.addonName == arg1) then 
+		-- Iterate widgets queued for disabling after their loading
+		for widgetName,widgetData in pairs(self.queue) do
+			if (widgetData.addonName == arg1) then
 				UIWidgetsDisable[widgetName](self, unpack(widgetData.args))
 				self.queue[widgetName] = nil
 				found = true
-			else 
+			else
 				hasQueued = true
-			end 
+			end
 			-- Definitely not the fastest way, but sufficient for our purpose
 			if (found) and (hasQueued) then
 				break
 			end
-		end 
+		end
 
-		-- Iterate widgets queued for enabling after their loading 
-		for widgetName,widgetData in pairs(self.enableQueue) do 
-			if (widgetData.addonName == arg1) then 
+		-- Iterate widgets queued for enabling after their loading
+		for widgetName,widgetData in pairs(self.enableQueue) do
+			if (widgetData.addonName == arg1) then
 				UIWidgetsEnable[widgetName](self, unpack(widgetData.args))
 				self.enableQueue[widgetName] = nil
 				found = true
-			else 
+			else
 				hasQueued = true
-			end 
+			end
 			-- Definitely not the fastest way, but sufficient for our purpose
 			if (found) and (hasQueued) then
 				break
 			end
-		end 
-		
+		end
+
 		-- Iterate widgets queued for styling after their loading
-		for widgetName, widgetData in pairs(self.stylingQueue) do 
-			if (widgetData.addonName == arg1) then 
+		for widgetName, widgetData in pairs(self.stylingQueue) do
+			if (widgetData.addonName == arg1) then
 				UIWidgetStyling[widgetName](self, unpack(widgetData.args))
 				self.stylingQueue[widgetName] = nil
 				found = true
-			else 
+			else
 				hasQueued = true
-			end 
+			end
 			if (found) and (hasQueued) then
 				break
 			end
-		end 
+		end
 
 		-- Nothing queued, kill off this event
-		if (not hasQueued) then 
-			if self:IsEventRegistered("ADDON_LOADED", "OnEvent") then 
+		if (not hasQueued) then
+			if self:IsEventRegistered("ADDON_LOADED", "OnEvent") then
 				self:UnregisterEvent("ADDON_LOADED", "OnEvent")
-			end 
-		end 
-	end 
-end 
+			end
+		end
+	end
+end
 
 -- Library Public API
 -----------------------------------------------------------------
 LibBlizzard.EnableUIWidget = function(self, name, ...)
 	-- Just silently fail for widgets that don't exist.
-	-- Makes it much simpler during development, 
+	-- Makes it much simpler during development,
 	-- and much easier in the future to upgrade.
-	if (not UIWidgetsEnable[name]) then 
+	if (not UIWidgetsEnable[name]) then
 		if (self.AddDebugMessageFormatted) then
 			self:AddDebugMessageFormatted(("LibBlizzard: The UI widget '%s' does not have an Enable method."):format(name))
 		end
-		return 
-	end 
+		return
+	end
 	local dependency = UIWidgetDependency[name]
-	if (dependency) then 
-		if (not IsAddOnLoaded(dependency)) then 
+	if (dependency) then
+		if (not IsAddOnLoaded(dependency)) then
 			LibBlizzard.enableQueue[name] = { addonName = dependency, args = { ... } }
-			if (not LibBlizzard:IsEventRegistered("ADDON_LOADED", "OnEvent")) then 
+			if (not LibBlizzard:IsEventRegistered("ADDON_LOADED", "OnEvent")) then
 				LibBlizzard:RegisterEvent("ADDON_LOADED", "OnEvent")
-			end 
-			return 
-		end 
-	end 
+			end
+			return
+		end
+	end
 	UIWidgetsEnable[name](LibBlizzard, ...)
 end
 
 LibBlizzard.DisableUIWidget = function(self, name, ...)
 	-- Just silently fail for widgets that don't exist.
-	-- Makes it much simpler during development, 
+	-- Makes it much simpler during development,
 	-- and much easier in the future to upgrade.
-	if (not UIWidgetsDisable[name]) then 
+	if (not UIWidgetsDisable[name]) then
 		if (self.AddDebugMessageFormatted) then
 			self:AddDebugMessageFormatted(("LibBlizzard: The UI widget '%s' does not exist."):format(name))
 		end
-		return 
-	end 
+		return
+	end
 	local dependency = UIWidgetDependency[name]
-	if (dependency) then 
-		if (not IsAddOnLoaded(dependency)) then 
+	if (dependency) then
+		if (not IsAddOnLoaded(dependency)) then
 			LibBlizzard.queue[name] = { addonName = dependency, args = { ... } }
-			if (not LibBlizzard:IsEventRegistered("ADDON_LOADED", "OnEvent")) then 
+			if (not LibBlizzard:IsEventRegistered("ADDON_LOADED", "OnEvent")) then
 				LibBlizzard:RegisterEvent("ADDON_LOADED", "OnEvent")
-			end 
-			return 
-		end 
-	end 
+			end
+			return
+		end
+	end
 	UIWidgetsDisable[name](LibBlizzard, ...)
 end
 
 LibBlizzard.StyleUIWidget = function(self, name, ...)
 	-- Just silently fail for widgets that don't exist.
-	-- Makes it much simpler during development, 
+	-- Makes it much simpler during development,
 	-- and much easier in the future to upgrade.
-	if (not UIWidgetStyling[name]) then 
+	if (not UIWidgetStyling[name]) then
 		if (self.AddDebugMessageFormatted) then
 			self:AddDebugMessageFormatted(("LibBlizzard: The UI widget '%s' does not exist."):format(name))
 		end
-		return 
-	end 
+		return
+	end
 	local dependency = UIWidgetDependency[name]
-	if (dependency) then 
-		if (not IsAddOnLoaded(dependency)) then 
+	if (dependency) then
+		if (not IsAddOnLoaded(dependency)) then
 			LibBlizzard.stylingQueue[name] = { addonName = dependency, args = { ... } }
-			if (not LibBlizzard:IsEventRegistered("ADDON_LOADED", "OnEvent")) then 
+			if (not LibBlizzard:IsEventRegistered("ADDON_LOADED", "OnEvent")) then
 				LibBlizzard:RegisterEvent("ADDON_LOADED", "OnEvent")
-			end 
-			return 
-		end 
-	end 
+			end
+			return
+		end
+	end
 	UIWidgetStyling[name](LibBlizzard, ...)
 end
 
@@ -1940,11 +2122,11 @@ LibBlizzard.DisableUIMenuOption = function(self, option_shrink, option_name)
 	if option_shrink then
 		option:SetHeight(0.00001)
 		-- Needed for the options to shrink properly.
-		-- Will mess up alignment for indented options, 
+		-- Will mess up alignment for indented options,
 		-- so only use this when the following options is
 		-- horizontally aligned with the removed one.
 		if (option_shrink == true) then
-			option:SetScale(0.00001) 
+			option:SetScale(0.00001)
 		end
 	end
 	option.cvar = ""
@@ -1957,7 +2139,7 @@ end
 
 LibBlizzard.DisableUIMenuPage = function(self, panel_id, panel_name)
 	local button,window
-	-- remove an entire blizzard options panel, 
+	-- remove an entire blizzard options panel,
 	-- and disable its automatic cancel/okay functionality
 	-- this is needed, or the option will be reset when the menu closes
 	-- it is also a major source of taint related to the Compact group frames!
@@ -1982,23 +2164,23 @@ LibBlizzard.DisableUIMenuPage = function(self, panel_id, panel_name)
 			window = true
 		end
 	end
-	-- By removing the menu panels above we're preventing the blizzard UI from calling it, 
-	-- and for some reason it is required to be called at least once, 
-	-- or the game won't fire off the events that tell the UI that the player has an active pet out. 
+	-- By removing the menu panels above we're preventing the blizzard UI from calling it,
+	-- and for some reason it is required to be called at least once,
+	-- or the game won't fire off the events that tell the UI that the player has an active pet out.
 	-- In other words: without it both the pet bar and pet unitframe will fail after a /reload
-	if (panel_id == 5) or (panel_name == "InterfaceOptionsActionBarsPanel") then 
+	if (panel_id == 5) or (panel_name == "InterfaceOptionsActionBarsPanel") then
 		SetActionBarToggles(nil, nil, nil, nil, nil)
-	end 
+	end
 	if (panel_id and not button) then
 		if (self.AddDebugMessageFormatted) then
 			self:AddDebugMessageFormatted(("LibBlizzard: The panel button with id '%.0f' does not exist."):format(panel_id))
 		end
-	end 
+	end
 	if (panel_name and not window) then
 		if (self.AddDebugMessageFormatted) then
 			self:AddDebugMessageFormatted(("LibBlizzard: The menu panel named '%s' does not exist."):format(panel_name))
 		end
-	end 
+	end
 end
 
 -- Module embedding

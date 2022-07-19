@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
-if (not Core) then 
-	return 
+if (not Core) then
+	return
 end
 
 local L = Wheel("LibLocale"):GetLocale(ADDON)
@@ -11,7 +11,7 @@ local Module = Core:NewModule("BlizzardGameMenu", "LibEvent", "LibDB", "LibToolt
 local _G = _G
 local ipairs = ipairs
 local table_remove = table.remove
-local type = type 
+local type = type
 
 -- WoW API
 local InCombatLockdown = InCombatLockdown
@@ -19,21 +19,22 @@ local IsMacClient = IsMacClient
 
 -- Private API
 local GetLayout = Private.GetLayout
+local IsDragonflight = Private.IsRetailDragonflight
 
 local BLANK_TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
 local buttonWidth, buttonHeight, buttonSpacing, sizeMod = 300, 50, 10, 3/4
 
 Module.OnEvent = function(self, event, ...)
-	if (event == "PLAYER_REGEN_ENABLED") then 
+	if (event == "PLAYER_REGEN_ENABLED") then
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 		self:UpdateButtonLayout()
-	end 
-end 
+	end
+end
 
 Module.UpdateButtonLayout = function(self)
-	if InCombatLockdown() then 
+	if InCombatLockdown() then
 		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
-	end 
+	end
 
 	local UICenter = self:GetFrame("UICenter")
 
@@ -52,7 +53,7 @@ Module.UpdateButtonLayout = function(self)
 			previous = button
 			last = button
 		end
-	end	
+	end
 
 	-- re-align first button so that the menu will be vertically centered
 	local top = first:GetTop()
@@ -79,10 +80,10 @@ Module.StyleButtons = function(self)
 		else
 			button = v.content
 		end
-		
+
 		-- style it unless we've already done it
 		if (not v.styled) then
-			
+
 			if (button) then
 				-- Ignore hidden buttons, because that means Blizzard aren't using them.
 				-- An example of this is the mac options button which is hidden on windows/linux.
@@ -94,7 +95,7 @@ Module.StyleButtons = function(self)
 					label = v.label
 				end
 				local anchor = v.anchor
-				
+
 				-- run custom scripts on the button, if any
 				if (v.run) then
 					v.run(button)
@@ -117,13 +118,13 @@ Module.StyleButtons = function(self)
 				button:SetPushedTexture("")
 
 				--button:SetText(" ") -- this is not enough, blizzard adds it back in some cases
-				
+
 				local fontstring = button:GetFontString()
 				if fontstring then
 					fontstring:SetAlpha(0) -- this is compatible with the Shop button
 				end
-				
-				button:SetSize(layout.MenuButtonSize[1]*layout.MenuButtonSizeMod, layout.MenuButtonSize[2]*layout.MenuButtonSizeMod) 
+
+				button:SetSize(layout.MenuButtonSize[1]*layout.MenuButtonSizeMod, layout.MenuButtonSize[2]*layout.MenuButtonSizeMod)
 				layout.MenuButton_PostCreate(button, label)
 
 				local PostUpdate = layout.MenuButton_PostUpdate
@@ -134,10 +135,10 @@ Module.StyleButtons = function(self)
 				button:HookScript("OnShow", function(self) self.isDown = false; return PostUpdate(self) end)
 				button:HookScript("OnHide", function(self) self.isDown = false; return PostUpdate(self) end)
 				PostUpdate(button)
-			
+
 				v.button = button -- add a reference to the frame handle for the layout function
 				v.styled = true -- avoid double styling
-					
+
 			else
 				-- If the button doesn't exist, it could be something added by an addon later.
 				if v.addon then
@@ -147,7 +148,7 @@ Module.StyleButtons = function(self)
 
 		end
 	end
-	
+
 	-- Add this as a callback if a button from an addon wasn't loaded.
 	-- *Could add in specific addons to look for here, but I'm not going to bother with it.
 	if need_addon_watch then
@@ -161,7 +162,7 @@ Module.StyleButtons = function(self)
 			self.looking_for_addons = nil
 		end
 	end
-	
+
 	self:UpdateButtonLayout()
 end
 
@@ -170,17 +171,17 @@ Module.StyleWindow = function(self, frame)
 	self.frame:EnableMouse(false) -- only need the mouse on the actual buttons
 
 	if (self.frame.SetBackdrop) then
-		self.frame:SetBackdrop(nil) 
+		self.frame:SetBackdrop(nil)
 	end
-	
+
 	self.frame:SetFrameStrata("DIALOG")
 	self.frame:SetFrameLevel(120)
 
 	-- registry of objects we won't strip (not actually used yet)
 	if (not self.objects) then
-		self.objects = {} 
+		self.objects = {}
 	end
-	
+
 	for i = 1, self.frame:GetNumRegions() do
 		local region = select(i, self.frame:GetRegions())
 		if region and not self.objects[region] then
@@ -196,15 +197,15 @@ Module.StyleWindow = function(self, frame)
 	end
 
 	-- 8.2.0 weirdness
-	if (self.frame.Border) then 
+	if (self.frame.Border) then
 		self.frame.Border:SetParent(self.UIHider)
 	end
 
 	-- 8.3.0 weirdness
-	if (self.frame.Header) then 
+	if (self.frame.Header) then
 		self.frame.Header:SetParent(self.UIHider)
 	end
-	
+
 end
 
 Module.OnInit = function(self)
@@ -222,10 +223,12 @@ Module.OnInit = function(self)
 		{ content = GameMenuButtonHelp, label = GAMEMENU_HELP },
 		{ content = GameMenuButtonStore, label = BLIZZARD_STORE },
 		{ content = GameMenuButtonWhatsNew, label = GAMEMENU_NEW_BUTTON },
+		{ content = GameMenuButtonSettings, label = GAMEMENU_SETTINGS },
+		{ content = GameMenuButtonEditMode, label = HUD_EDIT_MODE_MENU },
 		{ content = GameMenuButtonOptions, label = SYSTEMOPTIONS_MENU },
 		{ content = GameMenuButtonUIOptions, label = UIOPTIONS_MENU },
 		{ content = GameMenuButtonKeybindings, label = KEY_BINDINGS },
-		{ content = "GameMenuButtonMoveAnything", label = function() return GameMenuButtonMoveAnything:GetText() end, addon = true }, 
+		{ content = "GameMenuButtonMoveAnything", label = function() return GameMenuButtonMoveAnything:GetText() end, addon = true },
 		{ content = GameMenuButtonMacros, label = MACROS },
 		{ content = GameMenuButtonAddons, label = ADDONS },
 		{ content = GameMenuButtonRatings, label = RATINGS_MENU },
@@ -233,11 +236,11 @@ Module.OnInit = function(self)
 		{ content = GameMenuButtonQuit, label = EXIT_GAME },
 		{ content = GameMenuButtonContinue, label = RETURN_TO_GAME, anchor = "BOTTOM" }
 	}
-	
+
 	local UIHider = CreateFrame("Frame")
 	UIHider:Hide()
 	self.UIHider = UIHider
-	
+
 	-- kill mac options button if not a mac client
 	if GameMenuButtonMacOptions and (not IsMacClient()) then
 		for i,v in ipairs(self.buttons) do
@@ -250,15 +253,15 @@ Module.OnInit = function(self)
 			end
 		end
 	end
-	
+
 	-- Remove store button if there's no store available,
 	-- if we're currently using a trial account,
 	-- or if the account is in limited (no paid gametime) mode.
-	-- TODO: Hook a callback post-styling and post-showing this 
-	-- when the store becomes available mid-session. 
-	if GameMenuButtonStore 
+	-- TODO: Hook a callback post-styling and post-showing this
+	-- when the store becomes available mid-session.
+	if GameMenuButtonStore
 	and ((C_StorePublic and not C_StorePublic.IsEnabled())
-	or (IsTrialAccount and IsTrialAccount()) 
+	or (IsTrialAccount and IsTrialAccount())
 	or (GameLimitedMode_IsActive and GameLimitedMode_IsActive())) then
 		for i,v in ipairs(self.buttons) do
 			if v.content == GameMenuButtonStore then
@@ -279,12 +282,14 @@ Module.OnInit = function(self)
 	self:RegisterEvent("UI_SCALE_CHANGED", "UpdateButtonLayout")
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED", "UpdateButtonLayout")
 
-	if VideoOptionsFrameApply then
-		VideoOptionsFrameApply:HookScript("OnClick", function() self:UpdateButtonLayout() end)
-	end
+	if (not IsDragonflight) then
+		if VideoOptionsFrameApply then
+			VideoOptionsFrameApply:HookScript("OnClick", function() self:UpdateButtonLayout() end)
+		end
 
-	if VideoOptionsFrameOkay then
-		VideoOptionsFrameOkay:HookScript("OnClick", function() self:UpdateButtonLayout() end)
+		if VideoOptionsFrameOkay then
+			VideoOptionsFrameOkay:HookScript("OnClick", function() self:UpdateButtonLayout() end)
+		end
 	end
 
 end
