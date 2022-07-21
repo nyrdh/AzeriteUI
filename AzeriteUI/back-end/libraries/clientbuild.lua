@@ -1,4 +1,4 @@
-local LibClientBuild = Wheel:Set("LibClientBuild", 45)
+local LibClientBuild = Wheel:Set("LibClientBuild", 46)
 if (not LibClientBuild) then
 	return
 end
@@ -24,6 +24,7 @@ local IsRetail, IsRetailBFA, IsRetailShadowlands
 
 IsClassic = tonumber(MAJOR) == 1
 IsTBC = tonumber(MAJOR) == 2
+IsWotLK = tonumber(MAJOR) == 3
 IsRetail = tonumber(MAJOR) >= 9
 IsRetailBFA = tonumber(MAJOR) == 8
 IsRetailShadowlands = tonumber(MAJOR) == 9
@@ -61,6 +62,11 @@ end
 -- Returns true if we're on a classic TBC patch
 LibClientBuild.IsTBC = function(self)
 	return IsTBC
+end
+
+-- Returns true if we're on a classic WotLK patch
+LibClientBuild.IsWotLK = function(self)
+	return IsWotLK
 end
 
 -- Returns true if we're on a retail patch
@@ -102,6 +108,7 @@ end
 local embedMethods = {
 	IsClassic = true,
 	IsTBC = true,
+	IsWotLK = true,
 	IsRetail = true,
 	IsRetailBFA = true,
 	IsRetailShadowlands = true,

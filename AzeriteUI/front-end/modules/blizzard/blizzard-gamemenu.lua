@@ -220,7 +220,7 @@ Module.OnInit = function(self)
 	self.frame = GameMenuFrame
 	self.frame:SetParent(UICenter)
 	self.buttons = {
-		{ content = GameMenuButtonHelp, label = GAMEMENU_HELP },
+		{ content = GameMenuButtonHelp, label = IsDragonflight and GAMEMENU_SUPPORT or GAMEMENU_HELP },
 		{ content = GameMenuButtonStore, label = BLIZZARD_STORE },
 		{ content = GameMenuButtonWhatsNew, label = GAMEMENU_NEW_BUTTON },
 		{ content = GameMenuButtonSettings, label = GAMEMENU_SETTINGS },

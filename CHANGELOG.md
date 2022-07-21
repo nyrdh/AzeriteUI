@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.541-RC] 2022-07-21
+### Added
+- Added experimental support for WotLK classic. Feedback needed.
+
 ## [3.2.540-Beta] 2022-07-19
 ### Added
-- Started to add and modify code to make this Dragonflight compatible. Note that these changes are untested, and thus will be labeled as Beta or even Alpha for a while, to avoid crazy amounts of bug reports and incompatibility issues.
+- Added partial experimental support for Dragonflight.
 
 ## [3.2.539-Release] 2022-07-09
 - Bump for Classic Era client patch 1.14.3.
