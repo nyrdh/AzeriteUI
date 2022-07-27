@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.542-RC] 2022-07-27
+### Fixed
+- Fixed wrong frameType in the back-end on WotLK classic clients.
+
 ## [3.2.541-RC] 2022-07-21
 ### Added
 - Added experimental support for WotLK classic. Feedback needed.
