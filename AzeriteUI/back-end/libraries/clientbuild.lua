@@ -1,4 +1,4 @@
-local LibClientBuild = Wheel:Set("LibClientBuild", 46)
+local LibClientBuild = Wheel:Set("LibClientBuild", 47)
 if (not LibClientBuild) then
 	return
 end
@@ -18,17 +18,19 @@ currentClientBuild = tonumber(currentClientBuild)
 
 -- Let's create some constants for faster lookups
 local MAJOR,MINOR,PATCH = string_split(".", currentClientPatch)
+MAJOR = tonumber(MAJOR)
+MINOR = tonumber(MINOR)
 
 local IsClassic, IsTBC
 local IsRetail, IsRetailBFA, IsRetailShadowlands
 
-IsClassic = tonumber(MAJOR) == 1
-IsTBC = tonumber(MAJOR) == 2
-IsWotLK = tonumber(MAJOR) == 3
-IsRetail = tonumber(MAJOR) >= 9
-IsRetailBFA = tonumber(MAJOR) == 8
-IsRetailShadowlands = tonumber(MAJOR) == 9
-IsRetailDragonflight = tonumber(MAJOR) == 10
+IsClassic = MAJOR == 1
+IsTBC = MAJOR == 2
+IsWotLK = MAJOR == 3
+IsRetail = MAJOR >= 9
+IsRetailBFA = MAJOR == 8
+IsRetailShadowlands = MAJOR == 9
+IsRetailDragonflight = MAJOR == 10
 
 local builds = {}
 
@@ -95,14 +97,33 @@ LibClientBuild.GetClientBuildByPatch = function(self, patch)
 	return (currentClientPatch == patch) and currentClientBuild or builds[patch]
 end
 
+-- Return the current full patch version as string
 LibClientBuild.GetCurrentClientPatch = function(self)
 	return currentClientPatch
 end
 
--- Return the current WoW client build
+-- Return the current WoW MAJOR version as a numer
+LibClientBuild.GetCurrentClientVersionMajor = function(self)
+	return MAJOR
+end
+
+-- Return the current WoW MINOR version as a number
+LibClientBuild.GetCurrentClientVersionMinor = function(self)
+	return MINOR
+end
+
+-- Return the current WoW PATCH version as a string
+-- *note that this is not the full patch version,
+--  so for WoW Classic "1.13.7" this would return "7".
+LibClientBuild.GetCurrentClientVersionPatch = function(self)
+	return PATCH
+end
+
+-- Return the current WoW client build as a number
 LibClientBuild.GetCurrentClientBuild = function(self)
 	return currentClientBuild
 end
+
 
 -- Module embedding
 local embedMethods = {
@@ -115,7 +136,10 @@ local embedMethods = {
 	IsRetailDragonflight = true,
 	GetClientBuildByPatch = true,
 	GetCurrentClientBuild = true,
-	GetCurrentClientPatch = true
+	GetCurrentClientPatch = true,
+	GetCurrentClientVersionMajor = true,
+	GetCurrentClientVersionMinor = true,
+	GetCurrentClientVersionPatch = true
 }
 
 LibClientBuild.Embed = function(self, target)
