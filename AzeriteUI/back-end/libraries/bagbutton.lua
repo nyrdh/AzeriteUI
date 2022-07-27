@@ -1,5 +1,13 @@
-local LibBagButton = Wheel:Set("LibBagButton", 57)
-if (not LibBagButton) then	
+-- WoW Client MAJOR version
+local MAJOR = tonumber(string_split(".", (GetBuildInfo())))
+
+-- Bail out if this is Dragonflight
+if (MAJOR >= 10) then
+	return
+end
+
+local LibBagButton = Wheel:Set("LibBagButton", 58)
+if (not LibBagButton) then
 	return
 end
 
@@ -75,7 +83,12 @@ local SpellIsTargeting = SpellIsTargeting
 -- Constants
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWotLK = LibClientBuild:IsTBC()
 local IsRetail = LibClientBuild:IsRetail()
+
+-- No 'ItemButton' frameType in the classics.
+local USE_OLD_API = MAJOR < 9
+
 
 -- Library registries
 LibBagButton.embeds = LibBagButton.embeds or {}
@@ -90,8 +103,8 @@ LibBagButton.buttonSlots = LibBagButton.buttonSlots or {} -- cache of actual usa
 LibBagButton.containers = LibBagButton.containers or {} -- cache of virtual containers spawned
 LibBagButton.elements = LibBagButton.elements or {} -- global container element registry
 LibBagButton.contents = LibBagButton.contents or {} -- cache of actual bank and bag contents
-LibBagButton.queuedContainerIDs = LibBagButton.queuedContainerIDs or {} -- Queue system for uncached items 
-LibBagButton.queuedItemIDs = LibBagButton.queuedItemIDs or {} -- Queue system for uncached items 
+LibBagButton.queuedContainerIDs = LibBagButton.queuedContainerIDs or {} -- Queue system for uncached items
+LibBagButton.queuedItemIDs = LibBagButton.queuedItemIDs or {} -- Queue system for uncached items
 LibBagButton.callbacks = LibBagButton.callbacks or {} -- button callback registry
 LibBagButton.messages = LibBagButton.messages or {} -- library callback message cache
 LibBagButton.blizzardMethods = LibBagButton.blizzardMethods or {}
@@ -110,11 +123,11 @@ local QueuedItemIDs = LibBagButton.queuedItemIDs
 local BlizzardMethods = LibBagButton.blizzardMethods
 
 -- Blizzard FontObjects
--- Main idea about sticking to these, 
+-- Main idea about sticking to these,
 -- is that they are font families adjusting
--- themselves to whatever locale the client is using. 
+-- themselves to whatever locale the client is using.
 -- This combined with global strings for text
--- makes the whole library work for all locales by default. 
+-- makes the whole library work for all locales by default.
 local TextFontTiny = Game11Font_o1 -- 11
 local TextFontSmall = Game13Font_o1 -- 13
 local TextFontNormal = Game15Font_o1 --15
@@ -125,15 +138,15 @@ local NumberFontNormal = NumberFont_Outline_Large -- 16
 local NumberFontHuge = NumberFont_Outline_Huge -- 30
 
 -- Color table assigned to buttons. Can be replaced.
--- Note that replacements should follow the same structure, 
--- as my color handling assumes the methods to be there. 
+-- Note that replacements should follow the same structure,
+-- as my color handling assumes the methods to be there.
 -----------------------------------------------------------------
 -- Color Template
 local ColorTemplate = {}
 
--- Emulate some of the Blizzard methods, 
--- since they too do colors this way now. 
--- Goal is not to be fully interchangeable. 
+-- Emulate some of the Blizzard methods,
+-- since they too do colors this way now.
+-- Goal is not to be fully interchangeable.
 ColorTemplate.GetRGB = function(self)
 	return self[1], self[2], self[3]
 end
@@ -150,13 +163,13 @@ ColorTemplate.GenerateHexColorMarkup = function(self)
 	return "|c" .. self:GenerateHexColor()
 end
 
--- Convert a Blizzard Color or RGB value set 
--- into our own custom color table format. 
+-- Convert a Blizzard Color or RGB value set
+-- into our own custom color table format.
 local createColor = function(...)
 	local tbl
 	if (select("#", ...) == 1) then
 		local old = ...
-		if (old.r) then 
+		if (old.r) then
 			tbl = {}
 			tbl[1] = old.r or 1
 			tbl[2] = old.g or 1
@@ -168,7 +181,7 @@ local createColor = function(...)
 		tbl = { ... }
 	end
 	-- Do NOT use a metatable, just embed.
-	for name,method in pairs(ColorTemplate) do 
+	for name,method in pairs(ColorTemplate) do
 		tbl[name] = method
 	end
 	if (#tbl == 3) then
@@ -215,28 +228,29 @@ Colors.class.MAGE = createColor(105/255, 204/255, 240/255)
 Colors.class.MONK = createColor(0/255, 255/255, 150/255)
 Colors.class.PALADIN = createColor(225/255, 160/255, 226/255)
 Colors.class.PRIEST = createColor(176/255, 200/255, 225/255)
-Colors.class.ROGUE = createColor(255/255, 225/255, 95/255) 
-Colors.class.SHAMAN = createColor(32/255, 122/255, 222/255) 
-Colors.class.WARLOCK = createColor(148/255, 130/255, 201/255) 
-Colors.class.WARRIOR = createColor(229/255, 156/255, 110/255) 
+Colors.class.ROGUE = createColor(255/255, 225/255, 95/255)
+Colors.class.SHAMAN = createColor(32/255, 122/255, 222/255)
+Colors.class.WARLOCK = createColor(148/255, 130/255, 201/255)
+Colors.class.WARRIOR = createColor(229/255, 156/255, 110/255)
 Colors.class.UNKNOWN = createColor(195/255, 202/255, 217/255)
 
 -- Button Creation Templates
 -----------------------------------------------------------------
 -- Sourced from FrameXML/BankFrame.lua
--- Bag containing the 7 (or 6 in classic) bank bag buttons. 
+-- Bag containing the 7 (or 6 in classic) bank bag buttons.
 local BANK_SLOT_CONTAINER = -4
 
 -- This one does not exist. We made it up.
 local BAG_SLOT_CONTAINER = -100
 
 -- Frame type of slot buttons.
-local BUTTON_TYPE = (IsClassic or IsTBC) and "Button" or "ItemButton" 
+-- *the classics have yet to include the ItemButton frametype.
+local BUTTON_TYPE = USE_OLD_API and "Button" or "ItemButton"
 
 -- Frame template of itembuttons in each bagType.
--- This table will have both the bagTypes and all bagIDs as keys, 
+-- This table will have both the bagTypes and all bagIDs as keys,
 -- making it a good tool to compare slot button compatibility on bagID changes.
--- Since these templates can only be set on itembutton creation, 
+-- Since these templates can only be set on itembutton creation,
 -- we can only ever change between bagIDs using the same button templates.
 local ButtonTemplates = {
 	Bag = "ContainerFrameItemButtonTemplate", -- bag itembutton
@@ -247,21 +261,21 @@ local ButtonTemplates = {
 	BankSlot = "BankItemButtonBagTemplate" -- equippable bank container slot
 }
 
--- Localized display names for the bags. 
--- Note that some names can be generated on-the-fly, 
+-- Localized display names for the bags.
+-- Note that some names can be generated on-the-fly,
 -- so we're intentionally avoiding to list a few here.
 local BagNames = { [BACKPACK_CONTAINER] = BACKPACK_TOOLTIP, [BANK_CONTAINER] = BANK }
 
 -- Simple lookup table to get bagType from a provided bagID.
-local BagTypesFromID = { 
-	[BACKPACK_CONTAINER] = "Bag", 
-	[BANK_CONTAINER] = "Bank", 
-	[BAG_SLOT_CONTAINER] = "BagSlot", 
-	[BANK_SLOT_CONTAINER] = "BankSlot" 
+local BagTypesFromID = {
+	[BACKPACK_CONTAINER] = "Bag",
+	[BANK_CONTAINER] = "Bank",
+	[BAG_SLOT_CONTAINER] = "BagSlot",
+	[BANK_SLOT_CONTAINER] = "BankSlot"
 }
 
 -- Setup all bagID lookup tables.
-local bagIDs = { BACKPACK_CONTAINER } -- indexed 
+local bagIDs = { BACKPACK_CONTAINER } -- indexed
 local isBagID = { [BACKPACK_CONTAINER] = true } -- hashed
 for id = BACKPACK_CONTAINER + 1, NUM_BAG_SLOTS do
 	isBagID[id] = true
@@ -272,7 +286,7 @@ end
 ButtonTemplates[BACKPACK_CONTAINER] = ButtonTemplates.Bag
 
 -- Setup all bankBagID lookup tables.
-local bankIDs = { BANK_CONTAINER } -- indexed 
+local bankIDs = { BANK_CONTAINER } -- indexed
 local isBankID = { [BANK_CONTAINER] = true } -- hashed
 for id = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
 	isBankID[id] = true
@@ -282,7 +296,7 @@ for id = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
 end
 ButtonTemplates[BANK_CONTAINER] = ButtonTemplates.Bank
 
--- The keyring only exists in classic, 
+-- The keyring only exists in classic,
 -- but we leave the empty tables for a simpler API.
 local isKeyRingID = {} -- hashed
 if (IsClassic or IsTBC) then
@@ -294,7 +308,7 @@ if (IsClassic or IsTBC) then
 	BagTypesFromID[KEYRING_CONTAINER] = "KeyRing"
 end
 
--- The reagant bank only exists in retail, 
+-- The reagant bank only exists in retail,
 -- but we leave the empty tables for a simpler API.
 local isReagentBankID = {} -- hashed
 if (IsRetail) then
@@ -306,18 +320,18 @@ if (IsRetail) then
 	BagTypesFromID[REAGENTBANK_CONTAINER] = "ReagentBank"
 end
 
--- Half-truths. We need numbers to index both. 
+-- Half-truths. We need numbers to index both.
 ButtonTemplates[BAG_SLOT_CONTAINER] = ButtonTemplates.BagSlot
 ButtonTemplates[BANK_SLOT_CONTAINER] = ButtonTemplates.BankSlot
 
 -- Utility Functions
 -----------------------------------------------------------------
--- Syntax check 
+-- Syntax check
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if type(value) == select(i, ...) then 
-			return 
+		if type(value) == select(i, ...) then
+			return
 		end
 	end
 	local types = string_join(", ", ...)
@@ -393,7 +407,7 @@ Button.UnregisterEvent = function(self, event, func)
 			if events[i] == func then
 				table_remove(events, i)
 				if #events == 0 then
-					UnregisterEvent(self, event) 
+					UnregisterEvent(self, event)
 					break
 				end
 			end
@@ -402,7 +416,7 @@ Button.UnregisterEvent = function(self, event, func)
 end
 
 Button.UnregisterAllEvents = function(self)
-	if not Callbacks[self] then 
+	if not Callbacks[self] then
 		return
 	end
 	for event, funcs in pairs(Callbacks[self]) do
@@ -474,8 +488,8 @@ Button.SetHeight = function(self, ...)
 end
 
 -- ItemButton ID Handling
--- Don't use these for blizz buttons, 
--- we should just let them keep what they have. 
+-- Don't use these for blizz buttons,
+-- we should just let them keep what they have.
 ----------------------------------------------------
 -- Set the bagID of the button.
 -- Only accept changes within the same bagType range,
@@ -521,21 +535,21 @@ end
 
 -- Retrieve the button's current bagID.
 -- This method is meant for 3rd party access,
--- our own method uses button flags for faster parsing. 
+-- our own method uses button flags for faster parsing.
 Button.GetBagID = function(self)
 	return self.bagID
 end
 
 -- Retrieve the button's current slotID.
 -- This method is meant for 3rd party access,
--- our own method uses button flags for faster parsing. 
+-- our own method uses button flags for faster parsing.
 Button.GetSlotID = function(self)
 	return self.slotID
 end
 
 -- Retrieve the button's current bagID and slotID.
 -- This method is meant for 3rd party access,
--- our own method uses button flags for faster parsing. 
+-- our own method uses button flags for faster parsing.
 Button.GetBagAndSlotID = function(self)
 	return self.bagID, self.slotID
 end
@@ -557,7 +571,7 @@ Button.UpdateCount = function(self)
 			if (previous) and ((previous > 99) and (previous <= 999)) then
 				self.Count:SetFontObject(NumberFontNormal)
 			end
-			self.Count:SetText("*")  
+			self.Count:SetText("*")
 		elseif (count > 99) then
 			if (not previous) or ((previous <= 99) or (previous > 999)) then
 				self.Count:SetFontObject(NumberFontSmall)
@@ -578,7 +592,7 @@ end
 -- Updates item level.
 Button.UpdateItemLevel = function(self)
 	if (self.isBattlePet) -- Always show the level of battle pets.
-	or ((self.itemRarity) and (self.itemRarity > 1) and (self.itemLevel) and (self.itemLevel > 1)) then 
+	or ((self.itemRarity) and (self.itemRarity > 1) and (self.itemLevel) and (self.itemLevel > 1)) then
 		local color
 		if (self.isLocked) then
 			color = self.colors.quest.gray
@@ -643,8 +657,8 @@ end
 
 -- Updates the junk coin icon of a slot button.
 Button.UpdateJunk = function(self)
-	-- This method requires the 'isMerchantFrameShown' flag to be set correctly, 
-	-- so it is important that we only call this method after it has been updated, 
+	-- This method requires the 'isMerchantFrameShown' flag to be set correctly,
+	-- so it is important that we only call this method after it has been updated,
 	-- and also that we specifically recall this method after changes to that flag.
 	if (self.itemRarity) and (self.itemRarity == 0) and (not self.noValue) and (LibBagButton.isMerchantFrameShown) and (MerchantFrame.selectedTab == 1) then
 		self.CoinIcon:Show()
@@ -656,7 +670,7 @@ end
 Button.UpdateCooldown = function(self)
 end
 
--- All the following are applied to all button types, 
+-- All the following are applied to all button types,
 -- and thus should need to do relevant checks themselves.
 -----------------------------------------------------------------
 
@@ -784,22 +798,22 @@ end
 -- Basically a tooltip function that needs regular updates.
 -- Used only with OnUpdate, OnEnter and OnLeave.
 Button.OnUpdate = function(self)
-	-- Avoid nil bugs. 
+	-- Avoid nil bugs.
 	local hasSlot = self.bagID and self.slotID and self.hasItem
 
-	-- Is it a classic keyring? Add code. 
+	-- Is it a classic keyring? Add code.
 
-	-- If an item is transformed while hovering, 
+	-- If an item is transformed while hovering,
 	-- there will be a short moment when the button has no points it seems.
 	-- A better workaround with flags can be made, this is a hotfix.
 	local tooltip = self:GetTooltip()
 	if (hasSlot) then
 		local Item = LibBagButton:GetBlizzardContainerSlotCache(self.bagID, self.slotID)
 		if (Item) and (Item.itemName) and (self.UpdateTooltip) then -- (self:GetPoint()) not needed now?
-			-- Note that we are not using our available cache here, 
+			-- Note that we are not using our available cache here,
 			-- this is to avoid display bugs related to the repair cost of newly repaired items.
-			tooltip:SetSmartItemAnchor(self, tooltip.tooltipAnchorX or 4, tooltip.tooltipAnchorY or 0) 
-			tooltip:SetBagItem(self.bagID, self.slotID) 
+			tooltip:SetSmartItemAnchor(self, tooltip.tooltipAnchorX or 4, tooltip.tooltipAnchorY or 0)
+			tooltip:SetBagItem(self.bagID, self.slotID)
 		else
 			hasSlot = nil
 		end
@@ -814,7 +828,7 @@ Button.OnUpdate = function(self)
 
 	-- check for modified clicks, show compare tips if need be.
 	if (IsModifiedClick("COMPAREITEMS")) or (GetCVarBool("alwaysCompareItems")) then
-		-- Show compare item. 
+		-- Show compare item.
 		-- We will use our own system here.
 	end
 
@@ -856,7 +870,7 @@ Button.OnLeave = function(self)
 	end
 
 	if (not SpellIsTargeting()) then
-		ResetCursor()		
+		ResetCursor()
 	end
 end
 
@@ -866,7 +880,7 @@ end
 Button.OnPostClick = function(self)
 end
 
--- The button's actual event handler, 
+-- The button's actual event handler,
 -- as we are routing all our own callbacks to this one.
 local UpdateButton = function(self, event, ...)
 	local arg1, arg2 = ...
@@ -885,18 +899,18 @@ local UpdateButton = function(self, event, ...)
 	elseif (event == "ITEM_LOCK_CHANGED") then
 		-- Update item lock desaturation and darkening.
 		if (arg1 and arg2 and (self.bagID == arg1) and (self.slotID == arg2)) then
-	
+
 			-- Get the item lock status
 			local _, _, locked = GetContainerItemInfo(self.bagID, self.slotID)
 			self.isLocked = locked
-	
+
 			-- Update the icon.
 			self:UpdateIcon()
 			self:UpdateItemLevel()
 			self:UpdateItemBind()
 			self:UpdateJunk()
 			self:UpdateQuest()
-		
+
 			-- Run user post updates
 			if (self.PostUpdate) then
 				self:PostUpdate()
@@ -948,12 +962,12 @@ Button.OnHide = function(self)
 end
 
 Button.OnEvent = function(self, event, ...)
-	if (self:IsVisible() and Callbacks[self] and Callbacks[self][event]) then 
+	if (self:IsVisible() and Callbacks[self] and Callbacks[self][event]) then
 		local events = Callbacks[self][event]
 		for i = 1, #events do
 			events[i](self, event, ...)
 		end
-	end 
+	end
 end
 
 Button.GetTooltip = function(self)
@@ -998,7 +1012,7 @@ Container.Update = function(self)
 
 	-- Retrieve all buttons matching the container's bagType,
 	-- and insert them into our freshly wiped display cache.
-	local bagType = Containers[self] 
+	local bagType = Containers[self]
 	for i,bagID in ipairs(bagIDs) do
 		if (BagTypesFromID[bagID] == bagType) then
 			local container = LibBagButton:GetBlizzardContainerCache(bagID)
@@ -1033,7 +1047,7 @@ Container.Update = function(self)
 	-- Start ordering buttons
 		-- Add extra when needed
 		-- Hide empty buttons
-	
+
 	-- Update all visible buttons
 	for slot,button in pairs(self.buttons) do
 		if (button.isShown) then
@@ -1056,7 +1070,7 @@ Container.SpawnItemButton = function(self, ...)
 	end
 
 	-- Insert the virtual button slot object into the correct cache.
-	table_insert(self.buttons, button) 
+	table_insert(self.buttons, button)
 
 	return button
 end
@@ -1092,9 +1106,9 @@ LibBagButton.GetBagButtonCompareTooltips = function(self)
 			LibBagButton:GetTooltip("GP_BagButtonCompareTooltip2") or LibBagButton:CreateTooltip("GP_BagButtonCompareTooltip2")
 end
 
---[[-- 
+--[[--
 	local numberOfFreeSlots, bagType = GetContainerNumFreeSlots(bagID)
-	bagType = 2^(bitfield-1) 
+	bagType = 2^(bitfield-1)
 	(https://wow.gamepedia.com/ItemFamily)
 
 		bit category
@@ -1116,7 +1130,7 @@ end
 		24 	First Aid
 		25 	Jewelcrafting
 		26 	Skinning
-		27 	Tailoring 
+		27 	Tailoring
 --]]--
 
 -- Retrieve the existing or create a blank cache for this blizzard container.
@@ -1149,7 +1163,7 @@ LibBagButton.ClearBlizzardContainerSlot = function(self, bagID, slotID)
 	end
 end
 
--- Parse and cache a specific slot in a blizzard container. 
+-- Parse and cache a specific slot in a blizzard container.
 LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID, forceUpdate)
 
 	local isQuestItem, questID, isActive
@@ -1163,7 +1177,7 @@ LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID, forceUpd
 		-- or create an empty cache table if none exist.
 		local Item = self:GetBlizzardContainerSlotCache(bagID, slotID)
 
-		-- Compare the cache's itemlink to the blizzard itemlink, 
+		-- Compare the cache's itemlink to the blizzard itemlink,
 		-- and update or retrieve the contents to our cache if need be.
 		if (Item.itemLink ~= itemLink) or (forceUpdate) then
 
@@ -1173,13 +1187,13 @@ LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID, forceUpd
 			Item.itemLink = itemLink
 
 
-			if (Item.itemName) then 
+			if (Item.itemName) then
 
 				-- No quest item info in classic
 				if (IsRetail) then
 					isQuestItem, questID, isActive = GetContainerItemQuestInfo(bagID, slotID)
 				end
-				
+
 				Item.isUsable = IsUsableItem(Item.itemID)
 				Item.isQuestItem = isQuestItem or (Item.itemClassID == LE_ITEM_CLASS_QUESTITEM)
 				Item.isQuestActive = isActive
@@ -1195,7 +1209,7 @@ LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID, forceUpd
 					QueuedContainerIDs[bagID][slotID] = itemID
 				end
 				self:RegisterEvent("GET_ITEM_INFO_RECEIVED", "OnEvent")
-	
+
 				-- Use the client-only API for faster lookups here
 				Item.itemID,
 				Item.itemType,
@@ -1203,14 +1217,14 @@ LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID, forceUpd
 				Item.itemEquipLoc,
 				Item.itemIcon,
 				Item.itemClassID,
-				Item.itemSubClassID = GetItemInfoInstant(itemLink) 
+				Item.itemSubClassID = GetItemInfoInstant(itemLink)
 
 			end
 		end
 
-		-- This is implicit by the existence of all the other values, 
+		-- This is implicit by the existence of all the other values,
 		-- but for the sake of semantics and simplicity, we use a separate value for this.
-		-- We need to do this AFTER the tooltip parsing, as that clears all entries. 
+		-- We need to do this AFTER the tooltip parsing, as that clears all entries.
 		Item.hasItem = true
 
 	else
@@ -1219,7 +1233,7 @@ LibBagButton.ParseBlizzardContainerSlot = function(self, bagID, slotID, forceUpd
 	end
 end
 
--- Parse and cache all the slots of a blizzard container, and the container itself. 
+-- Parse and cache all the slots of a blizzard container, and the container itself.
 LibBagButton.ParseSingleBlizzardContainer = function(self, bagID, forceUpdate)
 
 	local numberOfSlots = GetContainerNumSlots(bagID) or 0 -- returns 0 before the BAG_UPDATE for the bagID has fired.
@@ -1228,7 +1242,7 @@ LibBagButton.ParseSingleBlizzardContainer = function(self, bagID, forceUpdate)
 	if (numberOfSlots > 0) then
 		local cache = self:GetBlizzardContainerCache(bagID)
 		cache.bagType = bagType or 0 -- any other value than 0 means profession bag.
-		cache.freeSlots = numberOfFreeSlots 
+		cache.freeSlots = numberOfFreeSlots
 		cache.totalSlots = numberOfSlots
 		cache.name = BagNames[bagID] or GetBagName(bagID)
 
@@ -1238,7 +1252,7 @@ LibBagButton.ParseSingleBlizzardContainer = function(self, bagID, forceUpdate)
 	end
 end
 
--- Parse and cache specific multiple blizzard containers. 
+-- Parse and cache specific multiple blizzard containers.
 -- Note that this method always uses the forceUpdate flag.
 LibBagButton.ParseMultipleBlizzardContainers = function(self, ...)
 	local bagID
@@ -1255,7 +1269,7 @@ end
 -- Suppresses the blizzard method if 'true' is returned.
 LibBagButton.ShowBags = function(self, forceUpdate)
 	-- Set this flag before we start showing.
-	-- The idea is to prevent buttons from calling this function, 
+	-- The idea is to prevent buttons from calling this function,
 	-- as button updates are many and frequent, and we want low performance impact.
 	self.isMerchantFrameShown = MerchantFrame:IsShown()
 	local hasBags
@@ -1287,8 +1301,8 @@ end
 -- *This one is called when Esc is clicked and bags forcehidden.
 -- Suppresses the blizzard method if 'true' is returned.
 LibBagButton.HideBags = function(self, forceUpdate)
-	--if (self:IsAtBank()) then 
-	--	CloseBankFrame() 
+	--if (self:IsAtBank()) then
+	--	CloseBankFrame()
 	--end
 
 	local hasBags
@@ -1319,11 +1333,11 @@ LibBagButton.ToggleBags = function(self, ...)
 	for container, bagType in pairs(Containers) do
 		if (bagType == "Bag") then
 			-- We have bag containers.
-			hasBags = true 
-			if (container:IsShown()) then 
+			hasBags = true
+			if (container:IsShown()) then
 				-- they are visible, so this is a hide operation.
-				shouldHide = true 
-				-- If both flags are true, 
+				shouldHide = true
+				-- If both flags are true,
 				-- no further iteration is needed.
 				if (hasBags) then
 					break
@@ -1332,7 +1346,7 @@ LibBagButton.ToggleBags = function(self, ...)
 		end
 	end
 	-- Set this flag before we start toggling.
-	-- The idea is to prevent buttons from calling this function, 
+	-- The idea is to prevent buttons from calling this function,
 	-- as button updates are many and frequent, and we want low performance impact.
 	if (not shouldHide) then
 		self.isMerchantFrameShown = MerchantFrame:IsShown()
@@ -1369,7 +1383,7 @@ LibBagButton.ToggleBags = function(self, ...)
 end
 
 -- Displays your bank frames.
--- Will use stored information when available, 
+-- Will use stored information when available,
 -- making it possible to track bank contents when not at the bank.
 -- TODO: Add API to assign a cache at container creation!
 LibBagButton.ShowBank = function(self)
@@ -1383,7 +1397,7 @@ end
 LibBagButton.ToggleBank = function(self)
 end
 
--- Global function names, 
+-- Global function names,
 -- and our library equivalents.
 -- Note: We should check for library version if we change this!
 local methodByGlobal = {
@@ -1395,9 +1409,9 @@ local methodByGlobal = {
 	["ToggleAllBags"] = "ToggleBags"
 }
 
--- Can't replace these, that'll backtrack to ToggleAllBags, 
--- and by association taint the click function of the item buttons in the bag, 
--- making the game block /use attempts from items appearing in your bags during combat. 
+-- Can't replace these, that'll backtrack to ToggleAllBags,
+-- and by association taint the click function of the item buttons in the bag,
+-- making the game block /use attempts from items appearing in your bags during combat.
 -- Fun, right?
 local hooksByGlobal = {
 	["CloseBackpack"] = "HideBags",
@@ -1413,8 +1427,8 @@ LibBagButton.HookBlizzardBagFunctions = function(self)
 	--BankFrame:SetScript("OnHide", nil)
 	--BankFrame:Hide()
 
-	-- Replace the global funcs, or update the replacements 
-	-- if this was a library upgrade. 
+	-- Replace the global funcs, or update the replacements
+	-- if this was a library upgrade.
 	-- Note: We should check for library version if we change this!
 	for globalName,method in pairs(methodByGlobal) do
 		local globalFunc = _G[globalName]
@@ -1438,7 +1452,7 @@ LibBagButton.HookBlizzardBagFunctions = function(self)
 		local globalFunc = _G[globalName]
 		if (globalFunc) then
 			local method = method
-			LibBagButton:SetSecureHook(globalName, function(...) 
+			LibBagButton:SetSecureHook(globalName, function(...)
 				if (LibBagButton.IsBlizzardHooked) then
 					return LibBagButton[method](LibBagButton, ...)
 				end
@@ -1488,7 +1502,7 @@ LibBagButton.OnEvent = function(self, event, ...)
 		self:HideBank()
 		self:HideBags()
 		self:SendMessage("GP_BANKFRAME_CLOSED")
-		
+
 	elseif (event == "BAG_OPEN") then
 		local bagID = ...
 		if (bagID) and (BagTypesFromID[bagID]) then
@@ -1504,7 +1518,7 @@ LibBagButton.OnEvent = function(self, event, ...)
 	elseif (event == "BAG_UPDATE") then
 		local bagID = ...
 
-		-- This is where the actual magic happens. 
+		-- This is where the actual magic happens.
 		self.parsingRequired = true
 		--self:ParseSingleBlizzardContainer(bagID, true)
 		self:ParseSingleBlizzardContainer(bagID)
@@ -1543,7 +1557,7 @@ LibBagButton.OnEvent = function(self, event, ...)
 			for slotID, itemID in pairs(QueuedContainerIDs[bagID]) do
 				-- If anything is found, just return.
 				-- We still need the event.
-				return 
+				return
 			end
 		end
 		-- Kill off the event if no more itemslots are queued
@@ -1573,7 +1587,7 @@ LibBagButton.OnEvent = function(self, event, ...)
 		self:ParseMultipleBlizzardContainers(unpack(bagIDs))
 
 		-- Fire off some semi-fake events.
-		-- The idea is to have the front-end only rely on custom messages, 
+		-- The idea is to have the front-end only rely on custom messages,
 		-- so we need these here instead of the Blizzard events.
 		for _,bagID in ipairs(bagIDs) do
 			self:SendMessage("GP_BAG_UPDATE", bagID)
@@ -1585,7 +1599,7 @@ LibBagButton.OnEvent = function(self, event, ...)
 			for bagID in pairs(QueuedContainerIDs) do
 				for slotID, itemID in pairs(QueuedContainerIDs[bagID]) do
 					-- If anything is found, break here
-					stillWaiting = true 
+					stillWaiting = true
 				end
 			end
 		end
@@ -1600,7 +1614,7 @@ end
 
 LibBagButton.OnMerchantFrameUpdate = function(self, id, ...)
 	if (MerchantFrame:IsShown()) then
-		-- The idea is to prevent buttons from calling the above function, 
+		-- The idea is to prevent buttons from calling the above function,
 		-- as button updates are many and frequent, and we want low performance impact.
 		LibBagButton.isMerchantFrameShown = true
 		if (LibBagButton.selectedMerchantTab ~= MerchantFrame.selectedTab) then
@@ -1620,7 +1634,7 @@ LibBagButton.Start = function(self)
 	-- Hook the blizzard bag toggling.
 	-- It is preferable to get this done as early as possible.
 	self:HookBlizzardBagFunctions()
-	
+
 	-- Always kill off all events here.
 	self:UnregisterAllEvents()
 
@@ -1629,7 +1643,7 @@ LibBagButton.Start = function(self)
 
 	-- Could be a library upgrade, or forced restart.
 	if (IsLoggedIn()) then
-		-- If we restarted the engine after login, 
+		-- If we restarted the engine after login,
 		-- we need to manually trigger this event as though
 		-- it was the initial login, to enable event tracking.
 		self:OnEvent("PLAYER_ENTERING_WORLD", true)
@@ -1641,7 +1655,7 @@ LibBagButton.Start = function(self)
 	local tooltip = self:GetBagButtonTooltip()
 	tooltip:SetCValue("backdrop", {
 		bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
-		edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]], 
+		edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
 		edgeSize = 16,
 		insets = {
 			left = 3.5,
@@ -1683,17 +1697,17 @@ LibBagButton.SpawnItemContainer = function(self, ...)
 		end
 	end)
 
-	-- Allow clicking the frame to raise it, the WorldMapFrame does it too. 
+	-- Allow clicking the frame to raise it, the WorldMapFrame does it too.
 	-- Requires that they have the same strata.
 	frame:SetFrameStrata(WorldMapFrame:GetFrameStrata() or "MEDIUM")
-	frame:SetToplevel(true) 
+	frame:SetToplevel(true)
 	frame:EnableMouse(true)
 	frame:Hide()
 
 	frame.buttons = {}
 	frame.slots = {}
 
-	-- It just makes life easier if we simply hide it, 
+	-- It just makes life easier if we simply hide it,
 	-- or we will have to forceUpdate everything on zoning.
 	frame:RegisterEvent("PLAYER_ENTERING_WORLD", frame.Hide, true)
 
@@ -1761,14 +1775,14 @@ LibBagButton.SpawnItemButton = function(self, ...)
 	button.slotID = slotID
 	button.colors = Colors
 
-	-- This is basically a bag for all intents and purposes, 
-	-- except that it totally isn't that at all. 
+	-- This is basically a bag for all intents and purposes,
+	-- except that it totally isn't that at all.
 	-- We just need a parent for the slot with and ID for the template to work.
 	parent = button:CreateFrame("Frame")
 	parent:EnableMouse(false)
 	parent:SetID(bagID or 100)
 
-	-- Need to clear away blizzard layers from this one, 
+	-- Need to clear away blizzard layers from this one,
 	-- as they interfere with anything we do.
 	slot = self:GetBlizzardSlotButton(bagID, slotID) or parent:CreateFrame(BUTTON_TYPE, nil, ButtonTemplates[bagType])
 	slot:SetParent(parent) -- in case it's a blizz button. need to grab it.
@@ -1778,7 +1792,7 @@ LibBagButton.SpawnItemButton = function(self, ...)
 	slot:EnableMouse(true)
 
 	-- BlizzKill
-	-- We're oversimplifying this 
+	-- We're oversimplifying this
 	-- by just disabling all the draw layers.
 	slot.UpdateTooltip = nil
 	slot:DisableDrawLayer("BACKDROP")
@@ -1786,7 +1800,7 @@ LibBagButton.SpawnItemButton = function(self, ...)
 	slot:DisableDrawLayer("ARTWORK")
 	slot:DisableDrawLayer("OVERLAY")
 
-	-- Sometimes on the first login on the initial startup of the game, 
+	-- Sometimes on the first login on the initial startup of the game,
 	-- these aren't set so hiding the textures will cause a nil bug.
 	slot:SetNormalTexture(nil)
 	slot:SetPushedTexture(nil)
@@ -1803,7 +1817,7 @@ LibBagButton.SpawnItemButton = function(self, ...)
 	slot:SetScript("PreClick", function(slot) button:OnPreClick() end)
 	slot:HookScript("OnClick", function(slot) button:OnPostClick() end)
 
-	-- We'll just let the button object handle this instead, 
+	-- We'll just let the button object handle this instead,
 	-- as the visibilities should be linked anyway.
 	--slot:SetScript("OnHide", function(slot) button:OnHide() end)
 	--slot:SetScript("OnShow", function(slot) button:OnShow() end)
@@ -1815,12 +1829,12 @@ LibBagButton.SpawnItemButton = function(self, ...)
 	button:SetScript("OnShow", button.OnShow)
 	button:SetScript("OnEvent", button.OnEvent)
 
-	-- Cache up our elements 
+	-- Cache up our elements
 	ButtonParents[button] = parent
 	ButtonSlots[button] = slot
 
 	-- Insert the virtual button slot object into the correct cache.
-	table_insert(Buttons[bagType], button) 
+	table_insert(Buttons[bagType], button)
 
 	-- Button Scaffolds
 	-----------------------------------------------------------
@@ -1831,7 +1845,7 @@ LibBagButton.SpawnItemButton = function(self, ...)
 
 	-- Button Layers
 	-----------------------------------------------------------
-	-- Slot backdrop visible on empty buttons 
+	-- Slot backdrop visible on empty buttons
 	local slot = button:CreateTexture()
 	slot:SetDrawLayer("BACKGROUND", -1)
 	slot:SetAllPoints()
@@ -1915,11 +1929,11 @@ LibBagButton.GetFreeBagSpaceInBag = function(self, bagID)
 end
 
 -- Returns the free bag space.
--- @input <number> query a certain bagType only. 
--- @return <number,number> currentFree, totalFree 
+-- @input <number> query a certain bagType only.
+-- @return <number,number> currentFree, totalFree
 LibBagButton.GetFreeBagSpace = function(self, bagType)
 	local freeSlots, totalSlots = 0, 0
-	if (not bagType) then 
+	if (not bagType) then
 		bagType = 0 -- 0 means regular non-profession containers
 	end
 	if (not LibBagButton.freeSlots) then
@@ -1932,7 +1946,7 @@ LibBagButton.GetFreeBagSpace = function(self, bagType)
 		for i,bagID in pairs(bagIDs) do
 			if (BagTypesFromID[bagID] == "Bag") then
 				local cache = Contents[bagID]
-				if (cache) and (cache.bagType == bagType) then 
+				if (cache) and (cache.bagType == bagType) then
 					totalSlots = totalSlots + cache.totalSlots
 					freeSlots = freeSlots + cache.freeSlots
 				end
@@ -1942,16 +1956,16 @@ LibBagButton.GetFreeBagSpace = function(self, bagType)
 		end
 		LibBagButton.parsingRequired = nil
 	end
-	return LibBagButton.freeSlots[bagType] or 0, LibBagButton.totalSlots[bagType] or 0	
+	return LibBagButton.freeSlots[bagType] or 0, LibBagButton.totalSlots[bagType] or 0
 end
 
 -- Returns the free bank space.
 -- *Will returned a cached value if not currently at the bank,
--- @input <number> query a certain bagType only. 
--- @return <number,number> currentFree, totalFree 
+-- @input <number> query a certain bagType only.
+-- @return <number,number> currentFree, totalFree
 LibBagButton.GetFreeBankSpace = function(self, bagType)
 	local freeSlots, totalSlots = 0, 0
-	if (not bagType) then 
+	if (not bagType) then
 		bagType = 0 -- 0 means regular non-profession containers
 	end
 	if (not LibBagButton.freeBankSlots) then
@@ -1964,7 +1978,7 @@ LibBagButton.GetFreeBankSpace = function(self, bagType)
 		for i,bagID in pairs(bankIDs) do
 			if (BagTypesFromID[bagID] == "Bank") then
 				local cache = Contents[bagID]
-				if (cache) and (cache.bagType == bagType) then 
+				if (cache) and (cache.bagType == bagType) then
 					totalSlots = totalSlots + cache.totalSlots
 					freeSlots = freeSlots + cache.freeSlots
 				end
@@ -2035,7 +2049,7 @@ local embedMethods = {
 	GetIteratorForBankIDs = true,
 	GetIteratorForReagentBankIDs = true,
 	GetFreeBagSpace = true,
-	GetFreeBagSpaceInBag = true, 
+	GetFreeBagSpaceInBag = true,
 	GetFreeBankSpace = true,
 	IsAnyBagOpen = true,
 	IsAtBank = true,
