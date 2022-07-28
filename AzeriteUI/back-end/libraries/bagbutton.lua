@@ -1,5 +1,5 @@
 -- WoW Client MAJOR version
-local MAJOR = tonumber(string_split(".", (GetBuildInfo())))
+local MAJOR = tonumber(string.split(".", (GetBuildInfo())))
 
 -- Bail out if this is Dragonflight
 if (MAJOR >= 10) then
