@@ -1,5 +1,9 @@
--- WoW Client MAJOR version
-local MAJOR = tonumber(string.split(".", (GetBuildInfo())))
+-- WoW Client versions
+local currentClientPatch, currentClientBuild = GetBuildInfo()
+currentClientBuild = tonumber(currentClientBuild)
+
+local MAJOR,MINOR,PATCH = string.split(".", currentClientPatch)
+MAJOR = tonumber(MAJOR)
 
 -- Bail out if this is Dragonflight
 if (MAJOR >= 10) then

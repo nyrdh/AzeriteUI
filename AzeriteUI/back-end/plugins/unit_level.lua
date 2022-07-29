@@ -6,34 +6,40 @@ local _G = _G
 local UnitCanAttack = UnitCanAttack
 local UnitLevel = UnitEffectiveLevel or UnitLevel
 
+-- WoW Client versions
+local currentClientPatch, currentClientBuild = GetBuildInfo()
+currentClientBuild = tonumber(currentClientBuild)
+
+local MAJOR,MINOR,PATCH = string.split(".", currentClientPatch)
+MAJOR = tonumber(MAJOR)
+
 -- Constants
-local Client = tonumber((string.split(".", (GetBuildInfo()))))
-local MAX_LEVEL = (Client == 2) and 70 or 60
+local MAX_LEVEL = (MAJOR == 2) and 70 or 60
 
 local Update = function(self, event, unit)
-	if (not unit) or (unit ~= self.unit) then 
-		return 
-	end 
+	if (not unit) or (unit ~= self.unit) then
+		return
+	end
 
 	local element = self.Level
 
 	-- Badge, dead skull and high level skull textures
-	-- We will toggle them if they exist or ignore them otherwise. 
+	-- We will toggle them if they exist or ignore them otherwise.
 	local badge = element.Badge
 	local dead = element.Dead
 	local skull = element.Skull
 
 	local unitLevel = UnitLevel(unit)
 
-	if element.visibilityFilter then 
-		if (not element:visibilityFilter(unit)) then 
-			if badge then 
+	if element.visibilityFilter then
+		if (not element:visibilityFilter(unit)) then
+			if badge then
 				badge:Hide()
 			end
-			if dead then 
+			if dead then
 				dead:Hide()
 			end
-			if skull then 
+			if skull then
 				skull:Hide()
 			end
 			return element:Hide()
@@ -46,107 +52,107 @@ local Update = function(self, event, unit)
 
 
 	-- Showing a skull badge for dead units
-	if UnitIsDeadOrGhost(unit) then 
+	if UnitIsDeadOrGhost(unit) then
 		element:SetText("")
 
-		-- use the dead skull first, 
+		-- use the dead skull first,
 		-- fallback to high level skull if dead skull doesn't exist
-		if dead then 
+		if dead then
 			dead:Show()
-			if skull then 
+			if skull then
 				skull:Hide()
 			end
-		elseif skull then 
+		elseif skull then
 			skull:Show()
-		end 
-		if badge then 
+		end
+		if badge then
 			badge:Show()
-		end 
+		end
 
 	-- Hide capped and above, if so chosen ny the module
-	elseif (element.hideCapped) and (unitLevel >= MAX_LEVEL) then 
+	elseif (element.hideCapped) and (unitLevel >= MAX_LEVEL) then
 		element:SetText("")
-		if badge then 
+		if badge then
 			badge:Hide()
-		end 
-		if skull then 
+		end
+		if skull then
 			skull:Hide()
-		end 
-		if dead then 
+		end
+		if dead then
 			dead:Hide()
 		end
 
 	-- Hide floored units (level 1 mobs and criters)
-	elseif (element.hideFloored) and (unitLevel == 1) then 
+	elseif (element.hideFloored) and (unitLevel == 1) then
 		element:SetText("")
-		if badge then 
+		if badge then
 			badge:Hide()
-		end 
-		if skull then 
+		end
+		if skull then
 			skull:Hide()
-		end 
-		if dead then 
+		end
+		if dead then
 			dead:Hide()
 		end
 
 	-- Normal creatures in a level range we can read
-	elseif (unitLevel > 0) then 
+	elseif (unitLevel > 0) then
 		element:SetText(unitLevel)
-		if UnitCanAttack("player", unit) then 
+		if UnitCanAttack("player", unit) then
 			local color = GetCreatureDifficultyColor(unitLevel)
 			element:SetVertexColor(color.r, color.g, color.b, element.alpha or 1)
-		else 
-			if (unitLevel ~= unitLevel) then 
+		else
+			if (unitLevel ~= unitLevel) then
 				if element.scaledColor then
 					element:SetTextColor(element.scaledColor[1], element.scaledColor[2], element.scaledColor[3], element.scaledColor[4] or element.alpha or 1)
-				else 
+				else
 					element:SetTextColor(.1, .8, .1, element.alpha or 1)
-				end 
-			else 
-				if element.defaultColor then 
+				end
+			else
+				if element.defaultColor then
 					element:SetTextColor(element.defaultColor[1], element.defaultColor[2], element.defaultColor[3], element.defaultColor[4] or element.alpha or 1)
-				else 
+				else
 					element:SetTextColor(.94, .94, .94, element.alpha or 1)
-				end 
-			end 
-		end 
-		if badge then 
+				end
+			end
+		end
+		if badge then
 			badge:Show()
-		end 
-		if skull then 
+		end
+		if skull then
 			skull:Hide()
-		end 
-		if dead then 
+		end
+		if dead then
 			dead:Hide()
 		end
 
 	-- Remaining creatures are boss level or too high to read (??)
 	-- So we're giving these a skull.
-	else 
-		if skull then 
+	else
+		if skull then
 			skull:Show()
-		end 
-		if badge then 
+		end
+		if badge then
 			badge:Show()
-		end 
-		if dead then 
+		end
+		if dead then
 			dead:Hide()
 		end
 		element:SetText("")
-	end 
+	end
 
-	if (not element:IsShown()) then 
+	if (not element:IsShown()) then
 		element:Show()
 	end
 
-	if element.PostUpdate then 
+	if element.PostUpdate then
 		return element:PostUpdate(unit, unitLevel)
 	end
-end 
+end
 
 local Proxy = function(self, ...)
 	return (self.Level.Override or Update)(self, ...)
-end 
+end
 
 local ForceUpdate = function(element)
 	return Proxy(element._owner, "Forced", element._owner.unit)
@@ -158,14 +164,14 @@ local Enable = function(self)
 		element._owner = self
 		element.ForceUpdate = ForceUpdate
 
-		if (self.unit == "player" or self.unit == "pet") then 
+		if (self.unit == "player" or self.unit == "pet") then
 			self:RegisterEvent("PLAYER_LEVEL_UP", Proxy, true)
-		end 
+		end
 		self:RegisterEvent("UNIT_LEVEL", Proxy)
 
-		return true 
+		return true
 	end
-end 
+end
 
 local Disable = function(self)
 	local element = self.Level
@@ -173,9 +179,9 @@ local Disable = function(self)
 		self:UnregisterEvent("UNIT_LEVEL", Proxy)
 		self:UnregisterEvent("PLAYER_LEVEL_UP", Proxy)
 	end
-end 
+end
 
 -- Register it with compatible libraries
-for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
+for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do
 	Lib:RegisterElement("Level", Enable, Disable, Proxy, 11)
-end 
+end

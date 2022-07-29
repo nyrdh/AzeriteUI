@@ -2,7 +2,7 @@
 
 <!-- callback libs -->
 <Script file='libraries\message.lua'/>
-<Script file='libraries\event.lua'/> 
+<Script file='libraries\event.lua'/>
 
 <!-- let's load this one first, others will need it -->
 <Script file='libraries\clientbuild.lua'/>
@@ -60,7 +60,7 @@
 
 <!-- advanced media widget libs, require tooltip lib -->
 <Script file='libraries\actionbutton.lua'/>
-<Script file='libraries\bagbutton.lua'/>
+<!--<Script file='libraries\bagbutton.lua'/>-->
 <Script file='libraries\nameplates.lua'/>
 
 <!-- Disabling and styling of Blizzard widgets and menu options -->
