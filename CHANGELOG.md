@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.545-RC] 2022-08-05
+### Changed
+- Added (untested) WotLK macro drivers and code to the unitframe- and actionbutton libraries.
+
 ## [3.2.544-RC] 2022-07-29
 ## Removed
 - Removed LibBagButton. Not currently needed.

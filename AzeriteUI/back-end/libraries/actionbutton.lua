@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 140)
+local LibSecureButton = Wheel:Set("LibSecureButton", 141)
 if (not LibSecureButton) then
 	return
 end
@@ -210,7 +210,7 @@ if (IsClassic or IsTBC) then
 end
 if (IsWotLK) then
 
-	-- Copied directly from Retail. Untested.
+	-- UNTESTED!
 	SECURE.Page_OnAttributeChanged = [=[
 		if (name == "state-page") then
 			local page;
@@ -1526,7 +1526,7 @@ ActionButton.UpdateRank = function(self)
 	end
 end
 
-if (IsClassic or IsTBC) then
+if (IsClassic or IsTBC or IsWotLK) then
 	ActionButton.ShowOverlayGlow = function(self, overlayType)
 		if (not self.SpellHighlight) then
 			return
@@ -2492,12 +2492,12 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 			visibilityDriver = "[@pet,exists]show;hide"
 
 		elseif (IsWotLK) then
-
+			-- UNTESTED!
+			visibilityDriver = "[@pet,exists,nopossessbar,nooverridebar,noshapeshift,novehicleui]show;hide"
 
 		elseif (IsRetail) then
 			-- Experimental change to avoid duplicate bars on some world quests.
 			visibilityDriver = "[@pet,exists,nopossessbar,nooverridebar,noshapeshift,novehicleui]show;hide"
-			--visibilityDriver = "[@pet,exists]show;hide"
 		end
 
 		-- Cross reference everything
@@ -2534,6 +2534,9 @@ LibSecureButton.SpawnActionButton = function(self, buttonType, parent, buttonTem
 			visibilityDriver = "[mounted]show;hide"
 
 		elseif (IsWotLK) then
+			-- UNTESTED!
+			macroText = "/leavevehicle [target=vehicle,exists,canexitvehicle]\n/dismount [mounted]"
+			visibilityDriver = "[target=vehicle,exists,canexitvehicle][possessbar][mounted]show;hide"
 
 		elseif (IsRetail) then
 			macroText = "/leavevehicle [target=vehicle,exists,canexitvehicle]\n/dismount [mounted]"
