@@ -7,69 +7,72 @@ assignees: goldpaw
 
 ---
 <!--
-Note that the use of this template is NOT optional, I ask these questions for a reason. So any future reports that just delete the template and thus do not supply a proper explanation of the problem, will be deleted and ignored. 
+Note that the use of this template is NOT optional, I ask these questions for a reason. So any future reports that just delete the template and thus do not supply a proper explanation of the problem, will be deleted and ignored.
 -->
 
-## The problem  
+## The problem
 <!--Briefly describe the issue you are experiencing BELOW, not inside this comment section. Tell us what you were trying to do and what happened instead. If there are multiple issues or bugs, create multiple reports. If you put multiple problems in a single report, that report will be prioritized below nearly all others or possibly deleted, as we can't really use it to track progress since tags such as "solved" might only apply to one of the isses.
-  
+
 And remember, this is _not_ a place to ask questions. For questions, go to [our Discord](https://discord.gg/MUSfWXd) server, just remember to read the rules and keep in mind nobody there are paid, we're all just gaming enthusiasts and volunteers.-->
 
-### Make sure you can check all these boxes  
-<!--The classic client still only finds new files on game startup, not on character relogs or interface reloads. So if this is in classic, make sure you exit the game when updating addons to avoid this. This doesn't matter in retail, as can add files when the game is running since patch 9.0.1. -->
-- [ ] I have the latest addon version available from CurseForge.
-- [ ] I restarted the entire game after updating the addon, not just relogged or reloaded. (Only needed in Classic.)
+### Did you update to the most recent version?
+- [ ] I have the latest addon version available from CurseForge or Wago.
 
-### What game version(s) does it happen in? Choose your version and the highest expansion you own. 
+### What game version(s) does it happen in? Choose your version and the highest expansion you own
 <!--The game uses different addon APIs in different versions, so this matters a lot.-->
 - Live Realms
-	- [ ] Classic Era 
-	- [ ] Burning Crusade Classic 
-	- [ ] Shadowlands 
-- Public Test Realm 
-	- [ ] Classic Era 
-	- [ ] Burning Crusade Classic 
-	- [ ] Shadowlands 
+  - [ ] Classic Era / Vanilla
+  - [ ] Burning Crusade Classic
+  - [ ] Shadowlands (Retail)
+- Public Test Realm
+  - [ ] Classic Era / Vanilla
+  - [ ] Burning Crusade Classic
+  - [ ] Wrath of the Lich King
+  - [ ] Shadowlands (Retail)
+- Alpha/Beta
+  - [ ] Wrath of the Lich King
+  - [ ] Dragonflight
 
-### What addon theme(s) does it happen in?  
+### What addon theme(s) does it happen in?
 <!--The addon uses different code in different themes, so this matters a lot.-->
-- [ ] Azerite 
-- [ ] Legacy 
-- [ ] I don't know what this means. 
+- [ ] Azerite
+- [ ] Legacy
+- [ ] I don't know what this means.
 
-### Does this happen with ONLY this addon enabled?  
+### Does this happen with ONLY this addon enabled?
 <!--This is helpful because it tells us whether it's an addon bug or addon conflict.-->
-- [ ] Yes 
-- [ ] No 
+- [ ] Yes
+- [ ] No
 
-### Does this happen with absolutely all addons (this included) disabled?  
+### Does this happen with absolutely all addons (this included) disabled?
 <!--This tells us something about where the error is happening. Sometimes a bug is caused by Blizzard!-->
-- [ ] Yes 
-- [ ] No 
+- [ ] Yes
+- [ ] No
 
-### What classes does it happen on?  
+### What classes does it happen on?
 <!--This is helpful because the issue could be related to databases or class powers that differ in code from class to class. So even though it might not appear to be a class related issue, the bug itself could be just that. You don't have to actually tre on all classes, though, just list the ones you personally experienced the bug on!-->
-- [ ] Death Knight 
-- [ ] Demon Hunter 
-- [ ] Druid 
-- [ ] Hunter 
-- [ ] Mage 
-- [ ] Monk 
-- [ ] Paladin 
-- [ ] Priest 
-- [ ] Rogue 
-- [ ] Shaman 
-- [ ] Warlock 
-- [ ] Warrior 
+- [ ] Death Knight
+- [ ] Demon Hunter
+- [ ] Druid
+- [ ] Evoker
+- [ ] Hunter
+- [ ] Mage
+- [ ] Monk
+- [ ] Paladin
+- [ ] Priest
+- [ ] Rogue
+- [ ] Shaman
+- [ ] Warlock
+- [ ] Warrior
 
-### Any logs, screenshots, error output, etc?  
+### Any logs, screenshots, error output, etc?
 <!--Post any screenshots and paste any shorter error logs below. If it’s long, please paste to https://ghostbin.com/ and insert the link here instead.-->
 
-### Steps to reproduce  
+### Steps to reproduce
 <!--If possible, tell us how to reproduce this issue. If you don't know exactly how to, please tell us what you were doing when it happened, in as much detail as possible. Include class, specialization, what quest/instance/battleground you were doing etc.-->
 
-### Expected behaviour  
+### Expected behaviour
 <!--Tell us what should happen.-->
 
-### Actual behaviour  
+### Actual behaviour
 <!--Tell us what happens instead.-->
