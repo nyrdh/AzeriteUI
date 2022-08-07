@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 141)
+local LibSecureButton = Wheel:Set("LibSecureButton", 142)
 if (not LibSecureButton) then
 	return
 end
@@ -108,6 +108,8 @@ local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
 local IsWotLK = LibClientBuild:IsWotLK()
 local IsRetail = LibClientBuild:IsRetail()
+local IsRetailShadowlands = LibClientBuild:IsRetailShadowlands()
+local IsRetailDragonflight = LibClientBuild:IsRetailDragonflight()
 
 -- Doing it this way to make the transition to library later on easier
 LibSecureButton.embeds = LibSecureButton.embeds or {}
@@ -1745,7 +1747,6 @@ ActionButton.OnEnable = function(self)
 	self:RegisterEvent("ACTIONBAR_UPDATE_USABLE", UpdateActionButton)
 	self:RegisterEvent("ACTIONBAR_HIDEGRID", UpdateActionButton)
 	self:RegisterEvent("ACTIONBAR_SHOWGRID", UpdateActionButton)
-	self:RegisterEvent("CURSOR_UPDATE", UpdateActionButton)
 	self:RegisterEvent("LOSS_OF_CONTROL_ADDED", UpdateActionButton)
 	self:RegisterEvent("LOSS_OF_CONTROL_UPDATE", UpdateActionButton)
 	self:RegisterEvent("PLAYER_ENTER_COMBAT", UpdateActionButton)
@@ -1765,6 +1766,10 @@ ActionButton.OnEnable = function(self)
 	if (IsClassic or IsTBC) then
 		self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", UpdateActionButton)
 		self:RegisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", UpdateActionButton)
+	end
+
+	if (IsClassic or IsTBC or IsRetailShadowlands) then
+		self:RegisterEvent("CURSOR_UPDATE", UpdateActionButton)
 	end
 
 	if (IsRetail) then
@@ -1789,14 +1794,8 @@ ActionButton.OnDisable = function(self)
 	self:UnregisterEvent("ACTIONBAR_UPDATE_USABLE", UpdateActionButton)
 	self:UnregisterEvent("ACTIONBAR_HIDEGRID", UpdateActionButton)
 	self:UnregisterEvent("ACTIONBAR_SHOWGRID", UpdateActionButton)
-	self:UnregisterEvent("CURSOR_UPDATE", UpdateActionButton)
 	self:UnregisterEvent("LOSS_OF_CONTROL_ADDED", UpdateActionButton)
 	self:UnregisterEvent("LOSS_OF_CONTROL_UPDATE", UpdateActionButton)
-	if (IsRetail) then
-		self:UnregisterEvent("PET_BAR_HIDEGRID", UpdateActionButton)
-		self:UnregisterEvent("PET_BAR_SHOWGRID", UpdateActionButton)
-		self:UnregisterEvent("PET_BAR_UPDATE", UpdateActionButton)
-	end
 	self:UnregisterEvent("PLAYER_ENTER_COMBAT", UpdateActionButton)
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD", UpdateActionButton)
 	self:UnregisterEvent("PLAYER_LEAVE_COMBAT", UpdateActionButton)
@@ -1804,11 +1803,35 @@ ActionButton.OnDisable = function(self)
 	self:UnregisterEvent("PLAYER_TARGET_CHANGED", UpdateActionButton)
 	self:UnregisterEvent("SPELL_UPDATE_CHARGES", UpdateActionButton)
 	self:UnregisterEvent("SPELL_UPDATE_ICON", UpdateActionButton)
+	self:UnregisterEvent("SPELLS_CHANGED", UpdateActionButton)
 	self:UnregisterEvent("TRADE_SKILL_CLOSE", UpdateActionButton)
 	self:UnregisterEvent("TRADE_SKILL_SHOW", UpdateActionButton)
 	self:UnregisterEvent("UPDATE_BINDINGS", UpdateActionButton)
 	self:UnregisterEvent("UPDATE_MACROS", UpdateActionButton)
 	self:UnregisterEvent("UPDATE_SHAPESHIFT_FORM", UpdateActionButton)
+
+	if (IsClassic or IsTBC) then
+		self:UnregisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", UpdateActionButton)
+		self:UnregisterMessage("GP_SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", UpdateActionButton)
+	end
+
+	if (IsClassic or IsTBC or IsRetailShadowlands) then
+		self:UnregisterEvent("CURSOR_UPDATE", UpdateActionButton)
+	end
+
+	if (IsRetail) then
+		self:UnregisterEvent("ARCHAEOLOGY_CLOSED", UpdateActionButton)
+		self:UnregisterEvent("COMPANION_UPDATE", UpdateActionButton)
+		self:UnregisterEvent("PET_BAR_HIDEGRID", UpdateActionButton)
+		self:UnregisterEvent("PET_BAR_SHOWGRID", UpdateActionButton)
+		self:UnregisterEvent("PET_BAR_UPDATE", UpdateActionButton)
+		self:UnregisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", UpdateActionButton)
+		self:UnregisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", UpdateActionButton)
+		self:UnregisterEvent("UNIT_ENTERED_VEHICLE", UpdateActionButton)
+		self:UnregisterEvent("UNIT_EXITED_VEHICLE", UpdateActionButton)
+		self:UnregisterEvent("UPDATE_SUMMONPETS_ACTION", UpdateActionButton)
+		self:UnregisterEvent("UPDATE_VEHICLE_ACTIONBAR", UpdateActionButton)
+	end
 end
 
 ActionButton.OnEvent = function(self, event, ...)
