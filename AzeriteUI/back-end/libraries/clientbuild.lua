@@ -1,4 +1,4 @@
-local LibClientBuild = Wheel:Set("LibClientBuild", 47)
+local LibClientBuild = Wheel:Set("LibClientBuild", 48)
 if (not LibClientBuild) then
 	return
 end
@@ -21,8 +21,8 @@ local MAJOR,MINOR,PATCH = string_split(".", currentClientPatch)
 MAJOR = tonumber(MAJOR)
 MINOR = tonumber(MINOR)
 
-local IsClassic, IsTBC
-local IsRetail, IsRetailBFA, IsRetailShadowlands
+local IsClassic, IsTBC, IsWotLK
+local IsRetail, IsRetailBFA, IsRetailShadowlands, IsRetailDragonflight
 
 IsClassic = MAJOR == 1
 IsTBC = MAJOR == 2
