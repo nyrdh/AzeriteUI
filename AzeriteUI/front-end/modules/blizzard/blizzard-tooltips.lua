@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
-if (not Core) then 
-	return 
+if (not Core) then
+	return
 end
 
 local LibNumbers = Wheel("LibNumbers")
@@ -67,7 +67,7 @@ local DEAD = DEAD
 local ITEM_LEVEL_ABBR = ITEM_LEVEL_ABBR
 local NOT_APPLICABLE = NOT_APPLICABLE
 
--- Blizzard textures we use 
+-- Blizzard textures we use
 local BLANK = "|T"..GetMedia("blank")..":14:14:-2:1|t" -- 1:1
 local BOSS_TEXTURE = "|TInterface\\TargetingFrame\\UI-TargetingFrame-Skull:14:14:-2:1|t" -- 1:1
 local FFA_TEXTURE = "|TInterface\\TargetingFrame\\UI-PVP-FFA:14:10:-2:1:64:64:6:34:0:40|t" -- 4:3
@@ -85,18 +85,18 @@ local UIHider = CreateFrame("Frame"); UIHider:Hide()
 local SmallTooltipBackdropTemplate = {
 	bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
 	edgeFile = GetMedia("better-blizzard-border-small-alternate"),
-	tile = false, 
-	tileEdge = false, 
+	tile = false,
+	tileEdge = false,
 	tileSize = nil,
 	edgeSize = 32,
-	insets = { left = 25, right = 25, top = 25, bottom = 25 } 
+	insets = { left = 25, right = 25, top = 25, bottom = 25 }
 }
 
 local HealthBarBackdropTemplate = {
 	bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
 	edgeFile = GetMedia("aura_border"),
-	tile = false, 
-	tileEdge = false, 
+	tile = false,
+	tileEdge = false,
 	tileSize = nil,
 	edgeSize = 8,
 	insets = { left = 5, right = 5, top = 5, bottom = 5 }
@@ -173,8 +173,8 @@ end
 -- Returns the r, g, b value
 local GetUnitHealthColor = function(unit, data)
 	local r, g, b
-	if data then 
-		if (data.isPet and data.petRarity) then 
+	if data then
+		if (data.isPet and data.petRarity) then
 			r, g, b = unpack(Colors.quality[data.petRarity - 1])
 		else
 			if ((not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit) and UnitCanAttack("player", unit)) then
@@ -185,18 +185,18 @@ local GetUnitHealthColor = function(unit, data)
 				r, g, b = unpack(Colors.dead)
 			elseif (UnitIsPlayer(unit)) then
 				local _, class = UnitClass(unit)
-				if class then 
+				if class then
 					r, g, b = unpack(Colors.class[class])
-				else 
+				else
 					r, g, b = unpack(Colors.disconnected)
-				end 
+				end
 			elseif (UnitReaction(unit, "player")) then
 				r, g, b = unpack(Colors.reaction[UnitReaction(unit, "player")])
 			else
 				r, g, b = 1, 1, 1
 			end
-		end 
-	else 
+		end
+	else
 		if ((not UnitPlayerControlled(unit)) and UnitIsTapDenied(unit) and UnitCanAttack("player", unit)) then
 			r, g, b = unpack(Colors.tapped)
 		elseif (not UnitIsConnected(unit)) then
@@ -205,19 +205,19 @@ local GetUnitHealthColor = function(unit, data)
 			r, g, b = unpack(Colors.dead)
 		elseif (UnitIsPlayer(unit)) then
 			local _, class = UnitClass(unit)
-			if class then 
+			if class then
 				r, g, b = unpack(Colors.class[class])
-			else 
+			else
 				r, g, b = unpack(Colors.disconnected)
-			end 
+			end
 		elseif (UnitReaction(unit, "player")) then
 			r, g, b = unpack(Colors.reaction[UnitReaction(unit, "player")])
 		else
 			r, g, b = 1, 1, 1
 		end
-	end 
+	end
 	return r,g,b
-end 
+end
 
 local GetTooltipUnit = function(tooltip)
 	local _, unit = tooltip:GetUnit()
@@ -243,13 +243,13 @@ local AddIndexedLine = function(tooltip, lineIndex, msg, r, g, b)
 	b = b or Colors.offwhite[3]
 	local line
 	local numLines = tooltip:NumLines()
-	if (lineIndex > numLines) then 
+	if (lineIndex > numLines) then
 		tooltip:AddLine(msg, r, g, b)
 		line = _G[tooltip:GetName().."TextLeft"..(numLines + 1)]
 	else
 		line = _G[tooltip:GetName().."TextLeft"..lineIndex]
 		line:SetText(msg)
-		if (r and g and b) then 
+		if (r and g and b) then
 			line:SetTextColor(r, g, b)
 		end
 	end
@@ -283,16 +283,16 @@ Tooltip.Style = function(self)
 	if (IsRetail) then
 
 		-- Textures in the combat pet tooltips
-		for _,texName in ipairs({ 
-			"BorderTopLeft", 
-			"BorderTopRight", 
-			"BorderBottomRight", 
-			"BorderBottomLeft", 
-			"BorderTop", 
-			"BorderRight", 
-			"BorderBottom", 
-			"BorderLeft", 
-			"Background" 
+		for _,texName in ipairs({
+			"BorderTopLeft",
+			"BorderTopRight",
+			"BorderBottomRight",
+			"BorderBottomLeft",
+			"BorderTop",
+			"BorderRight",
+			"BorderBottom",
+			"BorderLeft",
+			"Background"
 		}) do
 			local region = self[texName]
 			if (region) then
@@ -310,7 +310,7 @@ Tooltip.Style = function(self)
 		else
 			-- Region names sourced from SharedXML\NineSlice.lua
 			-- *Majority of this, if not all, was moved into frame.NineSlice in 9.1.5 / 1.14.1
-			for _,pieceName in ipairs({  
+			for _,pieceName in ipairs({
 				"TopLeftCorner",
 				"TopRightCorner",
 				"BottomLeftCorner",
@@ -355,7 +355,7 @@ Tooltip.Style = function(self)
 	self:SetScale(768/1080)
 
 	-- I don't THINK this taints, but one never knows.
-	-- We do this to easily avoid certain addons changing the scale. 
+	-- We do this to easily avoid certain addons changing the scale.
 	self.SetIgnoreParentScale = function() end
 	self.SetScale = function() end
 
@@ -365,9 +365,9 @@ Tooltip.AdjustScale = function(self)
 	local currentScale = self:GetScale()
 	local UICenter = Module:GetFrame("UICenter")
 	local targetScale = UICenter:GetEffectiveScale() / (self:GetParent() or WorldFrame):GetEffectiveScale()
-	if (math_abs(currentScale - targetScale) > .05) then 
+	if (math_abs(currentScale - targetScale) > .05) then
 		self:SetScale(targetScale)
-	end 
+	end
 end
 
 Tooltip.SetBackdrop = function(self, backdropInfo)
@@ -376,16 +376,30 @@ Tooltip.SetBackdrop = function(self, backdropInfo)
 		if (not backdrop) then
 			backdrop = CreateFrame("Frame", nil, self, BackdropTemplateMixin and "BackdropTemplate")
 			backdrop:SetAllPoints()
-			backdrop:SetFrameLevel(self:GetFrameLevel())
-			-- Hook into tooltip framelevel changes. 
-			-- Might help with some of the conflicts 
+			-- Hook into tooltip framelevel changes.
+			-- Might help with some of the conflicts
 			-- experienced with Silverdragon and Raider.IO
-			hooksecurefunc(self, "SetFrameLevel", function(self) 
-				backdrop:SetFrameLevel(self:GetFrameLevel())
-			end)
+			local fixLevel = function(self)
+				local backdropLevel = backdrop:GetFrameLevel()
+				local level = self:GetFrameLevel()
+				-- Assure we can always go one level below
+				if (level < 2) then
+					self:SetFrameLevel(2)
+					backdrop:SetFrameLevel(1)
+				else
+					backdrop:SetFrameLevel(level-1)
+				end
+			end
+			self:HookScript("OnShow",fixLevel)
+			self:HookScript("OnTooltipSetSpell",fixLevel)
+			self:HookScript("OnTooltipSetItem",fixLevel)
+			self:HookScript("OnTooltipSetUnit",fixLevel)
+			hooksecurefunc(self, "SetFrameLevel", fixLevel)
+			hooksecurefunc(self, "Show", fixLevel)
 			Backdrops[self] = backdrop
 		end
-		backdrop:SetBackdrop(backdropInfo)		
+		backdrop:SetBackdrop(backdropInfo)
+		fixLevel(self) -- might be needed?
 	elseif (backdrop) then
 		backdrop:SetBackdrop(nil)
 	end
@@ -447,7 +461,7 @@ Tooltip.SetDefaultAnchor = function(self, parent)
 		self:ClearAllPoints()
 		self:SetPoint(anchor, Tooltip.Anchor, anchor, 0, 0)
 	end
-	
+
 end
 
 Tooltip.OnCompareItemShow = function(self)
@@ -466,7 +480,7 @@ Tooltip.SetUnitColor = function(unit)
 	local unitReaction = unit and UnitReaction(unit, "player")
 	local unitIsPlayer = unit and UnitIsPlayer(unit)
 	local color
-	if (unitIsPlayer) then 
+	if (unitIsPlayer) then
 		local _,class = UnitClass(unit)
 		color = class and Colors.class[class]
 	elseif (unitReaction) then
@@ -500,17 +514,17 @@ Tooltip.OnTooltipSetUnit = function(self)
 	end
 
 	GameTooltip_ClearMoney(self)
-	SharedTooltip_ClearInsertedFrames(self) 
+	SharedTooltip_ClearInsertedFrames(self)
 	self:SetPadding(0,0,0,0)
 	self:ClearLines()
 
 	local lineIndex = 1
 	local tooltipName = self:GetName()
 
-	-- name 
+	-- name
 	local displayName = data.name
-	if (data.isPlayer) then 
-		if (data.showPvPFactionWithName) then 
+	if (data.isPlayer) then
+		if (data.showPvPFactionWithName) then
 			if (data.isFFA) then
 				displayName = FFA_TEXTURE .. " " .. displayName
 			elseif (data.isPVP and data.englishFaction) then
@@ -519,7 +533,7 @@ Tooltip.OnTooltipSetUnit = function(self)
 				elseif (data.englishFaction == "Alliance") then
 					displayName = FACTION_ALLIANCE_TEXTURE .. " " .. displayName
 				elseif (data.englishFaction == "Neutral") then
-					-- They changed this to their new atlas garbage in Legion, 
+					-- They changed this to their new atlas garbage in Legion,
 					-- so for the sake of simplicty we'll just use the FFA PvP icon instead. Works.
 					displayName = FFA_TEXTURE .. " " .. displayName
 				end
@@ -529,95 +543,95 @@ Tooltip.OnTooltipSetUnit = function(self)
 			displayName = displayName .. Colors.quest.gray.colorCode.. " (" .. data.pvpRankName .. ")|r"
 		end
 
-	else 
+	else
 		if (data.isBoss) then
 			displayName = BOSS_TEXTURE .. " " .. displayName
 		elseif (data.classification == "rare") or (data.classification == "rareelite") then
 			displayName = displayName .. Colors.quality[3].colorCode .. " (" .. ITEM_QUALITY3_DESC .. ")|r"
-		elseif (data.classification == "elite") then 
+		elseif (data.classification == "elite") then
 			displayName = displayName .. Colors.title.colorCode .. " (" .. ELITE .. ")|r"
 		end
 	end
 
 	local levelText
-	if (data.effectiveLevel and (data.effectiveLevel > 0)) then 
+	if (data.effectiveLevel and (data.effectiveLevel > 0)) then
 		local r, g, b, colorCode = GetDifficultyColorByLevel(data.effectiveLevel)
 		levelText = colorCode .. data.effectiveLevel .. "|r"
-	end 
+	end
 
 	if (data.isPlayer) and (not levelText) then
 		displayName = BOSS_TEXTURE .. " " .. displayName
-	end 
+	end
 
 	local r, g, b = GetUnitHealthColor(unit,data)
-	if (levelText) then 
+	if (levelText) then
 		lineIndex = AddIndexedLine(self, lineIndex, levelText .. Colors.quest.gray.colorCode .. ": |r" .. displayName, r, g, b)
 	else
 		lineIndex = AddIndexedLine(self, lineIndex, displayName, r, g, b)
-	end 
+	end
 
 	-- Players
-	if (data.isPlayer) then 
-		if (data.isDead) then 
+	if (data.isPlayer) then
+		if (data.isDead) then
 			lineIndex = AddIndexedLine(self, lineIndex, data.isGhost and DEAD or CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
-		else 
-			if (data.guild) then 
+		else
+			if (data.guild) then
 				lineIndex = AddIndexedLine(self, lineIndex, "<"..data.guild..">", Colors.title[1], Colors.title[2], Colors.title[3])
-			end 
+			end
 
 			local levelLine
 
-			if (data.raceDisplayName) then 
+			if (data.raceDisplayName) then
 				levelLine = (levelLine and levelLine.." " or "") .. data.raceDisplayName
-			end 
+			end
 
-			if (data.classDisplayName and data.class) then 
+			if (data.classDisplayName and data.class) then
 				levelLine = (levelLine and levelLine.." " or "") .. data.classDisplayName
-			end 
+			end
 
-			if (levelLine) then 
+			if (levelLine) then
 				lineIndex = AddIndexedLine(self, lineIndex, levelLine, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
-			end 
+			end
 
 			-- player faction (Horde/Alliance/Neutral)
-			if (data.localizedFaction) then 
+			if (data.localizedFaction) then
 				lineIndex = AddIndexedLine(self, lineIndex, data.localizedFaction)
-			end 
+			end
 		end
 
 	-- All other NPCs
-	else 
-		if (data.isDead) then 
+	else
+		if (data.isDead) then
 			lineIndex = AddIndexedLine(self, lineIndex, data.isGhost and DEAD or CORPSE, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
-			if (data.isSkinnable) then 
+			if (data.isSkinnable) then
 				lineIndex = AddIndexedLine(self, lineIndex, data.skinnableMsg, data.skinnableColor[1], data.skinnableColor[2], data.skinnableColor[3])
 			end
-		else 
+		else
 			-- titles
-			if (data.title) then 
+			if (data.title) then
 				lineIndex = AddIndexedLine(self, lineIndex, "<"..data.title..">", Colors.normal[1], Colors.normal[2], Colors.normal[3])
-			end 
+			end
 
-			if (data.city) then 
+			if (data.city) then
 				lineIndex = AddIndexedLine(self, lineIndex, data.city, Colors.title[1], Colors.title[2], Colors.title[3])
-			end 
+			end
 
-			-- Beast etc 
-			if (data.creatureFamily) then 
+			-- Beast etc
+			if (data.creatureFamily) then
 				lineIndex = AddIndexedLine(self, lineIndex, data.creatureFamily, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
 
-			-- Humanoid, Crab, etc 
-			elseif (data.creatureType) then 
+			-- Humanoid, Crab, etc
+			elseif (data.creatureType) then
 				lineIndex = AddIndexedLine(self, lineIndex, data.creatureType, Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3])
-			end 
+			end
 
 			-- Player faction (Horde/Alliance/Neutral)
-			if (data.localizedFaction) then 
+			if (data.localizedFaction) then
 				lineIndex = AddIndexedLine(self, lineIndex, data.localizedFaction)
-			end 
+			end
 
 			-- Definitely important in classic!
-			if (data.isCivilian) then 
+			if (data.isCivilian) then
 				lineIndex = AddIndexedLine(self, lineIndex, PVP_RANK_CIVILIAN, data.civilianColor[1], data.civilianColor[2], data.civilianColor[3])
 			end
 		end
@@ -637,7 +651,7 @@ Tooltip.OnTooltipSetUnit = function(self)
 				end
 
 				-- Only show incompletes.
-				if (notComplete) then 
+				if (notComplete) then
 
 					lineIndex = AddIndexedLine(self, lineIndex, BLANK) -- this ends up at the end(..?)
 					lineIndex = AddIndexedLine(self, lineIndex, objectiveData.questTitle, Colors.title[1], Colors.title[2], Colors.title[3])
@@ -661,7 +675,7 @@ Tooltip.OnTooltipSetUnit = function(self)
 			end
 		end
 
-	end 
+	end
 
 	-- Add player realm names.
 	if (data.realm) then
@@ -698,7 +712,7 @@ end
 
 -- This is amongst other times called
 -- when a tooltip changes contents while shown.
--- Like when hovering from a unit, to an object. 
+-- Like when hovering from a unit, to an object.
 Tooltip.OnTooltipCleared = function(self)
 	if (HealthBar:IsShown()) then
 		HealthBar:Hide()
@@ -751,13 +765,13 @@ end
 
 Module.StyleHealthBar = function(self)
 	HealthBar:SetScript("OnValueChanged", Tooltip.OnValueChanged)
-	HealthBar:SetStatusBarTexture(GetMedia("statusbar-normal")) 
+	HealthBar:SetStatusBarTexture(GetMedia("statusbar-normal"))
 	HealthBar:ClearAllPoints()
 	HealthBar:SetPoint("BOTTOMLEFT", HealthBar:GetParent(), "BOTTOMLEFT", 6, -4)
 	HealthBar:SetPoint("BOTTOMRIGHT", HealthBar:GetParent(), "BOTTOMRIGHT", -6, -4)
 	HealthBar:SetHeight(4)
 
-	HealthBar:HookScript("OnShow", function(self) 
+	HealthBar:HookScript("OnShow", function(self)
 		local tooltip = self:GetParent()
 		if (tooltip) then
 			if (tooltip == NarciGameTooltip) then
@@ -768,7 +782,7 @@ Module.StyleHealthBar = function(self)
 		end
 	end)
 
-	HealthBar:HookScript("OnHide", function(self) 
+	HealthBar:HookScript("OnHide", function(self)
 		local tooltip = self:GetParent()
 		if (tooltip) then
 			if (tooltip == NarciGameTooltip) then
@@ -790,7 +804,7 @@ Module.StyleTooltips = function(self, event, ...)
 	-- Only want this on the first run.
 	if (event == "PLAYER_ENTERING_WORLD") then
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD", "StyleTooltips")
-	end 
+	end
 
 	-- Force creation of money lines.
 	if (not GameTooltip.hasMoney) then
@@ -831,9 +845,9 @@ Module.StyleTooltips = function(self, event, ...)
 		-- Addons
 		NarciGameTooltip
 
-	}) do 
+	}) do
 		Tooltip.Style(tooltip)
-	end 
+	end
 end
 
 Module.SetTooltipHooks = function(self)
@@ -841,7 +855,7 @@ Module.SetTooltipHooks = function(self)
 	if (_G.GameTooltip_SetBackdropStyle) then
 		-- Blizzard removed this in 1.14.1, changed it to the same as retail below.
 		hooksecurefunc("GameTooltip_SetBackdropStyle", Tooltip.Style)
-	elseif (_G.SharedTooltip_SetBackdropStyle) then	
+	elseif (_G.SharedTooltip_SetBackdropStyle) then
 		hooksecurefunc("SharedTooltip_SetBackdropStyle", Tooltip.Style)
 	end
 
@@ -851,7 +865,7 @@ Module.SetTooltipHooks = function(self)
 	hooksecurefunc("GameTooltip_ClearMoney", Tooltip.ResetColor)
 
 	-- 2021-04-02: Workaround for the weird paragon faction reward tooltip width in 9.0.5.
-	-- 2021-04-03: When hovering over, out and back over a bonus objective reward, 
+	-- 2021-04-03: When hovering over, out and back over a bonus objective reward,
 	--             most the text except level requirement will disappear on re-entering.
 	--             Seems to be because of self.Tooltip:Show(), so we're trying something else.
 	-- 2021-04-05: This fix ONLY works for embedded tooltips on the worldmap. Not the rep frame. Not the quest log. Fuck.
@@ -859,7 +873,7 @@ Module.SetTooltipHooks = function(self)
 		Tooltip.UpdateSize = function(self)
 			local itemTooltipExtraBorderHeight = 22
 			if (self.Tooltip:IsShown()) then
-				-- Figure out the actual width of the embedded tooltip, 
+				-- Figure out the actual width of the embedded tooltip,
 				-- as blizzard since 9.0.5 for some reason makes it super wide.
 				local realWidth,lineID = 0,1
 				while (self["TextLeft"..lineID]) do
@@ -886,13 +900,13 @@ Module.SetTooltipHooks = function(self)
 		end
 		hooksecurefunc("EmbeddedItemTooltip_UpdateSize", Tooltip.UpdateSize)
 	end
-	
+
 	GameTooltip:HookScript("OnTooltipCleared", Tooltip.OnTooltipCleared)
 	GameTooltip:HookScript("OnTooltipSetSpell", Tooltip.OnTooltipSetSpell)
 	GameTooltip:HookScript("OnTooltipSetItem", Tooltip.OnTooltipSetItem)
 
 	-- Rather then attempt to hook into totalRP3's information system,
-	-- we just choose to NOT modify unit tooltips when the addon is enabled. 
+	-- we just choose to NOT modify unit tooltips when the addon is enabled.
 	-- People using it want this info, not ours.
 	if (not self:IsAddOnEnabled("totalRP3")) then
 		GameTooltip:HookScript("OnTooltipSetUnit", Tooltip.OnTooltipSetUnit)
@@ -900,7 +914,7 @@ Module.SetTooltipHooks = function(self)
 end
 
 Module.OnEvent = function(self, event, ...)
-	if (event == "GP_BAGS_SHOWN") then 
+	if (event == "GP_BAGS_SHOWN") then
 		local bags = Wheel("LibModule"):GetModule("Backpacker", true)
 		if (bags) then
 			local containerFrame = bags:GetCointainerFrame()
@@ -908,9 +922,9 @@ Module.OnEvent = function(self, event, ...)
 				Tooltip.Place("BOTTOMRIGHT", containerFrame, "BOTTOMLEFT", -20, 20)
 			end
 		end
-	elseif (event == "GP_BAGS_HIDDEN") or (event == "PLAYER_ENTERING_WORLD") then 
+	elseif (event == "GP_BAGS_HIDDEN") or (event == "PLAYER_ENTERING_WORLD") then
 		Tooltip.Place(unpack(GetLayout("Tooltips").TooltipPlace))
-	end 
+	end
 end
 
 Module.OnInit = function(self)
@@ -919,10 +933,10 @@ Module.OnInit = function(self)
 		return self:SetUserDisabled(true)
 	end
 	-- Place our anchor.
-	-- This also triggers the anchor creation, 
+	-- This also triggers the anchor creation,
 	-- well in advance of any method that needs it.
 	Tooltip.Place(unpack(GetLayout("Tooltips").TooltipPlace))
-end 
+end
 
 Module.OnEnable = function(self)
 	self:SetTooltipHooks()
@@ -932,4 +946,4 @@ Module.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterMessage("GP_BAGS_HIDDEN", "OnEvent")
 	self:RegisterMessage("GP_BAGS_SHOWN", "OnEvent")
-end 
+end

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.547-RC] 2022-08-09
+### Changed
+- Adjusted our custom bakcdrops for blizzard tooltips to always attempt to stay one level below the tooltip.
+
 ## [3.2.546-RC] 2022-08-07
 ### Fixed
 - Removed the CURSOR_UPDATE event from Wrath and Dragonflight, as it does not appear to exist there.
