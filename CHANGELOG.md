@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.548-RC] 2022-08-10
+### Fixed
+- Fixed the missing upvalue bug from yesterday's update.
+
 ## [3.2.547-RC] 2022-08-09
 ### Changed
 - Adjusted our custom bakcdrops for blizzard tooltips to always attempt to stay one level below the tooltip.
