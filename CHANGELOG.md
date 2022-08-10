@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.549-RC] 2022-08-10
+### Fixed
+- Make sure the relevant tooltip script handlers exist before trying to hook them.
+
 ## [3.2.548-RC] 2022-08-10
 ### Fixed
 - Fixed the missing upvalue bug from yesterday's update.

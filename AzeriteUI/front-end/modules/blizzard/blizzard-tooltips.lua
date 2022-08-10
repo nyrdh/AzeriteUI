@@ -394,10 +394,17 @@ Tooltip.SetBackdrop = function(self, backdropInfo)
 		if (not backdrop) then
 			backdrop = CreateFrame("Frame", nil, self, BackdropTemplateMixin and "BackdropTemplate")
 			backdrop:SetAllPoints()
-			self:HookScript("OnShow",Tooltip.UpdateFrameLevel)
-			self:HookScript("OnTooltipSetSpell",Tooltip.UpdateFrameLevel)
-			self:HookScript("OnTooltipSetItem",Tooltip.UpdateFrameLevel)
-			self:HookScript("OnTooltipSetUnit",Tooltip.UpdateFrameLevel)
+			for _,handler in ipairs({
+				"OnTooltipSetSpell",
+				"OnTooltipSetItem",
+				"OnTooltipSetUnit",
+				"OnShow"
+			}) do
+				-- Not all tooltipframes has these.
+				if (self:HasScript(handler)) then
+					self:HookScript(handler, Tooltip.UpdateFrameLevel)
+				end
+			end
 			hooksecurefunc(self, "SetFrameLevel", Tooltip.UpdateFrameLevel)
 			hooksecurefunc(self, "Show", Tooltip.UpdateFrameLevel)
 			Backdrops[self] = backdrop
