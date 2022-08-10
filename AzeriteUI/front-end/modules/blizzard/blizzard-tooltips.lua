@@ -370,36 +370,40 @@ Tooltip.AdjustScale = function(self)
 	end
 end
 
+-- Hook into tooltip framelevel changes.
+-- Might help with some of the conflicts
+-- experienced with Silverdragon and Raider.IO
+Tooltip.UpdateFrameLevel = function(self)
+	local backdrop = Backdrops[self]
+	if (not backdrop) then
+		return
+	end
+	-- Assure we can always go one level below
+	local level = self:GetFrameLevel()
+	if (level < 2) then
+		self:SetFrameLevel(2)
+		backdrop:SetFrameLevel(1)
+	else
+		backdrop:SetFrameLevel(level-1)
+	end
+end
+
 Tooltip.SetBackdrop = function(self, backdropInfo)
 	local backdrop = Backdrops[self]
 	if (backdropInfo) then
 		if (not backdrop) then
 			backdrop = CreateFrame("Frame", nil, self, BackdropTemplateMixin and "BackdropTemplate")
 			backdrop:SetAllPoints()
-			-- Hook into tooltip framelevel changes.
-			-- Might help with some of the conflicts
-			-- experienced with Silverdragon and Raider.IO
-			local fixLevel = function(self)
-				local backdropLevel = backdrop:GetFrameLevel()
-				local level = self:GetFrameLevel()
-				-- Assure we can always go one level below
-				if (level < 2) then
-					self:SetFrameLevel(2)
-					backdrop:SetFrameLevel(1)
-				else
-					backdrop:SetFrameLevel(level-1)
-				end
-			end
-			self:HookScript("OnShow",fixLevel)
-			self:HookScript("OnTooltipSetSpell",fixLevel)
-			self:HookScript("OnTooltipSetItem",fixLevel)
-			self:HookScript("OnTooltipSetUnit",fixLevel)
-			hooksecurefunc(self, "SetFrameLevel", fixLevel)
-			hooksecurefunc(self, "Show", fixLevel)
+			self:HookScript("OnShow",Tooltip.UpdateFrameLevel)
+			self:HookScript("OnTooltipSetSpell",Tooltip.UpdateFrameLevel)
+			self:HookScript("OnTooltipSetItem",Tooltip.UpdateFrameLevel)
+			self:HookScript("OnTooltipSetUnit",Tooltip.UpdateFrameLevel)
+			hooksecurefunc(self, "SetFrameLevel", Tooltip.UpdateFrameLevel)
+			hooksecurefunc(self, "Show", Tooltip.UpdateFrameLevel)
 			Backdrops[self] = backdrop
 		end
 		backdrop:SetBackdrop(backdropInfo)
-		fixLevel(self) -- might be needed?
+		Tooltip.UpdateFrameLevel(self) -- might be needed?
 	elseif (backdrop) then
 		backdrop:SetBackdrop(nil)
 	end
