@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.550-RC] 2022-08-17
+- Bump to client patch 9.2.7.
+
 ## [3.2.549-RC] 2022-08-10
 ### Fixed
 - Make sure the relevant tooltip script handlers exist before trying to hook them.
