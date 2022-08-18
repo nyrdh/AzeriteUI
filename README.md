@@ -39,11 +39,14 @@ These are some addons I feel go very well together with our user interface. They
 ### **It's so big, how can I scale it down?**
 * With the command `/setscale n`, where `n` should be a number from 0.75 to 1.25. The default scale is 1.
 
+### **How can I move spells around?**
+* There is an option to unlock the actionbars in the the menu, avaiable from the cogwheel menu in the bottom right corner. You can also hold down Alt+Ctrl+Shift and drag with the mouse to move spells at any time.
+
 ### **How can I move things?**
 * You can't. This is as much UX as UI, meaning the interface is designed around a concept, this isn't meant to be a pretty skin over your current interface, it's instead a full user experience system where how you interact with the game is affected.
 
 ### **How can I get more action buttons, and where is the stance bar?**
-* For more buttons, right-click the cogwheel icon in the bottom right corner of the screen. You can have a maximum of 2 full bars in the azerite theme, and a maximum of 4 full bars in the legacy theme.
+* For more buttons, middle-click the cogwheel icon in the bottom right corner of the screen. You can have a maximum of 2 full bars in the azerite theme, and a maximum of 4 full bars in the legacy theme.
 * The stance bar will be introduced as an optional feature in an upcoming update. If you need it right away, you can always use Bartender for it along with our [our Masque skin](https://www.curseforge.com/wow/addons/masque-azerite).
 
 ### **How can I disable the actionbars?**
