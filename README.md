@@ -7,6 +7,8 @@ This is a custom user interface suite for World of Warcraft, containing multiple
 
 To switch between interface theme, use the commands `/go azerite` and `/go legacy`. This is a per character setting.
 
+To change the scale of the custom interface elements, use the command `/setscale n`, where `n` should be a number from 0.75 to 1.25. The default scale is 1.
+
 ## **Report a bug, suggest a feature:**
 All feature requests and bug reports for all game versions are done on the main project's github page. Please use _only_ our report system and the supplied template when reporting bugs.
 * [github.com/GoldpawsStuff/AzeriteUI/issues](https://github.com/GoldpawsStuff/AzeriteUI/issues)
@@ -35,7 +37,7 @@ These are some addons I feel go very well together with our user interface. They
 
 ## **Frequently Asked Questions:**
 ### **It's so big, how can I scale it down?**
-* You can't. It's meant to be this big! We're a couple of lazy, laid back gamers, and prefer gaming in a fair distance from our screens, keeping things relaxed and simplified. Big health bars, easy to see big buttons, nothing there we don't absolutely need. We treat this as a console game, and this UI is built around that philosophy. The sizes should thus be relatively the same on all screens, relative to the height of the screen.
+* With the command `/setscale n`, where `n` should be a number from 0.75 to 1.25. The default scale is 1.
 
 ### **How can I move things?**
 * You can't. This is as much UX as UI, meaning the interface is designed around a concept, this isn't meant to be a pretty skin over your current interface, it's instead a full user experience system where how you interact with the game is affected.
