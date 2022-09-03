@@ -17,9 +17,6 @@
 ## SavedVariables: AzeriteUI_DB
 ## OptionalDeps: Clique
 
-# General taint fixes
-TaintLess.xml
-
 # Global Fonts
 FontStyles.xml
 
