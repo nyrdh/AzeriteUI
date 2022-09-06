@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.552-RC] 2022-09-06
+### Changed
+- First real steps towards Wrath Classic compatibility. Note that Death Knight Runes are left out intentionally, as I need to rewrite this plugin further for the old style system with multicolored runes.
+
 ## [3.2.551-RC] 2022-09-03
 ### Removed
 - Removing TaintLess.xml as its about to be deprecated.
