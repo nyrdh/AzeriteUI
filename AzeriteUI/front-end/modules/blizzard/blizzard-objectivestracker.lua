@@ -42,8 +42,10 @@ local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
+local IsAnyClassic = Private.IsAnyClassic
 local IsClassic = Private.IsClassic
 local IsTBC = Private.IsTBC
+local IsWrath = Private.IsWrath
 local IsRetail = Private.IsRetail
 
 -----------------------------------------------------------------
@@ -76,7 +78,7 @@ local ObjectiveAlphaDriver = Module:CreateFrame("Frame", nil, "UICenter", "Secur
 ObjectiveAlphaDriver.Update = function()
 
 	-- The tracker addon might not be loaded.
-	local tracker = QuestWatchFrame or ObjectiveTrackerFrame
+	local tracker = QuestWatchFrame or ObjectiveTrackerFrame or WatchFrame
 
 	-- Check for the visibility of addons conflicting with the visuals.
 	local bags = Wheel("LibModule"):GetModule("Backpacker", true)
@@ -252,6 +254,8 @@ Module.StyleClassicTracker = function(self)
 		return
 	end
 
+	local tracker = QuestWatchFrame
+
 	local layout = self.layout
 	local scaffold = self:CreateFrame("Frame", nil, MinimapCluster)
 	scaffold:SetWidth(layout.Width)
@@ -263,7 +267,7 @@ Module.StyleClassicTracker = function(self)
 	-- to block mouse input when it's faded out.
 	local mouseKiller = self:CreateFrame("Frame", nil, "UICenter")
 	mouseKiller:SetParent(scaffold)
-	mouseKiller:SetFrameLevel(QuestWatchFrame:GetFrameLevel() + 5)
+	mouseKiller:SetFrameLevel(tracker:GetFrameLevel() + 5)
 	mouseKiller:SetAllPoints()
 	mouseKiller:EnableMouse(true)
 	mouseKiller:Hide()
@@ -271,17 +275,17 @@ Module.StyleClassicTracker = function(self)
 
 	-- Minihack to fix mouseover fading (we still have this?)
 	self.frame:ClearAllPoints()
-	self.frame:SetAllPoints(QuestWatchFrame)
+	self.frame:SetAllPoints(tracker)
 
 	-- Re-position after UIParent messes with it.
-	hooksecurefunc(QuestWatchFrame,"SetPoint", function(_,_, anchor)
+	hooksecurefunc(tracker,"SetPoint", function(_,_, anchor)
 		if (anchor ~= scaffold) then
 			self:UpdateClassicTrackerPosition()
 		end
 	end)
 
 	-- Just in case some random addon messes with it.
-	hooksecurefunc(QuestWatchFrame,"SetAllPoints", function()
+	hooksecurefunc(tracker,"SetAllPoints", function()
 		self:UpdateClassicTrackerPosition()
 	end)
 
@@ -289,7 +293,7 @@ Module.StyleClassicTracker = function(self)
 	self:RegisterEvent("VARIABLES_LOADED", "UpdateClassicTrackerPosition")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateClassicTrackerPosition")
 
-	local dummyLine = QuestWatchFrame:CreateFontString()
+	local dummyLine = tracker:CreateFontString()
 	dummyLine:SetFontObject(layout.FontObject)
 	dummyLine:SetWidth(layout.Width)
 	dummyLine:SetJustifyH("RIGHT")
@@ -299,8 +303,9 @@ Module.StyleClassicTracker = function(self)
 	dummyLine:SetNonSpaceWrap(false)
 	dummyLine:SetSpacing(0)
 
-	QuestWatchQuestName:ClearAllPoints()
-	QuestWatchQuestName:SetPoint("TOPRIGHT", QuestWatchFrame, "TOPRIGHT", 0, 0)
+	local title = QuestWatchQuestName
+	title:ClearAllPoints()
+	title:SetPoint("TOPRIGHT", tracker, "TOPRIGHT", 0, 0)
 
 	-- Hook line styling
 	hooksecurefunc("QuestWatch_Update", function()
@@ -330,7 +335,7 @@ Module.StyleClassicTracker = function(self)
 					-- Align the quest title better
 					if (watchTextIndex == 1) then
 						watchText:ClearAllPoints()
-						watchText:SetPoint("TOPRIGHT", QuestWatchQuestName, "TOPRIGHT", 0, -4)
+						watchText:SetPoint("TOPRIGHT", title, "TOPRIGHT", 0, -4)
 					else
 						watchText:ClearAllPoints()
 						watchText:SetPoint("TOPRIGHT", _G["QuestWatchLine"..(watchTextIndex - 1)], "BOTTOMRIGHT", 0, -10)
@@ -435,7 +440,7 @@ Module.StyleClassicTracker = function(self)
 		-- Avoid a nil bug that sometimes can happen with no objectives tracked,
 		-- in weird circumstances I have been unable to reproduce.
 		if (top and bottom) then
-			QuestWatchFrame:SetHeight(top - bottom)
+			tracker:SetHeight(top - bottom)
 		end
 
 	end)
@@ -464,6 +469,78 @@ Module.UpdateClassicTrackerPosition = function(self)
 	QuestWatchFrame:SetAlpha(.9)
 	QuestWatchFrame:ClearAllPoints()
 	QuestWatchFrame:SetPoint("BOTTOMRIGHT", self.frame.holder, "BOTTOMRIGHT", 0, 0)
+end
+
+-----------------------------------------------------------------
+-- Wrath
+-----------------------------------------------------------------
+Module.StyleWrathTracker = function(self)
+	if (not IsWrath) then
+		return
+	end
+	local tracker = WatchFrame
+
+	local layout = self.layout
+	local scaffold = self:CreateFrame("Frame", nil, MinimapCluster)
+	scaffold:SetWidth(layout.Width)
+	scaffold:SetHeight(22)
+	scaffold:Place(unpack(layout.Place))
+	self.frame.holder = scaffold
+
+	-- Create a dummy frame to cover the tracker
+	-- to block mouse input when it's faded out.
+	local mouseKiller = self:CreateFrame("Frame", nil, "UICenter")
+	mouseKiller:SetParent(scaffold)
+	mouseKiller:SetFrameLevel(tracker:GetFrameLevel() + 5)
+	mouseKiller:SetAllPoints()
+	mouseKiller:EnableMouse(true)
+	mouseKiller:Hide()
+	self.frame.cover = mouseKiller
+
+	-- Minihack to fix mouseover fading (we still have this?)
+	self.frame:ClearAllPoints()
+	self.frame:SetAllPoints(tracker)
+
+	-- Re-position after UIParent messes with it.
+	hooksecurefunc(tracker,"SetPoint", function(_,_, anchor)
+		if (anchor ~= scaffold) then
+			self:UpdateWrathTrackerPosition()
+		end
+	end)
+
+	-- Just in case some random addon messes with it.
+	hooksecurefunc(tracker,"SetAllPoints", function()
+		self:UpdateWrathTrackerPosition()
+	end)
+
+	-- Try to bypass the frame cache
+	self:RegisterEvent("VARIABLES_LOADED", "UpdateWrathTrackerPosition")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateWrathTrackerPosition")
+
+end
+
+Module.UpdateWrathTrackerPosition = function(self)
+	if not(WatchFrame and self.frame and self.frame.holder) then
+		return
+	end
+
+	local layout = self.layout
+	if (not layout) then
+		return
+	end
+
+	local screenHeight = self:GetFrame("UICenter"):GetHeight()
+	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
+	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
+
+	WatchFrame:SetParent(self.frame)
+	WatchFrame:SetScale(layout.Scale or 1)
+	WatchFrame:SetWidth(layout.Width / (layout.Scale or 1))
+	WatchFrame:SetHeight(objectiveFrameHeight / (layout.Scale or 1))
+	WatchFrame:SetClampedToScreen(false)
+	WatchFrame:SetAlpha(.9)
+	WatchFrame:ClearAllPoints()
+	WatchFrame:SetPoint("BOTTOMRIGHT", self.frame.holder, "BOTTOMRIGHT", 0, 0)
 end
 
 -----------------------------------------------------------------
@@ -576,10 +653,12 @@ Module.InitAlphaDriver = function(self)
 		UnregisterAttributeDriver(ObjectiveAlphaDriver, "state-vis")
 	end
 	local driver = "hide;show"
-	if (IsRetail) then
+	if (IsRetail or IsWrath) then
 		if (self.layout.HideInVehicles) then
 			driver = "[overridebar][possessbar][shapeshift][vehicleui]"  .. driver
 		end
+	end
+	if (IsRetail or IsTBC or IsWrath) then
 		if (self.layout.HideInArena) then
 			driver = "[@arena1,exists][@arena2,exists][@arena3,exists][@arena4,exists][@arena5,exists]" .. driver
 		end
@@ -647,6 +726,12 @@ Module.OnInit = function(self)
 		self.frame:SetFrameStrata("LOW")
 		self:StyleClassicLog()
 		self:StyleClassicTracker()
+	end
+
+	if (IsWrath) then
+		self.frame = self:CreateFrame("Frame", nil, "UICenter")
+		self.frame:SetFrameStrata("LOW")
+		self:StyleWrathTracker()
 	end
 
 	if (IsRetail) then

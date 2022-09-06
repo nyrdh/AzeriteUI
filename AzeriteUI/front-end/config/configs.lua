@@ -1928,7 +1928,7 @@ RegisterLayout("BlizzardTimers", "Azerite", {
 })
 
 -- Blizzard Objectives Tracker
-RegisterLayout("BlizzardObjectivesTracker", "Azerite", (IsAnyClassic) and {
+RegisterLayout("BlizzardObjectivesTracker", "Azerite", (IsClassic or IsTBC) and {
 	["FontObject"] = GetFont(13, true),
 	["FontObjectTitle"] = GetFont(15, true),
 	["HideInBossFights"] = true,
@@ -1939,6 +1939,17 @@ RegisterLayout("BlizzardObjectivesTracker", "Azerite", (IsAnyClassic) and {
 	["SpaceBottom"] = 380,
 	["SpaceTop"] = 260,
 	["Width"] = 255 -- 280 is classic default
+} or (IsWrath) and {
+	["Place"] = { "BOTTOMRIGHT", -60, 380 },
+	["Width"] = 204, -- 204 is wrath default
+	["Scale"] = 1.25,
+	["SpaceTop"] = 260,
+	["SpaceBottom"] = 380,
+	["MaxHeight"] = 340,
+	["HideInCombat"] = false,
+	["HideInBossFights"] = true,
+	["HideInVehicles"] = false,
+	["HideInArena"] = true
 } or (IsRetail) and {
 	["Place"] = { "TOPRIGHT", -60, -280 },
 	["Width"] = 235, -- 235 default
