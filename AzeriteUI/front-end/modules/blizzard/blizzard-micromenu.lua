@@ -1,7 +1,7 @@
 local ADDON,Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
-if (not Core) then 
-	return 
+if (not Core) then
+	return
 end
 local Module = Core:NewModule("BlizzardMicroMenu", "LibEvent", "LibDB", "LibTooltip", "LibFrame")
 
@@ -26,8 +26,10 @@ local GetNetStats = GetNetStats
 -- Private API
 local Colors = Private.Colors
 local GetLayout = Private.GetLayout
+local IsAnyClassic = Private.IsAnyClassic
 local IsClassic = Private.IsClassic
 local IsTBC = Private.IsTBC
+local IsWrath = Private.IsWrath
 local IsRetail = Private.IsRetail
 
 -- All this shit needs to go!!
@@ -82,6 +84,18 @@ if (IsClassic or IsTBC) then
 	table_insert(microButtons, "MainMenuMicroButton")
 	table_insert(microButtons, "HelpMicroButton")
 end
+if (IsWrath) then
+	table_insert(microButtons, "CharacterMicroButton")
+	table_insert(microButtons, "SpellbookMicroButton")
+	table_insert(microButtons, "TalentMicroButton")
+	table_insert(microButtons, "AchievementMicroButton")
+	table_insert(microButtons, "QuestLogMicroButton")
+	table_insert(microButtons, "SocialsMicroButton")
+	table_insert(microButtons, "PVPMicroButton")
+	table_insert(microButtons, "LFGMicroButton")
+	table_insert(microButtons, "MainMenuMicroButton")
+	table_insert(microButtons, "HelpMicroButton")
+end
 if (IsRetail) then
 	table_insert(microButtons, "CharacterMicroButton")
 	table_insert(microButtons, "SpellbookMicroButton")
@@ -107,6 +121,18 @@ if (IsClassic or IsTBC) then
 		microButtonTexts.LFGMicroButton = DUNGEONS_BUTTON
 	end
 	microButtonTexts.WorldMapMicroButton = WORLD_MAP
+	microButtonTexts.MainMenuMicroButton = MAINMENU_BUTTON
+	microButtonTexts.HelpMicroButton = HELP_BUTTON
+end
+if (IsWrath) then
+	microButtonTexts.CharacterMicroButton = CHARACTER_BUTTON
+	microButtonTexts.SpellbookMicroButton = SPELLBOOK_ABILITIES_BUTTON
+	microButtonTexts.TalentMicroButton = TALENTS_BUTTON
+	microButtonTexts.AchievementMicroButton = ACHIEVEMENT_BUTTON
+	microButtonTexts.QuestLogMicroButton = QUESTLOG_BUTTON
+	microButtonTexts.SocialsMicroButton = SOCIALS
+	microButtonTexts.PVPMicroButton = PLAYER_V_PLAYER
+	microButtonTexts.LFGMicroButton = DUNGEONS_BUTTON
 	microButtonTexts.MainMenuMicroButton = MAINMENU_BUTTON
 	microButtonTexts.HelpMicroButton = HELP_BUTTON
 end
@@ -158,7 +184,7 @@ if (IsClassic or IsTBC) then
 	end
 	microButtonScripts.MicroButton_OnEnter = function(self)
 		if (self:IsEnabled() or self.minLevel or self.disabledTooltip or self.factionGroup) then
-	
+
 			local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
 			local tooltip = PrepareTooltip(self)
 
@@ -168,14 +194,14 @@ if (IsClassic or IsTBC) then
 			else
 				tooltip:AddLine(self.newbieText, titleColor[1], titleColor[2], titleColor[3], true)
 			end
-	
+
 			if (not self:IsEnabled()) then
 				if (self.factionGroup == "Neutral") then
 					tooltip:AddLine(FEATURE_NOT_AVAILBLE_PANDAREN, Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3], true)
-	
+
 				elseif ( self.minLevel ) then
 					tooltip:AddLine(string_format(FEATURE_BECOMES_AVAILABLE_AT_LEVEL, self.minLevel), Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3], true)
-	
+
 				elseif ( self.disabledTooltip ) then
 					tooltip:AddLine(self.disabledTooltip, Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3], true)
 				end
@@ -186,7 +212,7 @@ if (IsClassic or IsTBC) then
 	end
 	microButtonScripts.MicroButton_OnLeave = function(button)
 		local tooltip = Private:GetOptionsMenuTooltip()
-		tooltip:Hide() 
+		tooltip:Hide()
 	end
 end
 
@@ -224,7 +250,7 @@ if (IsRetail) then
 	end
 	microButtonScripts.MicroButton_OnEnter = function(self)
 		if (self:IsEnabled() or self.minLevel or self.disabledTooltip or self.factionGroup) then
-	
+
 			local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
 			local tooltip = PrepareTooltip(self)
 
@@ -234,14 +260,14 @@ if (IsRetail) then
 			else
 				tooltip:AddLine(self.newbieText, titleColor[1], titleColor[2], titleColor[3], true)
 			end
-	
+
 			if (not self:IsEnabled()) then
 				if (self.factionGroup == "Neutral") then
 					tooltip:AddLine(FEATURE_NOT_AVAILBLE_PANDAREN, Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3], true)
-	
+
 				elseif ( self.minLevel ) then
 					tooltip:AddLine(string_format(FEATURE_BECOMES_AVAILABLE_AT_LEVEL, self.minLevel), Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3], true)
-	
+
 				elseif ( self.disabledTooltip ) then
 					tooltip:AddLine(self.disabledTooltip, Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3], true)
 				end
@@ -256,33 +282,33 @@ if (IsRetail) then
 	end
 end
 
-local ConfigWindow_OnShow = function(self) 
+local ConfigWindow_OnShow = function(self)
 	local button = Module:GetToggleButton()
 	if (button) then
 		local tooltip = Private:GetOptionsMenuTooltip()
-		if (tooltip:IsShown() and (tooltip:GetOwner() == button)) then 
+		if (tooltip:IsShown() and (tooltip:GetOwner() == button)) then
 			tooltip:Hide()
-		end 
-	end 
-end
-
-local ConfigWindow_OnHide = function(self) 
-	local button = Module:GetToggleButton()
-	if (button) then
-		local tooltip = Private:GetOptionsMenuTooltip()
-		if (button:IsMouseOver(0,0,0,0) and ((not tooltip:IsShown()) or (tooltip:GetOwner() ~= button))) then 
-			button:GetScript("OnEnter")(button)
-		end 
+		end
 	end
 end
 
--- Avoid direct usage of 'self' here since this 
--- is used as a callback from global methods too! 
+local ConfigWindow_OnHide = function(self)
+	local button = Module:GetToggleButton()
+	if (button) then
+		local tooltip = Private:GetOptionsMenuTooltip()
+		if (button:IsMouseOver(0,0,0,0) and ((not tooltip:IsShown()) or (tooltip:GetOwner() ~= button))) then
+			button:GetScript("OnEnter")(button)
+		end
+	end
+end
+
+-- Avoid direct usage of 'self' here since this
+-- is used as a callback from global methods too!
 Module.UpdateMicroButtons = function()
-	if InCombatLockdown() then 
+	if InCombatLockdown() then
 		Module:AddDebugMessageFormatted("Attempted to adjust MicroMenu in combat, queueing up the action for combat end.")
 		return Module:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
-	end 
+	end
 
 	local buttons = Module:GetConfigButtons()
 	local window = Module:GetConfigWindow()
@@ -292,7 +318,7 @@ Module.UpdateMicroButtons = function()
 	local numVisible = 0
 	for id,microButton in ipairs(buttons) do
 		if (microButton and microButton:IsShown()) then
-			microButton:SetParent(window) 
+			microButton:SetParent(window)
 			microButton:SetFrameStrata(strata)
 			microButton:SetFrameLevel(level + 1)
 			microButton:SetSize(buttonWidth*sizeMod, buttonHeight*sizeMod)
@@ -304,22 +330,22 @@ Module.UpdateMicroButtons = function()
 			end
 			numVisible = numVisible + 1
 		end
-	end	
+	end
 
 	-- Resize window to fit the buttons
 	window:SetSize(buttonWidth*sizeMod + buttonSpacing*2, buttonHeight*sizeMod*numVisible + buttonSpacing*(numVisible+1))
 end
 
 Module.UpdatePerformanceBar = function(self)
-	if MainMenuBarPerformanceBar then 
+	if MainMenuBarPerformanceBar then
 		MainMenuBarPerformanceBar:SetTexture(nil)
 		MainMenuBarPerformanceBar:SetVertexColor(0,0,0,0)
 		MainMenuBarPerformanceBar:Hide()
-	end 
+	end
 end
 
 Module.GetConfigWindow = function(self)
-	if (not self.ConfigWindow) then 
+	if (not self.ConfigWindow) then
 
 		local configWindow = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 		configWindow:Hide()
@@ -333,12 +359,12 @@ Module.GetConfigWindow = function(self)
 
 		-- This can be called before OnInit
 		local layout = GetLayout(self:GetName())
-		if layout and layout.MenuWindow_CreateBorder then 
+		if layout and layout.MenuWindow_CreateBorder then
 			layout.MenuWindow_CreateBorder(configWindow)
 		end
-		
+
 		self.ConfigWindow = configWindow
-	end 
+	end
 	return self.ConfigWindow
 end
 
@@ -348,21 +374,21 @@ Module.GetToggleButton = function(self)
 end
 
 Module.GetConfigButtons = function(self)
-	if (not self.ConfigButtons) then 
+	if (not self.ConfigButtons) then
 		self.ConfigButtons = {}
-	end 
+	end
 	return self.ConfigButtons
 end
 
 Module.GetAutoHideReferences = function(self)
-	if (not self.AutoHideReferences) then 
+	if (not self.AutoHideReferences) then
 		self.AutoHideReferences = {}
-	end 
+	end
 	return self.AutoHideReferences
 end
 
 Module.AddOptionsToMenuWindow = function(self)
-	if (not self.addedToMenuWindow) then 
+	if (not self.addedToMenuWindow) then
 		self.addedToMenuWindow = true
 
 		-- Frame to hide items with
@@ -373,10 +399,10 @@ Module.AddOptionsToMenuWindow = function(self)
 		local window = self:GetConfigWindow()
 		local hiders = self:GetAutoHideReferences()
 
-		for id,buttonName in ipairs(microButtons) do 
+		for id,buttonName in ipairs(microButtons) do
 
 			local microButton = _G[buttonName]
-			if microButton then 
+			if microButton then
 
 				buttons[#buttons + 1] = microButton
 
@@ -386,7 +412,7 @@ Module.AddOptionsToMenuWindow = function(self)
 					normal:SetAlpha(0)
 					normal:SetSize(.0001, .0001)
 				end
-			
+
 				local pushed = microButton:GetPushedTexture()
 				if pushed then
 					microButton:SetPushedTexture("")
@@ -394,39 +420,39 @@ Module.AddOptionsToMenuWindow = function(self)
 					pushed:SetAlpha(0)
 					pushed:SetSize(.0001, .0001)
 				end
-			
+
 				local highlight = microButton:GetNormalTexture()
 				if highlight then
 					microButton:SetHighlightTexture("")
 					highlight:SetAlpha(0)
 					highlight:SetSize(.0001, .0001)
 				end
-				
+
 				local disabled = microButton:GetDisabledTexture()
 				if disabled then
 					microButton:SetNormalTexture("")
 					disabled:SetAlpha(0)
 					disabled:SetSize(.0001, .0001)
 				end
-				
+
 				local flash = _G[buttonName.."Flash"]
 				if flash then
 					flash:SetTexture(nil)
 					flash:SetAlpha(0)
 					flash:SetSize(.0001, .0001)
 				end
-		
+
 				microButton:SetScript("OnUpdate", nil)
 				microButton:SetScript("OnEnter", microButtonScripts[buttonName.."_OnEnter"] or microButtonScripts.MicroButton_OnEnter)
 				microButton:SetScript("OnLeave", microButtonScripts.MicroButton_OnLeave)
-				microButton:SetSize(Layout.MenuButtonSize[1]*Layout.MenuButtonSizeMod, Layout.MenuButtonSize[2]*Layout.MenuButtonSizeMod) 
+				microButton:SetSize(Layout.MenuButtonSize[1]*Layout.MenuButtonSizeMod, Layout.MenuButtonSize[2]*Layout.MenuButtonSizeMod)
 				microButton:SetHitRectInsets(0, 0, 0, 0)
 
-				if Layout.MenuButton_PostCreate then 
+				if Layout.MenuButton_PostCreate then
 					Layout.MenuButton_PostCreate(microButton, microButtonTexts[buttonName])
 				end
 
-				if Layout.MenuButton_PostUpdate then 
+				if Layout.MenuButton_PostUpdate then
 					local PostUpdate = Layout.MenuButton_PostUpdate
 					microButton:HookScript("OnEnter", PostUpdate)
 					microButton:HookScript("OnLeave", PostUpdate)
@@ -440,7 +466,7 @@ Module.AddOptionsToMenuWindow = function(self)
 					microButton:HookScript("OnMouseUp", function(self) self.isDown = false end)
 					microButton:HookScript("OnShow", function(self) self.isDown = false end)
 					microButton:HookScript("OnHide", function(self) self.isDown = false end)
-				end 
+				end
 
 				-- Add a frame the secure autohider can track,
 				-- and anchor it to the micro button
@@ -450,50 +476,50 @@ Module.AddOptionsToMenuWindow = function(self)
 
 				-- Add the frame to the list of secure autohiders
 				hiders["autohide"..id] = autohideParent
-			end 
+			end
 
-		end 
+		end
 
-		for id,object in ipairs({ 
-				MicroButtonPortrait, 
-				GuildMicroButtonTabard, 
-				PVPMicroButtonTexture, 
-				MainMenuBarPerformanceBar, 
-				MainMenuBarDownload }) 
+		for id,object in ipairs({
+				MicroButtonPortrait,
+				GuildMicroButtonTabard,
+				PVPMicroButtonTexture,
+				MainMenuBarPerformanceBar,
+				MainMenuBarDownload })
 			do
-			if object then 
-				if (object.SetTexture) then 
+			if object then
+				if (object.SetTexture) then
 					object:SetTexture(nil)
 					object:SetVertexColor(0,0,0,0)
-				end 
+				end
 				object:SetParent(UIHider)
-			end  
-		end 
-		for id,method in ipairs({ 
-				"MoveMicroButtons", 
-				"UpdateMicroButtons", 
-				"UpdateMicroButtonsParent" }) 
-			do 
-			if _G[method] then 
+			end
+		end
+		for id,method in ipairs({
+				"MoveMicroButtons",
+				"UpdateMicroButtons",
+				"UpdateMicroButtonsParent" })
+			do
+			if _G[method] then
 				hooksecurefunc(method, Module.UpdateMicroButtons)
-			end 
-		end 
+			end
+		end
 
 		self:UpdateMicroButtons()
-	end 
+	end
 end
 
 Module.OnEvent = function(self, event, ...)
-	if (event == "PLAYER_REGEN_ENABLED") then 
+	if (event == "PLAYER_REGEN_ENABLED") then
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 		self:UpdateMicroButtons()
-	end 
+	end
 end
 
 Module.HandleBartenderMicroBar = function(self)
 	self:AddDebugMessageFormatted("[Bartender4 - MicroMenu] bar loaded, handling incompatible elements.")
 	local MicroMenuMod = Bartender4:GetModule("MicroMenu")
-	if MicroMenuMod.bar then 
+	if MicroMenuMod.bar then
 		MicroMenuMod.bar.UpdateButtonLayout = function() end
 		self:AddDebugMessageFormatted("[Bartender4 - MicroMenu] handling, updating MicroButtons.")
 		self:UpdateMicroButtons()
@@ -505,25 +531,25 @@ Module.HandleBartender = function(self)
 	self:AddDebugMessageFormatted("[Bartender4] loaded, handling incompatible elements.")
 	local Bartender4 = Bartender4
 	local MicroMenuMod = Bartender4:GetModule("MicroMenu", true)
-	if MicroMenuMod then 
+	if MicroMenuMod then
 		self:AddDebugMessageFormatted("[MicroMenu] module detected.")
 		MicroMenuMod.MicroMenuBarShow = function() end
 		MicroMenuMod.BlizzardBarShow = function() end
 		MicroMenuMod.UpdateButtonLayout = function() end
-		if MicroMenuMod.bar then 
+		if MicroMenuMod.bar then
 			self:AddDebugMessageFormatted("[Bartender4 - MicroMenu] bar detected.")
 			self:HandleBartenderMicroBar()
 		else
 			self:AddDebugMessageFormatted("[Bartender4 - MicroMenu] bar not yet created, adding handle action to queue.")
-			hooksecurefunc(MicroMenuMod, "OnEnable", function() 
+			hooksecurefunc(MicroMenuMod, "OnEnable", function()
 				self:HandleBartenderMicroBar()
 			end)
-		end 
+		end
 	end
 end
 
 Module.ListenForBartender = function(self, event, addon)
-	if (addon == "Bartender4") then 
+	if (addon == "Bartender4") then
 		self:HandleBartender()
 		self:UnregisterEvent("ADDON_LOADED", "ListenForBartender")
 	end
@@ -545,23 +571,23 @@ Module.OnInit = function(self)
 			HelpTip:HideAllSystem("MicroButtons")
 		end
 	end
-	
+
 	if (MainMenuMicroButton_ShowAlert) then
 		hooksecurefunc("MainMenuMicroButton_ShowAlert", HideAlerts)
 	end
 
-	if self:IsAddOnEnabled("Bartender4") then 
+	if self:IsAddOnEnabled("Bartender4") then
 		self:AddDebugMessageFormatted("[Bartender4] detected.")
-		if IsAddOnLoaded("Bartender4") then 
+		if IsAddOnLoaded("Bartender4") then
 			self:HandleBartender()
-		else 
+		else
 			self:AddDebugMessageFormatted("[Bartender4] not yet loaded, adding handle action to queue.")
 			self:RegisterEvent("ADDON_LOADED", "ListenForBartender")
-		end 
+		end
 	end
 	self:AddOptionsToMenuWindow()
-end 
+end
 
 Module.OnEnable = function(self)
 	self:UpdatePerformanceBar()
-end 
+end

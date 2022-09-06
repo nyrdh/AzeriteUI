@@ -1,7 +1,7 @@
 local ADDON,Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
-if (not Core) then 
-	return 
+if (not Core) then
+	return
 end
 
 local LibNumbers = Wheel("LibNumbers")
@@ -53,13 +53,15 @@ local large = LibNumbers:GetNumberAbbreviationLong()
 local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
+local IsAnyClassic = Private.IsAnyClassic
 local IsClassic = Private.IsClassic
 local IsTBC = Private.IsTBC
+local IsWrath = Private.IsWrath
 local IsRetail = Private.IsRetail
 
 -- WoW Strings
-local REPUTATION = REPUTATION 
-local STANDING = STANDING 
+local REPUTATION = REPUTATION
+local STANDING = STANDING
 local UNKNOWN = UNKNOWN
 
 -- Custom strings & constants
@@ -78,24 +80,24 @@ local LEVEL = UnitLevel("player")
 -- Utility Functions
 ----------------------------------------------------
 local getTimeStrings = function(h, m, suffix, useStandardTime, abbreviateSuffix)
-	if (useStandardTime) then 
+	if (useStandardTime) then
 		return "%.0f:%02.0f |cff888888%s|r", h, m, abbreviateSuffix and string_match(suffix, "^.") or suffix
-	else 
+	else
 		return "%02.0f:%02.0f", h, m
-	end 
-end 
+	end
+end
 
 local MouseIsOver = function(frame)
 	return (frame == GetMouseFocus())
 end
 
-if (IsTBC) then
+if (IsTBC or IsWrath or IsWrath) then
 	GetTrackingTexture = function()
 		local count = GetNumTrackingTypes()
 		for id = 1, count do
 			local texture, active, category = select(2, GetTrackingInfo(id))
 			if (active) then
-				if (category == "spell") then 
+				if (category == "spell") then
 					return texture
 				end
 			end
@@ -108,37 +110,37 @@ end
 ----------------------------------------------------
 local XP_PostUpdate = function(element, min, max, restedLeft, restedTimeLeft)
 	local description = element.Value and element.Value.Description
-	if description then 
+	if description then
 		local level = LEVEL or UnitLevel("player")
-		if (level and (level > 0)) then 
+		if (level and (level > 0)) then
 			description:SetFormattedText(L["to level %s"], level + 1)
-		else 
+		else
 			description:SetText("")
-		end 
-	end 
+		end
+	end
 end
 
 local Rep_PostUpdate = function(element, current, min, max, factionName, standingID, standingLabel)
 	local description = element.Value and element.Value.Description
-	if description then 
+	if description then
 		if (standingID == MAX_REPUTATION_REACTION) then
 			description:SetText(standingLabel)
 		else
 			local nextStanding = standingID and _G["FACTION_STANDING_LABEL"..(standingID + 1)]
-			if nextStanding then 
+			if nextStanding then
 				description:SetFormattedText(L["to %s"], nextStanding)
 			else
 				description:SetText("")
-			end 
-		end 
-	end 
+			end
+		end
+	end
 end
 
 local AP_PostUpdate = function(element, min, max, level)
 	local description = element.Value and element.Value.Description
-	if description then 
+	if description then
 		description:SetText(L["to next level"])
-	end 
+	end
 end
 
 local Performance_UpdateTooltip = function(self)
@@ -147,7 +149,7 @@ local Performance_UpdateTooltip = function(self)
 	local bandwidthIn, bandwidthOut, latencyHome, latencyWorld = GetNetStats()
 	local fps = GetFramerate()
 
-	local colors = self._owner.colors 
+	local colors = self._owner.colors
 	local rt, gt, bt = unpack(colors.title)
 	local r, g, b = unpack(colors.normal)
 	local rh, gh, bh = unpack(colors.highlight)
@@ -163,20 +165,20 @@ local Performance_UpdateTooltip = function(self)
 	tooltip:AddDoubleLine(L["Home latency:"], ("%.0f|cff888888%s|r"):format(math_floor(latencyHome), MILLISECONDS_ABBR), rh, gh, bh, r, g, b)
 	tooltip:AddLine(L["This is the latency of the home server, which affects things like chat, guild chat, the auction house and some other non-combat related things."], rg, gg, bg, true)
 	tooltip:Show()
-end 
+end
 
 local Performance_OnEnter = function(self)
 	self.UpdateTooltip = Performance_UpdateTooltip
 	self:UpdateTooltip()
-end 
+end
 
 local Performance_OnLeave = function(self)
 	Private:GetMinimapTooltip():Hide()
 	self.UpdateTooltip = nil
-end 
+end
 
 local Tracking_OnClick = function(self, button)
-	if (IsClassic) then
+	if (IsAnyClassic) then
 		if (button == "LeftButton") then
 			Module:ShowMinimapTrackingMenu()
 		elseif (button == "RightButton") then
@@ -198,7 +200,7 @@ local Tracking_OnLeave = function(self)
 	Private:GetMinimapTooltip():Hide()
 end
 
--- This is the XP and AP tooltip (and rep/honor later on) 
+-- This is the XP and AP tooltip (and rep/honor later on)
 local Toggle_UpdateTooltip = function(toggle)
 
 	local tooltip = Private:GetMinimapTooltip()
@@ -207,7 +209,7 @@ local Toggle_UpdateTooltip = function(toggle)
 	local hasAP = IsRetail and Module:PlayerHasAP()
 
 	local NC = "|r"
-	local colors = toggle._owner.colors 
+	local colors = toggle._owner.colors
 	local rt, gt, bt = unpack(colors.title)
 	local r, g, b = unpack(colors.normal)
 	local rh, gh, bh = unpack(colors.highlight)
@@ -221,18 +223,18 @@ local Toggle_UpdateTooltip = function(toggle)
 	local resting, restState, restedName, mult
 	local restedLeft, restedTimeLeft
 
-	if (hasXP or hasAP or hasRep) then 
+	if (hasXP or hasAP or hasRep) then
 		tooltip:SetDefaultAnchor(toggle)
 		tooltip:SetMaximumWidth(360)
 	end
 
 	-- XP tooltip
 	-- Currently more or less a clone of the blizzard tip, we should improve!
-	if (hasXP) then 
+	if (hasXP) then
 		resting = IsResting()
 		restState, restedName, mult = GetRestState()
 		restedLeft, restedTimeLeft = GetXPExhaustion(), GetTimeToWellRested()
-		
+
 		local min, max = UnitXP("player"), UnitXPMax("player")
 
 		tooltip:AddDoubleLine(POWER_TYPE_EXPERIENCE, LEVEL or UnitLevel("player"), rt, gt, bt, rt, gt, bt)
@@ -242,7 +244,7 @@ local Toggle_UpdateTooltip = function(toggle)
 		if (restedLeft and (restedLeft > 0)) then
 			tooltip:AddDoubleLine(L["Rested Bonus: "], fullXPString:format(normal..short(restedLeft)..NC, normal..short(max * 1.5)..NC, highlight..math_floor(restedLeft/(max * 1.5)*100).."%"..NC), rh, gh, bh, rgg, ggg, bgg)
 		end
-		
+
 		if (restState) and (restState == 1) then
 			if (resting) and (restedTimeLeft) and (restedTimeLeft > 0) then
 				tooltip:AddLine(" ")
@@ -258,7 +260,7 @@ local Toggle_UpdateTooltip = function(toggle)
 				tooltip:AddLine(L["%s of normal experience gained from monsters."]:format(shortXPString:format((mult or 1)*100)), rg, gg, bg, true)
 			end
 		elseif (restState) and (restState >= 2) then
-			if not(restedTimeLeft and restedTimeLeft > 0) then 
+			if not(restedTimeLeft and restedTimeLeft > 0) then
 				tooltip:AddLine(" ")
 				tooltip:AddLine(L["You should rest at an Inn."], rr, gr, br)
 			else
@@ -268,26 +270,26 @@ local Toggle_UpdateTooltip = function(toggle)
 				--tooltip:AddLine(L["%s of normal experience gained from monsters."]:format(shortXPString:format((mult or 1)*100)), rg, gg, bg, true)
 			end
 		end
-	end 
+	end
 
 	-- New BfA Artifact Power tooltip!
-	if (hasAP) then 
-		if (hasXP) then 
+	if (hasAP) then
+		if (hasXP) then
 			tooltip:AddLine(" ")
-		end 
+		end
 
 		local min, max = GetAzeriteItemXPInfo(hasAP)
-		local level = GetPowerLevel(hasAP) 
+		local level = GetPowerLevel(hasAP)
 
 		tooltip:AddDoubleLine(ARTIFACT_POWER, level, rt, gt, bt, rt, gt, bt)
 		tooltip:AddDoubleLine(L["Current Artifact Power: "], fullXPString:format(normal..short(min)..NC, normal..short(max)..NC, highlight..math_floor(min/max*100).."%"..NC), rh, gh, bh, rgg, ggg, bgg)
-	end 
-	
+	end
+
 	-- Rep tooltip
-	if (hasRep) then 
-		if (hasXP or hasAP) then 
+	if (hasRep) then
+		if (hasXP or hasAP) then
 			tooltip:AddLine(" ")
-		end 
+		end
 
 		local name, reaction, min, max, current, factionID = GetWatchedFactionInfo()
 
@@ -303,12 +305,12 @@ local Toggle_UpdateTooltip = function(toggle)
 				end
 			end
 		end
-	
+
 		local standingID, isFriend, friendText
 		local standingLabel, standingDescription
 		for i = 1, GetNumFactions() do
 			local factionName, description, standingId, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(i)
-			
+
 			if (factionName == name) then
 
 				-- Retrieve friendship reputation info, if any.
@@ -317,14 +319,14 @@ local Toggle_UpdateTooltip = function(toggle)
 
 					if (friendID) then
 						isFriend = true
-						if nextFriendThreshold then 
+						if nextFriendThreshold then
 							min = friendThreshold
 							max = nextFriendThreshold
 						else
 							min = 0
 							max = friendMaxRep
 							current = friendRep
-						end 
+						end
 						standingLabel = friendTextLevel
 						standingDescription = friendText
 					end
@@ -335,40 +337,40 @@ local Toggle_UpdateTooltip = function(toggle)
 			end
 		end
 
-		if (standingID) then 
-			if (hasXP) then 
+		if (standingID) then
+			if (hasXP) then
 				tooltip:AddLine(" ")
-			end 
-			if (not isFriend) then 
+			end
+			if (not isFriend) then
 				standingLabel = _G["FACTION_STANDING_LABEL"..standingID]
-			end 
+			end
 			tooltip:AddDoubleLine(name, standingLabel, rt, gt, bt, rt, gt, bt)
 
-			local barMax = max - min 
+			local barMax = max - min
 			local barValue = current - min
-			if (barMax > 0) then 
+			if (barMax > 0) then
 				tooltip:AddDoubleLine(L["Current Standing: "], fullXPString:format(normal..short(current-min)..NC, normal..short(max-min)..NC, highlight..math_floor((current-min)/(max-min)*100).."%"..NC), rh, gh, bh, rgg, ggg, bgg)
-			else 
+			else
 				tooltip:AddDoubleLine(L["Current Standing: "], "100%", rh, gh, bh, r, g, b)
-			end 
-		else 
+			end
+		else
 			-- Don't add additional spaces if we can't display the information
 			hasRep = nil
 		end
 	end
-	
+
 	-- Only adding the sticky toggle to the toggle button for now, not the frame.
-	if (MouseIsOver(toggle)) then 
+	if (MouseIsOver(toggle)) then
 		tooltip:AddLine(" ")
-		if (Module.db.stickyBars) then 
+		if (Module.db.stickyBars) then
 			tooltip:AddLine(L["%s to disable sticky bars."]:format(green..L["<Left-Click>"]..NC), rh, gh, bh)
-		else 
+		else
 			tooltip:AddLine(L["%s to enable sticky bars."]:format(green..L["<Left-Click>"]..NC), rh, gh, bh)
-		end 
-	end 
+		end
+	end
 
 	tooltip:Show()
-end 
+end
 
 -- Full clear of any cancelled fade-ins
 local Toggle_Clear = function(toggle)
@@ -376,7 +378,7 @@ local Toggle_Clear = function(toggle)
 	toggle.Frame:SetAlpha(0)
 	toggle.Frame.isMouseOver = nil
 	toggle:SetScript("OnUpdate", nil)
-	toggle.fading = nil 
+	toggle.fading = nil
 	toggle.fadeDirection = nil
 	toggle.fadeDuration = 0
 	toggle.fadeDelay = 0
@@ -384,63 +386,63 @@ local Toggle_Clear = function(toggle)
 end
 
 local Toggle_OnUpdate = function(toggle, elapsed)
-	if (toggle.fadeDelay > 0) then 
+	if (toggle.fadeDelay > 0) then
 		local fadeDelay = toggle.fadeDelay - elapsed
-		if (fadeDelay > 0) then 
+		if (fadeDelay > 0) then
 			toggle.fadeDelay = fadeDelay
-			return 
+			return
 		end
 		toggle.fadeDelay = 0
 		toggle.timeFading = 0
-	end 
+	end
 
 	toggle.timeFading = toggle.timeFading + elapsed
 
-	if (toggle.fadeDirection == "OUT") then 
+	if (toggle.fadeDirection == "OUT") then
 		local alpha = 1 - (toggle.timeFading / toggle.fadeDuration)
-		if (alpha > 0) then 
+		if (alpha > 0) then
 			toggle.Frame:SetAlpha(alpha)
-		else 
+		else
 			toggle:SetScript("OnUpdate", nil)
 			toggle.Frame:Hide()
 			toggle.Frame:SetAlpha(0)
-			toggle.fading = nil 
+			toggle.fading = nil
 			toggle.fadeDirection = nil
 			toggle.fadeDuration = 0
 			toggle.timeFading = 0
-		end 
+		end
 
-	elseif (toggle.fadeDirection == "IN") then 
+	elseif (toggle.fadeDirection == "IN") then
 		local alpha = toggle.timeFading / toggle.fadeDuration
-		if (alpha < 1) then 
+		if (alpha < 1) then
 			toggle.Frame:SetAlpha(alpha)
-		else 
+		else
 			toggle:SetScript("OnUpdate", nil)
 			toggle.Frame:SetAlpha(1)
 			toggle.fading = nil
 			toggle.fadeDirection = nil
 			toggle.fadeDuration = 0
 			toggle.timeFading = 0
-		end 
-	end 
-end 
+		end
+	end
+end
 
--- This method is called upon entering or leaving 
--- either the toggle button, the visible ring frame, 
--- or by clicking the toggle button. 
--- Its purpose should be to decide ring frame visibility. 
+-- This method is called upon entering or leaving
+-- either the toggle button, the visible ring frame,
+-- or by clicking the toggle button.
+-- Its purpose should be to decide ring frame visibility.
 local Toggle_UpdateFrame = function(toggle)
 	local db = Module.db
 	local frame = toggle.Frame
 	local frameIsShown = frame:IsShown()
 
-	-- If sticky bars is enabled, we should only fade in, and keep it there, 
-	-- and then just remove the whole update handler until the sticky setting is changed. 
-	if (db.stickyBars) then 
+	-- If sticky bars is enabled, we should only fade in, and keep it there,
+	-- and then just remove the whole update handler until the sticky setting is changed.
+	if (db.stickyBars) then
 
-		-- if the frame isn't shown, 
+		-- if the frame isn't shown,
 		-- reset the alpha and initiate fade-in
-		if (not frameIsShown) then 
+		if (not frameIsShown) then
 			frame:SetAlpha(0)
 			frame:Show()
 
@@ -450,40 +452,40 @@ local Toggle_UpdateFrame = function(toggle)
 			toggle.timeFading = 0
 			toggle.fading = true
 
-			if not toggle:GetScript("OnUpdate") then 
+			if not toggle:GetScript("OnUpdate") then
 				toggle:SetScript("OnUpdate", Toggle_OnUpdate)
 			end
-	
-		-- If it is shown, we should probably just keep going. 
-		-- This is probably just called because the user moved 
-		-- between the toggle button and the frame. 
-		else 
+
+		-- If it is shown, we should probably just keep going.
+		-- This is probably just called because the user moved
+		-- between the toggle button and the frame.
+		else
 
 
 		end
 
 	-- Move towards full visibility if we're over the toggle or the visible frame
-	elseif (toggle.isMouseOver) then 
+	elseif (toggle.isMouseOver) then
 
 		-- If we entered while fading, it's most likely a fade-out that needs to be reversed.
-		if (toggle.fading) then 
+		if (toggle.fading) then
 
 			-- Reverse the fade-out.
-			if (toggle.fadeDirection == "OUT") then 
+			if (toggle.fadeDirection == "OUT") then
 				toggle.fadeDirection = "IN"
 				toggle.fadeDuration = .25
 				toggle.fadeDelay = 0
 				toggle.timeFading = 0
-				if (not toggle:GetScript("OnUpdate")) then 
+				if (not toggle:GetScript("OnUpdate")) then
 					toggle:SetScript("OnUpdate", Toggle_OnUpdate)
 				end
 			else
 				-- this is a fade-in we wish to keep running.
 			end
 
-		-- If it's not fading it's either because it's hidden, at full alpha,  
-		-- or because sticky bars just got disabled and it's still fully visible. 
-		else 
+		-- If it's not fading it's either because it's hidden, at full alpha,
+		-- or because sticky bars just got disabled and it's still fully visible.
+		else
 			-- Inititate a fade-in delay, but only if the frame is hidden.
 			if (not frameIsShown) then
 				frame:SetAlpha(0)
@@ -493,32 +495,32 @@ local Toggle_UpdateFrame = function(toggle)
 				toggle.fadeDelay = .5
 				toggle.timeFading = 0
 				toggle.fading = true
-				if not toggle:GetScript("OnUpdate") then 
+				if not toggle:GetScript("OnUpdate") then
 					toggle:SetScript("OnUpdate", Toggle_OnUpdate)
 				end
 			else
 				-- The frame is shown, just keep showing it and do nothing.
 			end
-		end  
-		
+		end
+
 	elseif (frame.isMouseOver) then
 		-- This happens when we've quickly left the toggle button,
-		-- like when the mouse accidentally passes it on its way somewhere else. 
+		-- like when the mouse accidentally passes it on its way somewhere else.
 		if (not toggle.isMouseOver) and (toggle.fading) and (toggle.fadeDelay > 0) and (frameIsShown and frame.isMouseOver) then
 			return Toggle_Clear(toggle)
 		end
 
-	-- We're not above the toggle or a visible frame, 
-	-- so we should initiate a fade-out or cancel pending fade-ins. 
-	else 
+	-- We're not above the toggle or a visible frame,
+	-- so we should initiate a fade-out or cancel pending fade-ins.
+	else
 		-- if the frame is visible, this should be a fade-out.
-		if (frameIsShown) then 
+		if (frameIsShown) then
 			-- Only initiate the fade delay if the frame previously was fully shown,
-			-- do not start a delay if we moved back into a fading frame then out again 
+			-- do not start a delay if we moved back into a fading frame then out again
 			-- before it could reach its full alpha, or the frame will appear to be "stuck"
-			-- in a semi-transparent state for a few seconds. Ewwww. 
-			if (toggle.fading) then 
-				-- This was a queued fade-in that now will be cancelled, 
+			-- in a semi-transparent state for a few seconds. Ewwww.
+			if (toggle.fading) then
+				-- This was a queued fade-in that now will be cancelled,
 				-- because the mouse is not above the toggle button anymore.
 				if (toggle.fadeDirection == "IN") and (toggle.fadeDelay > 0) then
 					return Toggle_Clear(toggle)
@@ -530,7 +532,7 @@ local Toggle_UpdateFrame = function(toggle)
 					toggle.fadeDuration = (.25 - (toggle.timeFading or 0))
 					toggle.timeFading = toggle.timeFading or 0
 				end
-			else 
+			else
 				-- Most likely a fully visible frame we just left.
 				-- Now we initiate the delay and a following fade-out.
 				toggle.fadeDirection = "OUT"
@@ -538,8 +540,8 @@ local Toggle_UpdateFrame = function(toggle)
 				toggle.fadeDuration = .25
 				toggle.timeFading = 0
 				toggle.fading = true
-			end 
-			if (not toggle:GetScript("OnUpdate")) then 
+			end
+			if (not toggle:GetScript("OnUpdate")) then
 				toggle:SetScript("OnUpdate", Toggle_OnUpdate)
 			end
 		end
@@ -552,15 +554,15 @@ local Toggle_OnMouseUp = function(toggle, button)
 
 	Toggle_UpdateFrame(toggle)
 
-	if toggle.UpdateTooltip then 
+	if toggle.UpdateTooltip then
 		toggle:UpdateTooltip()
-	end 
+	end
 
-	if Module.db.stickyBars then 
+	if Module.db.stickyBars then
 		print(toggle._owner.colors.title.colorCode..L["Sticky Minimap bars enabled."].."|r")
 	else
 		print(toggle._owner.colors.title.colorCode..L["Sticky Minimap bars disabled."].."|r")
-	end 	
+	end
 end
 
 local Toggle_OnEnter = function(toggle)
@@ -578,22 +580,22 @@ local Toggle_OnLeave = function(toggle)
 	toggle.isMouseOver = nil
 	toggle.UpdateTooltip = nil
 
-	-- Update this to avoid a flicker or delay 
+	-- Update this to avoid a flicker or delay
 	-- when moving directly from the toggle button to the ringframe.
 	toggle.Frame.isMouseOver = MouseIsOver(toggle.Frame)
 
 	Toggle_UpdateFrame(toggle)
-	
-	if not((toggle.Frame.isMouseOver) and (toggle.Frame:IsShown())) then 
+
+	if not((toggle.Frame.isMouseOver) and (toggle.Frame:IsShown())) then
 		Private:GetMinimapTooltip():Hide()
-	end 
+	end
 end
 
 local RingFrame_UpdateTooltip = function(frame)
 	local toggle = frame._owner
 
 	Toggle_UpdateTooltip(toggle)
-end 
+end
 
 local RingFrame_OnEnter = function(frame)
 	local toggle = frame._owner
@@ -607,15 +609,15 @@ local RingFrame_OnEnter = function(frame)
 
 	local toggle = frame._owner
 	if (not isShown) then
-		toggle.fading = nil 
+		toggle.fading = nil
 		toggle.fadeDirection = nil
 		toggle.fadeDuration = 0
 		toggle.fadeDelay = 0
 		toggle.timeFading = 0
 	end
 
-	-- The above method can actually hide this frame, 
-	-- trigger the OnLeave handler, and remove UpdateTooltip. 
+	-- The above method can actually hide this frame,
+	-- trigger the OnLeave handler, and remove UpdateTooltip.
 	-- We need to check if it still exists before running it.
 	if (isShown) and (frame.UpdateTooltip) then
 		frame:UpdateTooltip()
@@ -629,21 +631,21 @@ local RingFrame_OnLeave = function(frame)
 	frame.isMouseOver = nil
 	frame.UpdateTooltip = nil
 
-	-- Update this to avoid a flicker or delay 
-	-- when moving directly from the ringframe to the toggle button.  
+	-- Update this to avoid a flicker or delay
+	-- when moving directly from the ringframe to the toggle button.
 	toggle.isMouseOver = MouseIsOver(toggle)
 
 	Toggle_UpdateFrame(toggle)
-	
-	if (not toggle.isMouseOver) then 
+
+	if (not toggle.isMouseOver) then
 		Private:GetMinimapTooltip():Hide()
-	end 
+	end
 end
 
 local Time_UpdateTooltip = function(self)
 	local tooltip = Private:GetMinimapTooltip()
 
-	local colors = self._owner.colors 
+	local colors = self._owner.colors
 	local rt, gt, bt = unpack(colors.title)
 	local r, g, b = unpack(colors.normal)
 	local rh, gh, bh = unpack(colors.highlight)
@@ -674,37 +676,37 @@ local Time_UpdateTooltip = function(self)
 		tooltip:AddLine(green..L["<Left-Click>"]..NC .. " " .. TIMEMANAGER_SHOW_STOPWATCH, rh, gh, bh)
 	end
 
-	if useServerTime then 
+	if useServerTime then
 		tooltip:AddLine(L["%s to use local computer time."]:format(green..L["<Middle-Click>"]..NC), rh, gh, bh)
-	else 
+	else
 		tooltip:AddLine(L["%s to use game server time."]:format(green..L["<Middle-Click>"]..NC), rh, gh, bh)
-	end 
+	end
 
-	if useStandardTime then 
+	if useStandardTime then
 		tooltip:AddLine(L["%s to use military (24-hour) time."]:format(green..L["<Right-Click>"]..NC), rh, gh, bh)
-	else 
+	else
 		tooltip:AddLine(L["%s to use standard (12-hour) time."]:format(green..L["<Right-Click>"]..NC), rh, gh, bh)
-	end 
+	end
 
 	tooltip:Show()
-end 
+end
 
 local Time_OnEnter = function(self)
 	self.UpdateTooltip = Time_UpdateTooltip
 	self:UpdateTooltip()
-end 
+end
 
 local Time_OnLeave = function(self)
 	Private:GetMinimapTooltip():Hide()
 	self.UpdateTooltip = nil
-end 
+end
 
 local Time_OnClick = function(self, mouseButton)
-	if (mouseButton == "LeftButton") then 
+	if (mouseButton == "LeftButton") then
 		if (IsRetail) then
-			if (ToggleCalendar) then 
+			if (ToggleCalendar) then
 				ToggleCalendar()
-			end 
+			end
 		else
 			if (not IsAddOnLoaded("Blizzard_TimeManager")) then
 				UIParentLoadAddOn("Blizzard_TimeManager")
@@ -717,48 +719,48 @@ local Time_OnClick = function(self, mouseButton)
 			end
 		end
 
-	elseif (mouseButton == "MiddleButton") then 
+	elseif (mouseButton == "MiddleButton") then
 		Module.db.useServerTime = not Module.db.useServerTime
 
 		self.clock.useServerTime = Module.db.useServerTime
 		self.clock:ForceUpdate()
 
-		if self.UpdateTooltip then 
+		if self.UpdateTooltip then
 			self:UpdateTooltip()
-		end 
+		end
 
-		if Module.db.useServerTime then 
+		if Module.db.useServerTime then
 			print(self._owner.colors.title.colorCode..L["Now using game server time."].."|r")
 		else
 			print(self._owner.colors.title.colorCode..L["Now using local computer time."].."|r")
-		end 
+		end
 
-	elseif (mouseButton == "RightButton") then 
+	elseif (mouseButton == "RightButton") then
 		Module.db.useStandardTime = not Module.db.useStandardTime
 
 		self.clock.useStandardTime = Module.db.useStandardTime
 		self.clock:ForceUpdate()
 
-		if self.UpdateTooltip then 
+		if self.UpdateTooltip then
 			self:UpdateTooltip()
-		end 
+		end
 
-		if Module.db.useStandardTime then 
+		if Module.db.useStandardTime then
 			print(self._owner.colors.title.colorCode..L["Now using standard (12-hour) time."].."|r")
 		else
 			print(self._owner.colors.title.colorCode..L["Now using military (24-hour) time."].."|r")
-		end 
+		end
 	end
 end
 
 local Zone_OnEnter = function(self)
 	local tooltip = Private:GetMinimapTooltip()
 
-end 
+end
 
 local Zone_OnLeave = function(self)
 	Private:GetMinimapTooltip():Hide()
-end 
+end
 
 ----------------------------------------------------
 -- Map Setup
@@ -773,8 +775,8 @@ Module.SetUpMinimap = function(self)
 	-- This also syncs the minimap and sets it up for us.
 	local Handler = self:GetMinimapHandler()
 	Handler.colors = Colors
-	
-	-- Reposition minimap tooltip 
+
+	-- Reposition minimap tooltip
 	local tooltip = self:GetMinimapTooltip()
 
 	-- Blob & Ring Textures
@@ -786,21 +788,24 @@ Module.SetUpMinimap = function(self)
 
 	-- Blip textures
 	local clientPatch = GetBuildInfo()
-	self:SetMinimapBlips(layout.BlipTextures[clientPatch], clientPatch)
-	self:SetMinimapScale(layout.BlipScale or 1)
+	local blips = layout.BlipTextures[clientPatch]
+	if (blips) then
+		self:SetMinimapBlips(layout.BlipTextures[clientPatch], clientPatch)
+		self:SetMinimapScale(layout.BlipScale or 1)
+	end
 
 	-- Minimap Buttons
 	----------------------------------------------------
-	-- Only allow these when MBB is loaded. 
+	-- Only allow these when MBB is loaded.
 	self:SetMinimapAllowAddonButtons(self.MBB)
 
 	-- Minimap Compass
 	self:SetMinimapCompassEnabled(true)
-	self:SetMinimapCompassText(unpack(layout.CompassTexts)) 
-	self:SetMinimapCompassTextFontObject(layout.CompassFont) 
-	self:SetMinimapCompassTextColor(unpack(layout.CompassColor)) 
-	self:SetMinimapCompassRadiusInset(layout.CompassRadiusInset) 
-	
+	self:SetMinimapCompassText(unpack(layout.CompassTexts))
+	self:SetMinimapCompassTextFontObject(layout.CompassFont)
+	self:SetMinimapCompassTextColor(unpack(layout.CompassColor))
+	self:SetMinimapCompassRadiusInset(layout.CompassRadiusInset)
+
 	-- Background
 	local mapBackdrop = Handler:CreateBackdropTexture()
 	mapBackdrop:SetDrawLayer("BACKGROUND")
@@ -814,7 +819,7 @@ Module.SetUpMinimap = function(self)
 	mapOverlay:SetAllPoints()
 	mapOverlay:SetTexture(layout.MapOverlayTexture)
 	mapOverlay:SetVertexColor(unpack(layout.MapOverlayColor))
-	
+
 	-- Border
 	local border = Handler:CreateBorderTexture()
 	border:SetDrawLayer("BACKGROUND")
@@ -826,23 +831,23 @@ Module.SetUpMinimap = function(self)
 
 	-- Mail
 	local mail = Handler:CreateOverlayFrame()
-	mail:SetSize(unpack(layout.MailSize)) 
-	mail:Place(unpack(layout.MailPlace)) 
+	mail:SetSize(unpack(layout.MailSize))
+	mail:Place(unpack(layout.MailPlace))
 
 	local icon = mail:CreateTexture()
 	icon:SetTexture(layout.MailTexture)
 	icon:SetDrawLayer(unpack(layout.MailTextureDrawLayer))
 	icon:SetPoint(unpack(layout.MailTexturePlace))
-	icon:SetSize(unpack(layout.MailTextureSize)) 
+	icon:SetSize(unpack(layout.MailTextureSize))
 	icon:SetRotation(layout.MailTextureRotation)
-	Handler.Mail = mail 
+	Handler.Mail = mail
 
-	-- Clock 
+	-- Clock
 	local clockFrame = Handler:CreateBorderFrame("Button")
 	Handler.ClockFrame = clockFrame
 
 	local clock = Handler:CreateFontString()
-	clock:SetPoint(unpack(layout.ClockPlace)) 
+	clock:SetPoint(unpack(layout.ClockPlace))
 	clock:SetDrawLayer("OVERLAY")
 	clock:SetJustifyH("RIGHT")
 	clock:SetJustifyV("BOTTOM")
@@ -853,7 +858,7 @@ Module.SetUpMinimap = function(self)
 	clock.showSeconds = false -- show seconds in the clock
 	clock.OverrideValue = layout.Clock_OverrideValue
 
-	-- Make the clock clickable to change time settings 
+	-- Make the clock clickable to change time settings
 	clockFrame:SetAllPoints(clock)
 	clockFrame:SetScript("OnEnter", Time_OnEnter)
 	clockFrame:SetScript("OnLeave", Time_OnLeave)
@@ -873,13 +878,13 @@ Module.SetUpMinimap = function(self)
 	Handler.ZoneFrame = zoneFrame
 
 	local zone = zoneFrame:CreateFontString()
-	zone:SetPoint(layout.ZonePlaceFunc(Handler)) 
+	zone:SetPoint(layout.ZonePlaceFunc(Handler))
 	zone:SetDrawLayer("OVERLAY")
 	zone:SetJustifyH("RIGHT")
 	zone:SetJustifyV("BOTTOM")
 	zone:SetFontObject(layout.ZoneFont)
 	zone:SetAlpha(layout.ZoneAlpha or 1)
-	zone.colorPvP = true -- color zone names according to their PvP type 
+	zone.colorPvP = true -- color zone names according to their PvP type
 	zone.colorcolorDifficulty = true -- color instance names according to their difficulty
 	zone.showResting = true -- show resting status next to zone name
 
@@ -887,16 +892,16 @@ Module.SetUpMinimap = function(self)
 	zoneFrame:SetAllPoints(zone)
 	zoneFrame:SetScript("OnEnter", Zone_OnEnter)
 	zoneFrame:SetScript("OnLeave", Zone_OnLeave)
-	Handler.Zone = zone	
-	
+	Handler.Zone = zone
+
 	-- Coordinates
 	local coordinates = Handler:CreateBorderText()
-	coordinates:SetPoint(unpack(layout.CoordinatePlace)) 
+	coordinates:SetPoint(unpack(layout.CoordinatePlace))
 	coordinates:SetDrawLayer("OVERLAY")
 	coordinates:SetJustifyH("CENTER")
 	coordinates:SetJustifyV("BOTTOM")
 	coordinates:SetFontObject(layout.CoordinateFont)
-	coordinates:SetTextColor(unpack(layout.CoordinateColor)) 
+	coordinates:SetTextColor(unpack(layout.CoordinateColor))
 	coordinates.OverrideValue = layout.Coordinates_OverrideValue
 	Handler.Coordinates = coordinates
 
@@ -926,19 +931,19 @@ Module.SetUpMinimap = function(self)
 	latency.PostUpdate = layout.Performance_PostUpdate
 
 	Handler.Latency = latency
-	
+
 	-- Strap the frame to the text
 	performanceFrame:SetScript("OnEnter", Performance_OnEnter)
 	performanceFrame:SetScript("OnLeave", Performance_OnLeave)
-	
+
 	if (layout.PerformanceFramePlaceAdvancedFunc) then
 		layout.PerformanceFramePlaceAdvancedFunc(performanceFrame, Handler)
 	elseif (layout.PerformanceFramePlaceFunc) then
 		performanceFrame:Place(layout.PerformanceFramePlaceFunc(Handler))
 	end
 
-	framerate:Place(layout.FrameRatePlaceFunc(Handler)) 
-	latency:Place(layout.LatencyPlaceFunc(Handler)) 
+	framerate:Place(layout.FrameRatePlaceFunc(Handler))
+	latency:Place(layout.LatencyPlaceFunc(Handler))
 
 
 	-- Ring frame
@@ -951,27 +956,27 @@ Module.SetUpMinimap = function(self)
 		ringFrame:SetScript("OnEnter", RingFrame_OnEnter)
 		ringFrame:SetScript("OnLeave", RingFrame_OnLeave)
 
-		ringFrame:HookScript("OnShow", function() 
+		ringFrame:HookScript("OnShow", function()
 			local compassFrame = Wheel("LibMinimap"):GetCompassFrame()
-			if (compassFrame) then 
+			if (compassFrame) then
 				compassFrame.supressCompass = true
-			end 
+			end
 		end)
 
-		ringFrame:HookScript("OnHide", function() 
+		ringFrame:HookScript("OnHide", function()
 			local compassFrame = Wheel("LibMinimap"):GetCompassFrame()
-			if compassFrame then 
+			if compassFrame then
 				compassFrame.supressCompass = nil
-			end 
+			end
 		end)
 
 		-- Wait with this until now to trigger compass visibility changes
-		ringFrame:SetShown(db.stickyBars) 
+		ringFrame:SetShown(db.stickyBars)
 
 		-- ring frame backdrops
 		local ringFrameBg = ringFrame:CreateTexture()
 		ringFrameBg:SetPoint(unpack(layout.RingFrameBackdropPlace))
-		ringFrameBg:SetSize(unpack(layout.RingFrameBackdropSize))  
+		ringFrameBg:SetSize(unpack(layout.RingFrameBackdropSize))
 		ringFrameBg:SetDrawLayer(unpack(layout.RingFrameBackdropDrawLayer))
 		ringFrameBg:SetTexture(layout.RingFrameBackdropTexture)
 		ringFrameBg:SetVertexColor(unpack(layout.RingFrameBackdropColor))
@@ -998,23 +1003,23 @@ Module.SetUpMinimap = function(self)
 		toggleBackdrop:SetVertexColor(unpack(layout.ToggleBackdropColor))
 
 		Handler.Toggle = toggle
-	
+
 		-- outer ring
 		local ring1 = ringFrame:CreateSpinBar()
 		ring1:SetPoint(unpack(layout.OuterRingPlace))
-		ring1:SetSize(unpack(layout.OuterRingSize)) 
+		ring1:SetSize(unpack(layout.OuterRingSize))
 		ring1:SetSparkOffset(layout.OuterRingSparkOffset)
 		ring1:SetSparkFlash(unpack(layout.OuterRingSparkFlash))
 		ring1:SetSparkBlendMode(layout.OuterRingSparkBlendMode)
-		ring1:SetClockwise(layout.OuterRingClockwise) 
-		ring1:SetDegreeOffset(layout.OuterRingDegreeOffset) 
+		ring1:SetClockwise(layout.OuterRingClockwise)
+		ring1:SetDegreeOffset(layout.OuterRingDegreeOffset)
 		ring1:SetDegreeSpan(layout.OuterRingDegreeSpan)
-		ring1.showSpark = layout.OuterRingShowSpark 
+		ring1.showSpark = layout.OuterRingShowSpark
 		ring1.colorXP = layout.OuterRingColorXP
-		ring1.colorPower = layout.OuterRingColorPower 
-		ring1.colorStanding = layout.OuterRingColorStanding 
-		ring1.colorValue = layout.OuterRingColorValue 
-		ring1.backdropMultiplier = layout.OuterRingBackdropMultiplier 
+		ring1.colorPower = layout.OuterRingColorPower
+		ring1.colorStanding = layout.OuterRingColorStanding
+		ring1.colorValue = layout.OuterRingColorValue
+		ring1.backdropMultiplier = layout.OuterRingBackdropMultiplier
 		ring1.sparkMultiplier = layout.OuterRingSparkMultiplier
 
 		-- outer ring value text
@@ -1023,7 +1028,7 @@ Module.SetUpMinimap = function(self)
 		ring1Value:SetJustifyH(layout.OuterRingValueJustifyH)
 		ring1Value:SetJustifyV(layout.OuterRingValueJustifyV)
 		ring1Value:SetFontObject(layout.OuterRingValueFont)
-		ring1Value.showDeficit = layout.OuterRingValueShowDeficit 
+		ring1Value.showDeficit = layout.OuterRingValueShowDeficit
 		ring1.Value = ring1Value
 
 		-- outer ring value description text
@@ -1049,25 +1054,25 @@ Module.SetUpMinimap = function(self)
 		outerPercent:SetPoint("CENTER", 1, -1)
 		ring1.Value.Percent = outerPercent
 
-		-- inner ring 
+		-- inner ring
 		local ring2 = ringFrame:CreateSpinBar()
 		ring2:SetPoint(unpack(layout.InnerRingPlace))
-		ring2:SetSize(unpack(layout.InnerRingSize)) 
+		ring2:SetSize(unpack(layout.InnerRingSize))
 		ring2:SetSparkSize(unpack(layout.InnerRingSparkSize))
 		ring2:SetSparkInset(layout.InnerRingSparkInset)
 		ring2:SetSparkOffset(layout.InnerRingSparkOffset)
 		ring2:SetSparkFlash(unpack(layout.InnerRingSparkFlash))
 		ring2:SetSparkBlendMode(layout.InnerRingSparkBlendMode)
-		ring2:SetClockwise(layout.InnerRingClockwise) 
-		ring2:SetDegreeOffset(layout.InnerRingDegreeOffset) 
+		ring2:SetClockwise(layout.InnerRingClockwise)
+		ring2:SetDegreeOffset(layout.InnerRingDegreeOffset)
 		ring2:SetDegreeSpan(layout.InnerRingDegreeSpan)
 		ring2:SetStatusBarTexture(layout.InnerRingBarTexture)
-		ring2.showSpark = layout.InnerRingShowSpark 
+		ring2.showSpark = layout.InnerRingShowSpark
 		ring2.colorXP = layout.InnerRingColorXP
-		ring2.colorPower = layout.InnerRingColorPower 
-		ring2.colorStanding = layout.InnerRingColorStanding 
-		ring2.colorValue = layout.InnerRingColorValue 
-		ring2.backdropMultiplier = layout.InnerRingBackdropMultiplier 
+		ring2.colorPower = layout.InnerRingColorPower
+		ring2.colorStanding = layout.InnerRingColorStanding
+		ring2.colorValue = layout.InnerRingColorValue
+		ring2.backdropMultiplier = layout.InnerRingBackdropMultiplier
 		ring2.sparkMultiplier = layout.InnerRingSparkMultiplier
 
 		-- inner ring value text
@@ -1076,7 +1081,7 @@ Module.SetUpMinimap = function(self)
 		ring2Value:SetJustifyH("CENTER")
 		ring2Value:SetJustifyV("TOP")
 		ring2Value:SetFontObject(layout.InnerRingValueFont)
-		ring2Value.showDeficit = true  
+		ring2Value.showDeficit = true
 		ring2.Value = ring2Value
 
 		local innerPercent = ringFrame:CreateFontString()
@@ -1096,7 +1101,7 @@ Module.SetUpMinimap = function(self)
 
 	-- Classic Tracking button
 	-- BC seems to use the dropdown with multiple tracking types...?
-	if (IsClassic or IsTBC) then
+	if (IsClassic or IsTBC or IsWrath) then
 		local tracking = Handler:CreateOverlayFrame("Button")
 		tracking:SetFrameLevel(tracking:GetFrameLevel() + 10) -- need this above the ring frame and the rings
 		tracking:SetPoint(unpack(layout.TrackingButtonPlace))
@@ -1145,26 +1150,26 @@ Module.SetUpMinimap = function(self)
 	end
 
 	-- Classic battleground eye
-	if (IsClassic or IsTBC) then
+	if (IsClassic or IsTBC or IsWrath) then
 		local BGFrame = MiniMapBattlefieldFrame
 		local BGFrameBorder = MiniMapBattlefieldBorder
 		local BGIcon = MiniMapBattlefieldIcon
 
 		if BGFrame then
 			local button = Handler:CreateOverlayFrame()
-			button:SetFrameLevel(button:GetFrameLevel() + 10) 
+			button:SetFrameLevel(button:GetFrameLevel() + 10)
 			button:Place(unpack(layout.BattleGroundEyePlace))
 			button:SetSize(unpack(layout.BattleGroundEyeSize))
 
 			local point, x, y = unpack(layout.BattleGroundEyePlace)
 
-			-- For some reason any other points 
+			-- For some reason any other points
 			BGFrame:ClearAllPoints()
 			BGFrame:SetPoint("TOPRIGHT", Minimap, -4, -2)
 			BGFrame:SetHitRectInsets(-8, -8, -8, -8)
 			BGFrameBorder:Hide()
 			BGIcon:SetAlpha(0)
-		
+
 			local eye = button:CreateTexture()
 			eye:SetDrawLayer("OVERLAY", 1)
 			eye:SetPoint("CENTER", 0, 0)
@@ -1177,11 +1182,11 @@ Module.SetUpMinimap = function(self)
 			local tracking = Handler.Tracking
 			if (tracking) then
 				tracking:Place(unpack(BGFrame:IsShown() and layout.TrackingButtonPlaceAlternate or layout.TrackingButtonPlace))
-				BGFrame:HookScript("OnShow", function() 
+				BGFrame:HookScript("OnShow", function()
 					eye:Show()
 					tracking:Place(unpack(layout.TrackingButtonPlaceAlternate))
 				end)
-				BGFrame:HookScript("OnHide", function() 
+				BGFrame:HookScript("OnHide", function()
 					eye:Hide()
 					tracking:Place(unpack(layout.TrackingButtonPlace))
 				end)
@@ -1192,9 +1197,9 @@ Module.SetUpMinimap = function(self)
 	-- Retail groupfinder eye
 	if (IsRetail) then
 		local queueButton = QueueStatusMinimapButton
-		if queueButton then 
+		if queueButton then
 			local button = Handler:CreateOverlayFrame()
-			button:SetFrameLevel(button:GetFrameLevel() + 10) 
+			button:SetFrameLevel(button:GetFrameLevel() + 10)
 			button:Place(unpack(layout.GroupFinderEyePlace))
 			button:SetSize(unpack(layout.GroupFinderEyeSize))
 
@@ -1221,7 +1226,7 @@ Module.SetUpMinimap = function(self)
 		end
 	end
 
-end 
+end
 
 -- Set up the MBB (MinimapButtonBag) integration
 Module.SetUpMBB = function(self)
@@ -1230,20 +1235,20 @@ Module.SetUpMBB = function(self)
 	local Handler = self:GetMinimapHandler()
 
 	local button = Handler:CreateOverlayFrame()
-	button:SetFrameLevel(button:GetFrameLevel() + 10) 
+	button:SetFrameLevel(button:GetFrameLevel() + 10)
 	button:Place(unpack(layout.MBBPlace))
 	button:SetSize(unpack(layout.MBBSize))
-	button:SetFrameStrata("LOW") -- MEDIUM collides with Immersion 
+	button:SetFrameStrata("LOW") -- MEDIUM collides with Immersion
 
 	local mbbFrame = _G.MBB_MinimapButtonFrame
 	mbbFrame:SetParent(button)
 	mbbFrame:RegisterForDrag()
-	mbbFrame:SetSize(unpack(layout.MBBSize)) 
+	mbbFrame:SetSize(unpack(layout.MBBSize))
 	mbbFrame:ClearAllPoints()
 	mbbFrame:SetFrameStrata("LOW") -- MEDIUM collides with Immersion
 	mbbFrame:SetPoint("CENTER", 0, 0)
-	mbbFrame:SetHighlightTexture("") 
-	mbbFrame:DisableDrawLayer("OVERLAY") 
+	mbbFrame:SetHighlightTexture("")
+	mbbFrame:DisableDrawLayer("OVERLAY")
 
 	mbbFrame.ClearAllPoints = function() end
 	mbbFrame.SetPoint = function() end
@@ -1256,7 +1261,7 @@ Module.SetUpMBB = function(self)
 	mbbIcon:SetTexture(layout.MBBTexture)
 	mbbIcon:SetTexCoord(0,1,0,1)
 	mbbIcon:SetAlpha(.85)
-	
+
 	local down, over
 	local setalpha = function()
 		if (down and over) then
@@ -1268,17 +1273,17 @@ Module.SetUpMBB = function(self)
 		end
 	end
 
-	mbbFrame:SetScript("OnMouseDown", function(self) 
+	mbbFrame:SetScript("OnMouseDown", function(self)
 		down = true
 		setalpha()
 	end)
 
-	mbbFrame:SetScript("OnMouseUp", function(self) 
+	mbbFrame:SetScript("OnMouseUp", function(self)
 		down = false
 		setalpha()
 	end)
 
-	mbbFrame:SetScript("OnEnter", function(self) 
+	mbbFrame:SetScript("OnEnter", function(self)
 		over = true
 		_G.MBB_ShowTimeout = -1
 
@@ -1292,7 +1297,7 @@ Module.SetUpMBB = function(self)
 		setalpha()
 	end)
 
-	mbbFrame:SetScript("OnLeave", function(self) 
+	mbbFrame:SetScript("OnLeave", function(self)
 		over = false
 		_G.MBB_ShowTimeout = 0
 
@@ -1341,7 +1346,7 @@ Module.SetUpNarcissus = function(self)
 			MinimapButton:ClearAllPoints()
 
 			-- Narci_MinimapButton.Background:SetSize(56,56)
-			
+
 			if (theme == "Azerite") then
 				MinimapButton:SetSize(56,56) -- 36,36
 				MinimapButton:SetPoint("CENTER", Minimap, "TOP", 0, 8)
@@ -1367,35 +1372,35 @@ Module.SetUpNarcissus = function(self)
 
 end
 
--- Perform and initial update of all elements, 
+-- Perform and initial update of all elements,
 -- as this is not done automatically by the back-end.
 Module.EnableAllElements = function(self)
 	local Handler = self:GetMinimapHandler()
 	Handler:EnableAllElements()
-end 
+end
 
 ----------------------------------------------------
 -- Map Post Updates
 ----------------------------------------------------
 -- Set the mask texture
 Module.UpdateMinimapMask = function(self)
-	-- Transparency in these textures also affect the indoors opacity 
-	-- of the minimap, something changing the map alpha directly does not. 
+	-- Transparency in these textures also affect the indoors opacity
+	-- of the minimap, something changing the map alpha directly does not.
 	self:SetMinimapMaskTexture(self.layout.MaskTexture)
-end 
+end
 
--- Set the size and position 
+-- Set the size and position
 -- Can't change this in combat, will cause taint!
 Module.UpdateMinimapSize = function(self)
-	if InCombatLockdown() then 
+	if InCombatLockdown() then
 		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	end
 
 	local layout = self.layout
 
-	self:SetMinimapSize(unpack(layout.Size)) 
-	self:SetMinimapPosition(unpack(layout.Place)) 
-end 
+	self:SetMinimapSize(unpack(layout.Size))
+	self:SetMinimapPosition(unpack(layout.Place))
+end
 
 Module.UpdateBars = function(self, event, ...)
 	local layout = self.layout
@@ -1409,32 +1414,32 @@ Module.UpdateBars = function(self, event, ...)
 	local hasAP = IsRetail and self:PlayerHasAP()
 
 	local first, second
-	if (IsClassic or IsTBC) then
-		if (hasXP) then 
+	if (IsClassic or IsTBC or IsWrath) then
+		if (hasXP) then
 			first = "XP"
 			second = hasRep and "Reputation"
-		elseif (hasRep) then 
+		elseif (hasRep) then
 			first = "Reputation"
-		end 
+		end
 	elseif (IsRetail) then
-		if hasXP then 
+		if hasXP then
 			first = "XP"
-		elseif hasRep then 
+		elseif hasRep then
 			first = "Reputation"
-		elseif hasAP then 
+		elseif hasAP then
 			first = "ArtifactPower"
-		end 
-		if first then 
-			if hasRep and (first ~= "Reputation") then 
+		end
+		if first then
+			if hasRep and (first ~= "Reputation") then
 				second = "Reputation"
-			elseif hasAP and (first ~= "ArtifactPower") then 
+			elseif hasAP and (first ~= "ArtifactPower") then
 				second = "ArtifactPower"
 			end
-		end 
+		end
 	end
 
 	if (first or second) then
-		if (not Handler.Toggle:IsShown()) then  
+		if (not Handler.Toggle:IsShown()) then
 			Handler.Toggle:Show()
 		end
 
@@ -1442,7 +1447,7 @@ Module.UpdateBars = function(self, event, ...)
 		if (first and second) then
 
 			-- Setup the bars and backdrops for dual bar mode
-			if (self.spinnerMode ~= "Dual") then 
+			if (self.spinnerMode ~= "Dual") then
 
 				-- Set the backdrop to the two bar backdrop
 				Handler.Toggle.Frame.Bg:SetTexture(layout.RingFrameBackdropDoubleTexture)
@@ -1458,9 +1463,9 @@ Module.UpdateBars = function(self, event, ...)
 			end
 
 			-- Assign the spinners to the elements
-			if (self.spinner1 ~= first) then 
+			if (self.spinner1 ~= first) then
 
-				-- Disable the old element 
+				-- Disable the old element
 				if (self.spinner1) then
 					self:DisableMinimapElement(self.spinner1)
 				end
@@ -1469,26 +1474,26 @@ Module.UpdateBars = function(self, event, ...)
 				Handler[first] = Spinner[1]
 
 				-- Assign the correct post updates
-				if (first == "XP") then 
+				if (first == "XP") then
 					Spinner[1].OverrideValue = layout.XP_OverrideValue
-	
-				elseif (first == "Reputation") then 
+
+				elseif (first == "Reputation") then
 					Spinner[1].OverrideValue = layout.Rep_OverrideValue
-	
-				elseif (first == "ArtifactPower") then 
+
+				elseif (first == "ArtifactPower") then
 					Spinner[1].OverrideValue = layout.AP_OverrideValue
 				end
 
-				-- Enable the updated element 
+				-- Enable the updated element
 				self:EnableMinimapElement(first)
 
 				-- Run an update
 				Handler[first]:ForceUpdate()
 			end
 
-			if (self.spinner2 ~= second) then 
+			if (self.spinner2 ~= second) then
 
-				-- Disable the old element 
+				-- Disable the old element
 				if (self.spinner2) then
 					self:DisableMinimapElement(self.spinner2)
 				end
@@ -1497,17 +1502,17 @@ Module.UpdateBars = function(self, event, ...)
 				Handler[second] = Spinner[2]
 
 				-- Assign the correct post updates
-				if (second == "XP") then 
+				if (second == "XP") then
 					Handler[second].OverrideValue = layout.XP_OverrideValue
-	
-				elseif (second == "Reputation") then 
-					Handler[second].OverrideValue = layout.Rep_OverrideValue
-	
-				elseif (second == "ArtifactPower") then 
-					Handler[second].OverrideValue = layout.AP_OverrideValue
-				end 
 
-				-- Enable the updated element 
+				elseif (second == "Reputation") then
+					Handler[second].OverrideValue = layout.Rep_OverrideValue
+
+				elseif (second == "ArtifactPower") then
+					Handler[second].OverrideValue = layout.AP_OverrideValue
+				end
+
+				-- Enable the updated element
 				self:EnableMinimapElement(second)
 
 				-- Run an update
@@ -1523,13 +1528,13 @@ Module.UpdateBars = function(self, event, ...)
 		else
 
 			-- Disable any previously active secondary element
-			if (self.spinner2) and (Handler[self.spinner2]) then 
+			if (self.spinner2) and (Handler[self.spinner2]) then
 				self:DisableMinimapElement(self.spinner2)
 				Handler[self.spinner2] = nil
-			end 
+			end
 
 			-- Setup the bars and backdrops for single bar mode
-			if (self.spinnerMode ~= "Single") then 
+			if (self.spinnerMode ~= "Single") then
 
 				-- Set the backdrop to the single thick bar backdrop
 				Handler.Toggle.Frame.Bg:SetTexture(layout.RingFrameBackdropTexture)
@@ -1546,18 +1551,18 @@ Module.UpdateBars = function(self, event, ...)
 				Spinner[2].Value.Percent:SetText("")
 
 				forceUpdate = true
-			end 
+			end
 
 			-- If the second spinner is still shown, hide it!
-			if (Spinner[2]:IsShown()) then 
+			if (Spinner[2]:IsShown()) then
 				Spinner[2]:Hide()
-			end 
+			end
 
 			-- Update the element if needed
 			local forceUpdate
-			if (self.spinner1 ~= first) then 
+			if (self.spinner1 ~= first) then
 
-				-- Disable the old element 
+				-- Disable the old element
 				if (self.spinner1) then
 					self:DisableMinimapElement(self.spinner1)
 				end
@@ -1566,33 +1571,33 @@ Module.UpdateBars = function(self, event, ...)
 				Handler[first] = Spinner[1]
 
 				-- Assign the correct post updates
-				if (first == "XP") then 
+				if (first == "XP") then
 					Handler[first].OverrideValue = layout.XP_OverrideValue
-	
-				elseif (first == "Reputation") then 
+
+				elseif (first == "Reputation") then
 					Handler[first].OverrideValue = layout.Rep_OverrideValue
-	
-				elseif (first == "ArtifactPower") then 
+
+				elseif (first == "ArtifactPower") then
 					Handler[first].OverrideValue = layout.AP_OverrideValue
-				end 
+				end
 
 				-- Enable the active element
 				self:EnableMinimapElement(first)
 
 				forceUpdate = true
-			end 
+			end
 
 			if (forceUpdate) then
 				-- Assign the correct post updates
-				if (first == "XP") then 
+				if (first == "XP") then
 					Handler[first].PostUpdate = XP_PostUpdate
-	
-				elseif (first == "Reputation") then 
+
+				elseif (first == "Reputation") then
 					Handler[first].PostUpdate = Rep_PostUpdate
-	
-				elseif (first == "ArtifactPower") then 
+
+				elseif (first == "ArtifactPower") then
 					Handler[first].PostUpdate = AP_PostUpdate
-				end 
+				end
 
 				-- Make sure descriptions are updated
 				Handler[first].Value.Description:Show()
@@ -1605,18 +1610,18 @@ Module.UpdateBars = function(self, event, ...)
 			self.spinnerMode = "Single"
 			self.spinner1 = first
 			self.spinner2 = nil
-		end 
+		end
 
 		-- Post update the frame, could be sticky
 		Toggle_UpdateFrame(Handler.Toggle)
-	else 
+	else
 		Handler.Toggle:Hide()
 		Handler.Toggle.Frame:Hide()
-	end 
+	end
 end
 
 Module.UpdateTracking = function(self)
-	if (IsClassic or IsTBC) then
+	if (IsClassic or IsTBC or IsWrath) then
 		local Handler = self:GetMinimapHandler()
 		local icon = GetTrackingTexture()
 		if (icon) then
@@ -1632,7 +1637,7 @@ end
 -- Module Initialization
 ----------------------------------------------------
 Module.OnEvent = function(self, event, ...)
-	if (event == "PLAYER_LEVEL_UP") then 
+	if (event == "PLAYER_LEVEL_UP") then
 		local level = ...
 		if (level and (level ~= LEVEL)) then
 			LEVEL = level
@@ -1642,11 +1647,11 @@ Module.OnEvent = function(self, event, ...)
 				LEVEL = level
 			end
 		end
-	elseif (event == "PLAYER_REGEN_ENABLED") then 
+	elseif (event == "PLAYER_REGEN_ENABLED") then
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 		self:UpdateMinimapSize()
-		return 
-	elseif (event == "PLAYER_ENTERING_WORLD") or (event == "VARIABLES_LOADED") then 
+		return
+	elseif (event == "PLAYER_ENTERING_WORLD") or (event == "VARIABLES_LOADED") then
 		self:UpdateMinimapSize()
 		self:UpdateMinimapMask()
 		self:UpdateTracking()
@@ -1654,27 +1659,27 @@ Module.OnEvent = function(self, event, ...)
 		-- Problem: GatherMate2, HandyNotes and Questie sometimes break for us.
 		SetCVar("rotateMinimap", GetCVar("rotateMinimap"))
 
-	elseif (event == "ADDON_LOADED") then 
+	elseif (event == "ADDON_LOADED") then
 		local addon = ...
-		if (addon == "MBB") then 
+		if (addon == "MBB") then
 			self:SetUpMBB()
 			self.addonCounter = self.addonCounter - 1
 			if (self.addonCounter == 0) then
 				self:UnregisterEvent("ADDON_LOADED", "OnEvent")
 			end
-			return 
+			return
 		elseif (addon == "Narcissus") then
 			self:SetUpNarcissus()
 			self.addonCounter = self.addonCounter - 1
 			if (self.addonCounter == 0) then
 				self:UnregisterEvent("ADDON_LOADED", "OnEvent")
 			end
-		end 
-	elseif (event == "UNIT_AURA") then 
+		end
+	elseif (event == "UNIT_AURA") then
 		self:UpdateTracking()
 	end
 	self:UpdateBars()
-end 
+end
 
 Module.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
@@ -1684,31 +1689,31 @@ Module.OnInit = function(self)
 	self.db = GetConfig(self:GetName())
 	self.MBB = self:IsAddOnEnabled("MBB")
 	self.Narcissus = self:IsAddOnEnabled("Narcissus")
-	
+
 	self:SetUpMinimap()
 
-	if (self.MBB) then 
-		if (IsAddOnLoaded("MBB")) then 
+	if (self.MBB) then
+		if (IsAddOnLoaded("MBB")) then
 			self:SetUpMBB()
-		else 
+		else
 			self.addonCounter = (self.addonCounter or 0) + 1
 			self:RegisterEvent("ADDON_LOADED", "OnEvent")
-		end 
-	end 
+		end
+	end
 
-	if (self.Narcissus) then 
-		if (IsAddOnLoaded("Narcissus")) then 
+	if (self.Narcissus) then
+		if (IsAddOnLoaded("Narcissus")) then
 			self:SetUpNarcissus()
-		else 
+		else
 			self.addonCounter = (self.addonCounter or 0) + 1
 			self:RegisterEvent("ADDON_LOADED", "OnEvent")
-		end 
-	end 
+		end
+	end
 
 	if (self.layout.UseBars) then
 		self:UpdateBars()
 	end
-end 
+end
 
 Module.OnEnable = function(self)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
@@ -1727,4 +1732,4 @@ Module.OnEnable = function(self)
 	end
 
 	self:EnableAllElements()
-end 
+end

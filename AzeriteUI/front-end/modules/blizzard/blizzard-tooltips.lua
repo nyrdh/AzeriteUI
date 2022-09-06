@@ -58,8 +58,10 @@ local Colors = Private.Colors
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 local GetMedia = Private.GetMedia
+local IsAnyClassic = Private.IsAnyClassic
 local IsClassic = Private.IsClassic
 local IsTBC = Private.IsTBC
+local IsWrath = Private.IsWrath
 local IsRetail = Private.IsRetail
 
 -- WoW Constants
@@ -106,7 +108,7 @@ local HealthBarBackdropTemplate = {
 -- Using this as a tooltip method to access our custom colors.
 -- *Sourced from /back-end/tooltip.lua
 local GetDifficultyColorByLevel
-if (IsClassic or IsTBC) then
+if (IsClassic or IsTBC or IsWrath) then
 	GetDifficultyColorByLevel = function(level, isScaling)
 		local colors = Colors.quest
 		local levelDiff = level - UnitLevel("player")

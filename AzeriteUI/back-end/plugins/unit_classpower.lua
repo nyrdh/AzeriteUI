@@ -35,8 +35,10 @@ local UnitPowerType = UnitPowerType
 local UnitStagger = UnitStagger
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- WoW Constants
@@ -100,7 +102,7 @@ local SOUL_FRAGMENTS_IDs = {
 -- Class specific info
 local _, PLAYERCLASS = UnitClass("player")
 
--- Declare core function names so we don't 
+-- Declare core function names so we don't
 -- have to worry about the order we put them in.
 local Proxy, ForceUpdate, Update, UpdatePowerType
 
@@ -109,18 +111,18 @@ local Generic = setmetatable({
 	EnablePower = function(self)
 		local element = self.ClassPower
 
-		for i = 1, #element do 
+		for i = 1, #element do
 			element[i]:SetMinMaxValues(0,1)
 			element[i]:SetValue(0)
 			element[i]:Hide()
-		end 
+		end
 
-		if (element.alphaNoCombat) or (element.alphaNoCombatRunes) then 
+		if (element.alphaNoCombat) or (element.alphaNoCombatRunes) then
 			self:RegisterEvent("PLAYER_REGEN_DISABLED", Proxy, true)
 			self:RegisterEvent("PLAYER_REGEN_ENABLED", Proxy, true)
-		end 
+		end
 		--self:RegisterEvent("PLAYER_TARGET_CHANGED", Proxy, true)
-		
+
 	end,
 	DisablePower = function(self)
 		local element = self.ClassPower
@@ -130,26 +132,26 @@ local Generic = setmetatable({
 		element.maxDisplayed = nil
 		element:Hide()
 
-		for i = 1, #element do 
+		for i = 1, #element do
 			element[i]:Hide()
 			element[i]:SetMinMaxValues(0,1)
 			element[i]:SetValue(0)
 			element[i]:SetScript("OnUpdate", nil)
-		end 
+		end
 
 		self:UnregisterEvent("PLAYER_REGEN_DISABLED", Proxy)
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", Proxy)
 		--self:UnregisterEvent("PLAYER_TARGET_CHANGED", Proxy)
-	end, 
+	end,
 	UpdatePower = function(self, event, unit, ...)
 		local element = self.ClassPower
-		if (not element.isEnabled) then 
+		if (not element.isEnabled) then
 			element:Hide()
-			return 
-		end 
+			return
+		end
 
 		local powerType = element.powerType
-		local powerID = element.powerID 
+		local powerID = element.powerID
 
 		local min = UnitPower("player", powerID) or 0
 		local max = UnitPowerMax("player", powerID) or 0
@@ -157,28 +159,28 @@ local Generic = setmetatable({
 		local maxDisplayed = element.maxDisplayed or element.max or max
 
 
-		for i = 1, maxDisplayed do 
+		for i = 1, maxDisplayed do
 			local point = element[i]
 			if (point) then
-				if (not point:IsShown()) then 
+				if (not point:IsShown()) then
 					point:Show()
-				end 
+				end
 				point:SetValue(min >= i and 1 or 0)
 			end
-		end 
+		end
 
-		for i = maxDisplayed+1, #element do 
+		for i = maxDisplayed+1, #element do
 			element[i]:SetValue(0)
-			if element[i]:IsShown() then 
+			if element[i]:IsShown() then
 				element[i]:Hide()
-			end 
-		end 
+			end
+		end
 
 		return min, max, powerType
-	end, 
+	end,
 	UpdateColor = function(element, unit, min, max, powerType)
 		local self = element._owner
-		local color = self.colors.power[powerType] 
+		local color = self.colors.power[powerType]
 		local colorMultiple = element.useAlternateColoring and self.colors.power[powerType.."_MULTIPLE"]
 		local r, g, b = color[1], color[2], color[3]
 		local maxDisplayed = element.maxDisplayed or element.max or max
@@ -188,18 +190,18 @@ local Generic = setmetatable({
 		if (element.colorClass and UnitIsPlayer(unit)) then
 			color = unitClass and self.colors.class[unitClass]
 			r, g, b = color[1], color[2], color[3]
-		end 
+		end
 
 		-- Decide on visibility
 		-- Has the module chosen to hide all when empty?
 		local hidden = element.hideWhenEmpty and (min == 0)
 		if (not hidden) then
 			-- Is the current power type one to keep visible?
-			local keepShown = (powerType == "SOUL_FRAGMENTS") or ((powerType == "HOLY_POWER") and (GetSpecialization() == SPEC_PALADIN_HOLY)) 
+			local keepShown = (powerType == "SOUL_FRAGMENTS") or ((powerType == "HOLY_POWER") and (GetSpecialization() == SPEC_PALADIN_HOLY))
 			if (not keepShown) then
 				hidden = (
 					-- Has the module chosen to only show this with an active target?
-					(element.hideWhenNoTarget and (not UnitExists("target"))) or 
+					(element.hideWhenNoTarget and (not UnitExists("target"))) or
 
 					-- Has the module chosen to only show this with a hostile target?
 					(element.hideWhenUnattackable and (not UnitCanAttack("player", "target")))
@@ -213,26 +215,26 @@ local Generic = setmetatable({
 				local point = element[i]
 				if (point) then
 					point:SetAlpha(0)
-				end 
-			end 
+				end
+			end
 		end
 
-		if (not hidden) then 
-			-- In case there are more points active 
-			-- then the currently allowed maximum. 
-			-- Meant to give an easy system to handle 
-			-- the Rogue Anticipation talent without 
-			-- the need for the module to write extra code. 
+		if (not hidden) then
+			-- In case there are more points active
+			-- then the currently allowed maximum.
+			-- Meant to give an easy system to handle
+			-- the Rogue Anticipation talent without
+			-- the need for the module to write extra code.
 			local overflow
-			if min > maxDisplayed then 
+			if min > maxDisplayed then
 				overflow = min % maxDisplayed
-			end 
+			end
 			for i = 1, maxDisplayed do
 				local point = element[i]
 				if (point) then
 
 					-- upvalue to preserve the original colors for the next point
-					local r, g, b = r, g, b 
+					local r, g, b = r, g, b
 					local multi = colorMultiple and colorMultiple[i]
 					if (multi) then
 						r, g, b = multi[1], multi[2], multi[3]
@@ -242,42 +244,42 @@ local Generic = setmetatable({
 					if (overflow) then
 						if (i > overflow) then
 							-- tone down "old" points
-							r, g, b = r*1/3, g*1/3, b*1/3 
-						else 
+							r, g, b = r*1/3, g*1/3, b*1/3
+						else
 							-- brighten the overflow points
 							r = (1-r)*1/3 + r
 							g = (1-g)*1/4 + g -- always brighten the green slightly less
 							b = (1-b)*1/3 + b
-						end 
-					end 
+						end
+					end
 
-					if (element.alphaNoCombat) then 
+					if (element.alphaNoCombat) then
 						point:SetStatusBarColor(r, g, b)
-						if (point.bg) then 
+						if (point.bg) then
 							local mult = element.backdropMultiplier or 1/3
 							point.bg:SetVertexColor(r*mult, g*mult, b*mult)
-						end 
+						end
 						local alpha = UnitAffectingCombat("player") and 1 or element.alphaNoCombat
 						if (i > min) and (element.alphaEmpty) then
 							point:SetAlpha(element.alphaEmpty * alpha)
-						else 
+						else
 							point:SetAlpha(alpha)
-						end 
-					else 
+						end
+					else
 						point:SetStatusBarColor(r, g, b, 1)
-						if (point.bg) then 
+						if (point.bg) then
 							local mult = element.backdropMultiplier or 1/3
 							point.bg:SetVertexColor(r*mult, g*mult, b*mult)
-						end 
-						if (element.alphaEmpty) then 
+						end
+						if (element.alphaEmpty) then
 							point:SetAlpha(min > i and element.alphaEmpty or 1)
-						else 
+						else
 							point:SetAlpha(1)
-						end 
-					end 
+						end
+					end
 				end
 			end
-		end 
+		end
 	end
 }, { __index = LibFrame:CreateFrame("Frame") })
 local Generic_MT = { __index = Generic }
@@ -295,23 +297,23 @@ ClassPower.None = setmetatable({
 			end
 			element:Hide()
 		end
-	end, 
+	end,
 	DisablePower = function() end,
 	UpdatePower = function() end,
 	UpdateColor = function() end,
 }, { __index = LibFrame:CreateFrame("Frame") })
 
-ClassPower.ComboPoints = setmetatable({ 
+ClassPower.ComboPoints = setmetatable({
 	ShouldEnable = function(self)
 		local element = self.ClassPower
-		if (PLAYERCLASS == "DRUID") then 
+		if (PLAYERCLASS == "DRUID") then
 			local powerType = UnitPowerType("player")
-			if (powerType == SPELL_POWER_ENERGY) then 
+			if (powerType == SPELL_POWER_ENERGY) then
 				return true
-			end 
-		else 
+			end
+		else
 			return true
-		end 
+		end
 	end,
 	EnablePower = function(self)
 		local element = self.ClassPower
@@ -319,16 +321,16 @@ ClassPower.ComboPoints = setmetatable({
 		element.powerType = "COMBO_POINTS"
 		element.maxDisplayed = element.maxComboPoints or MAX_COMBO_POINTS or 5
 
-		if (PLAYERCLASS == "DRUID") then 
+		if (PLAYERCLASS == "DRUID") then
 			element.isEnabled = element.ShouldEnable(self)
 			self:RegisterEvent("SPELLS_CHANGED", Proxy, true)
-		else 
+		else
 			element.isEnabled = true
-		end 
+		end
 
 		self:RegisterEvent("UNIT_POWER_FREQUENT", Proxy)
 		self:RegisterEvent("UNIT_MAXPOWER", Proxy)
-	
+
 		Generic.EnablePower(self)
 	end,
 	DisablePower = function(self)
@@ -337,42 +339,42 @@ ClassPower.ComboPoints = setmetatable({
 		self:UnregisterEvent("UNIT_MAXPOWER", Proxy)
 
 		Generic.DisablePower(self)
-	end, 
+	end,
 	UpdatePower = function(self, event, unit, ...)
 		local element = self.ClassPower
 		local min, max
 
 		if (PLAYERCLASS == "DRUID") then
-			if (event == "SPELLS_CHANGED") or (event == "UNIT_DISPLAYPOWER") then 
+			if (event == "SPELLS_CHANGED") or (event == "UNIT_DISPLAYPOWER") then
 				element.isEnabled = element.ShouldEnable(self)
-			end 
+			end
 		end
 		min = UnitPower("player", element.powerID) or 0
 		max = UnitPowerMax("player", element.powerID) or 0
-		if (not element.isEnabled) then 
+		if (not element.isEnabled) then
 			element:Hide()
-			return 
-		end 
+			return
+		end
 
 		local maxDisplayed = element.maxDisplayed or element.max or max
 
-		for i = 1, maxDisplayed do 
+		for i = 1, maxDisplayed do
 			local point = element[i]
 			if (point) then
-				if (not point:IsShown()) then 
+				if (not point:IsShown()) then
 					point:Show()
-				end 
+				end
 				local value = min >= i and 1 or 0
 				point:SetValue(value)
 			end
-		end 
+		end
 
-		for i = maxDisplayed+1, #element do 
+		for i = maxDisplayed+1, #element do
 			element[i]:SetValue(0)
-			if (element[i]:IsShown()) then 
+			if (element[i]:IsShown()) then
 				element[i]:Hide()
-			end 
-		end 
+			end
+		end
 
 		return min, max, element.powerType
 	end
@@ -381,7 +383,7 @@ ClassPower.ComboPoints = setmetatable({
 -- Class resources only available in retail
 if (IsRetail) then
 
-	ClassPower.ArcaneCharges = setmetatable({ 
+	ClassPower.ArcaneCharges = setmetatable({
 		EnablePower = function(self)
 			local element = self.ClassPower
 			element.powerID = SPELL_POWER_ARCANE_CHARGES
@@ -402,7 +404,7 @@ if (IsRetail) then
 		end
 	}, Generic_MT)
 
-	ClassPower.Chi = setmetatable({ 
+	ClassPower.Chi = setmetatable({
 		EnablePower = function(self)
 			local element = self.ClassPower
 			element.powerID = SPELL_POWER_CHI
@@ -432,7 +434,7 @@ if (IsRetail) then
 		end
 	}, Generic_MT)
 
-	ClassPower.HolyPower = setmetatable({ 
+	ClassPower.HolyPower = setmetatable({
 		EnablePower = function(self)
 			local element = self.ClassPower
 			element.powerID = SPELL_POWER_HOLY_POWER
@@ -453,7 +455,7 @@ if (IsRetail) then
 		end
 	}, Generic_MT)
 
-	ClassPower.Runes = setmetatable({ 
+	ClassPower.Runes = setmetatable({
 
 		EnablePower = function(self)
 			local element = self.ClassPower
@@ -471,11 +473,11 @@ if (IsRetail) then
 		DisablePower = function(self)
 			local element = self.ClassPower
 			element.runeOrder = nil
-			for i = 1, #element do 
+			for i = 1, #element do
 				element[i]:SetScript("OnUpdate", nil)
-			end 
+			end
 			Generic.DisablePower(self)
-		end, 
+		end,
 		SortByTimeAsc = function(runeAID, runeBID)
 			local runeAStart, _, runeARuneReady = GetRuneCooldown(runeAID)
 			local runeBStart, _, runeBRuneReady = GetRuneCooldown(runeBID)
@@ -504,10 +506,10 @@ if (IsRetail) then
 		end,
 		UpdatePower = function(self, event, unit, ...)
 			local element = self.ClassPower
-			if (not element.isEnabled) then 
+			if (not element.isEnabled) then
 				element:Hide()
-				return 
-			end 
+				return
+			end
 
 			if (element.runeSortOrder == "ASC") then
 				table_sort(element.runeOrder, element.SortByTimeAsc)
@@ -532,10 +534,10 @@ if (IsRetail) then
 				runeID = element.runeOrder[id]
 				rune = element[id]
 
-				if (not rune) then 
-					break 
+				if (not rune) then
+					break
 				end
-				
+
 				start, duration, runeReady = GetRuneCooldown(runeID)
 				if (runeReady) then
 					rune:SetScript("OnUpdate", nil)
@@ -555,28 +557,28 @@ if (IsRetail) then
 			end
 
 			-- Make sure the runes are shown
-			for i = 1, maxDisplayed do 
+			for i = 1, maxDisplayed do
 				local rune = element[i]
 				if (rune) then
-					if (not rune:IsShown()) then 
+					if (not rune:IsShown()) then
 						rune:Show()
-					end 
+					end
 				end
-			end 
+			end
 
 			-- Hide additional points in the classpower element, if any
-			for i = maxDisplayed + 1, #element do 
+			for i = maxDisplayed + 1, #element do
 				local rune = element[i]
 				if (rune) then
 					rune:SetValue(0)
-					if (rune:IsShown()) then 
+					if (rune:IsShown()) then
 						rune:Hide()
-					end 
+					end
 				end
-			end 
+			end
 
 			return min, max, element.powerType
-		end, 
+		end,
 		UpdateColor = function(element, unit, min, max, powerType)
 			local self = element._owner
 			local color = self.colors.power[powerType]
@@ -588,10 +590,10 @@ if (IsRetail) then
 				local _, class = UnitClass(unit)
 				color = class and self.colors.class[class]
 				r, g, b = color[1], color[2], color[3]
-			end 
-			
+			end
+
 			-- Ready ones fully opaque, charging ones toned down, everything even more without a hostile target
-			if (UnitAffectingCombat("player") or UnitAffectingCombat("pet")) then 
+			if (UnitAffectingCombat("player") or UnitAffectingCombat("pet")) then
 				local chargingAlpha = element.alphaEmpty or .5
 				local fullAlpha = 1
 				for i = 1, maxDisplayed do
@@ -599,26 +601,26 @@ if (IsRetail) then
 					if (point) then
 						point:SetStatusBarColor(r, g, b)
 						point:SetAlpha(i > min and chargingAlpha or fullAlpha)
-						if (point.bg) then 
+						if (point.bg) then
 							local mult = element.backdropMultiplier or 1/3
 							point.bg:SetVertexColor(r*mult, g*mult, b*mult)
-						end 
+						end
 					end
 				end
 
 			-- All are toned down, charging/empty ones even more
-			elseif (min < maxDisplayed) or (UnitExists("target") and not UnitIsFriend("player", "target")) then 
+			elseif (min < maxDisplayed) or (UnitExists("target") and not UnitIsFriend("player", "target")) then
 				local chargingAlpha = (element.alphaEmpty or .5)*(element.alphaNoCombatRunes or element.alphaNoCombat or .5)
 				local fullAlpha = element.alphaNoCombatRunes or element.alphaNoCombat or .5
 				for i = 1, maxDisplayed do
 					local point = element[i]
-					if (point) then 
+					if (point) then
 						point:SetStatusBarColor(r, g, b)
 						point:SetAlpha(i > min and chargingAlpha or fullAlpha)
-						if (point.bg) then 
+						if (point.bg) then
 							local mult = element.backdropMultiplier or 1/3
 							point.bg:SetVertexColor(r*mult, g*mult, b*mult)
-						end 
+						end
 					end
 				end
 
@@ -629,17 +631,17 @@ if (IsRetail) then
 					if (point) then
 						point:SetStatusBarColor(r, g, b)
 						point:SetAlpha(element.alphaWhenHiddenRunes or 0)
-						if (point.bg) then 
+						if (point.bg) then
 							local mult = element.backdropMultiplier or 1/3
 							point.bg:SetVertexColor(r*mult, g*mult, b*mult)
-						end 
-					end 
-				end 
+						end
+					end
+				end
 			end
 		end
 	}, Generic_MT)
 
-	ClassPower.SoulFragments = setmetatable({ 
+	ClassPower.SoulFragments = setmetatable({
 		EnablePower = function(self)
 			local element = self.ClassPower
 			element.powerType = "SOUL_FRAGMENTS"
@@ -657,10 +659,10 @@ if (IsRetail) then
 		end,
 		UpdatePower = function(self, event, unit, ...)
 			local element = self.ClassPower
-			if (not element.isEnabled) then 
+			if (not element.isEnabled) then
 				element:Hide()
-				return 
-			end 
+				return
+			end
 
 			local powerType = element.powerType
 			local min = 0
@@ -670,8 +672,8 @@ if (IsRetail) then
 			local id = 1
 			while (true) do
 				local name, _, count, _, _, _, _, _, _, spellID = UnitAura("player", id, "HELPFUL")
-				if (not name) then 
-					break 
+				if (not name) then
+					break
 				end
 				if (spellID) and ((spellID == SOUL_FRAGMENTS_ID) or (SOUL_FRAGMENTS_IDs[spellID])) then
 					min = count
@@ -680,28 +682,28 @@ if (IsRetail) then
 			end
 
 			local maxDisplayed = element.maxDisplayed or element.max or max
-			for i = 1, maxDisplayed do 
+			for i = 1, maxDisplayed do
 				local point = element[i]
 				if (point) then
-					if (not point:IsShown()) then 
+					if (not point:IsShown()) then
 						point:Show()
-					end 
+					end
 					point:SetValue(min >= i and 1 or 0)
 				end
-			end 
+			end
 
-			for i = maxDisplayed + 1, #element do 
+			for i = maxDisplayed + 1, #element do
 				element[i]:SetValue(0)
-				if (element[i]:IsShown()) then 
+				if (element[i]:IsShown()) then
 					element[i]:Hide()
-				end 
-			end 
+				end
+			end
 
 			return min, max, powerType
 		end,
 	}, Generic_MT)
 
-	ClassPower.SoulShards = setmetatable({ 
+	ClassPower.SoulShards = setmetatable({
 		EnablePower = function(self)
 			local element = self.ClassPower
 			element.powerID = SPELL_POWER_SOUL_SHARDS
@@ -722,13 +724,13 @@ if (IsRetail) then
 		end,
 		UpdatePower = function(self, event, unit, ...)
 			local element = self.ClassPower
-			if (not element.isEnabled) then 
+			if (not element.isEnabled) then
 				element:Hide()
-				return 
-			end 
+				return
+			end
 
 			local powerType = element.powerType
-			local powerID = element.powerID 
+			local powerID = element.powerID
 
 			local min = UnitPower("player", powerID, true) or 0
 			local max = UnitPowerMax("player", powerID) or 0
@@ -744,30 +746,30 @@ if (IsRetail) then
 
 			local numActive = min + 0.9
 			local maxDisplayed = element.maxDisplayed or element.max or max
-			
-			for i = 1, maxDisplayed do 
+
+			for i = 1, maxDisplayed do
 				local point = element[i]
 				if (point) then
-					if (not point:IsShown()) then 
+					if (not point:IsShown()) then
 						point:Show()
-					end 
+					end
 					local value = (i > numActive) and 0 or (min - i + 1)
 					point:SetValue(value)
 				end
-			end 
+			end
 
-			for i = maxDisplayed+1, #element do 
+			for i = maxDisplayed+1, #element do
 				element[i]:SetValue(0)
-				if (element[i]:IsShown()) then 
+				if (element[i]:IsShown()) then
 					element[i]:Hide()
-				end 
-			end 
+				end
+			end
 
 			return min, max, powerType
 		end
 	}, Generic_MT)
 
-	ClassPower.Stagger = setmetatable({ 
+	ClassPower.Stagger = setmetatable({
 		EnablePower = function(self)
 			local element = self.ClassPower
 			element.powerType = "STAGGER"
@@ -782,16 +784,16 @@ if (IsRetail) then
 			self:UnregisterEvent("UNIT_AURA", Proxy)
 
 			Generic.DisablePower(self)
-		end, 
+		end,
 		UpdatePower = function(self, event, unit, ...)
 			local element = self.ClassPower
-			if (not element.isEnabled) then 
+			if (not element.isEnabled) then
 				element:Hide()
-				return 
-			end 
+				return
+			end
 
 			local powerType = element.powerType
-			local powerID = element.powerID 
+			local powerID = element.powerID
 
 			-- Blizzard code has nil checks for UnitStagger return
 			local min = UnitStagger("player") or 0
@@ -805,28 +807,28 @@ if (IsRetail) then
 				numPoints = 2
 			elseif (perc > 0) then
 				numPoints = 1
-			else 
+			else
 				numPoints = 0
 			end
 
 			local maxDisplayed = element.maxDisplayed or element.max or max
 
-			for i = 1, maxDisplayed do 
+			for i = 1, maxDisplayed do
 				local point = element[i]
 				if (point) then
-					if (not point:IsShown()) then 
+					if (not point:IsShown()) then
 						point:Show()
-					end 
+					end
 					point:SetValue(numPoints >= i and 1 or 0)
 				end
-			end 
+			end
 
-			for i = maxDisplayed + 1, #element do 
+			for i = maxDisplayed + 1, #element do
 				element[i]:SetValue(0)
-				if (element[i]:IsShown()) then 
+				if (element[i]:IsShown()) then
 					element[i]:Hide()
-				end 
-			end 		
+				end
+			end
 
 			return min, max, powerType
 		end,
@@ -851,76 +853,76 @@ if (IsRetail) then
 				local _, class = UnitClass(unit)
 				color = class and self.colors.class[class]
 				r, g, b = color[1], color[2], color[3]
-			end 
-			
+			end
+
 			-- Has the module chosen to only show this with an active target,
 			-- or has the module chosen to hide all when empty?
 			if (element.hideWhenNoTarget and (not UnitExists("target")))
-			or (element.hideWhenUnattackable and (not UnitCanAttack("player", "target"))) 
-			or (element.hideWhenEmpty and (min == 0)) then 
+			or (element.hideWhenUnattackable and (not UnitCanAttack("player", "target")))
+			or (element.hideWhenEmpty and (min == 0)) then
 				for i = 1, maxDisplayed do
 					local point = element[i]
 					if (point) then
 						point:SetAlpha(0)
-					end 
-				end 
-			else 
-				-- In case there are more points active 
-				-- then the currently allowed maximum. 
-				-- Meant to give an easy system to handle 
-				-- the Rogue Anticipation talent without 
-				-- the need for the module to write extra code. 
+					end
+				end
+			else
+				-- In case there are more points active
+				-- then the currently allowed maximum.
+				-- Meant to give an easy system to handle
+				-- the Rogue Anticipation talent without
+				-- the need for the module to write extra code.
 				local overflow
-				if (min > maxDisplayed) then 
+				if (min > maxDisplayed) then
 					overflow = min % maxDisplayed
-				end 
+				end
 				for i = 1, maxDisplayed do
 					local point = element[i]
 					if (point) then
 
 						-- upvalue to preserve the original colors for the next point
-						local r, g, b = r, g, b 
+						local r, g, b = r, g, b
 
 						-- Handle overflow coloring
 						if (overflow) then
 							if (i > overflow) then
 								-- tone down "old" points
-								r, g, b = r*1/3, g*1/3, b*1/3 
-							else 
+								r, g, b = r*1/3, g*1/3, b*1/3
+							else
 								-- brighten the overflow points
 								r = (1-r)*1/3 + r
 								g = (1-g)*1/4 + g -- always brighten the green slightly less
 								b = (1-b)*1/3 + b
-							end 
-						end 
+							end
+						end
 
-						if (element.alphaNoCombat) then 
+						if (element.alphaNoCombat) then
 							point:SetStatusBarColor(r, g, b)
-							if (point.bg) then 
+							if (point.bg) then
 								local mult = element.backdropMultiplier or 1/3
 								point.bg:SetVertexColor(r*mult, g*mult, b*mult)
-							end 
+							end
 								local alpha = UnitAffectingCombat(unit) and 1 or element.alphaNoCombat
 							if (i > min) and (element.alphaEmpty) then
 								point:SetAlpha(element.alphaEmpty * alpha)
-							else 
+							else
 								point:SetAlpha(alpha)
-							end 
-						else 
+							end
+						else
 							point:SetStatusBarColor(r, g, b, 1)
-							if (point.bg) then 
+							if (point.bg) then
 								local mult = element.backdropMultiplier or 1/3
 								point.bg:SetVertexColor(r*mult, g*mult, b*mult)
-							end 
-							if (element.alphaEmpty) then 
+							end
+							if (element.alphaEmpty) then
 								point:SetAlpha(min > i and element.alphaEmpty or 1)
-							else 
+							else
 								point:SetAlpha(1)
-							end 
-						end 
-					end 
+							end
+						end
+					end
 				end
-			end 
+			end
 		end
 	}, Generic_MT)
 
@@ -931,9 +933,9 @@ Update = function(self, event, unit, ...)
 	local element = self.ClassPower
 
 	-- Run the general preupdate
-	if element.PreUpdate then 
+	if element.PreUpdate then
 		element:PreUpdate(unit)
-	end 
+	end
 
 	-- Store the old maximum value, if any
 	local oldMax = element.max
@@ -941,65 +943,65 @@ Update = function(self, event, unit, ...)
 	-- Run the current powerType's Update function
 	local min, max, powerType = element.UpdatePower(self, event, unit, ...)
 
-	-- Stop execution if element was disabled 
+	-- Stop execution if element was disabled
 	-- during its own update cycle.
-	if (not element.isEnabled) then 
-		return 
-	end 
+	if (not element.isEnabled) then
+		return
+	end
 
 	-- Post update element colors, allow modules to override
 	local updateColor = element.OverrideColor or element.UpdateColor
-	if updateColor then 
+	if updateColor then
 		updateColor(element, unit, min, max, powerType)
-	end 
+	end
 
 	if (element.hideFullyWhenEmpty) and (min == 0) then
 		if (element:IsShown()) then
 			element:Hide()
 		end
 	else
-		if (not element:IsShown()) then 
+		if (not element:IsShown()) then
 			element:Show()
-		end 
+		end
 	end
 
 	-- Run the general postupdate
-	if (element.PostUpdate) then 
+	if (element.PostUpdate) then
 		return element:PostUpdate(unit, min, max, oldMax ~= max, powerType)
-	end 
-end 
+	end
+end
 
--- This is where the current powerType is decided, 
+-- This is where the current powerType is decided,
 -- where we check for and unregister conditional events
 -- related to player specialization, talents or level.
 -- This is also where we toggle the current element,
--- disable the old and enable the new. 
+-- disable the old and enable the new.
 if (IsClassic or IsTBC) then
 	UpdatePowerType = function(self, event, unit, ...)
 		local element = self.ClassPower
 
-		-- Should be safe to always check for unit even here, 
+		-- Should be safe to always check for unit even here,
 		-- our unitframe library should provide it if unitless events are registered properly.
-		if (not unit) or (unit ~= self.unit) or (event == "UNIT_POWER_FREQUENT" and (...) ~= element.powerType) then 
-			return 
-		end 
+		if (not unit) or (unit ~= self.unit) or (event == "UNIT_POWER_FREQUENT" and (...) ~= element.powerType) then
+			return
+		end
 
-		local newType 
-		if ((PLAYERCLASS == "DRUID") or (PLAYERCLASS == "ROGUE")) and (not element.ignoreComboPoints) then 
+		local newType
+		if ((PLAYERCLASS == "DRUID") or (PLAYERCLASS == "ROGUE")) and (not element.ignoreComboPoints) then
 			newType = "ComboPoints"
-		else 
+		else
 			newType = "None"
-		end 
+		end
 
 		local currentType = element._currentType
 
 		-- Disable previous type if present and different
-		if (currentType) and (currentType ~= newType) then 
+		if (currentType) and (currentType ~= newType) then
 			element.DisablePower(self)
-		end 
+		end
 
 		-- Set or change the powerType if there is a new or initial one
-		if (not currentType) or (currentType ~= newType) then 
+		if (not currentType) or (currentType ~= newType) then
 
 			-- Update type
 			element._currentType = newType
@@ -1009,21 +1011,64 @@ if (IsClassic or IsTBC) then
 
 			-- Enable using new type
 			element.EnablePower(self)
-		end 
+		end
 
 		-- Continue to the regular update method
 		return Update(self, event, unit, ...)
-	end 
+	end
+end
+if (IsWrath) then
+	UpdatePowerType = function(self, event, unit, ...)
+		local element = self.ClassPower
+
+		-- Should be safe to always check for unit even here,
+		-- our unitframe library should provide it if unitless events are registered properly.
+		if (not unit) or (unit ~= self.unit) or (event == "UNIT_POWER_FREQUENT" and (...) ~= element.powerType) then
+			return
+		end
+
+		local newType
+		if ((PLAYERCLASS == "DRUID") or (PLAYERCLASS == "ROGUE")) and (not element.ignoreComboPoints) then
+			newType = "ComboPoints"
+		elseif (PLAYERCLASS == "DEATHKNIGHT") then
+			newType = "None"
+		else
+			newType = "None"
+		end
+
+		local currentType = element._currentType
+
+		-- Disable previous type if present and different
+		if (currentType) and (currentType ~= newType) then
+			element.DisablePower(self)
+		end
+
+		-- Set or change the powerType if there is a new or initial one
+		if (not currentType) or (currentType ~= newType) then
+
+			-- Update type
+			element._currentType = newType
+
+			-- Change the meta
+			setmetatable(element, { __index = ClassPower[newType] })
+
+			-- Enable using new type
+			element.EnablePower(self)
+		end
+
+		-- Continue to the regular update method
+		return Update(self, event, unit, ...)
+	end
 end
 if (IsRetail) then
 	UpdatePowerType = function(self, event, unit, ...)
 		local element = self.ClassPower
 
-		-- Should be safe to always check for unit even here, 
+		-- Should be safe to always check for unit even here,
 		-- our unitframe library should provide it if unitless events are registered properly.
-		if (not unit) or (unit ~= self.unit) or (event == "UNIT_POWER_FREQUENT" and (...) ~= element.powerType) then 
-			return 
-		end 
+		if (not unit) or (unit ~= self.unit) or (event == "UNIT_POWER_FREQUENT" and (...) ~= element.powerType) then
+			return
+		end
 
 		local spec = GetSpecialization()
 		local level = UnitLevel("player")
@@ -1032,14 +1077,14 @@ if (IsRetail) then
 			level = ...
 			if ((PLAYERCLASS == "PALADIN") and (level >= PALADINPOWERBAR_SHOW_LEVEL)) or (PLAYERCLASS == "WARLOCK") and (level >= SHARDBAR_SHOW_LEVEL) then
 				self:UnregisterEvent("PLAYER_LEVEL_UP", Proxy)
-			end 
-	
+			end
+
 		elseif (event == "UPDATE_POSSESS_BAR") then
 			element.hasPossessBar = IsPossessBarVisible()
-	
-		elseif (event == "UPDATE_OVERRIDE_ACTIONBAR") then 
-			element.hasOverrideBar = HasOverrideActionBar() or HasTempShapeshiftActionBar() 
-	
+
+		elseif (event == "UPDATE_OVERRIDE_ACTIONBAR") then
+			element.hasOverrideBar = HasOverrideActionBar() or HasTempShapeshiftActionBar()
+
 		elseif (event == "UNIT_ENTERING_VEHICLE")
 			or (event == "UNIT_ENTERED_VEHICLE")
 			or (event == "UNIT_EXITING_VEHICLE")
@@ -1047,46 +1092,46 @@ if (IsRetail) then
 		then
 			element.inVehicle = UnitInVehicle("player")
 			element.hasVehicleUI = UnitHasVehiclePlayerFrameUI("player") and PlayerVehicleHasComboPoints()
-		end 
+		end
 
-		local newType 
-		if (element.hasPossessBar or element.hasOverrideBar) or (element.inVehicle and (not element.hasVehicleUI)) then 
+		local newType
+		if (element.hasPossessBar or element.hasOverrideBar) or (element.inVehicle and (not element.hasVehicleUI)) then
 			newType = "None"
-		elseif (element.hasVehicleUI) and (not element.ignoreComboPoints) then 
+		elseif (element.hasVehicleUI) and (not element.ignoreComboPoints) then
 			newType = "ComboPoints"
-		elseif (PLAYERCLASS == "DEATHKNIGHT") and (not element.ignoreRunes) then 
+		elseif (PLAYERCLASS == "DEATHKNIGHT") and (not element.ignoreRunes) then
 			newType = "Runes"
-		elseif (PLAYERCLASS == "DRUID") and (not element.ignoreComboPoints) then 
+		elseif (PLAYERCLASS == "DRUID") and (not element.ignoreComboPoints) then
 			newType = "ComboPoints"
-		elseif (PLAYERCLASS == "MAGE") and (spec == SPEC_MAGE_ARCANE) and (not element.ignoreArcaneCharges) then 
+		elseif (PLAYERCLASS == "MAGE") and (spec == SPEC_MAGE_ARCANE) and (not element.ignoreArcaneCharges) then
 			newType = "ArcaneCharges"
-		elseif (PLAYERCLASS == "MONK") and (spec == SPEC_MONK_WINDWALKER) and (not element.ignoreChi) then 
+		elseif (PLAYERCLASS == "MONK") and (spec == SPEC_MONK_WINDWALKER) and (not element.ignoreChi) then
 			newType = "Chi"
-		elseif (PLAYERCLASS == "MONK") and (spec == SPEC_MONK_BREWMASTER) and (not element.ignoreStagger) then 
+		elseif (PLAYERCLASS == "MONK") and (spec == SPEC_MONK_BREWMASTER) and (not element.ignoreStagger) then
 			newType = "Stagger"
 		elseif ((PLAYERCLASS == "PALADIN") and (level >= PALADINPOWERBAR_SHOW_LEVEL)) and (not element.ignoreHolyPower) then
 			newType = "HolyPower"
-		elseif (PLAYERCLASS == "ROGUE") and (not element.ignoreComboPoints) then 
+		elseif (PLAYERCLASS == "ROGUE") and (not element.ignoreComboPoints) then
 			newType = "ComboPoints"
-		elseif ((PLAYERCLASS == "WARLOCK") and (level >= SHARDBAR_SHOW_LEVEL)) and (not element.ignoreSoulShards) then 
+		elseif ((PLAYERCLASS == "WARLOCK") and (level >= SHARDBAR_SHOW_LEVEL)) and (not element.ignoreSoulShards) then
 			newType = "SoulShards"
-		elseif (PLAYERCLASS == "DEMONHUNTER") and (spec == SPEC_DEMONHUNTER_VENGEANCE) and (not element.ignoreSoulFragments) then 
+		elseif (PLAYERCLASS == "DEMONHUNTER") and (spec == SPEC_DEMONHUNTER_VENGEANCE) and (not element.ignoreSoulFragments) then
 			newType = "SoulFragments"
-		--elseif (not element.ignoreComboPoints) then 
+		--elseif (not element.ignoreComboPoints) then
 		--	newType = "ComboPoints"
-		else 
+		else
 			newType = "None"
-		end 
-	
+		end
+
 		local currentType = element._currentType
 
 		-- Disable previous type if present and different
-		if (currentType) and (currentType ~= newType) then 
+		if (currentType) and (currentType ~= newType) then
 			element.DisablePower(self)
-		end 
+		end
 
 		-- Set or change the powerType if there is a new or initial one
-		if (not currentType) or (currentType ~= newType) then 
+		if (not currentType) or (currentType ~= newType) then
 
 			-- Update type
 			element._currentType = newType
@@ -1096,7 +1141,7 @@ if (IsRetail) then
 
 			-- Enable using new type
 			element.EnablePower(self)
-		end 
+		end
 
 		-- Continue to the regular update method
 		return Update(self, event, unit, ...)
@@ -1105,7 +1150,7 @@ end
 
 Proxy = function(self, ...)
 	return (self.ClassPower.Override or UpdatePowerType)(self, ...)
-end 
+end
 
 ForceUpdate = function(element)
 	return Proxy(element._owner, "Forced", element._owner.unit)
@@ -1117,8 +1162,8 @@ local Enable = function(self)
 		element._owner = self
 		element.ForceUpdate = ForceUpdate
 
-		-- Give points access to their owner element, 
-		-- regardless of whether that element is their direct parent or not. 
+		-- Give points access to their owner element,
+		-- regardless of whether that element is their direct parent or not.
 		for i = 1,#element do
 			element[i]._owner = element
 		end
@@ -1131,42 +1176,43 @@ local Enable = function(self)
 			local level = UnitLevel("player")
 			if ((PLAYERCLASS == "PALADIN") and (level < PALADINPOWERBAR_SHOW_LEVEL)) or (PLAYERCLASS == "WARLOCK") and (level < SHARDBAR_SHOW_LEVEL) then
 				self:RegisterEvent("PLAYER_LEVEL_UP", Proxy, true)
-			end  
-
-			-- We'll handle spec specific powers from here, 
-			-- but will leave level checking to the sub-elements.
-			if (PLAYERCLASS == "MONK") or (PLAYERCLASS == "MAGE") or (PLAYERCLASS == "PALADIN") or (PLAYERCLASS == "DEMONHUNTER") then 
-				self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", Proxy, true) 
-			end 
-			if (PLAYERCLASS == "MONK") then
-				self:RegisterEvent("PLAYER_TALENT_UPDATE", Proxy, true) 
 			end
 
+			-- We'll handle spec specific powers from here,
+			-- but will leave level checking to the sub-elements.
+			if (PLAYERCLASS == "MONK") or (PLAYERCLASS == "MAGE") or (PLAYERCLASS == "PALADIN") or (PLAYERCLASS == "DEMONHUNTER") then
+				self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", Proxy, true)
+			end
+			if (PLAYERCLASS == "MONK") then
+				self:RegisterEvent("PLAYER_TALENT_UPDATE", Proxy, true)
+			end
+			self:RegisterEvent("UPDATE_OVERRIDE_ACTIONBAR", Proxy, true)
+			self:RegisterEvent("UPDATE_POSSESS_BAR", Proxy, true)
+		end
+		if (IsRetail or IsWrath) then
 			-- All must check for vehicles
-			-- *Also of importance that none 
+			-- *Also of importance that none
 			-- of the powerTypes remove this event.
 			self:RegisterEvent("UNIT_ENTERED_VEHICLE", Proxy)
 			self:RegisterEvent("UNIT_ENTERING_VEHICLE", Proxy)
 			self:RegisterEvent("UNIT_EXITED_VEHICLE", Proxy)
 			self:RegisterEvent("UNIT_EXITING_VEHICLE", Proxy)
-			self:RegisterEvent("UPDATE_OVERRIDE_ACTIONBAR", Proxy, true)
-			self:RegisterEvent("UPDATE_POSSESS_BAR", Proxy, true)
 		end
 
 		return true
 	end
-end 
+end
 
 local Disable = function(self)
 	local element = self.ClassPower
 	if element then
 
 		-- Disable the current powerType, if any
-		if element._currentType then 
+		if element._currentType then
 			element.DisablePower(self)
 			element._currentType = nil
 			element.powerType = nil
-		end 
+		end
 
 		-- Remove generic events
 		self:UnregisterEvent("UNIT_DISPLAYPOWER", Proxy)
@@ -1176,17 +1222,19 @@ local Disable = function(self)
 		if (IsRetail) then
 			self:UnregisterEvent("PLAYER_LEVEL_UP", Proxy)
 			self:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED", Proxy)
+			self:UnregisterEvent("UPDATE_OVERRIDE_ACTIONBAR", Proxy)
+			self:UnregisterEvent("UPDATE_POSSESS_BAR", Proxy)
+		end
+		if (IsRetail or IsWrath) then
 			self:UnregisterEvent("UNIT_ENTERED_VEHICLE", Proxy)
 			self:UnregisterEvent("UNIT_ENTERING_VEHICLE", Proxy)
 			self:UnregisterEvent("UNIT_EXITED_VEHICLE", Proxy)
 			self:UnregisterEvent("UNIT_EXITING_VEHICLE", Proxy)
-			self:UnregisterEvent("UPDATE_OVERRIDE_ACTIONBAR", Proxy)
-			self:UnregisterEvent("UPDATE_POSSESS_BAR", Proxy)
 		end
 	end
-end 
+end
 
 -- Register it with compatible libraries
-for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
+for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do
 	Lib:RegisterElement("ClassPower", Enable, Disable, Proxy, 58)
-end 
+end

@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 106)
+local LibBlizzard = Wheel:Set("LibBlizzard", 108)
 if (not LibBlizzard) then
 	return
 end
@@ -52,8 +52,10 @@ local TargetofTarget_Update = TargetofTarget_Update
 local UIParent = UIParent
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 local IsDragonflight = LibClientBuild:IsRetailDragonflight()
 
@@ -212,7 +214,7 @@ end
 -- Widget Pool
 -----------------------------------------------------------------
 -- ActionBars (Classic)
-UIWidgetsDisable["ActionBars"] = (IsClassic or IsTBC) and function(self)
+UIWidgetsDisable["ActionBars"] = (IsClassic or IsTBC or IsWrath) and function(self)
 
 	for _,object in pairs({
 		"MainMenuBarVehicleLeaveButton",
@@ -1305,13 +1307,13 @@ end
 UIWidgetStyling["GameMenu"] = function(self, ...)
 end
 
-UIWidgetStyling["ObjectiveTracker"] = (IsClassic or IsTBC) and function(self, ...)
+UIWidgetStyling["ObjectiveTracker"] = (IsClassic or IsTBC or IsWrath) and function(self, ...)
 end
 or IsRetail and function(self, ...)
 end
 
 UIWidgetDependency["WorldMap"] = "Blizzard_WorldMap"
-UIWidgetStyling["WorldMap"] = (IsClassic or IsTBC) and function(self, ...)
+UIWidgetStyling["WorldMap"] = (IsClassic or IsTBC or IsWrath) and function(self, ...)
 	local Canvas = WorldMapFrame
 	Canvas.BlackoutFrame:Hide()
 	Canvas:SetIgnoreParentScale(false)

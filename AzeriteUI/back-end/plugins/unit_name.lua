@@ -16,8 +16,10 @@ local UnitQuestTrivialLevelRange = UnitQuestTrivialLevelRange or GetQuestGreenRa
 local UnitQuestTrivialLevelRangeScaling = UnitQuestTrivialLevelRangeScaling or GetScalingQuestGreenRange
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 local utf8sub = function(str, i, dots)
@@ -53,7 +55,7 @@ end
 -- Using this as a tooltip method to access our custom colors.
 -- *Sourced from /back-end/tooltip.lua
 local GetDifficultyColorByLevel
-if (IsClassic or IsTBC) then
+if (IsClassic or IsTBC or IsWrath) then
 	GetDifficultyColorByLevel = function(self, level, isScaling)
 		local colors = self.colors.quest
 		local levelDiff = level - UnitLevel("player")
@@ -117,9 +119,9 @@ elseif (IsRetail) then
 end
 
 local Update = function(self, event, unit)
-	if (not unit) or (unit ~= self.unit) then 
-		return 
-	end 
+	if (not unit) or (unit ~= self.unit) then
+		return
+	end
 
 	local element = self.Name
 	if (element.PreUpdate) then
@@ -128,7 +130,7 @@ local Update = function(self, event, unit)
 
 	-- Retrieve data
 	local name = UnitName(unit)
-	if (not name) then 
+	if (not name) then
 		element:SetText("")
 		return
 	end
@@ -138,16 +140,16 @@ local Update = function(self, event, unit)
 
 	if (element.showLevel) then
 		local level = UnitEffectiveLevel(unit)
-		if (level and level > 0) then 
+		if (level and level > 0) then
 			local r, g, b, colorCode = GetDifficultyColorByLevel(self, level)
 			levelText = colorCode .. level .. "|r"
 			levelTextLength = level >= 100 and 5 or level >= 10 and 4 or 3
 			showLevel = true
-		end 
+		end
 	end
 
 	local fullLength = (showLevel) and (nameLength + levelTextLength) or (nameLength)
-	if (element.maxChars) and (fullLength > element.maxChars) then 
+	if (element.maxChars) and (fullLength > element.maxChars) then
 		local maxChars = (showLevel) and (element.maxChars - levelTextLength) or (element.maxChars)
 		if (element.useSmartName) then
 			local nameTable = { string_split(" ", name) }
@@ -161,26 +163,26 @@ local Update = function(self, event, unit)
 		else
 			name = utf8sub(name, maxChars, element.useDots)
 		end
-	end 
+	end
 
 	if (showLevel) then
-		if (element.showLevelLast) then 
+		if (element.showLevelLast) then
 			name = name .. " |cff888888:|r" .. levelText
-		else 
+		else
 			name = levelText .. "|cff888888:|r " .. name
 		end
 	end
 
 	element:SetText(name)
 
-	if (element.PostUpdate) then 
+	if (element.PostUpdate) then
 		return element:PostUpdate(unit)
-	end 
-end 
+	end
+end
 
 local Proxy = function(self, ...)
 	return (self.Name.Override or Update)(self, ...)
-end 
+end
 
 local ForceUpdate = function(element)
 	return Proxy(element._owner, "Forced", element._owner.unit)
@@ -192,9 +194,9 @@ local Enable = function(self)
 		element._owner = self
 		element.ForceUpdate = ForceUpdate
 
-		if (self.unit == "player") or (self.unit == "pet") then 
+		if (self.unit == "player") or (self.unit == "pet") then
 			self:RegisterEvent("PLAYER_LEVEL_UP", Proxy, true)
-		end 
+		end
 
 		self:RegisterEvent("UNIT_NAME_UPDATE", Proxy)
 		self:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", Proxy)
@@ -204,7 +206,7 @@ local Enable = function(self)
 
 		return true
 	end
-end 
+end
 
 local Disable = function(self)
 	local element = self.Name
@@ -218,9 +220,9 @@ local Disable = function(self)
 		self:UnregisterEvent("UNIT_LEVEL", Proxy)
 		self:UnregisterEvent("ZONE_CHANGED_NEW_AREA", Proxy)
 	end
-end 
+end
 
 -- Register it with compatible libraries
-for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Name", Enable, Disable, Proxy, 14)
-end 
+for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do
+	Lib:RegisterElement("Name", Enable, Disable, Proxy, 16)
+end

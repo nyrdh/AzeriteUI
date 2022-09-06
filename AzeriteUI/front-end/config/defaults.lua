@@ -3,8 +3,10 @@ local ADDON, Private = ...
 local LibDB = Wheel("LibDB")
 assert(LibDB, ADDON.." requires LibDB to be loaded.")
 
+local IsAnyClassic = Private.IsAnyClassic
 local IsClassic = Private.IsClassic
 local IsTBC = Private.IsTBC
+local IsWrath = Private.IsWrath
 local IsRetail = Private.IsRetail
 
 ------------------------------------------------
@@ -12,10 +14,10 @@ local IsRetail = Private.IsRetail
 ------------------------------------------------
 -- The purpose of this is to supply all the front-end modules
 -- with default settings for all the user configurable choices.
--- 
+--
 -- Note that changing these won't change anything for existing characters,
 -- they only affect new characters or the first install.
--- I generally advice tinkerers to leave these as they are. 
+-- I generally advice tinkerers to leave these as they are.
 local RegisterDefaults = Private.RegisterDefaults
 
 -- Addon Core Settings.
@@ -23,7 +25,7 @@ RegisterDefaults(ADDON, {
 	-- Limits the width of the UI
 	aspectRatio = "wide", -- wide/ultrawide/full
 
-	-- Sets the aura filter level 
+	-- Sets the aura filter level
 	--auraFilter = "strict", -- strict/slack
 	auraFilterLevel = 2, -- 0 = strict, 1 = slack, 2 = spam
 
@@ -33,12 +35,12 @@ RegisterDefaults(ADDON, {
 	-- Enables a layout switch targeted towards healers
 	enableHealerMode = false,
 
-	-- Loads all child modules with debug functionality, 
-	-- doesn't actually load any consoles. 
-	loadDebugConsole = true, 
+	-- Loads all child modules with debug functionality,
+	-- doesn't actually load any consoles.
+	loadDebugConsole = true,
 
-	-- Enable console visibility. 
-	-- Requires the above to be true. 
+	-- Enable console visibility.
+	-- Requires the above to be true.
 	enableDebugConsole = false
 })
 
@@ -46,11 +48,11 @@ RegisterDefaults("BlizzardChatFrames", {
 	enableChatOutline = true -- enable outlined chat for readability
 })
 
-RegisterDefaults("BlizzardFloaterHUD", (IsClassic or IsTBC) and {
+RegisterDefaults("BlizzardFloaterHUD", (IsAnyClassic) and {
 	enableRaidWarnings = true -- not yet implemented!
 
 } or (IsRetail) and {
-	enableAlerts = false, -- achievements and currency. spams like crazy. can we filter it? I did in legion. MUST LOOK UP! 
+	enableAlerts = false, -- achievements and currency. spams like crazy. can we filter it? I did in legion. MUST LOOK UP!
 	enableAnnouncements = false, -- level up, loot, the various types of "banners"
 	enableObjectivesTracker = true, -- the blizzard monstrosity
 	enableRaidBossEmotes = true, -- partly needed for instance encounters, and some wqs like snapdragon flying
@@ -80,10 +82,10 @@ RegisterDefaults("Minimap", {
 
 RegisterDefaults("NamePlates", {
 	enableAuras = true,
-	clickThroughEnemies = false, 
-	clickThroughFriends = false, 
+	clickThroughEnemies = false,
+	clickThroughFriends = false,
 	clickThroughSelf = false,
-	nameplateShowSelf = false, 
+	nameplateShowSelf = false,
 	NameplatePersonalShowAlways = false,
 	NameplatePersonalShowInCombat = true,
 	NameplatePersonalShowWithTarget = true
@@ -124,7 +126,7 @@ RegisterDefaults("ModuleForge::ActionBars", {
 	["keybindDisplayPriority"] = "default", -- can be 'gamepad', 'keyboard', 'default'
 	["lastKeybindDisplayType"] = "keyboard", -- not a user setting, just to save the state.
 	["gamePadType"] = "default", -- gamepad icons used. 'xbox', 'xbox-reversed', 'playstation', 'default'
-	
+
 	-- Legacy specific settings
 	["Legacy::enableSecondaryBar"] = false, -- bottom left multibar
 	["Legacy::enableSideBarRight"] = false, -- right (first) side bar

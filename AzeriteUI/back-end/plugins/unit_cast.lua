@@ -38,8 +38,10 @@ local L_MILLISECONDS_ABBR = MILLISECONDS_ABBR
 local DAY, HOUR, MINUTE = 86400, 3600, 60
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 local playerGUID = UnitGUID("player")
@@ -91,7 +93,7 @@ local formatTime = function(time)
 		return ("%.1f"):format(time)
 	else
 		return ""
-	end	
+	end
 end
 
 
@@ -105,44 +107,44 @@ local clear = function(element)
 	element.total = nil
 	element.name = nil
 	element.text = nil
-	if (element.Name) then 
+	if (element.Name) then
 		element.Name:SetText("")
 	end
-	if (element.Value) then 
+	if (element.Value) then
 		element.Value:SetText("")
 	end
-	if (element.Failed) then 
+	if (element.Failed) then
 		element.Failed:SetText("")
 	end
-	if (element.SpellQueue) then 
+	if (element.SpellQueue) then
 		element.SpellQueue:SetValue(0, true)
 	end
 	element:SetValue(0, true)
 end
 
 local updateSpellQueueOrientation = function(element)
-	if (element.channeling) then 
+	if (element.channeling) then
 		local orientation = element:GetOrientation()
-		if (orientation ~= element.SpellQueue:GetOrientation()) then 
+		if (orientation ~= element.SpellQueue:GetOrientation()) then
 			element.SpellQueue:SetOrientation(orientation)
-		end 
-	else 
+		end
+	else
 		local orientation
 		local barDirection = element:GetOrientation()
 		if (barDirection == "LEFT") then
-			orientation = "RIGHT" 
-		elseif (barDirection == "RIGHT") then 
-			orientation = "LEFT" 
-		elseif (barDirection == "UP") then 
-			orientation = "DOWN" 
-		elseif (barDirection == "DOWN") then 
-			orientation = "UP" 
+			orientation = "RIGHT"
+		elseif (barDirection == "RIGHT") then
+			orientation = "LEFT"
+		elseif (barDirection == "UP") then
+			orientation = "DOWN"
+		elseif (barDirection == "DOWN") then
+			orientation = "UP"
 		end
 		local spellQueueDirection = element.SpellQueue:GetOrientation()
-		if (spellQueueDirection ~= orientation) then 
+		if (spellQueueDirection ~= orientation) then
 			element.SpellQueue:SetOrientation(orientation)
 		end
-	end 
+	end
 end
 
 local updateSpellQueueValue = function(element)
@@ -165,12 +167,12 @@ local updateSpellQueueDisplay = function(element)
 			value = max
 		end
 
-		-- Hide the overlay if it'd take up less than 5% of your bar, 
-		-- or if the total length of the window is shorter than 100ms. 
-		local ratio = value / max 
-		if (ratio < .05) or (ms < 100) then 
+		-- Hide the overlay if it'd take up less than 5% of your bar,
+		-- or if the total length of the window is shorter than 100ms.
+		local ratio = value / max
+		if (ratio < .05) or (ms < 100) then
 			value = 0
-		end 
+		end
 
 	else
 		max = 1
@@ -191,32 +193,32 @@ local UpdateColor = function(element, unit)
 	if (element.colorClass and UnitIsPlayer(unit)) then
 		local _, class = UnitClass(unit)
 		color = class and self.colors.class[class]
-	elseif (element.colorPetAsPlayer and UnitIsUnit(unit, "pet")) then 
+	elseif (element.colorPetAsPlayer and UnitIsUnit(unit, "pet")) then
 		local _, class = UnitClass("player")
 		color = class and self.colors.class[class]
 	elseif (element.colorReaction and UnitReaction(unit, "player")) then
 		color = self.colors.reaction[UnitReaction(unit, "player")]
 	end
-	if color then 
+	if color then
 		r, g, b = color[1], color[2], color[3]
-	end 
-	if (r) then 
+	end
+	if (r) then
 		element:SetStatusBarColor(r, g, b)
-	end 
-	if element.PostUpdateColor then 
+	end
+	if element.PostUpdateColor then
 		element:PostUpdateColor(unit)
-	end 
+	end
 end
 
 local OnUpdate = function(element, elapsed)
 	local self = element._owner
 	local unit = self.unit
-	if (not unit) or (not UnitExists(unit)) or (UnitIsDeadOrGhost(unit)) then 
+	if (not unit) or (not UnitExists(unit)) or (UnitIsDeadOrGhost(unit)) then
 		clear(element)
 		element:Hide()
 		element.max = 0
 		element.delay = 0
-		if (element.PostUpdate) then 
+		if (element.PostUpdate) then
 			return element:PostUpdate(unit)
 		end
 		return
@@ -225,11 +227,11 @@ local OnUpdate = function(element, elapsed)
 	if (element.casting or element.tradeskill) then
 		local duration = element.duration + elapsed
 		if (duration >= element.max) then
-			clear(element) 
+			clear(element)
 			element:Hide()
 			element.max = 0
 			element.delay = 0
-			if (element.PostUpdate) then 
+			if (element.PostUpdate) then
 				return element:PostUpdate(unit)
 			end
 			return
@@ -243,12 +245,12 @@ local OnUpdate = function(element, elapsed)
 				element.Value:SetText(formatTime(element.max - duration))
 			end
 		end
-		if (element.SpellQueue) and (not element.disableSpellQueue) then 
+		if (element.SpellQueue) and (not element.disableSpellQueue) then
 			updateSpellQueueDisplay(element)
-		end 
+		end
 		element.duration = duration
 		element:SetValue(duration)
-		if (element.PostUpdate) then 
+		if (element.PostUpdate) then
 			element:PostUpdate(unit)
 		end
 
@@ -259,7 +261,7 @@ local OnUpdate = function(element, elapsed)
 			element:Hide()
 			element.max = 0
 			element.delay = 0
-			if (element.PostUpdate) then 
+			if (element.PostUpdate) then
 				return element:PostUpdate(unit)
 			end
 			return
@@ -273,22 +275,22 @@ local OnUpdate = function(element, elapsed)
 				element.Value:SetText(formatTime(duration))
 			end
 		end
-		if (element.SpellQueue) and (not element.disableSpellQueue) then 
+		if (element.SpellQueue) and (not element.disableSpellQueue) then
 			updateSpellQueueDisplay(element)
-		end 
+		end
 		element.duration = duration
 		element:SetValue(duration)
-		if (element.PostUpdate) then 
+		if (element.PostUpdate) then
 			element:PostUpdate(unit)
 		end
-		
-	elseif (element.failedMessageTimer) then 
+
+	elseif (element.failedMessageTimer) then
 		element.failedMessageTimer = element.failedMessageTimer - elapsed
-		if (element.failedMessageTimer > 0) then 
-			return 
-		end 
+		if (element.failedMessageTimer > 0) then
+			return
+		end
 		element.failedMessageTimer = nil
-		if (element.Failed) then 
+		if (element.Failed) then
 			element.Failed:SetText("")
 		end
 	else
@@ -301,22 +303,22 @@ local OnUpdate = function(element, elapsed)
 		end
 		return
 	end
-end 
+end
 
 Update = function(self, event, unit, ...)
 	-- This just messes with our system here.
-	if (event == "FrequentUpdate") then 
+	if (event == "FrequentUpdate") then
 		return
 	end
 
 	-- Our custom events only return unitGUID, not unit
 	local unitGUID = UnitGUID(self.unit)
-	if (unit == unitGUID) then 
+	if (unit == unitGUID) then
 		unit = self.unit
 	end
-	if (not unit) or (unit ~= self.unit) then 
-		return 
-	end 
+	if (not unit) or (unit ~= self.unit) then
+		return
+	end
 
 	local element = self.Cast
 	if (element.PreUpdate) then
@@ -341,24 +343,24 @@ Update = function(self, event, unit, ...)
 			element.starttime = nil
 			element.failedMessageTimer = nil
 			element:SetMinMaxValues(0, element.total or element.max, true)
-			element:SetValue(element.duration, true) 
+			element:SetValue(element.duration, true)
 			element:UpdateColor(unit)
 
 			if (element.Failed) then element.Failed:SetText("") end
 			if (element.Name) then element.Name:SetText(utf8sub(text, element.maxNameChars or 32, true)) end
 			if (element.Icon) then element.Icon:SetTexture(texture) end
 			if (element.Value) then element.Value:SetText("") end
-			if (element.Shield) then 
+			if (element.Shield) then
 				if (element.notInterruptible) and (not UnitIsUnit(unit ,"player")) then
 					element.Shield:Show()
 				else
 					element.Shield:Hide()
 				end
 			end
-			if (element.SpellQueue) and (not element.disableSpellQueue) then 
+			if (element.SpellQueue) and (not element.disableSpellQueue) then
 				updateSpellQueueOrientation(element)
 				updateSpellQueueDisplay(element)
-			end 
+			end
 			element:Show()
 			element:SetScript("OnUpdate", OnUpdate)
 		else
@@ -366,45 +368,45 @@ Update = function(self, event, unit, ...)
 			element:SetValue(0, true)
 			element:SetScript("OnUpdate", nil)
 		end
-		
+
 	elseif (event == "GP_SPELL_CAST_FAILED") then
 
 		local timeLeft
 		if (element.timeToHold) then
 			timeLeft = GetTime() - (element.starttime or 0) -- should be there
 		end
-		
+
 		clear(element)
 
-		if (element.Shield) then 
-			element.Shield:Hide() 
-		end 
+		if (element.Shield) then
+			element.Shield:Hide()
+		end
 
 		if (element.timeToHold) then
 			local spellQueueWindow = updateSpellQueueValue(element) / 1e3 -- get value in seconds
 			if (timeLeft >= spellQueueWindow) then
 				element.failedMessageTimer = element.timeToHold
 				local msg = element.Failed or element.Value or element.Name
-				if (msg) then 
-					msg:SetText(utf8sub(L_FAILED, element.maxNameChars or 32, true)) 
-				end 
+				if (msg) then
+					msg:SetText(utf8sub(L_FAILED, element.maxNameChars or 32, true))
+				end
 			else
 				element.failedMessageTimer = nil
 				local msg = element.Failed or element.Value or element.Name
-				if (msg) then 
-					msg:SetText("") 
-				end 
+				if (msg) then
+					msg:SetText("")
+				end
 			end
 
 		else
 			element:Hide()
 			element:SetScript("OnUpdate", nil)
 			local msg = element.Failed or element.Value or element.Name
-			if (msg) then 
-				msg:SetText("") 
-			end 
+			if (msg) then
+				msg:SetText("")
+			end
 		end
-		
+
 	elseif (event == "GP_SPELL_CAST_SUCCESS") or (event == "GP_SPELL_CAST_STOP") or (event == "GP_SPELL_CAST_CHANNEL_STOP") then
 
 		clear(element)
@@ -414,13 +416,13 @@ Update = function(self, event, unit, ...)
 
 		-- Clear leftovers from earlier casts
 		local msg = element.Failed or element.Value or element.Name
-		if (msg) then 
-			msg:SetText("") 
-		end 
-		if (element.Shield) then 
-			element.Shield:Hide() 
-		end 
-		
+		if (msg) then
+			msg:SetText("")
+		end
+		if (element.Shield) then
+			element.Shield:Hide()
+		end
+
 	elseif (event == "GP_SPELL_CAST_INTERRUPTED") then
 
 		local timeLeft
@@ -430,9 +432,9 @@ Update = function(self, event, unit, ...)
 
 		clear(element)
 
-		if (element.Shield) then 
-			element.Shield:Hide() 
-		end 
+		if (element.Shield) then
+			element.Shield:Hide()
+		end
 
 		if (element.timeToHold) then
 
@@ -440,32 +442,32 @@ Update = function(self, event, unit, ...)
 			if (timeLeft >= spellQueueWindow) then
 				element.failedMessageTimer = element.timeToHold
 				local msg = element.Failed or element.Value or element.Name
-				if (msg) then 
-					msg:SetText(utf8sub(L_INTERRUPTED, element.maxNameChars or 32, true)) 
-				end 
+				if (msg) then
+					msg:SetText(utf8sub(L_INTERRUPTED, element.maxNameChars or 32, true))
+				end
 			else
 				element.failedMessageTimer = nil
 				local msg = element.Failed or element.Value or element.Name
-				if (msg) then 
-					msg:SetText("") 
-				end 
+				if (msg) then
+					msg:SetText("")
+				end
 			end
 
 		else
 			element:Hide()
 			element:SetScript("OnUpdate", nil)
 			local msg = element.Failed or element.Value or element.Name
-			if (msg) then 
-				msg:SetText("") 
-			end 
-			if (element.Shield) then 
-				element.Shield:Hide() 
-			end 
-		end 
+			if (msg) then
+				msg:SetText("")
+			end
+			if (element.Shield) then
+				element.Shield:Hide()
+			end
+		end
 
-	elseif (event == "GP_SPELL_CAST_INTERRUPTIBLE") then 
+	elseif (event == "GP_SPELL_CAST_INTERRUPTIBLE") then
 		element.notInterruptible = nil
-		if (element.Shield) then 
+		if (element.Shield) then
 			if (unitGUID ~= playerGUID) then
 				element.Shield:Show()
 			else
@@ -473,9 +475,9 @@ Update = function(self, event, unit, ...)
 			end
 		end
 
-	elseif (event == "GP_SPELL_CAST_NOT_INTERRUPTIBLE") then 
+	elseif (event == "GP_SPELL_CAST_NOT_INTERRUPTIBLE") then
 		element.notInterruptible = true
-		if (element.Shield) then 
+		if (element.Shield) then
 			if (unitGUID ~= playerGUID) then
 				element.Shield:Show()
 			else
@@ -485,20 +487,20 @@ Update = function(self, event, unit, ...)
 
 	elseif (event == "GP_SPELL_CAST_DELAYED") then
 		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = LibCast:UnitCastingInfo(unit)
-		if (not startTime) or (not element.duration) then 
-			return 
+		if (not startTime) or (not element.duration) then
+			return
 		end
-		
+
 		local duration = GetTime() - startTime
-		if (duration < 0) then 
-			duration = 0 
+		if (duration < 0) then
+			duration = 0
 		end
 
 		element.delay = (element.delay or 0) + element.duration - duration
 		element.duration = duration
 		element:SetValue(duration)
-		
-	elseif (event == "GP_SPELL_CAST_CHANNEL_START") then	
+
+	elseif (event == "GP_SPELL_CAST_CHANNEL_START") then
 		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = LibCast:UnitChannelInfo(unit)
 		if (name) then
 			local max = endTime - startTime
@@ -522,34 +524,34 @@ Update = function(self, event, unit, ...)
 			if (element.Name) then element.Name:SetText(utf8sub(name, element.maxNameChars or 32, true)) end
 			if (element.Icon) then element.Icon:SetTexture(texture) end
 			if (element.Value) then element.Value:SetText("") end
-			if (element.Shield) then 
+			if (element.Shield) then
 				if (element.notInterruptible) and (not UnitIsUnit(unit ,"player")) then
 					element.Shield:Show()
 				else
 					element.Shield:Hide()
 				end
 			end
-			if (element.SpellQueue) and (not element.disableSpellQueue) then 
+			if (element.SpellQueue) and (not element.disableSpellQueue) then
 				updateSpellQueueOrientation(element)
 				updateSpellQueueDisplay(element)
-			end 
+			end
 			element:Show()
 			element:SetScript("OnUpdate", OnUpdate)
-			
+
 		else
 			element:Hide()
 			element:SetValue(0, true)
 			element:SetScript("OnUpdate", nil)
 			local msg = element.Failed or element.Value or element.Name
-			if (msg) then 
-				msg:SetText("") 
-			end 
+			if (msg) then
+				msg:SetText("")
+			end
 		end
-		
+
 	elseif (event == "GP_SPELL_CAST_CHANNEL_UPDATE") then
 		local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID = LibCast:UnitChannelInfo(unit)
-		if (not name) or (not element.duration) then 
-			return 
+		if (not name) or (not element.duration) then
+			return
 		end
 
 		local duration = endTime - GetTime()
@@ -557,13 +559,13 @@ Update = function(self, event, unit, ...)
 		element.duration = duration
 		element.max = endTime - startTime
 
-		if (element.SpellQueue) and (not element.disableSpellQueue) then 
+		if (element.SpellQueue) and (not element.disableSpellQueue) then
 			updateSpellQueueDisplay(element)
-		end 
-	
+		end
+
 		element:SetMinMaxValues(0, element.max)
 		element:SetValue(duration)
-	
+
 	elseif (event == "Forced") or (event == "PLAYER_TARGET_CHANGED") then
 
 		if (LibCast:UnitCastingInfo(unit)) then
@@ -572,7 +574,7 @@ Update = function(self, event, unit, ...)
 			return Update(self, "GP_SPELL_CAST_CHANNEL_START", unitGUID)
 		end
 
-		if (event == "PLAYER_TARGET_CHANGED") or not(element.casting or element.channeling or element.tradeskill or element.failedMessageTimer) then 
+		if (event == "PLAYER_TARGET_CHANGED") or not(element.casting or element.channeling or element.tradeskill or element.failedMessageTimer) then
 			clear(element)
 			element:Hide()
 			element:SetScript("OnUpdate", nil)
@@ -580,19 +582,19 @@ Update = function(self, event, unit, ...)
 			element.delay = 0
 			element.failedMessageTimer = nil
 			local msg = element.Failed or element.Value or element.Name
-			if (msg) then 
-				msg:SetText("") 
-			end 
-		end 
+			if (msg) then
+				msg:SetText("")
+			end
+		end
 	end
-	if (element.PostUpdate) then 
+	if (element.PostUpdate) then
 		return element:PostUpdate(unit)
-	end 
-end 
+	end
+end
 
 local Proxy = function(self, ...)
 	return (self.Cast.Override or Update)(self, ...)
-end 
+end
 
 local ForceUpdate = function(element)
 	return Proxy(element._owner, "Forced", element._owner.unit)
@@ -636,7 +638,7 @@ local Enable = function(self)
 
 		return true
 	end
-end 
+end
 
 local Disable = function(self)
 	local element = self.Cast
@@ -660,9 +662,9 @@ local Disable = function(self)
 		element.max = 0
 		element.delay = 0
 	end
-end 
+end
 
 -- Register it with compatible libraries
-for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 54)
-end 
+for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 55)
+end

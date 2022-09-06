@@ -234,9 +234,14 @@ Private.GetMedia = function(name, type) return ([[Interface\AddOns\%s\front-end\
 -- Private Constants
 ------------------------------------------------
 Private.ClientBuild = LibClientBuild:GetCurrentClientBuild()
+Private.IsAnyClassic = LibClientBuild:IsAnyClassic()
 Private.IsClassic = LibClientBuild:IsClassic()
 Private.IsTBC = LibClientBuild:IsTBC()
+Private.IsBCC = LibClientBuild:IsTBC()
 Private.IsRetail = LibClientBuild:IsRetail()
+Private.IsDragonflight = LibClientBuild:IsDragonflight()
+Private.IsWrath = LibClientBuild:IsWotLK()
+Private.IsWotLK = LibClientBuild:IsWotLK()
 Private.IsWinterVeil = LibTime:IsWinterVeil()
 Private.IsLoveFestival = LibTime:IsLoveFestival()
 

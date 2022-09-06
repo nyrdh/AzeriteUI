@@ -19,8 +19,10 @@ local InCombatLockdown = InCombatLockdown
 local GetConfig = Private.GetConfig
 local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
+local IsAnyClassic = Private.IsAnyClassic
 local IsClassic = Private.IsClassic
 local IsTBC = Private.IsTBC
+local IsWrath = Private.IsWrath
 local IsRetail = Private.IsRetail
 
 -- Local caches
@@ -635,6 +637,11 @@ Module.OnEnable = function(self)
 		self:HandleQuestTimerFrame()
 	end
 	if (IsRetail) then
+		-- Not here in Wrath, or at least not by this name.
+		-- Must look into this!
+		self:HandleVehicleSeatIndicator()
+	end
+	if (IsRetail) then
 		if (IsAddOnLoaded("Blizzard_ArchaeologyUI")) then
 			self:HandleArcheologyDigsiteProgressBar()
 		else
@@ -648,7 +655,6 @@ Module.OnEnable = function(self)
 			self:RegisterEvent("ADDON_LOADED", fix)
 		end
 		self:HandleBelowMinimapWidgets()
-		self:HandleVehicleSeatIndicator()
 		self:UpdateAlertFrames()
 		self:UpdateAnnouncements()
 		self:UpdateTalkingHead()

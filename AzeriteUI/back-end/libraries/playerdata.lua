@@ -1,4 +1,4 @@
-local LibPlayerData = Wheel:Set("LibPlayerData", 24)
+local LibPlayerData = Wheel:Set("LibPlayerData", 26)
 if (not LibPlayerData) then
 	return
 end
@@ -39,22 +39,24 @@ local IsXPUserDisabled = IsXPUserDisabled
 local UnitLevel = UnitLevel
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Library registries
----------------------------------------------------------------------	
+---------------------------------------------------------------------
 LibPlayerData.embeds = LibPlayerData.embeds or {}
 
 -- Utility Functions
----------------------------------------------------------------------	
--- Syntax check 
+---------------------------------------------------------------------
+-- Syntax check
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if type(value) == select(i, ...) then 
-			return 
+		if type(value) == select(i, ...) then
+			return
 		end
 	end
 	local types = string_join(", ", ...)
@@ -69,7 +71,7 @@ if (IsClassic) then
 
 	-- Returns whether the player is  tracking a reputation
 	LibPlayerData.PlayerHasRep = function()
-		return GetWatchedFactionInfo() and true or false 
+		return GetWatchedFactionInfo() and true or false
 	end
 
 	-- Just in case I slip up and use the wrong API.
@@ -80,24 +82,37 @@ elseif (IsTBC) then
 	-- Return whether the player currently can gain XP
 	LibPlayerData.PlayerHasXP = function() return (UnitLevel("player") < 70) end
 
-	-- Returns whether the player is  tracking a reputation
+	-- Returns whether the player is tracking a reputation
 	LibPlayerData.PlayerHasRep = function()
-		return GetWatchedFactionInfo() and true or false 
+		return GetWatchedFactionInfo() and true or false
 	end
 
 	-- Just in case I slip up and use the wrong API.
 	LibPlayerData.PlayerHasAP = function() end
-	
+
+elseif (IsWrath) then
+
+	-- Return whether the player currently can gain XP
+	LibPlayerData.PlayerHasXP = function() return (UnitLevel("player") < 80) end
+
+	-- Returns whether the player is tracking a reputation
+	LibPlayerData.PlayerHasRep = function()
+		return GetWatchedFactionInfo() and true or false
+	end
+
+	-- Just in case I slip up and use the wrong API.
+	LibPlayerData.PlayerHasAP = function() end
+
 elseif (IsRetail) then
 
 	-- Return whether the player currently can gain XP
 	LibPlayerData.PlayerHasXP = function()
-		if (not IsXPUserDisabled()) then 
-			if (GetAccountExpansionLevel() == GetMaximumExpansionLevel()) then 
+		if (not IsXPUserDisabled()) then
+			if (GetAccountExpansionLevel() == GetMaximumExpansionLevel()) then
 				return (UnitLevel("player") < GetMaxLevelForLatestExpansion())
 			else
 				return (UnitLevel("player") < GetMaxLevelForPlayerExpansion())
-			end 
+			end
 		end
 		return false
 	end
@@ -114,23 +129,23 @@ elseif (IsRetail) then
 		return azeriteItem and azeriteItem:IsEquipmentSlot() and IsAzeriteItemEnabled(azeriteItem)
 	end
 
-	-- Returns whether the player is  tracking a reputation
+	-- Returns whether the player is tracking a reputation
 	LibPlayerData.PlayerHasRep = function()
 		local name, reaction, min, max, current, factionID = GetWatchedFactionInfo()
-		if name then 
+		if name then
 			local numFactions = GetNumFactions()
 			for i = 1, numFactions do
 				local factionName, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(i)
 				local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID)
 				if (factionName == name) then
-					if (standingID) then 
+					if (standingID) then
 						return true
-					else 
+					else
 						return false
-					end 
+					end
 				end
 			end
-		end 
+		end
 	end
 
 end

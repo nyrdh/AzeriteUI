@@ -1,4 +1,4 @@
-local LibClientBuild = Wheel:Set("LibClientBuild", 48)
+local LibClientBuild = Wheel:Set("LibClientBuild", 50)
 if (not LibClientBuild) then
 	return
 end
@@ -65,10 +65,17 @@ end
 LibClientBuild.IsTBC = function(self)
 	return IsTBC
 end
+LibClientBuild.IsBCC = LibClientBuild.IsTBC
 
 -- Returns true if we're on a classic WotLK patch
 LibClientBuild.IsWotLK = function(self)
 	return IsWotLK
+end
+LibClientBuild.IsWrath = LibClientBuild.IsWotLK
+
+-- Returns true if we're on any classic patch
+LibClientBuild.IsAnyClassic = function(self)
+	return IsClassic or IsTBC or IsWotLK
 end
 
 -- Returns true if we're on a retail patch
@@ -90,6 +97,7 @@ end
 LibClientBuild.IsRetailDragonflight = function(self)
 	return IsRetailDragonflight
 end
+LibClientBuild.IsDragonflight = LibClientBuild.IsRetailDragonflight
 
 -- Return the build number for a given patch.
 -- Return current build if the given patch is the current. EXPERIMENTAL!
@@ -127,13 +135,14 @@ end
 
 -- Module embedding
 local embedMethods = {
+	IsAnyClassic = true, 
 	IsClassic = true,
-	IsTBC = true,
-	IsWotLK = true,
+	IsTBC = true, IsBCC = true,
+	IsWotLK = true, IsWrath = true,
 	IsRetail = true,
 	IsRetailBFA = true,
 	IsRetailShadowlands = true,
-	IsRetailDragonflight = true,
+	IsRetailDragonflight = true, IsDragonflight = true,
 	GetClientBuildByPatch = true,
 	GetCurrentClientBuild = true,
 	GetCurrentClientPatch = true,

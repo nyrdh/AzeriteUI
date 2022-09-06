@@ -53,8 +53,10 @@ local GetFont = Private.GetFont
 local GetLayout = Private.GetLayout
 local GetLayoutID = Private.GetLayoutID
 local GetMedia = Private.GetMedia
+local IsAnyClassic = Private.IsAnyClassic
 local IsClassic = Private.IsClassic
 local IsTBC = Private.IsTBC
+local IsWrath = Private.IsWrath
 local IsRetail = Private.IsRetail
 local IsWinterVeil = Private.IsWinterVeil
 local IsLoveFestival = Private.IsLoveFestival
@@ -78,10 +80,10 @@ local UnitFrameTarget = Core:NewModule("UnitFrameTarget", "LibMessage", "LibEven
 -- Secondary Units
 local UnitFramePet = Core:NewModule("UnitFramePet", "LibUnitFrame", "LibFrame", "LibForge")
 local UnitFrameToT = Core:NewModule("UnitFrameToT", "LibUnitFrame", "LibForge")
-local UnitFrameFocus = (IsRetail or IsTBC) and Core:NewModule("UnitFrameFocus", "LibMessage", "LibUnitFrame", "LibForge")
+local UnitFrameFocus = (IsRetail or IsTBC or IsWrath) and Core:NewModule("UnitFrameFocus", "LibMessage", "LibUnitFrame", "LibForge")
 
 -- Grouped Units
-local UnitFrameArena = (IsRetail or IsTBC) and Core:NewModule("UnitFrameArena", "LibDB", "LibMessage", "LibUnitFrame", "LibFrame", "LibForge")
+local UnitFrameArena = (IsRetail or IsTBC or IsWrath) and Core:NewModule("UnitFrameArena", "LibDB", "LibMessage", "LibUnitFrame", "LibFrame", "LibForge")
 local UnitFrameBoss = Core:NewModule("UnitFrameBoss", "LibUnitFrame", "LibMessage", "LibForge")
 local UnitFrameParty = Core:NewModule("UnitFrameParty", "LibDB", "LibMessage", "LibFrame", "LibUnitFrame", "LibForge")
 local UnitFrameRaid = Core:NewModule("UnitFrameRaid", "LibDB", "LibFrame", "LibUnitFrame", "LibBlizzard", "LibForge")
@@ -1754,7 +1756,7 @@ UnitStyles.StylePlayerHUDFrame = function(self, unit, id, layout, ...)
 	classPower.runeSortOrder = layout.ClassPowerRuneSortOrder
 
 	-- We show all 6 runes in retail, but stick to 5 otherwise.
-	local numPoints = (IsRetail) and 6 or (IsClassic or IsTBC) and 5
+	local numPoints = (IsRetail or IsWrath) and 6 or 5
 	for i = 1,numPoints do
 
 		-- Main point object

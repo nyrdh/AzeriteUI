@@ -1,4 +1,4 @@
-local Version = 67
+local Version = 69
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -64,6 +64,7 @@ local WorldFrame = WorldFrame
 -- Constants for client version
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Localized Torghast instance name
@@ -105,7 +106,7 @@ do
 	LibMinimap.baggedButtonsIgnored["MinimapButtonFrame"] = true
 	LibMinimap.baggedButtonsIgnored["MiniMapBattlefieldFrame"] = true
 	--LibMinimap.baggedButtonsIgnored["QueueStatusMinimapButton"] = true
-	
+
 	LibMinimap.baggedButtonsIgnored["BookOfTracksFrame"] = true
 	LibMinimap.baggedButtonsIgnored["CartographerNotesPOI"] = true
 	LibMinimap.baggedButtonsIgnored["DA_Minimap"] = true
@@ -160,8 +161,8 @@ local noop = function() end
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if type(value) == select(i, ...) then 
-			return 
+		if type(value) == select(i, ...) then
+			return
 		end
 	end
 	local types = string_join(", ", ...)
@@ -244,7 +245,7 @@ ElementHandler.RegisterEvent = function(proxy, event, func)
 	if (not Callbacks[proxy][event]) then
 		Callbacks[proxy][event] = {}
 	end
-	
+
 	local events = Callbacks[proxy][event]
 	if (#events > 0) then
 		for i = #events, 1, -1 do
@@ -268,7 +269,7 @@ ElementHandler.RegisterMessage = function(proxy, event, func)
 	if (not Callbacks[proxy][event]) then
 		Callbacks[proxy][event] = {}
 	end
-	
+
 	local events = Callbacks[proxy][event]
 	if (#events > 0) then
 		for i = #events, 1, -1 do
@@ -408,7 +409,7 @@ end
 -- cause a SetPoint family anchor bullshit bug.
 -----------------------------------------------------------
 LibMinimap.HandleObjectivesTracker = function(self, event, addon)
-	if (event == "ADDON_LOADED") then 
+	if (event == "ADDON_LOADED") then
 		if (addon == "Blizzard_ObjectiveTracker") then
 			LibMinimap:UnregisterEvent("ADDON_LOADED", "HandleObjectivesTracker")
 		else
@@ -442,7 +443,7 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 			return false
 		end
 
-		-- If this flag isn't set or the map hasn't been initialized, 
+		-- If this flag isn't set or the map hasn't been initialized,
 		-- all of the below will always be redone.
 		if (onlyQuery) then
 			return true
@@ -503,7 +504,7 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 	Library.MapOverlay:SetAllPoints() -- This will by default fill the entire master frame
 	Library.MapOverlay:SetFrameStrata("LOW") -- MEDIUM collides with Immersion
 	Library.MapOverlay:SetFrameLevel(50)
-	
+
 
 	-- Configure Blizzard Elements
 	-----------------------------------------------------------
@@ -532,7 +533,7 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 	-- that it's still in its default position, and the end result will be.... bad.
 	-- The cluster is the parent to everything.
 	-- This prevents the default zone text from being updated,
-	-- as well as disables its tooltip. 
+	-- as well as disables its tooltip.
 	Library.OldCluster:SetParent(UIParent)
 	Library.OldCluster:UnregisterAllEvents()
 	Library.OldCluster:SetScript("OnEvent", noop)
@@ -580,7 +581,7 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 		SetSize = true,
 		SetScale = true
 	}) do
-		Library.OldMinimap[methodName] = noop	
+		Library.OldMinimap[methodName] = noop
 	end
 
 	-- Proxy methods on the actual minimap
@@ -631,9 +632,9 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 		end
 		Library.MapHolder[methodName] = method
 		Library.MapContent[methodName] = method
-	end 	
+	end
 
-	-- Should I move this to its own API call?	
+	-- Should I move this to its own API call?
 	Library.MapContent:EnableMouseWheel(true)
 
 	Library.MapContent:SetScript("OnMouseWheel", function(self, delta)
@@ -649,21 +650,21 @@ LibMinimap.SyncMinimap = function(self, onlyQuery)
 			LibMinimap:ShowMinimapTrackingMenu()
 		else
 			local effectiveScale = self:GetEffectiveScale()
-	
+
 			local x, y = GetCursorPosition()
 			x = x / effectiveScale
 			y = y / effectiveScale
-	
+
 			local cx, cy = self:GetCenter()
 			x = x - cx
 			y = y - cy
-	
+
 			if (math_sqrt(x * x + y * y) < (self:GetWidth() / 2)) then
 				self:PingLocation(x, y)
 			end
 		end
 	end)
-	
+
 	-- Configure Custom Elements
 	-----------------------------------------------------------
 	-- Register our Minimap as a keyword with the Engine,
@@ -772,10 +773,10 @@ if (IsRetail) then
 		self:SyncMinimap(true)
 
 		Library.OldMinimap:SetQuestBlobInsideAlpha(blobInside) -- "blue" areas with quest mobs/items in them
-		Library.OldMinimap:SetQuestBlobOutsideAlpha(blobOutside) -- borders around the "blue" areas 
+		Library.OldMinimap:SetQuestBlobOutsideAlpha(blobOutside) -- borders around the "blue" areas
 		Library.OldMinimap:SetQuestBlobRingAlpha(ringOutside) -- the big fugly edge ring texture!
 		Library.OldMinimap:SetQuestBlobRingScalar(ringInside) -- ring texture inside quest areas?
-	end 
+	end
 
 	LibMinimap.SetMinimapArchBlobAlpha = function(self, blobInside, blobOutside, ringOutside, ringInside)
 		check(blobInside, 1, "number")
@@ -786,10 +787,10 @@ if (IsRetail) then
 		self:SyncMinimap(true)
 
 		Library.OldMinimap:SetArchBlobInsideAlpha(blobInside) -- "blue" areas with quest mobs/items in them
-		Library.OldMinimap:SetArchBlobOutsideAlpha(blobOutside) -- borders around the "blue" areas 
+		Library.OldMinimap:SetArchBlobOutsideAlpha(blobOutside) -- borders around the "blue" areas
 		Library.OldMinimap:SetArchBlobRingAlpha(ringOutside) -- the big fugly edge ring texture!
 		Library.OldMinimap:SetArchBlobRingScalar(ringInside) -- ring texture inside quest areas?
-	end 
+	end
 
 	LibMinimap.SetMinimapTaskBlobAlpha = function(self, blobInside, blobOutside, ringOutside, ringInside)
 		check(blobInside, 1, "number")
@@ -800,10 +801,10 @@ if (IsRetail) then
 		self:SyncMinimap(true)
 
 		Library.OldMinimap:SetTaskBlobInsideAlpha(blobInside) -- "blue" areas with quest mobs/items in them
-		Library.OldMinimap:SetTaskBlobOutsideAlpha(blobOutside) -- borders around the "blue" areas 
+		Library.OldMinimap:SetTaskBlobOutsideAlpha(blobOutside) -- borders around the "blue" areas
 		Library.OldMinimap:SetTaskBlobRingAlpha(ringOutside) -- the big fugly edge ring texture!
 		Library.OldMinimap:SetTaskBlobRingScalar(ringInside) -- ring texture inside quest areas?
-	end 
+	end
 
 	-- Set all blob values at once
 	LibMinimap.SetMinimapBlobAlpha = function(self, blobInside, blobOutside, ringOutside, ringInside)
@@ -815,20 +816,20 @@ if (IsRetail) then
 		self:SyncMinimap(true)
 
 		Library.OldMinimap:SetQuestBlobInsideAlpha(blobInside) -- "blue" areas with quest mobs/items in them
-		Library.OldMinimap:SetQuestBlobOutsideAlpha(blobOutside) -- borders around the "blue" areas 
+		Library.OldMinimap:SetQuestBlobOutsideAlpha(blobOutside) -- borders around the "blue" areas
 		Library.OldMinimap:SetQuestBlobRingAlpha(ringOutside) -- the big fugly edge ring texture!
 		Library.OldMinimap:SetQuestBlobRingScalar(ringInside) -- ring texture inside quest areas?
 
 		Library.OldMinimap:SetArchBlobInsideAlpha(blobInside) -- "blue" areas with quest mobs/items in them
-		Library.OldMinimap:SetArchBlobOutsideAlpha(blobOutside) -- borders around the "blue" areas 
+		Library.OldMinimap:SetArchBlobOutsideAlpha(blobOutside) -- borders around the "blue" areas
 		Library.OldMinimap:SetArchBlobRingAlpha(ringOutside) -- the big fugly edge ring texture!
 		Library.OldMinimap:SetArchBlobRingScalar(ringInside) -- ring texture inside quest areas?
 
 		Library.OldMinimap:SetTaskBlobInsideAlpha(blobInside) -- "blue" areas with quest mobs/items in them
-		Library.OldMinimap:SetTaskBlobOutsideAlpha(blobOutside) -- borders around the "blue" areas 
+		Library.OldMinimap:SetTaskBlobOutsideAlpha(blobOutside) -- borders around the "blue" areas
 		Library.OldMinimap:SetTaskBlobRingAlpha(ringOutside) -- the big fugly edge ring texture!
 		Library.OldMinimap:SetTaskBlobRingScalar(ringInside) -- ring texture inside quest areas?
-	end 
+	end
 end
 
 LibMinimap.SetMinimapMaskTexture = function(self, path)
@@ -869,10 +870,10 @@ if (IsClassic) then
 				})
 			end
 		end
-		if (hasTracking) then 
+		if (hasTracking) then
 			EasyMenu(trackingMenu, trackingMenuFrame, "cursor", 0 , 0, "MENU")
 			LibMinimap:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "SFX")
-		end 
+		end
 	end
 else
 	LibMinimap.ShowMinimapTrackingMenu = function(self)
@@ -1025,7 +1026,7 @@ LibMinimap.UpdateMinimapButtonBag = function(self)
 			self:RestoreButton(button)
 		end
 	end
-	
+
 end
 
 LibMinimap.UpdateCompass = function()
@@ -1044,22 +1045,22 @@ LibMinimap.UpdateCompass = function()
 			end
 			radius = width/2
 		end
-	
+
 		local inset = LibMinimap.compassRadiusInset
 		if inset then
 			radius = radius - inset
 		end
-	
+
 		local playerFacing = GetPlayerFacing()
 		if (not playerFacing) or (compassFrame.supressCompass) then
 			compassFrame:SetAlpha(0)
 		else
 			compassFrame:SetAlpha(1)
 		end
-	
+
 		-- In Torghast, map is always locked. Weird.
 		local angle = (IN_TORGHAST) and 0 or (LibMinimap.rotateMinimap and playerFacing) and -playerFacing or 0
-	
+
 		compassFrame.east:SetPoint("CENTER", radius*math.cos(angle), radius*math.sin(angle))
 		compassFrame.north:SetPoint("CENTER", radius*math.cos(angle + math.pi/2), radius*math.sin(angle + math.pi/2))
 		compassFrame.west:SetPoint("CENTER", radius*math.cos(angle + math.pi), radius*math.sin(angle + math.pi))
@@ -1184,7 +1185,7 @@ LibMinimap.SetMinimapCompassEnabled = function(self, enableCompass)
 		-- Get or create our compass frame
 		local compassFrame = LibMinimap:GetCompassFrame() or LibMinimap:CreateCompassFrame()
 		compassFrame:Show()
-		
+
 		-- Get the current rotation setting and store it locally
 		LibMinimap.rotateMinimap = GetCVar("rotateMinimap") == "1"
 
@@ -1247,7 +1248,7 @@ LibMinimap.OnEvent = function(self, event, ...)
 		-- Update Cluster position
 		Library.OldCluster:ClearAllPoints()
 		Library.OldCluster:SetAllPoints(Library.MapHolder)
-	
+
 	elseif (event == "PLAYER_ENTERING_WORLD") then
 		-- In Torghast, map is always locked. Weird.
 		-- *Note that this is only in the tower, not the antechamber.
@@ -1340,7 +1341,7 @@ LibMinimap.RegisterElement = function(self, elementName, enableFunc, disableFunc
 	check(disableFunc, 3, "function")
 	check(updateFunc, 4, "function")
 	check(version, 5, "number", "nil")
-	
+
 	-- Does an old version of the element exist?
 	local old = Elements[elementName]
 	local needUpdate
