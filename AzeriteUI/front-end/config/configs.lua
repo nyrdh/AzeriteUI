@@ -1929,21 +1929,21 @@ RegisterLayout("BlizzardTimers", "Azerite", {
 
 -- Blizzard Objectives Tracker
 RegisterLayout("BlizzardObjectivesTracker", "Azerite", (IsClassic or IsTBC) and {
-	["FontObject"] = GetFont(13, true),
-	["FontObjectTitle"] = GetFont(15, true),
-	["HideInBossFights"] = true,
-	["HideInCombat"] = false,
-	["MaxHeight"] = 400,
 	["Place"] = { "BOTTOMRIGHT", -60, 380 },
+	["Width"] = 255, -- 280 is classic default
 	["Scale"] = 1.0,
+	["SpaceTop"] = 260,
 	["SpaceBottom"] = 380,
-	["SpaceTop"] = 260,
-	["Width"] = 255 -- 280 is classic default
+	["MaxHeight"] = 400,
+	["HideInCombat"] = false,
+	["HideInBossFights"] = true,
+	["FontObject"] = GetFont(13, true),
+	["FontObjectTitle"] = GetFont(15, true)
 } or (IsWrath) and {
-	["Place"] = { "BOTTOMRIGHT", -60, 380 },
-	["Width"] = 204, -- 204 is wrath default
+	["Place"] = { "BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -40, 380 },
+	["Width"] = 280, -- 204 is wrath default
 	["Scale"] = 1.25,
-	["SpaceTop"] = 260,
+	["SpaceTop"] = 320,
 	["SpaceBottom"] = 380,
 	["MaxHeight"] = 340,
 	["HideInCombat"] = false,
@@ -4019,7 +4019,7 @@ RegisterLayout("UnitFramePet", "Azerite", setmetatable({
 }, { __index = Template_SmallFrame }))
 
 -- Focus
-if (IsRetail or IsTBC) then
+if (IsRetail or IsTBC or IsWrath) then
 	RegisterLayout("UnitFrameFocus", "Azerite", setmetatable({
 		["AuraProperties"] = {
 			["growthX"] = "RIGHT",
