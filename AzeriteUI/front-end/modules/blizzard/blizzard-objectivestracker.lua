@@ -486,6 +486,7 @@ Module.StyleWrathTracker = function(self)
 	scaffold:SetWidth(layout.Width)
 	scaffold:SetHeight(22)
 	scaffold:Place(unpack(layout.Place))
+	scaffold:SetIgnoreParentScale(true)
 	self.frame.holder = scaffold
 
 	-- Create a dummy frame to cover the tracker
@@ -536,6 +537,10 @@ Module.UpdateWrathTrackerPosition = function(self)
 	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
 	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
 
+	-- Make sure the scaffold is on the right coordinates, scale affects this.
+	self.frame.holder:SetIgnoreParentScale(true)
+	self.frame.holder:SetScale(self:GetFrame("UICenter"):GetEffectiveScale())
+
 	tracker:SetParent(self.frame)
 	tracker:SetScale(layout.Scale or 1)
 	tracker:SetWidth(layout.Width / (layout.Scale or 1))
@@ -543,7 +548,7 @@ Module.UpdateWrathTrackerPosition = function(self)
 	tracker:SetClampedToScreen(false)
 	tracker:SetAlpha(.9)
 	tracker:ClearAllPoints()
-	tracker:SetPoint("BOTTOMRIGHT", self.frame.holder, "BOTTOMRIGHT", 0, 0)
+	tracker:SetPoint("TOPRIGHT", self.frame.holder, "TOPRIGHT", 0, 0)
 end
 
 -----------------------------------------------------------------

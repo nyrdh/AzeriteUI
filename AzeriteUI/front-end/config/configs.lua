@@ -1940,12 +1940,12 @@ RegisterLayout("BlizzardObjectivesTracker", "Azerite", (IsClassic or IsTBC) and 
 	["FontObject"] = GetFont(13, true),
 	["FontObjectTitle"] = GetFont(15, true)
 } or (IsWrath) and {
-	["Place"] = { "BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -40, 380 },
-	["Width"] = 280, -- 204 is wrath default
+	["Place"] = { "TOPRIGHT", "UIParent", "TOPRIGHT", -40, -260 },
+	["Width"] = 255, -- 204 is wrath default
 	["Scale"] = 1.25,
-	["SpaceTop"] = 320,
+	["SpaceTop"] = 260,
 	["SpaceBottom"] = 380,
-	["MaxHeight"] = 340,
+	["MaxHeight"] = 400,
 	["HideInCombat"] = false,
 	["HideInBossFights"] = true,
 	["HideInVehicles"] = false,
