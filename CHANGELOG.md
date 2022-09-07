@@ -5,9 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [3.2.554-RC] 2022-09-07
+### Added
+- Added Pet Happiness for Wrath.
+- Added micro menu entries for Wrath.
+
 ### Fixed
 - Added a lot of Wrath exceptions to the back-end.
-- Pet Happiness is now shown again, and the removed Loyalty trait has been removed.
+- Fixed quest tracker anchor point and position.
 
 ## [3.2.553-RC] 2022-09-06
 ### Fixed
