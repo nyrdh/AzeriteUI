@@ -1255,7 +1255,7 @@ UIWidgetStyling["BagButtons"] = function(self, ...)
 		-- *Dragonflight features a reagent bag slot
 		local slotSize = reagentSlot and 24 or 30
 		local previous
-		for _,slotName in ipairs({
+		for i,slotName in ipairs({
 			"CharacterBag0Slot",
 			"CharacterBag1Slot",
 			"CharacterBag2Slot",
@@ -1280,7 +1280,7 @@ UIWidgetStyling["BagButtons"] = function(self, ...)
 				end
 
 				-- Re-anchor the slots to remove space
-				if (i == 0) then
+				if (not previous) then
 					slot:ClearAllPoints()
 					slot:SetPoint("TOPRIGHT", backpack, "BOTTOMRIGHT", -6, 4)
 				else
