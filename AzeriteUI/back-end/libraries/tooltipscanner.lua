@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 94)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 95)
 if (not LibTooltipScanner) then
 	return
 end
@@ -1959,20 +1959,22 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 			local texPath = texture:GetTexture()
 
 			local hasObjective, objectiveType
-			if (texPath == 3083385) then -- Incomplete objective
-				hasObjective = true
-				objectiveType = "incomplete"
-			elseif (texPath == 628564) then -- Completed objective
-				hasObjective = true
-				objectiveType = "complete"
-			elseif (texPath == 237631) then -- Something in Wrath...?
-				--hasObjective = true
-				--objectiveType = "complete"
-			else
-				--local texID = tonumber(texPath) or 0
-				--if (texID ~= 0) then
-				--	print(string_format("|cffffd200LibTooltipScanner:|r |cfff0f0f0Unhandled textureID |r'|cff33aa33%d|r'.", texPath))
-				--end
+			if not(IsClassic or IsTBC or IsWrath) then
+				if (texPath == 3083385) then -- Incomplete objective
+					hasObjective = true
+					objectiveType = "incomplete"
+				elseif (texPath == 628564) then -- Completed objective
+					hasObjective = true
+					objectiveType = "complete"
+				elseif (texPath == 237631) then -- Something in Wrath...?
+					--hasObjective = true
+					--objectiveType = "complete"
+				else
+					--local texID = tonumber(texPath) or 0
+					--if (texID ~= 0) then
+					--	print(string_format("|cffffd200LibTooltipScanner:|r |cfff0f0f0Unhandled textureID |r'|cff33aa33%d|r'.", texPath))
+					--end
+				end
 			end
 
 			if (hasObjective) then
@@ -2014,7 +2016,7 @@ LibTooltipScanner.GetTooltipDataForUnit = function(self, unit, tbl)
 		end
 
 		-- Check for Questie data
-		if (IsClassic or IsTBC) and (Questie) then
+		if (IsAnyClassic and Questie) then
 
 			-- Only do this if the Questie
 			-- tooltip option is enabled(?)
