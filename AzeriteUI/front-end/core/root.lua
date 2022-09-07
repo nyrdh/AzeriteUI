@@ -3,12 +3,12 @@ if (Private.EngineFailure) then
 	return print(Private.EngineFailure)
 end
 
--- Wooh! 
+-- Wooh!
 local Core = Wheel("LibModule"):NewModule(ADDON, "LibDB", "LibMessage", "LibEvent", "LibBlizzard", "LibFrame", "LibSlash", "LibAuraData", "LibAura", "LibForge", "LibFader", "LibHook")
 
--- Tell the back-end what addon to look for before 
--- initializing this module and all its submodules. 
-Core:SetAddon(ADDON) 
+-- Tell the back-end what addon to look for before
+-- initializing this module and all its submodules.
+Core:SetAddon(ADDON)
 
 -- Tell the backend where our saved variables are found.
 -- *it's important that we're doing this here, before any module configs are created.
@@ -49,63 +49,65 @@ local GetMedia = Private.GetMedia
 local Colors = Private.Colors
 local IsClassic = Private.IsClassic
 local IsTBC = Private.IsTBC
+local IsWrath = Private.IsWrath
 local IsRetail = Private.IsRetail
+local IsDragonflight = Private.IsDragonflight
 
 -- Addon localization
 local L = Wheel("LibLocale"):GetLocale(ADDON)
 
 local SECURE = {
 	SecureCallback = [=[
-		if name then 
-			name = string.lower(name); 
-		end 
-		if (name == "change-enablehealermode") then 
-			self:SetAttribute("enableHealerMode", value); 
+		if name then
+			name = string.lower(name);
+		end
+		if (name == "change-enablehealermode") then
+			self:SetAttribute("enableHealerMode", value);
 
-			-- secure callbacks 
-			local extraProxy; 
-			local id = 0; 
+			-- secure callbacks
+			local extraProxy;
+			local id = 0;
 			repeat
 				id = id + 1
 				extraProxy = self:GetFrameRef("ExtraProxy"..id)
-				if extraProxy then 
-					extraProxy:SetAttribute(name, value); 
+				if extraProxy then
+					extraProxy:SetAttribute(name, value);
 				end
-			until (not extraProxy) 
+			until (not extraProxy)
 
 			-- Lua callbacks
-			-- *Note that we're not actually listing is as a mode in the menu. 
-			self:CallMethod("OnModeToggle", "healerMode"); 
+			-- *Note that we're not actually listing is as a mode in the menu.
+			self:CallMethod("OnModeToggle", "healerMode");
 
-		elseif (name == "change-aurafilterlevel") then 
-			self:SetAttribute("auraFilterLevel", value); 
-			self:CallMethod("UpdateAuraFilters"); 
+		elseif (name == "change-aurafilterlevel") then
+			self:SetAttribute("auraFilterLevel", value);
+			self:CallMethod("UpdateAuraFilters");
 
-		--elseif (name == "change-aurafilter") then 
-		--	self:SetAttribute("auraFilter", value); 
-		--	self:CallMethod("UpdateAuraFilters"); 
+		--elseif (name == "change-aurafilter") then
+		--	self:SetAttribute("auraFilter", value);
+		--	self:CallMethod("UpdateAuraFilters");
 
-		elseif (name == "change-aspectratio") then 
-			self:SetAttribute("aspectRatio", value); 
-			self:CallMethod("UpdateAspectRatio"); 
+		elseif (name == "change-aspectratio") then
+			self:SetAttribute("aspectRatio", value);
+			self:CallMethod("UpdateAspectRatio");
 
-		elseif (name == "change-enabledebugconsole") then 
-			self:SetAttribute("enableDebugConsole", value); 
-			self:CallMethod("UpdateDebugConsole"); 
-		end 
+		elseif (name == "change-enabledebugconsole") then
+			self:SetAttribute("enableDebugConsole", value);
+			self:CallMethod("UpdateDebugConsole");
+		end
 	]=]
 }
 
 local alreadyFixed
-local fixMacroIcons = function() 
-	if InCombatLockdown() or alreadyFixed then 
-		return 
+local fixMacroIcons = function()
+	if InCombatLockdown() or alreadyFixed then
+		return
 	end
 	--  Macro slot index to query. Slots 1 through 120 are general macros; 121 through 138 are per-character macros.
 	local numAccountMacros, numCharacterMacros = GetNumMacros()
-	for macroSlot = 1,138 do 
-		local name, icon, body, isLocal = GetMacroInfo(macroSlot) 
-		if body then 
+	for macroSlot = 1,138 do
+		local name, icon, body, isLocal = GetMacroInfo(macroSlot)
+		if body then
 			EditMacro(macroSlot, nil, nil, body)
 			alreadyFixed = true
 		end
@@ -114,13 +116,13 @@ end
 
 Core.IsModeEnabled = function(self, modeName)
 	-- Not actually called by the menu, since we're not
-	-- listing our healerMode as a mode, just a toggleValue. 
-	-- We do however use our standard mode API so for other modules 
-	-- to be able to easily query if this fake mode is enabled. 
-	if (modeName == "healerMode") then 
-		return self.db.enableHealerMode 
+	-- listing our healerMode as a mode, just a toggleValue.
+	-- We do however use our standard mode API so for other modules
+	-- to be able to easily query if this fake mode is enabled.
+	if (modeName == "healerMode") then
+		return self.db.enableHealerMode
 
-	-- This one IS a mode. 
+	-- This one IS a mode.
 	elseif (modeName == "enableDebugConsole") then
 		local db = GetConfig(ADDON, "global")
 		return db.enableDebugConsole -- self:GetDebugFrame():IsShown()
@@ -128,23 +130,23 @@ Core.IsModeEnabled = function(self, modeName)
 end
 
 Core.OnModeToggle = function(self, modeName)
-	if (modeName == "healerMode") then 
-		-- Gratz, we did nothing! 
-		-- This fake mode isn't changed by Lua, as it needs to move secure frames. 
-		-- We might add in Lua callbacks later though, and those will be called from here. 
+	if (modeName == "healerMode") then
+		-- Gratz, we did nothing!
+		-- This fake mode isn't changed by Lua, as it needs to move secure frames.
+		-- We might add in Lua callbacks later though, and those will be called from here.
 
-	elseif (modeName == "loadConsole") then 
+	elseif (modeName == "loadConsole") then
 		self:LoadDebugConsole()
 
-	elseif (modeName == "unloadConsole") then 
+	elseif (modeName == "unloadConsole") then
 		self:UnloadDebugConsole()
 
-	elseif (modeName == "enableDebugConsole") then 
+	elseif (modeName == "enableDebugConsole") then
 		local db = GetConfig(ADDON, "global")
 		db.enableDebugConsole = not db.enableDebugConsole
 		self:UpdateDebugConsole()
 
-	elseif (modeName == "reloadUI") then 
+	elseif (modeName == "reloadUI") then
 		ReloadUI()
 	end
 end
@@ -152,12 +154,12 @@ end
 Core.UpdateSecureUpdater = function(self)
 	local proxyUpdater = self:GetSecureUpdater()
 	local count = 0
-	for i,moduleName in ipairs({ "UnitFrameParty", "UnitFrameRaid", "GroupTools" }) do 
+	for i,moduleName in ipairs({ "UnitFrameParty", "UnitFrameRaid", "GroupTools" }) do
 		local module = self:GetModule(moduleName, true)
-		if module then 
+		if module then
 			count = count + 1
 			local secureUpdater = module.GetSecureUpdater and module:GetSecureUpdater()
-			if secureUpdater then 
+			if secureUpdater then
 				proxyUpdater:SetFrameRef("ExtraProxy"..count, secureUpdater)
 			end
 		end
@@ -166,7 +168,7 @@ end
 
 Core.UpdateDebugConsole = function(self)
 	local db = GetConfig(ADDON, "global")
-	if (db.enableDebugConsole) then 
+	if (db.enableDebugConsole) then
 		self:ShowDebugFrame()
 	else
 		self:HideDebugFrame()
@@ -251,14 +253,14 @@ end
 Core.ApplyExperimentalFeatures = function(self)
 
 	-- Register addon specific aura filters.
-	-- These can be accessed by the other modules by calling 
-	-- the relevant methods on the 'Core' module object. 
+	-- These can be accessed by the other modules by calling
+	-- the relevant methods on the 'Core' module object.
 	do
 		local auraFlags = Private.AuraFlags
-		if auraFlags then 
-			for spellID,flags in pairs(auraFlags) do 
+		if auraFlags then
+			for spellID,flags in pairs(auraFlags) do
 				self:AddAuraUserFlags(spellID,flags)
-			end 
+			end
 		end
 	end
 
@@ -268,12 +270,12 @@ Core.ApplyExperimentalFeatures = function(self)
 	self:RegisterChatCommand("clear", function() ChatFrame1:Clear() end)
 
 	-- Add a command to manually update macro icons.
-	-- This was only needed when macro icons wouldn't load at logon, 
-	-- and I would generally consider this a hacky and risky fix, 
+	-- This was only needed when macro icons wouldn't load at logon,
+	-- and I would generally consider this a hacky and risky fix,
 	-- as it includes reading all macros into memory and saving them again
 	-- in order to force a cache and icon update.
 	self:RegisterChatCommand("fix", fixMacroIcons)
-	
+
 	-- Add back retail like stop watch commands.
 	if (IsClassic) then
 		local commands = {
@@ -311,10 +313,10 @@ Core.ApplyExperimentalFeatures = function(self)
 				local text = string_match(msg, "%s*([^%s]+)%s*")
 				if (text) then
 					text = string_lower(text)
-		
+
 					-- in any of the following cases, the stopwatch will be shown
 					StopwatchFrame:Show()
-		
+
 					if (matchCommand("SLASH_STOPWATCH_PARAM_PLAY", text)) then
 						Stopwatch_Play()
 						return
@@ -372,16 +374,16 @@ Core.ApplyExperimentalFeatures = function(self)
 		fadeOut:SetDuration(.5)
 		fadeOut:SetSmoothing("IN_OUT")
 
-		self:RegisterEvent("UPDATE_BATTLEFIELD_STATUS", function() 
+		self:RegisterEvent("UPDATE_BATTLEFIELD_STATUS", function()
 			for i = 1, MAX_BATTLEFIELD_QUEUES do
 				local status, map, instanceID = GetBattlefieldStatus(i)
-				
+
 				if (status == "confirm") then
 					StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY")
-					
+
 					battleground:Show()
 					animation:Play()
-					
+
 					return
 				end
 			end
@@ -402,7 +404,7 @@ Core.ApplyExperimentalFeatures = function(self)
 		local filter = "HELPFUL PLAYER CANCELABLE"
 
 		-- These are the player auraIDs of the known games.
-		-- No other methods to detect these games 
+		-- No other methods to detect these games
 		-- than their associated auras currently exist.
 		local games = {
 			-- Untangle
@@ -411,7 +413,7 @@ Core.ApplyExperimentalFeatures = function(self)
 			[298654] = true, -- Arcane Leylock
 			[298657] = true, -- Arcane Leylock
 			[298659] = true, -- Arcane Leylock
-			-- Puzzle 
+			-- Puzzle
 			[298661] = true, -- Arcane Runelock
 			[298663] = true, -- Arcane Runelock
 			[298665] = true  -- Arcane Runelock
@@ -440,16 +442,16 @@ Core.ApplyExperimentalFeatures = function(self)
 		findActiveBuffID = function()
 			local buffID
 			local buffName
-			for i = 1, BUFF_MAX_DISPLAY do 
+			for i = 1, BUFF_MAX_DISPLAY do
 				local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = self:GetUnitBuff("player", i, filter)
 
-				if (name) then 
-					if (spellId and games[spellId]) then 
+				if (name) then
+					if (spellId and games[spellId]) then
 						buffID = i
 						buffName = name
 						break
-					end 
-				else 
+					end
+				else
 					break
 				end
 			end
@@ -461,7 +463,7 @@ Core.ApplyExperimentalFeatures = function(self)
 			local visFrame = self:GetFrame("UICenter"):GetParent()
 			-- This happens automatically in combat by the back-end now,
 			-- we still need to show it when the game ends normally, though.
-			if (not InCombatLockdown()) then 
+			if (not InCombatLockdown()) then
 				visFrame:Show()
 				exitButton:Hide()
 			end
@@ -471,8 +473,8 @@ Core.ApplyExperimentalFeatures = function(self)
 		checkForActiveGame = function()
 			local visFrame = self:GetFrame("UICenter"):GetParent()
 			local buffID, buffName = findActiveBuffID(self)
-			if (buffID) then 
-				if (visFrame:IsShown()) and (not InCombatLockdown()) then 
+			if (buffID) then
+				if (visFrame:IsShown()) and (not InCombatLockdown()) then
 					gameRunning = true
 					self:AddDebugMessageFormatted(string_format("MiniGame Enabled: '%s'", buffName))
 					visFrame:Hide()
@@ -522,7 +524,7 @@ Core.ApplyExperimentalFeatures = function(self)
 
 			else
 				if (not isTracking) then
-					
+
 					-- Set the tracking flag
 					isTracking = true
 
@@ -610,13 +612,13 @@ Core.ApplyExperimentalFeatures = function(self)
 		self:RegisterEvent("PLAYER_ENTERING_WORLD", onTrackingEvent)
 
 	end
-	
+
 	-- Little trick to show the layout and dimensions
-	-- of the Minimap blip icons on-screen in-game, 
-	-- whenever blizzard decide to update those. 
+	-- of the Minimap blip icons on-screen in-game,
+	-- whenever blizzard decide to update those.
 	-- This works in both Retail and Classic
 	do
-		-- By setting a single point, but not any sizes, 
+		-- By setting a single point, but not any sizes,
 		-- the texture is shown in its original size and dimensions!
 		local f = self:GetFrame("UICenter"):CreateTexture()
 		f:Hide()
@@ -630,17 +632,17 @@ Core.ApplyExperimentalFeatures = function(self)
 		g:SetColorTexture(0,.7,0,.25)
 		g:SetAllPoints(f)
 
-		self:RegisterChatCommand("blipicons", function() 
+		self:RegisterChatCommand("blipicons", function()
 			local show = not f:IsShown()
 			f:SetShown(show)
 			g:SetShown(show)
 		end)
 	end
 
-	hooksecurefunc("SetCVar", function(cvar,value) 
+	hooksecurefunc("SetCVar", function(cvar,value)
 		self:SendMessage("GP_CVAR_CHANGED", cvar, value)
 	end)
-	
+
 end
 
 -- Fix or work around Blizzard bugs we have discovered.
@@ -653,11 +655,11 @@ Core.FixBlizzardBugs = function(self)
 	end
 
 	-- These things only exist in retail, no point checking in Classic.
-	if (IsRetail) then 
+	if (IsRetail) then
 
 		-- Fix a blizzard bug with contribution tables.
 		local fixing = "Blizzard_Contribution"
-		if (not self.FixedBlizzardBugs[fixing]) then 
+		if (not self.FixedBlizzardBugs[fixing]) then
 			if (IsAddOnLoaded(fixing)) then
 
 				-- Fix the mixin method
@@ -731,7 +733,7 @@ Core.FixBlizzardBugs = function(self)
 
 		-- Attempt to fix a bug that sometimes occur with the anima channeling map.
 		local fixing, fixingMore = "Blizzard_AnimaDiversionUI", "Blizzard_MapCanvas"
-		if (not self.FixedBlizzardBugs[fixing]) then 
+		if (not self.FixedBlizzardBugs[fixing]) then
 			if (IsAddOnLoaded(fixing)) and (IsAddOnLoaded(fixingMore)) then
 
 				local OnUpdate = function(self, ...)
@@ -743,7 +745,7 @@ Core.FixBlizzardBugs = function(self)
 				AnimaDiversionFrame:SetScript("OnUpdate", OnUpdate)
 
 				-- Might be needed.
-				hooksecurefunc(AnimaDiversionFrame, "Show", function() 
+				hooksecurefunc(AnimaDiversionFrame, "Show", function()
 					AnimaDiversionFrame.OnUpdate = OnUpdate
 					AnimaDiversionFrame:SetScript("OnUpdate", OnUpdate)
 				end)
@@ -775,13 +777,13 @@ Core.FixBlizzardBugs = function(self)
 
 end
 
--- We could add this into the back-end, leaving it here for now, though. 
+-- We could add this into the back-end, leaving it here for now, though.
 Core.OnChatCommand = function(self, editBox, msg)
 	local db = GetConfig(ADDON, "global")
-	if (msg == "enable") or (msg == "on") then 
+	if (msg == "enable") or (msg == "on") then
 		db.enableDebugConsole = true
 
-	elseif (msg == "disable") or (msg == "off") then 
+	elseif (msg == "disable") or (msg == "off") then
 		db.enableDebugConsole = false
 	else
 		db.enableDebugConsole = not db.enableDebugConsole
@@ -789,12 +791,12 @@ Core.OnChatCommand = function(self, editBox, msg)
 	self:UpdateDebugConsole()
 end
 
--- Change the UI theme. 
+-- Change the UI theme.
 -- This does not actually change the theme,
 -- but rather changes the stored theme setting,
 -- and then forces a reload to load the new theme.
 Core.SetTheme = function(self, editBox, theme)
-	-- Do a minimum amount of control here, 
+	-- Do a minimum amount of control here,
 	-- as this is connected to saved settings.
 	-- We don't want crazy results saved.
 	local new = theme and ({
@@ -812,31 +814,31 @@ Core.SetTheme = function(self, editBox, theme)
 		blakmane = "Azerite",
 		blakmaneui = "Azerite",
 		diabolic = "Diabolic",
-		
-	})[theme] 
-	-- Only actually do something if a matching theme was found, 
-	-- and that theme is different from what we're currently using.	
+
+	})[theme]
+	-- Only actually do something if a matching theme was found,
+	-- and that theme is different from what we're currently using.
 	if (new == "Diabolic") then
 		if (self:IsAddOnAvailable("DiabolicUI2")) then
 			EnableAddOn("DiabolicUI2")
 			ReloadUI()
 		end
 	elseif (new) and (new ~= self.db.theme) then
-		-- Only apply the changed setting and 
+		-- Only apply the changed setting and
 		-- force a reload upon actual changes.
 		self.db.theme = new
-		ReloadUI() 
+		ReloadUI()
 	end
 end
 
 Core.OnInit = function(self)
 	self.db = GetConfig(ADDON)
-	
-	-- This sets the fallback layouts used when 
+
+	-- This sets the fallback layouts used when
 	-- the requested module isn't found in the current.
 	--Private.SetFallbackLayout("Generic")
-	  
-	-- This sets the current layout. 
+
+	-- This sets the current layout.
 	-- This will be moved to a user setting when implemented.
 	self.db.theme = (self.db.theme == "Azerite" or self.db.theme == "Legacy") and self.db.theme or "Azerite"
 	Private.SetLayout(self.db.theme)
@@ -850,7 +852,7 @@ Core.OnInit = function(self)
 	self:RegisterChatCommand("setscale", "SetScale")
 
 	-- In case some other jokers have disabled these, we add them back to avoid a World of Bugs.
-	-- RothUI used to remove the two first, and a lot of people missed his documentation on how to get them back. 
+	-- RothUI used to remove the two first, and a lot of people missed his documentation on how to get them back.
 	-- I personally removed the objective's tracker for a while in DiabolicUI, which led to pain. Lots of pain.
 	for _,v in ipairs({ "Blizzard_CUFProfiles", "Blizzard_CompactRaidFrames", "Blizzard_ObjectiveTracker" }) do
 		EnableAddOn(v)
@@ -864,14 +866,14 @@ Core.OnInit = function(self)
 	if (OptionsMenu) then
 		local callbackFrame = OptionsMenu:CreateCallbackFrame(self)
 		callbackFrame.OnModeToggle = function(callbackFrame)
-			for i,moduleName in ipairs({ "BlizzardChatFrames" }) do 
+			for i,moduleName in ipairs({ "BlizzardChatFrames" }) do
 				local module = self:GetModule(moduleName, true)
-				if module and not (module:IsIncompatible() or module:DependencyFailed()) then 
-					if (module.OnModeToggle) then 
+				if module and not (module:IsIncompatible() or module:DependencyFailed()) then
+					if (module.OnModeToggle) then
 						module:OnModeToggle("healerMode")
 					end
 				end
-			end 
+			end
 		end
 		callbackFrame:AssignProxyMethods("UpdateAspectRatio", "UpdateAuraFilters", "UpdateDebugConsole")
 		callbackFrame:AssignSettings(self.db)
@@ -881,17 +883,17 @@ Core.OnInit = function(self)
 	-- Let's just enforce this from now on.
 	-- I need it to be there, it doesn't affect performance.
 	local db = GetConfig(ADDON, "global")
-	db.loadDebugConsole = true 
+	db.loadDebugConsole = true
 
 	-- Fire a startup message into the console.
-	if (db.loadDebugConsole) then 
+	if (db.loadDebugConsole) then
 
 		-- Set the flag to tell the back-end we're in debug mode
 		self:EnableDebugMode()
 
 		-- Register a chat command for those that want to macro this
 		self:RegisterChatCommand("debug", "OnChatCommand")
-	
+
 		-- Update initial console visibility
 		self:UpdateDebugConsole()
 		self:AddDebugMessageFormatted("Debug Mode is active.")
@@ -901,33 +903,33 @@ Core.OnInit = function(self)
 		self:RegisterChatCommand("disableconsole", "UnloadDebugConsole")
 		self:RegisterChatCommand("ecode", function(_,msg)
 			local new = {}
-			for i = 1,string.len(msg) do 
+			for i = 1,string.len(msg) do
 				table.insert(new, string.byte(msg,i,i))
 			end
 			self:AddDebugMessage(table.concat(new,"::"))
 		end)
-	
+
 	else
-		-- Set the flag to tell the back-end we're in normal mode. 
-		-- This isn't actually needed, since the back-end don't store settings. 
-		-- Just leaving it here for weird semantic reasons that really don't make sense. 
+		-- Set the flag to tell the back-end we're in normal mode.
+		-- This isn't actually needed, since the back-end don't store settings.
+		-- Just leaving it here for weird semantic reasons that really don't make sense.
 		self:DisableDebugMode()
 
 		-- Add in a chat command to quickly load the console
 		self:RegisterChatCommand("enableconsole", "LoadDebugConsole")
 	end
 
-	-- Apply theme based edits.	
+	-- Apply theme based edits.
 	-- Should be moved to some settings table later on.
 	if (self.db.theme == "Legacy") then
 		self:SetObjectFadeDurationOut(.15)
 		self:SetObjectFadeHold(.5)
 	end
-end 
+end
 
 Core.OnEnable = function(self)
 	if (Private.HasSchematic("ModuleForge::Root")) then
-		self:Forge(Private.GetSchematic("ModuleForge::Root").OnEnable) 
+		self:Forge(Private.GetSchematic("ModuleForge::Root").OnEnable)
 	end
 
 	-- Clean the slate, clear out blizzard elements.
@@ -951,12 +953,23 @@ Core.OnEnable = function(self)
 	self:DisableUIWidget("UnitFrameBoss")
 	self:DisableUIWidget("UnitFrameArena")
 	self:DisableUIWidget("ZoneText")
-	self:DisableUIMenuPage(5, "InterfaceOptionsActionBarsPanel")
-	self:DisableUIMenuPage(10, "CompactUnitFrameProfiles")
-	self:DisableUIMenuOption(true, "InterfaceOptionsCombatPanelTargetOfTarget")
-	if (IsRetail) then
+
+	if (IsWrath) then
+		self:DisableUIMenuOption(false, "InterfaceOptionsCombatPanelTargetOfTarget")
+		self:DisableUIMenuPage(5, "InterfaceOptionsActionBarsPanel")
+		self:DisableUIMenuPage(11, "CompactUnitFrameProfiles")
+	elseif (IsDragonflight) then
+		-- The whole menu changes here.
+	elseif (IsRetail) then
+		self:DisableUIMenuPage(5, "InterfaceOptionsActionBarsPanel")
+		self:DisableUIMenuPage(10, "CompactUnitFrameProfiles")
+		self:DisableUIMenuOption(true, "InterfaceOptionsCombatPanelTargetOfTarget")
 		self:DisableUIMenuOption("Vertical", "InterfaceOptionsNamesPanelUnitNameplatesPersonalResource")
 		self:DisableUIMenuOption("Vertical", "InterfaceOptionsNamesPanelUnitNameplatesPersonalResourceOnEnemy")
+	else
+		self:DisableUIMenuPage(5, "InterfaceOptionsActionBarsPanel")
+		self:DisableUIMenuPage(10, "CompactUnitFrameProfiles")
+		self:DisableUIMenuOption(true, "InterfaceOptionsCombatPanelTargetOfTarget")
 	end
 
 	-- Experimental stuff we move to relevant modules once done
@@ -971,22 +984,22 @@ Core.OnEnable = function(self)
 
 	-- Listen for when the user closes the debugframe directly
 	------------------------------------------------------------------------------------
-	self:RegisterMessage("GP_DEBUG_FRAME_CLOSED", "OnEvent") 
+	self:RegisterMessage("GP_DEBUG_FRAME_CLOSED", "OnEvent")
 
 	-- Various logon updates
 	------------------------------------------------------------------------------------
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
-end 
+end
 
 Core.OnEvent = function(self, event, ...)
-	if (event == "PLAYER_ENTERING_WORLD") then 
+	if (event == "PLAYER_ENTERING_WORLD") then
 		self:UpdateAspectRatio()
 		self:UpdateAuraFilters()
 
-	elseif (event == "GP_DEBUG_FRAME_CLOSED") then 
-		-- This fires from the module back-end when 
+	elseif (event == "GP_DEBUG_FRAME_CLOSED") then
+		-- This fires from the module back-end when
 		-- the debug console was manually closed by the user.
 		-- We need to update our saved setting here.
 		GetConfig(ADDON, "global").enableDebugConsole = false
-	end 
-end 
+	end
+end
