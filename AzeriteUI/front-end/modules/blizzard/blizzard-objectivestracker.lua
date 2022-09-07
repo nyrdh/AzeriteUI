@@ -278,14 +278,14 @@ Module.StyleClassicTracker = function(self)
 	self.frame:SetAllPoints(tracker)
 
 	-- Re-position after UIParent messes with it.
-	hooksecurefunc(tracker,"SetPoint", function(_,_, anchor)
+	hooksecurefunc(tracker, "SetPoint", function(_,_, anchor)
 		if (anchor ~= scaffold) then
 			self:UpdateClassicTrackerPosition()
 		end
 	end)
 
 	-- Just in case some random addon messes with it.
-	hooksecurefunc(tracker,"SetAllPoints", function()
+	hooksecurefunc(tracker, "SetAllPoints", function()
 		self:UpdateClassicTrackerPosition()
 	end)
 
@@ -478,6 +478,7 @@ Module.StyleWrathTracker = function(self)
 	if (not IsWrath) then
 		return
 	end
+
 	local tracker = WatchFrame
 
 	local layout = self.layout
@@ -502,14 +503,14 @@ Module.StyleWrathTracker = function(self)
 	self.frame:SetAllPoints(tracker)
 
 	-- Re-position after UIParent messes with it.
-	hooksecurefunc(tracker,"SetPoint", function(_,_, anchor)
+	hooksecurefunc(tracker, "SetPoint", function(_,_, anchor)
 		if (anchor ~= scaffold) then
 			self:UpdateWrathTrackerPosition()
 		end
 	end)
 
 	-- Just in case some random addon messes with it.
-	hooksecurefunc(tracker,"SetAllPoints", function()
+	hooksecurefunc(tracker, "SetAllPoints", function()
 		self:UpdateWrathTrackerPosition()
 	end)
 
@@ -529,18 +530,20 @@ Module.UpdateWrathTrackerPosition = function(self)
 		return
 	end
 
+	local tracker = WatchFrame
+
 	local screenHeight = self:GetFrame("UICenter"):GetHeight()
 	local maxHeight = screenHeight - (layout.SpaceBottom + layout.SpaceTop)
 	local objectiveFrameHeight = math_min(maxHeight, layout.MaxHeight)
 
-	WatchFrame:SetParent(self.frame)
-	WatchFrame:SetScale(layout.Scale or 1)
-	WatchFrame:SetWidth(layout.Width / (layout.Scale or 1))
-	WatchFrame:SetHeight(objectiveFrameHeight / (layout.Scale or 1))
-	WatchFrame:SetClampedToScreen(false)
-	WatchFrame:SetAlpha(.9)
-	WatchFrame:ClearAllPoints()
-	WatchFrame:SetPoint("BOTTOMRIGHT", self.frame.holder, "BOTTOMRIGHT", 0, 0)
+	tracker:SetParent(self.frame)
+	tracker:SetScale(layout.Scale or 1)
+	tracker:SetWidth(layout.Width / (layout.Scale or 1))
+	tracker:SetHeight(objectiveFrameHeight / (layout.Scale or 1))
+	tracker:SetClampedToScreen(false)
+	tracker:SetAlpha(.9)
+	tracker:ClearAllPoints()
+	tracker:SetPoint("BOTTOMRIGHT", self.frame.holder, "BOTTOMRIGHT", 0, 0)
 end
 
 -----------------------------------------------------------------
