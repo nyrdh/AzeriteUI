@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.555-RC] 2022-09-07
+### Fixed
+- The Wrath quest tracker should show a bit more than a single quest again.
+- Fixed an issue preventing the bag buttons from being attached to the backpack frame.
+
 ## [3.2.554-RC] 2022-09-07
 ### Added
 - Added Pet Happiness for Wrath.
