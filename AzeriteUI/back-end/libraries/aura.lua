@@ -56,9 +56,12 @@ local UnitInRaid = UnitInRaid
 local UnitIsUnit = UnitIsUnit
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
+
 
 -- Shortcuts
 local AuraInfoFlags = LibAuraData:GetAllAuraInfoFlags()
@@ -66,7 +69,7 @@ local BitFilters = LibAuraData:GetAllAuraInfoBitFilters()
 
 -- Sourced from FrameXML/BuffFrame.lua
 local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
-local DEBUFF_MAX_DISPLAY = DEBUFF_MAX_DISPLAY 
+local DEBUFF_MAX_DISPLAY = DEBUFF_MAX_DISPLAY
 
 -- Add in support for LibClassicDurations.
 local LCD
@@ -90,17 +93,17 @@ if (LibAura.frame) then
 	LibAura.frame:SetScript("OnEvent",nil)
 	LibAura.frame:UnregisterAllEvents()
 	LibAura.frame:Hide()
-	LibAura.frame = nil 
+	LibAura.frame = nil
 end
 
 -- Utility Functions
 --------------------------------------------------------------------------
--- Syntax check 
+-- Syntax check
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if type(value) == select(i, ...) then 
-			return 
+		if type(value) == select(i, ...) then
+			return
 		end
 	end
 	local types = string_join(", ", ...)
@@ -108,12 +111,12 @@ local check = function(value, num, ...)
 	error(string_format("Bad argument #%.0f to '%s': %s expected, got %s", num, name, types, type(value)), 3)
 end
 
--- Utility function to parse and order a filter, 
--- to make sure we avoid duplicate caches. 
+-- Utility function to parse and order a filter,
+-- to make sure we avoid duplicate caches.
 local parseFilter = function(filter, harmful)
-	
+
 	-- speed it up for default situations
-	if ((not filter) or (filter == "")) then 
+	if ((not filter) or (filter == "")) then
 		return harmful and "HARMFUL" or "HELPFUL"
 	end
 
@@ -126,65 +129,65 @@ local parseFilter = function(filter, harmful)
 	local helpful = string_match(filter, "HELPFUL")
 
 	-- auras that were applied by the player
-	local player = string_match(filter, "PLAYER") 
+	local player = string_match(filter, "PLAYER")
 
 	-- auras that can be applied (if HELPFUL) or dispelled (if HARMFUL) by the player
-	local raid = string_match(filter, "RAID") 
+	local raid = string_match(filter, "RAID")
 
 	-- buffs that cannot be removed
-	local not_cancelable = string_match(filter, "NOT_CANCELABLE") 
+	local not_cancelable = string_match(filter, "NOT_CANCELABLE")
 	if (not_cancelable) then
 		-- Dumb way to avoid NOT_CANCELABLE also firing for CANCELABLE
 		filter = string_gsub(filter, "NOT_CANCELABLE", "")
 	end
 
 	-- buffs that can be removed (such as by right-clicking or using the /cancelaura command)
-	local cancelable = string_match(filter, "CANCELABLE") 
+	local cancelable = string_match(filter, "CANCELABLE")
 
-	-- return a nil value for invalid filters. 
+	-- return a nil value for invalid filters.
 	-- *this might cause an error, but that is the intention.
-	if (harmful and helpful) or (cancelable and not_cancelable) then 
-		return 
+	if (harmful and helpful) or (cancelable and not_cancelable) then
+		return
 	end
 
 	-- Always include these, as we're always using UnitAura() to retrieve buffs/debuffs.
-	-- Default to buffs when no help/harm is mentioned. 
+	-- Default to buffs when no help/harm is mentioned.
 	local parsedFilter = (harmful) and "HARMFUL" or "HELPFUL"
 
 	-- Return a parsed filter with arguments separated by spaces, and in our preferred order.
 	-- This way filters with the same arguments can be directly compared later on.
-	return parsedFilter .. (player and " PLAYER" or "") 
-						.. (raid and " RAID" or "") 
-						.. (cancelable and " CANCELABLE" or "") 
-						.. (not_cancelable and " NOT_CANCELABLE" or "") 
-end 
+	return parsedFilter .. (player and " PLAYER" or "")
+						.. (raid and " RAID" or "")
+						.. (cancelable and " CANCELABLE" or "")
+						.. (not_cancelable and " NOT_CANCELABLE" or "")
+end
 
 LibAura.GetUnitAura = function(self, unit, auraID, filter)
 	local filter = parseFilter(filter)
-	if (not filter) then 
-		return 
+	if (not filter) then
+		return
 	end
 
 	local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitAura(unit, auraID, filter)
 
 	if (name) then
-		
+
 		-- Add Classic aura duration info
-		if (IsClassic) and (LCD) then 
+		if (IsClassic) and (LCD) then
 			local durationNew, expirationTimeNew = LCD:GetAuraDurationByUnit(unit, spellId, caster)
 			if ((not duration) or (duration == 0)) and (durationNew) then
 				duration = durationNew
 				expirationTime = expirationTimeNew
 			end
 		end
-		
+
 		-- Add boss flags. Applies to both classic and retail.
 		if (AuraInfoFlags[spellId]) and (not isBossDebuff) and (LibAura:HasAuraInfoFlags(spellId, BitFilters.IsBoss)) then
 			isBossDebuff = true
 		end
-		
+
 		-- This just makes more sense, and it works.
-		-- The blizzard flag just shows if the player CAN cast it, 
+		-- The blizzard flag just shows if the player CAN cast it,
 		-- while we're interested if in the player ACTUALLY did it.
 		isCastByPlayer = unitCaster == "player"
 	end
@@ -194,30 +197,30 @@ end
 
 LibAura.GetUnitBuff = function(self, unit, auraID, filter)
 	--local filter = parseFilter(filter)
-	--if (not filter) then 
-	--	return 
+	--if (not filter) then
+	--	return
 	--end
 
 	local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitBuff(unit, auraID, filter)
 
 	if (name) then
-		
+
 		-- Add Classic aura duration info
-		if (IsClassic) and (LCD) then 
+		if (IsClassic) and (LCD) then
 			local durationNew, expirationTimeNew = LCD:GetAuraDurationByUnit(unit, spellId, caster)
 			if ((not duration) or (duration == 0)) and (durationNew) then
 				duration = durationNew
 				expirationTime = expirationTimeNew
 			end
 		end
-		
+
 		-- Add boss flags. Applies to both classic and retail.
 		if (AuraInfoFlags[spellId]) and (not isBossDebuff) and (LibAura:HasAuraInfoFlags(spellId, BitFilters.IsBoss)) then
 			isBossDebuff = true
 		end
-		
+
 		-- This just makes more sense, and it works.
-		-- The blizzard flag just shows if the player CAN cast it, 
+		-- The blizzard flag just shows if the player CAN cast it,
 		-- while we're interested if in the player ACTUALLY did it.
 		isCastByPlayer = unitCaster == "player"
 	end
@@ -227,30 +230,30 @@ end
 
 LibAura.GetUnitDebuff = function(self, unit, auraID, filter)
 	--local filter = parseFilter(filter, true)
-	--if (not filter) then 
-	--	return 
+	--if (not filter) then
+	--	return
 	--end
 
 	local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = UnitDebuff(unit, auraID, filter)
 
 	if (name) then
-		
+
 		-- Add Classic aura duration info
-		if (IsClassic) and (LCD) then 
+		if (IsClassic) and (LCD) then
 			local durationNew, expirationTimeNew = LCD:GetAuraDurationByUnit(unit, spellId, caster)
 			if ((not duration) or (duration == 0)) and (durationNew) then
 				duration = durationNew
 				expirationTime = expirationTimeNew
 			end
 		end
-		
+
 		-- Add boss flags. Applies to both classic and retail.
 		if (AuraInfoFlags[spellId]) and (not isBossDebuff) and (LibAura:HasAuraInfoFlags(spellId, BitFilters.IsBoss)) then
 			isBossDebuff = true
 		end
-		
+
 		-- This just makes more sense, and it works.
-		-- The blizzard flag just shows if the player CAN cast it, 
+		-- The blizzard flag just shows if the player CAN cast it,
 		-- while we're interested if in the player ACTUALLY did it.
 		isCastByPlayer = unitCaster == "player"
 	end

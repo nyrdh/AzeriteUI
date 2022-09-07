@@ -1,5 +1,5 @@
-local LibChatWindow, version = Wheel:Set("LibChatWindow", 36)
-if (not LibChatWindow) then	
+local LibChatWindow, version = Wheel:Set("LibChatWindow", 37)
+if (not LibChatWindow) then
 	return
 end
 
@@ -24,11 +24,11 @@ LibEvent:Embed(LibChatWindow)
 LibFrame:Embed(LibChatWindow)
 LibSecureHook:Embed(LibChatWindow)
 
--- Lua API 
+-- Lua API
 local _G = _G
 local assert = assert
 local debugstack = debugstack
-local error = error 
+local error = error
 local ipairs = ipairs
 local pairs = pairs
 local select = select
@@ -49,8 +49,10 @@ local CHAT_FRAMES = CHAT_FRAMES
 local CHAT_FRAME_TEXTURES = CHAT_FRAME_TEXTURES
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Create or retrieve our registries
@@ -64,12 +66,12 @@ local windows = LibChatWindow.windows
 -- Blizzard API methods
 local SetAlpha = LibChatWindow.frame.SetAlpha
 
--- Syntax check 
+-- Syntax check
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if type(value) == select(i, ...) then 
-			return 
+		if type(value) == select(i, ...) then
+			return
 		end
 	end
 	local types = string_join(", ", ...)
@@ -80,61 +82,61 @@ end
 -- module post create/post handle updates
 local postUpdateWindowProxy = function(self, frame, isTemporary, ...)
 	local postCreateWindow = isTemporary and self.PostCreateTemporaryChatWindow or self.PostCreateChatWindow
-	if postCreateWindow then 
-		if isTemporary then 
+	if postCreateWindow then
+		if isTemporary then
 			postCreateWindow(self, frame, isTemporary, ...)
-		else 
+		else
 			postCreateWindow(self, frame)
-		end 
-	end 
-end 
+		end
+	end
+end
 
 LibChatWindow.GetAllChatWindows = function(self)
 	return ipairs(CHAT_FRAMES)
-end 
+end
 
 LibChatWindow.GetAllHandledChatWindows = function(self)
 	return ipairs(windows)
-end 
+end
 
 LibChatWindow.HandleWindow = function(self, frame, isTemporary, ...)
 	-- silenty exit if the window has been handled already
-	if windows[frame] then 
-		return 
-	end 
+	if windows[frame] then
+		return
+	end
 
 	-- Add the window to our registry
-	table_insert(windows, frame)  
+	table_insert(windows, frame)
 
 	-- hashed for faster checks. we keep window data here too.
-	windows[frame] = {} 
+	windows[frame] = {}
 
 	-- module post updates
 	self:ForAllEmbeds(postUpdateWindowProxy, frame, isTemporary, ...)
 end
 
 LibChatWindow.HandleAllChatWindows = function(self)
-	for _,frameName in self:GetAllChatWindows() do 
+	for _,frameName in self:GetAllChatWindows() do
 		local frame = _G[frameName]
-		if frame then 
+		if frame then
 			LibChatWindow:HandleWindow(frame, frame.isTemporary)
-		end 
-	end 
+		end
+	end
 end
 
 LibChatWindow.IsChatWindowHandled = function(self, frame)
 	return windows[frame] and true or false
-end 
+end
 
 LibChatWindow.IsChatWindowTemporary = function(self, frame)
 	return frame.isTemporary and true or false
-end 
+end
 
 LibChatWindow.SetChatWindowPosition = function(self, frame, ...)
 	local db = windows[frame]
-	if (not db) then 
-		return 
-	end 
+	if (not db) then
+		return
+	end
 	db.slaveMaster = nil
 	db.position = { ... }
 	db.queuePositionUpdate = true
@@ -142,9 +144,9 @@ end
 
 LibChatWindow.SetChatWindowSize = function(self, frame, ...)
 	local db = windows[frame]
-	if (not db) then 
-		return 
-	end 
+	if (not db) then
+		return
+	end
 	db.slaveMaster = nil
 	db.size = { ... }
 	db.queueSizeUpdate = true
@@ -152,201 +154,201 @@ end
 
 LibChatWindow.SetChatWindowAsSlaveTo = function(self, frame, master)
 	local db = windows[frame]
-	if (not db) then 
-		return 
-	end 
+	if (not db) then
+		return
+	end
 	db.slaveMaster = master
 	db.queuePositionUpdate = true
 	db.queueSizeUpdate = true
 end
 
 LibChatWindow.UpdateChatWindowPositions = function(self, forced)
-	for _,frame in self:GetAllHandledChatWindows() do 
+	for _,frame in self:GetAllHandledChatWindows() do
 		local db = windows[frame]
-		if (db.position or db.slaveMaster) and (db.queuePositionUpdate or forced) then 
+		if (db.position or db.slaveMaster) and (db.queuePositionUpdate or forced) then
 			-- Is this the best way to stop blizzard from taking control back?
 			frame.ignoreFramePositionManager = true
-			if db.slaveMaster then 
+			if db.slaveMaster then
 				frame:ClearAllPoints()
 				frame:SetAllPoints(db.slaveMaster)
-			else 
+			else
 				frame.Place(frame, unpack(db.position))
-			end 
+			end
 			db.queuePositionUpdate = nil
-		end 
+		end
 		self:ForAllEmbeds("PostUpdateChatWindowPosition", frame)
-	end 
+	end
 end
 
 LibChatWindow.UpdateChatWindowSizes = function(self, forced)
-	for _,frame in self:GetAllHandledChatWindows() do 
+	for _,frame in self:GetAllHandledChatWindows() do
 		local db = windows[frame]
-		if (db.size or db.slaveMaster) and (db.queueSizeUpdate or forced) then 
-			if db.slaveMaster then 
+		if (db.size or db.slaveMaster) and (db.queueSizeUpdate or forced) then
+			if db.slaveMaster then
 				local scale = db.slaveMaster:GetEffectiveScale()
 				local width, height = db.slaveMaster:GetSize()
 				frame:SetSize(width/scale, height/scale)
-			else 
+			else
 				frame:SetSize(unpack(db.size))
-			end 
+			end
 			db.queueSizeUpdate = nil
-		end 
+		end
 		self:ForAllEmbeds("PostUpdateChatWindowSize", frame)
-	end 
+	end
 end
 
 LibChatWindow.UpdateChatWindowColors = function(self, forced)
-	for _,frame in self:GetAllHandledChatWindows() do 
+	for _,frame in self:GetAllHandledChatWindows() do
 		self:ForAllEmbeds("PostUpdateChatWindowColors", frame)
-	end 
+	end
 end
 
 local chatFrameTextures = {
 	"Background",
-	"TopLeftTexture", 
-	"BottomLeftTexture", 
-	"TopRightTexture", 
+	"TopLeftTexture",
+	"BottomLeftTexture",
+	"TopRightTexture",
 	"BottomRightTexture",
-	"LeftTexture", 
-	"RightTexture", 
-	"BottomTexture", 
+	"LeftTexture",
+	"RightTexture",
+	"BottomTexture",
 	"TopTexture"
 }
 
 local buttonFrameTextures = {
 	"Background",
-	"TopLeftTexture", 
-	"BottomLeftTexture", 
-	"TopRightTexture", 
+	"TopLeftTexture",
+	"BottomLeftTexture",
+	"TopRightTexture",
 	"BottomRightTexture",
-	"LeftTexture", 
-	"RightTexture", 
-	"BottomTexture", 
+	"LeftTexture",
+	"RightTexture",
+	"BottomTexture",
 	"TopTexture"
 }
 
 local editBoxTextures = {
-	"Left", 
-	"Mid", 
-	"Right", 
-	"FocusLeft", 
-	"FocusMid", 
-	"FocusRight", 
+	"Left",
+	"Mid",
+	"Right",
+	"FocusLeft",
+	"FocusMid",
+	"FocusRight",
 	"ConversationIcon"
 }
 
 local tabTextures = {
 	"Left",
-	"Middle", 
-	"Right", 
-	"SelectedLeft", 
-	"SelectedMiddle", 
-	"SelectedRight", 
-	"HighlightLeft", 
-	"HighlightMiddle", 
+	"Middle",
+	"Right",
+	"SelectedLeft",
+	"SelectedMiddle",
+	"SelectedRight",
+	"HighlightLeft",
+	"HighlightMiddle",
 	"HighlightRight"
 }
 
 LibChatWindow.GetChatWindowTextures = function(self, frame)
 	local counter = 0
 	local name = frame:GetName()
-	return function() 
+	return function()
 		counter = counter + 1
-		if chatFrameTextures[counter] then 
+		if chatFrameTextures[counter] then
 			local tex = _G[name..chatFrameTextures[counter]]
-			if tex then 
-				return tex 
-			end 
-		end 
-	end 
-end 
+			if tex then
+				return tex
+			end
+		end
+	end
+end
 
 LibChatWindow.GetChatWindowButtonFrameTextures = function(self, frame)
 	local counter = 0
 	local buttonFrame = _G[frame:GetName().."ButtonFrame"]
-	if buttonFrame then 
+	if buttonFrame then
 		local name = buttonFrame:GetName()
-		return function() 
+		return function()
 			counter = counter + 1
-			if buttonFrameTextures[counter] then 
+			if buttonFrameTextures[counter] then
 				local tex = _G[name..buttonFrameTextures[counter]]
-				if tex then 
-					return tex 
-				end 
-			end 
-		end 
-	end 
-end 
+				if tex then
+					return tex
+				end
+			end
+		end
+	end
+end
 
 LibChatWindow.GetChatWindowEditBoxTextures = function(self, frame)
 	local counter = 0
 	local editBox = _G[frame:GetName().."EditBox"]
-	if editBox then 
+	if editBox then
 		local name = editBox:GetName()
-		return function() 
+		return function()
 			counter = counter + 1
-			if editBoxTextures[counter] then 
+			if editBoxTextures[counter] then
 				local tex = _G[name..editBoxTextures[counter]]
-				if tex then 
-					return tex 
-				end 
-			end 
-		end 
-	end 
+				if tex then
+					return tex
+				end
+			end
+		end
+	end
 end
 
 LibChatWindow.GetChatWindowTabTextures = function(self, frame)
 	local counter = 0
 	local tab = _G[frame:GetName().."Tab"]
-	if tab then 
+	if tab then
 		local name = tab:GetName()
-		return function() 
+		return function()
 			counter = counter + 1
-			if tabTextures[counter] then 
+			if tabTextures[counter] then
 				local tex = _G[name..tabTextures[counter]]
-				if tex then 
-					return tex 
-				end 
-			end 
-		end 
-	end 
-end 
+				if tex then
+					return tex
+				end
+			end
+		end
+	end
+end
 
 LibChatWindow.GetChatWindowMenuButton = function(self)
 	return _G.ChatFrameMenuButton
-end 
+end
 
 LibChatWindow.GetChatWindowChannelButton = function(self)
 	return _G.ChatFrameChannelButton
-end 
+end
 
 LibChatWindow.GetChatWindowVoiceDeafenButton = function(self)
 	return _G.ChatFrameToggleVoiceDeafenButton
-end 
+end
 
 LibChatWindow.GetChatWindowVoiceMuteButton = function(self)
 	return _G.ChatFrameToggleVoiceMuteButton
-end 
+end
 
 LibChatWindow.GetChatWindowFriendsButton = function(self)
 	return _G.FriendsMicroButton
-end 
+end
 
 LibChatWindow.GetChatWindowClickAnywhereButton = function(self, frame)
 	return _G[frame:GetName().."ClickAnywhereButton"]
-end 
+end
 
 LibChatWindow.GetChatWindowButtonFrame = function(self, frame)
 	return _G[frame:GetName().."ButtonFrame"]
-end 
+end
 
 LibChatWindow.GetChatWindowMinimizeButton = function(self, frame)
 	return _G[frame:GetName().."ButtonFrameMinimizeButton"]
-end 
+end
 
 LibChatWindow.GetChatWindowEditBox = function(self, frame)
 	return _G[frame:GetName().."EditBox"]
-end 
+end
 
 LibChatWindow.GetChatWindowCurrentEditBox = function(self, frame)
 	if (GetCVar("chatStyle") == "classic") then
@@ -362,80 +364,80 @@ LibChatWindow.GetChatWindowCurrentEditBox = function(self, frame)
 		end
 		return _G[frame:GetName().."EditBox"]
 	end
-end 
+end
 
 LibChatWindow.GetChatWindowScrollUpButton = function(self, frame)
 	return _G[frame:GetName().."ButtonFrameUpButton"]
-end 
+end
 
 LibChatWindow.GetChatWindowScrollDownButton = function(self, frame)
 	return _G[frame:GetName().."ButtonFrameDownButton"]
-end 
+end
 
 LibChatWindow.GetChatWindowScrollToBottomButton = function(self, frame)
 	if (IsRetail) then
 		return frame.ScrollToBottomButton
-	elseif (IsClassic or IsTBC) then
+	elseif (IsClassic or IsTBC or IsWrath) then
 		return _G[frame:GetName().."ButtonFrameBottomButton"]
 	end
-end 
+end
 
 LibChatWindow.GetChatWindowScrollBar = function(self, frame)
 	return frame.ScrollBar
-end 
+end
 
 LibChatWindow.GetChatWindowScrollBarThumbTexture = function(self, frame)
 	return frame.ScrollBar and frame.ScrollBar.ThumbTexture
-end 
+end
 
 LibChatWindow.GetChatWindowTab = function(self, frame)
 	return _G[frame:GetName().."Tab"]
-end 
+end
 
 LibChatWindow.GetChatWindowTabText = function(self, frame)
 	return _G[frame:GetName().."TabText"]
-end 
+end
 
 LibChatWindow.GetChatWindowTabIcon = function(self, frame)
 	return _G[frame:GetName().."TabConversationIcon"]
-end 
+end
 
 LibChatWindow.GetSelectedChatFrame = function(self)
 	return _G.SELECTED_CHAT_FRAME
-end 
+end
 
 LibChatWindow.OnEvent = function(self, event, ...)
 	if (event == "UPDATE_CHAT_WINDOWS")
-	or (event == "UPDATE_FLOATING_CHAT_WINDOWS") 
-	or (event == "UI_SCALE_CHANGED") 
-	or (event == "DISPLAY_SIZE_CHANGED") 
-	or (event == "GP_VIDEO_OPTIONS_APPLY") 
-	or (event == "GP_VIDEO_OPTIONS_OKAY") 
-	or (event == "PLAYER_ENTERING_WORLD") then 
+	or (event == "UPDATE_FLOATING_CHAT_WINDOWS")
+	or (event == "UI_SCALE_CHANGED")
+	or (event == "DISPLAY_SIZE_CHANGED")
+	or (event == "GP_VIDEO_OPTIONS_APPLY")
+	or (event == "GP_VIDEO_OPTIONS_OKAY")
+	or (event == "PLAYER_ENTERING_WORLD") then
 		self:UpdateChatWindowPositions(true)
-	end 
+	end
 
 	if (event == "UPDATE_CHAT_WINDOWS")
-	or (event == "UPDATE_FLOATING_CHAT_WINDOWS") 
-	or (event == "UI_SCALE_CHANGED") 
-	or (event == "DISPLAY_SIZE_CHANGED") 
-	or (event == "GP_VIDEO_OPTIONS_APPLY") 
-	or (event == "GP_VIDEO_OPTIONS_OKAY") 
-	or (event == "PLAYER_ENTERING_WORLD") then 
+	or (event == "UPDATE_FLOATING_CHAT_WINDOWS")
+	or (event == "UI_SCALE_CHANGED")
+	or (event == "DISPLAY_SIZE_CHANGED")
+	or (event == "GP_VIDEO_OPTIONS_APPLY")
+	or (event == "GP_VIDEO_OPTIONS_OKAY")
+	or (event == "PLAYER_ENTERING_WORLD") then
 		self:UpdateChatWindowSizes(true)
-	end 
+	end
 
 	if (event == "UPDATE_CHAT_COLOR")
-	or (event == "PLAYER_ENTERING_WORLD") then 
+	or (event == "PLAYER_ENTERING_WORLD") then
 		self:UpdateChatWindowColors(true)
-	end 
+	end
 
-	if (event == "GP_OPEN_TEMPORARY_CHAT_WINDOW") then 
+	if (event == "GP_OPEN_TEMPORARY_CHAT_WINDOW") then
 		local currentFrame = ...
 		self:HandleWindow(currentFrame, currentFrame.isTemporary, select(2, ...))
-	end 
+	end
 
-end 
+end
 
 LibChatWindow.Enable = function(self)
 	self:UnregisterAllEvents()
@@ -457,12 +459,12 @@ LibChatWindow.Enable = function(self)
 	self:RegisterMessage("GP_OPEN_TEMPORARY_CHAT_WINDOW", "OnEvent")
 
 	-- proxy temporary windows creation through our event system
-	-- @return currentFrame, chatType, chatTarget, sourceChatFrame, selectWindow 
-	self:SetSecureHook("FCF_OpenTemporaryWindow", function(...) 
+	-- @return currentFrame, chatType, chatTarget, sourceChatFrame, selectWindow
+	self:SetSecureHook("FCF_OpenTemporaryWindow", function(...)
 		local frame = FCF_GetCurrentChatFrame()
-		if frame then 
-			self:SendMessage("GP_OPEN_TEMPORARY_CHAT_WINDOW", frame, ...) 
-		end 
+		if frame then
+			self:SendMessage("GP_OPEN_TEMPORARY_CHAT_WINDOW", frame, ...)
+		end
 	end, "GP_OPEN_TEMPORARY_CHAT_WINDOW")
 
 	-- initial positioning
@@ -470,7 +472,7 @@ LibChatWindow.Enable = function(self)
 
 	-- Need to set this to avoid frame popping back up
 	CHAT_FRAME_BUTTON_FRAME_MIN_ALPHA = 0
-end 
+end
 
 LibChatWindow:UnregisterAllEvents()
 LibChatWindow:RegisterEvent("PLAYER_ENTERING_WORLD", "Enable")
@@ -480,61 +482,61 @@ LibChatWindow:RegisterEvent("PLAYER_ENTERING_WORLD", "Enable")
 local embedMethods = {
 
 	-- runs post create callbacks for all frames
-	HandleAllChatWindows = true, 
+	HandleAllChatWindows = true,
 
 	-- chat frame queries
-	IsChatWindowHandled = true, 
+	IsChatWindowHandled = true,
 	IsChatWindowTemporary = true,
 
 	-- chat frames tables
-	GetAllChatWindows = true, 
-	GetAllTemporaryChatWindows = true, 
-	GetAllHandledChatWindows = true, 
+	GetAllChatWindows = true,
+	GetAllTemporaryChatWindows = true,
+	GetAllHandledChatWindows = true,
 
 	-- returns currently selected chat window, if any
 	GetSelectedChatFrame = true,
 
 	-- returns currently active editbox, if any
-	GetChatWindowCurrentEditBox = true, 
+	GetChatWindowCurrentEditBox = true,
 
 	-- returns the friends micro button (above the chat menu button)
-	GetChatWindowFriendsButton = true, 
+	GetChatWindowFriendsButton = true,
 
 	-- returns specific objects
-	GetChatWindowClickAnywhereButton = true, 
+	GetChatWindowClickAnywhereButton = true,
 	GetChatWindowButtonFrame = true,
-	GetChatWindowChannelButton = true, 
-	GetChatWindowEditBox = true, 
+	GetChatWindowChannelButton = true,
+	GetChatWindowEditBox = true,
 	GetChatWindowMenuButton = true,
-	GetChatWindowMinimizeButton = true, 
-	GetChatWindowScrollUpButton = true, 
-	GetChatWindowScrollDownButton = true, 
-	GetChatWindowScrollToBottomButton = true, 
-	GetChatWindowScrollBar = true, 
-	GetChatWindowScrollBarThumbTexture = true, 
-	GetChatWindowTab = true, 
-	GetChatWindowTabIcon = true, 
-	GetChatWindowTabText = true, 
-	GetChatWindowVoiceDeafenButton = true, 
-	GetChatWindowVoiceMuteButton = true, 
+	GetChatWindowMinimizeButton = true,
+	GetChatWindowScrollUpButton = true,
+	GetChatWindowScrollDownButton = true,
+	GetChatWindowScrollToBottomButton = true,
+	GetChatWindowScrollBar = true,
+	GetChatWindowScrollBarThumbTexture = true,
+	GetChatWindowTab = true,
+	GetChatWindowTabIcon = true,
+	GetChatWindowTabText = true,
+	GetChatWindowVoiceDeafenButton = true,
+	GetChatWindowVoiceMuteButton = true,
 
 	-- texture iterators (for tex in self:<Method>() do )
-	GetChatWindowTextures = true, 
+	GetChatWindowTextures = true,
 	GetChatWindowButtonFrameTextures = true,
-	GetChatWindowEditBoxTextures = true, 
-	GetChatWindowTabTextures = true, 
+	GetChatWindowEditBoxTextures = true,
+	GetChatWindowTabTextures = true,
 
 	-- chat frame setup
-	SetChatWindowPosition = true, 
-	SetChatWindowSize = true, 
+	SetChatWindowPosition = true,
+	SetChatWindowSize = true,
 	SetChatWindowAsSlaveTo = true
 }
 
 -- Iterate all embedded modules for the given method name or function
--- Silently fail if nothing exists. We don't want an error here. 
+-- Silently fail if nothing exists. We don't want an error here.
 LibChatWindow.ForAllEmbeds = function(self, method, ...)
-	for target in pairs(self.embeds) do 
-		if (target) and not(target.IsUserDisabled and target:IsUserDisabled()) then 
+	for target in pairs(self.embeds) do
+		if (target) and not(target.IsUserDisabled and target:IsUserDisabled()) then
 			if (type(method) == "string") then
 				if target[method] then
 					target[method](target, ...)
@@ -542,9 +544,9 @@ LibChatWindow.ForAllEmbeds = function(self, method, ...)
 			else
 				method(target, ...)
 			end
-		end 
-	end 
-end 
+		end
+	end
+end
 
 LibChatWindow.Embed = function(self, target)
 	for method in pairs(embedMethods) do

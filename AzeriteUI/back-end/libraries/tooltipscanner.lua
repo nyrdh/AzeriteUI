@@ -1,4 +1,4 @@
-local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 93)
+local LibTooltipScanner = Wheel:Set("LibTooltipScanner", 94)
 if (not LibTooltipScanner) then
 	return
 end
@@ -68,6 +68,7 @@ local UnitSex = UnitSex
 local DoesSpellExist = C_Spell.DoesSpellExist
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
 local IsWrath = LibClientBuild:IsWrath()

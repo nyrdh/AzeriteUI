@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 94)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 95)
 if (not LibUnitFrame) then
 	return
 end
@@ -64,9 +64,10 @@ local UnitIsFriend = UnitIsFriend
 local UnitName = UnitName
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
-local IsWotLK = LibClientBuild:IsWotLK()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Library Registries
@@ -410,7 +411,7 @@ LibUnitFrame.GetUnitFrameVisibilityDriver = function(self, unit, hideInVehicles)
 	if (unit == "player") then
 		if (IsClassic or IsTBC) then
 			visDriver = "[@player,exists][mounted]show;hide"
-		elseif (IsWotLK) then
+		elseif (IsWrath) then
 			-- UNTESTED!
 			if (hideInVehicles) then
 				visDriver = "[vehicleui]hide;[@player,exists][possessbar][overridebar][mounted]show;hide"
@@ -427,7 +428,7 @@ LibUnitFrame.GetUnitFrameVisibilityDriver = function(self, unit, hideInVehicles)
 			end
 		end
 	elseif (unit == "pet") then
-		if (IsWotLK) then
+		if (IsWrath) then
 			-- UNTESTED!
 			local prefix = "[@player,noexists]hide;"
 			if (hideInVehicles) then
@@ -471,7 +472,7 @@ end
 
 LibUnitFrame.GetUnitFrameUnitDriver = function(self, unit)
 	local unitDriver
-	if (IsWotLK) then
+	if (IsWrath) then
 		-- UNTESTED!
 		if (unit == "player") then
 			unitDriver = "[nooverridebar,vehicleui]pet;[overridebar,@vehicle,exists]vehicle;player"

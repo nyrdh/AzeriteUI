@@ -20,7 +20,10 @@ local GetWatchedFactionInfo = GetWatchedFactionInfo
 local IsFactionParagon = C_Reputation and C_Reputation.IsFactionParagon
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
+local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Number Abbreviation
@@ -28,47 +31,47 @@ local short = LibNumbers:GetNumberAbbreviationShort()
 local large = LibNumbers:GetNumberAbbreviationLong()
 
 local UpdateValue = function(element, current, min, max, factionName, standingID, standingLabel, isFriend)
-	local value = element.Value or element:IsObjectType("FontString") and element 
-	local barMax = max - min 
+	local value = element.Value or element:IsObjectType("FontString") and element
+	local barMax = max - min
 	local barValue = current - min
-	if value.showPercent then 
-		if (barMax > 0) then 
+	if value.showPercent then
+		if (barMax > 0) then
 			value:SetFormattedText("%.0f%%", barValue/barMax*100)
-		else 
+		else
 			value:SetText(MAXIMUM)
-		end 
-	elseif value.showDeficit then 
-		if (barMax > 0) then 
+		end
+	elseif value.showDeficit then
+		if (barMax > 0) then
 			value:SetFormattedText(short(barMax - barValue))
-		else 
+		else
 			value:SetText(MAXIMUM)
-		end 
-	else 
+		end
+	else
 		value:SetFormattedText(short(barValue))
 	end
 	local percent = value.Percent
-	if percent then 
-		if (barMax > 0) then 
+	if percent then
+		if (barMax > 0) then
 			percent:SetFormattedText("%.0f%%", barValue/barMax*100)
-		else 
+		else
 			percent:SetText(MAXIMUM)
-		end 
-	end 
-	if element.colorValue then 
+		end
+	end
+	if element.colorValue then
 		local color
-		if restedLeft then 
+		if restedLeft then
 			local colors = element._owner.colors
 			color = colors[isFriend and "friendship" or "reaction"][standingID]
-		else 
+		else
 			local colors = element._owner.colors
 			color = colors.xpValue or colors.xp
-		end 
+		end
 		value:SetTextColor(color[1], color[2], color[3])
-		if percent then 
+		if percent then
 			percent:SetTextColor(color[1], color[2], color[3])
-		end 
-	end 
-end 
+		end
+	end
+end
 
 local Update = function(self, event, unit)
 	local element = self.Reputation
@@ -79,7 +82,7 @@ local Update = function(self, event, unit)
 	local name, reaction, min, max, current, factionID = GetWatchedFactionInfo()
 	if (not name) then
 		return element:Hide()
-	end 
+	end
 
 	if (IsRetail) then
 		if (factionID and IsFactionParagon(factionID)) then
@@ -102,18 +105,18 @@ local Update = function(self, event, unit)
 			if (IsRetail) then
 				local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID)
 
-				if (friendID) then 
+				if (friendID) then
 					isFriend = true
-					if (nextFriendThreshold) then 
+					if (nextFriendThreshold) then
 						min = friendThreshold
 						max = nextFriendThreshold
 					else
 						min = 0
 						max = friendMaxRep
 						current = friendRep
-					end 
+					end
 					standingLabel = friendTextLevel
-				end 
+				end
 			end
 
 			standingID = standingId
@@ -121,47 +124,47 @@ local Update = function(self, event, unit)
 		end
 	end
 
-	if (not standingID) then 
+	if (not standingID) then
 		return element:Hide()
 	end
 
-	if (not isFriend) then 
+	if (not isFriend) then
 		standingLabel = _G["FACTION_STANDING_LABEL"..standingID]
 	end
 
-	if (element:IsObjectType("StatusBar")) then 
-		local barMax = max - min 
+	if (element:IsObjectType("StatusBar")) then
+		local barMax = max - min
 		local barValue = current - min
-		if (barMax == 0) then 
+		if (barMax == 0) then
 			element:SetMinMaxValues(0,1)
 			element:SetValue(1)
-		else 
+		else
 			element:SetMinMaxValues(0, max-min)
 			element:SetValue(current-min)
-		end 
-		if (element.colorStanding) then 
+		end
+		if (element.colorStanding) then
 			local color = self.colors[isFriend and "friendship" or "reaction"][standingID]
 			element:SetStatusBarColor(color[1], color[2], color[3])
-		end 
-	end 
-	
-	if (element.Value) then 
+		end
+	end
+
+	if (element.Value) then
 		(element.OverrideValue or element.UpdateValue) (element, current, min, max, name, standingID, standingLabel, isFriend)
-	end 
-	
-	if (not element:IsShown()) then 
+	end
+
+	if (not element:IsShown()) then
 		element:Show()
 	end
 
-	if (element.PostUpdate) then 
+	if (element.PostUpdate) then
 		return element:PostUpdate(current, min, max, name, standingID, standingLabel, isFriend)
-	end 
-	
-end 
+	end
+
+end
 
 local Proxy = function(self, ...)
 	return (self.Reputation.Override or Update)(self, ...)
-end 
+end
 
 local ForceUpdate = function(element, ...)
 	return Proxy(element._owner, "Forced", ...)
@@ -178,7 +181,7 @@ local Enable = function(self)
 
 		return true
 	end
-end 
+end
 
 local Disable = function(self)
 	local element = self.Reputation
@@ -186,9 +189,9 @@ local Disable = function(self)
 		element:Hide()
 		self:UnregisterEvent("UPDATE_FACTION", Proxy)
 	end
-end 
+end
 
 -- Register it with compatible libraries
-for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)), (Wheel("LibMinimap", true)) }) do 
-	Lib:RegisterElement("Reputation", Enable, Disable, Proxy, 3)
-end 
+for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)), (Wheel("LibMinimap", true)) }) do
+	Lib:RegisterElement("Reputation", Enable, Disable, Proxy, 5)
+end

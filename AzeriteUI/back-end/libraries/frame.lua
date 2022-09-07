@@ -1,5 +1,5 @@
-local LibFrame = Wheel:Set("LibFrame", 72)
-if (not LibFrame) then	
+local LibFrame = Wheel:Set("LibFrame", 73)
+if (not LibFrame) then
 	return
 end
 
@@ -52,37 +52,39 @@ local UIParent = UIParent
 local WorldFrame = WorldFrame
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Default keyword used as a fallback. this will not be user editable.
 local KEYWORD_DEFAULT = "UICenter"
 
--- Create the new frame parent 
+-- Create the new frame parent
 if (not LibFrame.frameParent) then
 	LibFrame.frameParent = LibFrame.frameParent or CreateFrame("Frame", nil, UIParent, "SecureHandlerAttributeTemplate")
 	RegisterAttributeDriver(LibFrame.frameParent, "state-visibility", "[combat]show;show")
 else
 	UnregisterAttributeDriver(LibFrame.frameParent, "state-visibility")
 	RegisterAttributeDriver(LibFrame.frameParent, "state-visibility", "[combat]show;show")
-end 
+end
 
 -- Create the cache frame
 if (not LibFrame.frameMemoryCache) then
 	LibFrame.frameMemoryCache = LibFrame.frameMemoryCache or CreateFrame("Frame", nil, UIParent)
 	LibFrame.frameMemoryCache:SetSize(2,2)
 	LibFrame.frameMemoryCache:SetPoint("BOTTOM", UIParent, "TOP", 0, 2)
-end 
+end
 
 -- Create the UICenter frame
 if (not LibFrame.frame) then
 	LibFrame.frame = CreateFrame("Frame", nil, LibFrame.frameParent, "SecureHandlerAttributeTemplate")
-else 
+else
 	-- needs to be done since not all previous versions held this frame
-	LibFrame.frame:SetParent(LibFrame.frameParent) 
+	LibFrame.frame:SetParent(LibFrame.frameParent)
 	UnregisterAttributeDriver(LibFrame.frame, "state-visibility")
-end 
+end
 
 -- Return a value rounded to the nearest integer.
 local math_round = function(value)
@@ -117,7 +119,7 @@ local SetDisplaySize = function(relativeScale, ratio, altRatio, useSmallestRatio
 	end
 
 	-- If a stored set of ratios exist, apply them.
-	if (ratio) then 
+	if (ratio) then
 		local ratioWidth = math_round(displayHeight*ratio)
 		local altRatioWidth = math_round(displayHeight*(altRatio or ratio))
 
@@ -138,7 +140,7 @@ local SetDisplaySize = function(relativeScale, ratio, altRatio, useSmallestRatio
 end
 SetDisplaySize()
 
-if (IsClassic or IsTBC) then
+if (IsClassic or IsTBC or IsWrath) then
 	-- Forcefully re-show this in combat if somebody has hidden it.
 	RegisterAttributeDriver(LibFrame.frame, "state-visibility", "[combat]show;show")
 
@@ -149,7 +151,7 @@ elseif (IsRetail) then
 end
 
 -- Keyword registry to translate words to frame handles used for anchoring or parenting
-LibFrame.keyWords = LibFrame.keyWords or { [KEYWORD_DEFAULT] = function() return LibFrame.frame end } 
+LibFrame.keyWords = LibFrame.keyWords or { [KEYWORD_DEFAULT] = function() return LibFrame.frame end }
 LibFrame.frames = LibFrame.frames or {}
 LibFrame.fontStrings = LibFrame.fontStrings or {}
 LibFrame.textures = LibFrame.textures or {}
@@ -181,12 +183,12 @@ local blizzSetHeight = FrameMethods.SetHeight
 
 -- Utility Functions
 -----------------------------------------------------------------
--- Syntax check 
+-- Syntax check
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if type(value) == select(i, ...) then 
-			return 
+		if type(value) == select(i, ...) then
+			return
 		end
 	end
 	local types = string_join(", ", ...)
@@ -201,7 +203,7 @@ end
 
 -- Translates keywords and parses normal frames, but doesn't include the defaults and fallbacks
 local parseAnchorStrict = function(anchor)
-	return anchor and (keyWords[anchor] and keyWords[anchor]() or _G[anchor] and _G[anchor] or anchor) 
+	return anchor and (keyWords[anchor] and keyWords[anchor]() or _G[anchor] and _G[anchor] or anchor)
 end
 
 local parseTemplate = function(template)
@@ -265,7 +267,7 @@ local frameWidgetPrototype = {
 		end
 	end,
 
-	-- Set a single point on a widget without clearing first. 
+	-- Set a single point on a widget without clearing first.
 	-- Like the above function, this too accepts keywords as anchors.
 	Point = function(self, ...)
 		local numArgs = select("#", ...)
@@ -295,37 +297,37 @@ local frameWidgetPrototype = {
 		elseif (numArgs == 2) then
 			self:SetSize(...)
 		end
-	end, 
+	end,
 
-	-- Assign multiple properties at once. 
-	-- Intented to simplify assignment operations in front-end stylesheets. 
+	-- Assign multiple properties at once.
+	-- Intented to simplify assignment operations in front-end stylesheets.
 	-- Process is generic enough to be a good fit for the back-end.
 	SetProperties = function(self, ...)
 		local numArgs = select("#", ...)
-		if (numArgs == 1) then 
+		if (numArgs == 1) then
 			local list = ...
-			for property,value in pairs(list) do 
+			for property,value in pairs(list) do
 				self[property] = value
 			end
-		else 
-			for i = 1,numArgs,2 do 
+		else
+			for i = 1,numArgs,2 do
 				local property,value = select(i, ...)
 				self[property] = value
-			end 
-		end 
+			end
+		end
 	end,
 
-	-- ConsolePort assumes this exists on a multiple of frames, 
+	-- ConsolePort assumes this exists on a multiple of frames,
 	-- so we're adding it and just opt out of various things by setting it to true.
-	IsForbidden = function(self) 
+	IsForbidden = function(self)
 		return true
 	end
-	
+
 }
 
 local framePrototype
 framePrototype = {
-	CreateFrame = function(self, frameType, frameName, template) 
+	CreateFrame = function(self, frameType, frameName, template)
 		local frame = embed(CreateFrame(frameType or "Frame", frameName, self, parseTemplate(template)), framePrototype)
 		frames[frame] = true
 		return frame
@@ -342,14 +344,14 @@ framePrototype = {
 	end
 }
 
--- Embed custom frame widget methods in the main frame prototype too 
+-- Embed custom frame widget methods in the main frame prototype too
 embed(framePrototype, frameWidgetPrototype)
 
--- Allow more methods to be added to our frame objects. 
+-- Allow more methods to be added to our frame objects.
 -- This will cascade down through all LibFrames, so use with caution!
 LibFrame.AddMethod = function(self, method, func)
 	-- Silently fail if the method exists.
-	-- *Edit: NO! Libraries that add newer version of their methods 
+	-- *Edit: NO! Libraries that add newer version of their methods
 	--  must be able to update those methods upon library updates!
 	--if (framePrototype[method]) then
 	--	return
@@ -358,35 +360,35 @@ LibFrame.AddMethod = function(self, method, func)
 	-- Add the new method to the prototype
 	framePrototype[method] = func
 
-	-- Add the method to any existing frames, 
-	-- since we're using embedding and not inheritance. 
+	-- Add the method to any existing frames,
+	-- since we're using embedding and not inheritance.
 	for frame in pairs(frames) do
 		frame[method] = func
 	end
 end
 
 -- Register a keyword to trigger a function call when used as an anchor on a frame
--- Even though embeddable, this method uses the global keyword table. 
+-- Even though embeddable, this method uses the global keyword table.
 -- There are no local ones, and this is intentional.
 LibFrame.RegisterKeyword = function(self, keyWord, func)
 	LibFrame.keyWords[keyWord] = func
 end
 
 -- Create a frame with certain extra methods we like to have
-LibFrame.CreateFrame = function(self, frameType, frameName, parent, template) 
+LibFrame.CreateFrame = function(self, frameType, frameName, parent, template)
 
-	-- Do some argument handling to allow the directly embedded version to skip 
+	-- Do some argument handling to allow the directly embedded version to skip
 	-- the 'parent' argument in the same manner the inherited frame method does.
-	-- Because we don't really want two different syntaxes. 
+	-- Because we don't really want two different syntaxes.
 	local parsedAnchor = parseAnchorStrict(parent)
-	if (template) then 
+	if (template) then
 		template = parseTemplate(template)
 	end
-	if (not parsedAnchor) then 
+	if (not parsedAnchor) then
 		parsedAnchor = self.IsObjectType and parseAnchor(self) or parseAnchor(parent)
-		if (type(parent) == "string") and (not template) then 
-			template = parent 
-		end 
+		if (type(parent) == "string") and (not template) then
+			template = parent
+		end
 	end
 
 	-- Create the new frame and copy our custom methods in
@@ -394,7 +396,7 @@ LibFrame.CreateFrame = function(self, frameType, frameName, parent, template)
 
 	-- Add the frame to our registry
 	frames[frame] = true
-	
+
 	-- Return it to the user
 	return frame
 end
@@ -441,26 +443,26 @@ LibFrame.SetAspectRatio = function(self, ratio, altRatio, useSmallestRatio)
 end
 
 LibFrame.UpdateDisplaySize = function(self)
-	if (InCombatLockdown()) then 
-		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent") 
-	end 
+	if (InCombatLockdown()) then
+		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
+	end
 	SetDisplaySize()
 end
 
 LibFrame.OnEvent = function(self, event, ...)
-	if (InCombatLockdown()) then 
-		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent") 
-	elseif (event == "PLAYER_REGEN_ENABLED") then 
+	if (InCombatLockdown()) then
+		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
+	elseif (event == "PLAYER_REGEN_ENABLED") then
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
-	end 
+	end
 	self:UpdateDisplaySize()
 end
 
 LibFrame.Enable = function(self)
 
-	-- Get rid of old events from previous handlers, 
-	-- if this library for some reason was overwritten 
-	-- by a more recent version from a load on demand addon. 
+	-- Get rid of old events from previous handlers,
+	-- if this library for some reason was overwritten
+	-- by a more recent version from a load on demand addon.
 	self:UnregisterAllEvents()
 
 	-- New system only needs to capture changes and events
@@ -470,11 +472,11 @@ LibFrame.Enable = function(self)
 	-- Register for changes to the parent frames
 	self:RegisterMessage("GP_WORLD_SCALE_UPDATE", "OnEvent")
 	self:RegisterMessage("GP_INTERFACE_SCALE_UPDATE", "OnEvent")
-	
+
 	-- Could it be enough to just track frame changes and not events?
 	self:SetHook(UIParent, "OnSizeChanged", "UpdateDisplaySize", "LibFrame_UIParent_OnSizeChanged")
 	self:SetHook(WorldFrame, "OnSizeChanged", "UpdateDisplaySize", "LibFrame_WorldFrame_OnSizeChanged")
-end 
+end
 
 LibFrame:UnregisterAllEvents()
 LibFrame:Enable()

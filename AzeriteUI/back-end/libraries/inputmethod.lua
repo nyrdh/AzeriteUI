@@ -1,4 +1,4 @@
-local LibInputMethod = Wheel:Set("LibInputMethod", 10)
+local LibInputMethod = Wheel:Set("LibInputMethod", 11)
 if (not LibInputMethod) then
 	return
 end
@@ -20,8 +20,10 @@ local GetActiveDeviceID = C_GamePad and C_GamePad.GetActiveDeviceID
 local GetDeviceMappedState = C_GamePad and C_GamePad.GetDeviceMappedState
 
 -- WoW Client Constants
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Library registries
@@ -111,15 +113,15 @@ LibInputMethod.GetGamepadType = function(self)
 		local mapped = GetDeviceMappedState(deviceID)
 		if (mapped) then
 			-- All except "Letters" is untested!
-			if (mapped.labelStyle == "Letters") then 
+			if (mapped.labelStyle == "Letters") then
 				return "xbox"
-			elseif (mapped.labelStyle == "LettersReversed") then 
+			elseif (mapped.labelStyle == "LettersReversed") then
 				return "xbox-reversed"
-			elseif (mapped.labelStyle == "Shapes") then 
+			elseif (mapped.labelStyle == "Shapes") then
 				return "playstation"
-			elseif (mapped.labelStyle == "Generic") then 
+			elseif (mapped.labelStyle == "Generic") then
 				return "generic"
-			end	
+			end
 		end
 	end
 end

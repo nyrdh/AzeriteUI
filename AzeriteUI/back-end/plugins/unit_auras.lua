@@ -31,6 +31,7 @@ local UnitIsUnit = UnitIsUnit
 
 -- Constants for client version
 local IsRetail = LibClientBuild:IsRetail()
+local IsWrath = LibClientBuild:IsWrath()
 
 -- Blizzard Textures
 local EDGE_TEXTURE = [[Interface\Cooldown\edge]]
@@ -62,15 +63,15 @@ local formatTime = function(time)
 		return "%.0f%s", math_ceil(time / HOUR), "h"
 	elseif (time > MINUTE) then -- more than a minute
 		return "%.0f%s", math_ceil(time / MINUTE), "m"
-	elseif (time > 5) then 
+	elseif (time > 5) then
 		return "%.0f", math_ceil(time)
-	elseif (time > .9) then 
+	elseif (time > .9) then
 		return "|cffff8800%.0f|r", math_ceil(time)
 	elseif (time > .05) then
 		return "|cffff0000%.0f|r", time*10 - time*10%1
 	else
 		return ""
-	end	
+	end
 end
 
 local auraSort = function(a,b)
@@ -103,7 +104,7 @@ local auraSort = function(a,b)
 				else
 
 					-- Sort by remaining time, first expiring first.
-					return (a.expirationTime < b.expirationTime) 
+					return (a.expirationTime < b.expirationTime)
 				end
 			end
 		end
@@ -145,7 +146,7 @@ local auraSortBuffsFirst = function(a,b)
 					else
 
 						-- Sort by remaining time, first expiring first.
-						return (a.expirationTime < b.expirationTime) 
+						return (a.expirationTime < b.expirationTime)
 					end
 				end
 			else
@@ -191,7 +192,7 @@ local auraSortDebuffsFirst = function(a,b)
 					else
 
 						-- Sort by remaining time, first expiring first.
-						return (a.expirationTime < b.expirationTime) 
+						return (a.expirationTime < b.expirationTime)
 					end
 				end
 			else
@@ -276,12 +277,12 @@ Aura.CreateButton = function(element)
 	cooldown:SetFrameLevel(button:GetFrameLevel() + 1)
 	cooldown:SetReverse(false)
 	cooldown:SetSwipeColor(0, 0, 0, .75)
-	cooldown:SetBlingTexture(BLING_TEXTURE, .3, .6, 1, .75) 
+	cooldown:SetBlingTexture(BLING_TEXTURE, .3, .6, 1, .75)
 	cooldown:SetEdgeTexture(EDGE_TEXTURE)
 	cooldown:SetDrawSwipe(true)
 	cooldown:SetDrawBling(true)
 	cooldown:SetDrawEdge(false)
-	cooldown:SetHideCountdownNumbers(true) 
+	cooldown:SetHideCountdownNumbers(true)
 	button.Cooldown = cooldown
 
 	local time = overlay:CreateFontString()
@@ -307,65 +308,65 @@ Aura.CreateButton = function(element)
 	button.Count = count
 
 	-- Borrow the unitframe tooltip
-	-- *Note that this method is created after element initialization, 
-	-- so we should probably use a smarter callback here. 
-	-- For now this is "safe", though, since auras won't be parsed this early anyway. 
+	-- *Note that this method is created after element initialization,
+	-- so we should probably use a smarter callback here.
+	-- For now this is "safe", though, since auras won't be parsed this early anyway.
 	button.GetTooltip = element._owner.GetTooltip
 
 	-- Run user post creation method
-	if element.PostCreateButton then 
+	if element.PostCreateButton then
 		element:PostCreateButton(button)
-	end 
+	end
 
 	-- Apply script handlers
-	-- * Note that we only provide out of combat aura cancelling, 
-	-- any other functionality including tooltips should be added by the modules. 
+	-- * Note that we only provide out of combat aura cancelling,
+	-- any other functionality including tooltips should be added by the modules.
 	-- * Also note that we apply these AFTER the post creation callbacks!
-	if (not element.disableMouse) then 
+	if (not element.disableMouse) then
 		button:SetScript("OnEnter", Aura.OnEnter)
 		button:SetScript("OnLeave", Aura.OnLeave)
 		button:SetScript("OnClick", Aura.OnClick)
 		button:SetScript("PreClick", Aura.PreClick)
 		button:SetScript("PostClick", Aura.PostClick)
-	end 
+	end
 
 	return button
-end 
+end
 
 Aura.OnEnter = function(button)
-	if (button.OnEnter) then 
+	if (button.OnEnter) then
 		return button:OnEnter()
-	end 
+	end
 	button.isMouseOver = true
 	button.UpdateTooltip = Aura.UpdateTooltip
 	button:UpdateTooltip()
-	if (button.PostEnter) then 
+	if (button.PostEnter) then
 		return button:PostEnter()
-	end 
+	end
 end
 
 Aura.OnLeave = function(button)
-	if (button.OnLeave) then 
+	if (button.OnLeave) then
 		return button:OnLeave()
-	end 
+	end
 
 	button.UpdateTooltip = nil
 
 	local tooltip = button:GetTooltip()
 	tooltip:Hide()
 
-	if (button.PostLeave) then 
+	if (button.PostLeave) then
 		return button:PostLeave()
-	end 
+	end
 end
 
 Aura.OnClick = function(button, buttonPressed, down)
-	if (button.OnClick) then 
+	if (button.OnClick) then
 		return button:OnClick(buttonPressed, down)
-	end 
+	end
 	-- Only called if no override exists above
 	if (buttonPressed == "RightButton") and (not InCombatLockdown()) then
-		-- Some times an update is run right after the unit has been removed, 
+		-- Some times an update is run right after the unit has been removed,
 		-- causing a myriad of nil bugs. Avoid it!
 		if (button.isBuff and UnitExists(button.unit)) then
 			CancelUnitBuff(button.unit, button:GetID(), button.filter)
@@ -374,16 +375,16 @@ Aura.OnClick = function(button, buttonPressed, down)
 end
 
 Aura.PreClick = function(button, buttonPressed, down)
-	if (button.PreClick) then 
+	if (button.PreClick) then
 		return button:PreClick(buttonPressed, down)
-	end 
-end 
+	end
+end
 
 Aura.PostClick = function(button, buttonPressed, down)
-	if (button.PostClick) then 
+	if (button.PostClick) then
 		return button:PostClick(buttonPressed, down)
-	end 
-end 
+	end
+end
 
 Aura.SetCooldownTimer = function(button, start, duration)
 	if (button._owner.showSpirals) then
@@ -398,10 +399,10 @@ Aura.SetCooldownTimer = function(button, start, duration)
 		else
 			cooldown:Hide()
 		end
-	else 
+	else
 		button.Cooldown:Hide()
-	end 
-end 
+	end
+end
 
 Aura.SetTimer = function(button, fullDuration, expirationTime)
 	if (fullDuration) and (fullDuration > 0) then
@@ -430,10 +431,10 @@ Aura.SetPosition = function(element, button, buttonNum)
 	elementW = (elementW + .5) - (elementW + .5)%1
 	elementH = (elementH + .5) - (elementH + .5)%1
 
-	-- Get the accurate size of the slots with spacing 
+	-- Get the accurate size of the slots with spacing
 	local width = (element.auraSize or element.auraWidth) + element.spacingH
 	local height = (element.auraSize or element.auraHeight) + element.spacingV
-	
+
 	-- Number of columns
 	local numCols = (elementW + element.spacingH)/width
 	numCols = numCols - numCols%1
@@ -443,15 +444,15 @@ Aura.SetPosition = function(element, button, buttonNum)
 	numRows = numRows - numRows%1
 
 	-- No room for this aura, return in panic!
-	if (buttonNum > numCols*numRows) then 
+	if (buttonNum > numCols*numRows) then
 		return true
-	end 
+	end
 
 	-- Figure out the origin
 	local point = ((element.growthY == "UP") and "BOTTOM" or (element.growthY == "DOWN") and "TOP") .. ((element.growthX == "RIGHT") and "LEFT" or (element.growthX == "LEFT") and "RIGHT")
 
 	-- Figure out the positions in the grid
-	buttonNum = buttonNum - 1 
+	buttonNum = buttonNum - 1
 	local posX = buttonNum%numCols
 	local posY = buttonNum/numCols - buttonNum/numCols%1
 
@@ -462,26 +463,26 @@ Aura.SetPosition = function(element, button, buttonNum)
 	-- Position the button
 	button:ClearAllPoints()
 	button:SetPoint(point, offsetX, offsetY)
-end 
+end
 
 Aura.UpdateTooltip = function(button)
 	local tooltip = button:GetTooltip()
 	tooltip:Hide()
 	tooltip:SetMinimumWidth(160)
 	local element = button._owner
-	if (element.tooltipDefaultPosition) then 
+	if (element.tooltipDefaultPosition) then
 		tooltip:SetDefaultAnchor(button)
-	elseif (element.tooltipPoint) then 
+	elseif (element.tooltipPoint) then
 		tooltip:SetOwner(button)
 		tooltip:Place(element.tooltipPoint, element.tooltipAnchor or button, element.tooltipRelPoint or element.tooltipPoint, element.tooltipOffsetX or 0, element.tooltipOffsetY or 0)
-	else 
+	else
 		tooltip:SetSmartAnchor(button, element.tooltipOffsetX or 10, element.tooltipOffsetY or 10)
-	end 
-	if (button.isBuff) then 
+	end
+	if (button.isBuff) then
 		tooltip:SetUnitBuff(button.unit, button:GetID(), button.filter)
-	else 
+	else
 		tooltip:SetUnitDebuff(button.unit, button:GetID(), button.filter)
-	end 
+	end
 end
 
 Aura.UpdateTimer = function(button, elapsed)
@@ -491,17 +492,17 @@ Aura.UpdateTimer = function(button, elapsed)
 			local element = button._owner
 			local timeLeft = button.expirationTime - GetTime()
 			if (timeLeft > 0) then
-				if (element.showDurations) and ((timeLeft < LONG_THRESHOLD) or (element.showLongDurations)) then 
+				if (element.showDurations) and ((timeLeft < LONG_THRESHOLD) or (element.showLongDurations)) then
 					button.Time:SetFormattedText(formatTime(timeLeft))
 				else
 					button.Time:SetText("")
-				end 
+				end
 			else
 				button:SetScript("OnUpdate", nil)
 				Aura.SetCooldownTimer(button, 0,0)
 				button.Time:SetText("")
 				element:ForceUpdate()
-			end	
+			end
 			if (button:IsShown() and element.PostUpdateButton) then
 				element:PostUpdateButton(button, "Timer")
 			end
@@ -520,7 +521,7 @@ local CacheBuffs = function(element)
 	local cache = element.cache or get()
 	local unit = element._owner.unit or element.unit
 
-	for i = 1, BUFF_MAX_DISPLAY do 
+	for i = 1, BUFF_MAX_DISPLAY do
 
 		name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = LibAura:GetUnitBuff(unit, i, element.filter)
 
@@ -554,7 +555,7 @@ local CacheBuffs = function(element)
 		entry.value3 = value3
 
 		cache[#cache + 1] = entry
-	end 
+	end
 
 	element.cache = cache
 
@@ -567,14 +568,14 @@ local CacheDebuffs = function(element)
 	local cache = element.cache or get()
 	local unit = element._owner.unit or element.unit
 
-	for i = 1, DEBUFF_MAX_DISPLAY do 
+	for i = 1, DEBUFF_MAX_DISPLAY do
 
 		name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = LibAura:GetUnitDebuff(unit, i, element.filter)
 
 		if (not name) then
 			break
 		end
-		
+
 		local entry = get()
 		entry.isBuff = false
 		entry.id = i
@@ -601,7 +602,7 @@ local CacheDebuffs = function(element)
 		entry.value3 = value3
 
 		cache[#cache + 1] = entry
-	end 
+	end
 
 	element.cache = cache
 
@@ -612,69 +613,69 @@ local Iterate = function(element)
 		return
 	end
 
-	for i,entry in ipairs(element.cache) do 
+	for i,entry in ipairs(element.cache) do
 		if (entry.id) then
 
 			local hideAura
 			local auraPriority
-			
-			if (element.customFilter) then 
+
+			if (element.customFilter) then
 				local displayAura, displayPriority = element:customFilter(
-					entry.isBuff, 
-					entry.unit, 
-					entry.isOwnedByPlayer, 
-					entry.name, 
-					entry.icon, 
-					entry.count, 
-					entry.debuffType, 
-					entry.duration, 
-					entry.expirationTime, 
-					entry.unitCaster, 
-					entry.isStealable, 
-					entry.nameplateShowPersonal, 
-					entry.spellId, 
-					entry.canApplyAura, 
-					entry.isBossDebuff, 
-					entry.isCastByPlayer, 
-					entry.nameplateShowAll, 
-					entry.timeMod, 
-					entry.value1, 
-					entry.value2, 
+					entry.isBuff,
+					entry.unit,
+					entry.isOwnedByPlayer,
+					entry.name,
+					entry.icon,
+					entry.count,
+					entry.debuffType,
+					entry.duration,
+					entry.expirationTime,
+					entry.unitCaster,
+					entry.isStealable,
+					entry.nameplateShowPersonal,
+					entry.spellId,
+					entry.canApplyAura,
+					entry.isBossDebuff,
+					entry.isCastByPlayer,
+					entry.nameplateShowAll,
+					entry.timeMod,
+					entry.value1,
+					entry.value2,
 					entry.value3
 				)
-				if (displayAura) then 
+				if (displayAura) then
 					auraPriority = displayPriority
-				else 
+				else
 					hideAura = true
-				end 
-			end 
+				end
+			end
 
 			-- Stop iteration if we've hit the maximum displayed allowed.
 			if (element.maxVisible and (element.maxVisible == element.visibleAuras)) then
-				break 
-			end 
+				break
+			end
 
-			if (not hideAura) then 
+			if (not hideAura) then
 
 				-- We can have reached the max of buffs or debuffs, yet have space for the opposite.
 				-- So we check whether or not we should display each single aura.
-				local skip = ((element.maxBuffs) and (entry.isBuff) and (element.maxBuffs == element.visibleBuffs)) 
-						or ((element.maxDebuffs) and (not entry.isBuff) and (element.maxDebuffs == element.visibleDebuffs))  
+				local skip = ((element.maxBuffs) and (entry.isBuff) and (element.maxBuffs == element.visibleBuffs))
+						or ((element.maxDebuffs) and (not entry.isBuff) and (element.maxDebuffs == element.visibleDebuffs))
 
 				-- Go ahead and display this button.
-				if (not skip) then 
+				if (not skip) then
 					-- Increase the total visible counter
 					element.visibleAuras = element.visibleAuras + 1
 
 					-- Increase the other counters
-					if (entry.isBuff) then 
+					if (entry.isBuff) then
 						element.visibleBuffs = element.visibleBuffs + 1
 					else
 						element.visibleDebuffs = element.visibleDebuffs + 1
 					end
 
-					-- Can't have frames that only are referenced by indexed table entries, 
-					-- we need a hashed key or for some reason /framestack will bug out. 
+					-- Can't have frames that only are referenced by indexed table entries,
+					-- we need a hashed key or for some reason /framestack will bug out.
 					local visibleKey = tostring(element.visibleAuras)
 
 					-- Create a new button, and initially hide it while setting it up
@@ -724,7 +725,7 @@ local Iterate = function(element)
 			end
 
 		end
-	end 
+	end
 
 	-- Position them all
 	--*Why on earth would this bug out?
@@ -751,15 +752,15 @@ local EvaluateVisibilities = function(element, visible)
 	end
 
 	-- Decide visibility of the whole frame
-	if (visible == 0) then 
+	if (visible == 0) then
 		if (element:IsShown()) then
 			element:Hide()
 		end
-	else 
+	else
 		if (not element:IsShown()) then
 			element:Show()
 		end
-	end 
+	end
 end
 
 local Update = function(self, event, unit, ...)
@@ -772,9 +773,9 @@ local Update = function(self, event, unit, ...)
 	end
 
 	-- Bail out on missing unit, which should never happen, but does.
-	if (not unit) or (unit ~= self.unit) then 
-		return 
-	end 
+	if (not unit) or (unit ~= self.unit) then
+		return
+	end
 
 	local isEnemy = UnitCanAttack("player", unit)
 	local isFriend = UnitIsFriend("player", unit)
@@ -784,7 +785,7 @@ local Update = function(self, event, unit, ...)
 	local Buffs = self.Buffs
 	local Debuffs = self.Debuffs
 
-	if (Auras) then 
+	if (Auras) then
 		Auras.unit = unit
 
 		if (Auras.PreUpdate) then
@@ -802,7 +803,7 @@ local Update = function(self, event, unit, ...)
 		local numBoss, numMagic, numCurse, numDisease, numPoison = 0, 0, 0, 0, 0
 		local visible, visibleBuffs, visibleDebuffs = 0, 0, 0
 
-		-- Parse the cached auras for meta info. 
+		-- Parse the cached auras for meta info.
 		for i,entry in ipairs(cache) do
 			if (entry.isBossDebuff) then
 				numBoss = numBoss + 1
@@ -852,10 +853,10 @@ local Update = function(self, event, unit, ...)
 		-- Evaluate if the element should be shown
 		EvaluateVisibilities(Auras, Auras.visibleAuras)
 
-		if (Auras.PostUpdate) then 
+		if (Auras.PostUpdate) then
 			Auras:PostUpdate(unit, Auras.visibleAuras)
-		end 
-	end 
+		end
+	end
 
 	if (Buffs) then
 		Buffs.unit = unit
@@ -873,7 +874,7 @@ local Update = function(self, event, unit, ...)
 		local numBoss, numMagic, numCurse, numDisease, numPoison = 0, 0, 0, 0, 0
 		local visible, visibleBuffs, visibleDebuffs = 0, 0, 0
 
-		-- Parse the cached auras for meta info. 
+		-- Parse the cached auras for meta info.
 		for i,entry in ipairs(cache) do
 			if (entry.isBossDebuff) then
 				numBoss = numBoss + 1
@@ -923,12 +924,12 @@ local Update = function(self, event, unit, ...)
 		-- Evaluate if the element should be shown
 		EvaluateVisibilities(Buffs, Buffs.visibleAuras)
 
-		if (Buffs.PostUpdate) then 
+		if (Buffs.PostUpdate) then
 			Buffs:PostUpdate(unit, Buffs.visibleAuras)
-		end 
-	end 
+		end
+	end
 
-	if (Debuffs) then 
+	if (Debuffs) then
 		Debuffs.unit = unit
 
 		if (Debuffs.PreUpdate) then
@@ -944,7 +945,7 @@ local Update = function(self, event, unit, ...)
 		local numBoss, numMagic, numCurse, numDisease, numPoison = 0, 0, 0, 0, 0
 		local visible, visibleBuffs, visibleDebuffs = 0, 0, 0
 
-		-- Parse the cached auras for meta info. 
+		-- Parse the cached auras for meta info.
 		for i,entry in ipairs(cache) do
 			if (entry.isBossDebuff) then
 				numBoss = numBoss + 1
@@ -994,16 +995,16 @@ local Update = function(self, event, unit, ...)
 		-- Evaluate if the element should be shown
 		EvaluateVisibilities(Debuffs, Debuffs.visibleAuras)
 
-		if (Debuffs.PostUpdate) then 
+		if (Debuffs.PostUpdate) then
 			Debuffs:PostUpdate(unit, Debuffs.visibleAuras)
-		end 
-	end 
+		end
+	end
 
-end 
+end
 
 local Proxy = function(self, ...)
 	return Update(self, ...)
-end 
+end
 
 local ForceUpdate = function(element)
 	return Proxy(element._owner, "Forced", element._owner.unit)
@@ -1033,7 +1034,7 @@ local Enable = function(self)
 			DisplayCache[Buffs] = DisplayCache[Buffs] or {}
 			BuffCache[Buffs] = BuffCache[Buffs] or {}
 		end
-		
+
 		if (Debuffs) then
 			Debuffs._owner = self
 			Debuffs.unit = unit
@@ -1051,7 +1052,7 @@ local Enable = function(self)
 			self:RegisterEvent("PLAYER_REGEN_DISABLED", Proxy, true)
 			self:RegisterEvent("PLAYER_REGEN_ENABLED", Proxy, true)
 
-			if (IsRetail) then
+			if (IsRetail or IsWrath) then
 				self:RegisterEvent("UNIT_ENTERED_VEHICLE", Proxy)
 				self:RegisterEvent("UNIT_ENTERING_VEHICLE", Proxy)
 				self:RegisterEvent("UNIT_EXITING_VEHICLE", Proxy)
@@ -1066,7 +1067,7 @@ local Enable = function(self)
 
 		return true
 	end
-end 
+end
 
 local Disable = function(self)
 	local Auras = self.Auras
@@ -1074,43 +1075,43 @@ local Disable = function(self)
 	local Debuffs = self.Debuffs
 
 	if (Auras or Buffs or Debuffs) then
-	
+
 		if (Auras) then
 			Auras.unit = nil
 			Auras:Hide()
-			if (DisplayCache[Auras]) then 
+			if (DisplayCache[Auras]) then
 				table_wipe(DisplayCache[Auras])
 			end
-			if (BuffCache[Auras]) then 
+			if (BuffCache[Auras]) then
 				table_wipe(BuffCache[Auras])
 			end
-			if (DebuffCache[Auras]) then 
+			if (DebuffCache[Auras]) then
 				table_wipe(DebuffCache[Auras])
 			end
 		end
-	
+
 		if (Buffs) then
 			Buffs.unit = nil
 			Buffs:Hide()
-			if (DisplayCache[Buffs]) then 
+			if (DisplayCache[Buffs]) then
 				table_wipe(DisplayCache[Buffs])
 			end
-			if (BuffCache[Buffs]) then 
+			if (BuffCache[Buffs]) then
 				table_wipe(BuffCache[Buffs])
 			end
 		end
-	
+
 		if (Debuffs) then
 			Debuffs.unit = nil
 			Debuffs:Hide()
-			if (DisplayCache[Debuffs]) then 
+			if (DisplayCache[Debuffs]) then
 				table_wipe(DisplayCache[Debuffs])
 			end
-			if (DebuffCache[Debuffs]) then 
+			if (DebuffCache[Debuffs]) then
 				table_wipe(DebuffCache[Debuffs])
 			end
 		end
-	
+
 		if not ((Auras and Auras.frequent) or (Buffs and Buffs.frequent) or (Debuffs and Debuffs.frequent)) then
 			self:UnregisterEvent("UNIT_AURA", Proxy)
 			self:UnregisterEvent("PLAYER_ENTERING_WORLD", Proxy)
@@ -1127,9 +1128,9 @@ local Disable = function(self)
 			end
 		end
 	end
-end 
+end
 
 -- Register it with compatible libraries
-for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 74)
-end 
+for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do
+	Lib:RegisterElement("Auras", Enable, Disable, Proxy, 75)
+end

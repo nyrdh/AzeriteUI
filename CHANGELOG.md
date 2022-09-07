@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.554-RC] 2022-09-07
+### Fixed
+- Added a lot of Wrath exceptions to the back-end.
+- Pet Happiness is now shown again, and the removed Loyalty trait has been removed.
+
 ## [3.2.553-RC] 2022-09-06
 ### Fixed
 - Removed some weird tooltip related debug output in Wrath.

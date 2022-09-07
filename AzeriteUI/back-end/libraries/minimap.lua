@@ -1,4 +1,4 @@
-local Version = 69
+local Version = 70
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -62,6 +62,7 @@ local ToggleDropDownMenu = ToggleDropDownMenu
 local WorldFrame = WorldFrame
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
 local IsWrath = LibClientBuild:IsWrath()

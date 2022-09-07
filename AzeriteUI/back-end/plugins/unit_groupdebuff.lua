@@ -18,8 +18,10 @@ local UnitClass = UnitClass
 local UnitIsCharmed = UnitIsCharmed
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Player Constants
@@ -27,15 +29,15 @@ local _,playerClass = UnitClass("player")
 local playerLevel = UnitLevel("player")
 
 -- Base filter for everybody
-local baseFilter = { 
-	HARMFUL = { Boss = true, Custom = true }, 
-	HELPFUL = { Boss = true, Custom = true } 
+local baseFilter = {
+	HARMFUL = { Boss = true, Custom = true },
+	HELPFUL = { Boss = true, Custom = true }
 }
 
 -- Class specific aura filter based on learning level of the dispel.
 -- *The above is todo, all levels changed in Shadowlands. Blergh.
 -- *Also note these are defensive dispels only, not offensive like Steal Magic.
--- 
+--
 -- https://wow.gamepedia.com/Dispel
 local classFilter
 if (IsClassic) then
@@ -46,7 +48,7 @@ if (IsClassic) then
 		PALADIN 	= { HARMFUL = { Magic = 1, Poison = 1, Disease = 1 } },
 		PRIEST 		= { HARMFUL = { Magic = 1, Disease = 1 } },
 		SHAMAN 		= { HARMFUL = { Poison = 1, Disease = 1 } },
-		WARLOCK 	= { HARMFUL = { Magic = 1 } } 
+		WARLOCK 	= { HARMFUL = { Magic = 1 } }
 	})[playerClass]
 elseif (IsTBC) then
 	classFilter = ({
@@ -56,7 +58,16 @@ elseif (IsTBC) then
 		PALADIN 	= { HARMFUL = { Magic = 1, Poison = 1, Disease = 1 } },
 		PRIEST 		= { HARMFUL = { Magic = 1, Disease = 1 } },
 		SHAMAN 		= { HARMFUL = { Poison = 1, Disease = 1 } },
-		WARLOCK 	= { HARMFUL = { Magic = 1 } } 
+		WARLOCK 	= { HARMFUL = { Magic = 1 } }
+	})[playerClass]
+elseif (IsWrath) then -- copy of retail? is retail still right?
+	classFilter = ({
+		-- CLASS 	= { FILTER_TYPE = { School = Level } }
+		DRUID 		= { HARMFUL = { Curse = 1, Poison = 1 } },
+		MAGE 		= { HARMFUL = { Curse = 1 } },
+		PALADIN 	= { HARMFUL = { Poison = 1, Disease = 1 } },
+		PRIEST 		= { HARMFUL = { Magic = 1, Disease = 1 } },
+		SHAMAN 		= { HARMFUL = { Curse = 1 } }
 	})[playerClass]
 else
 	classFilter = ({
@@ -70,7 +81,7 @@ else
 	})[playerClass]
 end
 
--- Only list dispels that require a specific spec. 
+-- Only list dispels that require a specific spec.
 -- *Basically this is all healer classes except priest.
 -- *Note that this ONLY applies to Retail, not Classic!
 local specFilter = (IsRetail) and ({
@@ -104,14 +115,14 @@ local UpdateClassFilter = function(level)
 end
 UpdateClassFilter(playerLevel)
 
--- SpellIDs that will have their type overridden, 
--- to allow for specific auras to be tracked through our system. 
+-- SpellIDs that will have their type overridden,
+-- to allow for specific auras to be tracked through our system.
 local spellTypeOverride = {
 	-- Tests (Require Custom to be enabled for Druids to try out)
 	--[  8936] = "Custom"  -- Regrowth
 }
 
--- Priority of aura types. 
+-- Priority of aura types.
 -- Higher means higher.
 local PRIORITY_NONE = -9999 -- Start at something outlandishly low.
 local priorities = {
@@ -136,78 +147,78 @@ local formatTime = function(time)
 		return "%.0f%s", math_ceil(time / HOUR), "h"
 	elseif (time > MINUTE) then -- more than a minute
 		return "%.0f%s", math_ceil(time / MINUTE), "m"
-	elseif (time > 5) then 
+	elseif (time > 5) then
 		return "%.0f", math_ceil(time)
-	elseif (time > .9) then 
+	elseif (time > .9) then
 		return "|cffff8800%.0f|r", math_ceil(time)
 	elseif (time > .05) then
 		return "|cffff0000%.0f|r", time*10 - time*10%1
 	else
 		return ""
-	end	
+	end
 end
 
 -- Borrow the unitframe tooltip
 local GetTooltip = function(element)
 	return element.GetTooltip and element:GetTooltip() or element._owner.GetTooltip and element._owner:GetTooltip()
-end 
+end
 
 local Aura_UpdateTooltip = function(element)
 	local tooltip = GetTooltip(element)
 	tooltip:Hide()
 	tooltip:SetMinimumWidth(160)
 
-	if element.tooltipDefaultPosition then 
+	if element.tooltipDefaultPosition then
 		tooltip:SetDefaultAnchor(element)
 
-	elseif element.tooltipPoint then 
+	elseif element.tooltipPoint then
 		tooltip:SetOwner(element)
 		tooltip:Place(element.tooltipPoint, element.tooltipAnchor or element, element.tooltipRelPoint or element.tooltipPoint, element.tooltipOffsetX or 0, element.tooltipOffsetY or 0)
-	else 
+	else
 		tooltip:SetSmartAnchor(element, element.tooltipOffsetX or 10, element.tooltipOffsetY or 10)
-	end 
+	end
 
-	if (element.filter == "HELPFUL") then 
+	if (element.filter == "HELPFUL") then
 		tooltip:SetUnitBuff(element.unit, element.index, element.filter)
-	else 
+	else
 		tooltip:SetUnitDebuff(element.unit, element.index, element.filter)
-	end 
+	end
 end
 
 local Aura_OnEnter = function(element)
-	if element.OnEnter then 
+	if element.OnEnter then
 		return element:OnEnter()
-	end 
+	end
 
 	element.isMouseOver = true
 	element.UpdateTooltip = Aura_UpdateTooltip
 	element:UpdateTooltip()
 
-	if element.PostEnter then 
+	if element.PostEnter then
 		return element:PostEnter()
-	end 
+	end
 end
 
 local Aura_OnLeave = function(element)
-	if element.OnLeave then 
+	if element.OnLeave then
 		return element:OnLeave()
-	end 
+	end
 
 	element.UpdateTooltip = nil
 
 	local tooltip = GetTooltip(element)
 	tooltip:Hide()
 
-	if element.PostLeave then 
+	if element.PostLeave then
 		return element:PostLeave()
-	end 
+	end
 end
 
 local Aura_SetCooldownTimer = function(element, start, duration)
 	local cooldown = element.Cooldown
 	if (not cooldown) then
 		return
-	end 
+	end
 	if (element.showCooldownSpiral) then
 		cooldown:SetSwipeColor(0, 0, 0, .75)
 		cooldown:SetDrawEdge(false)
@@ -220,10 +231,10 @@ local Aura_SetCooldownTimer = function(element, start, duration)
 		else
 			element:Hide()
 		end
-	else 
+	else
 		cooldown:Hide()
-	end 
-end 
+	end
+end
 
 local HZ = 1/20
 local Aura_UpdateTimer = function(element, elapsed)
@@ -233,11 +244,11 @@ local Aura_UpdateTimer = function(element, elapsed)
 			element.timeLeft = element.expirationTime - GetTime()
 			if (element.timeLeft > 0) then
 				if (element.Time) then
-					if (element.timeLeft < LONG_THRESHOLD) or (element.showLongCooldownValues) then 
+					if (element.timeLeft < LONG_THRESHOLD) or (element.showLongCooldownValues) then
 						element.Time:SetFormattedText(formatTime(element.timeLeft))
 					else
 						element.Time:SetText("")
-					end 
+					end
 				end
 				if element.PostUpdateTimer then
 					element:PostUpdateTimer()
@@ -252,7 +263,7 @@ local Aura_UpdateTimer = function(element, elapsed)
 				if (element:IsShown() and element.PostUpdateTimer) then
 					element:PostUpdateTimer()
 				end
-			end	
+			end
 			element.elapsed = 0
 		end
 	end
@@ -290,7 +301,7 @@ end
 
 local Update = function(self, event, unit, ...)
 	local forceUpdateFilter
-	if (event == "PLAYER_LEVEL_UP") then 
+	if (event == "PLAYER_LEVEL_UP") then
 		local level = ...
 		if (level and (level ~= playerLevel)) then
 			playerLevel = level
@@ -299,15 +310,15 @@ local Update = function(self, event, unit, ...)
 			end
 			UpdateClassFilter(playerLevel)
 		end
-	elseif (event == "PLAYER_SPECIALIZATION_CHANGED") or (event == "PLAYER_TALENT_UPDATE") or (event == "CHARACTER_POINTS_CHANGED") then 
+	elseif (event == "PLAYER_SPECIALIZATION_CHANGED") or (event == "PLAYER_TALENT_UPDATE") or (event == "CHARACTER_POINTS_CHANGED") then
 		UpdateClassFilter(playerLevel)
 	end
-	if (not unit) or (unit ~= self.unit) then 
-		return 
-	end 
-	
+	if (not unit) or (unit ~= self.unit) then
+		return
+	end
+
 	-- Different GUID means a different player or NPC,
-	-- so we want updates to be instant, not smoothed. 
+	-- so we want updates to be instant, not smoothed.
 	local guid = UnitGUID(unit)
 	local forced = event == "Forced"
 
@@ -319,33 +330,33 @@ local Update = function(self, event, unit, ...)
 	-- Store some basic values on the element
 	local forced = forced or guid ~= element.guid
 	element.guid = guid
-	
+
 	local canAttack = UnitCanAttack("player", unit)
 	local isCharmed = UnitIsCharmed(unit)
 
 	local newID, newPriority, newType, newDebuffType, newFilter, newSpellID
 	local newIcon, newCount, newDuration, newExpirationTime
 
-	-- Use a local priority comparison, 
-	-- avoid changing anything on the element while it's iterating. 
+	-- Use a local priority comparison,
+	-- avoid changing anything on the element while it's iterating.
 	local currentPrio = PRIORITY_NONE
 
-	-- Once for each filter type, as UnitAura can't list HELPFUL and HARMFUL at the same time. 
+	-- Once for each filter type, as UnitAura can't list HELPFUL and HARMFUL at the same time.
 	for filterType,schoolList in pairs(baseFilter) do
 
-		-- Iterate auras until no more exists, 
-		-- don't rely on values that will be different in Classic and Live. 
+		-- Iterate auras until no more exists,
+		-- don't rely on values that will be different in Classic and Live.
 		local auraID = 0
 		while true do
 			auraID = auraID + 1
 
 			local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, spellID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = LibAura:GetUnitAura(unit, auraID, filterType)
 
-			if (not name) then 
-				break 
-			end 
+			if (not name) then
+				break
+			end
 
-			-- Clunky, but still shortest current way to bake the overrides into the system 
+			-- Clunky, but still shortest current way to bake the overrides into the system
 			local auraType = isBossDebuff and "Boss" or spellTypeOverride[spellID] or debuffType
 
 			-- Don't show if the unit is mindcontrolled or attackable for some reason.
@@ -361,8 +372,8 @@ local Update = function(self, event, unit, ...)
 					newFilter = filterType
 					newSpellID = spellID
 					newIcon = icon
-					newCount = count 
-					newDuration = duration 
+					newCount = count
+					newDuration = duration
 					newExpirationTime = expirationTime
 
 					-- Update our local prio tracker
@@ -373,14 +384,14 @@ local Update = function(self, event, unit, ...)
 	end
 
 	-- Update the element
-	if (newID) then 
+	if (newID) then
 
 		-- Too much?
 		--element:Hide()
 		--print(newSpellID, newID)
 
 		-- Values have to be set before it's shown,
-		-- to avoid the update timer bugging out. 
+		-- to avoid the update timer bugging out.
 		element.priority = newPriority
 		element.index = newID
 		element.filter = newFilter
@@ -410,7 +421,7 @@ local Update = function(self, event, unit, ...)
 		-- Hide the element and halt update timer
 		element:Hide()
 
-		-- Clear the icon 
+		-- Clear the icon
 		if (element.Icon) then
 			element.Icon:SetTexture("")
 		end
@@ -423,8 +434,8 @@ local Update = function(self, event, unit, ...)
 		-- Clear the timer
 		Aura_SetTimer(element)
 
-		-- Clear out the values only after it's been hidden, 
-		-- to avoid bugging out our update timer. 
+		-- Clear out the values only after it's been hidden,
+		-- to avoid bugging out our update timer.
 		element.priority = nil
 		element.index = nil
 		element.filter = nil
@@ -434,16 +445,16 @@ local Update = function(self, event, unit, ...)
 		element.duration = nil
 		element.expirationTime = nil
 	end
-	
+
 	-- Run module post updates.
 	if (element.PostUpdate) then
 		return element:PostUpdate(unit)
-	end	
-end 
+	end
+end
 
 local Proxy = function(self, ...)
 	return (self.GroupAura.Override or Update)(self, ...)
-end 
+end
 
 local ForceUpdate = function(element)
 	return Proxy(element._owner, "Forced", element._owner.unit)
@@ -461,9 +472,9 @@ local Enable = function(self)
 		-- Let's make sure this is cleared
 		element:SetScript("OnUpdate", nil)
 
-		-- Let the modules decide whether or not 
-		-- we will use tooltips and mouse capture. 
-		if (element.disableMouse) then 
+		-- Let the modules decide whether or not
+		-- we will use tooltips and mouse capture.
+		if (element.disableMouse) then
 			element:EnableMouse(false)
 			element:SetScript("OnEnter", nil)
 			element:SetScript("OnLeave", nil)
@@ -483,7 +494,7 @@ local Enable = function(self)
 
 		return true
 	end
-end 
+end
 
 local Disable = function(self)
 	local element = self.GroupAura
@@ -499,9 +510,9 @@ local Disable = function(self)
 		element:Hide()
 		element:SetScript("OnUpdate", nil)
 	end
-end 
+end
 
 -- Register it with compatible libraries
-for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 32)
-end 
+for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do
+	Lib:RegisterElement("GroupAura", Enable, Disable, Proxy, 33)
+end

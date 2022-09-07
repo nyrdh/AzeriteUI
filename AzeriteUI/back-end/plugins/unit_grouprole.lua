@@ -5,12 +5,14 @@ assert(LibClientBuild, "UnitGroupRole requires LibClientBuild to be loaded.")
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- WoW Dummy API for now.
--- We will find a way to figure this out better later on. Maybe. 
+-- We will find a way to figure this out better later on. Maybe.
 if (IsClassic or IsTBC) then
 	UnitGroupRolesAssigned = function(unit)
 		return "DAMAGER"
@@ -20,9 +22,9 @@ end
 local roleToObject = { TANK = "Tank", HEALER = "Healer", DAMAGER = "Damager" }
 
 local Update = function(self, event, unit)
-	if (not unit) or (unit ~= self.unit) then 
-		return 
-	end 
+	if (not unit) or (unit ~= self.unit) then
+		return
+	end
 
 	local element = self.GroupRole
 	if (element.PreUpdate) then
@@ -32,38 +34,38 @@ local Update = function(self, event, unit)
 	local groupRole = UnitGroupRolesAssigned(self.unit)
 	if (groupRole == "TANK" or groupRole == "HEALER" or groupRole == "DAMAGER") then
 		local hasRoleTexture
-		for role, objectName in pairs(roleToObject) do 
+		for role, objectName in pairs(roleToObject) do
 			local object = element[objectName]
-			if (object) then 
+			if (object) then
 				object:SetShown(role == groupRole)
 				hasRoleTexture = true
-			end 
-		end 
-		if (element.Show and hasRoleTexture) then 
+			end
+		end
+		if (element.Show and hasRoleTexture) then
 			element:Show()
-		elseif (element.Hide) then  
+		elseif (element.Hide) then
 			element:Hide()
-		end 
+		end
 	else
-		for role, objectName in pairs(roleToObject) do 
+		for role, objectName in pairs(roleToObject) do
 			local object = element[objectName]
-			if (object) then 
+			if (object) then
 				object:Hide()
-			end 
-		end 
-		if (element.Hide) then 
+			end
+		end
+		if (element.Hide) then
 			element:Hide()
-		end 
+		end
 	end
 
-	if (element.PostUpdate) then 
+	if (element.PostUpdate) then
 		return element:PostUpdate(unit, groupRole)
 	end
-end 
+end
 
 local Proxy = function(self, ...)
 	return (self.GroupRole.Override or Update)(self, ...)
-end 
+end
 
 local ForceUpdate = function(element)
 	return Proxy(element._owner, "Forced", element._owner.unit)
@@ -75,39 +77,39 @@ local Enable = function(self)
 		element._owner = self
 		element.ForceUpdate = ForceUpdate
 
-		for role, objectName in pairs(roleToObject) do 
+		for role, objectName in pairs(roleToObject) do
 			local object = element[objectName]
-			if object then 
+			if object then
 				object:Hide()
-			end 
-		end 
-		if element.Hide then 
+			end
+		end
+		if element.Hide then
 			element:Hide()
-		end 
+		end
 
 		self:RegisterEvent("GROUP_ROSTER_UPDATE", Proxy, true)
 
-		return true 
+		return true
 	end
-end 
+end
 
 local Disable = function(self)
 	local element = self.GroupRole
 	if element then
-		for role, objectName in pairs(roleToObject) do 
+		for role, objectName in pairs(roleToObject) do
 			local object = element[objectName]
-			if object then 
+			if object then
 				object:Hide()
-			end 
-		end 
-		if element.Hide then 
+			end
+		end
+		if element.Hide then
 			element:Hide()
-		end 
+		end
 		self:UnregisterEvent("GROUP_ROSTER_UPDATE", Proxy)
 	end
-end 
+end
 
 -- Register it with compatible libraries
-for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("GroupRole", Enable, Disable, Proxy, 18)
-end 
+for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do
+	Lib:RegisterElement("GroupRole", Enable, Disable, Proxy, 19)
+end

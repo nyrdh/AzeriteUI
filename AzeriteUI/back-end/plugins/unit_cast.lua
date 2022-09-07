@@ -666,5 +666,5 @@ end
 
 -- Register it with compatible libraries
 for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do
-	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 55)
+	Lib:RegisterElement("Cast", Enable, Disable, Proxy, 56)
 end

@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 125)
+local LibTooltip = Wheel:Set("LibTooltip", 126)
 if (not LibTooltip) then
 	return
 end

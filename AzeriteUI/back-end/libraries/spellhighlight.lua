@@ -1,4 +1,4 @@
-local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 9)
+local LibSpellHighlight = Wheel:Set("LibSpellHighlight", 10)
 if (not LibSpellHighlight) then
 	return
 end
@@ -59,7 +59,7 @@ local UnitPowerMax = UnitPowerMax
 local UnitPowerType = UnitPowerType
 
 -- Doing it this way to make the transition to library later on easier
-LibSpellHighlight.embeds = LibSpellHighlight.embeds or {} 
+LibSpellHighlight.embeds = LibSpellHighlight.embeds or {}
 LibSpellHighlight.activeHighlights = LibSpellHighlight.activeHighlights or {} -- current active highlights spellIDs and their highlight type
 LibSpellHighlight.activeHighlightsByAuraID = LibSpellHighlight.activeHighlightsByAuraID or {}
 LibSpellHighlight.highlightSpellsByAuraID = LibSpellHighlight.highlightSpellsByAuraID or {} -- reactive auras and actionbar highlight spells
@@ -72,7 +72,7 @@ LibSpellHighlight.playerSpellCache = LibSpellHighlight.playerSpellCache or {} --
 LibSpellHighlight.runningTimers = LibSpellHighlight.runningTimers or {} -- currently running timers
 
 -- Frame tracking timers
-LibSpellHighlight.frame = LibSpellHighlight.frame or CreateFrame("Frame") 
+LibSpellHighlight.frame = LibSpellHighlight.frame or CreateFrame("Frame")
 
 -- Shortcuts
 local Frame = LibSpellHighlight.frame
@@ -103,8 +103,10 @@ local _,playerClass = UnitClass("player")
 local playerGUID = UnitGUID("player")
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Sourced from BlizzardInterfaceResources/Resources/EnumerationTables.lua
@@ -166,12 +168,12 @@ local L = {
 
 -- Utility Functions
 ----------------------------------------------------
--- Syntax check 
+-- Syntax check
 local check = function(value, num, ...)
 	assert(type(num) == "number", ("Bad argument #%.0f to '%s': %s expected, got %s"):format(2, "Check", "number", type(num)))
 	for i = 1,select("#", ...) do
-		if type(value) == select(i, ...) then 
-			return 
+		if type(value) == select(i, ...) then
+			return
 		end
 	end
 	local types = string_join(", ", ...)
@@ -217,7 +219,7 @@ end
 -- Library Timers
 ----------------------------------------------------
 -- Constant to track if updates are running
-local TimerRunning 
+local TimerRunning
 
 -- Reset the frame, in case this is a library update
 Frame:SetScript("OnUpdate", nil)
@@ -302,7 +304,7 @@ LibSpellHighlight.UpdateAuras = function(self, event, ...)
 	end
 
 	-- Iterate for current highlights
-	for i = 1, BUFF_MAX_DISPLAY do 
+	for i = 1, BUFF_MAX_DISPLAY do
 
 		-- Retrieve buff information
 		local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, nameplateShowPersonal, auraID, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod, value1, value2, value3 = self:GetUnitBuff("player", i, "HELPFUL PLAYER")
@@ -326,7 +328,7 @@ LibSpellHighlight.UpdateAuras = function(self, event, ...)
 				end
 			end
 		end
-		
+
 	end
 
 	-- Disable active highlights that no longer match the current iteration.
@@ -391,7 +393,7 @@ LibSpellHighlight.UpdateCounterAttack = function(self, event, ...)
 			end
 		end
 	end
-	
+
 	if (isSrcPlayer) and (eventType == "SPELL_CAST_SUCCESS") and (spellName == L.Spell_Counterattack) then
 		local spellID = PlayerSpellCache[L.Spell_Counterattack]
 		self:DeactivateHighlight(spellID)
@@ -463,7 +465,7 @@ LibSpellHighlight.UpdateMongooseBite = function(self, event, ...)
 			end
 		end
 	end
-	
+
 	if (isSrcPlayer) and (eventType == "SPELL_CAST_SUCCESS") and (spellName == L.Spell_MongooseBite) then
 		local spellID = PlayerSpellCache[L.Spell_MongooseBite]
 		self:DeactivateHighlight(spellID)
@@ -619,7 +621,7 @@ LibSpellHighlight.UpdateClassicEvents = function(self, event, ...)
 		-- Initial update of highlights.
 		self:UpdateAuras()
 		self:UpdateComboPoints()
-	
+
 	elseif (playerClass == "HUNTER") then
 		-- Register combat log parsing if abilities exist.
 		if (PlayerSpellCache[L.Spell_Counterattack]) and (PlayerSpellCache[L.Spell_MongooseBite]) then
@@ -631,7 +633,7 @@ LibSpellHighlight.UpdateClassicEvents = function(self, event, ...)
 		elseif ((PlayerSpellCache[L.Spell_MongooseBite])) then
 			self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "UpdateMongooseBite")
 		end
-	
+
 	elseif (playerClass == "ROGUE") then
 		-- Track combo points for finisher highlight.
 		self:RegisterEvent("PLAYER_TARGET_CHANGED", "UpdateComboPoints")
@@ -695,7 +697,7 @@ LibSpellHighlight.UpdateClassicEvents = function(self, event, ...)
 end
 
 local PopulateClassicDatabase = function(self)
-	if not(IsClassic or IsTBC) then
+	if not(IsClassic or IsTBC or IsWrath) then
 		return
 	end
 
@@ -730,7 +732,7 @@ local PopulateClassicDatabase = function(self)
 			[9829] = true, -- Shred (Rank 4)
 			[9830] = true  -- Shred (Rank 5)
 		}
-	
+
 		ComboFinishersBySpellID[22568] = true -- Ferocious Bite (Rank 1)
 		ComboFinishersBySpellID[22827] = true -- Ferocious Bite (Rank 2)
 		ComboFinishersBySpellID[22828] = true -- Ferocious Bite (Rank 3)
@@ -742,22 +744,22 @@ local PopulateClassicDatabase = function(self)
 		ComboFinishersBySpellID[ 9752] = true -- Rip (Rank 4)
 		ComboFinishersBySpellID[ 9894] = true -- Rip (Rank 5)
 		ComboFinishersBySpellID[ 9896] = true -- Rip (Rank 6)
-	
+
 	end
-	
+
 	if (playerClass == "HUNTER") then
 		ReactiveSpellsBySpellID[L.Spell_Counterattack] = { 19306, 20909, 20910 }
 		ReactiveSpellsBySpellID[L.Spell_MongooseBite] = { 1495, 14269, 14270, 14271 }
-	end 
-	
+	end
+
 	if (playerClass == "PALADIN") then
 		ReactiveSpellsBySpellID[L.Spell_Exorcism] = { 879, 5614, 5615, 10312, 10313, 10314 }
 		ReactiveSpellsBySpellID[L.Spell_HammerOfWrath] = { 24239, 24274, 24275 }
-	end 
-	
+	end
+
 	if (playerClass == "ROGUE") then
 		ReactiveSpellsBySpellID[L.Spell_Riposte] = { 14251 }
-	
+
 		ComboFinishersBySpellID[ 8647] = true -- Expose Armor (Rank 1)
 		ComboFinishersBySpellID[ 8649] = true -- Expose Armor (Rank 2)
 		ComboFinishersBySpellID[ 8650] = true -- Expose Armor (Rank 3)
@@ -780,14 +782,14 @@ local PopulateClassicDatabase = function(self)
 		ComboFinishersBySpellID[11275] = true -- Rupture (Rank 6)
 		ComboFinishersBySpellID[ 5171] = true -- Slice and Dive (Rank 1)
 		ComboFinishersBySpellID[ 6774] = true -- Slice and Dive (Rank 2)
-	
-	end 
-	
+
+	end
+
 	if (playerClass == "SHAMAN") then
 	end
-	
+
 	if (playerClass == "WARLOCK") then
-	
+
 		HighlightTypeByAuraID[17941] = "REACTIVE"
 		HighlightSpellsByAuraID[17941] = { -- Shadow Trance
 			[  686] = true, -- Shadow Bolt (Rank 1)
@@ -802,14 +804,14 @@ local PopulateClassicDatabase = function(self)
 			[25307] = true, -- Shadow Bolt (Rank 10)
 		}
 		ReactiveSpellsBySpellID[L.Spell_Nightfall] = { 18094, 18095 }
-	end 
-	
+	end
+
 	if (playerClass == "WARRIOR") then
 		ReactiveSpellsBySpellID[L.Spell_Execute] = { 5308, 20658, 20660, 20661, 20662 }
 		ReactiveSpellsBySpellID[L.Spell_Overpower] = { 7384, 7887, 11584, 11585 }
 		ReactiveSpellsBySpellID[L.Spell_Revenge] = { 6572, 6574, 7379, 11600, 11601, 25288 }
 	end
-	
+
 	-- Cache all spellIDs that have a triggering auraID,
 	-- and store their overlay types.
 	for auraID,spells in pairs(HighlightSpellsByAuraID) do
@@ -818,7 +820,7 @@ local PopulateClassicDatabase = function(self)
 			HighlightTypeBySpellID[spellID] = HighlightTypeByAuraID[auraID]
 		end
 	end
-	
+
 	-- Store overlay type of reative spells
 	for spellName, spells in pairs(ReactiveSpellsBySpellID) do
 		for _,spellID in ipairs(spells) do
@@ -852,7 +854,7 @@ LibSpellHighlight.Embed = function(self, target)
 	return target
 end
 
-if (IsClassic or IsTBC) then
+if (IsClassic or IsTBC or IsWrath) then
 	-- Register initialization events
 	if (playerClass == "DRUID") then
 		LibSpellHighlight:RegisterEvent("SPELLS_CHANGED", "UpdateClassicEvents")

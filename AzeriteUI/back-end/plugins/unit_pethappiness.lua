@@ -2,8 +2,11 @@ local LibClientBuild = Wheel("LibClientBuild")
 assert(LibClientBuild, "UnitPetHappiness requires LibClientBuild to be loaded.")
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
+local IsRetail = LibClientBuild:IsRetail()
 
 -- WoW API
 local GetPetHappiness = GetPetHappiness
@@ -49,9 +52,9 @@ local happyMessage = {
 }
 
 local Update = function(self, event, unit, ...)
-	if (not unit) or (unit ~= self.unit) then 
-		return 
-	end 
+	if (not unit) or (unit ~= self.unit) then
+		return
+	end
 	if (event == "UNIT_PET") then
 		local owner = ...
 		if (owner ~= "player") then
@@ -71,12 +74,17 @@ local Update = function(self, event, unit, ...)
 	end
 
 	if (element:IsObjectType("FontString")) then
-		if (loyaltyRate < 0) then
-			element:SetFormattedText(happyMessage.losing[happiness], damagePercentage, loyaltyRate)
-		elseif (loyaltyRate > 0) then
-			element:SetFormattedText(happyMessage.gaining[happiness], damagePercentage, loyaltyRate)
-		else
+		if (IsWrath) then
+			-- Loyalty was removed in wrath, only damage is now affected!
 			element:SetFormattedText(happyMessage.passive[happiness], damagePercentage)
+		else
+			if (loyaltyRate and loyaltyRate < 0) then
+				element:SetFormattedText(happyMessage.losing[happiness], damagePercentage, loyaltyRate)
+			elseif (loyaltyRate and loyaltyRate > 0) then
+				element:SetFormattedText(happyMessage.gaining[happiness], damagePercentage, loyaltyRate)
+			else
+				element:SetFormattedText(happyMessage.passive[happiness], damagePercentage)
+			end
 		end
 	elseif (element:IsObjectType("Texture")) then
 		element:SetTexCoord(unpack(happyTexCoord[happiness]))
@@ -84,14 +92,14 @@ local Update = function(self, event, unit, ...)
 
 	element:Show()
 
-	if (element.PostUpdate) then 
-		return element:PostUpdate(unit, happiness, damagePercentage, loyaltyRate, hunterPet)
-	end 
-end 
+	if (element.PostUpdate) then
+		return element:PostUpdate(unit, happiness, damagePercentage, loyaltyRate or 0, hunterPet)
+	end
+end
 
 local Proxy = function(self, ...)
 	return (self.PetHappiness.Override or Update)(self, ...)
-end 
+end
 
 local ForceUpdate = function(element)
 	return Proxy(element._owner, "Forced", element._owner.unit)
@@ -103,8 +111,9 @@ local Enable = function(self)
 		element._owner = self
 		element.ForceUpdate = ForceUpdate
 
-		-- Forcefully hide this when not in Classic
-		if not(IsClassic or IsTBC) then
+		-- Forcefully hide this when not in Classics
+		-- *pet happiness was removed in 4.1 in Cata
+		if not(IsAnyClassic) then
 			element:Hide()
 			return
 		end
@@ -121,14 +130,14 @@ local Enable = function(self)
 
 		return true
 	end
-end 
+end
 
 local Disable = function(self)
 	local element = self.PetHappiness
 	if element then
 		element:Hide()
 
-		if not(IsClassic) then
+		if not(IsAnyClassic) then
 			return
 		end
 
@@ -136,9 +145,9 @@ local Disable = function(self)
 		self:UnregisterEvent("UNIT_PET", Proxy)
 		self:UnregisterEvent("UNIT_HAPPINESS", Proxy)
 	end
-end 
+end
 
 -- Register it with compatible libraries
-for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do 
-	Lib:RegisterElement("PetHappiness", Enable, Disable, Proxy, 4)
-end 
+for _,Lib in ipairs({ (Wheel("LibUnitFrame", true)), (Wheel("LibNamePlate", true)) }) do
+	Lib:RegisterElement("PetHappiness", Enable, Disable, Proxy, 6)
+end

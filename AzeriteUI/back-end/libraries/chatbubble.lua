@@ -1,5 +1,5 @@
-local LibChatBubble = Wheel:Set("LibChatBubble", 28)
-if (not LibChatBubble) then	
+local LibChatBubble = Wheel:Set("LibChatBubble", 29)
+if (not LibChatBubble) then
 	return
 end
 
@@ -36,8 +36,10 @@ local SetCVar = SetCVar
 local UnitAffectingCombat = UnitAffectingCombat
 
 -- Constants for client version
+local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
+local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
 
 -- Textures
@@ -93,10 +95,10 @@ local getMaxWidth = function()
 	return 400 + math_floor((LibChatBubble.fontSize - 12)/22 * 260)
 end
 
-local getBackdrop = function(scale) 
+local getBackdrop = function(scale)
 	return {
-		bgFile = [[Interface\Tooltips\CHATBUBBLE-BACKGROUND]], 
-		edgeFile = [[Interface\Tooltips\CHATBUBBLE-BACKDROP]],  
+		bgFile = [[Interface\Tooltips\CHATBUBBLE-BACKGROUND]],
+		edgeFile = [[Interface\Tooltips\CHATBUBBLE-BACKDROP]],
 		edgeSize = 16 * scale,
 		insets = {
 			left = 16 * scale,
@@ -107,10 +109,10 @@ local getBackdrop = function(scale)
 	}
 end
 
-local getBackdropClean = function(scale) 
+local getBackdropClean = function(scale)
 	return {
-		bgFile = BLANK_TEXTURE,  
-		edgeFile = TOOLTIP_BORDER, 
+		bgFile = BLANK_TEXTURE,
+		edgeFile = TOOLTIP_BORDER,
 		edgeSize = 16 * scale,
 		insets = {
 			left = 2.5 * scale,
@@ -128,16 +130,16 @@ local OnUpdate = function(self)
 	local scale = WorldFrame:GetHeight()/UIParent:GetHeight()
 	for _, bubble in pairs(GetAllChatBubbles()) do
 
-		if (not customBubbles[bubble]) then 
+		if (not customBubbles[bubble]) then
 			LibChatBubble:InitBubble(bubble)
-		end 
+		end
 
 		local customBubble = customBubbles[bubble]
 
 		if bubble:IsShown() then
-			-- continuing the fight against overlaps blending into each other! 
+			-- continuing the fight against overlaps blending into each other!
 			customBubbles[bubble]:SetFrameLevel(bubble:GetFrameLevel()) -- this works?
-			
+
 			local blizzTextWidth = math_floor(customBubble.blizzardText:GetWidth())
 			local blizzTextHeight = math_floor(customBubble.blizzardText:GetHeight())
 			local point, anchor, rpoint, blizzX, blizzY = customBubble.blizzardText:GetPoint()
@@ -168,19 +170,19 @@ local OnUpdate = function(self)
 				local ourTextHeight = customBubbles[bubble].text:GetHeight()
 
 				-- chatbubbles are rendered at BOTTOM, WorldFrame, BOTTOMLEFT, x, y
-				local ourX = math_floor(offsetX + (blizzX - blizzTextWidth/2)/scale - (ourTextWidth-blizzTextWidth)/2) 
+				local ourX = math_floor(offsetX + (blizzX - blizzTextWidth/2)/scale - (ourTextWidth-blizzTextWidth)/2)
 				local ourY = math_floor(offsetY + blizzY/scale - (ourTextHeight-blizzTextHeight)/2) -- get correct bottom coordinate
 				local ourWidth = math_floor(ourTextWidth + space*2)
 				local ourHeight = math_floor(ourTextHeight + space*2)
 
 				-- hide while sizing and moving, to gain fps
-				customBubbles[bubble]:Hide() 
+				customBubbles[bubble]:Hide()
 				customBubbles[bubble]:SetSize(ourWidth, ourHeight)
 				customBubbles[bubble]:SetBackdropColor(0, 0, 0, .5)
 				customBubbles[bubble]:SetBackdropBorderColor(0, 0, 0, .5)
 
 				-- show the bubble again
-				customBubbles[bubble]:Show() 
+				customBubbles[bubble]:Show()
 			end
 
 			customBubble.blizzardText:SetAlpha(0)
@@ -192,8 +194,8 @@ local OnUpdate = function(self)
 			end
 		end
 	end
-	for bubble in pairs(customBubbles) do 
-		if (not bubble:IsShown()) and (customBubbles[bubble]:IsShown()) then 
+	for bubble in pairs(customBubbles) do
+		if (not bubble:IsShown()) and (customBubbles[bubble]:IsShown()) then
 			customBubbles[bubble]:Hide()
 		end
 	end
@@ -203,8 +205,8 @@ LibChatBubble.DisableBlizzard = function(self, bubble)
 	local customBubble = customBubbles[bubble]
 
 	-- Grab the original bubble's text color
-	customBubble.blizzardColor[1], 
-	customBubble.blizzardColor[2], 
+	customBubble.blizzardColor[1],
+	customBubble.blizzardColor[2],
 	customBubble.blizzardColor[3] = customBubble.blizzardText:GetTextColor()
 
 	-- Make the original blizzard text transparent
@@ -213,7 +215,7 @@ LibChatBubble.DisableBlizzard = function(self, bubble)
 	-- Remove all the default textures
 	for region, texture in pairs(customBubbles[bubble].blizzardRegions) do
 		-- Needed in classic, as the game keeps resetting the alpha.
-		if (IsClassic or IsTBC) then
+		if (IsClassic or IsTBC or IsWrath) then
 			region:SetTexture(nil)
 		end
 		region:SetAlpha(0)
@@ -277,13 +279,13 @@ LibChatBubble.InitBubble = function(self, bubble)
 		customBubble.blizzardBackdropFrame = customBubble
 		customBubble.blizzardBackdrop = customBubble:GetBackdrop()
 	end
-	
+
 	customBubble.text = customBubble:CreateFontString()
 	customBubble.text:SetPoint("BOTTOMLEFT", 12, 12)
-	customBubble.text:SetFontObject(LibChatBubble:GetFontObject()) 
+	customBubble.text:SetFontObject(LibChatBubble:GetFontObject())
 	customBubble.text:SetShadowOffset(0, 0)
 	customBubble.text:SetShadowColor(0, 0, 0, 0)
-	
+
 	-- Old way, still active in classic.
 	-- Update 22-03-2021: NOT working in classic anymore?!
 	for i = 1, bubble:GetNumRegions() do
@@ -315,44 +317,44 @@ LibChatBubble.InitBubble = function(self, bubble)
 			end
 		end
 	end
-	
+
 	customBubbles[bubble] = customBubble
 
-	-- Only disable the Blizzard bubble outside of instances, 
-	-- and only when any cinematics aren't playing. 
+	-- Only disable the Blizzard bubble outside of instances,
+	-- and only when any cinematics aren't playing.
 	local _, instanceType = IsInInstance()
 	if ((instanceType == "none") and (not MovieFrame:IsShown()) and (not CinematicFrame:IsShown()) and UIParent:IsShown()) then
 		LibChatBubble:DisableBlizzard(bubble)
 	end
 
-	if LibChatBubble.PostCreateBubble then 
+	if LibChatBubble.PostCreateBubble then
 		LibChatBubble.PostCreateBubble(bubble)
-	end 
+	end
 end
 
 LibChatBubble.PostCreateBubble = function(self, bubble)
-	if LibChatBubble.PostCreateBubbleFunc then 
+	if LibChatBubble.PostCreateBubbleFunc then
 		LibChatBubble.PostCreateBubbleFunc(bubble)
-	end 
-end 
+	end
+end
 
 LibChatBubble.SetBubblePostCreateFunc = function(self, func)
 	LibChatBubble.PostCreateBubbleFunc = func
-end 
+end
 
 LibChatBubble.SetBubblePostUpdateFunc = function(self, func)
 	LibChatBubble.PostUpdateBubbleFunc = func
-end 
+end
 
 -- Seems to be some taint when CinematicFrame is shown, in here?
 LibChatBubble.UpdateBubbleVisibility = function(self)
-	-- Add an extra layer of combat protection here, 
+	-- Add an extra layer of combat protection here,
 	-- in case we got here abruptly by a started cinematic.
-	if (InCombatLockdown()) then 
+	if (InCombatLockdown()) then
 		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	end
 	local _, instanceType = IsInInstance()
-	if ((instanceType == "none") and (not MovieFrame:IsShown()) and (not CinematicFrame:IsShown()) and UIParent:IsShown()) then 
+	if ((instanceType == "none") and (not MovieFrame:IsShown()) and (not CinematicFrame:IsShown()) and UIParent:IsShown()) then
 
 		-- Start our updater, this will show our bubbles.
 		bubbleUpdater:SetScript("OnUpdate", OnUpdate)
@@ -403,7 +405,7 @@ LibChatBubble.EnableBubbleStyling = function(self)
 	LibChatBubble:RegisterEvent("PLAYER_REGEN_DISABLED", "OnEvent")
 	LibChatBubble:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	LibChatBubble:OnEvent("PLAYER_ENTERING_WORLD")
-end 
+end
 
 LibChatBubble.DisableBubbleStyling = function(self)
 	LibChatBubble.stylingEnabled = nil
@@ -411,18 +413,18 @@ LibChatBubble.DisableBubbleStyling = function(self)
 	LibChatBubble:UnregisterEvent("PLAYER_REGEN_DISABLED", "OnEvent")
 	LibChatBubble:UnregisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 	LibChatBubble:OnEvent("PLAYER_ENTERING_WORLD")
-end 
+end
 
 LibChatBubble.GetAllChatBubbles = function(self)
 	return pairs(GetAllChatBubbles())
 end
 
 LibChatBubble.OnEvent = function(self, event, ...)
-	if (event == "PLAYER_ENTERING_WORLD") then 
+	if (event == "PLAYER_ENTERING_WORLD") then
 
-		-- Don't ever do any of this while in combat. 
-		-- This should never happen, we're just being overly safe here. 
-		if (InCombatLockdown()) then 
+		-- Don't ever do any of this while in combat.
+		-- This should never happen, we're just being overly safe here.
+		if (InCombatLockdown()) then
 			return self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnEvent")
 		end
 
@@ -476,14 +478,14 @@ LibChatBubble.OnEvent = function(self, event, ...)
 			self:ClearHook(CinematicFrame, "OnShow", "UpdateBubbleVisibility", "GP_CINEMATICFRAME_ONSHOW_BUBBLEUPDATE")
 			self:ClearHook(MovieFrame, "OnHide", "UpdateBubbleVisibility", "GP_MOVIEFRAME_ONHIDE_BUBBLEUPDATE")
 			self:ClearHook(MovieFrame, "OnShow", "UpdateBubbleVisibility", "GP_MOVIEFRAME_ONSHOW_BUBBLEUPDATE")
-		end 
+		end
 
 		self:UpdateBubbleVisibility()
 
-	elseif (event == "PLAYER_REGEN_ENABLED") then 
+	elseif (event == "PLAYER_REGEN_ENABLED") then
 		return self:OnEvent("PLAYER_ENTERING_WORLD")
 
-	elseif (event == "PLAYER_REGEN_DISABLED") then 
+	elseif (event == "PLAYER_REGEN_DISABLED") then
 		return self:OnEvent("PLAYER_ENTERING_WORLD")
 
 	end
