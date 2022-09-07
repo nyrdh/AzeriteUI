@@ -1155,7 +1155,7 @@ Module.SetUpMinimap = function(self)
 		local BGFrameBorder = MiniMapBattlefieldBorder
 		local BGIcon = MiniMapBattlefieldIcon
 
-		if BGFrame then
+		if (BGFrame) then
 			local button = Handler:CreateOverlayFrame()
 			button:SetFrameLevel(button:GetFrameLevel() + 10)
 			button:Place(unpack(layout.BattleGroundEyePlace))
