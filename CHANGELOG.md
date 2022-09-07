@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Added Pet Happiness for Wrath.
 - Added micro menu entries for Wrath.
+- Added Questie support for Wrath.
 
 ### Fixed
 - Added a lot of Wrath exceptions to the back-end.
