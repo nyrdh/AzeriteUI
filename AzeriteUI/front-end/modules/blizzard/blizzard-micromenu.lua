@@ -70,21 +70,51 @@ local getMicroButtonTooltipText = function(text, action)
 	return formatBindingKeyIntoText(text, action, "%s %s", NORMAL_FONT_COLOR_CODE.."(%s)"..FONT_COLOR_CODE_CLOSE)
 end
 
-local microButtons = {}
-if (IsClassic or IsTBC) then
+local microButtons, microButtonTexts = {}, {}
+if (IsClassic) then
+
 	table_insert(microButtons, "CharacterMicroButton")
 	table_insert(microButtons, "SpellbookMicroButton")
 	table_insert(microButtons, "TalentMicroButton")
 	table_insert(microButtons, "QuestLogMicroButton")
 	table_insert(microButtons, "SocialsMicroButton")
-	if (IsTBC) then
-		table_insert(microButtons, "LFGMicroButton")
-	end
 	table_insert(microButtons, "WorldMapMicroButton")
 	table_insert(microButtons, "MainMenuMicroButton")
 	table_insert(microButtons, "HelpMicroButton")
-end
-if (IsWrath) then
+
+	microButtonTexts.CharacterMicroButton = CHARACTER_BUTTON
+	microButtonTexts.SpellbookMicroButton = SPELLBOOK_ABILITIES_BUTTON
+	microButtonTexts.TalentMicroButton = TALENTS_BUTTON
+	microButtonTexts.QuestLogMicroButton = QUESTLOG_BUTTON
+	microButtonTexts.SocialsMicroButton = SOCIALS
+	microButtonTexts.WorldMapMicroButton = WORLD_MAP
+	microButtonTexts.MainMenuMicroButton = MAINMENU_BUTTON
+	microButtonTexts.HelpMicroButton = HELP_BUTTON
+
+elseif (IsTBC) then
+
+	table_insert(microButtons, "CharacterMicroButton")
+	table_insert(microButtons, "SpellbookMicroButton")
+	table_insert(microButtons, "TalentMicroButton")
+	table_insert(microButtons, "QuestLogMicroButton")
+	table_insert(microButtons, "SocialsMicroButton")
+	table_insert(microButtons, "LFGMicroButton")
+	table_insert(microButtons, "WorldMapMicroButton")
+	table_insert(microButtons, "MainMenuMicroButton")
+	table_insert(microButtons, "HelpMicroButton")
+
+	microButtonTexts.CharacterMicroButton = CHARACTER_BUTTON
+	microButtonTexts.SpellbookMicroButton = SPELLBOOK_ABILITIES_BUTTON
+	microButtonTexts.TalentMicroButton = TALENTS_BUTTON
+	microButtonTexts.QuestLogMicroButton = QUESTLOG_BUTTON
+	microButtonTexts.SocialsMicroButton = SOCIALS
+	microButtonTexts.LFGMicroButton = DUNGEONS_BUTTON
+	microButtonTexts.WorldMapMicroButton = WORLD_MAP
+	microButtonTexts.MainMenuMicroButton = MAINMENU_BUTTON
+	microButtonTexts.HelpMicroButton = HELP_BUTTON
+
+elseif (IsWrath) then
+
 	table_insert(microButtons, "CharacterMicroButton")
 	table_insert(microButtons, "SpellbookMicroButton")
 	table_insert(microButtons, "TalentMicroButton")
@@ -95,8 +125,20 @@ if (IsWrath) then
 	table_insert(microButtons, "LFGMicroButton")
 	table_insert(microButtons, "MainMenuMicroButton")
 	table_insert(microButtons, "HelpMicroButton")
-end
-if (IsRetail) then
+
+	microButtonTexts.CharacterMicroButton = CHARACTER_BUTTON
+	microButtonTexts.SpellbookMicroButton = SPELLBOOK_ABILITIES_BUTTON
+	microButtonTexts.TalentMicroButton = TALENTS_BUTTON
+	microButtonTexts.AchievementMicroButton = ACHIEVEMENT_BUTTON
+	microButtonTexts.QuestLogMicroButton = QUESTLOG_BUTTON
+	microButtonTexts.SocialsMicroButton = SOCIALS
+	microButtonTexts.PVPMicroButton = PLAYER_V_PLAYER
+	microButtonTexts.LFGMicroButton = DUNGEONS_BUTTON
+	microButtonTexts.MainMenuMicroButton = MAINMENU_BUTTON
+	microButtonTexts.HelpMicroButton = HELP_BUTTON
+
+else
+
 	table_insert(microButtons, "CharacterMicroButton")
 	table_insert(microButtons, "SpellbookMicroButton")
 	table_insert(microButtons, "TalentMicroButton")
@@ -108,35 +150,7 @@ if (IsRetail) then
 	table_insert(microButtons, "EJMicroButton")
 	table_insert(microButtons, "StoreMicroButton")
 	table_insert(microButtons, "MainMenuMicroButton")
-end
 
-local microButtonTexts = {}
-if (IsClassic or IsTBC) then
-	microButtonTexts.CharacterMicroButton = CHARACTER_BUTTON
-	microButtonTexts.SpellbookMicroButton = SPELLBOOK_ABILITIES_BUTTON
-	microButtonTexts.TalentMicroButton = TALENTS_BUTTON
-	microButtonTexts.QuestLogMicroButton = QUESTLOG_BUTTON
-	microButtonTexts.SocialsMicroButton = SOCIALS
-	if (IsTBC) then
-		microButtonTexts.LFGMicroButton = DUNGEONS_BUTTON
-	end
-	microButtonTexts.WorldMapMicroButton = WORLD_MAP
-	microButtonTexts.MainMenuMicroButton = MAINMENU_BUTTON
-	microButtonTexts.HelpMicroButton = HELP_BUTTON
-end
-if (IsWrath) then
-	microButtonTexts.CharacterMicroButton = CHARACTER_BUTTON
-	microButtonTexts.SpellbookMicroButton = SPELLBOOK_ABILITIES_BUTTON
-	microButtonTexts.TalentMicroButton = TALENTS_BUTTON
-	microButtonTexts.AchievementMicroButton = ACHIEVEMENT_BUTTON
-	microButtonTexts.QuestLogMicroButton = QUESTLOG_BUTTON
-	microButtonTexts.SocialsMicroButton = SOCIALS
-	microButtonTexts.PVPMicroButton = PLAYER_V_PLAYER
-	microButtonTexts.LFGMicroButton = DUNGEONS_BUTTON
-	microButtonTexts.MainMenuMicroButton = MAINMENU_BUTTON
-	microButtonTexts.HelpMicroButton = HELP_BUTTON
-end
-if (IsRetail) then
 	microButtonTexts.CharacterMicroButton = CHARACTER_BUTTON
 	microButtonTexts.SpellbookMicroButton = SPELLBOOK_ABILITIES_BUTTON
 	microButtonTexts.TalentMicroButton = TALENTS_BUTTON
@@ -148,6 +162,7 @@ if (IsRetail) then
 	microButtonTexts.EJMicroButton = ADVENTURE_JOURNAL or ENCOUNTER_JOURNAL
 	microButtonTexts.StoreMicroButton = BLIZZARD_STORE
 	microButtonTexts.MainMenuMicroButton = MAINMENU_BUTTON
+
 end
 
 local PrepareTooltip = function(self)
@@ -158,7 +173,7 @@ local PrepareTooltip = function(self)
 end
 
 local microButtonScripts = {}
-if (IsClassic or IsTBC) then
+if (IsClassic or IsTBC or IsWrath) then
 	microButtonScripts.CharacterMicroButton_OnEnter = function(self)
 		self.tooltipText = getMicroButtonTooltipText(CHARACTER_BUTTON, "TOGGLECHARACTER0")
 		local titleColor, normalColor = Layout.MenuButtonTitleColor, Layout.MenuButtonNormalColor
@@ -576,9 +591,9 @@ Module.OnInit = function(self)
 		hooksecurefunc("MainMenuMicroButton_ShowAlert", HideAlerts)
 	end
 
-	if self:IsAddOnEnabled("Bartender4") then
+	if (self:IsAddOnEnabled("Bartender4")) then
 		self:AddDebugMessageFormatted("[Bartender4] detected.")
-		if IsAddOnLoaded("Bartender4") then
+		if (IsAddOnLoaded("Bartender4")) then
 			self:HandleBartender()
 		else
 			self:AddDebugMessageFormatted("[Bartender4] not yet loaded, adding handle action to queue.")
