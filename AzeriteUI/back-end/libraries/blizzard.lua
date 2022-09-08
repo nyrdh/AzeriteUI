@@ -231,7 +231,7 @@ UIWidgetsDisable["ActionBars"] = (IsClassic or IsTBC or IsWrath) and function(se
 		"TutorialFrameAlertButton7",
 		"TutorialFrameAlertButton8",
 		"TutorialFrameAlertButton9",
-		"TutorialFrameAlertButton10",
+		"TutorialFrameAlertButton10"
 	}) do
 		if (_G[object] and _G[object].UnregisterAllEvents) then
 			_G[object]:UnregisterAllEvents()
