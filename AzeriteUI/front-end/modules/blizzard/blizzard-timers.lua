@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
-if (not Core) then 
-	return 
+if (not Core) then
+	return
 end
 local Module = Core:NewModule("BlizzardTimers", "LibMessage", "LibEvent", "LibSecureHook", "LibFrame", "LibStatusBar")
 
@@ -72,19 +72,19 @@ Module.StyleTimer = function(self, frame, ignoreTextureFix)
 	local timer = self.timers[frame.bar]
 	local bar = timer.bar
 
-	if (not ignoreTextureFix) then 
-		for i = 1,frame:GetNumRegions() do 
+	if (not ignoreTextureFix) then
+		for i = 1,frame:GetNumRegions() do
 			local region = select(i, frame:GetRegions())
-			if (region and region:IsObjectType("Texture")) then 
+			if (region and region:IsObjectType("Texture")) then
 				region:SetTexture(nil)
-			end 
-		end 
-		for i = 1,bar:GetNumRegions() do 
+			end
+		end
+		for i = 1,bar:GetNumRegions() do
 			local region = select(i, bar:GetRegions())
-			if (region and region:IsObjectType("Texture")) then 
+			if (region and region:IsObjectType("Texture")) then
 				region:SetTexture(nil)
-			end 
-		end 
+			end
+		end
 	end
 
 	frame:SetSize(unpack(layout.MirrorSize))
@@ -102,30 +102,30 @@ Module.StyleTimer = function(self, frame, ignoreTextureFix)
 	backdrop:SetTexture(layout.MirrorBackdropTexture)
 	backdrop:SetVertexColor(unpack(layout.MirrorBackdropColor))
 
-	if (not ignoreTextureFix) then 
+	if (not ignoreTextureFix) then
 		-- just hide the spark for now
 		local spark = timer.spark
-		if spark then 
+		if spark then
 			spark:SetDrawLayer("OVERLAY") -- needs to be OVERLAY, as ARTWORK will sometimes be behind the bars
 			spark:SetPoint("CENTER", bar:GetStatusBarTexture(), "RIGHT", 0, 0)
 			spark:SetSize(.001,.001)
-			spark:SetTexture(layout.MirrorBlankTexture) 
+			spark:SetTexture(layout.MirrorBlankTexture)
 			spark:SetVertexColor(0,0,0,0)
-		end 
+		end
 
 		-- hide the default border
 		local border = timer.border
-		if border then 
+		if border then
 			border:ClearAllPoints()
 			border:SetPoint("CENTER", 0, 0)
 			border:SetSize(.001, .001)
 			border:SetTexture(layout.MirrorBlankTexture)
 			border:SetVertexColor(0,0,0,0)
-		end 
-	end 
+		end
+	end
 
 	local msg = timer.msg
-	if msg then 
+	if msg then
 		msg:SetParent(bar)
 		msg:ClearAllPoints()
 		msg:SetPoint(unpack(layout.MirrorBarValuePlace))
@@ -134,12 +134,12 @@ Module.StyleTimer = function(self, frame, ignoreTextureFix)
 		msg:SetJustifyV("MIDDLE")
 		msg:SetFontObject(layout.MirrorBarValueFont)
 		msg:SetTextColor(unpack(layout.MirrorBarValueColor))
-	end 
+	end
 
-	if (not ignoreTextureFix) then 
+	if (not ignoreTextureFix) then
 		self:SetSecureHook(bar, "SetValue", "UpdateBarTexture")
 		self:SetSecureHook(bar, "SetMinMaxValues", "UpdateBarTexture")
-	end 
+	end
 end
 
 Module.StyleBuffTimer = function(self, timer, auraID)
@@ -170,7 +170,7 @@ Module.StyleBuffTimer = function(self, timer, auraID)
 	local bar = frame:CreateStatusBar()
 	bar:SetSparkMap(layout.MirrorBarSparkMap)
 	bar:SetStatusBarColor(unpack(layout.MirrorBarColor))
-	frame.bar = bar 
+	frame.bar = bar
 
 	local msg = bar:CreateFontString()
 	frame.msg = msg
@@ -182,7 +182,7 @@ Module.StyleBuffTimer = function(self, timer, auraID)
 	timer.msg = msg
 	timer.type = 1000
 	timer.id = #self.buffTimers + 1
-	
+
 	-- Store the timer object
 	self.timers[frame.bar] = timer
 
@@ -213,7 +213,7 @@ Module.KillWidgetPowerBarFrame = function(self, event, addon)
 	if (not bar) then
 		return self:RegisterEvent("ADDON_LOADED", "KillWidgetPowerBarFrame")
 	end
-	-- Only way that works. 
+	-- Only way that works.
 	-- Any messing with the bar, or the widget system's API == TAINT!
 	local Hider = CreateFrame("Frame")
 	Hider:Hide()
@@ -225,8 +225,8 @@ Module.GetBuffTimer = function(self, auraID)
 
 	-- Attempt to retrieve the existing timer
 	local timer = self.buffTimersByAuraID[auraID]
-	if (timer and timer.frame:IsShown()) then 
-		return timer, false 
+	if (timer and timer.frame:IsShown()) then
+		return timer, false
 	end
 
 	return self:StyleBuffTimer(timer, auraID)
@@ -241,32 +241,32 @@ Module.UpdateAnchors = function(self, event, ...)
 	local order = self.order or {}
 
 	-- Reset the order table
-	for i = #order,1,-1 do 
+	for i = #order,1,-1 do
 		order[i] = nil
-	end 
-	
+	end
+
 	-- Release the points of all timers
 	for bar,timer in pairs(timers) do
 		timer.frame:SetParent(layout.MirrorAnchor)
-		timer.frame:ClearAllPoints() 
+		timer.frame:ClearAllPoints()
 		if (timer.frame:IsShown()) then
 			order[#order + 1] = timer
 		end
-	end	
-	
+	end
+
 	-- Sort and arrange visible timers
 	if (#order > 0) then
 
 		-- Sort by type -> id
-		table_sort(order, sort_mirrors) 
+		table_sort(order, sort_mirrors)
 
 		-- Figure out the start offset
-		local offsetY = layout.MirrorAnchorOffsetY 
+		local offsetY = layout.MirrorAnchorOffsetY
 
 		-- Add space for capturebars, if visible
-		if self.captureBarVisible then 
+		if self.captureBarVisible then
 			offsetY = offsetY + layout.MirrorGrowth
-		end 
+		end
 
 		-- Position the bars
 		for i = 1, #order do
@@ -291,12 +291,12 @@ Module.UpdateBarTexture = function(self, event, bar)
 end
 
 Module.UpdateBuffTimers = function(self, event, unit)
-	if ((event == "UNIT_POWER_BAR_TIMER_UPDATE") and (unit ~= "player")) then 
+	if ((event == "UNIT_POWER_BAR_TIMER_UPDATE") and (unit ~= "player")) then
 		return
-	end 
+	end
 
 	-- Flag all active bars for hiding
-	for auraID,timer in pairs(self.buffTimersByAuraID) do 
+	for auraID,timer in pairs(self.buffTimersByAuraID) do
 		timer.flagForHide = true
 	end
 
@@ -305,28 +305,28 @@ Module.UpdateBuffTimers = function(self, event, unit)
 	local duration, expiration, barID, auraID = UnitPowerBarTimerInfo("player", id)
 	while barID do
 
-		-- Counters are just numeral representation of player alt power, 
-		-- and we have an alt power bar for this already. 
+		-- Counters are just numeral representation of player alt power,
+		-- and we have an alt power bar for this already.
 		local barType = GetAlternatePowerInfoByID(barID)
-		if (barType ~= ALT_POWER_TYPE_COUNTER) then 
+		if (barType ~= ALT_POWER_TYPE_COUNTER) then
 
 			-- Retrieve or create the timer frame
 			local timer, needsReset = self:GetBuffTimer(auraID)
 
 			-- Unflag the bar for hiding
-			timer.flagForHide = nil 
+			timer.flagForHide = nil
 
 			-- update bar values, make it an instant update
 			timer.bar:SetMinMaxValues(0, duration, true)
-			timer.bar:SetValue(duration, true) 
+			timer.bar:SetValue(duration, true)
 
 			-- update expiration value
-			timer.frame.timerExpiration = expiration 
+			timer.frame.timerExpiration = expiration
 
-			if needsReset then 
+			if needsReset then
 				timer.frame:SetScript("OnUpdate", updateBuffTimer)
 				timer.frame:Show()
-			end 
+			end
 		end
 
 		id = id + 1
@@ -334,19 +334,19 @@ Module.UpdateBuffTimers = function(self, event, unit)
 	end
 
 	-- Hide all active but flagged bars
-	for auraID,timer in pairs(self.buffTimersByAuraID) do 
-		if timer.flagForHide then 
+	for auraID,timer in pairs(self.buffTimersByAuraID) do
+		if timer.flagForHide then
 			timer.frame:Hide()
 			timer.frame:SetScript("OnUpdate", nil)
 
 			-- Remove the reference from the list of active timers
 			self.buffTimersByAuraID[auraID] = nil
 		end
-	end	
+	end
 
-	if (event ~= "ForceUpdate") then 
+	if (event ~= "ForceUpdate") then
 		self:UpdateAnchors()
-	end 
+	end
 end
 
 Module.UpdateMirrorTimers = function(self)
@@ -354,9 +354,9 @@ Module.UpdateMirrorTimers = function(self)
 	for i = 1, MIRRORTIMER_NUMTIMERS do
 		local name  = "MirrorTimer"..i
 		local frame = _G[name]
-		
-		if (frame and (not frame.bar or not timers[frame.bar])) then 
-			frame.bar = _G[name.."StatusBar"]
+
+		if (frame and (not frame.bar or not timers[frame.bar])) then
+			frame.bar = _G[name.."StatusBar"] or frame.StatusBar
 
 			timers[frame.bar] = {}
 			timers[frame.bar].frame = frame
@@ -368,17 +368,17 @@ Module.UpdateMirrorTimers = function(self)
 			timers[frame.bar].id = i
 
 			self:StyleTimer(frame)
-		end 
-	end 
-	if (event ~= "ForceUpdate") then 
+		end
+	end
+	if (event ~= "ForceUpdate") then
 		self:UpdateAnchors()
-	end 
+	end
 end
 
 Module.UpdateTimerTrackers = function(self, event, ...)
 	local timers = self.timers
-	for i,frame in pairs(TimerTracker.timerList) do 
-		if (frame and (not frame.bar or not timers[frame.bar])) then 
+	for i,frame in pairs(TimerTracker.timerList) do
+		if (frame and (not frame.bar or not timers[frame.bar])) then
 			local name = frame:GetName()
 
 			timers[frame.bar] = {}
@@ -393,10 +393,10 @@ Module.UpdateTimerTrackers = function(self, event, ...)
 			self:StyleTimer(frame)
 		end
 	end
-	if (event ~= "ForceUpdate") then 
+	if (event ~= "ForceUpdate") then
 		self:UpdateAnchors()
-	end 
-end 
+	end
+end
 
 Module.UpdateAll = function(self)
 	self:UpdateMirrorTimers("ForceUpdate")

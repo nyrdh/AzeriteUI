@@ -1,4 +1,4 @@
-local LibUnitFrame = Wheel:Set("LibUnitFrame", 95)
+local LibUnitFrame = Wheel:Set("LibUnitFrame", 96)
 if (not LibUnitFrame) then
 	return
 end
@@ -69,6 +69,7 @@ local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
 local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
+local IsDragonflight = LibClientBuild:IsDragonflight()
 
 -- Library Registries
 LibUnitFrame.embeds = LibUnitFrame.embeds or {} -- who embeds this?
@@ -532,7 +533,11 @@ LibUnitFrame.SpawnUnitFrame = function(self, unit, parent, styleFunc, ...)
 
 	if (frame.ignoreMouseOver) then
 		frame:EnableMouse(false)
-		frame:RegisterForClicks("")
+		if (IsDragonflight) then
+			frame:RegisterForClicks()
+		else
+			frame:RegisterForClicks("")
+		end
 	else
 		frame:SetAttribute("*type1", "target")
 		frame:SetAttribute("*type2", "togglemenu")

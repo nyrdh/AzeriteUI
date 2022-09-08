@@ -1,4 +1,4 @@
-local LibSecureButton = Wheel:Set("LibSecureButton", 142)
+local LibSecureButton = Wheel:Set("LibSecureButton", 144)
 if (not LibSecureButton) then
 	return
 end
@@ -156,7 +156,7 @@ local PETBUTTON_NAME_TEMPLATE_FULL = "GP_PetActionButton%d"
 -- Constants
 local NUM_ACTIONBAR_BUTTONS = NUM_ACTIONBAR_BUTTONS
 local NUM_PET_ACTION_SLOTS = NUM_PET_ACTION_SLOTS
-local NUM_STANCE_SLOTS = NUM_STANCE_SLOTS
+local NUM_STANCE_SLOTS = NUM_STANCE_SLOTS or 10
 local BOTTOMLEFT_ACTIONBAR_PAGE = BOTTOMLEFT_ACTIONBAR_PAGE
 local BOTTOMRIGHT_ACTIONBAR_PAGE = BOTTOMRIGHT_ACTIONBAR_PAGE
 local LEFT_ACTIONBAR_PAGE = LEFT_ACTIONBAR_PAGE
@@ -3312,11 +3312,13 @@ LibSecureButton.HookMaxDps = function(self, event, ...)
 end
 
 -- This will cause multiple updates when library is updated. Hmm....
-hooksecurefunc("ActionButton_UpdateFlyout", function(self, ...)
-	if AllButtons[self] then
-		self:UpdateFlyout()
-	end
-end)
+if (ActionButton_UpdateFlyout) then
+	hooksecurefunc("ActionButton_UpdateFlyout", function(self, ...)
+		if AllButtons[self] then
+			self:UpdateFlyout()
+		end
+	end)
+end
 
 -- Module embedding
 local embedMethods = {

@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 108)
+local LibBlizzard = Wheel:Set("LibBlizzard", 110)
 if (not LibBlizzard) then
 	return
 end
@@ -57,7 +57,7 @@ local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
 local IsWrath = LibClientBuild:IsWrath()
 local IsRetail = LibClientBuild:IsRetail()
-local IsDragonflight = LibClientBuild:IsRetailDragonflight()
+local IsDragonflight = LibClientBuild:IsDragonflight()
 
 LibBlizzard.embeds = LibBlizzard.embeds or {}
 LibBlizzard.queue = LibBlizzard.queue or {}
@@ -355,7 +355,7 @@ or IsRetail and function(self)
 	handleManagedFrame(MultiCastActionBarFrame) -- >= 10.0.0
 	handleManagedFrame(PetActionBarFrame) -- >= 10.0.0
 	handleManagedFrame(PossessBarFrame) -- >= 10.0.0
-	handleManagedFrame(StanceBarFrame) -- >= 10.0.0
+	handleManagedFrame(StanceBar) -- >= 10.0.0
 	handleManagedFrame(TutorialFrameAlertButton) -- >= 10.0.0
 
 	-- Removed in Dragonflight.
@@ -372,8 +372,10 @@ or IsRetail and function(self)
 	MainMenuBar:UnregisterEvent("DISPLAY_SIZE_CHANGED")
 	MainMenuBar:UnregisterEvent("UI_SCALE_CHANGED")
 
-	local animations = { MainMenuBar.slideOut:GetAnimations() }
-	animations[1]:SetOffset(0,0)
+	if (MainMenuBar.slideOut) then
+		local animations = { MainMenuBar.slideOut:GetAnimations() }
+		animations[1]:SetOffset(0,0)
+	end
 
 	handleActionBar(MainMenuBarVehicleLeaveButton, true, false, true)
 	handleActionBar(OverrideActionBar, true, false, true)
@@ -381,12 +383,15 @@ or IsRetail and function(self)
 	StatusTrackingBarManager:Hide()
 	StatusTrackingBarManager:UnregisterAllEvents()
 
-	local animations = { OverrideActionBar.slideOut:GetAnimations() }
-	if (animations[1] and animations[1].SetOffset) then
-		animations[1]:SetOffset(0,0)
+	if (OverrideActionBar.slideOut) then
+		local animations = { OverrideActionBar.slideOut:GetAnimations() }
+		if (animations[1] and animations[1].SetOffset) then
+			animations[1]:SetOffset(0,0)
+		end
 	end
 
 	handleActionBar(MicroButtonAndBagsBar, false, false, true)
+	handleActionBar(StanceBar, true, true)
 	handleActionBar(StanceBarFrame, true, true)
 	handleActionBar(PossessBarFrame, false, true)
 	handleActionBar(MultiCastActionBarFrame, true, true)
@@ -687,10 +692,12 @@ end
 
 UIWidgetsDisable["CastBars"] = function(self)
 	-- player's castbar
-	CastingBarFrame:SetScript("OnEvent", nil)
-	CastingBarFrame:SetScript("OnUpdate", nil)
-	CastingBarFrame:SetParent(UIHider)
-	CastingBarFrame:UnregisterAllEvents()
+	if (CastingBarFrame) then
+		CastingBarFrame:SetScript("OnEvent", nil)
+		CastingBarFrame:SetScript("OnUpdate", nil)
+		CastingBarFrame:SetParent(UIHider)
+		CastingBarFrame:UnregisterAllEvents()
+	end
 
 	-- player's pet's castbar
 	PetCastingBarFrame:SetScript("OnEvent", nil)
@@ -1160,9 +1167,11 @@ UIWidgetsDisable["UnitFrameParty"] = function(self)
 	end
 
 	-- Kill off the party background
-	_G.PartyMemberBackground:SetParent(UIHider)
-	_G.PartyMemberBackground:Hide()
-	_G.PartyMemberBackground:SetAlpha(0)
+	if (_G.PartyMemberBackground) then
+		_G.PartyMemberBackground:SetParent(UIHider)
+		_G.PartyMemberBackground:Hide()
+		_G.PartyMemberBackground:SetAlpha(0)
+	end
 
 	--hooksecurefunc("CompactPartyFrame_Generate", function()
 	--	killUnitFrame(_G.CompactPartyFrame)
@@ -1398,6 +1407,9 @@ UIWidgetStyling["WorldMap"] = (IsClassic or IsTBC or IsWrath) and function(self,
 end
 
 or IsRetail and function(self, ...)
+	if (IsDragonflight) then
+		return
+	end
 
 	-- War on Taint!
 	-----------------------------------------------------------------

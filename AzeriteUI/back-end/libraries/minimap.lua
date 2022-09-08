@@ -1,4 +1,4 @@
-local Version = 70
+local Version = 71
 local LibMinimap = Wheel:Set("LibMinimap", Version)
 if (not LibMinimap) then
 	return
@@ -1181,7 +1181,10 @@ LibMinimap.SetMinimapCompassEnabled = function(self, enableCompass)
 	if enableCompass then
 		-- Hide blizzard textires
 		MinimapCompassTexture:SetAlpha(0)
-		MinimapNorthTag:SetAlpha(0)
+
+		if (MinimapNorthTag) then
+			MinimapNorthTag:SetAlpha(0)
+		end
 
 		-- Get or create our compass frame
 		local compassFrame = LibMinimap:GetCompassFrame() or LibMinimap:CreateCompassFrame()

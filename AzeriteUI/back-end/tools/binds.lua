@@ -1,4 +1,4 @@
-local LibBindTool = Wheel:Set("LibBindTool", 4)
+local LibBindTool = Wheel:Set("LibBindTool", 5)
 if (not LibBindTool) then
 	return
 end
@@ -67,7 +67,7 @@ local IsAltKeyDown = IsAltKeyDown
 local IsControlKeyDown = IsControlKeyDown
 local IsShiftKeyDown = IsShiftKeyDown
 local LoadBindings = LoadBindings
-local AttemptToSaveBindings = AttemptToSaveBindings or SaveBindings 
+local AttemptToSaveBindings = AttemptToSaveBindings or SaveBindings
 local SetBinding = SetBinding
 
 -- Private API
@@ -75,6 +75,7 @@ local Colors = LibColorTool:GetColorTable()
 
 -- Constants for client version
 local IsRetail = LibClientBuild:IsRetail()
+local IsDragonflight = LibClientBuild:IsDragonflight()
 
 -- Library registries
 LibBindTool.embeds = LibBindTool.embeds or {}
@@ -89,33 +90,33 @@ local CHARACTER_BINDINGS = 2
 
 -- Simplest and hackiest locale system to date.
 local gameLocale = GetLocale()
-local L = (function(tbl) 
+local L = (function(tbl)
 	local L = tbl[gameLocale] or tbl.enUS
-	for i in pairs(L) do 
-		if (L[i] == true) then 
+	for i in pairs(L) do
+		if (L[i] == true) then
 			L[i] = i
 		end
-	end 
-	if (gameLocale ~= "enUS") then 
-		for i,msg in pairs(tbl.enUS) do 
-			if (not L[i]) then 
+	end
+	if (gameLocale ~= "enUS") then
+		for i,msg in pairs(tbl.enUS) do
+			if (not L[i]) then
 				L[i] = (msg == true) and i or msg
 			end
 		end
 	end
 	return L
-end)({ 
+end)({
 
 	-- Entries set to the boolean 'true' will use the key as the value!
 	-- When making new locales, do NOT replace the key, only the value.
 	enUS = {
 
-		-- This is shown in the frame, it is word-wrapped. 
-		-- Try to keep the length fairly identical to enUS, 
-		-- to make sure it fits properly inside the window. 
+		-- This is shown in the frame, it is word-wrapped.
+		-- Try to keep the length fairly identical to enUS,
+		-- to make sure it fits properly inside the window.
 		["Hover your mouse over any actionbutton and press a key or a mouse button to bind it. Press the ESC key to clear the current actionbutton's keybinding."] = true,
 
-		-- These are output to the chat frame. 
+		-- These are output to the chat frame.
 		["Keybinds cannot be changed while engaged in combat."] = true,
 		["Keybind changes were discarded because you entered combat."] = true,
 		["Keybind changes were saved."] = true,
@@ -133,23 +134,23 @@ local BindFrame = LibBindTool:CreateFrame("Frame")
 local BindFrame_MT = { __index = BindFrame }
 
 BindFrame.GetActionName = function(self)
-	local actionName 
+	local actionName
 	local bindingAction = self.button.bindingAction
-	if bindingAction then 
+	if bindingAction then
 		actionName = _G["BINDING_NAME_"..bindingAction]
-	end 
+	end
 	return actionName
 end
 
-BindFrame.OnMouseUp = function(self, key) 
-	LibBindTool:ProcessInput(key) 
+BindFrame.OnMouseUp = function(self, key)
+	LibBindTool:ProcessInput(key)
 end
 
-BindFrame.OnMouseWheel = function(self, delta) 
-	LibBindTool:ProcessInput((delta > 0) and "MOUSEWHEELUP" or "MOUSEWHEELDOWN") 
+BindFrame.OnMouseWheel = function(self, delta)
+	LibBindTool:ProcessInput((delta > 0) and "MOUSEWHEELUP" or "MOUSEWHEELDOWN")
 end
 
-BindFrame.OnEnter = function(self) 
+BindFrame.OnEnter = function(self)
 
 	-- Start listening for keybind input
 	local bindingFrame = LibBindTool:GetBindingFrame()
@@ -160,28 +161,28 @@ BindFrame.OnEnter = function(self)
 
 	-- Retrieve the action
 	local bindingAction = self.button.bindingAction
-	local binds = { GetBindingKey(bindingAction) } 
-	
+	local binds = { GetBindingKey(bindingAction) }
+
 	-- Show the tooltip
 	local tooltip = LibBindTool:GetBindingsTooltip()
 	tooltip:SetDefaultAnchor(self)
 	tooltip:AddLine(self:GetActionName(), 1, .82, .1)
 
-	if (#binds == 0) then 
+	if (#binds == 0) then
 		tooltip:AddLine(L["No keybinds set."], 1, 0, 0)
-	else 
+	else
 		tooltip:AddDoubleLine("Binding", "Key", .6, .6, .6, .6, .6, .6)
 		for i = 1,#binds do
 			tooltip:AddDoubleLine(i .. ":", LibBindTool:GetBindingName(binds[i]), 1, .82, 0, 0, 1, 0)
 		end
-	end 
+	end
 	tooltip:Show()
 
 	-- Color the backdrop
 	self.bg:SetVertexColor(.4, .6, .9, 1)
 end
 
-BindFrame.OnLeave = function(self) 
+BindFrame.OnLeave = function(self)
 
 	-- Stop lisetning for keyboard input
 	local bindingFrame = LibBindTool:GetBindingFrame()
@@ -206,9 +207,9 @@ end
 ----------------------------------------------------
 -- Utility function for easy colored output messages
 local Print = function(r, g, b, msg)
-	if (type(r) == "string") then 
+	if (type(r) == "string") then
 		print(r)
-		return 
+		return
 	end
 	print(string_format("|cff%02x%02x%02x%s|r", r*255, g*255, b*255, msg))
 end
@@ -231,8 +232,8 @@ LibBindTool.RegisterButtonForBinding = function(self, button, ...)
 		bindFrame:EnableMouseWheel(true)
 		bindFrame.button = button
 
-		-- Mouse input is connected to the frame the cursor is currently over, 
-		-- so we prefer to register these for every single button. 
+		-- Mouse input is connected to the frame the cursor is currently over,
+		-- so we prefer to register these for every single button.
 		bindFrame:SetScript("OnMouseUp", BindFrame.OnMouseUp)
 		bindFrame:SetScript("OnMouseWheel", BindFrame.OnMouseWheel)
 
@@ -264,17 +265,17 @@ end
 LibBindTool.GetBindingName = function(self, binding)
 	local bindingName = ""
 	if string_find(binding, "ALT%-") then
-		binding = string_gsub(binding, "(ALT%-)", "") 
+		binding = string_gsub(binding, "(ALT%-)", "")
 		bindingName = bindingName .. ALT_KEY_TEXT .. "+"
-	end 
-	if string_find(binding, "CTRL%-") then 
-		binding = string_gsub(binding, "(CTRL%-)", "") 
+	end
+	if string_find(binding, "CTRL%-") then
+		binding = string_gsub(binding, "(CTRL%-)", "")
 		bindingName = bindingName .. CTRL_KEY_TEXT .. "+"
-	end 
-	if string_find(binding, "SHIFT%-") then 
-		binding = string_gsub(binding, "(SHIFT%-)", "") 
+	end
+	if string_find(binding, "SHIFT%-") then
+		binding = string_gsub(binding, "(SHIFT%-)", "")
 		bindingName = bindingName .. SHIFT_KEY_TEXT .. "+"
-	end 
+	end
 	return bindingName .. (_G[binding.."_KEY_TEXT"] or _G["KEY_"..binding] or binding)
 end
 
@@ -288,7 +289,7 @@ LibBindTool.GetBinding = function(self, key)
 	if (key:find("Button%d")) then
 		key = key:upper()
 	end
-	
+
 	local alt = IsAltKeyDown() and "ALT-" or ""
 	local ctrl = IsControlKeyDown() and "CTRL-" or ""
 	local shift = IsShiftKeyDown() and "SHIFT-" or ""
@@ -297,37 +298,37 @@ LibBindTool.GetBinding = function(self, key)
 end
 
 LibBindTool.ProcessInput = function(self, key)
-	-- Pause the processing if we currently 
-	-- have a dialog open awaiting a user choice, 
+	-- Pause the processing if we currently
+	-- have a dialog open awaiting a user choice,
 	local bindingFrame = LibBindTool:GetBindingFrame()
-	if bindingFrame.lockdown then 
-		return 
-	end 
+	if bindingFrame.lockdown then
+		return
+	end
 
 	-- Bail out if the mouse isn't above a registered button.
 	local button = bindingFrame.bindButton
-	if (not button) or (not Binds[button]) then 
-		return 
+	if (not button) or (not Binds[button]) then
+		return
 	end
 
 	-- Retrieve the action
 	local bindFrame = Binds[button]
 	local bindingAction = button.bindingAction
-	local binds = { GetBindingKey(bindingAction) } 
+	local binds = { GetBindingKey(bindingAction) }
 
 	-- Clear the button's bindings
 	if (key == "ESCAPE") and (#binds > 0) then
-		for i = 1, #binds do 
+		for i = 1, #binds do
 			SetBinding(binds[i], nil)
 		end
 
 		Print(1, 0, 0, L["%s is now unbound."]:format(bindFrame:GetActionName()))
 
 		-- Post update tooltips with changes
-		if (LibBindTool:GetBindingsTooltip():IsShown()) then 
+		if (LibBindTool:GetBindingsTooltip():IsShown()) then
 			bindFrame:OnEnter()
 		end
-		return 
+		return
 	end
 
 	-- Ignore modifiers until an actual key or mousebutton is pressed
@@ -336,44 +337,44 @@ LibBindTool.ProcessInput = function(self, key)
 	or (key == "LALT") or (key == "RALT") or (key == "ALT")
 	or (key == "UNKNOWN")
 	then
-		return 
+		return
 	end
 
 	-- Get the binding key and its display name
 	local keybind = LibBindTool:GetBinding(key)
 	local keybindName = LibBindTool:GetBindingName(keybind)
 
-	-- Hidden defaults that some addons and UIs allow the user to change. 
-	-- Leaving it here for my own reference. 
+	-- Hidden defaults that some addons and UIs allow the user to change.
+	-- Leaving it here for my own reference.
 	--SetBinding("BUTTON1", "CAMERAORSELECTORMOVE")
 	--SetBinding("BUTTON2", "TURNORACTION")
 	--AttemptToSaveBindings(GetCurrentBindingSet())
 
-	-- Don't allow people to bind these, let's follow blizz standards here. 
-	if (keybind == "BUTTON1") or (keybind == "BUTTON2") then 
-		return 
-	end 
+	-- Don't allow people to bind these, let's follow blizz standards here.
+	if (keybind == "BUTTON1") or (keybind == "BUTTON2") then
+		return
+	end
 
-	-- If binds exist, we re-order it to be the last one. 
-	if (#binds > 0) then 
-		for i = 1,#binds do 
-			
+	-- If binds exist, we re-order it to be the last one.
+	if (#binds > 0) then
+		for i = 1,#binds do
+
 			-- We've found a match
-			if (keybind == binds[i]) then 
-				
-				-- if the match is the first and only bind, or the last one registered, we change nothing 
+			if (keybind == binds[i]) then
+
+				-- if the match is the first and only bind, or the last one registered, we change nothing
 				if (#binds == 1) or (i == #binds) then
-					return 
-				end  
+					return
+				end
 
 				-- Clear all existing binds to be able to re-order
 				for j = 1,#binds do
 					SetBinding(binds[j], nil)
 				end
-		
-				-- Re-apply all other existing binds, except the one we just pressed. 
+
+				-- Re-apply all other existing binds, except the one we just pressed.
 				for j = 1,#binds do
-					if (keybind ~= binds[j]) then 
+					if (keybind ~= binds[j]) then
 						SetBinding(binds[j], bindingAction)
 					end
 				end
@@ -391,31 +392,31 @@ LibBindTool.ProcessInput = function(self, key)
 	Print(0, 1, 0, L["%s is now bound to %s"]:format(Binds[button]:GetActionName(), keybindName))
 
 	-- Post update tooltips with changes
-	if LibBindTool:GetBindingsTooltip():IsShown() then 
+	if LibBindTool:GetBindingsTooltip():IsShown() then
 		bindFrame:OnEnter()
 	end
 end
 
 LibBindTool.UpdateBindings = function(self)
-	for button, bindFrame in pairs(Binds) do 
+	for button, bindFrame in pairs(Binds) do
 		bindFrame:UpdateBinding()
-	end 
+	end
 end
 
 LibBindTool.UpdateButtons = function(self)
-	for button, bindFrame in pairs(Binds) do 
+	for button, bindFrame in pairs(Binds) do
 		bindFrame:SetShown(button:IsVisible())
-	end 
-end 
+	end
+end
 
 
 -- Mode Toggling
 ----------------------------------------------------
 LibBindTool.EnableBindMode = function(self)
-	if InCombatLockdown() then 
+	if InCombatLockdown() then
 		Print(1, 0, 0, L["Keybinds cannot be changed while engaged in combat."])
-		return 
-	end 
+		return
+	end
 
 	self.bindActive = true
 	self:SetObjectFadeOverride(true)
@@ -424,7 +425,7 @@ LibBindTool.EnableBindMode = function(self)
 	self:GetBindingFrame():Show()
 	self:UpdateButtons()
 	self:SendMessage("GP_BIND_MODE_ENABLED")
-end 
+end
 
 LibBindTool.DisableBindMode = function(self)
 	self.bindActive = false
@@ -438,11 +439,11 @@ end
 
 LibBindTool.ApplyBindings = function(self)
 	AttemptToSaveBindings(GetCurrentBindingSet())
-	if self.bindingsChanged then 
+	if self.bindingsChanged then
 		Print(.1, 1, .1, L["Keybind changes were saved."])
-	else 
+	else
 		Print(1, .82, 0, L["No keybinds were changed."])
-	end 
+	end
 	self:DisableBindMode()
 end
 
@@ -451,34 +452,34 @@ LibBindTool.CancelBindings = function(self)
 	LoadBindings(GetCurrentBindingSet())
 
 	-- Output a message depending on whether or not any changes were cancelled
-	if (self.bindingsChanged) then 
+	if (self.bindingsChanged) then
 		Print(1, 0, 0, L["Keybind changes were discarded."])
-	else 
+	else
 		Print(1, .82, 0, L["No keybinds were changed."])
-	end 
+	end
 
 	-- Close the windows and disable the bind mode
 	self:DisableBindMode()
 
 	-- Update the local bindings cache
 	self:UpdateBindingsCache()
-end 
+end
 
 -- Will be called when switching between general and character specific keybinds
 LibBindTool.ChangeBindingSet = function(self)
 
-	-- Check if current bindings have changed, show a warning dialog if so. 
-	if self.bindingsChanged or (self.lockdown and (not self.acceptDiscard)) then 
+	-- Check if current bindings have changed, show a warning dialog if so.
+	if self.bindingsChanged or (self.lockdown and (not self.acceptDiscard)) then
 
-		-- We don't get farther than this unless the 
+		-- We don't get farther than this unless the
 		-- user clicks 'Accept' in the dialog below.
 		local discardFrame = self:GetDiscardFrame()
-		if (not discardFrame:IsShown()) then 
+		if (not discardFrame:IsShown()) then
 			discardFrame:Show()
 		end
 	else
 		self.acceptDiscard = nil
-		self.bindingsChanged = nil 
+		self.bindingsChanged = nil
 
 		-- Load the appropriate binding set
 		if (self:GetBindingFrame().perCharacter:GetChecked()) then
@@ -491,8 +492,8 @@ LibBindTool.ChangeBindingSet = function(self)
 
 		-- Update the local bindings cache
 		self:UpdateBindingsCache()
-	end 
-end 
+	end
+end
 
 -- Update and reset the local cache of keybinds
 LibBindTool.UpdateBindingsCache = function(self)
@@ -536,7 +537,7 @@ LibBindTool.CreateButton = function(self, parent)
 			self.Msg:SetPoint("CENTER", 0, -2)
 			if (self:IsMouseOver()) then
 				show:SetVertexColor(1, 1, 1)
-			elseif (self.isChecked) then 
+			elseif (self.isChecked) then
 				show:SetVertexColor(.9, .9, .9)
 			else
 				show:SetVertexColor(.75, .75, .75)
@@ -601,17 +602,17 @@ LibBindTool.CreateWindow = function(self)
 	frame.ApplyButton = apply
 
 	return frame
-end 
+end
 
 LibBindTool.GetBindingFrame = function(self)
-	if (not LibBindTool.bindingFrame) then 
+	if (not LibBindTool.bindingFrame) then
 
-		local frame = LibBindTool:CreateWindow() 
+		local frame = LibBindTool:CreateWindow()
 		frame:SetFrameLevel(96)
 		frame:EnableKeyboard(false)
 		frame:EnableMouse(false)
 		frame:EnableMouseWheel(false)
-		frame:SetScript("OnShow", function() 
+		frame:SetScript("OnShow", function()
 			frame.msg:SetText(L["Hover your mouse over any actionbutton and press a key or a mouse button to bind it. Press the ESC key to clear the current actionbutton's keybinding."])
 		end)
 
@@ -619,24 +620,24 @@ LibBindTool.GetBindingFrame = function(self)
 		frame.msg:SetPoint("TOPLEFT", 40, -60)
 		frame.msg:SetSize(440,50)
 
-		local perCharacter = frame:CreateFrame("CheckButton", nil, "OptionsCheckButtonTemplate")
+		local perCharacter = frame:CreateFrame("CheckButton", nil, IsDragonflight and "UICheckButtonTemplate" or "OptionsCheckButtonTemplate")
 		perCharacter:SetSize(32,32)
 		perCharacter:SetPoint("TOPLEFT", 34, -16)
 		perCharacter:SetHitRectInsets(-10, -408, -10, -10)
-		
+
 		-- Update the discard confirm frame's text when the checkbox is toggled.
 		-- The frame will however only be shown if changes were made prior to toggling it.
 		perCharacter:SetScript("OnShow", function() perCharacter:SetChecked(GetCurrentBindingSet() == 2) end)
-		perCharacter:SetScript("OnClick", function() 
+		perCharacter:SetScript("OnClick", function()
 			local discardFrame = LibBindTool:GetDiscardFrame()
-			if (perCharacter:GetChecked()) then 
+			if (perCharacter:GetChecked()) then
 				discardFrame.msg:SetText(CONFIRM_LOSE_BINDING_CHANGES)
-			else 
+			else
 				discardFrame.msg:SetText(CONFIRM_DELETING_CHARACTER_SPECIFIC_BINDINGS)
-			end 
-			LibBindTool:ChangeBindingSet() 
-		end) 
-		
+			end
+			LibBindTool:ChangeBindingSet()
+		end)
+
 		perCharacter:SetScript("OnLeave", function() LibBindTool:GetBindingsTooltip():Hide() end)
 		perCharacter:SetScript("OnEnter", function()
 			local tooltip = LibBindTool:GetBindingsTooltip()
@@ -667,10 +668,10 @@ LibBindTool.GetBindingFrame = function(self)
 		if (IsRetail) then
 			frame:SetScript("OnGamePadButtonUp", function(_, key) LibBindTool:ProcessInput(key) end)
 		end
-		
+
 		LibBindTool.bindingFrame = frame
-	end 
-	return LibBindTool.bindingFrame	
+	end
+	return LibBindTool.bindingFrame
 end
 LibBindTool.GetKeybindFrame = LibBindTool.GetBindingFrame
 
@@ -706,7 +707,7 @@ LibBindTool.GetDiscardFrame = function(self)
 		frame:SetScript("OnShow", function() LibBindTool.lockdown = true end)
 		frame:SetScript("OnHide", function() LibBindTool.lockdown = nil end)
 
-		frame.CancelButton:SetScript("OnClick", function() 
+		frame.CancelButton:SetScript("OnClick", function()
 			LibBindTool.acceptDiscard = nil
 
 			-- Revert the checkbox click on cancel
@@ -714,24 +715,24 @@ LibBindTool.GetDiscardFrame = function(self)
 			bindingFrame.perCharacter:SetChecked(not bindingFrame.perCharacter:GetChecked())
 
 			-- Hide this
-			frame:Hide() 
+			frame:Hide()
 		end)
 
 		frame.ApplyButton.Msg:SetText(ACCEPT)
-		frame.ApplyButton:SetScript("OnClick", function() 
+		frame.ApplyButton:SetScript("OnClick", function()
 			LibBindTool.acceptDiscard = true
 
 			-- Continue changing the binding set
-			LibBindTool:ChangeBindingSet() 
+			LibBindTool:ChangeBindingSet()
 
 			-- Hide this
-			frame:Hide() 
+			frame:Hide()
 		end)
 
 		LibBindTool.discardFrame = frame
-	end 
+	end
 	return LibBindTool.discardFrame
-end 
+end
 LibBindTool.GetKeybindDiscardFrame = LibBindTool.GetDiscardFrame
 
 -- Retrieve the current locale table.
@@ -751,48 +752,48 @@ LibBindTool.IsBindModeEnabled = function(self)
 	return LibBindTool:GetBindingFrame():IsShown()
 end
 
--- Callback needed by the menu system to decide 
--- whether a given mode toggle button is active or not. 
+-- Callback needed by the menu system to decide
+-- whether a given mode toggle button is active or not.
 LibBindTool.IsModeEnabled = function(self, modeName)
-	if (modeName == "bindMode") then 
+	if (modeName == "bindMode") then
 		return LibBindTool:IsBindModeEnabled()
 	end
 end
 
--- Callback needed by the menu system 
--- to switch between modes. 
+-- Callback needed by the menu system
+-- to switch between modes.
 LibBindTool.OnModeToggle = function(self, modeName)
-	if (modeName == "bindMode") then 
-		if (LibBindTool:IsBindModeEnabled()) then 
+	if (modeName == "bindMode") then
+		if (LibBindTool:IsBindModeEnabled()) then
 			LibBindTool:DisableBindMode()
 		else
-			LibBindTool:EnableBindMode() 
+			LibBindTool:EnableBindMode()
 		end
-	end 
+	end
 end
 
 -- LibBindTool Event & Chat Command Handling
 ----------------------------------------------------
 LibBindTool.OnChatCommand = function(self, editBox, ...)
-	if (self:GetBindingFrame():IsShown()) then 
+	if (self:GetBindingFrame():IsShown()) then
 		self:CancelBindings()
-	else 
+	else
 		self:EnableBindMode()
 	end
 end
 
 LibBindTool.OnEvent = function(self, event, ...)
-	if (event == "PLAYER_REGEN_DISABLED") then 
-		if self.bindActive then 
+	if (event == "PLAYER_REGEN_DISABLED") then
+		if self.bindActive then
 			Print(1, 0, 0, L["Keybind changes were discarded because you entered combat."])
 			return self:CancelBindings()
-		end	
-	elseif (event == "UPDATE_BINDINGS") or (event == "PLAYER_ENTERING_WORLD") then 
-		-- Binds aren't fully loaded directly after login, 
+		end
+	elseif (event == "UPDATE_BINDINGS") or (event == "PLAYER_ENTERING_WORLD") then
+		-- Binds aren't fully loaded directly after login,
 		-- so we need to track the event for updated bindings as well.
 		self:UpdateBindings()
 
-	elseif (event == "GP_UPDATE_ACTIONBUTTON_COUNT") then 
+	elseif (event == "GP_UPDATE_ACTIONBUTTON_COUNT") then
 		self:UpdateButtons()
 	end
 end
@@ -807,7 +808,7 @@ LibBindTool.Start = function(self)
 	self:RegisterMessage("GP_UPDATE_ACTIONBUTTON_COUNT", "OnEvent")
 end
 
-LibBindTool:RegisterChatCommand("bind", "OnChatCommand", true) -- force flag set, in case of library upgrade 
+LibBindTool:RegisterChatCommand("bind", "OnChatCommand", true) -- force flag set, in case of library upgrade
 LibBindTool:Start() -- start this!
 
 -- For front-end overrides
