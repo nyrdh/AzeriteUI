@@ -1,4 +1,4 @@
-local LibTooltip = Wheel:Set("LibTooltip", 126)
+local LibTooltip = Wheel:Set("LibTooltip", 127)
 if (not LibTooltip) then
 	return
 end
@@ -1213,12 +1213,19 @@ local SetItemInfo = function(self, data, useSimplified)
 	end
 
 	-- item name and item level on top
+	-- *sometimes the itemRarity isn't passed(?)
+	local r, g, b
+	if (data.itemRarity) and (colors.quality[data.itemRarity]) then
+		r, g, b = colors.quality[data.itemRarity][1], colors.quality[data.itemRarity][2], colors.quality[data.itemRarity][3]
+	else
+		r, g, b = colors.quality[1][1], colors.quality[1][2], colors.quality[1][3]
+	end
 	if (data.itemLevel) and (not skipItemLevel) and (data.itemLevel > 1) then
-		self:AddDoubleLine(displayName, data.itemLevel, colors.quality[data.itemRarity][1], colors.quality[data.itemRarity][2], colors.quality[data.itemRarity][3], colors.normal[1], colors.normal[2], colors.normal[3], true)
+		self:AddDoubleLine(displayName, data.itemLevel, r, g, b, colors.normal[1], colors.normal[2], colors.normal[3], true)
 	elseif colorNameAsSpell then
 		self:AddLine(displayName, colors.title[1], colors.title[2], colors.title[3], true)
 	else
-		self:AddLine(displayName, colors.quality[data.itemRarity][1], colors.quality[data.itemRarity][2], colors.quality[data.itemRarity][3], true)
+		self:AddLine(displayName, r, g, b, true)
 	end
 
 	-- itemID

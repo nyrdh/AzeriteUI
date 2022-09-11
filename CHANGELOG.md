@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.557-RC] 2022-09-11
+### Fixed
+- Worked around a tooltip issue where item rarity wasn't always available, and would cause errors.
+
 ## [3.2.556-RC] 2022-09-08
 ### Changed
 - First real step towards Dragonflight compatibility. Probably a metric ton of new and exciting bugs left, but a good first draft nonetheless!
