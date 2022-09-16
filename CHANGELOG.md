@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 2022-09-16
+## [3.2.558-RC] 2022-09-16
 ### Added
 - Added the Blizzard Shaman totem bar to Wrath.
 - Added the missing pet happiness text to Wrath.
