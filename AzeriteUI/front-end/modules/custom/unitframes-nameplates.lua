@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
-if (not Core) then 
-	return 
+if (not Core) then
+	return
 end
 
 local Module = Core:NewModule("NamePlates", "LibEvent", "LibNamePlate", "LibDB", "LibFrame", "LibForge")
@@ -9,7 +9,7 @@ local Module = Core:NewModule("NamePlates", "LibEvent", "LibNamePlate", "LibDB",
 -- WoW API
 local GetQuestGreenRange = GetQuestGreenRange
 local InCombatLockdown = InCombatLockdown
-local IsInInstance = IsInInstance 
+local IsInInstance = IsInInstance
 local SetCVar = SetCVar
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
 local SetNamePlateEnemySize = C_NamePlate.SetNamePlateEnemySize
@@ -22,17 +22,21 @@ local SetNamePlateSelfSize = C_NamePlate.SetNamePlateSelfSize
 local Colors = Private.Colors
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
+local IsAnyClassic = Private.IsAnyClassic
 local IsClassic = Private.IsClassic
 local IsTBC = Private.IsTBC
+local IsWrath = Private.IsWrath
 local IsRetail = Private.IsRetail
+local IsWinterVeil = Private.IsWinterVeil
+local IsLoveFestival = Private.IsLoveFestival
 
 -- Local cache of the nameplates, for easy access to some methods
-local Plates = {} 
+local Plates = {}
 
 -- Library Updates
 -- *will be called by the library at certain times
 -----------------------------------------------------------------
--- Called on PLAYER_ENTERING_WORLD by the library, 
+-- Called on PLAYER_ENTERING_WORLD by the library,
 -- but before the library calls its own updates.
 Module.PreUpdateNamePlateOptions = function(self)
 
@@ -44,7 +48,7 @@ Module.PreUpdateNamePlateOptions = function(self)
 			SetCVar("nameplateMaxDistance", 45)
 		end
 
-	elseif (IsTBC) then 
+	elseif (IsTBC) then
 		local _, instanceType = IsInInstance()
 		if (instanceType == "none") then
 			SetCVar("nameplateMaxDistance", 30)
@@ -53,27 +57,27 @@ Module.PreUpdateNamePlateOptions = function(self)
 		end
 	end
 
-	-- If these are enabled the GameTooltip will become protected, 
+	-- If these are enabled the GameTooltip will become protected,
 	-- and all sort of taints and bugs will occur.
 	-- This happens on specs that can dispel when hovering over nameplate auras.
-	-- We create our own auras anyway, so we don't need these. 
-	SetCVar("nameplateShowDebuffsOnFriendly", 0) 
+	-- We create our own auras anyway, so we don't need these.
+	SetCVar("nameplateShowDebuffsOnFriendly", 0)
 
-end 
+end
 
--- Called when certain bindable blizzard settings change, 
--- or when the VARIABLES_LOADED event fires. 
+-- Called when certain bindable blizzard settings change,
+-- or when the VARIABLES_LOADED event fires.
 Module.PostUpdateNamePlateOptions = function(self, isInInstace)
 	local layout = self.layout
 
 	-- Make an extra call to the preupdate
 	self:PreUpdateNamePlateOptions()
 
-	if layout.SetConsoleVars then 
-		for name,value in pairs(layout.SetConsoleVars) do 
+	if layout.SetConsoleVars then
+		for name,value in pairs(layout.SetConsoleVars) do
 			SetCVar(name, value or GetCVarDefault(name))
-		end 
-	end 
+		end
+	end
 
 	-- Setting the base size involves changing the size of secure unit buttons,
 	-- but since we're using our out of combat wrapper, we should be safe.
@@ -166,7 +170,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	name.showMouseover = layout.NameShowOnMouseover
 	name.showTarget = layout.NameShowOnTarget
 	plate.Name = name
-	
+
 	local cast = plate.Health:CreateStatusBar()
 	cast:SetSize(unpack(layout.CastSize))
 	cast:SetPoint(unpack(layout.CastPlace))
@@ -199,7 +203,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	local castShield = cast:CreateTexture()
 	castShield:SetPoint(unpack(layout.CastShieldPlace))
 	castShield:SetSize(unpack(layout.CastShieldSize))
-	castShield:SetTexture(layout.CastShieldTexture) 
+	castShield:SetTexture(layout.CastShieldTexture)
 	castShield:SetDrawLayer(unpack(layout.CastShieldDrawLayer))
 	castShield:SetVertexColor(unpack(layout.CastShieldColor))
 	cast.Shield = castShield
@@ -210,7 +214,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	threat:SetTexture(layout.ThreatTexture)
 	threat:SetDrawLayer(unpack(layout.ThreatDrawLayer))
 	threat:SetVertexColor(unpack(layout.ThreatColor))
-	threat.hideSolo = layout.ThreatHideSolo
+	threat.hideSolo = false -- layout.ThreatHideSolo
 	threat.feedbackUnit = "player"
 	plate.Threat = threat
 
@@ -220,10 +224,10 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 		spellQueue:SetFrameLevel(cast:GetFrameLevel() + 1)
 		spellQueue:Place(unpack(layout.CastBarSpellQueuePlace))
 		spellQueue:SetSize(unpack(layout.CastBarSpellQueueSize))
-		spellQueue:SetOrientation(layout.CastBarSpellQueueOrientation) 
-		spellQueue:SetStatusBarTexture(layout.CastBarSpellQueueTexture) 
+		spellQueue:SetOrientation(layout.CastBarSpellQueueOrientation)
+		spellQueue:SetStatusBarTexture(layout.CastBarSpellQueueTexture)
 		spellQueue:SetTexCoord(unpack(layout.CastBarSpellQueueCastTexCoord))
-		spellQueue:SetStatusBarColor(unpack(layout.CastBarSpellQueueColor)) 
+		spellQueue:SetStatusBarColor(unpack(layout.CastBarSpellQueueColor))
 		spellQueue:DisableSmoothing(true)
 		cast.SpellQueue = spellQueue
 	end
@@ -283,16 +287,16 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	auras.disableMouse = true
 	auras:ClearAllPoints()
 	auras:SetPoint(auras.point, auras.anchor, auras.relPoint, auras.offsetX, auras.offsetY)
-	for property,value in pairs(layout.AuraProperties) do 
+	for property,value in pairs(layout.AuraProperties) do
 		auras[property] = value
 	end
 	plate.Auras = auras
 	plate.Auras.PostCreateButton = layout.PostCreateAuraButton -- post creation styling
 	plate.Auras.PostUpdateButton = layout.PostUpdateAuraButton -- post updates when something changes (even timers)
 	plate.Auras.PostUpdate = layout.PostUpdateAura
-	if (not db.enableAuras) then 
+	if (not db.enableAuras) then
 		plate:DisableElement("Auras")
-	end 
+	end
 
 	-- Target Highlighting
 	-----------------------------------------------------------
@@ -304,7 +308,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 		targetHighlightFrame:SetFrameLevel(owner:GetFrameLevel())
 		targetHighlightFrame:SetAllPoints()
 		--targetHighlightFrame:SetIgnoreParentAlpha(true)
-	
+
 		local targetHighlight = targetHighlightFrame:CreateTexture()
 		targetHighlight:SetDrawLayer(unpack(layout.TargetHighlightDrawLayer))
 		targetHighlight:SetSize(unpack(layout.TargetHighlightSize))
@@ -350,7 +354,7 @@ Module.PostCreateNamePlate = function(self, plate, baseFrame)
 	-- Add preupdates. Usually only meaningful in Retail.
 	plate.PreUpdate = layout.PreUpdate
 
-	-- Add post updates. 
+	-- Add post updates.
 	plate.PostUpdate = layout.PostUpdate
 
 	-- The library does this too, but isn't exposing it to us.
@@ -359,52 +363,52 @@ end
 
 Module.PostUpdateSettings = function(self)
 	local db = self.db
-	for plate, baseFrame in pairs(Plates) do 
-		if (db.enableAuras) then 
+	for plate, baseFrame in pairs(Plates) do
+		if (db.enableAuras) then
 			plate:EnableElement("Auras")
 			plate.Auras:ForceUpdate()
 			plate.RaidTarget:ForceUpdate()
-		else 
+		else
 			plate:DisableElement("Auras")
 			plate.RaidTarget:ForceUpdate()
-		end 
+		end
 		plate:PostUpdate("ForceUpdate", plate.unit)
 	end
 end
 
 Module.PostUpdateCVars = function(self, event, ...)
-	if InCombatLockdown() then 
+	if InCombatLockdown() then
 		return self:RegisterEvent("PLAYER_REGEN_ENABLED", "PostUpdateCVars")
-	end 
-	if (event == "PLAYER_REGEN_ENABLED") then 
+	end
+	if (event == "PLAYER_REGEN_ENABLED") then
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "PostUpdateCVars")
-	end 
+	end
 	local db = self.db
 
 	-- Click-through settings.
 	SetNamePlateEnemyClickThrough(db.clickThroughEnemies)
 	SetNamePlateFriendlyClickThrough(db.clickThroughFriends)
 	SetNamePlateSelfClickThrough(db.clickThroughSelf)
-	
+
 	if (IsRetail) then
 		-- Show the Personal Resource Display
-		SetCVar("nameplateShowSelf", db.nameplateShowSelf and "1" or "0") 
+		SetCVar("nameplateShowSelf", db.nameplateShowSelf and "1" or "0")
 
-		-- Determines if the the personal nameplate is always shown. 
-		SetCVar("NameplatePersonalShowAlways", db.NameplatePersonalShowAlways and "1" or "0") 
+		-- Determines if the the personal nameplate is always shown.
+		SetCVar("NameplatePersonalShowAlways", db.NameplatePersonalShowAlways and "1" or "0")
 
-		-- Determines if the the personal nameplate is shown when you enter combat. 
-		SetCVar("NameplatePersonalShowInCombat", db.NameplatePersonalShowInCombat and "1" or "0") 
+		-- Determines if the the personal nameplate is shown when you enter combat.
+		SetCVar("NameplatePersonalShowInCombat", db.NameplatePersonalShowInCombat and "1" or "0")
 
-		-- 0 = targeting has no effect, 1 = show on hostile target, 2 = show on any target 
-		SetCVar("NameplatePersonalShowWithTarget", db.NameplatePersonalShowWithTarget and "2" or "0") 
+		-- 0 = targeting has no effect, 1 = show on hostile target, 2 = show on any target
+		SetCVar("NameplatePersonalShowWithTarget", db.NameplatePersonalShowWithTarget and "2" or "0")
 	end
 end
 
 Module.OnEvent = function(self, event, ...)
-	if (event == "PLAYER_ENTERING_WORLD") then 
+	if (event == "PLAYER_ENTERING_WORLD") then
 		self:PostUpdateCVars()
-	end 
+	end
 end
 
 Module.OnInit = function(self)
@@ -420,47 +424,47 @@ Module.OnInit = function(self)
 		callbackFrame:AssignProxyMethods("PostUpdateSettings", "PostUpdateCVars")
 		callbackFrame:AssignSettings(self.db)
 		callbackFrame:AssignCallback([=[
-			if name then 
-				name = string.lower(name); 
-			end 
-			if (name == "change-enableauras") then 
-				self:SetAttribute("enableAuras", value); 
-				self:CallMethod("PostUpdateSettings"); 
+			if name then
+				name = string.lower(name);
+			end
+			if (name == "change-enableauras") then
+				self:SetAttribute("enableAuras", value);
+				self:CallMethod("PostUpdateSettings");
 
 			elseif (name == "change-clickthroughenemies") then
-				self:SetAttribute("clickThroughEnemies", value); 
-				self:CallMethod("PostUpdateCVars"); 
+				self:SetAttribute("clickThroughEnemies", value);
+				self:CallMethod("PostUpdateCVars");
 
-			elseif (name == "change-clickthroughfriends") then 
-				self:SetAttribute("clickThroughFriends", value); 
-				self:CallMethod("PostUpdateCVars"); 
+			elseif (name == "change-clickthroughfriends") then
+				self:SetAttribute("clickThroughFriends", value);
+				self:CallMethod("PostUpdateCVars");
 
-			elseif (name == "change-clickthroughself") then 
-				self:SetAttribute("clickThroughSelf", value); 
-				self:CallMethod("PostUpdateCVars"); 
+			elseif (name == "change-clickthroughself") then
+				self:SetAttribute("clickThroughSelf", value);
+				self:CallMethod("PostUpdateCVars");
 
-			elseif (name == "change-nameplateshowself") then 
-				self:SetAttribute("nameplateShowSelf", value); 
-				self:CallMethod("PostUpdateCVars"); 
+			elseif (name == "change-nameplateshowself") then
+				self:SetAttribute("nameplateShowSelf", value);
+				self:CallMethod("PostUpdateCVars");
 
-			elseif (name == "change-nameplatepersonalshowalways") then 
-				self:SetAttribute("NameplatePersonalShowAlways", value); 
-				self:CallMethod("PostUpdateCVars"); 
+			elseif (name == "change-nameplatepersonalshowalways") then
+				self:SetAttribute("NameplatePersonalShowAlways", value);
+				self:CallMethod("PostUpdateCVars");
 
-			elseif (name == "change-nameplatepersonalshowincombat") then 
-				self:SetAttribute("NameplatePersonalShowInCombat", value); 
-				self:CallMethod("PostUpdateCVars"); 
+			elseif (name == "change-nameplatepersonalshowincombat") then
+				self:SetAttribute("NameplatePersonalShowInCombat", value);
+				self:CallMethod("PostUpdateCVars");
 
-			elseif (name == "change-nameplatepersonalshowWithtarget") then 
-				self:SetAttribute("NameplatePersonalShowWithTarget", value); 
-				self:CallMethod("PostUpdateCVars"); 
+			elseif (name == "change-nameplatepersonalshowWithtarget") then
+				self:SetAttribute("NameplatePersonalShowWithTarget", value);
+				self:CallMethod("PostUpdateCVars");
 
-			end 
+			end
 		]=])
 	end
-end 
+end
 
 Module.OnEnable = function(self)
 	self:StartNamePlateEngine()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
-end 
+end
