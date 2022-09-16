@@ -1,4 +1,4 @@
-local LibClientBuild = Wheel:Set("LibClientBuild", 51)
+local LibClientBuild = Wheel:Set("LibClientBuild", 52)
 if (not LibClientBuild) then
 	return
 end
@@ -17,13 +17,13 @@ local currentClientPatch, currentClientBuild, _, clientVersion = GetBuildInfo()
 currentClientBuild = tonumber(currentClientBuild)
 
 -- Let's create some constants for faster lookups
+local VERSION = clientVersion
 local MAJOR,MINOR,PATCH = string_split(".", currentClientPatch)
 MAJOR = tonumber(MAJOR)
 MINOR = tonumber(MINOR)
 
 local IsClassic, IsTBC, IsWotLK
 local IsRetail, IsRetailBFA, IsRetailShadowlands, IsRetailDragonflight
-local ClientVersion
 
 IsClassic = MAJOR == 1
 IsTBC = MAJOR == 2
@@ -32,7 +32,6 @@ IsRetail = MAJOR >= 9
 IsRetailBFA = MAJOR == 8
 IsRetailShadowlands = MAJOR == 9
 IsRetailDragonflight = MAJOR == 10
-ClientVersion = clientVersion
 
 local builds = {}
 
@@ -114,7 +113,7 @@ end
 
 -- Return the current TOC version as a number
 LibClientBuild.GetCurrentClientVersion = function(self)
-	return ClientVersion
+	return VERSION
 end
 
 -- Return the current WoW MAJOR version as a number
