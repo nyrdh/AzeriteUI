@@ -2085,7 +2085,7 @@ RegisterLayout("Durability", "Azerite", {
 })
 
 -- Group Leader Tools
-RegisterLayout("GroupTools", "Azerite", (IsAnyClassic) and {
+RegisterLayout("GroupTools", "Azerite", (IsClassic or IsTBC) and {
 	["ConvertButtonPlace"] = { "TOP", 0, -360 + 140 },
 	["ConvertButtonSize"] = { 300*.75, 50*.75 },
 	["ConvertButtonTextColor"] = { 0, 0, 0 },
@@ -2130,7 +2130,7 @@ RegisterLayout("GroupTools", "Azerite", (IsAnyClassic) and {
 	["ReadyCheckButtonTextureSize"] = { 1024 *1/3 *.75, 256 *1/3 *.75 },
 
 
-} or IsRetail and {
+} or (IsRetail or IsWrath) and {
 	["ConvertButtonPlace"] = { "TOP", 0, -360 },
 	["ConvertButtonSize"] = { 300*.75, 50*.75 },
 	["ConvertButtonTextColor"] = { 0, 0, 0 },

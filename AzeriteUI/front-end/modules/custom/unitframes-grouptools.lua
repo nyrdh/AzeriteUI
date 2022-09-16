@@ -1,7 +1,7 @@
 local ADDON, Private = ...
 local Core = Wheel("LibModule"):GetModule(ADDON)
-if (not Core) then 
-	return 
+if (not Core) then
+	return
 end
 
 local Module = Core:NewModule("GroupTools", "PLUGIN", "LibEvent", "LibDB", "LibFader", "LibFrame", "LibSound")
@@ -33,6 +33,10 @@ local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 -- Private API
 local GetConfig = Private.GetConfig
 local GetLayout = Private.GetLayout
+local IsAnyClassic = Private.IsAnyClassic
+local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
+local IsWrath = Private.IsWrath
 local IsRetail = Private.IsRetail
 
 -- WoW Constants
@@ -51,35 +55,35 @@ local READY_CHECK = READY_CHECK
 local ROLE_POLL = ROLE_POLL
 local TANK = TANK
 
--- Uncomment to show tools when solo 
+-- Uncomment to show tools when solo
 local DEV -- = true
 
 -- Secure Snippets
 local SECURE = {
 	HealerMode_SecureCallback = [=[
-		if name then 
-			name = string.lower(name); 
-		end 
-		if (name == "change-enablehealermode") then 
-			self:SetAttribute("enableHealerMode", value); 
+		if name then
+			name = string.lower(name);
+		end
+		if (name == "change-enablehealermode") then
+			self:SetAttribute("enableHealerMode", value);
 
-			local window = self:GetFrameRef("Window"); 
-			if window then 
-				local anchor = value and self:GetFrameRef("WindowAnchorHealer") or self:GetFrameRef("WindowAnchor"); 
-				local point, _, rpoint = anchor:GetPoint(); 
-				if (point and anchor and rpoint) then 
-					window:ClearAllPoints(); 
-					window:SetPoint(point, anchor, rpoint, 0, 0); 
+			local window = self:GetFrameRef("Window");
+			if window then
+				local anchor = value and self:GetFrameRef("WindowAnchorHealer") or self:GetFrameRef("WindowAnchor");
+				local point, _, rpoint = anchor:GetPoint();
+				if (point and anchor and rpoint) then
+					window:ClearAllPoints();
+					window:SetPoint(point, anchor, rpoint, 0, 0);
 				end
 			end
 
-			local button = self:GetFrameRef("ToggleButton"); 
-			if button then 
-				local anchor = value and self:GetFrameRef("ButtonAnchorHealer") or self:GetFrameRef("ButtonAnchor"); 
-				local point, _, rpoint = anchor:GetPoint(); 
-				if (point and anchor and rpoint) then 
-					button:ClearAllPoints(); 
-					button:SetPoint(point, anchor, rpoint, 0, 0); 
+			local button = self:GetFrameRef("ToggleButton");
+			if button then
+				local anchor = value and self:GetFrameRef("ButtonAnchorHealer") or self:GetFrameRef("ButtonAnchor");
+				local point, _, rpoint = anchor:GetPoint();
+				if (point and anchor and rpoint) then
+					button:ClearAllPoints();
+					button:SetPoint(point, anchor, rpoint, 0, 0);
 				end
 			end
 		end
@@ -88,38 +92,38 @@ local SECURE = {
 
 local hasLeaderTools = function()
 	local inInstance, instanceType = IsInInstance()
-	return DEV or (UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") or (IsInGroup() and (not IsInRaid()))) 
+	return DEV or (UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") or (IsInGroup() and (not IsInRaid())))
 		and (instanceType ~= "pvp" and instanceType ~= "arena")
 end
 
 local updateButton = function(self)
-	if self.down then 
+	if self.down then
 		(self.Msg or self.Bg):SetPoint("CENTER", 0, -1)
-	else 
+	else
 		(self.Msg or self.Bg):SetPoint("CENTER", 0, 0)
-	end 
-end 
+	end
+end
 
 local updateMarker = function(self)
-	if (self.down or self.mouseOver) then 
+	if (self.down or self.mouseOver) then
 		self.Icon:SetDesaturated(false)
 		self.Icon:SetVertexColor(1, 1, 1, 1)
-	elseif (UnitExists("target") and CanBeRaidTarget("target") and (GetRaidTargetIndex("target") == self:GetID())) then 
+	elseif (UnitExists("target") and CanBeRaidTarget("target") and (GetRaidTargetIndex("target") == self:GetID())) then
 		self.Icon:SetDesaturated(false)
 		self.Icon:SetVertexColor(1, 1, 1, .85)
-	else 
+	else
 		self.Icon:SetDesaturated(true)
 		self.Icon:SetVertexColor(.6, .6, .6, .85)
-	end 
-	if self.down then 
+	end
+	if self.down then
 		self.Icon:SetPoint("CENTER", 0, -1)
-	else 
+	else
 		self.Icon:SetPoint("CENTER", 0, 0)
-	end 
-end 
+	end
+end
 
 local onButtonDown = function(self)
-	self.down = true 
+	self.down = true
 	updateButton(self)
 end
 
@@ -138,18 +142,18 @@ local onButtonLeave = function(self)
 	updateButton(self)
 end
 
-local onRollPollClick = function(self) 
-	if hasLeaderTools() then 
+local onRollPollClick = function(self)
+	if hasLeaderTools() then
 		Module:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "SFX")
-		InitiateRolePoll() 
-	end 
+		InitiateRolePoll()
+	end
 end
 
-local onReadyCheckClick = function(self) 
-	if hasLeaderTools() then 
+local onReadyCheckClick = function(self)
+	if hasLeaderTools() then
 		Module:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "SFX")
-		DoReadyCheck() 
-	end 
+		DoReadyCheck()
+	end
 end
 
 local onMarkerClick = function(self)
@@ -166,28 +170,28 @@ local onMarkerClick = function(self)
 end
 
 local onMarkerDown = function(self)
-	self.down = true 
+	self.down = true
 	updateMarker(self)
-end 
+end
 
 local onMarkerUp = function(self)
 	self.down = false
 	updateMarker(self)
-end 
+end
 
 local onMarkerEnter = function(self)
 	self.mouseOver = true
 	updateMarker(self)
-end 
+end
 
 local onMarkerLeave = function(self)
 	self.mouseOver = false
 	updateMarker(self)
-end 
+end
 
-local onConvertClick = function(self) 
-	if InCombatLockdown() then 
-		return 
+local onConvertClick = function(self)
+	if InCombatLockdown() then
+		return
 	end
 	if IsInRaid() then
 		if (GetNumGroupMembers() < 6) then
@@ -199,9 +203,9 @@ local onConvertClick = function(self)
 end
 
 Module.UpdateRaidTargets = function(self)
-	for id = 1,8 do 
+	for id = 1,8 do
 		updateMarker(self.RaidIcons[id])
-	end 
+	end
 end
 
 Module.AddCount = function(self, role, alive)
@@ -212,9 +216,9 @@ Module.GetCount = function(self, role, alive)
 	return self.roleCounts[role][alive and "alive" or "dead"]
 end
 
-Module.UpdateCounts = (IsRetail) and function(self)
+Module.UpdateCounts = (IsRetail or IsWrath) and function(self)
 	local counts = self.roleCounts
-	local alive, dead = 0, 0 
+	local alive, dead = 0, 0
 
 	for role in pairs(counts) do
 		for status in pairs(counts[role]) do
@@ -226,37 +230,37 @@ Module.UpdateCounts = (IsRetail) and function(self)
 		for i = 1, GetNumGroupMembers() do
 			local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML, combatRole = GetRaidRosterInfo(i)
 			if rank then
-				if isDead then 
+				if isDead then
 					dead = dead + 1
 					counts[combatRole].dead = counts[combatRole].dead + 1
-				else 
+				else
 					alive = alive + 1
 					counts[combatRole].alive = counts[combatRole].alive + 1
-				end 
+				end
 			end
 		end
 	else
-	
+
 		local combatRole = UnitGroupRolesAssigned("player")
-		if UnitIsDeadOrGhost("player") then 
+		if UnitIsDeadOrGhost("player") then
 			dead = dead + 1
 			counts[combatRole].dead = counts[combatRole].dead + 1
-		else 
+		else
 			alive = alive + 1
 			counts[combatRole].alive = counts[combatRole].alive + 1
-		end 
+		end
 
 		for i = 1, GetNumSubgroupMembers() do
-			local combatRole = UnitGroupRolesAssigned("party" .. i) 
-			if UnitIsDeadOrGhost("party" .. i) then 
+			local combatRole = UnitGroupRolesAssigned("party" .. i)
+			if UnitIsDeadOrGhost("party" .. i) then
 				dead = dead + 1
 				counts[combatRole].dead = counts[combatRole].dead + 1
-			else 
+			else
 				alive = alive + 1
 				counts[combatRole].alive = counts[combatRole].alive + 1
-			end 
+			end
 		end
-	end	
+	end
 
 	local label = IsInRaid() and RAID_MEMBERS or PARTY_MEMBERS
 	if (dead > 0) then
@@ -265,46 +269,46 @@ Module.UpdateCounts = (IsRetail) and function(self)
 		self.GroupMemberCount:SetFormattedText("%s: |cffffffff%s|r", label, alive)
 	end
 
-	for role,msg in pairs(self.RoleCount) do 
+	for role,msg in pairs(self.RoleCount) do
 		local count = counts[role]
-		if (count.dead > 0) then 
+		if (count.dead > 0) then
 			msg:SetFormattedText("%.0f/%.0f", count.alive, count.alive + count.dead)
 		else
 			msg:SetFormattedText("%.0f", count.alive)
-		end 
-	end 
+		end
+	end
 
-end 
+end
 or function(self)
-	local alive, dead = 0, 0 
+	local alive, dead = 0, 0
 
 	if IsInRaid() then
 		for i = 1, GetNumGroupMembers() do
 			local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML  = GetRaidRosterInfo(i)
 			if rank then
-				if isDead then 
+				if isDead then
 					dead = dead + 1
-				else 
+				else
 					alive = alive + 1
-				end 
+				end
 			end
 		end
 	else
-	
-		if UnitIsDeadOrGhost("player") then 
+
+		if UnitIsDeadOrGhost("player") then
 			dead = dead + 1
-		else 
+		else
 			alive = alive + 1
-		end 
+		end
 
 		for i = 1, GetNumSubgroupMembers() do
-			if UnitIsDeadOrGhost("party" .. i) then 
+			if UnitIsDeadOrGhost("party" .. i) then
 				dead = dead + 1
-			else 
+			else
 				alive = alive + 1
-			end 
+			end
 		end
-	end	
+	end
 
 	local label = IsInRaid() and RAID_MEMBERS or PARTY_MEMBERS
 	if (dead > 0) then
@@ -322,24 +326,24 @@ Module.UpdateConvertButton = function(self)
 		self.inRaid = nil
 		self.ConvertButton.Msg:SetText(CONVERT_TO_RAID)
 	end
-end 
+end
 
 Module.UpdateAvailableButtons = function(self, inLockdown)
 	local enableConvert
-	if (not inLockdown) then 
-		if IsInRaid() then 
+	if (not inLockdown) then
+		if IsInRaid() then
 			enableConvert = UnitIsGroupLeader("player") and (GetNumGroupMembers() < 6)
 		else
-			enableConvert = IsInGroup() 
-		end 
-	end 
-	if enableConvert then 
+			enableConvert = IsInGroup()
+		end
+	end
+	if enableConvert then
 		self.ConvertButton:Enable()
 		self.ConvertButton:SetAlpha(.85)
 	else
 		self.ConvertButton:Disable()
 		self.ConvertButton:SetAlpha(.5)
-	end 
+	end
 end
 
 Module.UpdateAll = function(self)
@@ -351,10 +355,10 @@ Module.UpdateAll = function(self)
 end
 
 Module.ToggleLeaderTools = function(self)
-	if InCombatLockdown() then 
+	if InCombatLockdown() then
 		self.queueLeaderToolsToggle = true
-		return 
-	end 
+		return
+	end
 	if hasLeaderTools() then
 		self.ToggleButton:Show()
 	else
@@ -371,15 +375,15 @@ Module.CreateLeaderTools = function(self)
 	self.visibility = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	self.visibility:SetAttribute("_onattributechanged", [=[
 		if (name == "state-vis") then
-			if (value == "show") then 
-				if (not self:IsShown()) then 
-					self:Show(); 
-				end 
-			elseif (value == "hide") then 
-				if (self:IsShown()) then 
-					self:Hide(); 
-				end 
-			end 
+			if (value == "show") then
+				if (not self:IsShown()) then
+					self:Show();
+				end
+			elseif (value == "hide") then
+				if (self:IsShown()) then
+					self:Hide();
+				end
+			end
 		end
 	]=])
 	RegisterAttributeDriver(self.visibility, "state-vis", DEV and "show" or "[group]show;hide")
@@ -396,20 +400,20 @@ Module.CreateLeaderTools = function(self)
 			if leftclick then
 				self:RunAttribute("leftclick", button);
 			end
-		elseif (button == "RightButton") then 
+		elseif (button == "RightButton") then
 			local rightclick = self:GetAttribute("rightclick");
 			if rightclick then
 				self:RunAttribute("rightclick", button);
 			end
 		end
-		local window = self:GetFrameRef("Window"); 
-		if window then 
-			if window:IsShown() then 
-				window:Hide(); 
-			else 
-				window:Show(); 
-			end 
-		end 
+		local window = self:GetFrameRef("Window");
+		if window then
+			if window:IsShown() then
+				window:Hide();
+			else
+				window:Show();
+			end
+		end
 	]])
 
 	toggleButton.Icon = toggleButton:CreateTexture()
@@ -429,11 +433,11 @@ Module.CreateLeaderTools = function(self)
 	self.Window = frame
 
 	toggleButton:HookScript("OnClick", function()
-		if frame:IsShown() then 
-			Module:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "SFX") 
-		else 
+		if frame:IsShown() then
+			Module:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "SFX")
+		else
 			Module:PlaySoundKitID(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF, "SFX")
-		end  
+		end
 	end)
 
 	local callbackFrame = self:GetSecureUpdater()
@@ -444,15 +448,15 @@ Module.CreateLeaderTools = function(self)
 
 	local frameAnchorAlternate = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	frameAnchorAlternate:SetSize(1,1)
-	frameAnchorAlternate:Place(unpack(self.layout.MenuAlternatePlace)) 
+	frameAnchorAlternate:Place(unpack(self.layout.MenuAlternatePlace))
 
 	local buttoAnchor = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	buttoAnchor:SetSize(1,1)
-	buttoAnchor:Place(unpack(self.layout.MenuToggleButtonPlace)) 
+	buttoAnchor:Place(unpack(self.layout.MenuToggleButtonPlace))
 
 	local buttoAnchorAlternate = self:CreateFrame("Frame", nil, "UICenter", "SecureHandlerAttributeTemplate")
 	buttoAnchorAlternate:SetSize(1,1)
-	buttoAnchorAlternate:Place(unpack(self.layout.MenuToggleButtonAlternatePlace)) 
+	buttoAnchorAlternate:Place(unpack(self.layout.MenuToggleButtonAlternatePlace))
 
 	-- Reference all secure frames
 	frame:SetFrameRef("Button", toggleButton)
@@ -468,8 +472,8 @@ Module.CreateLeaderTools = function(self)
 	-- Attach the module's menu window toggle button to the proxy
 	callbackFrame:SetFrameRef("ToggleButton", self.ToggleButton)
 
-	-- Fake a menu update and hopefully move the thing. 
-	-- We need to do this since the frame references didn't exist when the menu did it at startup. 
+	-- Fake a menu update and hopefully move the thing.
+	-- We need to do this since the frame references didn't exist when the menu did it at startup.
 	callbackFrame:SetAttribute("change-enablehealermode", enableHealerMode)
 
 	frame.Border = self.layout.MenuWindow_CreateBorder(frame)
@@ -485,7 +489,7 @@ Module.CreateLeaderTools = function(self)
 	count:SetNonSpaceWrap(false)
 	self.GroupMemberCount = count
 
-	if (IsRetail) then
+	if (IsRetail or IsWrath) then
 
 		self.RoleCount = {}
 
@@ -545,25 +549,25 @@ Module.CreateLeaderTools = function(self)
 
 		-- Role Counts
 		-- *We're treating no role as a Damager
-		self.roleCounts = setmetatable({ 
-			DAMAGER = { alive = 0, dead = 0 }, 
-			TANK 	= { alive = 0, dead = 0 }, 
-			HEALER 	= { alive = 0, dead = 0 } 
-		}, { 
-			__index = function(t,k) 
+		self.roleCounts = setmetatable({
+			DAMAGER = { alive = 0, dead = 0 },
+			TANK 	= { alive = 0, dead = 0 },
+			HEALER 	= { alive = 0, dead = 0 }
+		}, {
+			__index = function(t,k)
 				return rawget(t,k) or rawget(t, "DAMAGER")
-			end 
+			end
 		})
 	end
 
 	self.RaidIcons = {}
-	for id = 1,8 do 
+	for id = 1,8 do
 		local button = frame:CreateFrame("CheckButton")
 		button:SetID(id)
-		button:SetScript("OnClick", onMarkerClick) 
+		button:SetScript("OnClick", onMarkerClick)
 		button:SetScript("OnMouseDown", onMarkerDown)
 		button:SetScript("OnMouseUp", onMarkerUp)
-		button:SetScript("OnEnter", onMarkerEnter) 
+		button:SetScript("OnEnter", onMarkerEnter)
 		button:SetScript("OnLeave", onMarkerLeave)
 		button:SetSize(unpack(self.layout.RaidTargetIconsSize))
 		button:SetPoint(unpack(self.layout["RaidTargetIcon"..id.."Place"]))
@@ -576,9 +580,10 @@ Module.CreateLeaderTools = function(self)
 		button.Icon = icon
 
 		self.RaidIcons[id] = button
-	end 
+	end
 
-	if (IsRetail) then 
+	-- Role check exists in Wrath.
+	if (IsRetail or IsWrath) then
 
 		local button = frame:CreateFrame("Button")
 		button:Place(unpack(self.layout.RolePollButtonPlace))
@@ -602,7 +607,7 @@ Module.CreateLeaderTools = function(self)
 		msg:SetNonSpaceWrap(false)
 		msg:SetText(ROLE_POLL)
 		button.Msg = msg
-	
+
 		local bg = button:CreateTexture()
 		bg:SetDrawLayer("ARTWORK")
 		bg:SetTexture(self.layout.RolePollButtonTextureNormal)
@@ -612,7 +617,7 @@ Module.CreateLeaderTools = function(self)
 		button.Bg = bg
 
 		self.RolePollButton = button
-	end 
+	end
 
 	local button = frame:CreateFrame("Button")
 	button:Place(unpack(self.layout.ReadyCheckButtonPlace))
@@ -646,7 +651,8 @@ Module.CreateLeaderTools = function(self)
 	button.Bg = bg
 	self.ReadyCheckButton = button
 
-	if (IsRetail) then 
+	-- This was introduced in Cata, does not exist in Wrath.
+	if (IsRetail) then
 		local button = frame:CreateFrame("Frame")
 		button:Place(unpack(self.layout.WorldMarkerFlagPlace))
 		button:SetSize(unpack(self.layout.WorldMarkerFlagSize))
@@ -673,7 +679,7 @@ Module.CreateLeaderTools = function(self)
 		content:SetSize(unpack(self.layout.WorldMarkerFlagContentSize))
 		content:ClearAllPoints()
 		content:SetPoint("CENTER", 0, 0)
-		
+
 		content:HookScript("OnMouseDown", function() onButtonDown(button) end)
 		content:HookScript("OnMouseUp", function() onButtonUp(button) end)
 		content:HookScript("OnEnter", function() onButtonEnter(button) end)
@@ -681,11 +687,11 @@ Module.CreateLeaderTools = function(self)
 
 		button:SetScript("OnEnter", onButtonEnter)
 		button:SetScript("OnLeave", onButtonLeave)
-	
-		-- World Marker Button
-		self.WorldMarkerFlag = button 
 
-	end 
+		-- World Marker Button
+		self.WorldMarkerFlag = button
+
+	end
 
 	local button = frame:CreateFrame("CheckButton")
 	button:Place(unpack(self.layout.ConvertButtonPlace))
@@ -764,11 +770,11 @@ Module.OnEvent = function(self, event, ...)
 
 	elseif event == "PLAYER_REGEN_ENABLED" then
 		self:UpdateAvailableButtons(false)
-		if self.queueLeaderToolsToggle then 
+		if self.queueLeaderToolsToggle then
 			self:ToggleLeaderTools()
-		end 
+		end
 	end
-end 
+end
 
 Module.OnInit = function(self)
 	self.layout = GetLayout(self:GetName())
@@ -781,12 +787,12 @@ Module.OnInit = function(self)
 		local callbackFrame = OptionsMenu:CreateCallbackFrame(self)
 		callbackFrame:AssignCallback(SECURE.HealerMode_SecureCallback)
 	end
-end 
+end
 
 Module.OnEnable = function(self)
-	if IsAddOnLoaded("Blizzard_CompactRaidFrames") then 
+	if IsAddOnLoaded("Blizzard_CompactRaidFrames") then
 		self:CreateLeaderTools()
-	else 
+	else
 		self:RegisterEvent("ADDON_LOADED", "OnEvent")
-	end 
-end 
+	end
+end

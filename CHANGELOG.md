@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 2022-09-16
+### Added
+- Added missing buttons like Role Check and the role counts to the Wrath group leader tools.
+
 ## [3.2.557-RC] 2022-09-11
 ### Fixed
 - Worked around a tooltip issue where item rarity wasn't always available, and would cause errors.
