@@ -82,6 +82,7 @@ front-end\modules\custom\bindings.lua
 front-end\modules\custom\bugs.lua
 front-end\modules\custom\durability.lua
 front-end\modules\custom\explorermode.lua
+front-end\modules\custom\multicast.lua
 front-end\modules\custom\tooltips.lua
 front-end\modules\custom\unitframes-azerite.lua
 front-end\modules\custom\unitframes-legacy.lua
