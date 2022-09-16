@@ -1,4 +1,4 @@
-local LibClientBuild = Wheel:Set("LibClientBuild", 50)
+local LibClientBuild = Wheel:Set("LibClientBuild", 51)
 if (not LibClientBuild) then
 	return
 end
@@ -13,7 +13,7 @@ local tostring = tostring
 
 LibClientBuild.embeds = LibClientBuild.embeds or {}
 
-local currentClientPatch, currentClientBuild = GetBuildInfo()
+local currentClientPatch, currentClientBuild, _, clientVersion = GetBuildInfo()
 currentClientBuild = tonumber(currentClientBuild)
 
 -- Let's create some constants for faster lookups
@@ -23,6 +23,7 @@ MINOR = tonumber(MINOR)
 
 local IsClassic, IsTBC, IsWotLK
 local IsRetail, IsRetailBFA, IsRetailShadowlands, IsRetailDragonflight
+local ClientVersion
 
 IsClassic = MAJOR == 1
 IsTBC = MAJOR == 2
@@ -31,6 +32,7 @@ IsRetail = MAJOR >= 9
 IsRetailBFA = MAJOR == 8
 IsRetailShadowlands = MAJOR == 9
 IsRetailDragonflight = MAJOR == 10
+ClientVersion = clientVersion
 
 local builds = {}
 
@@ -110,7 +112,12 @@ LibClientBuild.GetCurrentClientPatch = function(self)
 	return currentClientPatch
 end
 
--- Return the current WoW MAJOR version as a numer
+-- Return the current TOC version as a number
+LibClientBuild.GetCurrentClientVersion = function(self)
+	return ClientVersion
+end
+
+-- Return the current WoW MAJOR version as a number
 LibClientBuild.GetCurrentClientVersionMajor = function(self)
 	return MAJOR
 end
@@ -135,7 +142,7 @@ end
 
 -- Module embedding
 local embedMethods = {
-	IsAnyClassic = true, 
+	IsAnyClassic = true,
 	IsClassic = true,
 	IsTBC = true, IsBCC = true,
 	IsWotLK = true, IsWrath = true,
@@ -146,6 +153,7 @@ local embedMethods = {
 	GetClientBuildByPatch = true,
 	GetCurrentClientBuild = true,
 	GetCurrentClientPatch = true,
+	GetCurrentClientVersion = true,
 	GetCurrentClientVersionMajor = true,
 	GetCurrentClientVersionMinor = true,
 	GetCurrentClientVersionPatch = true

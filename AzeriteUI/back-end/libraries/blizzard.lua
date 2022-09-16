@@ -1,4 +1,4 @@
-local LibBlizzard = Wheel:Set("LibBlizzard", 110)
+local LibBlizzard = Wheel:Set("LibBlizzard", 111)
 if (not LibBlizzard) then
 	return
 end
@@ -52,6 +52,7 @@ local TargetofTarget_Update = TargetofTarget_Update
 local UIParent = UIParent
 
 -- Constants for client version
+local ClientVersion = LibClientBuild:GetCurrentClientVersion()
 local IsAnyClassic = LibClientBuild:IsAnyClassic()
 local IsClassic = LibClientBuild:IsClassic()
 local IsTBC = LibClientBuild:IsTBC()
@@ -213,8 +214,194 @@ end
 
 -- Widget Pool
 -----------------------------------------------------------------
+UIWidgetsDisable["ActionBars"] = function(self)
+
+	local NPE_LoadUI = function(self)
+		if not (Tutorials and Tutorials.AddSpellToActionBar) then return end
+
+		-- Action Bar drag tutorials
+		Tutorials.AddSpellToActionBar:Disable()
+		Tutorials.AddClassSpellToActionBar:Disable()
+
+		-- these tutorials rely on finding valid action bar buttons, and error otherwise
+		Tutorials.Intro_CombatTactics:Disable()
+
+		-- enable spell pushing because the drag tutorial is turned off
+		Tutorials.AutoPushSpellWatcher:Complete()
+	end
+
+	-- Dragonflight
+	if (ClientVersion >= 10000) then
+
+		handleActionBar(MultiBarBottomLeft, true)
+		handleActionBar(MultiBarBottomRight, true)
+		handleActionBar(MultiBarLeft, true)
+		handleActionBar(MultiBarRight, true)
+
+		-- Hide MultiBar Buttons, but keep the bars alive
+		for i=1,12 do
+			_G["ActionButton" .. i]:Hide()
+			_G["ActionButton" .. i]:UnregisterAllEvents()
+			_G["ActionButton" .. i]:SetAttribute("statehidden", true)
+
+			_G["MultiBarBottomLeftButton" .. i]:Hide()
+			_G["MultiBarBottomLeftButton" .. i]:UnregisterAllEvents()
+			_G["MultiBarBottomLeftButton" .. i]:SetAttribute("statehidden", true)
+
+			_G["MultiBarBottomRightButton" .. i]:Hide()
+			_G["MultiBarBottomRightButton" .. i]:UnregisterAllEvents()
+			_G["MultiBarBottomRightButton" .. i]:SetAttribute("statehidden", true)
+
+			_G["MultiBarRightButton" .. i]:Hide()
+			_G["MultiBarRightButton" .. i]:UnregisterAllEvents()
+			_G["MultiBarRightButton" .. i]:SetAttribute("statehidden", true)
+
+			_G["MultiBarLeftButton" .. i]:Hide()
+			_G["MultiBarLeftButton" .. i]:UnregisterAllEvents()
+			_G["MultiBarLeftButton" .. i]:SetAttribute("statehidden", true)
+		end
+
+		--MainMenuBar:UnregisterAllEvents()
+		MainMenuBar:SetParent(UIHider)
+		MainMenuBar:Hide()
+		--MainMenuBar:EnableMouse(false)
+
+		handleActionBar(MicroButtonAndBagsBar, false, false, true)
+		handleActionBar(StanceBar, true)
+		handleActionBar(PossessActionBar, true)
+		handleActionBar(MultiCastActionBarFrame, false, false, true)
+		handleActionBar(PetActionBar, true)
+		handleActionBar(StatusTrackingBarManager, false)
+
+		if (IsAddOnLoaded("Blizzard_NewPlayerExperience")) then
+			NPE_LoadUI()
+		elseif (_G.NPE_LoadUI ~= nil) then
+			hooksecurefunc("NPE_LoadUI", NPE_LoadUI)
+		end
+	end
+
+	-- Shadowlands, Wrath, Vanilla
+	if (ClientVersion < 10000) then
+
+		MultiBarBottomLeft:SetParent(UIHider)
+		MultiBarBottomRight:SetParent(UIHider)
+		MultiBarLeft:SetParent(UIHider)
+		MultiBarRight:SetParent(UIHider)
+
+		-- Hide MultiBar Buttons, but keep the bars alive
+		for i=1,12 do
+			_G["ActionButton" .. i]:Hide()
+			_G["ActionButton" .. i]:UnregisterAllEvents()
+			_G["ActionButton" .. i]:SetAttribute("statehidden", true)
+
+			_G["MultiBarBottomLeftButton" .. i]:Hide()
+			_G["MultiBarBottomLeftButton" .. i]:UnregisterAllEvents()
+			_G["MultiBarBottomLeftButton" .. i]:SetAttribute("statehidden", true)
+
+			_G["MultiBarBottomRightButton" .. i]:Hide()
+			_G["MultiBarBottomRightButton" .. i]:UnregisterAllEvents()
+			_G["MultiBarBottomRightButton" .. i]:SetAttribute("statehidden", true)
+
+			_G["MultiBarRightButton" .. i]:Hide()
+			_G["MultiBarRightButton" .. i]:UnregisterAllEvents()
+			_G["MultiBarRightButton" .. i]:SetAttribute("statehidden", true)
+
+			_G["MultiBarLeftButton" .. i]:Hide()
+			_G["MultiBarLeftButton" .. i]:UnregisterAllEvents()
+			_G["MultiBarLeftButton" .. i]:SetAttribute("statehidden", true)
+		end
+		UIPARENT_MANAGED_FRAME_POSITIONS["MainMenuBar"] = nil
+		UIPARENT_MANAGED_FRAME_POSITIONS["StanceBarFrame"] = nil
+		UIPARENT_MANAGED_FRAME_POSITIONS["PossessBarFrame"] = nil
+		UIPARENT_MANAGED_FRAME_POSITIONS["MultiCastActionBarFrame"] = nil
+		UIPARENT_MANAGED_FRAME_POSITIONS["PETACTIONBAR_YPOS"] = nil
+		UIPARENT_MANAGED_FRAME_POSITIONS["ExtraAbilityContainer"] = nil
+
+		--MainMenuBar:UnregisterAllEvents()
+		--MainMenuBar:SetParent(UIHider)
+		--MainMenuBar:Hide()
+		MainMenuBar:EnableMouse(false)
+		MainMenuBar:UnregisterEvent("DISPLAY_SIZE_CHANGED")
+		MainMenuBar:UnregisterEvent("UI_SCALE_CHANGED")
+
+
+		local animations = {MainMenuBar.slideOut:GetAnimations()}
+		animations[1]:SetOffset(0,0)
+
+		if (OverrideActionBar) then -- classic doesn't have this
+			animations = {OverrideActionBar.slideOut:GetAnimations()}
+			animations[1]:SetOffset(0,0)
+
+			-- when blizzard vehicle is turned off, we need to manually fix the state since the OverrideActionBar animation wont run
+			hooksecurefunc("BeginActionBarTransition", function(bar, animIn)
+				if (bar == OverrideActionBar) then
+					OverrideActionBar.slideOut:Stop()
+					MainMenuBar:Show()
+				end
+			end)
+		end
+
+		handleActionBar(MainMenuBarArtFrame, false, true)
+		handleActionBar(MainMenuBarArtFrameBackground)
+		handleActionBar(MicroButtonAndBagsBar, false, false, true)
+
+		if StatusTrackingBarManager then
+			StatusTrackingBarManager:Hide()
+			--StatusTrackingBarManager:SetParent(UIHider)
+		end
+
+		handleActionBar(StanceBarFrame, true, true)
+		handleActionBar(PossessBarFrame, false, true)
+		handleActionBar(MultiCastActionBarFrame, false, false, true)
+		handleActionBar(PetActionBarFrame, true, true)
+		ShowPetActionBar = function() end
+
+		--BonusActionBarFrame:UnregisterAllEvents()
+		--BonusActionBarFrame:Hide()
+		--BonusActionBarFrame:SetParent(UIHider)
+
+		if (not IsClassic) then
+			if (PlayerTalentFrame) then
+				PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+			else
+				hooksecurefunc("TalentFrame_LoadUI", function() PlayerTalentFrame:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED") end)
+			end
+		end
+
+		handleActionBar(MainMenuBarPerformanceBarFrame, false, false, true)
+		handleActionBar(MainMenuExpBar, false, false, true)
+		handleActionBar(ReputationWatchBar, false, false, true)
+		handleActionBar(MainMenuBarMaxLevelBar, false, false, true)
+
+		if (IsAddOnLoaded("Blizzard_NewPlayerExperience")) then
+			NPE_LoadUI()
+		elseif (_G.NPE_LoadUI ~= nil) then
+			hooksecurefunc("NPE_LoadUI", NPE_LoadUI)
+		end
+
+		-- Gets rid of the loot anims
+		MainMenuBarBackpackButton:UnregisterEvent("ITEM_PUSH")
+		for slot = 0,3 do
+			_G["CharacterBag"..slot.."Slot"]:UnregisterEvent("ITEM_PUSH")
+		end
+
+	end
+
+	-- Disable annoying yellow popup alerts.
+	if (MainMenuMicroButton_ShowAlert) then
+		local HideAlerts = function()
+			if (HelpTip) then
+				HelpTip:HideAllSystem("MicroButtons")
+			end
+		end
+		hooksecurefunc("MainMenuMicroButton_ShowAlert", HideAlerts)
+	end
+
+end
+
+
 -- ActionBars (Classic)
-UIWidgetsDisable["ActionBars"] = (IsClassic or IsTBC or IsWrath) and function(self)
+UIWidgetsDisable["ActionBarsOld"] = (IsClassic or IsTBC or IsWrath) and function(self)
 
 	for _,object in pairs({
 		"MainMenuBarVehicleLeaveButton",
