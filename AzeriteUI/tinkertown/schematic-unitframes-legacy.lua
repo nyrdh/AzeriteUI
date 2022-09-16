@@ -29,7 +29,10 @@ local GetFont = Private.GetFont
 local GetMedia = Private.GetMedia
 local GetSchematic = Private.GetSchematic
 local HasSchematic = Private.HasSchematic
+local IsAnyClassic = Private.IsAnyClassic
 local IsClassic = Private.IsClassic
+local IsTBC = Private.IsTBC
+local IsWrath = Private.IsWrath
 local IsRetail = Private.IsRetail
 local IsWinterVeil = Private.IsWinterVeil
 local IsLoveFestival = Private.IsLoveFestival
@@ -43,7 +46,7 @@ local IsLoveFestival = Private.IsLoveFestival
 -- General aura button post creating forge
 local Aura_PostCreate = function(element, button)
 	if (element._owner:Forge(button, GetSchematic("WidgetForge::AuraButton::Large"))) then
-		return 
+		return
 	end
 end
 
@@ -56,33 +59,33 @@ local Aura_PostUpdate = function(element, button)
 
 	-- Border
 	if (element.isFriend) then
-		if (button.isBuff) then 
+		if (button.isBuff) then
 			button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
 		else
 			local color = Colors.debuff[button.debuffType or "none"]
-			if color then 
+			if color then
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			else
 				button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
-			end 
+			end
 		end
-	else 
-		if (button.isStealable) then 
+	else
+		if (button.isStealable) then
 			local color = Colors.power.ARCANE_CHARGES
-			if (color) then 
+			if (color) then
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			else
 				button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
-			end 
-		elseif (button.isBuff) then 
+			end
+		elseif (button.isBuff) then
 			button.Border:SetBackdropBorderColor(Colors.ui[1] *.3, Colors.ui[2] *.3, Colors.ui[3] *.3)
 		else
 			local color = Colors.debuff.none
-			if (color) then 
+			if (color) then
 				button.Border:SetBackdropBorderColor(color[1], color[2], color[3])
 			else
 				button.Border:SetBackdropBorderColor(Colors.quest.red[1], Colors.quest.red[2], Colors.quest.red[3])
-			end 
+			end
 		end
 	end
 
@@ -90,17 +93,17 @@ local Aura_PostUpdate = function(element, button)
 	local desaturate
 	if (element.isYou) then
 		-- Desature buffs on you cast by others
-		if (button.isBuff) and (not button.isCastByPlayer) then 
+		if (button.isBuff) and (not button.isCastByPlayer) then
 			desaturate = true
 		end
 	elseif (element.isFriend) then
 		-- Desature buffs on friends not cast by you
-		if (button.isBuff) and (not button.isCastByPlayer) then 
+		if (button.isBuff) and (not button.isCastByPlayer) then
 			desaturate = true
 		end
 	else
 		-- Desature debuffs not cast by you on attackable units
-		if (not button.isBuff) and (not button.isCastByPlayer) then 
+		if (not button.isBuff) and (not button.isCastByPlayer) then
 			desaturate = true
 		end
 	end
@@ -153,7 +156,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 			{
 				-- Note that a missing ownerKey
 				-- will apply these changes to the original object instead.
-				parent = nil, ownerKey = nil, 
+				parent = nil, ownerKey = nil,
 				chain = {
 					"SetSize", { 316, 86 }, "SetHitBox", { -4, -4, -4, -4 },
 					"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -210, 250 }
@@ -163,20 +166,20 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"isPlayerFrame", true,
 
 					-- hides when the unit has a vehicleui
-					"hideInVehicles", true, 
+					"hideInVehicles", true,
 
 					-- hides when the unit is in a vehicle, but lacks a vehicleui (tortollan minigames)
-					--"visibilityPreDriver", "[canexitvehicle,novehicleui,nooverridebar,nopossessbar,noshapeshift]hide;", 
+					--"visibilityPreDriver", "[canexitvehicle,novehicleui,nooverridebar,nopossessbar,noshapeshift]hide;",
 					"visibilityPreDriver", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;"
 				}
 			},
 			-- Setup backdrop and border
 			{
-				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame",
 				chain = {
 					"SetBackdrop", {{
-						bgFile = nil, tile = false, 
-						edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
+						bgFile = nil, tile = false,
+						edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32,
 						insets = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
 					}},
 					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
@@ -197,18 +200,18 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
 					"SetSize", { 300, 58 }, -- 52
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
 					"colorAbsorb", true, -- tint absorb overlay
-					"colorClass", true, -- color players by class 
+					"colorClass", true, -- color players by class
 					"colorDisconnected", false, -- color disconnected units
 					"colorHealth", true, -- color anything else in the default health color
 					"colorReaction", true, -- color NPCs by their reaction standing with us
-					"colorTapped", false, -- color tap denied units 
+					"colorTapped", false, -- color tap denied units
 					"colorThreat", false, -- color non-friendly by threat
 					"frequent", true, -- listen to frequent health events for more accurate updates
 					"predictThreshold", .01,
@@ -222,7 +225,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 			},
 			-- Health Bar Backdrop Texture
 			{
-				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -238,7 +241,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 			},
 			-- Health Bar Overlay Texture
 			{
-				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -250,11 +253,11 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 
 			-- Health Bar Value
 			{
-				parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+				parent = "self,Health", parentKey = "Value", objectType = "FontString",
 				chain = {
 					"SetPosition", { "RIGHT", -16, -1 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(15,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
@@ -267,14 +270,14 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 
 			-- Health Bar Absorb Value
 			{
-				parent = "self,Health", parentKey = "ValueAbsorb", objectType = "FontString", 
+				parent = "self,Health", parentKey = "ValueAbsorb", objectType = "FontString",
 				chain = {
-					"SetPosition", function(self, owner, ...) 
+					"SetPosition", function(self, owner, ...)
 						self:ClearAllPoints()
 						self:SetPoint("RIGHT", owner.Health.Value, "LEFT", -13, 0)
-					end, 
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					end,
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(15,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
@@ -282,7 +285,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 				}
 
 			},
-			
+
 			-- Health Bar Overlay Cast Bar
 			{
 				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
@@ -290,7 +293,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
 					"SetSize", { 300, 58 }, -- 18
 					"SetStatusBarTexture", GetMedia("statusbar-power"),
@@ -305,7 +308,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "BOTTOMLEFT", 8, 8 }, -- relative to unit frame
 					"SetSize", { 300, 12 }, --18
 					"SetStatusBarTexture", GetMedia("statusbar-power")
@@ -321,7 +324,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 			},
 			-- Power Bar Backdrop Texture
 			{
-				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", -2 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -337,7 +340,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 			},
 			-- Power Bar Overlay Texture
 			{
-				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -349,25 +352,25 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 
 			-- Power Bar Value
 			{
-				parent = "self,Power", parentKey = "Value", objectType = "FontString", 
+				parent = "self,Power", parentKey = "Value", objectType = "FontString",
 				chain = {
 					"SetPosition", { "CENTER", 0, 0 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "CENTER", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "CENTER",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(15,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
 					"SetParentToOwnerKey", "OverlayScaffold"
 				}
 			},
-			
+
 			-- Combat Status
 			{
-				parent = "self,OverlayScaffold", ownerKey = "Combat", objectType = "Texture", 
+				parent = "self,OverlayScaffold", ownerKey = "Combat", objectType = "Texture",
 				chain = {
 					"SetPosition", { "CENTER", 0, 9 },
-					"SetDrawLayer", { "OVERLAY", 2 }, 
-					"SetSize", { 64, 64 }, 
+					"SetDrawLayer", { "OVERLAY", 2 },
+					"SetSize", { 64, 64 },
 					"SetTexture", GetMedia("state-grid"),
 					"SetTexCoord", { .5, 1, 0, .5 }
 				}
@@ -375,15 +378,15 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 
 			-- Unit Name
 			{
-				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString",
 				chain = {
 					"SetPosition", { "LEFT", 24, 5 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(13,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-					"SetSize", { 220, 14 }, 
+					"SetSize", { 220, 14 },
 				},
 				values = {
 					"maxChars", 16,
@@ -396,10 +399,10 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 
 			-- Raid Role (Leader, Assistant, Master Looter, Main Tank, Main Assist)
 			{
-				parent = "self,OverlayScaffold", ownerKey = "RaidRole", objectType = "Texture", 
+				parent = "self,OverlayScaffold", ownerKey = "RaidRole", objectType = "Texture",
 				chain = {
 					"SetPosition", { "TOPLEFT", 26, 10 },
-					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetDrawLayer", { "OVERLAY", 2 },
 					"SetSize", { 20, 16 }
 				},
 				values = {
@@ -415,32 +418,32 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"SetPoint", { "TOPRIGHT", -7, 96 }
 				},
 				values = {
-					"auraSize", 40, 
-					"auraWidth", false, 
+					"auraSize", 40,
+					"auraWidth", false,
 					"auraHeight", false,
 					"customSort", false,
-					"debuffsFirst", false, 
-					"disableMouse", false, 
-					"customFilter", GetAuraFilter("legacy"), 
-					"growthX", "LEFT", 
-					"growthY", "UP", 
-					"maxBuffs", false, 
-					"maxDebuffs", false, 
-					"maxVisible", 21, 
-					"showDurations", true, 
-					"showSpirals", false, 
+					"debuffsFirst", false,
+					"disableMouse", false,
+					"customFilter", GetAuraFilter("legacy"),
+					"growthX", "LEFT",
+					"growthY", "UP",
+					"maxBuffs", false,
+					"maxDebuffs", false,
+					"maxVisible", 21,
+					"showDurations", true,
+					"showSpirals", false,
 					"showLongDurations", true,
-					"spacingH", 4, 
-					"spacingV", 4, 
+					"spacingH", 4,
+					"spacingV", 4,
 					"tooltipAnchor", false,
-					"tooltipDefaultPosition", false, 
+					"tooltipDefaultPosition", false,
 					"tooltipOffsetX", -8,
 					"tooltipOffsetY", 16,
 					"tooltipPoint", "BOTTOMRIGHT",
 					"tooltipRelPoint", "TOPRIGHT",
 					"PostCreateButton", Aura_PostCreate,
 					"PostUpdateButton", Aura_PostUpdate
-					
+
 				}
 			},
 
@@ -452,26 +455,26 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"SetPoint", { "TOPRIGHT", -321, 1 }
 				},
 				values = {
-					"auraSize", 32, 
-					"auraWidth", false, 
+					"auraSize", 32,
+					"auraWidth", false,
 					"auraHeight", false,
 					"customSort", false,
-					"debuffsFirst", false, 
-					"disableMouse", false, 
-					"filter", false, 
-					"customFilter", GetAuraFilter("legacy-secondary"), 
-					"growthX", "LEFT", 
-					"growthY", "DOWN", 
-					"maxBuffs", false, 
-					"maxDebuffs", false, 
-					"maxVisible", 12, 
-					"showDurations", true, 
-					"showSpirals", false, 
+					"debuffsFirst", false,
+					"disableMouse", false,
+					"filter", false,
+					"customFilter", GetAuraFilter("legacy-secondary"),
+					"growthX", "LEFT",
+					"growthY", "DOWN",
+					"maxBuffs", false,
+					"maxDebuffs", false,
+					"maxVisible", 12,
+					"showDurations", true,
+					"showSpirals", false,
 					"showLongDurations", true,
-					"spacingH", 4, 
-					"spacingV", 4, 
+					"spacingH", 4,
+					"spacingV", 4,
 					"tooltipAnchor", false,
-					"tooltipDefaultPosition", false, 
+					"tooltipDefaultPosition", false,
 					"tooltipOffsetX", 8,
 					"tooltipOffsetY", 16,
 					"tooltipPoint", "BOTTOMRIGHT",
@@ -480,7 +483,7 @@ Private.RegisterSchematic("UnitForge::Player", "Legacy", {
 					"PostUpdateButton", Aura_PostUpdate
 				}
 			}
-			
+
 		}
 	}
 })
@@ -521,7 +524,7 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 			{
 				-- Note that a missing ownerKey
 				-- will apply these changes to the original object instead.
-				parent = nil, ownerKey = nil, 
+				parent = nil, ownerKey = nil,
 				chain = {
 					"SetSize", { 316, 86 }, "SetHitBox", { -4, -4, -4, -4 },
 					"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 210, 250 }
@@ -530,26 +533,26 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"colors", Colors,
 
 					-- hides when the unit has a vehicleui
-					"hideInVehicles", true, 
+					"hideInVehicles", true,
 
-					-- don't need the explorer mode on this, 
+					-- don't need the explorer mode on this,
 					-- as it's visibility is tied to the fade-in anyway.
 					"ignoreExplorerMode", true,
 
 					-- hides when the unit is in a vehicle, but lacks a vehicleui (tortollan minigames)
-					--"visibilityPreDriver", "[canexitvehicle,novehicleui,nooverridebar,nopossessbar,noshapeshift]hide;", 
+					--"visibilityPreDriver", "[canexitvehicle,novehicleui,nooverridebar,nopossessbar,noshapeshift]hide;",
 					--"visibilityPreDriver", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;"
 					"visibilityPreDriver", "[canexitvehicle,novehicleui][vehicleui][overridebar][possessbar][shapeshift]hide;[@player,noexists]hide;"
-					
+
 				}
 			},
 			-- Setup backdrop and border
 			{
-				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame",
 				chain = {
 					"SetBackdrop", {{
-						bgFile = nil, tile = false, 
-						edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32, 
+						bgFile = nil, tile = false,
+						edgeFile = GetMedia("tooltip_border_hex"), edgeSize = 32,
 						insets = { top = 10.5, bottom = 10.5, left = 10.5, right = 10.5 }
 					}},
 					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
@@ -570,18 +573,18 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"SetOrientation", "LEFT",
 					"SetFlippedHorizontally", true,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
 					"SetSize", { 300, 58 }, -- 18
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
 					"colorAbsorb", true, -- tint absorb overlay
-					"colorClass", true, -- color players by class 
+					"colorClass", true, -- color players by class
 					"colorDisconnected", true, -- color disconnected units
 					"colorHealth", true, -- color anything else in the default health color
 					"colorReaction", true, -- color NPCs by their reaction standing with us
-					"colorTapped", true, -- color tap denied units 
+					"colorTapped", true, -- color tap denied units
 					"colorThreat", true, -- color non-friendly by threat
 					"frequent", true, -- listen to frequent health events for more accurate updates
 					"predictThreshold", .01,
@@ -595,7 +598,7 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 			},
 			-- Health Bar Backdrop Texture
 			{
-				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -611,7 +614,7 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 			},
 			-- Health Bar Overlay Texture
 			{
-				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -623,11 +626,11 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 
 			-- Health Bar Value
 			{
-				parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+				parent = "self,Health", parentKey = "Value", objectType = "FontString",
 				chain = {
 					"SetPosition", { "LEFT", 16, -1 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(15,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
@@ -641,14 +644,14 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 
 			-- Health Bar Absorb Value
 			{
-				parent = "self,Health", parentKey = "ValueAbsorb", objectType = "FontString", 
+				parent = "self,Health", parentKey = "ValueAbsorb", objectType = "FontString",
 				chain = {
-					"SetPosition", function(self, owner, ...) 
+					"SetPosition", function(self, owner, ...)
 						self:ClearAllPoints()
 						self:SetPoint("LEFT", owner.Health.Value, "RIGHT", 13, 0)
-					end, 
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					end,
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(15,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
@@ -656,7 +659,7 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 				}
 
 			},
-			
+
 			-- Health Bar Overlay Cast Bar
 			{
 				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
@@ -664,7 +667,7 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"SetOrientation", "LEFT",
 					"SetFlippedHorizontally", true,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
 					"SetSize", { 300, 58 }, -- 18
 					"SetStatusBarTexture", GetMedia("statusbar-power"),
@@ -679,9 +682,9 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"SetOrientation", "LEFT",
 					"SetFlippedHorizontally", true,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "BOTTOMLEFT", 8, 8 }, -- relative to unit frame
-					"SetSize", { 300, 12 }, 
+					"SetSize", { 300, 12 },
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
@@ -695,7 +698,7 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 			},
 			-- Power Bar Backdrop Texture
 			{
-				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", -2 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -711,7 +714,7 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 			},
 			-- Power Bar Overlay Texture
 			{
-				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -723,11 +726,11 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 
 			-- Power Bar Value
 			{
-				parent = "self,Power", parentKey = "Value", objectType = "FontString", 
+				parent = "self,Power", parentKey = "Value", objectType = "FontString",
 				chain = {
 					"SetPosition", { "CENTER", 0, 0 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "CENTER", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "CENTER",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(15,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
@@ -737,15 +740,15 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 
 			-- Unit Name
 			{
-				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString",
 				chain = {
 					"SetPosition", { "RIGHT", -24, 6 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(13,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-					"SetSize", { 220, 14 }, 
+					"SetSize", { 220, 14 },
 				},
 				values = {
 					"maxChars", 16,
@@ -756,12 +759,12 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 
 			},
 
-			-- Raid Target 
+			-- Raid Target
 			{
-				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture", 
+				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture",
 				chain = {
 					"SetPosition", { "TOP", 0, 12 },
-					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetDrawLayer", { "OVERLAY", 2 },
 					"SetSize", { 30, 30 },
 					"SetTexture", GetMedia("raid_target_icons_small")
 				}
@@ -775,26 +778,26 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"SetPoint", { "TOPLEFT", 7, 96 }
 				},
 				values = {
-					"auraSize", 40, 
-					"auraWidth", false, 
+					"auraSize", 40,
+					"auraWidth", false,
 					"auraHeight", false,
 					"customSort", false,
-					"debuffsFirst", false, 
-					"disableMouse", false, 
-					"filter", false, 
-					"customFilter", GetAuraFilter("legacy"), 
-					"growthX", "RIGHT", 
-					"growthY", "UP", 
-					"maxBuffs", false, 
-					"maxDebuffs", false, 
-					"maxVisible", 21, 
-					"showDurations", true, 
-					"showSpirals", false, 
+					"debuffsFirst", false,
+					"disableMouse", false,
+					"filter", false,
+					"customFilter", GetAuraFilter("legacy"),
+					"growthX", "RIGHT",
+					"growthY", "UP",
+					"maxBuffs", false,
+					"maxDebuffs", false,
+					"maxVisible", 21,
+					"showDurations", true,
+					"showSpirals", false,
 					"showLongDurations", true,
-					"spacingH", 4, 
-					"spacingV", 4, 
+					"spacingH", 4,
+					"spacingV", 4,
 					"tooltipAnchor", false,
-					"tooltipDefaultPosition", false, 
+					"tooltipDefaultPosition", false,
 					"tooltipOffsetX", 8,
 					"tooltipOffsetY", 16,
 					"tooltipPoint", "BOTTOMLEFT",
@@ -812,26 +815,26 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"SetPoint", { "TOPLEFT", 321, 1 }
 				},
 				values = {
-					"auraSize", 32, 
-					"auraWidth", false, 
+					"auraSize", 32,
+					"auraWidth", false,
 					"auraHeight", false,
 					"customSort", false,
-					"debuffsFirst", false, 
-					"disableMouse", false, 
-					"filter", false, 
-					"customFilter", GetAuraFilter("legacy-secondary"), 
-					"growthX", "RIGHT", 
-					"growthY", "DOWN", 
-					"maxBuffs", false, 
-					"maxDebuffs", false, 
-					"maxVisible", 12, 
-					"showDurations", true, 
-					"showSpirals", false, 
+					"debuffsFirst", false,
+					"disableMouse", false,
+					"filter", false,
+					"customFilter", GetAuraFilter("legacy-secondary"),
+					"growthX", "RIGHT",
+					"growthY", "DOWN",
+					"maxBuffs", false,
+					"maxDebuffs", false,
+					"maxVisible", 12,
+					"showDurations", true,
+					"showSpirals", false,
 					"showLongDurations", true,
-					"spacingH", 4, 
-					"spacingV", 4, 
+					"spacingH", 4,
+					"spacingV", 4,
 					"tooltipAnchor", false,
-					"tooltipDefaultPosition", false, 
+					"tooltipDefaultPosition", false,
 					"tooltipOffsetX", 8,
 					"tooltipOffsetY", 16,
 					"tooltipPoint", "BOTTOMLEFT",
@@ -849,26 +852,26 @@ Private.RegisterSchematic("UnitForge::Target", "Legacy", {
 					"SetPoint", { "TOPLEFT", 321, 1 }
 				},
 				values = {
-					"auraSize", 32, 
-					"auraWidth", false, 
+					"auraSize", 32,
+					"auraWidth", false,
 					"auraHeight", false,
 					"customSort", false,
-					"debuffsFirst", false, 
-					"disableMouse", false, 
-					"filter", false, 
-					"customFilter", GetAuraFilter("legacy-secondary"), 
-					"growthX", "RIGHT", 
-					"growthY", "DOWN", 
-					"maxBuffs", false, 
-					"maxDebuffs", false, 
-					"maxVisible", 12, 
-					"showDurations", true, 
-					"showSpirals", false, 
+					"debuffsFirst", false,
+					"disableMouse", false,
+					"filter", false,
+					"customFilter", GetAuraFilter("legacy-secondary"),
+					"growthX", "RIGHT",
+					"growthY", "DOWN",
+					"maxBuffs", false,
+					"maxDebuffs", false,
+					"maxVisible", 12,
+					"showDurations", true,
+					"showSpirals", false,
 					"showLongDurations", true,
-					"spacingH", 4, 
-					"spacingV", 4, 
+					"spacingH", 4,
+					"spacingV", 4,
 					"tooltipAnchor", false,
-					"tooltipDefaultPosition", false, 
+					"tooltipDefaultPosition", false,
 					"tooltipOffsetX", 8,
 					"tooltipOffsetY", 16,
 					"tooltipPoint", "BOTTOMLEFT",
@@ -918,7 +921,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			{
 				-- Note that a missing ownerKey
 				-- will apply these changes to the original object instead.
-				parent = nil, ownerKey = nil, 
+				parent = nil, ownerKey = nil,
 				chain = {
 					"SetSize", { 224, 26 }, "SetHitBox", { -4, -4, -4, -4 },
 					"Place", { "BOTTOM", "UICenter", "BOTTOM", 0, 230 }
@@ -959,7 +962,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			},
 			-- Cast Bar Backdrop Texture
 			{
-				parent = "self,Cast,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Cast,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetAllPointsToParent", "SetDrawLayer", { "BACKGROUND", 1 },
 					"SetTexture", GetMedia("statusbar-dark"), "SetVertexColor", { .1, .1, .1, 1 }
@@ -972,10 +975,10 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			},
 			-- Cast Bar Overlay Texture
 			{
-				parent = "self,Cast,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Cast,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetAllPointsToParent", "SetDrawLayer", { "ARTWORK", 1 },
-					"SetTexture", GetMedia("statusbar-normal-overlay")	
+					"SetTexture", GetMedia("statusbar-normal-overlay")
 				}
 			},
 			-- Setup backdrop and border
@@ -992,11 +995,11 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			},
 			-- Cast Bar Value
 			{
-				parent = "self,Cast", parentKey = "Value", objectType = "FontString", 
+				parent = "self,Cast", parentKey = "Value", objectType = "FontString",
 				chain = {
 					"SetPosition", { "RIGHT", -16, 0 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(14,true),
 					"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
@@ -1005,11 +1008,11 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			},
 			-- Cast Bar Name
 			{
-				parent = "self,Cast", parentKey = "Name", objectType = "FontString", 
+				parent = "self,Cast", parentKey = "Name", objectType = "FontString",
 				chain = {
 					"SetPosition", { "LEFT", 16, 0 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "CENTER", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "CENTER",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(12,true),
 					"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
@@ -1032,14 +1035,14 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			-- Class Power
 			{
 				parent = "self,ContentScaffold", ownerKey = "ClassPower", objectType = "Frame", objectSubType = "Frame",
-				chain = { 
+				chain = {
 					"SetFrameLevelOffset", 4,
-					--"Place", { "BOTTOM", "UICenter", "BOTTOM", 0, 230 + 26+16+2 }, 
-					"Place", { "TOPLEFT", 0, 18+16+2 }, 
-					"SetSize", { 224, 18 }, 
-				
-					-- We need to call this once on element creation, 
-					-- to force-trigger our pill spawning method before 
+					--"Place", { "BOTTOM", "UICenter", "BOTTOM", 0, 230 + 26+16+2 },
+					"Place", { "TOPLEFT", 0, 18+16+2 },
+					"SetSize", { 224, 18 },
+
+					-- We need to call this once on element creation,
+					-- to force-trigger our pill spawning method before
 					-- the back-end can start its own updates.
 					-- Will be chaos and unupdated points if not!
 					"PostCreate", {}
@@ -1047,13 +1050,13 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 				},
 				values = {
 					-- These apply to the main element frame.
-					"hideFullyWhenEmpty", true, 
+					"hideFullyWhenEmpty", true,
 
 					-- These apply to points.
 					"alphaEmpty", 1, -- Element alpha when no points are available.
 					"alphaNoCombat", 1, -- Element alpha multiplier when out of combat.
-					"alphaNoCombatRunes", 1, 
-					"alphaWhenHiddenRunes", 1, 
+					"alphaNoCombatRunes", 1,
+					"alphaWhenHiddenRunes", 1,
 					"hideWhenEmpty", false, -- Whether to fully hide an empty bar or not.
 					"hideWhenNoTarget", false, -- Whether to hide when no target exists.
 					"hideSoulShardsWhenNoTargetOrCombat", true, -- Whether to hide Soul Shards when no target exists, and no combat.
@@ -1065,9 +1068,9 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 
 					"backdropMultiplier", .1,
 
-					-- Post creation method called once and only once. 
-					-- It is important that we call this prior to the back-end enabling the element, 
-					-- as the maximum displayed number of sub-frames is expected to be there for updates. 
+					-- Post creation method called once and only once.
+					-- It is important that we call this prior to the back-end enabling the element,
+					-- as the maximum displayed number of sub-frames is expected to be there for updates.
 					"PostCreate", function(element)
 						for i = 1,6 do
 							local pill = element:CreateStatusBar()
@@ -1075,7 +1078,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 							pill:SetValue(0,true)
 							pill:SetStatusBarTexture(GetMedia("statusbar-power"))
 							pill:SetStatusBarColor(70/255, 255/255, 131/255, 1) -- back-end overwrites this
-		
+
 							local bg = element:CreateFrame("Frame")
 							bg:SetAllPoints()
 							bg:SetFrameLevel(pill:GetFrameLevel()-2)
@@ -1105,19 +1108,19 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 						-- Figure out the number of pills to divide the bar into.
 						-- Anything not having an exception here will default to 5.
 						local currentPillCount
-						if (powerType == "RUNES") or ((powerType == "CHI") and (UnitPowerMax("player", SPELL_POWER_CHI) == 6)) then 
+						if (powerType == "RUNES") or ((powerType == "CHI") and (UnitPowerMax("player", SPELL_POWER_CHI) == 6)) then
 							currentPillCount = 6
-						elseif (powerType == "STAGGER") then 
+						elseif (powerType == "STAGGER") then
 							currentPillCount = 3
-						elseif (powerType == "ARCANE_CHARGES") then 
+						elseif (powerType == "ARCANE_CHARGES") then
 							currentPillCount = 4
 						else
 							currentPillCount = 5
-						end 
+						end
 
 						-- Align and toggle pills on count changes.
 						-- This will also fire off the first time we call this method.
-						if (currentPillCount ~= element.currentPillCount) then 
+						if (currentPillCount ~= element.currentPillCount) then
 
 							-- Figure out pill sizes
 							local elementWidth,elementHeight = element:GetSize()
@@ -1145,16 +1148,16 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 							element.currentPillCount = currentPillCount
 						end
 
-						-- Update main element alpha and visibility. 
+						-- Update main element alpha and visibility.
 						-- This will override the visibility set by the back-end.
-						-- *ComboPoints fail to get here sometimes? 
+						-- *ComboPoints fail to get here sometimes?
 						local safe = not UnitExists("target") and not UnitAffectingCombat("player")
-						if 	((safe) and ((min >= max) or (powerType == "SOUL_SHARDS"))) or 
-							((min == 0) and (powerType ~= "RUNES") and (powerType ~= "SOUL_SHARDS")) 
-						then 
+						if 	((safe) and ((min >= max) or (powerType == "SOUL_SHARDS"))) or
+							((min == 0) and (powerType ~= "RUNES") and (powerType ~= "SOUL_SHARDS"))
+						then
 							element:Hide()
 						end
-					
+
 					end
 				}
 			},
@@ -1184,9 +1187,9 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health
 					"SetPosition", { "TOPLEFT", 0, -26-16-2 }, -- relative to unit frame
-					"SetSize", { 224, 18 }, 
+					"SetSize", { 224, 18 },
 					"SetStatusBarTexture", GetMedia("statusbar-power"),
 					"SetStatusBarColor", { 70/255, 255/255, 131/255, .69 }
 				},
@@ -1201,7 +1204,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			},
 			-- AltPower Bar Backdrop Texture
 			{
-				parent = "self,AltPower,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,AltPower,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetAllPointsToParent", "SetDrawLayer", { "BACKGROUND", 1 },
 					"SetTexture", GetMedia("statusbar-dark"), "SetVertexColor", { .1, .1, .1, 1 }
@@ -1214,10 +1217,10 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			},
 			-- AltPower Bar Overlay Texture
 			{
-				parent = "self,AltPower,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,AltPower,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetAllPointsToParent", "SetDrawLayer", { "ARTWORK", 1 },
-					"SetTexture", GetMedia("statusbar-normal-overlay")	
+					"SetTexture", GetMedia("statusbar-normal-overlay")
 				}
 			},
 			-- Setup backdrop and border
@@ -1234,11 +1237,11 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			},
 			-- AltPower Bar Value
 			{
-				parent = "self,AltPower", parentKey = "Value", objectType = "FontString", 
+				parent = "self,AltPower", parentKey = "Value", objectType = "FontString",
 				chain = {
 					"SetPosition", { "RIGHT", -16, 0 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(14,true),
 					"SetTextColor", { Colors.highlight[1], Colors.highlight[2], Colors.highlight[3], .5 },
@@ -1247,7 +1250,7 @@ Private.RegisterSchematic("UnitForge::PlayerHUD", "Legacy", {
 			}
 		}
 	} or nil
-	
+
 })
 
 -- Applied to the special vehicle frame (only visible while in a vehicle).
@@ -1290,7 +1293,7 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 			{
 				-- Note that a missing ownerKey
 				-- will apply these changes to the original object instead.
-				parent = nil, ownerKey = nil, 
+				parent = nil, ownerKey = nil,
 				chain = {
 					"SetSize", { 24+16, 64+16 }, "SetHitBox", { -4, -4, -4, -4 },
 					"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -162 -12, 29-10 }
@@ -1303,7 +1306,7 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 			},
 			-- Setup backdrops and borders
 			{
-				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame",
 				chain = {
 					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 24 }},
 					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
@@ -1311,7 +1314,7 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 				}
 			},
 			{
-				parent = nil, ownerKey = "PowerBorderScaffold", objectType = "Frame", 
+				parent = nil, ownerKey = "PowerBorderScaffold", objectType = "Frame",
 				chain = {
 					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 24 }},
 					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
@@ -1333,19 +1336,19 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 					"SetOrientation", "UP",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
-					"SetSize", { 24, 64 }, 
+					"SetSize", { 24, 64 },
 					"SetStatusBarTexCoord", { 1,0, 0,0, 1,1, 0,1 }, -- ULx,ULy,LLx,LLy,URx,URy,LRx,LRy
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
 					"colorAbsorb", true, -- tint absorb overlay
-					"colorClass", true, -- color players by class 
+					"colorClass", true, -- color players by class
 					"colorDisconnected", false, -- color disconnected units
 					"colorHealth", true, -- color anything else in the default health color
 					"colorReaction", true, -- color NPCs by their reaction standing with us
-					"colorTapped", false, -- color tap denied units 
+					"colorTapped", false, -- color tap denied units
 					"colorThreat", false, -- color non-friendly by threat
 					"frequent", true, -- listen to frequent health events for more accurate updates
 					"predictThreshold", .01,
@@ -1359,7 +1362,7 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 			},
 			-- Health Bar Backdrop Texture
 			{
-				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -1376,7 +1379,7 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 			},
 			-- Health Bar Overlay Texture
 			{
-				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -1388,11 +1391,11 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 
 			-- Health Bar Value
 			{
-				parent = "self,Health", parentKey = "ValuePercent", objectType = "FontString", 
+				parent = "self,Health", parentKey = "ValuePercent", objectType = "FontString",
 				chain = {
 					"SetPosition", { "TOP", 0, 30 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "CENTER", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "CENTER",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(18,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
@@ -1409,7 +1412,7 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 					end
 				}
 			},
-			
+
 			-- Health Bar Overlay Cast Bar
 			{
 				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
@@ -1417,7 +1420,7 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 					"SetOrientation", "UP",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
 					"SetSize", { 24, 64 }, -- 18
 					"SetStatusBarTexCoord", { 1,0, 0,0, 1,1, 0,1 }, -- ULx,ULy,LLx,LLy,URx,URy,LRx,LRy
@@ -1433,8 +1436,8 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 					"SetOrientation", "UP",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
-					"SetSize", { 24, 64 }, 
+					"SetFrameLevelOffset", 2,
+					"SetSize", { 24, 64 },
 					"SetPosition", { "TOPLEFT", 376 +24, -8 }, -- relative to unit frame
 					"SetStatusBarTexCoord", { 1,0, 0,0, 1,1, 0,1 }, -- ULx,ULy,LLx,LLy,URx,URy,LRx,LRy
 					"SetStatusBarTexture", GetMedia("statusbar-power")
@@ -1451,7 +1454,7 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 			},
 			-- Power Bar Backdrop Texture
 			{
-				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", -2 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -1467,7 +1470,7 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 			},
 			-- Power Bar Overlay Texture
 			{
-				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -1479,11 +1482,11 @@ Private.RegisterSchematic("UnitForge::PlayerInVehicle", "Legacy", {
 
 			-- Power Bar Value
 			{
-				parent = "self,Power", parentKey = "ValuePercent", objectType = "FontString", 
+				parent = "self,Power", parentKey = "ValuePercent", objectType = "FontString",
 				chain = {
 					"SetPosition", { "TOP", 0, 30 },
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "CENTER", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "CENTER",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(18,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .5 },
@@ -1545,7 +1548,7 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 			{
 				-- Note that a missing ownerKey
 				-- will apply these changes to the original object instead.
-				parent = nil, ownerKey = nil, 
+				parent = nil, ownerKey = nil,
 				chain = {
 					"SetSize", { 158, 43 + 8 }, "SetHitBox", { -4, -4, -4, -4 },
 					"Place", { "BOTTOMLEFT", "UICenter", "BOTTOM", 210, 250 - 43 - 4 - 8 }
@@ -1559,7 +1562,7 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 			},
 			-- Setup backdrop and border
 			{
-				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame",
 				chain = {
 					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 32 }},
 					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
@@ -1580,18 +1583,18 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 					"SetOrientation", "LEFT",
 					"SetFlippedHorizontally", true,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
-					"SetSize", { 142, 27 }, 
+					"SetSize", { 142, 27 },
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
 					"colorAbsorb", true, -- tint absorb overlay
-					"colorClass", true, -- color players by class 
+					"colorClass", true, -- color players by class
 					"colorDisconnected", false, -- color disconnected units
 					"colorHealth", true, -- color anything else in the default health color
 					"colorReaction", true, -- color NPCs by their reaction standing with us
-					"colorTapped", false, -- color tap denied units 
+					"colorTapped", false, -- color tap denied units
 					"colorThreat", false, -- color non-friendly by threat
 					"frequent", true, -- listen to frequent health events for more accurate updates
 					"predictThreshold", .01,
@@ -1605,7 +1608,7 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 			},
 			-- Health Bar Backdrop Texture
 			{
-				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -1621,7 +1624,7 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 			},
 			-- Health Bar Overlay Texture
 			{
-				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -1633,11 +1636,11 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 
 			-- Health Bar Value
 			{
-				parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+				parent = "self,Health", parentKey = "Value", objectType = "FontString",
 				chain = {
 					"SetPosition", { "LEFT", 8, 1 -3 }, -- Relative to the health bar
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(12,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
@@ -1647,7 +1650,7 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 					"useSmartValue", true
 				}
 			},
-			
+
 			-- Health Bar Overlay Cast Bar
 			{
 				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
@@ -1655,9 +1658,9 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 					"SetOrientation", "LEFT",
 					"SetFlippedHorizontally", true,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
-					"SetSize", { 142, 27 }, 
+					"SetSize", { 142, 27 },
 					"SetStatusBarTexture", GetMedia("statusbar-power"),
 					"SetStatusBarColor", { 1, 1, 1, .25 }
 				}
@@ -1670,9 +1673,9 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 					"SetOrientation", "LEFT",
 					"SetFlippedHorizontally", true,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "BOTTOMLEFT", 8, 8 }, -- relative to unit frame
-					"SetSize", { 142, 8 }, 
+					"SetSize", { 142, 8 },
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
@@ -1686,7 +1689,7 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 			},
 			-- Power Bar Backdrop Texture
 			{
-				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", -2 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -1702,7 +1705,7 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 			},
 			-- Power Bar Overlay Texture
 			{
-				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -1711,18 +1714,18 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 					"SetTexCoord", { 1, 0, 0, 1 }
 				}
 			},
-			
+
 			-- Unit Name
 			{
-				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString",
 				chain = {
 					"SetPosition", { "RIGHT", -16, 1 }, -- relative to the whole frame (with border)
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(11, true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-					"SetSize", { 80, 14 }, 
+					"SetSize", { 80, 14 },
 				},
 				values = {
 					"maxChars", 8,
@@ -1733,12 +1736,12 @@ Private.RegisterSchematic("UnitForge::ToT", "Legacy", {
 
 			},
 
-			-- Raid Target 
+			-- Raid Target
 			{
-				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture", 
+				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture",
 				chain = {
 					"SetPosition", { "BOTTOM", 0, -8 },
-					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetDrawLayer", { "OVERLAY", 2 },
 					"SetSize", { 24, 24 },
 					"SetTexture", GetMedia("raid_target_icons_small")
 				}
@@ -1784,7 +1787,7 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 			{
 				-- Note that a missing ownerKey
 				-- will apply these changes to the original object instead.
-				parent = nil, ownerKey = nil, 
+				parent = nil, ownerKey = nil,
 				chain = {
 					"SetSize", { 158, 43 + 8 }, "SetHitBox", { -4, -4, -4, -4 },
 					"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -210, 250 - 43 - 4 -8 }
@@ -1798,7 +1801,7 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 			},
 			-- Setup backdrop and border
 			{
-				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame",
 				chain = {
 					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 32 }},
 					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
@@ -1819,19 +1822,19 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
-					"SetSize", { 142, 27 }, 
+					"SetSize", { 142, 27 },
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
 					"colorAbsorb", true, -- tint absorb overlay
-					"colorClass", true, -- color players by class 
-					"colorPetAsPlayer", true, 
+					"colorClass", true, -- color players by class
+					"colorPetAsPlayer", true,
 					"colorDisconnected", false, -- color disconnected units
 					"colorHealth", true, -- color anything else in the default health color
 					"colorReaction", true, -- color NPCs by their reaction standing with us
-					"colorTapped", false, -- color tap denied units 
+					"colorTapped", false, -- color tap denied units
 					"colorThreat", false, -- color non-friendly by threat
 					"frequent", true, -- listen to frequent health events for more accurate updates
 					"predictThreshold", .01,
@@ -1845,7 +1848,7 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 			},
 			-- Health Bar Backdrop Texture
 			{
-				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -1861,7 +1864,7 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 			},
 			-- Health Bar Overlay Texture
 			{
-				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -1873,11 +1876,11 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 
 			-- Health Bar Value
 			{
-				parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+				parent = "self,Health", parentKey = "Value", objectType = "FontString",
 				chain = {
 					"SetPosition", { "RIGHT", -8, 1 -3 }, -- Relative to the health bar
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(12,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
@@ -1887,7 +1890,7 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 					"useSmartValue", true
 				}
 			},
-			
+
 			-- Health Bar Overlay Cast Bar
 			{
 				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
@@ -1895,9 +1898,9 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
-					"SetSize", { 142, 27 }, 
+					"SetSize", { 142, 27 },
 					"SetStatusBarTexture", GetMedia("statusbar-power"),
 					"SetStatusBarColor", { 1, 1, 1, .25 }
 				}
@@ -1910,9 +1913,9 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "BOTTOMRIGHT", -8, 8 }, -- relative to unit frame
-					"SetSize", { 142, 8 }, 
+					"SetSize", { 142, 8 },
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
@@ -1926,7 +1929,7 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 			},
 			-- Power Bar Backdrop Texture
 			{
-				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", -2 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -1942,7 +1945,7 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 			},
 			-- Power Bar Overlay Texture
 			{
-				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "BOTTOMLEFT", 0, 0 },
@@ -1954,15 +1957,15 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 
 			-- Unit Name
 			{
-				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString",
 				chain = {
 					"SetPosition", { "LEFT", 16, 1 }, -- relative to the whole frame (with border)
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(11, true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-					"SetSize", { 80, 14 }, 
+					"SetSize", { 80, 14 },
 				},
 				values = {
 					"maxChars", 8,
@@ -2001,7 +2004,7 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 
 			-- Group Aura Icon
 			{
-				parent = "self,GroupAura", parentKey = "Icon", objectType = "Texture", 
+				parent = "self,GroupAura", parentKey = "Icon", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "CENTER", 0, 0 },
@@ -2012,10 +2015,10 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 
 			-- Group Aura Stack Count
 			{
-				parent = "self,GroupAura", parentKey = "Count", objectType = "FontString", 
+				parent = "self,GroupAura", parentKey = "Count", objectType = "FontString",
 				chain = {
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "BOTTOM",
 					"SetPosition", { "BOTTOMRIGHT", -2, 2 },
 					"SetFontObject", GetFont(14, true),
@@ -2026,10 +2029,10 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 
 			-- Group Aura Time
 			{
-				parent = "self,GroupAura", parentKey = "Time", objectType = "FontString", 
+				parent = "self,GroupAura", parentKey = "Time", objectType = "FontString",
 				chain = {
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "TOP",
 					"SetPosition", { "TOPLEFT", 0, 0 },
 					"SetFontObject", GetFont(12, true),
@@ -2037,19 +2040,19 @@ Private.RegisterSchematic("UnitForge::Pet", "Legacy", {
 					"SetParentToOwnerKey", "self,GroupAura,Border"
 				}
 			},
-			
 
-			-- Raid Target 
+
+			-- Raid Target
 			{
-				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture", 
+				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture",
 				chain = {
 					"SetPosition", { "BOTTOM", 0, -8 },
-					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetDrawLayer", { "OVERLAY", 2 },
 					"SetSize", { 24, 24 },
 					"SetTexture", GetMedia("raid_target_icons_small")
 				}
 			}
-			
+
 
 		}
 	}
@@ -2091,7 +2094,7 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 			{
 				-- Note that a missing ownerKey
 				-- will apply these changes to the original object instead.
-				parent = nil, ownerKey = nil, 
+				parent = nil, ownerKey = nil,
 				chain = {
 					"SetSize", { 158, 43 + 8 }, "SetHitBox", { -4, -4, -4, -4 },
 					"Place", { "BOTTOMRIGHT", "UICenter", "BOTTOM", -210 - 158, 250 - 43 - 4 -8 }
@@ -2105,7 +2108,7 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 			},
 			-- Setup backdrop and border
 			{
-				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame",
 				chain = {
 					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 32 }},
 					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
@@ -2126,19 +2129,19 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
-					"SetSize", { 142, 27 }, 
+					"SetSize", { 142, 27 },
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
 					"colorAbsorb", true, -- tint absorb overlay
-					"colorClass", true, -- color players by class 
-					"colorPetAsPlayer", true, 
+					"colorClass", true, -- color players by class
+					"colorPetAsPlayer", true,
 					"colorDisconnected", false, -- color disconnected units
 					"colorHealth", true, -- color anything else in the default health color
 					"colorReaction", true, -- color NPCs by their reaction standing with us
-					"colorTapped", false, -- color tap denied units 
+					"colorTapped", false, -- color tap denied units
 					"colorThreat", false, -- color non-friendly by threat
 					"frequent", true, -- listen to frequent health events for more accurate updates
 					"predictThreshold", .01,
@@ -2152,7 +2155,7 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 			},
 			-- Health Bar Backdrop Texture
 			{
-				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -2168,7 +2171,7 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 			},
 			-- Health Bar Overlay Texture
 			{
-				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -2180,11 +2183,11 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 
 			-- Health Bar Value
 			{
-				parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+				parent = "self,Health", parentKey = "Value", objectType = "FontString",
 				chain = {
 					"SetPosition", { "RIGHT", -8, 1 -3 }, -- Relative to the health bar
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(12,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
@@ -2194,7 +2197,7 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 					"useSmartValue", true
 				}
 			},
-			
+
 			-- Health Bar Overlay Cast Bar
 			{
 				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
@@ -2202,9 +2205,9 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
-					"SetSize", { 142, 27 }, 
+					"SetSize", { 142, 27 },
 					"SetStatusBarTexture", GetMedia("statusbar-power"),
 					"SetStatusBarColor", { 1, 1, 1, .25 }
 				}
@@ -2217,9 +2220,9 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "BOTTOMRIGHT", -8, 8 }, -- relative to unit frame
-					"SetSize", { 142, 8 }, 
+					"SetSize", { 142, 8 },
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
@@ -2233,7 +2236,7 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 			},
 			-- Power Bar Backdrop Texture
 			{
-				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", -2 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -2249,7 +2252,7 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 			},
 			-- Power Bar Overlay Texture
 			{
-				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "BOTTOMLEFT", 0, 0 },
@@ -2261,15 +2264,15 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 
 			-- Unit Name
 			{
-				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString",
 				chain = {
 					"SetPosition", { "LEFT", 16, 1 }, -- relative to the whole frame (with border)
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(11, true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-					"SetSize", { 80, 14 }, 
+					"SetSize", { 80, 14 },
 				},
 				values = {
 					"maxChars", 8,
@@ -2288,26 +2291,26 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 					"SetPoint", { "TOPRIGHT", -10, -51 -6 }
 				},
 				values = {
-					"auraSize", 32, 
-					"auraWidth", false, 
+					"auraSize", 32,
+					"auraWidth", false,
 					"auraHeight", false,
 					"customSort", false,
-					"debuffsFirst", false, 
-					"disableMouse", false, 
-					"filter", false, 
-					"customFilter", GetAuraFilter("focus"), 
-					"growthX", "LEFT", 
-					"growthY", "DOWN", 
-					"maxBuffs", false, 
-					"maxDebuffs", false, 
-					"maxVisible", 12, 
-					"showDurations", true, 
-					"showSpirals", false, 
+					"debuffsFirst", false,
+					"disableMouse", false,
+					"filter", false,
+					"customFilter", GetAuraFilter("focus"),
+					"growthX", "LEFT",
+					"growthY", "DOWN",
+					"maxBuffs", false,
+					"maxDebuffs", false,
+					"maxVisible", 12,
+					"showDurations", true,
+					"showSpirals", false,
 					"showLongDurations", true,
-					"spacingH", 4, 
-					"spacingV", 4, 
+					"spacingH", 4,
+					"spacingV", 4,
 					"tooltipAnchor", false,
-					"tooltipDefaultPosition", false, 
+					"tooltipDefaultPosition", false,
 					"tooltipOffsetX", 8,
 					"tooltipOffsetY", 16,
 					"tooltipPoint", "BOTTOMRIGHT",
@@ -2345,7 +2348,7 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 
 			-- Group Aura Icon
 			{
-				parent = "self,GroupAura", parentKey = "Icon", objectType = "Texture", 
+				parent = "self,GroupAura", parentKey = "Icon", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "CENTER", 0, 0 },
@@ -2356,10 +2359,10 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 
 			-- Group Aura Stack Count
 			{
-				parent = "self,GroupAura", parentKey = "Count", objectType = "FontString", 
+				parent = "self,GroupAura", parentKey = "Count", objectType = "FontString",
 				chain = {
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "BOTTOM",
 					"SetPosition", { "BOTTOMRIGHT", -2, 2 },
 					"SetFontObject", GetFont(14, true),
@@ -2370,10 +2373,10 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 
 			-- Group Aura Time
 			{
-				parent = "self,GroupAura", parentKey = "Time", objectType = "FontString", 
+				parent = "self,GroupAura", parentKey = "Time", objectType = "FontString",
 				chain = {
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "TOP",
 					"SetPosition", { "TOPLEFT", 0, 0 },
 					"SetFontObject", GetFont(12, true),
@@ -2382,17 +2385,17 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 				}
 			},
 
-			-- Raid Target 
+			-- Raid Target
 			{
-				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture", 
+				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture",
 				chain = {
 					"SetPosition", { "BOTTOM", 0, -8 },
-					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetDrawLayer", { "OVERLAY", 2 },
 					"SetSize", { 24, 24 },
 					"SetTexture", GetMedia("raid_target_icons_small")
 				}
 			}
-			
+
 
 		}
 	}
@@ -2401,7 +2404,7 @@ Private.RegisterSchematic("UnitForge::Focus", "Legacy", {
 -- Party frames.
 local PARTY_SLOT_ID = 0
 Private.RegisterSchematic("UnitForge::Party", "Legacy", {
-	
+
 	-- Create layered scaffold frames.
 	-- These are used to house the other widgets and elements.
 	{
@@ -2437,12 +2440,12 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 			{
 				-- Note that a missing ownerKey
 				-- will apply these changes to the original object instead.
-				parent = nil, ownerKey = nil, 
+				parent = nil, ownerKey = nil,
 				chain = {
 					"SetSize", { 198, 55 }, "SetHitBox", { -4, -4, -4, -4 },
 					"Position", {}
 				},
-				-- Note that values are added before the chain is executed, 
+				-- Note that values are added before the chain is executed,
 				-- so the above chain can call methods defined in the values here.
 				values = {
 					"colors", Colors,
@@ -2460,8 +2463,8 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 					-- Will move a slot down each time it's called.
 					"Position", function(self)
 						local unit = self.unit
-						if (not unit) then 
-							return 
+						if (not unit) then
+							return
 						end
 						PARTY_SLOT_ID = PARTY_SLOT_ID + 1
 						self:Place("TOPLEFT", "UICenter", "TOPLEFT", 48 + 8, -(64 + (55 + 4+30+4+20)*(PARTY_SLOT_ID-1)))
@@ -2470,7 +2473,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 			},
 			-- Setup backdrop and border
 			{
-				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame",
 				chain = {
 					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 32 }},
 					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
@@ -2492,18 +2495,18 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
-					"SetSize", { 182, 31 }, 
+					"SetSize", { 182, 31 },
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
 					"colorAbsorb", true, -- tint absorb overlay
-					"colorClass", true, -- color players by class 
+					"colorClass", true, -- color players by class
 					"colorDisconnected", true, -- color disconnected units
 					"colorHealth", true, -- color anything else in the default health color
 					"colorReaction", true, -- color NPCs by their reaction standing with us
-					"colorTapped", false, -- color tap denied units 
+					"colorTapped", false, -- color tap denied units
 					"colorThreat", false, -- color non-friendly by threat
 					"frequent", true, -- listen to frequent health events for more accurate updates
 					"predictThreshold", .01,
@@ -2517,7 +2520,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 			},
 			-- Health Bar Backdrop Texture
 			{
-				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -2533,7 +2536,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 			},
 			-- Health Bar Overlay Texture
 			{
-				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -2545,11 +2548,11 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 
 			-- Health Bar Value
 			{
-				parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+				parent = "self,Health", parentKey = "Value", objectType = "FontString",
 				chain = {
 					"SetPosition", { "RIGHT", -8, 0 }, -- Relative to the health bar
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(12,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
@@ -2559,7 +2562,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 					"useSmartValue", true
 				}
 			},
-			
+
 			-- Health Bar Overlay Cast Bar
 			{
 				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
@@ -2567,9 +2570,9 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
-					"SetSize", { 182, 27 }, 
+					"SetSize", { 182, 27 },
 					"SetStatusBarTexture", GetMedia("statusbar-power"),
 					"SetStatusBarColor", { 1, 1, 1, .25 }
 				}
@@ -2582,9 +2585,9 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "BOTTOMLEFT", 8, 8 }, -- relative to unit frame
-					"SetSize", { 182, 8 }, 
+					"SetSize", { 182, 8 },
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
@@ -2598,7 +2601,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 			},
 			-- Power Bar Backdrop Texture
 			{
-				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", -2 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -2614,7 +2617,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 			},
 			-- Power Bar Overlay Texture
 			{
-				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -2626,15 +2629,15 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 
 			-- Unit Name
 			{
-				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString",
 				chain = {
 					"SetPosition", { "LEFT", 16, 4 }, -- relative to the whole frame (with border)
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(11, true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-					"SetSize", { 80, 14 }, 
+					"SetSize", { 80, 14 },
 				},
 				values = {
 					"maxChars", 12,
@@ -2653,33 +2656,33 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 					"SetPoint", { "TOPLEFT", 4, -55 - 8 +2 }
 				},
 				values = {
-					"auraSize", 28, 
-					"auraWidth", false, 
+					"auraSize", 28,
+					"auraWidth", false,
 					"auraHeight", false,
 					"customSort", false,
-					"debuffsFirst", false, 
-					"disableMouse", false, 
-					"filter", "PLAYER", 
-					"customFilter", false, 
-					"growthX", "RIGHT", 
-					"growthY", "DOWN", 
-					"maxBuffs", false, 
-					"maxDebuffs", false, 
-					"maxVisible", 6, 
-					"showDurations", true, 
-					"showSpirals", false, 
+					"debuffsFirst", false,
+					"disableMouse", false,
+					"filter", "PLAYER",
+					"customFilter", false,
+					"growthX", "RIGHT",
+					"growthY", "DOWN",
+					"maxBuffs", false,
+					"maxDebuffs", false,
+					"maxVisible", 6,
+					"showDurations", true,
+					"showSpirals", false,
 					"showLongDurations", true,
-					"spacingH", 4, 
-					"spacingV", 4, 
+					"spacingH", 4,
+					"spacingV", 4,
 					"tooltipAnchor", false,
-					"tooltipDefaultPosition", false, 
+					"tooltipDefaultPosition", false,
 					"tooltipOffsetX", 8,
 					"tooltipOffsetY", -16,
 					"tooltipPoint", "TOPLEFT",
 					"tooltipRelPoint", "BOTTOMLEFT",
 					"PostCreateButton", Aura_PostCreate,
 					"PostUpdateButton", Aura_PostUpdate
-					
+
 				}
 			},
 
@@ -2711,7 +2714,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 
 			-- Group Aura Icon
 			{
-				parent = "self,GroupAura", parentKey = "Icon", objectType = "Texture", 
+				parent = "self,GroupAura", parentKey = "Icon", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "CENTER", 0, 0 },
@@ -2722,10 +2725,10 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 
 			-- Group Aura Stack Count
 			{
-				parent = "self,GroupAura", parentKey = "Count", objectType = "FontString", 
+				parent = "self,GroupAura", parentKey = "Count", objectType = "FontString",
 				chain = {
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "BOTTOM",
 					"SetPosition", { "BOTTOMRIGHT", 4, -4 },
 					"SetFontObject", GetFont(16, true),
@@ -2736,10 +2739,10 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 
 			-- Group Aura Time
 			{
-				parent = "self,GroupAura", parentKey = "Time", objectType = "FontString", 
+				parent = "self,GroupAura", parentKey = "Time", objectType = "FontString",
 				chain = {
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "TOP",
 					"SetPosition", { "TOPLEFT", -4, 4 },
 					"SetFontObject", GetFont(16, true),
@@ -2748,12 +2751,12 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 				}
 			},
 
-			-- Raid Target 
+			-- Raid Target
 			{
-				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture", 
+				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture",
 				chain = {
 					"SetPosition", { "BOTTOM", 0, -10 },
-					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetDrawLayer", { "OVERLAY", 2 },
 					"SetSize", { 28, 28 },
 					"SetTexture", GetMedia("raid_target_icons_small")
 				}
@@ -2761,17 +2764,17 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 
 			-- Raid Role (Leader, Assistant, Master Looter, Main Tank, Main Assist)
 			{
-				parent = "self,OverlayScaffold", ownerKey = "RaidRole", objectType = "Texture", 
+				parent = "self,OverlayScaffold", ownerKey = "RaidRole", objectType = "Texture",
 				chain = {
 					"SetPosition", { "TOPLEFT", 15, 8 },
-					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetDrawLayer", { "OVERLAY", 2 },
 					"SetSize", { 20, 16 }
 				},
 				values = {
 					"ignoreRaidTargets", true
 				}
 			},
-			
+
 		}
 	},
 
@@ -2790,7 +2793,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 			},
 
 			{
-				parent = "self,GroupRole", parentKey = "Healer", objectType = "Texture", 
+				parent = "self,GroupRole", parentKey = "Healer", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "CENTER", 0, 0 },
@@ -2800,7 +2803,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 			},
 
 			{
-				parent = "self,GroupRole", parentKey = "Tank", objectType = "Texture", 
+				parent = "self,GroupRole", parentKey = "Tank", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "CENTER", 0, 0 },
@@ -2810,7 +2813,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 			},
 
 			{
-				parent = "self,GroupRole", parentKey = "Damager", objectType = "Texture", 
+				parent = "self,GroupRole", parentKey = "Damager", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "CENTER", 0, 0 },
@@ -2826,7 +2829,7 @@ Private.RegisterSchematic("UnitForge::Party", "Legacy", {
 -- Raid frames.
 local RAID_SLOT_ID = 0
 Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
-	
+
 	-- Create layered scaffold frames.
 	-- These are used to house the other widgets and elements.
 	{
@@ -2862,12 +2865,12 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 			{
 				-- Note that a missing ownerKey
 				-- will apply these changes to the original object instead.
-				parent = nil, ownerKey = nil, 
+				parent = nil, ownerKey = nil,
 				chain = { -- 198, 55
 					"SetSize", { 60+16, 30+16 }, "SetHitBox", { -4, -4, -4, -4 },
 					"Position", {}
 				},
-				-- Note that values are added before the chain is executed, 
+				-- Note that values are added before the chain is executed,
 				-- so the above chain can call methods defined in the values here.
 				values = {
 					"colors", Colors,
@@ -2885,8 +2888,8 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 					-- Will move a slot down each time it's called.
 					"Position", function(self)
 						local unit = self.unit
-						if (not unit) then 
-							return 
+						if (not unit) then
+							return
 						end
 
 						-- grid positions
@@ -2905,18 +2908,18 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 						local yChaos = -64 - two * (hChaos + 10)
 
 						RAID_SLOT_ID = RAID_SLOT_ID + 1
-						
+
 						local layoutDriver = "[@raid26,exists]chaos;cool"
 						if (unit == "player") then
 							layoutDriver = "[@target,exists]chaos;cool" -- just for testing
 						end
-					
+
 						local layoutSwitcher = CreateFrame("Frame", nil, nil, "SecureHandlerAttributeTemplate")
 						layoutSwitcher:SetFrameRef("UnitFrame", self)
 						layoutSwitcher:SetFrameRef("UICenter", self:GetFrame("UICenter"))
 						layoutSwitcher:SetAttribute("_onattributechanged", string_format([=[
 							if (name == "state-layout") then
-								local frame = self:GetFrameRef("UnitFrame"); 
+								local frame = self:GetFrameRef("UnitFrame");
 								local anchor = self:GetFrameRef("UICenter");
 								local oldlayout = self:GetAttribute("oldlayout");
 								if (not oldlayout) or (oldlayout ~= value) then
@@ -2932,13 +2935,13 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 									end
 									self:SetAttribute("oldlayout", value);
 								end
-							end	
+							end
 
 						]=], w,h,x,y, wChaos,hChaos,xChaos,yChaos))
 						RegisterAttributeDriver(layoutSwitcher, "state-layout", layoutDriver)
 
 						layoutSwitcher:SetAttribute("layout", SecureCmdOptionParse(layoutDriver))
-				
+
 
 					end
 				}
@@ -2966,18 +2969,18 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPoint", { "TOPLEFT", 8, -8 }, -- relative to unit frame
 					"SetPoint", { "BOTTOMRIGHT", -8, 8 + 4 },
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
 					"colorAbsorb", true, -- tint absorb overlay
-					"colorClass", true, -- color players by class 
+					"colorClass", true, -- color players by class
 					"colorDisconnected", true, -- color disconnected units
 					"colorHealth", true, -- color anything else in the default health color
 					"colorReaction", true, -- color NPCs by their reaction standing with us
-					"colorTapped", false, -- color tap denied units 
+					"colorTapped", false, -- color tap denied units
 					"colorThreat", false, -- color non-friendly by threat
 					"frequent", true, -- listen to frequent health events for more accurate updates
 					"predictThreshold", .01,
@@ -2991,9 +2994,9 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 			},
 			-- Health Bar Backdrop Texture
 			{
-				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
-					"SetAllPointsToParent", 
+					"SetAllPointsToParent",
 					"SetDrawLayer", { "BACKGROUND", 1 },
 					"SetTexture", GetMedia("statusbar-dark"),
 					"SetVertexColor", { .1, .1, .1, 1 }
@@ -3006,9 +3009,9 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 			},
 			-- Health Bar Overlay Texture
 			{
-				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
-					"SetAllPointsToParent", 
+					"SetAllPointsToParent",
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetTexture", GetMedia("statusbar-normal-overlay"),
 					"SetTexCoord", { 0, 1, 0, 1 }
@@ -3017,11 +3020,11 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 
 			-- Health Bar Value
 			--{
-			--	parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+			--	parent = "self,Health", parentKey = "Value", objectType = "FontString",
 			--	chain = {
 			--		"SetPosition", { "BOTTOMRIGHT", -2, 3 }, -- Relative to the health bar
-			--		"SetDrawLayer", { "OVERLAY", 1 }, 
-			--		"SetJustifyH", "RIGHT", 
+			--		"SetDrawLayer", { "OVERLAY", 1 },
+			--		"SetJustifyH", "RIGHT",
 			--		"SetJustifyV", "BOTTOM",
 			--		"SetFontObject", GetFont(12,true),
 			--		"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
@@ -3031,7 +3034,7 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 			--		"useSmartValue", true
 			--	}
 			--},
-			
+
 			-- Power Bar
 			{
 				parent = "self,ContentScaffold", ownerKey = "Power", objectType = "Frame", objectSubType = "StatusBar",
@@ -3039,8 +3042,8 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 					"SetOrientation", "RIGHT",
 					"SetFlippedHorizontally", false,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
-					"SetPoint", { "BOTTOMLEFT", 8, 8 }, 
+					"SetFrameLevelOffset", 2,
+					"SetPoint", { "BOTTOMLEFT", 8, 8 },
 					"SetPoint", { "BOTTOMRIGHT", -8, 8 },
 					"SetHeight", 4,
 					"SetStatusBarTexture", GetMedia("statusbar-power")
@@ -3056,9 +3059,9 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 			},
 			-- Power Bar Backdrop Texture
 			{
-				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
-					"SetAllPointsToParent", 
+					"SetAllPointsToParent",
 					"SetDrawLayer", { "BACKGROUND", -2 },
 					"SetTexture", GetMedia("statusbar-dark"),
 					"SetVertexColor", { .1, .1, .1, 1 }
@@ -3071,9 +3074,9 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 			},
 			-- Power Bar Overlay Texture
 			{
-				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
-					"SetAllPointsToParent", 
+					"SetAllPointsToParent",
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetTexture", GetMedia("statusbar-normal-overlay"),
 					"SetTexCoord", { 0, 1, 0, 1 }
@@ -3082,12 +3085,12 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 
 			-- Unit Name
 			{
-				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString",
 				chain = {
 					--"SetPosition", { "TOPLEFT", 10, -11 }, -- relative to the whole frame (with border)
 					"SetPosition", { "TOPLEFT", 12, -12 }, -- relative to the whole frame (with border)
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "TOP",
 					"SetFontObject", GetFont(12, true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
@@ -3129,7 +3132,7 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 
 			-- Group Aura Icon
 			{
-				parent = "self,GroupAura", parentKey = "Icon", objectType = "Texture", 
+				parent = "self,GroupAura", parentKey = "Icon", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "CENTER", 0, 0 },
@@ -3140,10 +3143,10 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 
 			-- Group Aura Stack Count
 			{
-				parent = "self,GroupAura", parentKey = "Count", objectType = "FontString", 
+				parent = "self,GroupAura", parentKey = "Count", objectType = "FontString",
 				chain = {
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "BOTTOM",
 					"SetPosition", { "BOTTOMRIGHT", -2, 2 },
 					"SetFontObject", GetFont(14, true),
@@ -3154,10 +3157,10 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 
 			-- Group Aura Time
 			{
-				parent = "self,GroupAura", parentKey = "Time", objectType = "FontString", 
+				parent = "self,GroupAura", parentKey = "Time", objectType = "FontString",
 				chain = {
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "TOP",
 					"SetPosition", { "TOPLEFT", 0, 0 },
 					"SetFontObject", GetFont(12, true),
@@ -3168,10 +3171,10 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 
 			-- Group Number
 			{
-				parent = "self,OverlayScaffold", ownerKey = "GroupNumber", objectType = "FontString", 
+				parent = "self,OverlayScaffold", ownerKey = "GroupNumber", objectType = "FontString",
 				chain = {
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "BOTTOM",
 					"SetPosition", { "BOTTOMLEFT", -4, -1 },
 					"SetFontObject", GetFont(12, true),
@@ -3179,12 +3182,12 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 				}
 			},
 
-			-- Raid Target 
+			-- Raid Target
 			{
-				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture", 
+				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture",
 				chain = {
 					"SetPosition", { "BOTTOM", 0, -10 },
-					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetDrawLayer", { "OVERLAY", 2 },
 					"SetSize", { 28, 28 },
 					"SetTexture", GetMedia("raid_target_icons_small")
 				}
@@ -3192,17 +3195,17 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 
 			-- Raid Role (Leader, Assistant, Master Looter, Main Tank, Main Assist)
 			{
-				parent = "self,OverlayScaffold", ownerKey = "RaidRole", objectType = "Texture", 
+				parent = "self,OverlayScaffold", ownerKey = "RaidRole", objectType = "Texture",
 				chain = {
 					"SetPosition", { "TOPLEFT", 10, 6 },
-					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetDrawLayer", { "OVERLAY", 2 },
 					"SetSize", { 16, 12 }
 				},
 				values = {
 					"ignoreRaidTargets", true
 				}
 			},
-			
+
 		}
 	},
 
@@ -3221,7 +3224,7 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 			},
 
 			{
-				parent = "self,GroupRole", parentKey = "Healer", objectType = "Texture", 
+				parent = "self,GroupRole", parentKey = "Healer", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "CENTER", 0, 0 },
@@ -3231,7 +3234,7 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 			},
 
 			{
-				parent = "self,GroupRole", parentKey = "Tank", objectType = "Texture", 
+				parent = "self,GroupRole", parentKey = "Tank", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "CENTER", 0, 0 },
@@ -3241,7 +3244,7 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 			},
 
 			{
-				parent = "self,GroupRole", parentKey = "Damager", objectType = "Texture", 
+				parent = "self,GroupRole", parentKey = "Damager", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "CENTER", 0, 0 },
@@ -3259,7 +3262,7 @@ Private.RegisterSchematic("UnitForge::Raid", "Legacy", {
 local BOSS_SLOT_ID = 0
 Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 
-		
+
 	-- Create layered scaffold frames.
 	-- These are used to house the other widgets and elements.
 	{
@@ -3295,12 +3298,12 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 			{
 				-- Note that a missing ownerKey
 				-- will apply these changes to the original object instead.
-				parent = nil, ownerKey = nil, 
+				parent = nil, ownerKey = nil,
 				chain = {
 					"SetSize", { 198, 55 }, "SetHitBox", { -4, -4, -4, -4 },
 					"Position", {}
 				},
-				-- Note that values are added before the chain is executed, 
+				-- Note that values are added before the chain is executed,
 				-- so the above chain can call methods defined in the values here.
 				values = {
 					"colors", Colors,
@@ -3318,8 +3321,8 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 					-- Will move a slot down each time it's called.
 					"Position", function(self)
 						local unit = self.unit
-						if (not unit) then 
-							return 
+						if (not unit) then
+							return
 						end
 						BOSS_SLOT_ID = BOSS_SLOT_ID + 1
 						self:Place("TOPRIGHT", "UICenter", "TOPRIGHT", -(48 + 8), -(420-30 + (55 + 4+30+4+20)*(BOSS_SLOT_ID-1)))
@@ -3328,7 +3331,7 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 			},
 			-- Setup backdrop and border
 			{
-				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame", 
+				parent = nil, ownerKey = "BorderScaffold", objectType = "Frame",
 				chain = {
 					"SetBackdrop", {{ edgeFile = GetMedia("tooltip_border_hex_small"), edgeSize = 32 }},
 					"SetBackdropBorderColor", { Colors.ui[1], Colors.ui[2], Colors.ui[3], 1 },
@@ -3350,18 +3353,18 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 					"SetOrientation", "LEFT",
 					"SetFlippedHorizontally", true,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
-					"SetSize", { 182, 31 }, 
+					"SetSize", { 182, 31 },
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
 					"colorAbsorb", true, -- tint absorb overlay
-					"colorClass", true, -- color players by class 
+					"colorClass", true, -- color players by class
 					"colorDisconnected", true, -- color disconnected units
 					"colorHealth", true, -- color anything else in the default health color
 					"colorReaction", true, -- color NPCs by their reaction standing with us
-					"colorTapped", true, -- color tap denied units 
+					"colorTapped", true, -- color tap denied units
 					"colorThreat", true, -- color non-friendly by threat
 					"frequent", true, -- listen to frequent health events for more accurate updates
 					"predictThreshold", .01,
@@ -3375,7 +3378,7 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 			},
 			-- Health Bar Backdrop Texture
 			{
-				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -3392,7 +3395,7 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 			},
 			-- Health Bar Overlay Texture
 			{
-				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Health,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "TOPLEFT", 0, 0 },
@@ -3404,11 +3407,11 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 
 			-- Health Bar Value
 			{
-				parent = "self,Health", parentKey = "Value", objectType = "FontString", 
+				parent = "self,Health", parentKey = "Value", objectType = "FontString",
 				chain = {
 					"SetPosition", { "LEFT", 8, 0 }, -- Relative to the health bar
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "LEFT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "LEFT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(12,true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
@@ -3419,7 +3422,7 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 					"useSmartValue", true
 				}
 			},
-			
+
 			-- Health Bar Overlay Cast Bar
 			{
 				parent = "self,ContentScaffold", ownerKey = "Cast", objectType = "Frame", objectSubType = "StatusBar",
@@ -3427,9 +3430,9 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 					"SetOrientation", "LEFT",
 					"SetFlippedHorizontally", true,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 4, -- should be 2 higher than the health 
+					"SetFrameLevelOffset", 4, -- should be 2 higher than the health
 					"SetPosition", { "TOPLEFT", 8, -8 }, -- relative to unit frame
-					"SetSize", { 182, 27 }, 
+					"SetSize", { 182, 27 },
 					"SetStatusBarTexture", GetMedia("statusbar-power"),
 					"SetStatusBarColor", { 1, 1, 1, .25 }
 				}
@@ -3442,9 +3445,9 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 					"SetOrientation", "LEFT",
 					"SetFlippedHorizontally", true,
 					"SetSmartSmoothing", true,
-					"SetFrameLevelOffset", 2, 
+					"SetFrameLevelOffset", 2,
 					"SetPosition", { "BOTTOMLEFT", 8, 8 }, -- relative to unit frame
-					"SetSize", { 182, 8 }, 
+					"SetSize", { 182, 8 },
 					"SetStatusBarTexture", GetMedia("statusbar-power")
 				},
 				values = {
@@ -3458,7 +3461,7 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 			},
 			-- Power Bar Backdrop Texture
 			{
-				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Bg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "BACKGROUND", -2 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -3475,7 +3478,7 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 			},
 			-- Power Bar Overlay Texture
 			{
-				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture", 
+				parent = "self,Power,Fg", parentKey = "Texture", objectType = "Texture",
 				chain = {
 					"SetDrawLayer", { "ARTWORK", 1 },
 					"SetPosition", { "BOTTOMRIGHT", 0, 0 },
@@ -3487,15 +3490,15 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 
 			-- Unit Name
 			{
-				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString", 
+				parent = "self,OverlayScaffold", ownerKey = "Name", objectType = "FontString",
 				chain = {
 					"SetPosition", { "RIGHT", -16, 4 }, -- relative to the whole frame (with border)
-					"SetDrawLayer", { "OVERLAY", 1 }, 
-					"SetJustifyH", "RIGHT", 
+					"SetDrawLayer", { "OVERLAY", 1 },
+					"SetJustifyH", "RIGHT",
 					"SetJustifyV", "MIDDLE",
 					"SetFontObject", GetFont(11, true),
 					"SetTextColor", { Colors.offwhite[1], Colors.offwhite[2], Colors.offwhite[3], .75 },
-					"SetSize", { 80, 14 }, 
+					"SetSize", { 80, 14 },
 				},
 				values = {
 					"maxChars", 12,
@@ -3514,47 +3517,47 @@ Private.RegisterSchematic("UnitForge::Boss", "Legacy", {
 					"SetPoint", { "TOPRIGHT", -4, -55 - 8 +2 }
 				},
 				values = {
-					"auraSize", 28, 
-					"auraWidth", false, 
+					"auraSize", 28,
+					"auraWidth", false,
 					"auraHeight", false,
 					"customSort", false,
-					"debuffsFirst", false, 
-					"disableMouse", false, 
-					"filter", false, 
-					"customFilter", GetAuraFilter("boss"), 
-					"growthX", "LEFT", 
-					"growthY", "DOWN", 
-					"maxBuffs", false, 
-					"maxDebuffs", false, 
-					"maxVisible", 6, 
-					"showDurations", true, 
-					"showSpirals", false, 
+					"debuffsFirst", false,
+					"disableMouse", false,
+					"filter", false,
+					"customFilter", GetAuraFilter("boss"),
+					"growthX", "LEFT",
+					"growthY", "DOWN",
+					"maxBuffs", false,
+					"maxDebuffs", false,
+					"maxVisible", 6,
+					"showDurations", true,
+					"showSpirals", false,
 					"showLongDurations", true,
-					"spacingH", 4, 
-					"spacingV", 4, 
+					"spacingH", 4,
+					"spacingV", 4,
 					"tooltipAnchor", false,
-					"tooltipDefaultPosition", false, 
+					"tooltipDefaultPosition", false,
 					"tooltipOffsetX", 8,
 					"tooltipOffsetY", -16,
 					"tooltipPoint", "TOPRIGHT",
 					"tooltipRelPoint", "BOTTOMRIGHT",
 					"PostCreateButton", Aura_PostCreate,
 					"PostUpdateButton", Aura_PostUpdate
-					
+
 				}
 			},
 
-			-- Raid Target 
+			-- Raid Target
 			{
-				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture", 
+				parent = "self,OverlayScaffold", ownerKey = "RaidTarget", objectType = "Texture",
 				chain = {
 					"SetPosition", { "BOTTOM", 0, -10 },
-					"SetDrawLayer", { "OVERLAY", 2 }, 
+					"SetDrawLayer", { "OVERLAY", 2 },
 					"SetSize", { 28, 28 },
 					"SetTexture", GetMedia("raid_target_icons_small")
 				}
 			}
-			
+
 		}
 	}
 
