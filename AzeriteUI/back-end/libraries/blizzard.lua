@@ -331,14 +331,6 @@ UIWidgetsDisable["ActionBars"] = function(self)
 		if (OverrideActionBar) then -- classic doesn't have this
 			animations = {OverrideActionBar.slideOut:GetAnimations()}
 			animations[1]:SetOffset(0,0)
-
-			-- when blizzard vehicle is turned off, we need to manually fix the state since the OverrideActionBar animation wont run
-			hooksecurefunc("BeginActionBarTransition", function(bar, animIn)
-				if (bar == OverrideActionBar) then
-					OverrideActionBar.slideOut:Stop()
-					MainMenuBar:Show()
-				end
-			end)
 		end
 
 		handleActionBar(MainMenuBarArtFrame, false, true)
@@ -358,6 +350,7 @@ UIWidgetsDisable["ActionBars"] = function(self)
 		handleActionBar(PossessBarFrame, false, true)
 		handleActionBar(MultiCastActionBarFrame, false, false, true)
 		handleActionBar(PetActionBarFrame, true, true)
+		handleActionBar(OverrideActionBar, true)
 		ShowPetActionBar = function() end
 
 		--BonusActionBarFrame:UnregisterAllEvents()
