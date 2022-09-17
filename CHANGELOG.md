@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Be aware th
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.559-RC] 2022-09-17
+### Fixed
+- The Wrath Shaman totembar now actually appears.
+
 ## [3.2.558-RC] 2022-09-16
 ### Added
 - Added the Blizzard Shaman totem bar to Wrath.
